@@ -82,6 +82,28 @@ const Footer = () => {
                   <Button variant="hero" size="sm">Subscribe</Button>
                 </div>
               </div>
+
+              {/* Payment Methods */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm">We Accept</h4>
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
+                    💳 Credit Cards
+                  </div>
+                  <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
+                    📱 Mobile Money
+                  </div>
+                  <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
+                    🏦 Bank Transfer
+                  </div>
+                  <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
+                    💰 PayPal
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Secure payments powered by Stripe
+                </p>
+              </div>
             </div>
 
             {/* Footer Links */}
