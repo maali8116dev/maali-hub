@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, DollarSign, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
   id: string;
@@ -16,6 +17,7 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({
+  id,
   title,
   description,
   sector,
@@ -25,6 +27,7 @@ const ProjectCard = ({
   applicants,
   status
 }: ProjectCardProps) => {
+  const navigate = useNavigate();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
@@ -97,6 +100,7 @@ const ProjectCard = ({
           variant={status === 'open' ? 'hero' : 'outline'} 
           className="w-full"
           disabled={status === 'closed'}
+          onClick={() => status !== 'closed' && navigate(`/application/${id}`)}
         >
           {status === 'closed' ? 'Application Closed' : 'Apply Now'}
         </Button>
