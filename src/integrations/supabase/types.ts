@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_documents: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applications: {
+        Row: {
+          application_fee_paid: boolean | null
+          business_plan: string | null
+          company_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string
+          funding_amount_requested: string
+          id: string
+          location: string | null
+          project_description: string
+          project_id: number
+          status: string | null
+          stripe_payment_intent_id: string | null
+          team_size: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          application_fee_paid?: boolean | null
+          business_plan?: string | null
+          company_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string
+          funding_amount_requested: string
+          id?: string
+          location?: string | null
+          project_description: string
+          project_id: number
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          team_size?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          application_fee_paid?: boolean | null
+          business_plan?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string
+          funding_amount_requested?: string
+          id?: string
+          location?: string | null
+          project_description?: string
+          project_id?: number
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          team_size?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
