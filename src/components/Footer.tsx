@@ -184,6 +184,9 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
               © {currentYear} Maali. All rights reserved. Powered by TechNuru & GAT.
+              <div className="text-primary font-medium mt-1">
+                Demo Application • Created by Dr. Wilfried Zoungrana
+              </div>
             </div>
             
             {/* Social Links */}
