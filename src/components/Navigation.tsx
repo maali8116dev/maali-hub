@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const languages = [
     { code: 'en', name: 'English' },
@@ -80,8 +83,25 @@ const Navigation = () => {
                 ))}
               </div>
             </div>
-            <Button variant="outline">Login</Button>
-            <Button variant="hero">Get Started</Button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  Welcome back!
+                </span>
+                <Button variant="outline" onClick={signOut}>
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => navigate("/auth")}>
+                  Login
+                </Button>
+                <Button variant="hero" onClick={() => navigate("/auth")}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -116,8 +136,20 @@ const Navigation = () => {
               </Link>
             ))}
             <div className="pt-4 pb-2 space-y-2">
-              <Button variant="outline" className="w-full">Login</Button>
-              <Button variant="hero" className="w-full">Get Started</Button>
+              {user ? (
+                <Button variant="outline" className="w-full" onClick={signOut}>
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
+                    Login
+                  </Button>
+                  <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

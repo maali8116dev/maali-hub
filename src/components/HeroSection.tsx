@@ -1,7 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Globe, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleApplyClick = () => {
+    if (user) {
+      // User is logged in, redirect to projects or application form
+      navigate("/projects");
+    } else {
+      // User not logged in, redirect to auth page
+      navigate("/auth");
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center bg-gradient-subtle overflow-hidden">
       {/* Background Pattern */}
@@ -26,11 +41,11 @@ const HeroSection = () => {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-              <Button variant="hero" size="lg" className="group">
-                Start Your Application
+              <Button variant="hero" size="lg" className="group" onClick={handleApplyClick}>
+                {user ? "View Projects" : "Start Your Application"}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" onClick={() => navigate("/projects")}>
                 Browse Projects
               </Button>
             </div>
