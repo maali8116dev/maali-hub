@@ -47,10 +47,10 @@ const HeroSection = () => {
             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
               Empowering
               <span className="bg-gradient-hero bg-clip-text text-transparent"> African </span>
-              <span className="text-white">Women in Agriculture</span>
+              <span className="text-white">Entrepreneurs in Agriculture</span>
             </h1>
             <p className="text-xl text-white/90 mb-8 max-w-2xl">
-              Discover funding opportunities, submit applications, and connect with a thriving ecosystem of women entrepreneurs transforming African agriculture. Your journey to agricultural innovation starts here.
+              Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs transforming African agriculture. Your journey to agricultural innovation starts here.
             </p>
             
             {/* CTA Buttons */}
@@ -71,7 +71,7 @@ const HeroSection = () => {
                   <Users className="h-5 w-5 text-accent mr-2" />
                 </div>
                 <div className="text-2xl font-bold text-accent">500+</div>
-                <div className="text-sm text-white/80">Women Entrepreneurs</div>
+                <div className="text-sm text-white/80">Entrepreneurs</div>
               </div>
               <div className="text-center lg:text-left">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
@@ -100,7 +100,7 @@ const HeroSection = () => {
                     <span className="text-success-foreground text-lg font-bold">✓</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Aisha's Farm</div>
+                    <div className="font-semibold text-foreground">Ahmed's Farm</div>
                     <div className="text-sm text-muted-foreground">$75K Funded</div>
                     <div className="text-xs text-success font-medium">Solar-Powered Irrigation</div>
                   </div>
@@ -113,7 +113,7 @@ const HeroSection = () => {
                     <span className="text-primary-foreground text-lg font-bold">🌱</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Fatima's Cooperative</div>
+                    <div className="font-semibold text-foreground">Kofi's Cooperative</div>
                     <div className="text-sm text-muted-foreground">$120K Investment</div>
                     <div className="text-xs text-primary font-medium">Organic Farming Network</div>
                   </div>
@@ -126,7 +126,7 @@ const HeroSection = () => {
                     <span className="text-accent-foreground text-lg font-bold">🚜</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Kemi's AgriTech</div>
+                    <div className="font-semibold text-foreground">Samuel's AgriTech</div>
                     <div className="text-sm text-muted-foreground">$200K Series A</div>
                     <div className="text-xs text-accent font-medium">Smart Farming Solutions</div>
                   </div>
