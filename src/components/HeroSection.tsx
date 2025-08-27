@@ -47,10 +47,10 @@ const HeroSection = () => {
             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
               Empowering
               <span className="bg-gradient-hero bg-clip-text text-transparent"> African </span>
-              <span className="text-white">Entrepreneurs in Agriculture</span>
+              <span className="text-white">Entrepreneurs</span>
             </h1>
             <p className="text-xl text-white/90 mb-8 max-w-2xl">
-              Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs transforming African agriculture. Your journey to agricultural innovation starts here.
+              Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here.
             </p>
             
             {/* CTA Buttons */}
@@ -85,7 +85,7 @@ const HeroSection = () => {
                   <TrendingUp className="h-5 w-5 text-warning mr-2" />
                 </div>
                 <div className="text-2xl font-bold text-warning">$2M+</div>
-                <div className="text-sm text-white/80">Agricultural Funding</div>
+                <div className="text-sm text-white/80">Total Funding</div>
               </div>
             </div>
           </div>
@@ -100,9 +100,9 @@ const HeroSection = () => {
                     <span className="text-success-foreground text-lg font-bold">✓</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Ahmed's Farm</div>
+                    <div className="font-semibold text-foreground">Ahmed's Startup</div>
                     <div className="text-sm text-muted-foreground">$75K Funded</div>
-                    <div className="text-xs text-success font-medium">Solar-Powered Irrigation</div>
+                    <div className="text-xs text-success font-medium">Fintech Innovation</div>
                   </div>
                 </div>
               </div>
@@ -110,12 +110,12 @@ const HeroSection = () => {
               <div className="absolute bottom-10 left-5 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '1.5s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-lg font-bold">🌱</span>
+                    <span className="text-primary-foreground text-lg font-bold">💡</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Kofi's Cooperative</div>
+                    <div className="font-semibold text-foreground">Kofi's Tech Hub</div>
                     <div className="text-sm text-muted-foreground">$120K Investment</div>
-                    <div className="text-xs text-primary font-medium">Organic Farming Network</div>
+                    <div className="text-xs text-primary font-medium">EdTech Platform</div>
                   </div>
                 </div>
               </div>
@@ -123,12 +123,12 @@ const HeroSection = () => {
               <div className="absolute top-0 left-20 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '2s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                    <span className="text-accent-foreground text-lg font-bold">🚜</span>
+                    <span className="text-accent-foreground text-lg font-bold">🚀</span>
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Samuel's AgriTech</div>
+                    <div className="font-semibold text-foreground">Samuel's Venture</div>
                     <div className="text-sm text-muted-foreground">$200K Series A</div>
-                    <div className="text-xs text-accent font-medium">Smart Farming Solutions</div>
+                    <div className="text-xs text-accent font-medium">E-commerce Solutions</div>
                   </div>
                 </div>
               </div>
