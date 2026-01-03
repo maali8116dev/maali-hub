@@ -44,48 +44,66 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
+            <div className="mb-4">
+              <span className="inline-block px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-white border border-primary/30">
+                Join 500+ Entrepreneurs
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white">
               Empowering
               <span className="bg-gradient-hero bg-clip-text text-transparent"> African </span>
               <span className="text-white">Entrepreneurs</span>
             </h1>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl">
-              Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here.
+            <p className="text-xl md:text-2xl text-white/90 mb-4 max-w-2xl leading-relaxed">
+              The fastest way to discover and apply for funding opportunities across Africa.
+            </p>
+            <p className="text-lg text-white/80 mb-8 max-w-2xl">
+              Connect with a thriving ecosystem of entrepreneurs, submit applications, and turn your vision into reality. Your journey to success starts here.
             </p>
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-              <Button variant="hero" size="lg" className="group bg-primary hover:bg-primary-dark transition-all duration-300" onClick={handleApplyClick}>
+              <Button 
+                variant="hero" 
+                size="lg" 
+                className="group bg-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
+                onClick={handleApplyClick}
+              >
                 {user ? "View Projects" : "Start Your Application"}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary transition-all duration-300" onClick={() => navigate("/projects")}>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="group border-white text-primary hover:bg-white hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
+                onClick={() => navigate("/projects")}
+              >
                 Browse Projects
               </Button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-md mx-auto lg:mx-0 animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
-              <div className="text-center lg:text-left">
+            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <Users className="h-5 w-5 text-accent mr-2" />
+                  <Users className="h-6 w-6 text-accent mr-2" />
                 </div>
-                <div className="text-2xl font-bold text-accent">500+</div>
-                <div className="text-sm text-white/80">Entrepreneurs</div>
+                <div className="text-3xl md:text-4xl font-bold text-accent mb-1">500+</div>
+                <div className="text-sm text-white/90 font-medium">Entrepreneurs</div>
               </div>
-              <div className="text-center lg:text-left">
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <Globe className="h-5 w-5 text-success mr-2" />
+                  <Globe className="h-6 w-6 text-success mr-2" />
                 </div>
-                <div className="text-2xl font-bold text-success">25+</div>
-                <div className="text-sm text-white/80">Countries</div>
+                <div className="text-3xl md:text-4xl font-bold text-success mb-1">25+</div>
+                <div className="text-sm text-white/90 font-medium">Countries</div>
               </div>
-              <div className="text-center lg:text-left">
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <TrendingUp className="h-5 w-5 text-warning mr-2" />
+                  <TrendingUp className="h-6 w-6 text-warning mr-2" />
                 </div>
-                <div className="text-2xl font-bold text-warning">$2M+</div>
-                <div className="text-sm text-white/80">Total Funding</div>
+                <div className="text-3xl md:text-4xl font-bold text-warning mb-1">$2M+</div>
+                <div className="text-sm text-white/90 font-medium">Total Funding</div>
               </div>
             </div>
           </div>

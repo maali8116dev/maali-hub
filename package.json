@@ -8,7 +8,12 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "server:dev": "tsx watch server/server.ts",
+    "server:start": "tsx server/server.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -60,9 +65,16 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5",
+    "hono": "^4.6.11",
+    "@hono/zod-validator": "^0.4.1",
+    "@hono/node-server": "^1.12.0"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.30.0",
+    "tsx": "^4.19.2",
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.16.5",
