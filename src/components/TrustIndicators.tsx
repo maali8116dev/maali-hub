@@ -8,17 +8,14 @@ import {
 } from "@/components/ui/carousel";
 
 const TrustIndicators = () => {
-
+  
 
   const partners = [
     "TechNuru",
     "GAT",
-    "African Ventures","TechNuru",
+    "African Ventures", "TechNuru",
     "GAT",
-    "African Ventures","TechNuru",
-    "GAT",
-    "African Ventures","TechNuru",
-    "GAT",
+    "African Ventures",
     "African Ventures",
     "Innovation Hub"
   ];
@@ -48,6 +45,10 @@ const TrustIndicators = () => {
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
           Trusted by leading <span className="bg-gradient-primary bg-clip-text text-transparent">Organizations</span> Worldwide
         </h2>
+        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+         Our focus on honesty, integrity and competence makes us the preferred choice for our partners and clients.
+          </p>
+          </div>
         <Carousel setApi={setApi} className="w-full">
           <CarouselContent>
             {partners.map((partner, index) => (
@@ -60,7 +61,7 @@ const TrustIndicators = () => {
           </CarouselContent>
         </Carousel>
       </div>
-    </div>
+    
     </section>
     </>
  

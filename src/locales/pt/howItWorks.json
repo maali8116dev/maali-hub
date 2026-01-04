@@ -1,0 +1,23 @@
+{
+  "title": "Como",
+  "titleHighlight": "Funciona",
+  "subtitle": "Comece em quatro etapas simples. Da descoberta ao financiamento, simplificamos todo o processo.",
+  "step1": {
+    "title": "Navegar oportunidades",
+    "description": "Explore oportunidades de financiamento em vários setores. Filtre por localização, valor de financiamento e setor para encontrar a correspondência perfeita."
+  },
+  "step2": {
+    "title": "Criar seu perfil",
+    "description": "Cadastre-se em minutos e crie seu perfil de empreendedor. Mostre seu negócio, experiência e visão."
+  },
+  "step3": {
+    "title": "Enviar candidatura",
+    "description": "Complete sua candidatura com nosso processo guiado. Envie documentos, forneça detalhes e envie com confiança."
+  },
+  "step4": {
+    "title": "Obter financiamento",
+    "description": "Acompanhe o status da sua candidatura em tempo real. Receba feedback e obtenha financiamento para expandir seu negócio."
+  },
+  "cta": "Começar hoje"
+}
+

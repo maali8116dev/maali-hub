@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Globe, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 import heroImage from "@/assets/hero-agriculture.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation('hero');
 
   const handleApplyClick = () => {
     if (user) {
@@ -21,7 +23,7 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image with Parallax Effect */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-transparent">
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-parallax"
           style={{
@@ -46,19 +48,19 @@ const HeroSection = () => {
           <div className="text-center lg:text-left animate-fade-in">
             <div className="mb-4">
               <span className="inline-block px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-white border border-primary/30">
-                Join 500+ Entrepreneurs
+                {t('badge')}
               </span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white">
-              Empowering
-              <span className="bg-gradient-hero bg-clip-text text-transparent"> African </span>
-              <span className="text-white">Entrepreneurs</span>
+              {t('headline1')}
+              <span className="bg-gradient-hero bg-clip-text text-transparent"> {t('headline2')} </span>
+              <span className="text-white">{t('headline3')}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-4 max-w-2xl leading-relaxed">
-              The fastest way to discover and apply for funding opportunities across Africa.
+              {t('subheadline')}
             </p>
             <p className="text-lg text-white/80 mb-8 max-w-2xl">
-              Connect with a thriving ecosystem of entrepreneurs, submit applications, and turn your vision into reality. Your journey to success starts here.
+              {t('description')}
             </p>
             
             {/* CTA Buttons */}
@@ -69,7 +71,7 @@ const HeroSection = () => {
                 className="group bg-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={handleApplyClick}
               >
-                {user ? "View Projects" : "Start Your Application"}
+                {user ? t('viewProjects') : t('startApplication')}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
               <Button 
@@ -78,7 +80,7 @@ const HeroSection = () => {
                 className="group border-white text-primary hover:bg-white hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={() => navigate("/projects")}
               >
-                Browse Projects
+                {t('browseProjects')}
               </Button>
             </div>
 
@@ -89,21 +91,21 @@ const HeroSection = () => {
                   <Users className="h-6 w-6 text-accent mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-accent mb-1">500+</div>
-                <div className="text-sm text-white/90 font-medium">Entrepreneurs</div>
+                <div className="text-sm text-white/90 font-medium">{t('entrepreneurs')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
                   <Globe className="h-6 w-6 text-success mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-success mb-1">25+</div>
-                <div className="text-sm text-white/90 font-medium">Countries</div>
+                <div className="text-sm text-white/90 font-medium">{t('countries')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
                   <TrendingUp className="h-6 w-6 text-warning mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-warning mb-1">$2M+</div>
-                <div className="text-sm text-white/90 font-medium">Total Funding</div>
+                <div className="text-sm text-white/90 font-medium">{t('totalFunding')}</div>
               </div>
             </div>
           </div>

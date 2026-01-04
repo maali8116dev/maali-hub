@@ -4,13 +4,14 @@ import { Globe, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('en');
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t, i18n } = useTranslation(['navigation', 'common']);
 
   const languages = [
     { code: 'en', name: 'English' },
@@ -18,12 +19,18 @@ const Navigation = () => {
     { code: 'pt', name: 'Português' }
   ];
 
+  const currentLang = i18n.language || 'en';
+
+  const handleLanguageChange = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+  };
+
   const navigationItems = [
-    { href: '/', label: 'Home' },
-    { href: '/projects', label: 'Projects' },
-    { href: '/about', label: 'About' },
-    { href: '/resources', label: 'Resources' },
-    { href: '/contact', label: 'Contact' }
+    { href: '/', label: t('navigation:home') },
+    { href: '/projects', label: t('navigation:projects') },
+    { href: '/about', label: t('navigation:about') },
+    { href: '/resources', label: t('navigation:resources') },
+    { href: '/contact', label: t('navigation:contact') }
   ];
 
   return (
@@ -72,7 +79,7 @@ const Navigation = () => {
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => setCurrentLang(lang.code)}
+                    onClick={() => handleLanguageChange(lang.code)}
                     className={cn(
                       "block w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors",
                       currentLang === lang.code && "bg-muted text-primary"
@@ -86,19 +93,19 @@ const Navigation = () => {
             {user ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-muted-foreground">
-                  Welcome back!
+                  {t('navigation:welcomeBack')}
                 </span>
                 <Button variant="outline" onClick={signOut}>
-                  Sign Out
+                  {t('navigation:signOut')}
                 </Button>
               </div>
             ) : (
               <>
                 <Button variant="outline" onClick={() => navigate("/auth")}>
-                  Login
+                  {t('navigation:login')}
                 </Button>
                 <Button variant="hero" onClick={() => navigate("/auth")}>
-                  Get Started
+                  {t('navigation:getStarted')}
                 </Button>
               </>
             )}
@@ -138,15 +145,15 @@ const Navigation = () => {
             <div className="pt-4 pb-2 space-y-2">
               {user ? (
                 <Button variant="outline" className="w-full" onClick={signOut}>
-                  Sign Out
+                  {t('navigation:signOut')}
                 </Button>
               ) : (
                 <>
                   <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
-                    Login
+                    {t('navigation:login')}
                   </Button>
                   <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>
-                    Get Started
+                    {t('navigation:getStarted')}
                   </Button>
                 </>
               )}

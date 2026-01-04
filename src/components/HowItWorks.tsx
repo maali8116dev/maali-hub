@@ -2,40 +2,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, UserPlus, FileText, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const HowItWorks = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('howItWorks');
 
   const steps = [
     {
       number: 1,
       icon: Search,
-      title: "Browse Opportunities",
-      description: "Explore funding opportunities across various sectors. Filter by location, funding amount, and sector to find the perfect match.",
+      title: t('step1.title'),
+      description: t('step1.description'),
       color: "text-primary",
       bgColor: "bg-primary/10"
     },
     {
       number: 2,
       icon: UserPlus,
-      title: "Create Your Profile",
-      description: "Sign up in minutes and create your entrepreneur profile. Showcase your business, experience, and vision.",
+      title: t('step2.title'),
+      description: t('step2.description'),
       color: "text-accent",
       bgColor: "bg-accent/10"
     },
     {
       number: 3,
       icon: FileText,
-      title: "Submit Application",
-      description: "Complete your application with our guided process. Upload documents, provide details, and submit with confidence.",
+      title: t('step3.title'),
+      description: t('step3.description'),
       color: "text-success",
       bgColor: "bg-success/10"
     },
     {
       number: 4,
       icon: TrendingUp,
-      title: "Get Funded",
-      description: "Track your application status in real-time. Receive feedback and get funded to grow your business.",
+      title: t('step4.title'),
+      description: t('step4.description'),
       color: "text-warning",
       bgColor: "bg-warning/10"
     }
@@ -46,10 +48,10 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            How It <span className="bg-gradient-primary bg-clip-text text-transparent">Works</span>
+            {t('title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('titleHighlight')}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get started in four simple steps. From discovery to funding, we've streamlined the entire process.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -91,7 +93,7 @@ const HowItWorks = () => {
             className="group"
             onClick={() => navigate("/auth")}
           >
-            Get Started Today
+            {t('cta')}
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
