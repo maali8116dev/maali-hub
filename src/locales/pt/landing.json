@@ -1,0 +1,151 @@
+{
+  "hero": {
+    "badge": "Junte-se a 500+ Empreendedores",
+    "headline1": "Capacitando",
+    "headline2": "Empreendedores",
+    "headline3": "Africanos",
+    "subheadline": "A forma mais rápida de descobrir e se candidatar a oportunidades de financiamento em toda a África.",
+    "description": "Conecte-se com um ecossistema próspero de empreendedores, envie candidaturas e transforme sua visão em realidade. Sua jornada para o sucesso começa aqui.",
+    "startApplication": "Iniciar sua candidatura",
+    "viewProjects": "Ver projetos",
+    "browseProjects": "Navegar projetos",
+    "entrepreneurs": "Empreendedores",
+    "countries": "Países",
+    "totalFunding": "Financiamento total"
+  },
+  "trustIndicators": {
+    "title": "Confiado pelas principais",
+    "titleHighlight": "Organizações",
+    "subtitle": "Nosso foco em honestidade, integridade e competência nos torna a escolha preferida de nossos parceiros e clientes."
+  },
+  "howItWorks": {
+    "title": "Como",
+    "titleHighlight": "Funciona",
+    "subtitle": "Comece em quatro etapas simples. Da descoberta ao financiamento, simplificamos todo o processo.",
+    "step1": {
+      "title": "Navegar oportunidades",
+      "description": "Explore oportunidades de financiamento em vários setores. Filtre por localização, valor de financiamento e setor para encontrar a correspondência perfeita."
+    },
+    "step2": {
+      "title": "Criar seu perfil",
+      "description": "Cadastre-se em minutos e crie seu perfil de empreendedor. Mostre seu negócio, experiência e visão."
+    },
+    "step3": {
+      "title": "Enviar candidatura",
+      "description": "Complete sua candidatura com nosso processo guiado. Envie documentos, forneça detalhes e envie com confiança."
+    },
+    "step4": {
+      "title": "Obter financiamento",
+      "description": "Acompanhe o status da sua candidatura em tempo real. Receba feedback e obtenha financiamento para expandir seu negócio."
+    },
+    "cta": "Começar hoje"
+  },
+  "benefits": {
+    "title": "Por que escolher",
+    "titleHighlight": "Maali",
+    "subtitle": "Criamos uma plataforma especificamente para empreendedores africanos, atendendo às suas necessidades e desafios únicos.",
+    "benefit1": {
+      "title": "Rápido e Simples",
+      "description": "Complete candidaturas em minutos, não em horas. Nosso processo simplificado economiza seu tempo."
+    },
+    "benefit2": {
+      "title": "Oportunidades Focadas",
+      "description": "Encontre financiamentos especificamente projetados para empreendedores e empresas africanos."
+    },
+    "benefit3": {
+      "title": "Suporte Especializado",
+      "description": "Obtenha orientação de mentores e revisores experientes em toda a sua jornada."
+    },
+    "benefit4": {
+      "title": "Resultados Comprovados",
+      "description": "Junte-se a centenas de empreendedores de sucesso que obtiveram financiamento através da nossa plataforma."
+    }
+  },
+  "testimonials": {
+    "title": "Histórias de",
+    "titleHighlight": "Sucesso",
+    "subtitle": "Ouça empreendedores que obtiveram financiamento com sucesso através do Maali",
+    "testimonial1": {
+      "name": "Ahmed Hassan",
+      "company": "FinTech Solutions",
+      "location": "Quênia",
+      "quote": "O Maali tornou tão fácil encontrar e se candidatar a financiamento. Em 3 meses, obtive 75K$ para minha startup fintech. A plataforma é intuitiva e a equipe de suporte é incrível.",
+      "result": "75K$ Financiado",
+      "sector": "Fintech"
+    },
+    "testimonial2": {
+      "name": "Kofi Mensah",
+      "company": "Plataforma EdTech",
+      "location": "Gana",
+      "quote": "Como empreendedor iniciante, fiquei sobrecarregado com o processo de financiamento. O Maali me guiou em cada etapa e me conectou com as oportunidades certas. Altamente recomendado!",
+      "result": "120K$ Investimento",
+      "sector": "Educação"
+    },
+    "testimonial3": {
+      "name": "Amina Okafor",
+      "company": "AgriTech Innovations",
+      "location": "Nigéria",
+      "quote": "O suporte multilíngue e o design mobile-first tornaram perfeito para mim. Eu poderia trabalhar na minha candidatura mesmo com internet limitada. Esta plataforma realmente entende os empreendedores africanos.",
+      "result": "50K$ Financiado",
+      "sector": "Agricultura"
+    }
+  },
+  "newsletter": {
+    "title": "Mantenha-se atualizado sobre novas oportunidades",
+    "subtitle": "Seja notificado quando novas oportunidades de financiamento estiverem disponíveis. Junte-se à nossa newsletter e nunca perca uma chance de expandir seu negócio.",
+    "emailPlaceholder": "Digite seu endereço de email",
+    "subscribe": "Inscrever-se",
+    "subscribed": "Inscrito!",
+    "privacy": "Respeitamos sua privacidade. Cancele a inscrição a qualquer momento.",
+    "thankYou": "Obrigado!",
+    "subscribedMessage": "Você foi inscrito em nossa newsletter."
+  },
+  "featuredProjects": {
+    "title": "Oportunidades",
+    "titleHighlight": "em Destaque",
+    "subtitle": "Descubra oportunidades de financiamento em vários setores. Da agricultura à tecnologia, encontre a correspondência perfeita para sua visão empreendedora.",
+    "viewAll": "Ver todos os projetos"
+  },
+  "featureShowcase": {
+    "title": "Construído para",
+    "titleHighlight": "Empreendedores Africanos",
+    "subtitle": "Cada recurso é projetado com os desafios e oportunidades únicos do ecossistema empreendedor africano em mente.",
+    "feature1": {
+      "title": "Sistema de Candidatura Inteligente",
+      "description": "Processo de candidatura guiado por IA com modelos de documentos e validação em tempo real para garantir que sua submissão esteja completa e convincente."
+    },
+    "feature2": {
+      "title": "Armazenamento Seguro de Documentos",
+      "description": "Segurança de nível bancário para seus documentos sensíveis com armazenamento criptografado e acesso controlado para proteger sua propriedade intelectual."
+    },
+    "feature3": {
+      "title": "Experiência Mobile-First",
+      "description": "Otimizado para dispositivos móveis com capacidades offline, garantindo que você possa trabalhar em candidaturas mesmo com conectividade limitada."
+    },
+    "feature4": {
+      "title": "Revisão Colaborativa",
+      "description": "Processo de revisão transparente com múltiplas partes interessadas, feedback detalhado e comunicação clara durante toda a avaliação."
+    },
+    "feature5": {
+      "title": "Suporte Multilíngue",
+      "description": "Disponível em inglês, francês e português para servir empreendedores em todas as regiões da África sem problemas."
+    },
+    "feature6": {
+      "title": "Acompanhamento de Progresso",
+      "description": "Atualizações em tempo real sobre o status da sua candidatura com análises detalhadas e insights para melhorar submissões futuras."
+    },
+    "feature7": {
+      "title": "Gerenciamento de Prazos",
+      "description": "Notificações e lembretes inteligentes para mantê-lo no caminho certo com prazos de candidatura e documentação necessária."
+    },
+    "feature8": {
+      "title": "Comunicação Direta",
+      "description": "Sistema de mensagens integrado para comunicação direta com revisores, mentores e outros empreendedores no ecossistema."
+    },
+    "feature9": {
+      "title": "Pagamentos Flexíveis",
+      "description": "Múltiplas opções de pagamento incluindo Mobile Money, Paystack e Stripe para acomodar diferentes preferências e regiões."
+    }
+  }
+}
+

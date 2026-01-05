@@ -1,35 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useTranslation } from "react-i18next";
 
 const Testimonials = () => {
+  const { t } = useTranslation('landing');
   const testimonials = [
     {
-      name: "Ahmed Hassan",
-      company: "FinTech Solutions",
-      location: "Kenya",
+      name: t('testimonials.testimonial1.name'),
+      company: t('testimonials.testimonial1.company'),
+      location: t('testimonials.testimonial1.location'),
       image: "AH",
-      quote: "Maali made it so easy to find and apply for funding. Within 3 months, I secured $75K for my fintech startup. The platform is intuitive and the support team is amazing.",
-      result: "$75K Funded",
-      sector: "Fintech"
+      quote: t('testimonials.testimonial1.quote'),
+      result: t('testimonials.testimonial1.result'),
+      sector: t('testimonials.testimonial1.sector')
     },
     {
-      name: "Kofi Mensah",
-      company: "EdTech Platform",
-      location: "Ghana",
+      name: t('testimonials.testimonial2.name'),
+      company: t('testimonials.testimonial2.company'),
+      location: t('testimonials.testimonial2.location'),
       image: "KM",
-      quote: "As a first-time entrepreneur, I was overwhelmed by the funding process. Maali guided me through every step and connected me with the right opportunities. Highly recommended!",
-      result: "$120K Investment",
-      sector: "Education"
+      quote: t('testimonials.testimonial2.quote'),
+      result: t('testimonials.testimonial2.result'),
+      sector: t('testimonials.testimonial2.sector')
     },
     {
-      name: "Amina Okafor",
-      company: "AgriTech Innovations",
-      location: "Nigeria",
+      name: t('testimonials.testimonial3.name'),
+      company: t('testimonials.testimonial3.company'),
+      location: t('testimonials.testimonial3.location'),
       image: "AO",
-      quote: "The multilingual support and mobile-first design made it perfect for me. I could work on my application even with limited internet. This platform truly understands African entrepreneurs.",
-      result: "$50K Funded",
-      sector: "Agriculture"
+      quote: t('testimonials.testimonial3.quote'),
+      result: t('testimonials.testimonial3.result'),
+      sector: t('testimonials.testimonial3.sector')
     }
   ];
 
@@ -38,10 +40,10 @@ const Testimonials = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Success <span className="bg-gradient-primary bg-clip-text text-transparent">Stories</span>
+            {t('testimonials.title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('testimonials.titleHighlight')}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Hear from entrepreneurs who've successfully secured funding through Maali
+            {t('testimonials.subtitle')}
           </p>
         </div>
 

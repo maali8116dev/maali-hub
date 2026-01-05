@@ -10,61 +10,63 @@ import {
   MessageSquare,
   CreditCard
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const FeatureShowcase = () => {
+  const { t } = useTranslation('landing');
   const features = [
     {
       icon: FileText,
-      title: "Smart Application System",
-      description: "AI-guided application process with document templates and real-time validation to ensure your submission is complete and compelling.",
+      title: t('featureShowcase.feature1.title'),
+      description: t('featureShowcase.feature1.description'),
       color: "text-primary"
     },
     {
       icon: Shield,
-      title: "Secure Document Storage",
-      description: "Bank-level security for your sensitive documents with encrypted storage and controlled access to protect your intellectual property.",
+      title: t('featureShowcase.feature2.title'),
+      description: t('featureShowcase.feature2.description'),
       color: "text-accent"
     },
     {
       icon: Smartphone,
-      title: "Mobile-First Experience",
-      description: "Optimized for mobile devices with offline capabilities, ensuring you can work on applications even with limited connectivity.",
+      title: t('featureShowcase.feature3.title'),
+      description: t('featureShowcase.feature3.description'),
       color: "text-success"
     },
     {
       icon: Users,
-      title: "Collaborative Review",
-      description: "Transparent review process with multiple stakeholders, detailed feedback, and clear communication throughout the evaluation.",
+      title: t('featureShowcase.feature4.title'),
+      description: t('featureShowcase.feature4.description'),
       color: "text-warning"
     },
     {
       icon: Globe,
-      title: "Multilingual Support",
-      description: "Available in English, French, and Portuguese to serve entrepreneurs across all regions of Africa seamlessly.",
+      title: t('featureShowcase.feature5.title'),
+      description: t('featureShowcase.feature5.description'),
       color: "text-primary"
     },
     {
       icon: TrendingUp,
-      title: "Progress Tracking",
-      description: "Real-time updates on your application status with detailed analytics and insights to improve future submissions.",
+      title: t('featureShowcase.feature6.title'),
+      description: t('featureShowcase.feature6.description'),
       color: "text-accent"
     },
     {
       icon: Clock,
-      title: "Deadline Management",
-      description: "Smart notifications and reminders to keep you on track with application deadlines and required documentation.",
+      title: t('featureShowcase.feature7.title'),
+      description: t('featureShowcase.feature7.description'),
       color: "text-success"
     },
     {
       icon: MessageSquare,
-      title: "Direct Communication",
-      description: "Built-in messaging system for direct communication with reviewers, mentors, and other entrepreneurs in the ecosystem.",
+      title: t('featureShowcase.feature8.title'),
+      description: t('featureShowcase.feature8.description'),
       color: "text-warning"
     },
     {
       icon: CreditCard,
-      title: "Flexible Payments",
-      description: "Multiple payment options including Mobile Money, Paystack, and Stripe to accommodate different preferences and regions.",
+      title: t('featureShowcase.feature9.title'),
+      description: t('featureShowcase.feature9.description'),
       color: "text-primary"
     }
   ];
@@ -74,10 +76,10 @@ const FeatureShowcase = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Built for <span className="bg-gradient-accent bg-clip-text text-transparent">African</span> Entrepreneurs
+            {t('featureShowcase.title')} <span className="bg-gradient-accent bg-clip-text text-transparent">{t('featureShowcase.titleHighlight')}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Every feature is designed with the unique challenges and opportunities of the African entrepreneurship ecosystem in mind.
+            {t('featureShowcase.subtitle')}
           </p>
         </div>
 
@@ -109,3 +111,4 @@ const FeatureShowcase = () => {
 };
 
 export default FeatureShowcase;
+

@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Mail, Check } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Newsletter = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation('landing');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +18,8 @@ const Newsletter = () => {
       // TODO: Integrate with email service
       setSubmitted(true);
       toast({
-        title: "Thank you!",
-        description: "You've been subscribed to our newsletter.",
+        title: t('newsletter.thankYou'),
+        description: t('newsletter.subscribedMessage'),
       });
       setEmail("");
       setTimeout(() => setSubmitted(false), 3000);
@@ -40,10 +42,10 @@ const Newsletter = () => {
                 <Mail className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Stay Updated on New Opportunities
+                {t('newsletter.title')}
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Get notified when new funding opportunities are available. Join our newsletter and never miss a chance to grow your business.
+                {t('newsletter.subtitle')}
               </p>
             </div>
 
@@ -51,7 +53,7 @@ const Newsletter = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Input
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder={t('newsletter.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="flex-1"
@@ -67,18 +69,18 @@ const Newsletter = () => {
                   {submitted ? (
                     <>
                       <Check className="mr-2 h-5 w-5" />
-                      Subscribed!
+                      {t('newsletter.subscribed')}
                     </>
                   ) : (
                     <>
-                      Subscribe
+                      {t('newsletter.subscribe')}
                       <Mail className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
                 </Button>
               </div>
               <p className="text-xs text-center text-muted-foreground mt-4">
-                We respect your privacy. Unsubscribe at any time.
+                {t('newsletter.privacy')}
               </p>
             </form>
           </CardContent>

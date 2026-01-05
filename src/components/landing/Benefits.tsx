@@ -1,33 +1,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Zap, Target, Users, Award } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Benefits = () => {
+  const { t } = useTranslation('landing');
   const benefits = [
     {
       icon: Zap,
-      title: "Fast & Simple",
-      description: "Complete applications in minutes, not hours. Our streamlined process saves you time.",
+      title: t('benefits.benefit1.title'),
+      description: t('benefits.benefit1.description'),
       color: "text-primary",
       bgColor: "bg-primary/10"
     },
     {
       icon: Target,
-      title: "Focused Opportunities",
-      description: "Find funding specifically designed for African entrepreneurs and businesses.",
+      title: t('benefits.benefit2.title'),
+      description: t('benefits.benefit2.description'),
       color: "text-accent",
       bgColor: "bg-accent/10"
     },
     {
       icon: Users,
-      title: "Expert Support",
-      description: "Get guidance from experienced mentors and reviewers throughout your journey.",
+      title: t('benefits.benefit3.title'),
+      description: t('benefits.benefit3.description'),
       color: "text-success",
       bgColor: "bg-success/10"
     },
     {
       icon: Award,
-      title: "Proven Results",
-      description: "Join hundreds of successful entrepreneurs who've secured funding through our platform.",
+      title: t('benefits.benefit4.title'),
+      description: t('benefits.benefit4.description'),
       color: "text-warning",
       bgColor: "bg-warning/10"
     }
@@ -38,10 +40,10 @@ const Benefits = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Why Choose <span className="bg-gradient-accent bg-clip-text text-transparent">Maali</span>?
+            {t('benefits.title')} <span className="bg-gradient-accent bg-clip-text text-transparent">{t('benefits.titleHighlight')}</span>?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We've built a platform specifically for African entrepreneurs, addressing your unique needs and challenges.
+            {t('benefits.subtitle')}
           </p>
         </div>
 

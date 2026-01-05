@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import ProjectCard from "./ProjectCard";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const FeaturedProjects = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('landing');
   const mockProjects = [
     {
       id: "1",
@@ -79,10 +81,10 @@ const FeaturedProjects = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Featured <span className="bg-gradient-primary bg-clip-text text-transparent">Opportunities</span>
+            {t('featuredProjects.title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('featuredProjects.titleHighlight')}</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Discover funding opportunities across various sectors. From agriculture to technology, find the perfect match for your entrepreneurial vision.
+            {t('featuredProjects.subtitle')}
           </p>
         </div>
 
@@ -99,7 +101,7 @@ const FeaturedProjects = () => {
             className="group"
             onClick={() => navigate("/projects")}
           >
-            View All Projects
+            {t('featuredProjects.viewAll')}
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
@@ -109,3 +111,4 @@ const FeaturedProjects = () => {
 };
 
 export default FeaturedProjects;
+

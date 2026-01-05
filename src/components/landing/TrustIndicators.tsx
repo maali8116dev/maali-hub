@@ -6,8 +6,10 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { useTranslation } from "react-i18next";
 
 const TrustIndicators = () => {
+  const { t } = useTranslation('landing');
   
 
   const partners = [
@@ -43,10 +45,10 @@ const TrustIndicators = () => {
 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-          Trusted by leading <span className="bg-gradient-primary bg-clip-text text-transparent">Organizations</span> Worldwide
+          {t('trustIndicators.title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('trustIndicators.titleHighlight')}</span> Worldwide
         </h2>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-         Our focus on honesty, integrity and competence makes us the preferred choice for our partners and clients.
+         {t('trustIndicators.subtitle')}
           </p>
           </div>
         <Carousel setApi={setApi} className="w-full">

@@ -5,21 +5,18 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Import translation files
 import enCommon from '../locales/en/common.json';
 import enNavigation from '../locales/en/navigation.json';
-import enHero from '../locales/en/hero.json';
+import enLanding from '../locales/en/landing.json';
 import enFooter from '../locales/en/footer.json';
-import enHowItWorks from '../locales/en/howItWorks.json';
 
 import frCommon from '../locales/fr/common.json';
 import frNavigation from '../locales/fr/navigation.json';
-import frHero from '../locales/fr/hero.json';
+import frLanding from '../locales/fr/landing.json';
 import frFooter from '../locales/fr/footer.json';
-import frHowItWorks from '../locales/fr/howItWorks.json';
 
 import ptCommon from '../locales/pt/common.json';
 import ptNavigation from '../locales/pt/navigation.json';
-import ptHero from '../locales/pt/hero.json';
+import ptLanding from '../locales/pt/landing.json';
 import ptFooter from '../locales/pt/footer.json';
-import ptHowItWorks from '../locales/pt/howItWorks.json';
 
 i18n
   .use(LanguageDetector)
@@ -29,23 +26,20 @@ i18n
       en: {
         common: enCommon,
         navigation: enNavigation,
-        hero: enHero,
+        landing: enLanding,
         footer: enFooter,
-        howItWorks: enHowItWorks,
       },
       fr: {
         common: frCommon,
         navigation: frNavigation,
-        hero: frHero,
+        landing: frLanding,
         footer: frFooter,
-        howItWorks: frHowItWorks,
       },
       pt: {
         common: ptCommon,
         navigation: ptNavigation,
-        hero: ptHero,
+        landing: ptLanding,
         footer: ptFooter,
-        howItWorks: ptHowItWorks,
       },
     },
     fallbackLng: 'en',

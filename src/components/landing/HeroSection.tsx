@@ -8,7 +8,7 @@ import heroImage from "@/assets/hero-agriculture.jpg";
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation('hero');
+  const { t } = useTranslation('landing');
 
   const handleApplyClick = () => {
     if (user) {
@@ -48,19 +48,19 @@ const HeroSection = () => {
           <div className="text-center lg:text-left animate-fade-in">
             <div className="mb-4">
               <span className="inline-block px-4 py-2 bg-primary/20 backdrop-blur-sm rounded-full text-sm font-medium text-white border border-primary/30">
-                {t('badge')}
+                {t('hero.badge')}
               </span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white">
-              {t('headline1')}
-              <span className="bg-gradient-hero bg-clip-text text-transparent"> {t('headline2')} </span>
-              <span className="text-white">{t('headline3')}</span>
+              {t('hero.headline1')}
+              <span className="bg-gradient-hero bg-clip-text text-transparent"> {t('hero.headline2')} </span>
+              <span className="text-white">{t('hero.headline3')}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-4 max-w-2xl leading-relaxed">
-              {t('subheadline')}
+              {t('hero.subheadline')}
             </p>
             <p className="text-lg text-white/80 mb-8 max-w-2xl">
-              {t('description')}
+              {t('hero.description')}
             </p>
             
             {/* CTA Buttons */}
@@ -71,7 +71,7 @@ const HeroSection = () => {
                 className="group bg-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={handleApplyClick}
               >
-                {user ? t('viewProjects') : t('startApplication')}
+                {user ? t('hero.viewProjects') : t('hero.startApplication')}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
               <Button 
@@ -80,7 +80,7 @@ const HeroSection = () => {
                 className="group border-white text-primary hover:bg-white hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={() => navigate("/projects")}
               >
-                {t('browseProjects')}
+                {t('hero.browseProjects')}
               </Button>
             </div>
 
@@ -91,21 +91,21 @@ const HeroSection = () => {
                   <Users className="h-6 w-6 text-accent mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-accent mb-1">500+</div>
-                <div className="text-sm text-white/90 font-medium">{t('entrepreneurs')}</div>
+                <div className="text-sm text-white/90 font-medium">{t('hero.entrepreneurs')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
                   <Globe className="h-6 w-6 text-success mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-success mb-1">25+</div>
-                <div className="text-sm text-white/90 font-medium">{t('countries')}</div>
+                <div className="text-sm text-white/90 font-medium">{t('hero.countries')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
                   <TrendingUp className="h-6 w-6 text-warning mr-2" />
                 </div>
                 <div className="text-3xl md:text-4xl font-bold text-warning mb-1">$2M+</div>
-                <div className="text-sm text-white/90 font-medium">{t('totalFunding')}</div>
+                <div className="text-sm text-white/90 font-medium">{t('hero.totalFunding')}</div>
               </div>
             </div>
           </div>
@@ -161,3 +161,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+

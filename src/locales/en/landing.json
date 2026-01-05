@@ -1,0 +1,151 @@
+{
+  "hero": {
+    "badge": "Join 500+ Entrepreneurs",
+    "headline1": "Empowering",
+    "headline2": "African",
+    "headline3": "Entrepreneurs",
+    "subheadline": "The fastest way to discover and apply for funding opportunities across Africa.",
+    "description": "Connect with a thriving ecosystem of entrepreneurs, submit applications, and turn your vision into reality. Your journey to success starts here.",
+    "startApplication": "Start Your Application",
+    "viewProjects": "View Projects",
+    "browseProjects": "Browse Projects",
+    "entrepreneurs": "Entrepreneurs",
+    "countries": "Countries",
+    "totalFunding": "Total Funding"
+  },
+  "trustIndicators": {
+    "title": "Trusted by leading",
+    "titleHighlight": "Organizations",
+    "subtitle": "Our focus on honesty, integrity and competence makes us the preferred choice for our partners and clients."
+  },
+  "howItWorks": {
+    "title": "How It",
+    "titleHighlight": "Works",
+    "subtitle": "Get started in four simple steps. From discovery to funding, we've streamlined the entire process.",
+    "step1": {
+      "title": "Browse Opportunities",
+      "description": "Explore funding opportunities across various sectors. Filter by location, funding amount, and sector to find the perfect match."
+    },
+    "step2": {
+      "title": "Create Your Profile",
+      "description": "Sign up in minutes and create your entrepreneur profile. Showcase your business, experience, and vision."
+    },
+    "step3": {
+      "title": "Submit Application",
+      "description": "Complete your application with our guided process. Upload documents, provide details, and submit with confidence."
+    },
+    "step4": {
+      "title": "Get Funded",
+      "description": "Track your application status in real-time. Receive feedback and get funded to grow your business."
+    },
+    "cta": "Get Started Today"
+  },
+  "benefits": {
+    "title": "Why Choose",
+    "titleHighlight": "Maali",
+    "subtitle": "We've built a platform specifically for African entrepreneurs, addressing your unique needs and challenges.",
+    "benefit1": {
+      "title": "Fast & Simple",
+      "description": "Complete applications in minutes, not hours. Our streamlined process saves you time."
+    },
+    "benefit2": {
+      "title": "Focused Opportunities",
+      "description": "Find funding specifically designed for African entrepreneurs and businesses."
+    },
+    "benefit3": {
+      "title": "Expert Support",
+      "description": "Get guidance from experienced mentors and reviewers throughout your journey."
+    },
+    "benefit4": {
+      "title": "Proven Results",
+      "description": "Join hundreds of successful entrepreneurs who've secured funding through our platform."
+    }
+  },
+  "testimonials": {
+    "title": "Success",
+    "titleHighlight": "Stories",
+    "subtitle": "Hear from entrepreneurs who've successfully secured funding through Maali",
+    "testimonial1": {
+      "name": "Ahmed Hassan",
+      "company": "FinTech Solutions",
+      "location": "Kenya",
+      "quote": "Maali made it so easy to find and apply for funding. Within 3 months, I secured $75K for my fintech startup. The platform is intuitive and the support team is amazing.",
+      "result": "$75K Funded",
+      "sector": "Fintech"
+    },
+    "testimonial2": {
+      "name": "Kofi Mensah",
+      "company": "EdTech Platform",
+      "location": "Ghana",
+      "quote": "As a first-time entrepreneur, I was overwhelmed by the funding process. Maali guided me through every step and connected me with the right opportunities. Highly recommended!",
+      "result": "$120K Investment",
+      "sector": "Education"
+    },
+    "testimonial3": {
+      "name": "Amina Okafor",
+      "company": "AgriTech Innovations",
+      "location": "Nigeria",
+      "quote": "The multilingual support and mobile-first design made it perfect for me. I could work on my application even with limited internet. This platform truly understands African entrepreneurs.",
+      "result": "$50K Funded",
+      "sector": "Agriculture"
+    }
+  },
+  "newsletter": {
+    "title": "Stay Updated on New Opportunities",
+    "subtitle": "Get notified when new funding opportunities are available. Join our newsletter and never miss a chance to grow your business.",
+    "emailPlaceholder": "Enter your email address",
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed!",
+    "privacy": "We respect your privacy. Unsubscribe at any time.",
+    "thankYou": "Thank you!",
+    "subscribedMessage": "You've been subscribed to our newsletter."
+  },
+  "featuredProjects": {
+    "title": "Featured",
+    "titleHighlight": "Opportunities",
+    "subtitle": "Discover funding opportunities across various sectors. From agriculture to technology, find the perfect match for your entrepreneurial vision.",
+    "viewAll": "View All Projects"
+  },
+  "featureShowcase": {
+    "title": "Built for",
+    "titleHighlight": "African Entrepreneurs",
+    "subtitle": "Every feature is designed with the unique challenges and opportunities of the African entrepreneurship ecosystem in mind.",
+    "feature1": {
+      "title": "Smart Application System",
+      "description": "AI-guided application process with document templates and real-time validation to ensure your submission is complete and compelling."
+    },
+    "feature2": {
+      "title": "Secure Document Storage",
+      "description": "Bank-level security for your sensitive documents with encrypted storage and controlled access to protect your intellectual property."
+    },
+    "feature3": {
+      "title": "Mobile-First Experience",
+      "description": "Optimized for mobile devices with offline capabilities, ensuring you can work on applications even with limited connectivity."
+    },
+    "feature4": {
+      "title": "Collaborative Review",
+      "description": "Transparent review process with multiple stakeholders, detailed feedback, and clear communication throughout the evaluation."
+    },
+    "feature5": {
+      "title": "Multilingual Support",
+      "description": "Available in English, French, and Portuguese to serve entrepreneurs across all regions of Africa seamlessly."
+    },
+    "feature6": {
+      "title": "Progress Tracking",
+      "description": "Real-time updates on your application status with detailed analytics and insights to improve future submissions."
+    },
+    "feature7": {
+      "title": "Deadline Management",
+      "description": "Smart notifications and reminders to keep you on track with application deadlines and required documentation."
+    },
+    "feature8": {
+      "title": "Direct Communication",
+      "description": "Built-in messaging system for direct communication with reviewers, mentors, and other entrepreneurs in the ecosystem."
+    },
+    "feature9": {
+      "title": "Flexible Payments",
+      "description": "Multiple payment options including Mobile Money, Paystack, and Stripe to accommodate different preferences and regions."
+    }
+  }
+}
+

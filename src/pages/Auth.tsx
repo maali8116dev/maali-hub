@@ -1,18 +1,58 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Form } from "@/components/ui/form";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
+import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+// Form schemas
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const signUpSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type SignInFormValues = z.infer<typeof signInSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Sign In Form
+  const signInForm = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // Sign Up Form
+  const signUpForm = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
 
   // Check if user is already logged in
   useEffect(() => {
@@ -25,27 +65,20 @@ const Auth = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSignUp = async (data: SignUpFormValues) => {
     setIsLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
 
     try {
       const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            first_name: firstName,
-            last_name: lastName,
+            first_name: data.firstName,
+            last_name: data.lastName,
           },
         },
       });
@@ -69,6 +102,7 @@ const Auth = () => {
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your registration.",
         });
+        signUpForm.reset();
       }
     } catch (error) {
       toast({
@@ -81,18 +115,13 @@ const Auth = () => {
     }
   };
 
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSignIn = async (data: SignInFormValues) => {
     setIsLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
 
       if (error) {
@@ -115,6 +144,48 @@ const Auth = () => {
           description: "You have successfully signed in.",
         });
         navigate("/");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const email = signInForm.getValues("email");
+    
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        toast({
+          title: "Password reset failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Check your email",
+          description: "We've sent you a password reset link. Please check your inbox.",
+        });
       }
     } catch (error) {
       toast({
@@ -162,6 +233,12 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
+          {/* Logo Placeholder */}
+          <div className="flex justify-center mb-4">
+            <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-primary-foreground">
+              <span className="text-2xl font-bold">M</span>
+            </div>
+          </div>
           <CardTitle className="text-2xl text-center">Welcome</CardTitle>
           <CardDescription className="text-center">
             Join the community of African entrepreneurs
@@ -227,31 +304,43 @@ const Auth = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
+              <Form {...signInForm}>
+                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+                  <CustomFormField
+                    control={signInForm.control}
                     name="email"
-                    type="email"
+                    fieldType={FormFieldType.EMAIL}
+                    label="Email"
                     placeholder="your@email.com"
+                    icon={Mail}
+                    iconPosition="left"
                     required
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
+                  <CustomFormField
+                    control={signInForm.control}
                     name="password"
-                    type="password"
+                    fieldType={FormFieldType.PASSWORD}
+                    label="Password"
                     placeholder="Enter your password"
+                    icon={Lock}
+                    iconPosition="left"
                     required
                   />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
+                  <div className="flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={isLoading}
+                      className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
@@ -307,54 +396,55 @@ const Auth = () => {
                 </div>
               </div>
 
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
+              <Form {...signUpForm}>
+                <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <CustomFormField
+                      control={signUpForm.control}
                       name="firstName"
-                      type="text"
+                      fieldType={FormFieldType.INPUT}
+                      label="First Name"
                       placeholder="John"
+                      icon={User}
+                      iconPosition="left"
                       required
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
+                    <CustomFormField
+                      control={signUpForm.control}
                       name="lastName"
-                      type="text"
+                      fieldType={FormFieldType.INPUT}
+                      label="Last Name"
                       placeholder="Doe"
+                      icon={User}
+                      iconPosition="left"
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
+                  <CustomFormField
+                    control={signUpForm.control}
                     name="email"
-                    type="email"
+                    fieldType={FormFieldType.EMAIL}
+                    label="Email"
                     placeholder="your@email.com"
+                    icon={Mail}
+                    iconPosition="left"
                     required
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
+                  <CustomFormField
+                    control={signUpForm.control}
                     name="password"
-                    type="password"
+                    fieldType={FormFieldType.PASSWORD}
+                    label="Password"
                     placeholder="Create a strong password"
+                    icon={Lock}
+                    iconPosition="left"
                     required
-                    minLength={6}
                   />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
+                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                    {isLoading ? "Creating account..." : "Create Account"}
+                  </Button>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -126,7 +126,12 @@ const Application = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Ready to apply for this grant? Click below to begin the application process.
                 </p>
-                <Button className="w-full" size="lg">
+                <Button 
+                  className="w-full" 
+                  variant="hero"
+                  size="lg"
+                  onClick={() => navigate(`/application-form/${projectId}`)}
+                >
                   Begin Application
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3 text-center">

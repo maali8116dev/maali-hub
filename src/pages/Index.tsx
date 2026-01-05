@@ -1,12 +1,12 @@
 import Navigation from "@/components/Navigation";
-import HeroSection from "@/components/HeroSection";
-import TrustIndicators from "@/components/TrustIndicators";
-import HowItWorks from "@/components/HowItWorks";
-import FeaturedProjects from "@/components/FeaturedProjects";
-import Benefits from "@/components/Benefits";
-import FeatureShowcase from "@/components/FeatureShowcase";
-import Testimonials from "@/components/Testimonials";
-import Newsletter from "@/components/Newsletter";
+import HeroSection from "@/components/landing/HeroSection";
+import TrustIndicators from "@/components/landing/TrustIndicators";
+import HowItWorks from "@/components/landing/HowItWorks";
+import FeaturedProjects from "@/components/landing/FeaturedProjects";
+import Benefits from "@/components/landing/Benefits";
+import FeatureShowcase from "@/components/landing/FeatureShowcase";
+import Testimonials from "@/components/landing/Testimonials";
+import Newsletter from "@/components/landing/Newsletter";
 import Footer from "@/components/Footer";
 
 const Index = () => {

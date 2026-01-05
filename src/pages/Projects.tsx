@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,7 +81,7 @@ const Projects = () => {
           <TabsContent value="all" className="mt-8">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
-                <Card key={project.id} className="hover:shadow-elegant transition-all duration-300">
+                <Card key={project.id} className="hover:shadow-elegant transition-all duration-300 flex flex-col h-full">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg leading-tight">{project.title}</CardTitle>
@@ -88,7 +89,7 @@ const Projects = () => {
                     </div>
                     <CardDescription className="text-sm">{project.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 flex flex-col flex-1">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -107,9 +108,11 @@ const Projects = () => {
                         <span>{project.applicants} applied</span>
                       </div>
                     </div>
-                    <Button className="w-full" variant="hero">
-                      Apply Now
-                    </Button>
+                    <Link to={`/application-form/${project.id}`} className="mt-auto">
+                      <Button className="w-full mt-2.5 mb-0" variant="hero">
+                        Apply Now
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -146,9 +149,11 @@ const Projects = () => {
                         <span>{project.applicants} applied</span>
                       </div>
                     </div>
-                    <Button className="w-full" variant="hero">
-                      Apply Now
-                    </Button>
+                    <Link to={`/application-form/${project.id}`}>
+                      <Button className="w-full" variant="hero">
+                        Apply Now
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -185,9 +190,11 @@ const Projects = () => {
                         <span>{project.applicants} applied</span>
                       </div>
                     </div>
-                    <Button className="w-full" variant="hero">
-                      Apply Now
-                    </Button>
+                    <Link to={`/application-form/${project.id}`}>
+                      <Button className="w-full" variant="hero">
+                        Apply Now
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -224,9 +231,11 @@ const Projects = () => {
                         <span>{project.applicants} applied</span>
                       </div>
                     </div>
-                    <Button className="w-full" variant="hero">
-                      Apply Now
-                    </Button>
+                    <Link to={`/application-form/${project.id}`}>
+                      <Button className="w-full" variant="hero">
+                        Apply Now
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
