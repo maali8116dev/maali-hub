@@ -335,11 +335,11 @@ const Auth = () => {
                     >
                       Forgot password?
                     </button>
-                  </div>
-                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
+                </div>
+                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
               </Form>
             </TabsContent>
             
@@ -398,7 +398,7 @@ const Auth = () => {
 
               <Form {...signUpForm}>
                 <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                     <CustomFormField
                       control={signUpForm.control}
                       name="firstName"
@@ -440,10 +440,10 @@ const Auth = () => {
                     iconPosition="left"
                     required
                   />
-                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
+                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                  {isLoading ? "Creating account..." : "Create Account"}
+                </Button>
+              </form>
               </Form>
             </TabsContent>
           </Tabs>

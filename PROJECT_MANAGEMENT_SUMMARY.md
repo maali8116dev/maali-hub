@@ -4,7 +4,7 @@
 
 **Platform**: Funding opportunity hub for African entrepreneurs  
 **Tech Stack**: React + TypeScript, Hono Backend, Supabase, Drizzle ORM  
-**Status**: In Development (Frontend UI complete, Backend API ready, Integration pending)
+**Status**: In Development (Frontend UI complete, Backend API ready, Integration in progress)
 
 ---
 
@@ -17,7 +17,7 @@
 - [x] Facebook OAuth integration
 - [x] User session management
 - [x] Auth middleware (backend)
-- [ ] Password reset flow
+- [x] Password reset flow
 - [ ] Email verification flow
 - [ ] User profile creation on signup
 
@@ -26,23 +26,25 @@
 - [x] Profile schema (Drizzle)
 - [x] Profile API endpoints (backend)
 - [x] Profile query functions
+- [x] Profile editing page (connected to API)
+- [x] Profile view page (connected to API)
 - [ ] Profile creation page
-- [ ] Profile editing page
-- [ ] Profile view page
 - [ ] Avatar upload functionality
 - [ ] Profile completion tracking
 
 ### 📄 **PROJECTS/OPPORTUNITIES**
 
-- [x] Projects listing page (UI only - mock data)
+- [x] Projects listing page (connected to API with fallback)
 - [x] Project filtering by category (Technology, Agriculture, FinTech)
-- [x] Project status badges (Open, Closing Soon, Closed)
+- [x] Project filtering by status (Open, Closing Soon, Closed, New)
+- [x] Project status badges (Open, Closing Soon, Closed, New)
 - [x] Project detail view page
-- [ ] Projects database schema
-- [ ] Projects API endpoints
-- [ ] Projects CRUD operations
-- [ ] Project search functionality
-- [ ] Project pagination
+- [x] Project card button alignment (flexbox layout)
+- [x] Project search functionality
+- [x] Projects database schema
+- [x] Projects API endpoints (backend)
+- [x] Projects CRUD operations (backend)
+- [x] Project pagination (frontend and backend)
 - [ ] Project favorites/bookmarks
 
 ### 📝 **APPLICATIONS**
@@ -51,7 +53,8 @@
 - [x] Application API endpoints (backend)
 - [x] Application query functions
 - [x] Application detail page (UI only)
-- [ ] Full application form
+- [x] CustomFormField component (reusable form fields with validation)
+- [x] Full application form (Multi-step form with validation)
 - [ ] Application submission flow
 - [ ] Application status tracking
 - [ ] Application history/dashboard
@@ -90,16 +93,29 @@
 - [x] About page
 - [x] Resources page
 - [x] Contact page
-- [x] Auth page (Login/Signup)
+- [x] Auth page (Login/Signup with react-hook-form, forgot password)
+- [x] Dashboard page (UI with mock data)
+- [x] Dashboard layout with sidebar navigation
+- [x] Applications page (UI with mock data)
+- [x] Notifications page (UI with mock data)
+- [x] Profile page (UI with mock data)
+- [x] Admin dashboard pages (Dashboard, Projects, Applications, Users, Settings)
+- [x] Reviewer dashboard pages (Dashboard, Applications, Pending, ReviewApplication, Settings)
+- [x] Footer link pages (Apply, Partners, Success Stories, Blog, Help, FAQ, Guide, Privacy, Terms, Cookies, Data Protection)
+- [x] Blog listing and detail pages
+- [x] Admin blog management pages
 - [x] 404 Not Found page
 
 #### ⚠️ **NEEDS BACKEND INTEGRATION**
 
-- [ ] Connect Projects page to API
+- [x] Connect Projects page to API (with Supabase fallback)
 - [ ] Connect Application page to API
 - [ ] Connect Auth to profile creation
-- [ ] User dashboard (not yet created)
-- [ ] Application tracking page (not yet created)
+- [x] User dashboard (UI created - mock data)
+- [x] Application tracking page (UI created - mock data)
+- [ ] Connect Dashboard to API
+- [ ] Connect Applications page to API
+- [x] Profile page connected to API
 
 ### 🎨 **UI COMPONENTS**
 
@@ -110,16 +126,20 @@
 - [x] Hero section
 - [x] Featured projects section
 - [x] Feature showcase
-- [x] Project cards
+- [x] Project cards (with aligned buttons)
 - [x] Full shadcn/ui component library (50+ components)
+- [x] CustomFormField component with show/hide password
+- [x] React Hook Form integration in Auth page
+- [x] Logo placeholder on Auth page
+- [x] Theme toggle component (light/dark mode)
 
 #### 🔄 **NEEDS WORK**
 
-- [ ] Loading states
+- [x] Loading states (skeleton loaders implemented)
 - [ ] Error boundaries
-- [ ] Empty states
-- [ ] Skeleton loaders
-- [ ] Toast notifications (partially done)
+- [x] Empty states (EmptyState component created)
+- [x] Skeleton loaders (ProjectCardSkeleton, DashboardStatsSkeleton, ApplicationListSkeleton, TableRowSkeleton)
+- [x] Toast notifications (implemented)
 
 ### 🔧 **BACKEND API**
 
@@ -127,21 +147,22 @@
 
 - [x] Hono server setup
 - [x] Authentication middleware
-- [x] CORS configuration
+- [x] CORS configuration (fixed for localhost development)
 - [x] Error handling
 - [x] Profile routes (CRUD)
 - [x] Application routes (CRUD)
 - [x] Document routes (CRUD)
+- [x] Projects routes (CRUD - public GET, protected POST/PATCH/DELETE)
 - [x] Database schema (Drizzle)
-- [x] Query functions
+- [x] Query functions (profiles, applications, documents, projects)
 
 #### ⚠️ **NEEDS CONFIGURATION**
 
-- [ ] Environment variables setup
-- [ ] Database connection testing
+- [x] Environment variables setup (documentation added, DATABASE_URL password needed)
+- [ ] Database connection testing (pending password configuration)
 - [ ] API endpoint testing
 - [ ] Rate limiting
-- [ ] Request validation (Zod - partially done)
+- [x] Request validation (Zod - implemented for projects, applications, profiles)
 
 ### 🗄️ **DATABASE**
 
@@ -150,15 +171,16 @@
 - [x] Profiles table schema
 - [x] Applications table schema
 - [x] Application documents table schema
+- [x] Projects table schema
+- [x] Blog posts table schema
+- [x] User role enum (admin, reviewer, applicant)
 - [x] Supabase migrations
 - [x] Row Level Security policies
+- [x] Database seeding script (for projects)
 
 #### ⚠️ **MISSING**
 
-- [ ] Projects/opportunities table
-- [ ] Projects categories/enums
 - [ ] Application status enums
-- [ ] Database seeding script
 - [ ] Migration testing
 
 ### 🌐 **INTEGRATIONS**
@@ -219,22 +241,25 @@
 
 1. **Projects/Opportunities Management**
 
-   - Database table for projects
-   - Admin interface to create/manage projects
-   - API endpoints for projects
+   - [x] Database table for projects
+   - [x] API endpoints for projects (backend)
+   - [x] Projects page connected to API (frontend)
+   - [ ] Admin interface to create/manage projects (backend ready, UI needed)
 
 2. **Application Form**
 
-   - Complete multi-step form
-   - Form validation
-   - Save draft functionality
-   - File upload integration
+   - [x] Complete multi-step form (implemented)
+   - [x] Form validation (implemented with Zod)
+   - [ ] Save draft functionality
+   - [ ] File upload integration
 
 3. **Backend-Frontend Integration**
 
-   - Connect all pages to API
-   - Replace mock data with real API calls
-   - Error handling in frontend
+   - [x] Projects page connected (with Supabase fallback)
+   - [x] Profile page connected (with Supabase fallback)
+   - [ ] Connect remaining pages to API
+   - [x] Error handling in frontend (fallback mechanisms)
+   - [x] API client created and integrated
 
 4. **User Dashboard**
 
@@ -264,14 +289,17 @@
 
 3. **Search & Filtering**
 
-   - Advanced project search
-   - Filter by multiple criteria
-   - Sort functionality
+   - [x] Basic project search (implemented)
+   - [x] Filter by category (implemented)
+   - [x] Filter by status (implemented)
+   - [ ] Advanced project search
+   - [ ] Sort functionality
 
 4. **Admin Panel**
-   - Manage projects
-   - Review applications
-   - User management
+   - [x] Admin dashboard UI (implemented)
+   - [ ] Manage projects (backend integration needed)
+   - [ ] Review applications (backend integration needed)
+   - [ ] User management (backend integration needed)
 
 ### **LOW PRIORITY**
 
@@ -335,23 +363,47 @@
 
 ## 🛠️ **TECHNICAL DEBT**
 
-1. Mock data still in use (Projects, Applications)
+1. Mock data still in use for some pages (Applications, Dashboard stats)
 2. No error boundaries implemented
-3. Limited loading states
-4. No API client integration in frontend (api.ts created but not used)
-5. Missing environment variable configuration
+3. Loading states implemented (skeleton loaders)
+4. API client integrated (api.ts used in useProjects, useProfile hooks)
+5. Environment variable configuration documented (DATABASE_URL password needed)
 6. No testing setup (unit/integration tests)
 7. No CI/CD pipeline
-8. Limited documentation
+8. Documentation improved (BACKEND_SETUP.md, DATABASE_SETUP.md)
+
+**Recent Improvements:**
+
+- ✅ Auth forms now use react-hook-form with Zod validation
+- ✅ CustomFormField component provides consistent form field handling
+- ✅ Password fields have show/hide functionality
+- ✅ Project cards have improved layout with aligned buttons
+- ✅ Project search functionality implemented
+- ✅ Project filtering by category and status with dropdowns
+- ✅ Multi-step application form implemented with validation
+- ✅ Light/dark mode theme toggle implemented
+- ✅ Admin dashboard pages created (UI)
+- ✅ Reviewer dashboard pages created (UI)
+- ✅ Skeleton loaders implemented (Projects, Dashboard, Applications)
+- ✅ Empty state component created and integrated
+- ✅ Projects database table and migrations created
+- ✅ Projects API endpoints implemented (backend)
+- ✅ Projects page connected to real data (with Supabase fallback)
+- ✅ Profile page connected to real data (with Supabase fallback)
+- ✅ CORS configuration fixed for development
+- ✅ Blog CRUD functionality scaffolded
+- ✅ All footer link pages created
+- ✅ useProjects and useProfile hooks with API integration
 
 ---
 
 ## 📝 **NOTES FOR PROJECT MANAGER**
 
-- **Current State**: Frontend UI is ~80% complete, Backend API is ~90% complete, but they're not connected
-- **Biggest Gap**: Projects/Opportunities management system is missing entirely
-- **Next Critical Step**: Create projects table and connect frontend to backend
-- **Estimated Completion**: 8-12 weeks for full MVP
+- **Current State**: Frontend UI is ~85% complete, Backend API is ~95% complete, Integration ~40% complete
+- **Recent Progress**: Projects and Profile pages now connected to real data with fallback mechanisms
+- **Biggest Gap**: Application submission flow and file upload system
+- **Next Critical Step**: Complete database connection (DATABASE_URL password), then connect Applications page
+- **Estimated Completion**: 6-10 weeks for full MVP (reduced from 8-12 weeks)
 - **Team Needs**: Backend developer, Frontend developer, Full-stack developer, or one person doing both
 
 ---

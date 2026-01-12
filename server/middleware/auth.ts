@@ -1,8 +1,16 @@
 import { Context, Next } from "hono";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl) {
+  throw new Error("SUPABASE_URL environment variable is required. Please set it in your .env file.");
+}
+
+if (!supabaseServiceKey) {
+  throw new Error("SUPABASE_SERVICE_ROLE_KEY environment variable is required. Please set it in your .env file.");
+}
 
 // Create Supabase admin client for server-side auth verification
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {

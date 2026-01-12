@@ -1,14 +1,24 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useParams, useNavigate, } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { ApplicationFormExample } from "@/components/form/CustomFormField.example";
+import MultiStepApplicationForm from "@/components/application/MultiStepApplicationForm";
+import { useApplicationFormStore } from "@/stores/applicationForm";
 
 const ApplicationForm = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { updateFormData } = useApplicationFormStore();
+
+  // Set projectId from URL if available
+  useEffect(() => {
+    if (projectId) {
+      updateFormData({ projectId: parseInt(projectId) });
+    }
+  }, [projectId, updateFormData]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,7 +45,7 @@ const ApplicationForm = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ApplicationFormExample />
+            <MultiStepApplicationForm />
           </CardContent>
         </Card>
       </main>

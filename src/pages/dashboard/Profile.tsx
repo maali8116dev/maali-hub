@@ -1,43 +1,104 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Building, Phone, MapPin } from "lucide-react";
+import { User, Mail, Building, Phone, MapPin, Loader2 } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: profile, isLoading, error } = useProfile();
+  const updateProfile = useUpdateProfile();
   
-  // Mock data - replace with API calls when backend is ready
-  const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    bio: "Passionate entrepreneur focused on sustainable agriculture solutions for African markets.",
-    company: "AgriTech Solutions",
-    phone: "+234 123 456 7890",
-    location: "Lagos, Nigeria",
-    website: "https://agritech.example.com",
+  // Local form state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    bio: "",
+    businessName: "",
+    country: "",
   });
 
-  const [saving, setSaving] = useState(false);
+  // Update form data when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        bio: profile.bio || "",
+        businessName: profile.businessName || "",
+        country: profile.country || "",
+      });
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await updateProfile.mutateAsync({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        businessName: formData.businessName,
+        country: formData.country,
+        bio: formData.bio,
+      });
+      
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
-      setSaving(false);
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <p className="text-destructive mb-4">
+              {error instanceof Error ? error.message : "Failed to load profile"}
+            </p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // No profile found
+  if (!profile) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">No profile found. Please create one.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -60,10 +121,10 @@ const Profile = () => {
             </div>
             <div>
               <h2 className="text-2xl font-semibold">
-                {profile.firstName} {profile.lastName}
+                {formData.firstName || profile.firstName || "User"} {formData.lastName || profile.lastName || ""}
               </h2>
-              <p className="text-muted-foreground">{profile.company}</p>
-              <p className="text-sm text-muted-foreground mt-1">{profile.location}</p>
+              <p className="text-muted-foreground">{formData.businessName || profile.businessName || "No company"}</p>
+              <p className="text-sm text-muted-foreground mt-1">{formData.country || profile.country || "No location"}</p>
             </div>
           </div>
         </CardContent>
@@ -81,9 +142,9 @@ const Profile = () => {
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
-                  value={profile.firstName}
+                  value={formData.firstName}
                   onChange={(e) =>
-                    setProfile({ ...profile, firstName: e.target.value })
+                    setFormData({ ...formData, firstName: e.target.value })
                   }
                   placeholder="Enter your first name"
                 />
@@ -92,9 +153,9 @@ const Profile = () => {
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
-                  value={profile.lastName}
+                  value={formData.lastName}
                   onChange={(e) =>
-                    setProfile({ ...profile, lastName: e.target.value })
+                    setFormData({ ...formData, lastName: e.target.value })
                   }
                   placeholder="Enter your last name"
                 />
@@ -118,30 +179,14 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  value={profile.phone}
-                  onChange={(e) =>
-                    setProfile({ ...profile, phone: e.target.value })
-                  }
-                  placeholder="+234 123 456 7890"
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location/Country</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="location"
-                  value={profile.location}
+                  value={formData.country}
                   onChange={(e) =>
-                    setProfile({ ...profile, location: e.target.value })
+                    setFormData({ ...formData, country: e.target.value })
                   }
                   placeholder="City, Country"
                   className="pl-10"
@@ -155,9 +200,9 @@ const Profile = () => {
                 <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="company"
-                  value={profile.company}
+                  value={formData.businessName}
                   onChange={(e) =>
-                    setProfile({ ...profile, company: e.target.value })
+                    setFormData({ ...formData, businessName: e.target.value })
                   }
                   placeholder="Your company name"
                   className="pl-10"
@@ -166,25 +211,12 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                type="url"
-                value={profile.website}
-                onChange={(e) =>
-                  setProfile({ ...profile, website: e.target.value })
-                }
-                placeholder="https://example.com"
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
               <Textarea
                 id="bio"
-                value={profile.bio}
+                value={formData.bio}
                 onChange={(e) =>
-                  setProfile({ ...profile, bio: e.target.value })
+                  setFormData({ ...formData, bio: e.target.value })
                 }
                 placeholder="Tell us about yourself and your business..."
                 className="min-h-[120px]"
@@ -195,11 +227,33 @@ const Profile = () => {
             </div>
 
             <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  // Reset form to original profile data
+                  if (profile) {
+                    setFormData({
+                      firstName: profile.firstName || "",
+                      lastName: profile.lastName || "",
+                      bio: profile.bio || "",
+                      businessName: profile.businessName || "",
+                      country: profile.country || "",
+                    });
+                  }
+                }}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : "Save Changes"}
+              <Button type="submit" disabled={updateProfile.isPending}>
+                {updateProfile.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </div>
           </form>

@@ -6,17 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 import { Bell, Shield, Globe, Mail } from "lucide-react";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   
   const [settings, setSettings] = useState({
     emailNotifications: true,
     applicationUpdates: true,
     newsletter: false,
     language: "en",
-    theme: "system",
   });
 
   const [saving, setSaving] = useState(false);
@@ -138,10 +139,14 @@ const Settings = () => {
           <div className="space-y-2">
             <Label htmlFor="theme">Theme</Label>
             <Select
-              value={settings.theme}
-              onValueChange={(value) =>
-                setSettings({ ...settings, theme: value })
-              }
+              value={theme || "system"}
+              onValueChange={(value) => {
+                setTheme(value);
+                toast({
+                  title: "Theme updated",
+                  description: `Theme changed to ${value}`,
+                });
+              }}
             >
               <SelectTrigger id="theme">
                 <SelectValue />

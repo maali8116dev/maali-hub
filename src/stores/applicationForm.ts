@@ -76,7 +76,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 4,
+      totalSteps: 3,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
@@ -180,19 +180,17 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
         
         switch (step) {
           case 1:
-            return !!formData.projectId;
-          case 2:
             return !!(
               formData.companyName &&
               formData.contactEmail &&
               formData.location
             );
-          case 3:
+          case 2:
             return !!(
               formData.projectDescription &&
               formData.fundingAmountRequested
             );
-          case 4:
+          case 3:
             // Documents are optional, but you can add validation here
             return true;
           default:

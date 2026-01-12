@@ -25,13 +25,32 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 }
 
 /**
- * Make an authenticated API request
+ * Make an API request (auth optional for public endpoints)
  */
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  requireAuth: boolean = true
 ): Promise<T> {
-  const headers = await getAuthHeaders();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  // Only add auth headers if required or if available
+  if (requireAuth) {
+    const authHeaders = await getAuthHeaders();
+    Object.assign(headers, authHeaders);
+  } else {
+    // For public endpoints, try to add auth if available (optional)
+    try {
+      const authHeaders = await getAuthHeaders();
+      if (authHeaders["Authorization"]) {
+        headers["Authorization"] = authHeaders["Authorization"];
+      }
+    } catch {
+      // Ignore auth errors for public endpoints
+    }
+  }
   
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
@@ -55,7 +74,20 @@ async function apiRequest<T>(
 export const api = {
   // Profiles
   profiles: {
-    getMe: () => apiRequest<{ id: string; userId: string; firstName: string | null }>("/api/profiles/me"),
+    getMe: () => apiRequest<{
+      id: string;
+      userId: string;
+      firstName: string | null;
+      lastName: string | null;
+      businessName: string | null;
+      businessSector: string | null;
+      country: string | null;
+      bio: string | null;
+      avatarUrl: string | null;
+      role: "admin" | "reviewer" | "applicant";
+      createdAt: string;
+      updatedAt: string;
+    }>("/api/profiles/me"),
     getById: (id: string) => apiRequest(`/api/profiles/${id}`),
     create: (data: any) => apiRequest("/api/profiles", { method: "POST", body: JSON.stringify(data) }),
     update: (data: any) => apiRequest("/api/profiles/me", { method: "PATCH", body: JSON.stringify(data) }),
@@ -79,6 +111,29 @@ export const api = {
     getByApplicationId: (applicationId: string) => apiRequest(`/api/documents/application/${applicationId}`),
     create: (data: any) => apiRequest("/api/documents", { method: "POST", body: JSON.stringify(data) }),
     delete: (id: string) => apiRequest(`/api/documents/${id}`, { method: "DELETE" }),
+  },
+
+  // Projects (public GET endpoints, auth required for POST/PATCH/DELETE)
+  projects: {
+    getAll: (params?: { category?: string; status?: string; search?: string; limit?: number; offset?: number }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.category) queryParams.append("category", params.category);
+      if (params?.status) queryParams.append("status", params.status);
+      if (params?.search) queryParams.append("search", params.search);
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.offset) queryParams.append("offset", params.offset.toString());
+      const query = queryParams.toString();
+      return apiRequest<{ data: any[]; total: number; limit: number; offset: number }>(
+        `/api/projects${query ? `?${query}` : ""}`,
+        {},
+        false // Public endpoint
+      );
+    },
+    getById: (id: number) => apiRequest(`/api/projects/${id}`, {}, false), // Public endpoint
+    getCategories: () => apiRequest<string[]>("/api/projects/categories/list", {}, false), // Public endpoint
+    create: (data: any) => apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data) }, true),
+    update: (id: number, data: any) => apiRequest(`/api/projects/${id}`, { method: "PATCH", body: JSON.stringify(data) }, true),
+    delete: (id: number) => apiRequest(`/api/projects/${id}`, { method: "DELETE" }, true),
   },
 };
 

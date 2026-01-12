@@ -1,3 +1,6 @@
+// Load environment variables FIRST, before any other imports
+import "dotenv/config";
+
 import { serve } from "@hono/node-server";
 import app from "./index";
 

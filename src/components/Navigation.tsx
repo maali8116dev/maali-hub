@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -68,8 +69,9 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Language Selector & CTA */}
+          {/* Language Selector, Theme Toggle & CTA */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             <div className="relative group">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
@@ -143,6 +145,10 @@ const Navigation = () => {
               </Link>
             ))}
             <div className="pt-4 pb-2 space-y-2">
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-sm text-muted-foreground">Theme</span>
+                <ThemeToggle />
+              </div>
               {user ? (
                 <Button variant="outline" className="w-full" onClick={signOut}>
                   {t('navigation:signOut')}

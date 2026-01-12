@@ -1,12 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   // Mock data - replace with API calls when backend is ready
+  const [isLoadingStats, setIsLoadingStats] = useState(true); // Temporarily true to see skeleton loaders
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true); // Temporarily true to see skeleton loaders
+  
+  // Simulate loading for demonstration - remove this when integrating with API
+  useEffect(() => {
+    const timer1 = setTimeout(() => {
+      setIsLoadingStats(false);
+    }, 1500); // Show stats skeleton for 1.5 seconds
+    
+    const timer2 = setTimeout(() => {
+      setIsLoadingApplications(false);
+    }, 2000); // Show applications skeleton for 2 seconds
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, []);
   const [stats] = useState({
     totalApplications: 5,
     pending: 2,
@@ -57,59 +78,63 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalApplications}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              All time applications
-            </p>
-          </CardContent>
-        </Card>
+      {isLoadingStats ? (
+        <DashboardStatsSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalApplications}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                All time applications
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Under review
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-warning" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pending}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Under review
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.approved}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Successfully funded
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Approved</CardTitle>
+              <CheckCircle className="h-4 w-4 text-success" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.approved}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Successfully funded
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.rejected}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Not selected
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.rejected}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Not selected
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -177,7 +202,9 @@ const Dashboard = () => {
           </Link>
         </CardHeader>
         <CardContent>
-          {recentApplications.length > 0 ? (
+          {isLoadingApplications ? (
+            <ApplicationListSkeleton count={3} />
+          ) : recentApplications.length > 0 ? (
             <div className="space-y-4">
               {recentApplications.map((app) => (
                 <div
@@ -205,15 +232,16 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No applications yet</p>
-              <Link to="/projects">
-                <Button variant="outline" className="mt-4">
-                  Browse Opportunities
-                </Button>
-              </Link>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="No applications yet"
+              description="Start applying to funding opportunities to see your applications here."
+              action={{
+                label: "Browse Opportunities",
+                onClick: () => navigate("/projects"),
+                variant: "outline",
+              }}
+            />
           )}
         </CardContent>
       </Card>

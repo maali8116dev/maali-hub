@@ -11,6 +11,10 @@ if (!connectionString) {
   throw new Error("DATABASE_URL environment variable is not set");
 }
 
+if (connectionString.includes('[YOUR-PASSWORD]')) {
+  throw new Error("DATABASE_URL contains [YOUR-PASSWORD] placeholder. Please replace it with your actual database password from Supabase Dashboard > Settings > Database > Database password");
+}
+
 // Create the connection
 const client = postgres(connectionString, {
   max: 1, // Connection pool size
