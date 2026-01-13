@@ -89,74 +89,41 @@
   }
 
   .dark {
-    /* Core Background & Text - Dark African Night */
-    --background: 25 20% 8%;
-    --foreground: 30 15% 95%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    /* Card & Surfaces */
-    --card: 25 18% 12%;
-    --card-foreground: 30 15% 95%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    /* Popover */
-    --popover: 25 18% 12%;
-    --popover-foreground: 30 15% 95%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Primary - Terra Cotta / African Earth (slightly lighter for dark mode) */
-    --primary: 15 70% 55%;
-    --primary-foreground: 25 20% 8%;
-    --primary-light: 15 60% 65%;
-    --primary-dark: 15 80% 45%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    /* Secondary - Warm Dark */
-    --secondary: 25 15% 18%;
-    --secondary-foreground: 30 15% 90%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    /* Muted - Dark Warm */
-    --muted: 25 12% 20%;
-    --muted-foreground: 30 10% 60%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    /* Accent - Vibrant Green */
-    --accent: 140 50% 40%;
-    --accent-foreground: 30 15% 95%;
-    --accent-light: 140 40% 55%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
-    /* Success - Deep Green */
-    --success: 140 65% 40%;
-    --success-foreground: 30 15% 95%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    /* Warning - Golden Orange */
-    --warning: 35 80% 50%;
-    --warning-foreground: 25 20% 8%;
-
-    /* Destructive - Sunset Red */
-    --destructive: 5 70% 50%;
-    --destructive-foreground: 30 15% 95%;
-
-    /* Border & Input */
-    --border: 25 15% 22%;
-    --input: 25 15% 18%;
-    --ring: 15 70% 55%;
-
-    /* Gradients - Dark mode versions */
-    --gradient-primary: linear-gradient(135deg, hsl(15 70% 55%), hsl(35 80% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(15 80% 45%), hsl(5 70% 50%), hsl(35 80% 50%));
-    --gradient-accent: linear-gradient(135deg, hsl(140 50% 40%), hsl(160 45% 45%));
-    --gradient-subtle: linear-gradient(180deg, hsl(25 18% 14%), hsl(25 15% 18%));
-
-    /* Shadows - Dark mode */
-    --shadow-elegant: 0 10px 30px -10px hsl(15 70% 55% / 0.3);
-    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 30px hsl(15 70% 55% / 0.4);
-
-    /* Sidebar */
-    --sidebar-background: 25 18% 10%;
-    --sidebar-foreground: 30 15% 95%;
-    --sidebar-primary: 15 70% 55%;
-    --sidebar-primary-foreground: 25 20% 8%;
-    --sidebar-accent: 25 12% 20%;
-    --sidebar-accent-foreground: 30 15% 95%;
-    --sidebar-border: 25 15% 22%;
-    --sidebar-ring: 15 70% 55%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -172,7 +139,8 @@
 
 @layer utilities {
   @keyframes pulse-slow {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
