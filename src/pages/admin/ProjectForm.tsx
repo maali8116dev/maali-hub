@@ -10,7 +10,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useProject, useCreateProject, useUpdateProject } from "@/hooks/useAdminProjects";
+import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from "@/hooks/useAdminProjects";
 import { useProjectCategories } from "@/hooks/useProjects";
 
 const projectSchema = z.object({
@@ -97,8 +97,14 @@ const ProjectForm = () => {
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      const formData = {
-        ...data,
+      const formData: ProjectFormData = {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        status: data.status,
+        deadline: data.deadline,
+        fundingAmount: data.fundingAmount,
+        location: data.location,
         imageUrl: data.imageUrl || undefined,
         requirements: data.requirements || undefined,
         eligibilityCriteria: data.eligibilityCriteria || undefined,

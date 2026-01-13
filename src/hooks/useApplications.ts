@@ -37,7 +37,7 @@ export function useApplications() {
 
       try {
         // Try backend API first
-        const applications = await api.applications.getAll();
+        const applications = await api.applications.getAll() as any[];
 
         if (!applications || applications.length === 0) {
           return [];
@@ -45,10 +45,10 @@ export function useApplications() {
 
         // Fetch project details for each application
         const applicationsWithProjects = await Promise.all(
-          applications.map(async (app: any) => {
+          applications.map(async (app) => {
             try {
               // Fetch project details
-              const project = await api.projects.getById(app.projectId);
+              const project = await api.projects.getById(app.projectId) as any;
               
               // Map status from backend to UI format
               const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> = {

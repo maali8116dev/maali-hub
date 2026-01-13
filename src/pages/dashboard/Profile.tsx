@@ -24,15 +24,21 @@ const Profile = () => {
     country: "",
   });
 
+  // Helper to access profile fields (handles both camelCase from API and snake_case from Supabase)
+  const getProfileField = (camelCase: string, snake_case: string) => {
+    if (!profile) return "";
+    return (profile as any)[camelCase] || (profile as any)[snake_case] || "";
+  };
+
   // Update form data when profile loads
   useEffect(() => {
     if (profile) {
       setFormData({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        bio: profile.bio || "",
-        businessName: profile.businessName || "",
-        country: profile.country || "",
+        firstName: getProfileField("firstName", "first_name"),
+        lastName: getProfileField("lastName", "last_name"),
+        bio: getProfileField("bio", "bio"),
+        businessName: getProfileField("businessName", "business_name"),
+        country: getProfileField("country", "country"),
       });
     }
   }, [profile]);
@@ -121,10 +127,10 @@ const Profile = () => {
             </div>
             <div>
               <h2 className="text-2xl font-semibold">
-                {formData.firstName || profile.firstName || "User"} {formData.lastName || profile.lastName || ""}
+                {formData.firstName || getProfileField("firstName", "first_name") || "User"} {formData.lastName || getProfileField("lastName", "last_name") || ""}
               </h2>
-              <p className="text-muted-foreground">{formData.businessName || profile.businessName || "No company"}</p>
-              <p className="text-sm text-muted-foreground mt-1">{formData.country || profile.country || "No location"}</p>
+              <p className="text-muted-foreground">{formData.businessName || getProfileField("businessName", "business_name") || "No company"}</p>
+              <p className="text-sm text-muted-foreground mt-1">{formData.country || getProfileField("country", "country") || "No location"}</p>
             </div>
           </div>
         </CardContent>
@@ -234,11 +240,11 @@ const Profile = () => {
                   // Reset form to original profile data
                   if (profile) {
                     setFormData({
-                      firstName: profile.firstName || "",
-                      lastName: profile.lastName || "",
-                      bio: profile.bio || "",
-                      businessName: profile.businessName || "",
-                      country: profile.country || "",
+                      firstName: getProfileField("firstName", "first_name"),
+                      lastName: getProfileField("lastName", "last_name"),
+                      bio: getProfileField("bio", "bio"),
+                      businessName: getProfileField("businessName", "business_name"),
+                      country: getProfileField("country", "country"),
                     });
                   }
                 }}
