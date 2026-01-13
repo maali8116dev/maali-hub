@@ -13,7 +13,7 @@ const BlogDetail = () => {
   const blogPost = {
     id: id ? parseInt(id) : 1,
     title: "10 Tips for Writing a Winning Funding Application",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=600&fit=crop",
+    featuredImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=600&fit=crop",
     content: `
       <p>Writing a compelling funding application is crucial for securing the resources your business needs to grow. Here are ten essential tips to help you craft an application that stands out.</p>
       
@@ -56,7 +56,7 @@ const BlogDetail = () => {
     category: "Applications",
     readTime: "5 min read",
     featured: true,
-    image: "📝",
+    emoji: "📝",
     tags: ["Funding", "Applications", "Business Tips", "Entrepreneurship"]
   };
 
@@ -82,7 +82,7 @@ const BlogDetail = () => {
           {/* Featured Image */}
           <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden mb-6">
             <img
-              src={blogPost.image}
+              src={blogPost.featuredImage}
               alt={blogPost.title}
               className="w-full h-full object-cover"
             />
