@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -110,6 +110,71 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "applications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          author: string
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          featured: boolean | null
+          id: number
+          image_url: string
+          published_at: string | null
+          read_time: string
+          status: string
+          tags: string | null
+          title: string
+          updated_at: string
+          views: number | null
+        }
+        Insert: {
+          author: string
+          category: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          excerpt: string
+          featured?: boolean | null
+          id?: number
+          image_url: string
+          published_at?: string | null
+          read_time: string
+          status?: string
+          tags?: string | null
+          title: string
+          updated_at?: string
+          views?: number | null
+        }
+        Update: {
+          author?: string
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          featured?: boolean | null
+          id?: number
+          image_url?: string
+          published_at?: string | null
+          read_time?: string
+          status?: string
+          tags?: string | null
+          title?: string
+          updated_at?: string
+          views?: number | null
+        }
         Relationships: []
       }
       profiles: {
@@ -123,6 +188,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
         }
@@ -136,6 +202,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
         }
@@ -149,8 +216,69 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          application_fee: number | null
+          category: string
+          created_at: string
+          created_by: string | null
+          current_applicants: number | null
+          deadline: string
+          description: string
+          eligibility_criteria: string | null
+          funding_amount: string
+          id: number
+          image_url: string | null
+          location: string
+          max_applicants: number | null
+          requirements: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_fee?: number | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          current_applicants?: number | null
+          deadline: string
+          description: string
+          eligibility_criteria?: string | null
+          funding_amount: string
+          id?: number
+          image_url?: string | null
+          location: string
+          max_applicants?: number | null
+          requirements?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_fee?: number | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          current_applicants?: number | null
+          deadline?: string
+          description?: string
+          eligibility_criteria?: string | null
+          funding_amount?: string
+          id?: number
+          image_url?: string | null
+          location?: string
+          max_applicants?: number | null
+          requirements?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -162,7 +290,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "reviewer" | "applicant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -289,6 +417,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "reviewer", "applicant"],
+    },
   },
 } as const
