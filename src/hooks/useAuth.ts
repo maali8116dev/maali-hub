@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { setSentryUser, clearSentryUser } from "@/lib/sentry";
+import { identifyUser, resetUser, trackEvent } from "@/lib/posthog";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -14,6 +16,20 @@ export const useAuth = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Update analytics contexts based on auth state
+        if (session?.user) {
+          setSentryUser({ id: session.user.id, email: session.user.email });
+          identifyUser({ id: session.user.id, email: session.user.email });
+          
+          if (event === "SIGNED_IN") {
+            trackEvent("user_logged_in", { method: "email" });
+          }
+        } else if (event === "SIGNED_OUT") {
+          clearSentryUser();
+          resetUser();
+          trackEvent("user_logged_out");
+        }
       }
     );
 
@@ -22,6 +38,12 @@ export const useAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Set initial user context if already logged in
+      if (session?.user) {
+        setSentryUser({ id: session.user.id, email: session.user.email });
+        identifyUser({ id: session.user.id, email: session.user.email });
+      }
     });
 
     return () => subscription.unsubscribe();

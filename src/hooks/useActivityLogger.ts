@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { trackEvent } from "@/lib/posthog";
 
 export type ActionType = 
   | 'create' 
@@ -49,6 +50,15 @@ export function useActivityLogger() {
     metadata,
   }: LogActivityParams) => {
     try {
+      // Send to PostHog for analytics
+      trackEvent(`${entityType}_${actionType}`, {
+        entity_type: entityType,
+        entity_id: entityId,
+        action_type: actionType,
+        description,
+        ...metadata,
+      });
+
       const insertData: ActivityLogInsert = {
         user_id: user?.id || null,
         action_type: actionType,
@@ -84,6 +94,16 @@ export async function logActivityDirect({
   metadata,
 }: LogActivityParams & { userId?: string }) {
   try {
+    // Send to PostHog for analytics
+    trackEvent(`${entityType}_${actionType}`, {
+      entity_type: entityType,
+      entity_id: entityId,
+      action_type: actionType,
+      user_id: userId,
+      description,
+      ...metadata,
+    });
+
     const insertData: ActivityLogInsert = {
       user_id: userId || null,
       action_type: actionType,
