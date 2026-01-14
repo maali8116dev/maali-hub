@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export type Project = {
@@ -40,6 +40,50 @@ export type ProjectFormData = {
   featured?: boolean;
 };
 
+// Transform Supabase snake_case to camelCase
+function transformProject(data: any): Project {
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    status: data.status,
+    deadline: data.deadline,
+    fundingAmount: data.funding_amount,
+    location: data.location,
+    imageUrl: data.image_url,
+    requirements: data.requirements,
+    eligibilityCriteria: data.eligibility_criteria,
+    applicationFee: data.application_fee,
+    maxApplicants: data.max_applicants,
+    currentApplicants: data.current_applicants || 0,
+    featured: data.featured ?? false,
+    createdBy: data.created_by,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+// Transform camelCase to snake_case for Supabase
+function toSnakeCase(data: ProjectFormData): Record<string, any> {
+  return {
+    title: data.title,
+    description: data.description,
+    category: data.category,
+    status: data.status,
+    deadline: data.deadline,
+    funding_amount: data.fundingAmount,
+    location: data.location,
+    image_url: data.imageUrl || null,
+    requirements: data.requirements || null,
+    eligibility_criteria: data.eligibilityCriteria || null,
+    application_fee: data.applicationFee || 0,
+    max_applicants: data.maxApplicants || null,
+    current_applicants: data.currentApplicants || 0,
+    featured: data.featured ?? false,
+  };
+}
+
 /**
  * Hook to fetch all projects for admin (no pagination, all projects)
  */
@@ -47,12 +91,13 @@ export function useAdminProjects() {
   return useQuery({
     queryKey: ["admin-projects"],
     queryFn: async () => {
-      // Fetch all projects without pagination
-      const response = await api.projects.getAll({
-        limit: 1000, // Large limit to get all projects
-        offset: 0,
-      });
-      return response.data as Project[];
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return (data || []).map(transformProject);
     },
     staleTime: 1 * 60 * 1000, // Cache for 1 minute
     retry: 1,
@@ -67,7 +112,15 @@ export function useProject(id: number | undefined) {
     queryKey: ["project", id],
     queryFn: async () => {
       if (!id) throw new Error("Project ID is required");
-      return await api.projects.getById(id) as Project;
+      
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return transformProject(data);
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -83,11 +136,40 @@ export function useCreateProject() {
 
   return useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await api.projects.create(data);
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session?.session?.user?.id;
+      
+      const insertData = {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        status: data.status,
+        deadline: data.deadline,
+        funding_amount: data.fundingAmount,
+        location: data.location,
+        image_url: data.imageUrl || null,
+        requirements: data.requirements || null,
+        eligibility_criteria: data.eligibilityCriteria || null,
+        application_fee: data.applicationFee || 0,
+        max_applicants: data.maxApplicants || null,
+        current_applicants: data.currentApplicants || 0,
+        featured: data.featured ?? false,
+        created_by: userId || null,
+      };
+
+      const { data: result, error } = await supabase
+        .from("projects")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformProject(result);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
       toast({
         title: "Project created",
         description: "The project has been created successfully.",
@@ -112,11 +194,22 @@ export function useUpdateProject() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<ProjectFormData> }) => {
-      return await api.projects.update(id, data);
+      const updateData = toSnakeCase(data as ProjectFormData);
+      
+      const { data: result, error } = await supabase
+        .from("projects")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformProject(result);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", variables.id] });
       toast({
         title: "Project updated",
@@ -142,11 +235,18 @@ export function useDeleteProject() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      return await api.projects.delete(id);
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
       toast({
         title: "Project deleted",
         description: "The project has been deleted successfully.",
@@ -161,4 +261,3 @@ export function useDeleteProject() {
     },
   });
 }
-
