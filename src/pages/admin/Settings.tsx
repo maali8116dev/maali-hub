@@ -12,7 +12,6 @@ const AdminSettings = () => {
   const [settings, setSettings] = useState({
     emailNotifications: true,
     applicationAlerts: true,
-    autoApprove: false,
     maintenanceMode: false,
   });
 
@@ -63,21 +62,6 @@ const AdminSettings = () => {
               checked={settings.maintenanceMode}
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, maintenanceMode: checked })
-              }
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="auto-approve">Auto-approve Applications</Label>
-              <p className="text-sm text-muted-foreground">
-                Automatically approve applications meeting criteria
-              </p>
-            </div>
-            <Switch
-              id="auto-approve"
-              checked={settings.autoApprove}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, autoApprove: checked })
               }
             />
           </div>
