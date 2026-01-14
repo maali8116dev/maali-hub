@@ -29,6 +29,7 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminBlog from "./pages/admin/Blog";
 import AdminBlogForm from "./pages/admin/BlogForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
+import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
 import ReviewerDashboard from "./pages/reviewer/Dashboard";
 import ReviewerApplications from "./pages/reviewer/Applications";
@@ -145,6 +146,14 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminProjectForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/projects/:id"
+            element={
+              <AdminLayout>
+                <AdminProjectDetails />
               </AdminLayout>
             }
           />
