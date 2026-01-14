@@ -2,9 +2,32 @@ import * as Sentry from "@sentry/react";
 
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 
+let isInitialized = false;
+
 export const initSentry = () => {
   if (!SENTRY_DSN) {
     console.warn("Sentry DSN not configured. Error tracking disabled.");
+    return;
+  }
+
+  // Check if user has consented to analytics
+  const consent = localStorage.getItem("cookie-consent");
+  const preferences = localStorage.getItem("cookie-preferences");
+  
+  if (consent !== "accepted") {
+    console.log("Sentry: Waiting for cookie consent");
+    return;
+  }
+
+  if (preferences) {
+    const prefs = JSON.parse(preferences);
+    if (!prefs.analytics) {
+      console.log("Sentry: Analytics cookies not accepted");
+      return;
+    }
+  }
+
+  if (isInitialized) {
     return;
   }
 
@@ -19,8 +42,8 @@ export const initSentry = () => {
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     
-    // Enable when DSN is configured (works in dev and prod)
-    enabled: !!SENTRY_DSN,
+    // Enable when DSN is configured
+    enabled: true,
     
     // Filter out known benign errors
     beforeSend(event, hint) {
@@ -49,10 +72,19 @@ export const initSentry = () => {
       Sentry.replayIntegration(),
     ],
   });
+
+  isInitialized = true;
+  console.log("Sentry initialized with consent");
+};
+
+// Re-initialize after consent is given
+export const initSentryWithConsent = () => {
+  initSentry();
 };
 
 // Set user context when authenticated
 export const setSentryUser = (user: { id: string; email?: string }) => {
+  if (!isInitialized) return;
   Sentry.setUser({
     id: user.id,
     email: user.email,
@@ -61,6 +93,7 @@ export const setSentryUser = (user: { id: string; email?: string }) => {
 
 // Clear user context on logout
 export const clearSentryUser = () => {
+  if (!isInitialized) return;
   Sentry.setUser(null);
 };
 
@@ -69,6 +102,10 @@ export const captureError = (
   error: Error,
   context?: Record<string, unknown>
 ) => {
+  if (!isInitialized) {
+    console.error("Sentry not initialized, error not captured:", error);
+    return;
+  }
   Sentry.captureException(error, {
     extra: context,
   });
@@ -80,6 +117,7 @@ export const addBreadcrumb = (
   category: string,
   data?: Record<string, unknown>
 ) => {
+  if (!isInitialized) return;
   Sentry.addBreadcrumb({
     message,
     category,
