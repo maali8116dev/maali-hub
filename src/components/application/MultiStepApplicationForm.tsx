@@ -25,6 +25,8 @@ import {
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+// Email integration - uncomment to enable application confirmation emails
+// import { sendApplicationSubmittedEmail } from "@/lib/email";
 
 // Step 1: Company Information Schema
 const step1Schema = z.object({
@@ -188,6 +190,16 @@ const MultiStepApplicationForm = () => {
         ...data,
         documents: formData.documents,
       });
+      
+      // Email integration - uncomment to send confirmation email after submission
+      // const applicationId = "generated-id"; // Replace with actual application ID from API response
+      // await sendApplicationSubmittedEmail(
+      //   data.contactEmail,
+      //   data.companyName,
+      //   "Project Title", // Replace with actual project title
+      //   applicationId,
+      //   `${window.location.origin}/dashboard/applications`
+      // );
       
       toast({
         title: "Application Submitted",

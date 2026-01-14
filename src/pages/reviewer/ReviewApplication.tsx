@@ -20,6 +20,12 @@ import {
   Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+// Email integration - uncomment to enable status update emails
+// import { 
+//   sendApplicationApprovedEmail, 
+//   sendApplicationRejectedEmail,
+//   sendApplicationUnderReviewEmail 
+// } from "@/lib/email";
 
 const ReviewApplication = () => {
   const { id } = useParams();
@@ -91,6 +97,15 @@ const ReviewApplication = () => {
       // API call to approve application
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       
+      // Email integration - uncomment to send approval email
+      // await sendApplicationApprovedEmail(
+      //   application.contactEmail,
+      //   application.applicantName,
+      //   application.projectTitle,
+      //   application.id,
+      //   reviewNotes || undefined
+      // );
+      
       toast({
         title: "Application Approved",
         description: "The application has been approved successfully.",
@@ -123,6 +138,15 @@ const ReviewApplication = () => {
       // API call to reject application
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       
+      // Email integration - uncomment to send rejection email
+      // await sendApplicationRejectedEmail(
+      //   application.contactEmail,
+      //   application.applicantName,
+      //   application.projectTitle,
+      //   reviewNotes,
+      //   `${window.location.origin}/projects`
+      // );
+      
       toast({
         title: "Application Rejected",
         description: "The application has been rejected.",
@@ -154,6 +178,15 @@ const ReviewApplication = () => {
     try {
       // API call to request more info
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      
+      // Email integration - uncomment to send under review email with info request
+      // await sendApplicationUnderReviewEmail(
+      //   application.contactEmail,
+      //   application.applicantName,
+      //   application.projectTitle,
+      //   application.id,
+      //   `${window.location.origin}/dashboard/applications`
+      // );
       
       toast({
         title: "Information Requested",
