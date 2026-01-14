@@ -3,9 +3,32 @@ import posthog from "posthog-js";
 const POSTHOG_KEY = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || "https://app.posthog.com";
 
+let isInitialized = false;
+
 export const initPostHog = () => {
   if (!POSTHOG_KEY) {
     console.warn("PostHog API key not configured. Analytics disabled.");
+    return;
+  }
+
+  // Check if user has consented to analytics
+  const consent = localStorage.getItem("cookie-consent");
+  const preferences = localStorage.getItem("cookie-preferences");
+  
+  if (consent !== "accepted") {
+    console.log("PostHog: Waiting for cookie consent");
+    return;
+  }
+
+  if (preferences) {
+    const prefs = JSON.parse(preferences);
+    if (!prefs.analytics) {
+      console.log("PostHog: Analytics cookies not accepted");
+      return;
+    }
+  }
+
+  if (isInitialized) {
     return;
   }
 
@@ -27,15 +50,19 @@ export const initPostHog = () => {
     respect_dnt: true,
     
     // Performance
-    loaded: (posthog) => {
-      if (import.meta.env.DEV) {
-        // Disable in development unless explicitly enabled
-        if (!POSTHOG_KEY) {
-          posthog.opt_out_capturing();
-        }
-      }
+    loaded: () => {
+      console.log("PostHog initialized with consent");
     },
   });
+
+  isInitialized = true;
+};
+
+// Disable tracking
+export const disablePostHog = () => {
+  if (isInitialized) {
+    posthog.opt_out_capturing();
+  }
 };
 
 // Identify user for tracking
@@ -46,7 +73,7 @@ export const identifyUser = (user: {
   firstName?: string;
   lastName?: string;
 }) => {
-  if (!POSTHOG_KEY) return;
+  if (!isInitialized) return;
   
   posthog.identify(user.id, {
     email: user.email,
@@ -58,7 +85,7 @@ export const identifyUser = (user: {
 
 // Reset user on logout
 export const resetUser = () => {
-  if (!POSTHOG_KEY) return;
+  if (!isInitialized) return;
   posthog.reset();
 };
 
@@ -67,13 +94,13 @@ export const trackEvent = (
   eventName: string,
   properties?: Record<string, unknown>
 ) => {
-  if (!POSTHOG_KEY) return;
+  if (!isInitialized) return;
   posthog.capture(eventName, properties);
 };
 
 // Track page view manually (if needed)
 export const trackPageView = (path?: string) => {
-  if (!POSTHOG_KEY) return;
+  if (!isInitialized) return;
   posthog.capture("$pageview", {
     $current_url: path || window.location.href,
   });
@@ -81,13 +108,13 @@ export const trackPageView = (path?: string) => {
 
 // Feature flags
 export const isFeatureEnabled = (flagKey: string): boolean => {
-  if (!POSTHOG_KEY) return false;
+  if (!isInitialized) return false;
   return posthog.isFeatureEnabled(flagKey) ?? false;
 };
 
 // Get feature flag value
 export const getFeatureFlag = (flagKey: string): string | boolean | undefined => {
-  if (!POSTHOG_KEY) return undefined;
+  if (!isInitialized) return undefined;
   return posthog.getFeatureFlag(flagKey);
 };
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,10 @@ import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CookieConsent } from "@/components/CookieConsent";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { initSentry } from "@/lib/sentry";
+import { initPostHog } from "@/lib/posthog";
 import Index from "./pages/Index";
 import Projects from "./pages/projects/Projects";
 import About from "./pages/About";
@@ -54,11 +59,27 @@ import ErrorTest from "./tests/ErrorTest";
 
 const queryClient = new QueryClient();
 
+// Component to initialize tracking after consent
+const TrackingInitializer = () => {
+  const { canTrack } = useCookieConsent();
+
+  useEffect(() => {
+    if (canTrack) {
+      initSentry();
+      initPostHog();
+    }
+  }, [canTrack]);
+
+  return null;
+};
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <TooltipProvider>
+          <TrackingInitializer />
+          <CookieConsent />
           <Toaster />
           <Sonner />
           <BrowserRouter>
