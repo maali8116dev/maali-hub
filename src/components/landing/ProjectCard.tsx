@@ -4,7 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Calendar, MapPin, DollarSign, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface ProjectCardProps {
+// Props for legacy mock data (used in FeaturedProjects)
+interface LegacyProjectCardProps {
   id: string;
   title: string;
   description: string;
@@ -13,21 +14,43 @@ interface ProjectCardProps {
   fundingAmount: string;
   deadline: string;
   applicants: number;
-  status: 'open' | 'closing-soon' | 'closed';
+  status: 'open' | 'closing-soon' | 'closed' | 'new';
 }
 
-const ProjectCard = ({
-  id,
-  title,
-  description,
-  sector,
-  country,
-  fundingAmount,
-  deadline,
-  applicants,
-  status
-}: ProjectCardProps) => {
+// Props for database projects (used in Projects page)
+interface DatabaseProjectCardProps {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  fundingAmount: string;
+  deadline: string;
+  currentApplicants: number;
+  status: string;
+}
+
+type ProjectCardProps = LegacyProjectCardProps | DatabaseProjectCardProps;
+
+// Type guard to check if it's a database project
+function isDatabaseProject(props: ProjectCardProps): props is DatabaseProjectCardProps {
+  return 'category' in props && 'location' in props && 'currentApplicants' in props;
+}
+
+const ProjectCard = (props: ProjectCardProps) => {
   const navigate = useNavigate();
+  
+  // Normalize props based on type
+  const id = props.id;
+  const title = props.title;
+  const description = props.description;
+  const sector = isDatabaseProject(props) ? props.category : props.sector;
+  const country = isDatabaseProject(props) ? props.location : props.country;
+  const fundingAmount = props.fundingAmount;
+  const deadline = props.deadline;
+  const applicants = isDatabaseProject(props) ? props.currentApplicants : props.applicants;
+  const status = props.status;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'open':
@@ -36,6 +59,8 @@ const ProjectCard = ({
         return 'bg-warning text-warning-foreground';
       case 'closed':
         return 'bg-muted text-muted-foreground';
+      case 'new':
+        return 'bg-blue-500 text-white';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -49,13 +74,30 @@ const ProjectCard = ({
         return 'Closing Soon';
       case 'closed':
         return 'Closed';
+      case 'new':
+        return 'New';
       default:
         return 'Unknown';
     }
   };
 
+  // Format deadline if it's a date string
+  const formatDeadline = (deadline: string) => {
+    try {
+      const date = new Date(deadline);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    } catch {
+      // Return as-is if parsing fails
+    }
+    return deadline;
+  };
+
+  const isDisabled = status === 'closed';
+
   return (
-    <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-border">
+    <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-border flex flex-col h-full">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start mb-2">
           <Badge variant="secondary" className="text-xs">
@@ -70,7 +112,7 @@ const ProjectCard = ({
         </h3>
       </CardHeader>
       
-      <CardContent className="pb-4">
+      <CardContent className="pb-4 flex-1">
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
           {description}
         </p>
@@ -86,7 +128,7 @@ const ProjectCard = ({
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>{deadline}</span>
+            <span>{formatDeadline(deadline)}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4" />
@@ -97,12 +139,12 @@ const ProjectCard = ({
       
       <CardFooter className="pt-0">
         <Button 
-          variant={status === 'open' ? 'hero' : 'outline'} 
+          variant={!isDisabled ? 'hero' : 'outline'} 
           className="w-full"
-          disabled={status === 'closed'}
-          onClick={() => status !== 'closed' && navigate(`/application/${id}`)}
+          disabled={isDisabled}
+          onClick={() => !isDisabled && navigate(`/application-form/${id}`)}
         >
-          {status === 'closed' ? 'Application Closed' : 'Apply Now'}
+          {isDisabled ? 'Application Closed' : 'Apply Now'}
         </Button>
       </CardFooter>
     </Card>
@@ -110,4 +152,3 @@ const ProjectCard = ({
 };
 
 export default ProjectCard;
-
