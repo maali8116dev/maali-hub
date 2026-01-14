@@ -34,6 +34,8 @@ import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
 import AdminBlog from "./pages/admin/Blog";
 import AdminBlogForm from "./pages/admin/BlogForm";
+import AdminFAQ from "./pages/admin/FAQ";
+import AdminFAQForm from "./pages/admin/FAQForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
@@ -243,6 +245,30 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminBlogForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/faq"
+            element={
+              <AdminLayout>
+                <AdminFAQ />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/faq/new"
+            element={
+              <AdminLayout>
+                <AdminFAQForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/faq/:id/edit"
+            element={
+              <AdminLayout>
+                <AdminFAQForm />
               </AdminLayout>
             }
           />

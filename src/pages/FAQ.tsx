@@ -1,107 +1,57 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search, HelpCircle } from "lucide-react";
+import { useFAQs, FAQ } from "@/hooks/useFAQs";
 
-const FAQ = () => {
+const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: faqs, isLoading, error } = useFAQs();
 
-  const faqCategories = [
-    {
-      category: "General",
-      questions: [
-        {
-          question: "What is Maali?",
-          answer: "Maali is a funding opportunity hub designed to connect African entrepreneurs with funding opportunities, resources, and support. We provide a platform where entrepreneurs can discover funding opportunities, submit applications, and track their progress."
-        },
-        {
-          question: "Is Maali free to use?",
-          answer: "Yes, creating an account and browsing opportunities on Maali is completely free. However, some funding opportunities may have application fees set by the funders themselves."
-        },
-        {
-          question: "Which countries does Maali serve?",
-          answer: "Maali serves entrepreneurs across all African countries. We work with funders and partners throughout the continent to provide opportunities for African entrepreneurs regardless of their location."
-        }
-      ]
-    },
-    {
-      category: "Applications",
-      questions: [
-        {
-          question: "How do I apply for funding?",
-          answer: "To apply for funding, first browse our available opportunities on the Projects page. When you find an opportunity that matches your business, click 'Apply Now' and complete the multi-step application form. Make sure you have all required documents ready before starting."
-        },
-        {
-          question: "What documents do I need to apply?",
-          answer: "Required documents typically include: business registration documents, business plan, financial statements or projections, identification documents, and any sector-specific documents. Each opportunity may have slightly different requirements, which will be listed in the application form."
-        },
-        {
-          question: "Can I save my application and complete it later?",
-          answer: "Yes, you can save your application as a draft and return to complete it later. Your progress will be saved automatically, and you can access your draft applications from your dashboard."
-        },
-        {
-          question: "How long does the review process take?",
-          answer: "Review times vary depending on the funding opportunity and the number of applications received. Typically, initial reviews take 2-4 weeks, but some opportunities may take longer. You'll receive updates on your application status via email and in your dashboard."
-        },
-        {
-          question: "Can I apply for multiple opportunities at once?",
-          answer: "Yes, you can apply for multiple funding opportunities simultaneously. Each application is independent, and you can track all your applications from your dashboard."
-        }
-      ]
-    },
-    {
-      category: "Payments",
-      questions: [
-        {
-          question: "Are there application fees?",
-          answer: "Application fees vary by opportunity. Some opportunities are free to apply for, while others may have a small application fee set by the funder. All fees are clearly displayed before you submit your application."
-        },
-        {
-          question: "What payment methods do you accept?",
-          answer: "We accept various payment methods including credit cards, mobile money, bank transfers, and PayPal. The available payment methods will be shown during the payment process."
-        },
-        {
-          question: "Is my payment information secure?",
-          answer: "Yes, all payments are processed securely through Stripe, a leading payment processor. We never store your full payment card details on our servers."
-        }
-      ]
-    },
-    {
-      category: "Account & Profile",
-      questions: [
-        {
-          question: "How do I create an account?",
-          answer: "Click on 'Sign Up' in the navigation bar or visit the Auth page. You can create an account using your email address and password, or sign up with Google or Facebook for faster registration."
-        },
-        {
-          question: "How do I update my profile?",
-          answer: "You can update your profile information from your dashboard. Go to the Profile section to edit your personal details, business information, and upload documents."
-        },
-        {
-          question: "What if I forget my password?",
-          answer: "On the login page, click 'Forgot password?' and enter your email address. We'll send you a link to reset your password."
-        }
-      ]
-    }
-  ];
+  // Group FAQs by category
+  const faqCategories = useMemo(() => {
+    if (!faqs) return [];
+    
+    const grouped = faqs.reduce((acc, faq) => {
+      if (!acc[faq.category]) {
+        acc[faq.category] = [];
+      }
+      acc[faq.category].push(faq);
+      return acc;
+    }, {} as Record<string, FAQ[]>);
 
-  const allQuestions = faqCategories.flatMap(cat =>
-    cat.questions.map(q => ({ ...q, category: cat.category }))
-  );
+    return Object.entries(grouped)
+      .map(([category, questions]) => ({
+        category,
+        questions: questions.sort((a, b) => a.display_order - b.display_order),
+      }))
+      .sort((a, b) => a.category.localeCompare(b.category));
+  }, [faqs]);
 
-  const filteredQuestions = searchQuery
-    ? allQuestions.filter(q =>
-        q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.answer.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : allQuestions;
+  // Filter FAQs based on search
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery) return faqCategories;
 
-  const filteredCategories = searchQuery
-    ? [{ category: "Search Results", questions: filteredQuestions }]
-    : faqCategories;
+    const searchLower = searchQuery.toLowerCase();
+    const matchingFAQs = faqs?.filter(
+      (faq) =>
+        faq.question.toLowerCase().includes(searchLower) ||
+        faq.answer.toLowerCase().includes(searchLower)
+    );
+
+    if (!matchingFAQs || matchingFAQs.length === 0) return [];
+
+    return [
+      {
+        category: "Search Results",
+        questions: matchingFAQs,
+      },
+    ];
+  }, [searchQuery, faqs, faqCategories]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,38 +81,85 @@ const FAQ = () => {
           </div>
         </div>
 
-        {/* FAQ Accordion */}
-        <div className="space-y-6 mb-12">
-          {filteredCategories.map((category, categoryIndex) => (
-            <Card key={categoryIndex}>
-              <CardContent className="pt-6">
-                <h2 className="text-2xl font-bold mb-4">{category.category}</h2>
-                <Accordion type="single" collapsible className="w-full">
-                  {category.questions.map((faq, faqIndex) => (
-                    <AccordionItem key={faqIndex} value={`item-${categoryIndex}-${faqIndex}`}>
-                      <AccordionTrigger className="text-left">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="space-y-6 mb-12">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="pt-6">
+                  <Skeleton className="h-6 w-32 mb-4" />
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((j) => (
+                      <div key={j} className="border-b pb-3">
+                        <Skeleton className="h-5 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-        {filteredQuestions.length === 0 && searchQuery && (
-          <Card>
+        {/* Error State */}
+        {error && (
+          <Card className="mb-12">
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground mb-4">No questions found matching your search.</p>
-              <a href="/contact">
-                <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                  Contact Support
-                </button>
-              </a>
+              <p className="text-destructive mb-4">
+                Failed to load FAQs. Please try again later.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Retry
+              </button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* FAQ Accordion */}
+        {!isLoading && !error && (
+          <div className="space-y-6 mb-12">
+            {filteredCategories.map((category, categoryIndex) => (
+              <Card key={categoryIndex}>
+                <CardContent className="pt-6">
+                  <h2 className="text-2xl font-bold mb-4">{category.category}</h2>
+                  <Accordion type="single" collapsible className="w-full">
+                    {category.questions.map((faq, faqIndex) => (
+                      <AccordionItem key={faq.id} value={`item-${categoryIndex}-${faqIndex}`}>
+                        <AccordionTrigger className="text-left">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && filteredCategories.length === 0 && (
+          <Card className="mb-12">
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground mb-4">
+                {searchQuery
+                  ? "No questions found matching your search."
+                  : "No FAQs available at the moment."}
+              </p>
+              {searchQuery && (
+                <a href="/contact">
+                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                    Contact Support
+                  </button>
+                </a>
+              )}
             </CardContent>
           </Card>
         )}
@@ -196,5 +193,4 @@ const FAQ = () => {
   );
 };
 
-export default FAQ;
-
+export default FAQPage;
