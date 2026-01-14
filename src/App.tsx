@@ -30,6 +30,7 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminBlogForm from "./pages/admin/BlogForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
+import AdminActivityLogs from "./pages/admin/ActivityLogs";
 import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
 import ReviewerDashboard from "./pages/reviewer/Dashboard";
 import ReviewerApplications from "./pages/reviewer/Applications";
@@ -178,6 +179,14 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminUsers />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/activity-logs"
+            element={
+              <AdminLayout>
+                <AdminActivityLogs />
               </AdminLayout>
             }
           />

@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Briefcase,
@@ -11,6 +9,7 @@ import {
   LogOut,
   Shield,
   BookOpen,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +42,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/activity-logs", label: "Activity Logs", icon: Activity },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
@@ -57,6 +57,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
     if (location.pathname === "/admin/users") return "Manage Users";
+    if (location.pathname === "/admin/activity-logs") return "Activity Logs";
     if (location.pathname === "/admin/settings") return "Admin Settings";
     return "Admin Dashboard";
   };
