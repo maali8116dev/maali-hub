@@ -3,11 +3,16 @@ import ProjectCard from "./ProjectCard";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useFeaturedProjects } from "@/hooks/useProjects";
+import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
 
 const FeaturedProjects = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('landing');
-  const mockProjects = [
+  const { data: featuredProjects, isLoading } = useFeaturedProjects();
+
+  // Fallback mock data when no featured projects exist
+  const fallbackProjects = [
     {
       id: "1",
       title: "AgriTech Innovation Fund",
@@ -41,40 +46,9 @@ const FeaturedProjects = () => {
       applicants: 23,
       status: "closing-soon" as const
     },
-    {
-      id: "4",
-      title: "Healthcare Innovation Lab",
-      description: "Supporting digital health solutions and medical technology startups. Telemedicine, health monitoring, and diagnostic tools for rural areas.",
-      sector: "Healthcare",
-      country: "South Africa",
-      fundingAmount: "Up to $75K",
-      deadline: "Feb 28, 2025",
-      applicants: 34,
-      status: "open" as const
-    },
-    {
-      id: "5",
-      title: "Fintech for Financial Inclusion",
-      description: "Expanding access to financial services through innovative fintech solutions. Mobile payments, microfinance, and digital banking platforms.",
-      sector: "Fintech",
-      country: "Rwanda",
-      fundingAmount: "Up to $40K",
-      deadline: "Oct 15, 2024",
-      applicants: 67,
-      status: "closed" as const
-    },
-    {
-      id: "6",
-      title: "Education Technology Hub",
-      description: "Revolutionizing education through technology. E-learning platforms, educational apps, and digital literacy programs for African students.",
-      sector: "Education",
-      country: "Uganda",
-      fundingAmount: "Up to $30K",
-      deadline: "Jan 31, 2025",
-      applicants: 52,
-      status: "open" as const
-    }
   ];
+
+  const hasRealProjects = featuredProjects && featuredProjects.length > 0;
 
   return (
     <section className="py-20 md:py-24 bg-background">
@@ -88,11 +62,32 @@ const FeaturedProjects = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {mockProjects.slice(0, 3).map((project) => (
-            <ProjectCard key={project.id} {...project} />
-          ))}
-        </div>
+        {isLoading ? (
+          <ProjectCardSkeletonGrid count={3} />
+        ) : hasRealProjects ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {featuredProjects.slice(0, 3).map((project) => (
+              <ProjectCard
+                key={project.id}
+                id={project.id}
+                title={project.title}
+                description={project.description}
+                category={project.category}
+                location={project.location}
+                fundingAmount={project.fundingAmount}
+                deadline={project.deadline}
+                currentApplicants={project.currentApplicants}
+                status={project.status}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {fallbackProjects.map((project) => (
+              <ProjectCard key={project.id} {...project} />
+            ))}
+          </div>
+        )}
 
         <div className="text-center">
           <Button 
@@ -111,4 +106,3 @@ const FeaturedProjects = () => {
 };
 
 export default FeaturedProjects;
-

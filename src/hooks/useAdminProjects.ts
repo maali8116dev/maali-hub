@@ -17,6 +17,7 @@ export type Project = {
   applicationFee: number | null;
   maxApplicants: number | null;
   currentApplicants: number;
+  featured: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export type ProjectFormData = {
   applicationFee?: number;
   maxApplicants?: number;
   currentApplicants?: number;
+  featured?: boolean;
 };
 
 /**
