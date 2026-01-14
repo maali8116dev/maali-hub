@@ -10,6 +10,7 @@ import {
   Shield,
   BookOpen,
   Activity,
+  HelpCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/projects", label: "Projects", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
+    { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/activity-logs", label: "Activity Logs", icon: Activity },
     { href: "/admin/settings", label: "Settings", icon: Settings },
@@ -56,6 +58,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname === "/admin/projects") return "Manage Projects";
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
+    if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
     if (location.pathname === "/admin/users") return "Manage Users";
     if (location.pathname === "/admin/activity-logs") return "Activity Logs";
     if (location.pathname === "/admin/settings") return "Admin Settings";
