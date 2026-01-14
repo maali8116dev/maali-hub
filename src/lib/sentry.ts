@@ -19,8 +19,8 @@ export const initSentry = () => {
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     
-    // Only send errors in production
-    enabled: import.meta.env.PROD || !!SENTRY_DSN,
+    // Enable when DSN is configured (works in dev and prod)
+    enabled: !!SENTRY_DSN,
     
     // Filter out known benign errors
     beforeSend(event, hint) {
