@@ -144,11 +144,13 @@ const AdminProjects = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Link to={`/projects/${project.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/admin/projects/${project.id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
