@@ -4,6 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { captureError, addBreadcrumb } from "@/lib/sentry";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -52,6 +53,12 @@ async function apiRequest<T>(
     }
   }
   
+  // Add breadcrumb for request tracking
+  addBreadcrumb(`API ${options.method || "GET"} ${endpoint}`, "api", {
+    endpoint,
+    method: options.method || "GET",
+  });
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -61,8 +68,19 @@ async function apiRequest<T>(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Unknown error" }));
-    throw new Error(error.message || error.error || "API request failed");
+    const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+    const error = new Error(errorData.message || errorData.error || "API request failed");
+    
+    // Capture error to Sentry with context
+    captureError(error, {
+      endpoint,
+      method: options.method || "GET",
+      status: response.status,
+      statusText: response.statusText,
+      errorData,
+    });
+    
+    throw error;
   }
 
   return response.json();
