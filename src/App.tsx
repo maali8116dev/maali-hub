@@ -54,9 +54,9 @@ import DataProtection from "./pages/DataProtection";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ErrorBoundary>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <QueryClientProvider client={queryClient}>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -272,9 +272,9 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+    </ErrorBoundary>
     </QueryClientProvider>
-    </ThemeProvider>
-  </ErrorBoundary>
+  </ThemeProvider>
 );
 
 export default App;
