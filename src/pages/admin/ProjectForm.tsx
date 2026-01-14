@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Save, Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,6 +28,7 @@ const projectSchema = z.object({
   applicationFee: z.number().min(0, "Application fee must be 0 or greater").optional(),
   maxApplicants: z.number().int().positive("Max applicants must be a positive number").optional(),
   currentApplicants: z.number().int().min(0, "Current applicants cannot be negative").optional(),
+  featured: z.boolean().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -65,6 +67,7 @@ const ProjectForm = () => {
       applicationFee: undefined,
       maxApplicants: undefined,
       currentApplicants: undefined,
+      featured: false,
     },
   });
 
@@ -91,6 +94,7 @@ const ProjectForm = () => {
         applicationFee: project.applicationFee ? parseFloat(project.applicationFee.toString()) : undefined,
         maxApplicants: project.maxApplicants || undefined,
         currentApplicants: project.currentApplicants || undefined,
+        featured: project.featured || false,
       });
     }
   }, [project, isEditing, reset]);
@@ -111,6 +115,7 @@ const ProjectForm = () => {
         applicationFee: data.applicationFee || undefined,
         maxApplicants: data.maxApplicants || undefined,
         currentApplicants: data.currentApplicants || undefined,
+        featured: data.featured || false,
       };
 
       if (isEditing && projectId) {
@@ -397,6 +402,31 @@ const ProjectForm = () => {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Featured Toggle */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  Featured Project
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="featured">Show on Homepage</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Featured projects appear on the landing page
+                    </p>
+                  </div>
+                  <Switch
+                    id="featured"
+                    checked={watch("featured") || false}
+                    onCheckedChange={(checked) => setValue("featured", checked)}
+                  />
+                </div>
               </CardContent>
             </Card>
 

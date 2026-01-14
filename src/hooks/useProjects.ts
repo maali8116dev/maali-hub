@@ -18,6 +18,7 @@ export type Project = {
   applicationFee: string | null;
   maxApplicants: number | null;
   currentApplicants: number;
+  featured: boolean;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
@@ -40,6 +41,7 @@ function transformProject(data: any): Project {
     applicationFee: data.application_fee?.toString() || data.applicationFee,
     maxApplicants: data.max_applicants || data.maxApplicants,
     currentApplicants: data.current_applicants || data.currentApplicants || 0,
+    featured: data.featured ?? false,
     createdBy: data.created_by || data.createdBy,
     createdAt: data.created_at || data.createdAt,
     updatedAt: data.updated_at || data.updatedAt,
@@ -199,5 +201,52 @@ export function useProjectCategories() {
       }
     },
     staleTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Direct Supabase query for featured projects
+ */
+async function fetchFeaturedProjectsDirect(): Promise<Project[]> {
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("featured", true)
+    .neq("status", "closed")
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (error) throw error;
+
+  return (data || []).map(transformProject);
+}
+
+/**
+ * Hook to fetch featured projects for homepage
+ */
+export function useFeaturedProjects() {
+  return useQuery({
+    queryKey: ["featured-projects"],
+    queryFn: async () => {
+      if (isDirectMode()) {
+        return fetchFeaturedProjectsDirect();
+      }
+
+      try {
+        // API fallback - filter featured from all projects
+        const response = await api.projects.getAll({ limit: 100 });
+        return response.data
+          .map(transformProject)
+          .filter((p) => p.featured && p.status !== "closed")
+          .slice(0, 6);
+      } catch (error: any) {
+        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
+          console.warn("Backend API unavailable, falling back to direct Supabase");
+          return fetchFeaturedProjectsDirect();
+        }
+        throw error;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }

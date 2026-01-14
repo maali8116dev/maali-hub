@@ -232,6 +232,7 @@ export type Database = {
           deadline: string
           description: string
           eligibility_criteria: string | null
+          featured: boolean
           funding_amount: string
           id: number
           image_url: string | null
@@ -251,6 +252,7 @@ export type Database = {
           deadline: string
           description: string
           eligibility_criteria?: string | null
+          featured?: boolean
           funding_amount: string
           id?: number
           image_url?: string | null
@@ -270,6 +272,7 @@ export type Database = {
           deadline?: string
           description?: string
           eligibility_criteria?: string | null
+          featured?: boolean
           funding_amount?: string
           id?: number
           image_url?: string | null
