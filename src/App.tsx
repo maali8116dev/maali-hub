@@ -79,10 +79,10 @@ const App = () => (
       <ErrorBoundary>
         <TooltipProvider>
           <TrackingInitializer />
-          <CookieConsent />
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <CookieConsent />
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/projects" element={<Projects />} />
