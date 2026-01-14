@@ -50,6 +50,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
 import DataProtection from "./pages/DataProtection";
+import ErrorTest from "./tests/ErrorTest";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +85,7 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/data-protection" element={<DataProtection />} />
-          
+          <Route path="/tests/error" element={<ErrorTest />} />
           {/* Dashboard Routes - Accessible without auth for development */}
           <Route
             path="/dashboard"
