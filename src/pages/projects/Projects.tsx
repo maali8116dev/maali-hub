@@ -1,9 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,10 +21,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Calendar, MapPin, Users, DollarSign, Search, X, Loader2 } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
-import { useProjects, useProjectCategories, type Project } from "@/hooks/useProjects";
+import { useProjects, useProjectCategories } from "@/hooks/useProjects";
+import ProjectCard from "@/components/landing/ProjectCard";
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,104 +50,6 @@ const Projects = () => {
   const totalPages = data?.totalPages || 0;
   const total = data?.total || 0;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "open":
-        return <Badge className="bg-success text-success-foreground">Open</Badge>;
-      case "closing-soon":
-        return <Badge className="bg-warning text-warning-foreground">Closing Soon</Badge>;
-      case "closed":
-        return <Badge variant="secondary">Closed</Badge>;
-      case "new":
-        return <Badge className="bg-blue-500 text-white">New</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedCategory, selectedStatus]);
-
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages: (number | "ellipsis")[] = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is less than max visible
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      if (currentPage <= 3) {
-        // Near the start
-        for (let i = 2; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        // Near the end
-        pages.push("ellipsis");
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // In the middle
-        pages.push("ellipsis");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
-  // Render project cards
-  const renderProjectCard = (project: Project) => (
-    <Card key={project.id} className="hover:shadow-elegant transition-all duration-300 flex flex-col h-full">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <CardTitle className="text-lg leading-tight">{project.title}</CardTitle>
-          {getStatusBadge(project.status)}
-        </div>
-        <CardDescription className="text-sm">{project.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 flex flex-col flex-1">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>Due: {new Date(project.deadline).toLocaleDateString()}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <span>{project.fundingAmount}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>{project.location}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span>{project.currentApplicants} applied</span>
-          </div>
-        </div>
-        <Link to={`/application-form/${project.id}`} className="mt-auto">
-          <Button className="w-full mt-2.5 mb-0" variant="hero">
-            Apply Now
-          </Button>
-        </Link>
-      </CardContent>
-    </Card>
-  );
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -283,8 +184,21 @@ const Projects = () => {
           </Card>
         ) : projects.length > 0 ? (
           <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => renderProjectCard(project))}
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  id={project.id}
+                  title={project.title}
+                  description={project.description}
+                  category={project.category}
+                  location={project.location}
+                  fundingAmount={project.fundingAmount}
+                  deadline={project.deadline}
+                  currentApplicants={project.currentApplicants}
+                  status={project.status}
+                />
+              ))}
             </div>
 
             {/* Pagination */}
