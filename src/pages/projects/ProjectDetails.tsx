@@ -10,25 +10,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const Application = () => {
-  const { projectId } = useParams();
+const ProjectDetails = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { data: project, isLoading, error } = useQuery({
-    queryKey: ["project", projectId],
+    queryKey: ["project", id],
     queryFn: async () => {
-      if (!projectId) throw new Error("Project ID is required");
+      if (!id) throw new Error("Project ID is required");
       
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .eq("id", parseInt(projectId))
+        .eq("id", parseInt(id))
         .single();
 
       if (error) throw error;
       return data;
     },
-    enabled: !!projectId,
+    enabled: !!id,
   });
 
   const getStatusColor = (status: string) => {
@@ -242,7 +242,7 @@ const Application = () => {
                   variant="hero"
                   size="lg"
                   disabled={isDisabled}
-                  onClick={() => navigate(`/application-form/${projectId}`)}
+                  onClick={() => navigate(`/projects/${id}/apply`)}
                 >
                   {isDisabled ? "Application Closed" : "Begin Application"}
                 </Button>
@@ -261,4 +261,4 @@ const Application = () => {
   );
 };
 
-export default Application;
+export default ProjectDetails;

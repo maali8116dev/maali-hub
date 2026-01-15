@@ -9,16 +9,16 @@ import MultiStepApplicationForm from "@/components/application/MultiStepApplicat
 import { useApplicationFormStore } from "@/stores/applicationForm";
 
 const ApplicationForm = () => {
-  const { projectId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { updateFormData } = useApplicationFormStore();
 
   // Set projectId from URL if available
   useEffect(() => {
-    if (projectId) {
-      updateFormData({ projectId: parseInt(projectId) });
+    if (id) {
+      updateFormData({ projectId: parseInt(id) });
     }
-  }, [projectId, updateFormData]);
+  }, [id, updateFormData]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,18 +27,18 @@ const ApplicationForm = () => {
         {/* Back Button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate(projectId ? `/application/${projectId}` : "/projects")}
+          onClick={() => navigate(id ? `/projects/${id}` : "/projects")}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {projectId ? "Back to Project Details" : "Back to Projects"}
+          {id ? "Back to Project Details" : "Back to Projects"}
         </Button>
 
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Application Form</CardTitle>
             <CardDescription>
-              {projectId 
+              {id 
                 ? "Complete the form below to apply for this funding opportunity."
                 : "Complete the form below to start your application."
               }

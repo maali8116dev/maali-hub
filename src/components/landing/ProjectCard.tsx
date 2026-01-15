@@ -107,7 +107,7 @@ const ProjectCard = (props: ProjectCardProps) => {
             {getStatusText(status)}
           </Badge>
         </div>
-        <Link to={`/application/${id}`} className="block">
+        <Link to={`/projects/${id}`} className="block">
           <h3 className="text-lg font-semibold group-hover:text-primary transition-colors cursor-pointer hover:underline">
             {title}
           </h3>
@@ -145,7 +145,7 @@ const ProjectCard = (props: ProjectCardProps) => {
           className="flex-1"
           asChild
         >
-          <Link to={`/application/${id}`}>
+          <Link to={`/projects/${id}`}>
             View Details
             <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
@@ -154,7 +154,7 @@ const ProjectCard = (props: ProjectCardProps) => {
           variant={!isDisabled ? 'hero' : 'outline'} 
           className="flex-1"
           disabled={isDisabled}
-          onClick={() => !isDisabled && navigate(`/application-form/${id}`)}
+          onClick={() => !isDisabled && navigate(`/projects/${id}/apply`)}
         >
           {isDisabled ? 'Closed' : 'Apply'}
         </Button>
