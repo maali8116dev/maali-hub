@@ -12,8 +12,7 @@ import CustomFormField, { FormFieldType } from "@/components/form/CustomFormFiel
 import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-// Email integration - uncomment to enable welcome emails
-// import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail } from "@/lib/email";
 
 // Form schemas
 const signInSchema = z.object({
@@ -100,12 +99,12 @@ const Auth = () => {
           });
         }
       } else {
-        // Email integration - uncomment to send welcome email after signup
-        // await sendWelcomeEmail(
-        //   data.email,
-        //   `${data.firstName} ${data.lastName}`,
-        //   `${window.location.origin}/projects`
-        // );
+        // Send welcome email after signup (async, don't block)
+        sendWelcomeEmail(
+          data.email,
+          `${data.firstName} ${data.lastName}`,
+          `${window.location.origin}/projects`
+        ).catch(err => console.error("Failed to send welcome email:", err));
         
         toast({
           title: "Check your email",

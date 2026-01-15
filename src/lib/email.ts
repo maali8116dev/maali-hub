@@ -6,7 +6,9 @@ type EmailType =
   | "application_rejected"
   | "application_under_review"
   | "status_update"
-  | "welcome";
+  | "welcome"
+  | "email_verification"
+  | "password_reset";
 
 interface EmailData {
   recipientName?: string;
@@ -180,6 +182,42 @@ export async function sendStatusUpdateEmail(
       applicationId,
       statusMessage: message,
       actionUrl,
+    },
+  });
+}
+
+/**
+ * Send email verification email
+ */
+export async function sendEmailVerification(
+  to: string,
+  recipientName: string,
+  verificationUrl: string
+) {
+  return sendEmail({
+    to,
+    type: "email_verification",
+    data: {
+      recipientName,
+      actionUrl: verificationUrl,
+    },
+  });
+}
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(
+  to: string,
+  recipientName: string,
+  resetUrl: string
+) {
+  return sendEmail({
+    to,
+    type: "password_reset",
+    data: {
+      recipientName,
+      actionUrl: resetUrl,
     },
   });
 }
