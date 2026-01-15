@@ -246,6 +246,25 @@ const ProjectDetails = () => {
                 >
                   {isDisabled ? "Application Closed" : "Begin Application"}
                 </Button>
+                
+                {/* Application Stats */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Applications
+                    </span>
+                    <span className="font-medium">
+                      {project.current_applicants || 0}
+                      {project.max_applicants && (
+                        <span className="text-muted-foreground font-normal">
+                          {" "}/ {project.max_applicants}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
                 {project.application_fee && Number(project.application_fee) > 0 && (
                   <p className="text-xs text-muted-foreground mt-3 text-center">
                     Application fee: ${Number(project.application_fee).toFixed(2)} (processed at submission)
