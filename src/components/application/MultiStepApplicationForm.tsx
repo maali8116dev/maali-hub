@@ -12,19 +12,17 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  FileText, 
   DollarSign, 
   Users,
   CheckCircle2,
   Circle,
-  Upload,
-  X,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import DocumentUploadSection from "./DocumentUploadSection";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -71,8 +69,6 @@ const MultiStepApplicationForm = () => {
     previousStep,
     goToStep,
     updateFormData,
-    addDocument,
-    removeDocument,
     canProceedToNextStep,
     isStepValid,
     reset,
@@ -170,18 +166,6 @@ const MultiStepApplicationForm = () => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      Array.from(files).forEach((file) => {
-        addDocument(file);
-      });
-      toast({
-        title: "Files Added",
-        description: `${files.length} file(s) added successfully.`,
-      });
-    }
-  };
 
   const handleSubmit = async (data: ApplicationFormValues) => {
     try {
@@ -403,59 +387,7 @@ const MultiStepApplicationForm = () => {
                     </p>
                   </div>
                   
-                  {/* File Upload */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <label
-                        htmlFor="file-upload"
-                        className="flex items-center gap-2 px-4 py-2 border border-dashed rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                      >
-                        <Upload className="h-4 w-4" />
-                        <span className="text-sm font-medium">Upload Files</span>
-                      </label>
-                      <input
-                        id="file-upload"
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        accept=".pdf,.doc,.docx,.txt"
-                      />
-                    </div>
-
-                    {/* Uploaded Files List */}
-                    {formData.documents && formData.documents.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">Uploaded Files:</p>
-                        <div className="space-y-2">
-                          {formData.documents.map((doc) => (
-                            <div
-                              key={doc.id}
-                              className="flex items-center justify-between p-3 border rounded-lg"
-                            >
-                              <div className="flex items-center gap-3">
-                                <FileText className="h-5 w-5 text-muted-foreground" />
-                                <div>
-                                  <p className="text-sm font-medium">{doc.fileName}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {(doc.fileSize / 1024).toFixed(2)} KB
-                                  </p>
-                                </div>
-                              </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeDocument(doc.id)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <DocumentUploadSection />
                 </div>
               )}
 

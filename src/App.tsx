@@ -24,6 +24,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Applications from "./pages/dashboard/Applications";
+import Documents from "./pages/dashboard/Documents";
 import Notifications from "./pages/dashboard/Notifications";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
@@ -127,6 +128,14 @@ const App = () => (
             element={
               <DashboardLayout>
                 <Applications />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/dashboard/documents"
+            element={
+              <DashboardLayout>
+                <Documents />
               </DashboardLayout>
             }
           />
