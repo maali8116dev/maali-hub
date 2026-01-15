@@ -1,48 +1,125 @@
-import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Users } from "lucide-react";
-
-// Mock project data - in a real app, this would come from your backend
-const mockProjects = [
-  {
-    id: "1",
-    title: "Smart Irrigation System for Smallholder Farmers",
-    description: "Develop affordable IoT-based irrigation solutions to help smallholder farmers optimize water usage and increase crop yields in sub-Saharan Africa.",
-    sector: "Agriculture",
-    country: "Kenya",
-    fundingAmount: "$50,000",
-    deadline: "March 30, 2024",
-    applicants: 45,
-    status: "open" as const
-  },
-  // Add more mock projects as needed
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Application = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
-  const [project, setProject] = useState<any>(null);
 
-  useEffect(() => {
-    // Find the project by ID
-    const foundProject = mockProjects.find(p => p.id === projectId);
-    setProject(foundProject);
-  }, [projectId]);
+  const { data: project, isLoading, error } = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: async () => {
+      if (!projectId) throw new Error("Project ID is required");
+      
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", parseInt(projectId))
+        .single();
 
-  if (!project) {
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "open":
+        return "bg-success text-success-foreground";
+      case "closing-soon":
+        return "bg-warning text-warning-foreground";
+      case "closed":
+        return "bg-muted text-muted-foreground";
+      case "new":
+        return "bg-blue-500 text-white";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "open":
+        return "Open";
+      case "closing-soon":
+        return "Closing Soon";
+      case "closed":
+        return "Closed";
+      case "new":
+        return "New";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          <Skeleton className="h-10 w-32 mb-6" />
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-24 mb-4" />
+                  <Skeleton className="h-8 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-20 w-full mb-6" />
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
+                  </div>
+                  <Skeleton className="h-32 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <Skeleton className="h-48 w-full" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !project) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
+            <p className="text-muted-foreground mb-4">
+              {error instanceof Error ? error.message : "The project you're looking for doesn't exist."}
+            </p>
             <Button onClick={() => navigate("/projects")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Projects
             </Button>
           </div>
@@ -51,6 +128,8 @@ const Application = () => {
       </div>
     );
   }
+
+  const isDisabled = project.status === "closed";
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,13 +147,13 @@ const Application = () => {
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Project Details */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-start mb-4">
-                  <Badge variant="secondary">{project.sector}</Badge>
-                  <Badge className="bg-success text-success-foreground">
-                    {project.status === 'open' ? 'Open' : 'Closed'}
+                  <Badge variant="secondary">{project.category}</Badge>
+                  <Badge className={getStatusColor(project.status)}>
+                    {getStatusText(project.status)}
                   </Badge>
                 </div>
                 <CardTitle className="text-2xl">{project.title}</CardTitle>
@@ -87,57 +166,91 @@ const Application = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-muted-foreground" />
-                    <span>{project.country}</span>
+                    <span>{project.location}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5 text-muted-foreground" />
-                    <span>{project.fundingAmount}</span>
+                    <span>{project.funding_amount}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-muted-foreground" />
-                    <span>Deadline: {project.deadline}</span>
+                    <span>Deadline: {formatDate(project.deadline)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-muted-foreground" />
-                    <span>{project.applicants} applications</span>
+                    <span>
+                      {project.current_applicants || 0} applications
+                      {project.max_applicants && ` (max ${project.max_applicants})`}
+                    </span>
                   </div>
-                </div>
-
-                <div className="bg-muted p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2">Requirements</h3>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    <li>Business plan document</li>
-                    <li>Financial projections</li>
-                    <li>Team member resumes</li>
-                    <li>Letters of support</li>
-                    <li>Technical specifications</li>
-                  </ul>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Requirements */}
+            {project.requirements && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="h-5 w-5" />
+                    Requirements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
+                    {project.requirements}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Eligibility Criteria */}
+            {project.eligibility_criteria && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="h-5 w-5" />
+                    Eligibility Criteria
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
+                    {project.eligibility_criteria}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Application Form */}
+          {/* Application Sidebar */}
           <div>
-            <Card>
+            <Card className="sticky top-8">
               <CardHeader>
-                <CardTitle>Start Your Application</CardTitle>
+                <CardTitle>
+                  {isDisabled ? "Applications Closed" : "Start Your Application"}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ready to apply for this grant? Click below to begin the application process.
+                  {isDisabled 
+                    ? "This opportunity is no longer accepting applications."
+                    : "Ready to apply for this grant? Click below to begin the application process."
+                  }
                 </p>
                 <Button 
                   className="w-full" 
                   variant="hero"
                   size="lg"
+                  disabled={isDisabled}
                   onClick={() => navigate(`/application-form/${projectId}`)}
                 >
-                  Begin Application
+                  {isDisabled ? "Application Closed" : "Begin Application"}
                 </Button>
-                <p className="text-xs text-muted-foreground mt-3 text-center">
-                  Application fee: $25 (processed at submission)
-                </p>
+                {project.application_fee && Number(project.application_fee) > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3 text-center">
+                    Application fee: ${Number(project.application_fee).toFixed(2)} (processed at submission)
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -149,4 +262,3 @@ const Application = () => {
 };
 
 export default Application;
-
