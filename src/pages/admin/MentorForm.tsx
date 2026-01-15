@@ -12,7 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { useMentor, useCreateMentor, useUpdateMentor, useAdminMentors } from "@/hooks/useMentors";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { ArrowLeft, X, Plus } from "lucide-react";
 
 const mentorSchema = z.object({
@@ -71,6 +73,11 @@ const AdminMentorForm = () => {
 
   const [expertiseInput, setExpertiseInput] = useState("");
   const [expertiseAreas, setExpertiseAreas] = useState<string[]>([]);
+  
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
+    bucket: "mentor-avatars",
+    maxSizeMB: 5,
+  });
 
   const form = useForm<MentorFormValues>({
     resolver: zodResolver(mentorSchema),
@@ -361,11 +368,33 @@ const AdminMentorForm = () => {
                     name="avatar_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Avatar URL</FormLabel>
+                        <FormLabel>Avatar Image</FormLabel>
+                        <FormControl>
+                          <ImageUpload
+                            value={field.value}
+                            onChange={(url) => field.onChange(url || "")}
+                            onUpload={uploadImage}
+                            onDelete={deleteImage}
+                            isUploading={isUploading}
+                            uploadProgress={uploadProgress}
+                            placeholder="Upload Avatar"
+                          />
+                        </FormControl>
+                        <FormDescription>Upload a profile image or paste URL below</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="avatar_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Or paste URL directly</FormLabel>
                         <FormControl>
                           <Input placeholder="https://..." {...field} />
                         </FormControl>
-                        <FormDescription>Direct link to profile image</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
