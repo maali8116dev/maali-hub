@@ -416,7 +416,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      activity_logs_safe: {
+        Row: {
+          action_type: string | null
+          created_at: string | null
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string | null
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
