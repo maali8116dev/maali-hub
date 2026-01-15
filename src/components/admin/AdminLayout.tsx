@@ -11,6 +11,7 @@ import {
   BookOpen,
   Activity,
   HelpCircle,
+  FolderOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/projects", label: "Projects", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
+    { href: "/admin/resources", label: "Resources", icon: FolderOpen },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
     { href: "/admin/mentors", label: "Mentors", icon: Users },
@@ -99,7 +101,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   const isActive = location.pathname === item.href || 
                     (item.href === "/admin/blog" && location.pathname.startsWith("/admin/blog")) ||
                     (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
-                    (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors"));
+                    (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors")) ||
+                    (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources"));
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton

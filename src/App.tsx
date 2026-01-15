@@ -39,6 +39,8 @@ import AdminFAQ from "./pages/admin/FAQ";
 import AdminFAQForm from "./pages/admin/FAQForm";
 import AdminMentors from "./pages/admin/Mentors";
 import AdminMentorForm from "./pages/admin/MentorForm";
+import AdminResources from "./pages/admin/Resources";
+import AdminResourceForm from "./pages/admin/ResourceForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
@@ -306,6 +308,30 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminMentorForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/resources"
+            element={
+              <AdminLayout>
+                <AdminResources />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/resources/new"
+            element={
+              <AdminLayout>
+                <AdminResourceForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/resources/:id"
+            element={
+              <AdminLayout>
+                <AdminResourceForm />
               </AdminLayout>
             }
           />
