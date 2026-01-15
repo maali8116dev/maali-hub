@@ -24,13 +24,14 @@ import {
 import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
-import { useProjects, useProjectCategories } from "@/hooks/useProjects";
+import { useProjects, useProjectCategories, useProjectLocations } from "@/hooks/useProjects";
 import ProjectCard from "@/components/landing/ProjectCard";
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9; // Show 9 projects per page (3 columns × 3 rows)
 
@@ -38,13 +39,15 @@ const Projects = () => {
   const { data, isLoading, error } = useProjects({
     category: selectedCategory,
     status: selectedStatus,
+    location: selectedLocation,
     search: searchQuery.trim() || undefined,
     page: currentPage,
     itemsPerPage,
   });
 
-  // Fetch categories for dropdown
+  // Fetch categories and locations for dropdowns
   const { data: categories = [] } = useProjectCategories();
+  const { data: locations = [] } = useProjectLocations();
 
   const projects = data?.projects || [];
   const totalPages = data?.totalPages || 0;
@@ -55,6 +58,7 @@ const Projects = () => {
     setSearchQuery("");
     setSelectedCategory(null);
     setSelectedStatus(null);
+    setSelectedLocation(null);
     setCurrentPage(1);
   };
 
@@ -124,6 +128,31 @@ const Projects = () => {
                   </Select>
                 </div>
 
+                {/* Region/Location Filter Dropdown */}
+                <div className="flex-1 w-full md:w-auto">
+                  <Label htmlFor="location-filter" className="mb-2 block">
+                    Region
+                  </Label>
+                  <Select
+                    value={selectedLocation || "all"}
+                    onValueChange={(value) =>
+                      setSelectedLocation(value === "all" ? null : value)
+                    }
+                  >
+                    <SelectTrigger id="location-filter" className="w-full">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Regions</SelectItem>
+                      {locations.map((location) => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Status Filter Dropdown */}
                 <div className="w-full md:w-auto">
                   <Label htmlFor="status-filter" className="mb-2 block">
@@ -135,27 +164,27 @@ const Projects = () => {
                       setSelectedStatus(value === "all" ? null : value)
                     }
                   >
-                    <SelectTrigger id="status-filter" className="w-full md:w-[200px]">
+                    <SelectTrigger id="status-filter" className="w-full md:w-[180px]">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="open">Open </SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="closing-soon">Closing Soon</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
-                     
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Clear Filters Button */}
-                {(selectedCategory || selectedStatus) && (
+                {(selectedCategory || selectedStatus || selectedLocation) && (
                   <Button
                     variant="outline"
                     onClick={() => {
                       setSelectedCategory(null);
                       setSelectedStatus(null);
+                      setSelectedLocation(null);
                     }}
                     className="w-full md:w-auto"
                   >
@@ -301,12 +330,12 @@ const Projects = () => {
                 icon={Search}
                 title="No projects found"
                 description={
-                  searchQuery || selectedCategory || selectedStatus
+                  searchQuery || selectedCategory || selectedStatus || selectedLocation
                     ? "Try adjusting your search terms or filters to find more projects."
                     : "There are no projects available at the moment. Check back later for new opportunities."
                 }
                 action={
-                  searchQuery || selectedCategory || selectedStatus
+                  searchQuery || selectedCategory || selectedStatus || selectedLocation
                     ? {
                         label: "Clear Filters",
                         onClick: handleClearFilters,

@@ -54,6 +54,7 @@ function transformProject(data: any): Project {
 async function fetchProjectsDirect(filters?: {
   category?: string | null;
   status?: string | null;
+  location?: string | null;
   search?: string;
   page?: number;
   itemsPerPage?: number;
@@ -73,6 +74,10 @@ async function fetchProjectsDirect(filters?: {
 
   if (filters?.status) {
     query = query.eq("status", filters.status);
+  }
+
+  if (filters?.location) {
+    query = query.eq("location", filters.location);
   }
 
   if (filters?.search) {
@@ -137,6 +142,7 @@ async function fetchProjectsApi(filters?: {
 export function useProjects(filters?: {
   category?: string | null;
   status?: string | null;
+  location?: string | null;
   search?: string;
   page?: number;
   itemsPerPage?: number;
@@ -196,6 +202,47 @@ export function useProjectCategories() {
         if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
           console.warn("Backend API unavailable, falling back to direct Supabase");
           return fetchCategoriesDirect();
+        }
+        throw error;
+      }
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Direct Supabase query for locations (regions)
+ */
+async function fetchLocationsDirect(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("projects")
+    .select("location");
+
+  if (error) throw error;
+
+  return Array.from(
+    new Set((data || []).map((p) => p.location).filter(Boolean))
+  ).sort() as string[];
+}
+
+/**
+ * Hook to fetch project locations/regions
+ */
+export function useProjectLocations() {
+  return useQuery({
+    queryKey: ["project-locations"],
+    queryFn: async () => {
+      if (isDirectMode()) {
+        return fetchLocationsDirect();
+      }
+
+      try {
+        // API doesn't have locations endpoint, use direct
+        return fetchLocationsDirect();
+      } catch (error: any) {
+        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
+          console.warn("Backend API unavailable, falling back to direct Supabase");
+          return fetchLocationsDirect();
         }
         throw error;
       }
