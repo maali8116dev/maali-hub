@@ -36,6 +36,8 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminBlogForm from "./pages/admin/BlogForm";
 import AdminFAQ from "./pages/admin/FAQ";
 import AdminFAQForm from "./pages/admin/FAQForm";
+import AdminMentors from "./pages/admin/Mentors";
+import AdminMentorForm from "./pages/admin/MentorForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
@@ -52,6 +54,7 @@ import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Help from "./pages/Help";
 import FAQ from "./pages/FAQ";
+import Mentors from "./pages/Mentors";
 import Guide from "./pages/Guide";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -103,6 +106,7 @@ const App = () => (
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/help" element={<Help />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/mentors" element={<Mentors />} />
           <Route path="/guide" element={<Guide />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
@@ -269,6 +273,30 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminFAQForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/mentors"
+            element={
+              <AdminLayout>
+                <AdminMentors />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/mentors/new"
+            element={
+              <AdminLayout>
+                <AdminMentorForm />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/mentors/:id/edit"
+            element={
+              <AdminLayout>
+                <AdminMentorForm />
               </AdminLayout>
             }
           />

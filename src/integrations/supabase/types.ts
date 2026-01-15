@@ -252,6 +252,60 @@ export type Database = {
         }
         Relationships: []
       }
+      mentors: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          display_order: number | null
+          expertise_areas: string[] | null
+          id: number
+          is_published: boolean | null
+          linkedin_url: string | null
+          name: string
+          sector: string | null
+          twitter_url: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number | null
+          expertise_areas?: string[] | null
+          id?: number
+          is_published?: boolean | null
+          linkedin_url?: string | null
+          name: string
+          sector?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          display_order?: number | null
+          expertise_areas?: string[] | null
+          id?: number
+          is_published?: boolean | null
+          linkedin_url?: string | null
+          name?: string
+          sector?: string | null
+          twitter_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
