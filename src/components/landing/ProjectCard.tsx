@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Calendar, MapPin, DollarSign, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Calendar, MapPin, DollarSign, Users, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 // Props for legacy mock data (used in FeaturedProjects)
 interface LegacyProjectCardProps {
@@ -107,9 +107,11 @@ const ProjectCard = (props: ProjectCardProps) => {
             {getStatusText(status)}
           </Badge>
         </div>
-        <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
-          {title}
-        </h3>
+        <Link to={`/projects/${id}`} className="block">
+          <h3 className="text-lg font-semibold group-hover:text-primary transition-colors cursor-pointer hover:underline">
+            {title}
+          </h3>
+        </Link>
       </CardHeader>
       
       <CardContent className="pb-4 flex-1">
@@ -137,14 +139,24 @@ const ProjectCard = (props: ProjectCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 flex gap-2">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          asChild
+        >
+          <Link to={`/projects/${id}`}>
+            View Details
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Link>
+        </Button>
         <Button 
           variant={!isDisabled ? 'hero' : 'outline'} 
-          className="w-full"
+          className="flex-1"
           disabled={isDisabled}
           onClick={() => !isDisabled && navigate(`/application-form/${id}`)}
         >
-          {isDisabled ? 'Application Closed' : 'Apply Now'}
+          {isDisabled ? 'Closed' : 'Apply'}
         </Button>
       </CardFooter>
     </Card>
