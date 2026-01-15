@@ -70,7 +70,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       
       const { error } = await supabase.auth.signUp({
         email: data.email,
@@ -151,7 +151,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error) {
       toast({
@@ -209,7 +209,7 @@ const Auth = () => {
   const handleOAuthSignIn = async (provider: "google" | "facebook") => {
     setIsLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
