@@ -9,9 +9,8 @@ export interface ActivityLog {
   entityId: string | null;
   description: string;
   metadata: Record<string, unknown> | null;
-  ipAddress: string | null;
-  userAgent: string | null;
   createdAt: string;
+  // Note: ipAddress and userAgent are excluded for privacy protection
 }
 
 interface UseActivityLogsOptions {
@@ -26,8 +25,9 @@ export function useActivityLogs(options: UseActivityLogsOptions = {}) {
   return useQuery({
     queryKey: ['activity-logs', { limit, actionType, entityType }],
     queryFn: async () => {
+      // Use the safe view that excludes sensitive columns (ip_address, user_agent)
       let query = supabase
-        .from('activity_logs' as any)
+        .from('activity_logs_safe' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -54,8 +54,6 @@ export function useActivityLogs(options: UseActivityLogsOptions = {}) {
         entityId: log.entity_id,
         description: log.description,
         metadata: log.metadata as Record<string, unknown> | null,
-        ipAddress: log.ip_address,
-        userAgent: log.user_agent,
         createdAt: log.created_at,
       }));
     },
