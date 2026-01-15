@@ -18,7 +18,6 @@ import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import Application from "./pages/projects/Application";
 import ApplicationForm from "./pages/projects/ApplicationForm";
-import ProjectDetails from "./pages/projects/ProjectDetails";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -95,7 +94,6 @@ const App = () => (
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/projects" element={<Projects />} />
-          <Route path="/projects/:id" element={<ProjectDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/contact" element={<Contact />} />
