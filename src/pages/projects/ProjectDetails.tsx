@@ -197,9 +197,14 @@ const ProjectDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
-                    {project.requirements}
-                  </div>
+                  <ul className="space-y-2 text-muted-foreground">
+                    {project.requirements.split('\n').filter(line => line.trim()).map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-primary mt-1.5">•</span>
+                        <span>{item.replace(/^[-•]\s*/, '').trim()}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             )}
@@ -214,9 +219,14 @@ const ProjectDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
-                    {project.eligibility_criteria}
-                  </div>
+                  <ul className="space-y-2 text-muted-foreground">
+                    {project.eligibility_criteria.split('\n').filter(line => line.trim()).map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="text-primary mt-1.5">•</span>
+                        <span>{item.replace(/^[-•]\s*/, '').trim()}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             )}
