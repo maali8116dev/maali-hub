@@ -16,7 +16,7 @@ import About from "./pages/About";
 import Resources from "./pages/Resources";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
-import Application from "./pages/projects/Application";
+import ProjectDetails from "./pages/projects/ProjectDetails";
 import ApplicationForm from "./pages/projects/ApplicationForm";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -98,8 +98,8 @@ const App = () => (
           <Route path="/resources" element={<Resources />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/application/:projectId" element={<Application />} />
-          <Route path="/application-form/:projectId?" element={<ApplicationForm />} />
+          <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/projects/:id/apply" element={<ApplicationForm />} />
           
           {/* Footer Link Pages */}
           <Route path="/apply" element={<Apply />} />
