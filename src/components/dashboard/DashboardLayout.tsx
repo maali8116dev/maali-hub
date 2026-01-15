@@ -12,6 +12,7 @@ import {
   Bell,
 } from "lucide-react";
 import NotificationsDropdown from "./NotificationsDropdown";
+import EmailVerificationBanner from "./EmailVerificationBanner";
 import {
   Sidebar,
   SidebarContent,
@@ -231,6 +232,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
+          {/* Email Verification Banner */}
+          {user && !user.email_confirmed_at && user.email && (
+            <EmailVerificationBanner email={user.email} />
+          )}
           {children}
         </div>
       </SidebarInset>

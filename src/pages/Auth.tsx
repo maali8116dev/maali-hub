@@ -107,10 +107,13 @@ const Auth = () => {
         ).catch(err => console.error("Failed to send welcome email:", err));
         
         toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration.",
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
         });
         signUpForm.reset();
+        
+        // Redirect to dashboard - verification banner will show there
+        navigate("/dashboard");
       }
     } catch (error) {
       toast({
