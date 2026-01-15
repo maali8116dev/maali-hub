@@ -18,7 +18,7 @@
 - [x] User session management
 - [x] Auth middleware (backend)
 - [x] Password reset flow
-- [ ] Email verification flow
+- [x] Email verification flow (banner + resend functionality)
 - [ ] User profile creation on signup
 
 ### 👤 **USER PROFILES**
@@ -196,7 +196,7 @@
 
 - [ ] Supabase Storage (for documents)
 - [ ] Stripe payment integration
-- [ ] Email service (for notifications)
+- [x] Email service (Resend via Supabase Edge Function - send-email)
 - [ ] Analytics integration
 
 ### 📱 **FEATURES MENTIONED BUT NOT IMPLEMENTED**
@@ -283,9 +283,9 @@
 
 2. **Email Notifications**
 
-   - Application submitted
-   - Status updates
-   - Welcome emails
+   - [x] Welcome emails (implemented via Resend)
+   - [ ] Application submitted notifications
+   - [ ] Status update notifications
 
 3. **Search & Filtering**
 
@@ -394,6 +394,9 @@
 - ✅ Blog CRUD functionality scaffolded
 - ✅ All footer link pages created
 - ✅ useProjects and useProfile hooks with API integration
+- ✅ Email verification banner with resend functionality
+- ✅ Email service via Resend (Supabase Edge Function)
+- ✅ Welcome email on signup
 
 ---
 
