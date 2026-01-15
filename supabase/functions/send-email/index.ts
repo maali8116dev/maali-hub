@@ -16,7 +16,9 @@ type EmailType =
   | "application_rejected"
   | "application_under_review"
   | "status_update"
-  | "welcome";
+  | "welcome"
+  | "email_verification"
+  | "password_reset";
 
 interface SendEmailRequest {
   to: string;
@@ -200,6 +202,59 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             </div>
             <div class="footer">
               <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
+            </div>
+          </div>
+        `,
+      };
+
+    case "email_verification":
+      return {
+        subject: "Verify Your Email - Maali",
+        html: `
+          ${baseStyles}
+          <div class="container">
+            <div class="header">
+              <h1>✉️ Verify Your Email</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${recipientName},</p>
+              <p>Thank you for signing up for Maali! Please verify your email address to activate your account and access all features.</p>
+              ${actionUrl ? `<a href="${actionUrl}" class="button">Verify Email Address</a>` : ""}
+              <p>If you didn't create an account with Maali, you can safely ignore this email.</p>
+              <p>This verification link will expire in 24 hours.</p>
+              <p>Best regards,<br>The Maali Team</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              ${actionUrl ? `<p style="word-break: break-all; color: #16a34a;">${actionUrl}</p>` : ""}
+            </div>
+          </div>
+        `,
+      };
+
+    case "password_reset":
+      return {
+        subject: "Reset Your Password - Maali",
+        html: `
+          ${baseStyles}
+          <div class="container">
+            <div class="header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+              <h1>🔐 Password Reset</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${recipientName},</p>
+              <p>We received a request to reset your password for your Maali account.</p>
+              <p>Click the button below to create a new password:</p>
+              ${actionUrl ? `<a href="${actionUrl}" class="button" style="background: #f59e0b;">Reset Password</a>` : ""}
+              <p>If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
+              <p>This link will expire in 1 hour for security reasons.</p>
+              <p>Best regards,<br>The Maali Team</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              ${actionUrl ? `<p style="word-break: break-all; color: #f59e0b;">${actionUrl}</p>` : ""}
             </div>
           </div>
         `,
