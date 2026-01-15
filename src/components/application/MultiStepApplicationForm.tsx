@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
@@ -22,6 +23,7 @@ import {
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import DocumentUploadSection from "./DocumentUploadSection";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
@@ -59,7 +61,7 @@ const stepTitles = [
 ];
 
 const MultiStepApplicationForm = () => {
-  // All hooks must be called unconditionally at the top level
+  const navigate = useNavigate();
   const { toast } = useToast();
   const {
     currentStep,
@@ -169,21 +171,57 @@ const MultiStepApplicationForm = () => {
 
   const handleSubmit = async (data: ApplicationFormValues) => {
     try {
-      // Here you would submit to your API
-      console.log("Submitting application:", {
-        ...data,
-        documents: formData.documents,
-      });
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // Email integration - uncomment to send confirmation email after submission
-      // const applicationId = "generated-id"; // Replace with actual application ID from API response
-      // await sendApplicationSubmittedEmail(
-      //   data.contactEmail,
-      //   data.companyName,
-      //   "Project Title", // Replace with actual project title
-      //   applicationId,
-      //   `${window.location.origin}/dashboard/applications`
-      // );
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to submit your application.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+
+      if (!formData.projectId) {
+        toast({
+          title: "Project Required",
+          description: "Please select a project to apply for.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Insert application into database
+      const { data: application, error } = await supabase
+        .from("applications")
+        .insert({
+          user_id: user.id,
+          project_id: formData.projectId,
+          company_name: data.companyName,
+          contact_email: data.contactEmail,
+          contact_phone: data.contactPhone || null,
+          location: data.location || null,
+          project_description: data.projectDescription,
+          funding_amount_requested: data.fundingAmountRequested,
+          business_plan: data.businessPlan || null,
+          team_size: data.teamSize || null,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update uploaded documents with application_id if any
+      if (formData.documents && formData.documents.length > 0 && application) {
+        await supabase
+          .from("application_documents")
+          .update({ application_id: application.id })
+          .eq("user_id", user.id)
+          .is("application_id", null);
+      }
       
       toast({
         title: "Application Submitted",
@@ -193,7 +231,11 @@ const MultiStepApplicationForm = () => {
       // Reset form after successful submission
       reset();
       form.reset();
+      
+      // Redirect to dashboard applications
+      navigate("/dashboard/applications");
     } catch (error) {
+      console.error("Submission error:", error);
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",
