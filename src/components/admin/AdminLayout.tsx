@@ -43,6 +43,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
+    { href: "/admin/mentors", label: "Mentors", icon: Users },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/activity-logs", label: "Activity Logs", icon: Activity },
     { href: "/admin/settings", label: "Settings", icon: Settings },
@@ -59,6 +60,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
     if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
+    if (location.pathname.startsWith("/admin/mentors")) return "Manage Mentors";
     if (location.pathname === "/admin/users") return "Manage Users";
     if (location.pathname === "/admin/activity-logs") return "Activity Logs";
     if (location.pathname === "/admin/settings") return "Admin Settings";
@@ -95,7 +97,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href || 
-                    (item.href === "/admin/blog" && location.pathname.startsWith("/admin/blog"));
+                    (item.href === "/admin/blog" && location.pathname.startsWith("/admin/blog")) ||
+                    (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
+                    (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors"));
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton

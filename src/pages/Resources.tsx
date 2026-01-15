@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,13 +117,21 @@ const Resources = () => {
                             {resource.type} {resource.size && `• ${resource.size}`} {resource.duration && `• ${resource.duration}`}
                           </p>
                         </div>
-                        <Button size="sm" variant="ghost">
-                          {resource.type === "Directory" || resource.type === "Event" ? (
-                            <ExternalLink className="h-4 w-4" />
-                          ) : (
-                            <Download className="h-4 w-4" />
-                          )}
-                        </Button>
+                        {resource.title === "Find a Mentor" ? (
+                          <Button size="sm" variant="ghost" asChild>
+                            <Link to="/mentors">
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="ghost">
+                            {resource.type === "Directory" || resource.type === "Event" ? (
+                              <ExternalLink className="h-4 w-4" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
