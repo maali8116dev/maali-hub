@@ -414,6 +414,60 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          download_count: number | null
+          duration: string | null
+          file_size: number | null
+          file_type: string
+          file_url: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          download_count?: number | null
+          duration?: string | null
+          file_size?: number | null
+          file_type: string
+          file_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          download_count?: number | null
+          duration?: string | null
+          file_size?: number | null
+          file_type?: string
+          file_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       activity_logs_safe: {
