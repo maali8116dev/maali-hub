@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,67 +6,66 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
+import { useApplications, ApplicationWithProject } from "@/hooks/useApplications";
+import { useProfile } from "@/hooks/useProfile";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // Mock data - replace with API calls when backend is ready
-  const [isLoadingStats, setIsLoadingStats] = useState(true); // Temporarily true to see skeleton loaders
-  const [isLoadingApplications, setIsLoadingApplications] = useState(true); // Temporarily true to see skeleton loaders
-  
-  // Simulate loading for demonstration - remove this when integrating with API
-  useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setIsLoadingStats(false);
-    }, 1500); // Show stats skeleton for 1.5 seconds
-    
-    const timer2 = setTimeout(() => {
-      setIsLoadingApplications(false);
-    }, 2000); // Show applications skeleton for 2 seconds
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
-  const [stats] = useState({
-    totalApplications: 5,
-    pending: 2,
-    approved: 2,
-    rejected: 1,
-  });
+  const { data: applications, isLoading: isLoadingApplications } = useApplications();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
 
-  const recentApplications = [
-    {
-      id: "1",
-      projectTitle: "AgriTech Innovation Fund",
-      status: "pending",
-      submittedAt: "2024-01-15",
-      sector: "Agriculture",
-    },
-    {
-      id: "2",
-      projectTitle: "Women in Tech Accelerator",
-      status: "approved",
-      submittedAt: "2024-01-10",
-      sector: "Technology",
-    },
-    {
-      id: "3",
-      projectTitle: "Clean Energy Initiative",
-      status: "pending",
-      submittedAt: "2024-01-08",
-      sector: "Energy",
-    },
-  ];
+  // Calculate stats from real applications
+  const stats = useMemo(() => {
+    if (!applications) {
+      return { totalApplications: 0, pending: 0, approved: 0, rejected: 0 };
+    }
+    return {
+      totalApplications: applications.length,
+      pending: applications.filter((app) => app.status === "pending").length,
+      approved: applications.filter((app) => app.status === "approved").length,
+      rejected: applications.filter((app) => app.status === "rejected").length,
+    };
+  }, [applications]);
+
+  // Get recent applications (last 3)
+  const recentApplications = useMemo(() => {
+    if (!applications) return [];
+    return applications.slice(0, 3);
+  }, [applications]);
+
+  // Calculate profile completion percentage
+  const profileCompletion = useMemo(() => {
+    if (!profile) return 0;
+    
+    const fields = [
+      profile.firstName,
+      profile.lastName,
+      profile.bio,
+      profile.country,
+      profile.businessName,
+      profile.businessSector,
+      profile.avatarUrl,
+    ];
+    
+    const filledFields = fields.filter((field) => field && field.trim() !== "").length;
+    return Math.round((filledFields / fields.length) * 100);
+  }, [profile]);
 
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: "bg-warning/10 text-warning border-warning/20",
       approved: "bg-success/10 text-success border-success/20",
       rejected: "bg-destructive/10 text-destructive border-destructive/20",
+      draft: "bg-muted text-muted-foreground border-muted",
     };
     return styles[status as keyof typeof styles] || styles.pending;
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const isLoadingStats = isLoadingApplications;
 
   return (
     <div className="space-y-6">
@@ -175,14 +174,19 @@ const Dashboard = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Profile Status</span>
-                <span className="font-medium">60% Complete</span>
+                <span className="font-medium">
+                  {isLoadingProfile ? "..." : `${profileCompletion}% Complete`}
+                </span>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-primary h-2 rounded-full" style={{ width: "60%" }}></div>
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300" 
+                  style={{ width: isLoadingProfile ? "0%" : `${profileCompletion}%` }}
+                ></div>
               </div>
               <Link to="/dashboard/profile">
                 <Button variant="link" className="p-0 h-auto">
-                  Complete your profile →
+                  {profileCompletion < 100 ? "Complete your profile →" : "View your profile →"}
                 </Button>
               </Link>
             </div>
@@ -206,7 +210,7 @@ const Dashboard = () => {
             <ApplicationListSkeleton count={3} />
           ) : recentApplications.length > 0 ? (
             <div className="space-y-4">
-              {recentApplications.map((app) => (
+              {recentApplications.map((app: ApplicationWithProject) => (
                 <div
                   key={app.id}
                   className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
@@ -216,7 +220,7 @@ const Dashboard = () => {
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span>{app.sector}</span>
                       <span>•</span>
-                      <span>Submitted {new Date(app.submittedAt).toLocaleDateString()}</span>
+                      <span>Submitted {formatDate(app.submittedAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -250,4 +254,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
