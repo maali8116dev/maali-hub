@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   FileText,
+  FolderOpen,
   User,
   Settings,
   LogOut,
@@ -39,6 +40,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/applications", label: "My Applications", icon: FileText },
+    { href: "/dashboard/documents", label: "Documents", icon: FolderOpen },
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
     { href: "/dashboard/profile", label: "Profile", icon: User },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
@@ -104,6 +106,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const getPageTitle = () => {
     if (location.pathname === "/dashboard") return "Dashboard";
     if (location.pathname === "/dashboard/applications") return "My Applications";
+    if (location.pathname === "/dashboard/documents") return "Documents";
     if (location.pathname === "/dashboard/notifications") return "Notifications";
     if (location.pathname === "/dashboard/profile") return "Profile";
     if (location.pathname === "/dashboard/settings") return "Settings";
