@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Activity, User, FileText, FolderOpen, Clock, CalendarIcon, X } from "lucide-react";
+import { Search, Activity, User, FileText, FolderOpen, Clock, CalendarIcon, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -34,28 +34,58 @@ const entityTypeIcons: Record<string, React.ReactNode> = {
   document: <FileText className="h-4 w-4" />,
 };
 
+const PAGE_SIZE = 15;
+
 export default function ActivityLogs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: logs, isLoading } = useActivityLogs({
-    limit: 100,
+  const { data, isLoading } = useActivityLogs({
+    limit: PAGE_SIZE,
+    page: currentPage,
     actionType: actionFilter !== "all" ? actionFilter : undefined,
     entityType: entityFilter !== "all" ? entityFilter : undefined,
     startDate,
     endDate,
   });
 
-  const filteredLogs = (logs || []).filter((log) =>
+  const logs = data?.logs || [];
+  const totalPages = data?.totalPages || 1;
+  const totalCount = data?.totalCount || 0;
+
+  const filteredLogs = logs.filter((log) =>
     log.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const clearDateFilters = () => {
     setStartDate(undefined);
     setEndDate(undefined);
+    setCurrentPage(1);
+  };
+
+  // Reset to page 1 when filters change
+  const handleActionFilterChange = (value: string) => {
+    setActionFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleEntityFilterChange = (value: string) => {
+    setEntityFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    setCurrentPage(1);
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    setCurrentPage(1);
   };
 
   return (
@@ -90,7 +120,7 @@ export default function ActivityLogs() {
                   className="pl-10"
                 />
               </div>
-              <Select value={actionFilter} onValueChange={setActionFilter}>
+              <Select value={actionFilter} onValueChange={handleActionFilterChange}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Action Type" />
                 </SelectTrigger>
@@ -107,7 +137,7 @@ export default function ActivityLogs() {
                   <SelectItem value="reject">Reject</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={entityFilter} onValueChange={setEntityFilter}>
+              <Select value={entityFilter} onValueChange={handleEntityFilterChange}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Entity Type" />
                 </SelectTrigger>
@@ -143,7 +173,7 @@ export default function ActivityLogs() {
                   <Calendar
                     mode="single"
                     selected={startDate}
-                    onSelect={setStartDate}
+                    onSelect={handleStartDateChange}
                     disabled={(date) => (endDate ? date > endDate : false) || date > new Date()}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
@@ -168,7 +198,7 @@ export default function ActivityLogs() {
                   <Calendar
                     mode="single"
                     selected={endDate}
-                    onSelect={setEndDate}
+                    onSelect={handleEndDateChange}
                     disabled={(date) => (startDate ? date < startDate : false) || date > new Date()}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
@@ -252,6 +282,52 @@ export default function ActivityLogs() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && totalCount > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, totalCount)} of {totalCount} entries
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
