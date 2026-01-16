@@ -27,13 +27,18 @@ export function useMentors() {
   return useQuery({
     queryKey: ['mentors', 'published'],
     queryFn: async () => {
+      console.log('Fetching mentors...');
       const { data, error } = await supabase
         .from('mentors')
         .select('*')
         .eq('is_published', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      console.log('Mentors response:', { data, error });
+      if (error) {
+        console.error('Mentors fetch error:', error);
+        throw error;
+      }
       return data as Mentor[];
     },
   });
