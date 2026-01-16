@@ -17,13 +17,15 @@ interface UseActivityLogsOptions {
   limit?: number;
   actionType?: string;
   entityType?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export function useActivityLogs(options: UseActivityLogsOptions = {}) {
-  const { limit = 50, actionType, entityType } = options;
+  const { limit = 50, actionType, entityType, startDate, endDate } = options;
 
   return useQuery({
-    queryKey: ['activity-logs', { limit, actionType, entityType }],
+    queryKey: ['activity-logs', { limit, actionType, entityType, startDate: startDate?.toISOString(), endDate: endDate?.toISOString() }],
     queryFn: async () => {
       // Use the safe view that excludes sensitive columns (ip_address, user_agent)
       let query = supabase
@@ -38,6 +40,17 @@ export function useActivityLogs(options: UseActivityLogsOptions = {}) {
 
       if (entityType) {
         query = query.eq('entity_type', entityType);
+      }
+
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
+
+      if (endDate) {
+        // Add one day to include the end date fully
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        query = query.lte('created_at', endOfDay.toISOString());
       }
 
       const { data, error } = await query;
