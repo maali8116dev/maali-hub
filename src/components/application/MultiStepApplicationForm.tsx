@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import DocumentUploadSection from "./DocumentUploadSection";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -63,6 +64,7 @@ const stepTitles = [
 const MultiStepApplicationForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
   const {
     currentStep,
     totalSteps,
@@ -222,6 +224,19 @@ const MultiStepApplicationForm = () => {
           .eq("user_id", user.id)
           .is("application_id", null);
       }
+      
+      // Log activity for application submission
+      logActivity({
+        actionType: "submit",
+        entityType: "application",
+        entityId: application.id,
+        description: `Submitted application for project ID: ${formData.projectId}`,
+        metadata: { 
+          projectId: formData.projectId, 
+          companyName: data.companyName,
+          fundingAmount: data.fundingAmountRequested,
+        },
+      });
       
       toast({
         title: "Application Submitted",
