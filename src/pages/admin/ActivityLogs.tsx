@@ -8,10 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Activity, User, FileText, FolderOpen, Clock, CalendarIcon, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, Activity, User, FileText, FolderOpen, Clock, CalendarIcon, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, FileSpreadsheet, Printer } from "lucide-react";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import type { ActivityLog } from "@/hooks/useActivityLogs";
 
 const actionTypeColors: Record<string, string> = {
   create: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
@@ -88,6 +92,191 @@ export default function ActivityLogs() {
     setCurrentPage(1);
   };
 
+  // Fetch all logs for export (bypassing pagination)
+  const fetchAllLogsForExport = async (): Promise<ActivityLog[]> => {
+    let query = supabase
+      .from('activity_logs_safe' as any)
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (actionFilter !== "all") {
+      query = query.eq('action_type', actionFilter);
+    }
+
+    if (entityFilter !== "all") {
+      query = query.eq('entity_type', entityFilter);
+    }
+
+    if (startDate) {
+      query = query.gte('created_at', startDate.toISOString());
+    }
+
+    if (endDate) {
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = query.lte('created_at', endOfDay.toISOString());
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    return ((data as any[]) || []).map((log): ActivityLog => ({
+      id: log.id,
+      userId: log.user_id,
+      actionType: log.action_type,
+      entityType: log.entity_type,
+      entityId: log.entity_id,
+      description: log.description,
+      metadata: log.metadata as Record<string, unknown> | null,
+      createdAt: log.created_at,
+    }));
+  };
+
+  const exportToCSV = async () => {
+    try {
+      toast.loading("Preparing CSV export...");
+      const allLogs = await fetchAllLogsForExport();
+      
+      // Filter by search query if present
+      const logsToExport = searchQuery 
+        ? allLogs.filter(log => log.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        : allLogs;
+
+      if (logsToExport.length === 0) {
+        toast.dismiss();
+        toast.error("No logs to export");
+        return;
+      }
+
+      // Create CSV content
+      const headers = ["Date", "Action", "Entity Type", "Entity ID", "Description"];
+      const rows = logsToExport.map(log => [
+        format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss"),
+        log.actionType,
+        log.entityType.replace('_', ' '),
+        log.entityId || "N/A",
+        `"${log.description.replace(/"/g, '""')}"` // Escape quotes in description
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...rows.map(row => row.join(","))
+      ].join("\n");
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `activity-logs-${format(new Date(), "yyyy-MM-dd")}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.dismiss();
+      toast.success(`Exported ${logsToExport.length} logs to CSV`);
+    } catch (error) {
+      toast.dismiss();
+      toast.error("Failed to export logs");
+      console.error("Export error:", error);
+    }
+  };
+
+  const printLogs = async () => {
+    try {
+      toast.loading("Preparing print view...");
+      const allLogs = await fetchAllLogsForExport();
+      
+      // Filter by search query if present
+      const logsToExport = searchQuery 
+        ? allLogs.filter(log => log.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        : allLogs;
+
+      if (logsToExport.length === 0) {
+        toast.dismiss();
+        toast.error("No logs to print");
+        return;
+      }
+
+      // Create print window content
+      const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Activity Logs Report - ${format(new Date(), "yyyy-MM-dd")}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #333; margin-bottom: 5px; }
+            .subtitle { color: #666; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; font-weight: bold; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+            .create, .approve { background-color: #dcfce7; color: #166534; }
+            .update { background-color: #dbeafe; color: #1e40af; }
+            .delete, .reject { background-color: #fee2e2; color: #991b1b; }
+            .login, .logout { background-color: #f3e8ff; color: #6b21a8; }
+            .submit { background-color: #fef9c3; color: #854d0e; }
+            .view { background-color: #f3f4f6; color: #374151; }
+            .footer { margin-top: 20px; font-size: 11px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <h1>Activity Logs Report</h1>
+          <p class="subtitle">
+            Generated on ${format(new Date(), "MMMM d, yyyy 'at' HH:mm")}
+            ${startDate || endDate ? ` • Date range: ${startDate ? format(startDate, "MMM d, yyyy") : "Start"} to ${endDate ? format(endDate, "MMM d, yyyy") : "End"}` : ""}
+            ${actionFilter !== "all" ? ` • Action: ${actionFilter}` : ""}
+            ${entityFilter !== "all" ? ` • Entity: ${entityFilter}` : ""}
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logsToExport.map(log => `
+                <tr>
+                  <td>${format(new Date(log.createdAt), "MMM d, yyyy HH:mm")}</td>
+                  <td><span class="badge ${log.actionType}">${log.actionType}</span></td>
+                  <td>${log.entityType.replace('_', ' ')}</td>
+                  <td>${log.description}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <p class="footer">Total: ${logsToExport.length} entries</p>
+        </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.dismiss();
+      toast.success("Print view opened");
+    } catch (error) {
+      toast.dismiss();
+      toast.error("Failed to prepare print view");
+      console.error("Print error:", error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -99,13 +288,35 @@ export default function ActivityLogs() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Recent Activity
-          </CardTitle>
-          <CardDescription>
-            View all actions performed across the platform
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Recent Activity
+              </CardTitle>
+              <CardDescription>
+                View all actions performed across the platform
+              </CardDescription>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={exportToCSV}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export to CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={printLogs}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print / Save as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
