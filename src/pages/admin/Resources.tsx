@@ -94,15 +94,12 @@ const Resources = () => {
   };
 
   return (
-  
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Resources</h1>
-            <p className="text-muted-foreground">
-              Manage downloadable materials and resources
-            </p>
-          </div>
+          <p className="text-muted-foreground">
+            Manage downloadable materials and resources
+          </p>
           <Button asChild>
             <Link to="/admin/resources/new">
               <Plus className="mr-2 h-4 w-4" />
@@ -259,6 +256,7 @@ const Resources = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </>
   );
 };
 
