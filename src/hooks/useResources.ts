@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 
 export interface Resource {
   id: string;
@@ -142,6 +143,7 @@ export const useResourceCategories = () => {
 // Create resource
 export const useCreateResource = () => {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (data: ResourceFormData) => {
@@ -157,10 +159,17 @@ export const useCreateResource = () => {
         .single();
 
       if (error) throw error;
-      return resource;
+      return resource as Resource;
     },
-    onSuccess: () => {
+    onSuccess: (resource) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
+      logActivity({
+        actionType: "create",
+        entityType: "document",
+        entityId: resource.id,
+        description: `Created resource: ${resource.title}`,
+        metadata: { title: resource.title, category: resource.category },
+      });
       toast.success("Resource created successfully");
     },
     onError: (error) => {
@@ -172,6 +181,7 @@ export const useCreateResource = () => {
 // Update resource
 export const useUpdateResource = () => {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ResourceFormData> }) => {
@@ -183,10 +193,17 @@ export const useUpdateResource = () => {
         .single();
 
       if (error) throw error;
-      return resource;
+      return resource as Resource;
     },
-    onSuccess: () => {
+    onSuccess: (resource) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
+      logActivity({
+        actionType: "update",
+        entityType: "document",
+        entityId: resource.id,
+        description: `Updated resource: ${resource.title}`,
+        metadata: { title: resource.title },
+      });
       toast.success("Resource updated successfully");
     },
     onError: (error) => {
@@ -198,18 +215,34 @@ export const useUpdateResource = () => {
 // Delete resource
 export const useDeleteResource = () => {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Fetch resource title before deleting for logging
+      const { data: resource } = await supabase
+        .from("resources")
+        .select("title")
+        .eq("id", id)
+        .single();
+      
       const { error } = await supabase
         .from("resources")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
+      return { id, title: resource?.title || "Unknown" };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
+      logActivity({
+        actionType: "delete",
+        entityType: "document",
+        entityId: data.id,
+        description: `Deleted resource: ${data.title}`,
+        metadata: { title: data.title },
+      });
       toast.success("Resource deleted successfully");
     },
     onError: (error) => {

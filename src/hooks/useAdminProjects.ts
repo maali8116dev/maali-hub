@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 
 export type Project = {
   id: number;
@@ -133,6 +134,7 @@ export function useProject(id: number | undefined) {
 export function useCreateProject() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (data: ProjectFormData) => {
@@ -166,10 +168,20 @@ export function useCreateProject() {
       if (error) throw error;
       return transformProject(result);
     },
-    onSuccess: () => {
+    onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+      
+      // Log activity
+      logActivity({
+        actionType: "create",
+        entityType: "project",
+        entityId: String(project.id),
+        description: `Created project: ${project.title}`,
+        metadata: { title: project.title, category: project.category },
+      });
+      
       toast({
         title: "Project created",
         description: "The project has been created successfully.",
@@ -191,6 +203,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<ProjectFormData> }) => {
@@ -206,11 +219,21 @@ export function useUpdateProject() {
       if (error) throw error;
       return transformProject(result);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (project, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", variables.id] });
+      
+      // Log activity
+      logActivity({
+        actionType: "update",
+        entityType: "project",
+        entityId: String(project.id),
+        description: `Updated project: ${project.title}`,
+        metadata: { title: project.title },
+      });
+      
       toast({
         title: "Project updated",
         description: "The project has been updated successfully.",
@@ -232,21 +255,39 @@ export function useUpdateProject() {
 export function useDeleteProject() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (id: number) => {
+      // Fetch project title before deleting for logging
+      const { data: project } = await supabase
+        .from("projects")
+        .select("title")
+        .eq("id", id)
+        .single();
+      
       const { error } = await supabase
         .from("projects")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-      return true;
+      return { id, title: project?.title || "Unknown" };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+      
+      // Log activity
+      logActivity({
+        actionType: "delete",
+        entityType: "project",
+        entityId: String(data.id),
+        description: `Deleted project: ${data.title}`,
+        metadata: { title: data.title },
+      });
+      
       toast({
         title: "Project deleted",
         description: "The project has been deleted successfully.",

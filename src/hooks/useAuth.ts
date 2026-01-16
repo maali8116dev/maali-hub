@@ -3,6 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { setSentryUser, clearSentryUser } from "@/lib/sentry";
 import { identifyUser, resetUser, trackEvent } from "@/lib/posthog";
+import { logActivityDirect } from "./useActivityLogger";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -24,11 +25,21 @@ export const useAuth = () => {
           
           if (event === "SIGNED_IN") {
             trackEvent("user_logged_in", { method: "email" });
+            // Log activity for login
+            logActivityDirect({
+              userId: session.user.id,
+              actionType: "login",
+              entityType: "user",
+              entityId: session.user.id,
+              description: `User logged in: ${session.user.email}`,
+              metadata: { email: session.user.email },
+            });
           }
         } else if (event === "SIGNED_OUT") {
           clearSentryUser();
           resetUser();
           trackEvent("user_logged_out");
+          // Note: Can't log activity on signout as user context is gone
         }
       }
     );
@@ -50,6 +61,18 @@ export const useAuth = () => {
   }, []);
 
   const signOut = async () => {
+    // Log activity before signing out (while we still have user context)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await logActivityDirect({
+        userId: session.user.id,
+        actionType: "logout",
+        entityType: "user",
+        entityId: session.user.id,
+        description: `User logged out: ${session.user.email}`,
+        metadata: { email: session.user.email },
+      });
+    }
     await supabase.auth.signOut();
   };
 

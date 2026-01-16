@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 export interface Mentor {
   id: number;
@@ -82,6 +83,7 @@ export function useMentor(id: number | undefined) {
 // Create mentor
 export function useCreateMentor() {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (mentor: Partial<NewMentor>) => {
@@ -107,10 +109,17 @@ export function useCreateMentor() {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Mentor;
     },
-    onSuccess: () => {
+    onSuccess: (mentor) => {
       queryClient.invalidateQueries({ queryKey: ['mentors'] });
+      logActivity({
+        actionType: 'create',
+        entityType: 'profile',
+        entityId: String(mentor.id),
+        description: `Created mentor: ${mentor.name}`,
+        metadata: { name: mentor.name, sector: mentor.sector },
+      });
       toast.success('Mentor created successfully');
     },
     onError: (error) => {
@@ -122,6 +131,7 @@ export function useCreateMentor() {
 // Update mentor
 export function useUpdateMentor() {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async ({ id, ...mentor }: Partial<Mentor> & { id: number }) => {
@@ -133,10 +143,17 @@ export function useUpdateMentor() {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Mentor;
     },
-    onSuccess: () => {
+    onSuccess: (mentor) => {
       queryClient.invalidateQueries({ queryKey: ['mentors'] });
+      logActivity({
+        actionType: 'update',
+        entityType: 'profile',
+        entityId: String(mentor.id),
+        description: `Updated mentor: ${mentor.name}`,
+        metadata: { name: mentor.name },
+      });
       toast.success('Mentor updated successfully');
     },
     onError: (error) => {
@@ -148,14 +165,30 @@ export function useUpdateMentor() {
 // Delete mentor
 export function useDeleteMentor() {
   const queryClient = useQueryClient();
+  const { logActivity } = useActivityLogger();
 
   return useMutation({
     mutationFn: async (id: number) => {
+      // Fetch mentor name before deleting for logging
+      const { data: mentor } = await supabase
+        .from('mentors')
+        .select('name')
+        .eq('id', id)
+        .single();
+      
       const { error } = await supabase.from('mentors').delete().eq('id', id);
       if (error) throw error;
+      return { id, name: mentor?.name || 'Unknown' };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['mentors'] });
+      logActivity({
+        actionType: 'delete',
+        entityType: 'profile',
+        entityId: String(data.id),
+        description: `Deleted mentor: ${data.name}`,
+        metadata: { name: data.name },
+      });
       toast.success('Mentor deleted successfully');
     },
     onError: (error) => {
