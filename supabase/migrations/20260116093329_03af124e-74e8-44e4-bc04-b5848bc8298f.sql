@@ -1,0 +1,8 @@
+-- Add sample mentor data for testing
+INSERT INTO mentors (name, bio, expertise_areas, sector, country, linkedin_url, is_published, display_order) VALUES
+('Dr. Grace Adebayo', 'Agricultural economist with 15 years experience in sustainable farming practices across West Africa.', ARRAY['Agribusiness', 'Sustainability', 'Finance'], 'Agriculture', 'Nigeria', 'https://linkedin.com/in/example', true, 9),
+('Michael Kamau', 'Serial entrepreneur who has built 3 successful fintech startups in East Africa.', ARRAY['Fintech', 'Fundraising', 'Product Development'], 'Technology', 'Kenya', 'https://linkedin.com/in/example', true, 10),
+('Aisha Mensah', 'Former investment banker now helping SMEs access growth capital.', ARRAY['Investment', 'Business Strategy', 'Mergers & Acquisitions'], 'Financial Services', 'Ghana', 'https://linkedin.com/in/example', true, 11),
+('Jean-Pierre Ndayisaba', 'Renewable energy expert specializing in solar solutions for rural communities.', ARRAY['Solar Energy', 'Project Management', 'Community Development'], 'Energy', 'Rwanda', 'https://linkedin.com/in/example', true, 12),
+('Fatou Diop', 'Healthcare innovator focused on telemedicine and digital health solutions.', ARRAY['Healthcare Tech', 'Telemedicine', 'Digital Transformation'], 'Healthcare', 'Senegal', 'https://linkedin.com/in/example', true, 13),
+('Ibrahim Toure', 'Supply chain specialist helping businesses optimize logistics across Africa.', ARRAY['Logistics', 'Supply Chain', 'Operations'], 'Logistics', 'Ivory Coast', 'https://linkedin.com/in/example', true, 14);
