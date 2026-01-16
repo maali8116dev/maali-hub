@@ -5,9 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Activity, User, FileText, FolderOpen, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, Activity, User, FileText, FolderOpen, Clock, CalendarIcon, X } from "lucide-react";
 import { useActivityLogs } from "@/hooks/useActivityLogs";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const actionTypeColors: Record<string, string> = {
   create: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
@@ -34,16 +38,25 @@ export default function ActivityLogs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const { data: logs, isLoading } = useActivityLogs({
     limit: 100,
     actionType: actionFilter !== "all" ? actionFilter : undefined,
     entityType: entityFilter !== "all" ? entityFilter : undefined,
+    startDate,
+    endDate,
   });
 
   const filteredLogs = (logs || []).filter((log) =>
     log.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const clearDateFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
 
   return (
     <div className="space-y-6">
@@ -65,47 +78,115 @@ export default function ActivityLogs() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search activities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="flex flex-col gap-4 mb-6">
+            {/* Search and main filters row */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search activities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={actionFilter} onValueChange={setActionFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Action Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="create">Create</SelectItem>
+                  <SelectItem value="update">Update</SelectItem>
+                  <SelectItem value="delete">Delete</SelectItem>
+                  <SelectItem value="view">View</SelectItem>
+                  <SelectItem value="login">Login</SelectItem>
+                  <SelectItem value="logout">Logout</SelectItem>
+                  <SelectItem value="submit">Submit</SelectItem>
+                  <SelectItem value="approve">Approve</SelectItem>
+                  <SelectItem value="reject">Reject</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={entityFilter} onValueChange={setEntityFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Entity Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Entities</SelectItem>
+                  <SelectItem value="project">Projects</SelectItem>
+                  <SelectItem value="application">Applications</SelectItem>
+                  <SelectItem value="user">Users</SelectItem>
+                  <SelectItem value="blog_post">Blog Posts</SelectItem>
+                  <SelectItem value="profile">Profiles</SelectItem>
+                  <SelectItem value="document">Documents</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Action Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
-                <SelectItem value="create">Create</SelectItem>
-                <SelectItem value="update">Update</SelectItem>
-                <SelectItem value="delete">Delete</SelectItem>
-                <SelectItem value="view">View</SelectItem>
-                <SelectItem value="login">Login</SelectItem>
-                <SelectItem value="logout">Logout</SelectItem>
-                <SelectItem value="submit">Submit</SelectItem>
-                <SelectItem value="approve">Approve</SelectItem>
-                <SelectItem value="reject">Reject</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={entityFilter} onValueChange={setEntityFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Entity Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Entities</SelectItem>
-                <SelectItem value="project">Projects</SelectItem>
-                <SelectItem value="application">Applications</SelectItem>
-                <SelectItem value="user">Users</SelectItem>
-                <SelectItem value="blog_post">Blog Posts</SelectItem>
-                <SelectItem value="profile">Profiles</SelectItem>
-                <SelectItem value="document">Documents</SelectItem>
-              </SelectContent>
-            </Select>
+
+            {/* Date range filters row */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <span className="text-sm text-muted-foreground">Date range:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full sm:w-[180px] justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    disabled={(date) => (endDate ? date > endDate : false) || date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <span className="text-sm text-muted-foreground hidden sm:inline">to</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full sm:w-[180px] justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "MMM d, yyyy") : "End date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    disabled={(date) => (startDate ? date < startDate : false) || date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {(startDate || endDate) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearDateFilters}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear dates
+                </Button>
+              )}
+            </div>
           </div>
 
           {isLoading ? (
