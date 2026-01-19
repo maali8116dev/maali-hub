@@ -146,7 +146,7 @@ const Applications = () => {
                         <Button variant="outline">Continue Application</Button>
                       </Link>
                     ) : (
-                      <Link to={`/projects/${app.projectId}`}>
+                      <Link to={`/dashboard/applications/${app.id}`}>
                         <Button variant="outline">View Details</Button>
                       </Link>
                     )}
