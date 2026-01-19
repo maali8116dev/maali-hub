@@ -76,7 +76,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 3,
+      totalSteps: 4,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,

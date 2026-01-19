@@ -16,6 +16,8 @@ import {
   DollarSign, 
   Users,
   CheckCircle2,
+  FileText,
+  Edit2,
   Circle,
   ChevronLeft,
   ChevronRight
@@ -61,6 +63,7 @@ const stepTitles = [
   "Company Information",
   "Project Details",
   "Upload Documents",
+  "Review & Submit",
 ];
 
 const MultiStepApplicationForm = () => {
@@ -81,11 +84,15 @@ const MultiStepApplicationForm = () => {
     markAsSaved,
   } = useApplicationFormStore();
 
+  // Step 4 has no schema - it's just review
+  const step4Schema = z.object({});
+
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(
       currentStep === 1 ? step1Schema :
       currentStep === 2 ? step2Schema :
-      step3Schema
+      currentStep === 3 ? step3Schema :
+      step4Schema
     ),
     defaultValues: {
       companyName: formData.companyName || "",
@@ -457,6 +464,141 @@ const MultiStepApplicationForm = () => {
                   </div>
                   
                   <DocumentUploadSection />
+                </div>
+              )}
+
+              {/* Step 4: Review & Submit */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Review Your Application</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Please review all the information below before submitting your application.
+                    </p>
+                  </div>
+                  
+                  {/* Company Information Review */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        Company Information
+                      </h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => goToStep(1)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Company Name:</span>
+                        <p className="font-medium">{formData.companyName || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Contact Email:</span>
+                        <p className="font-medium">{formData.contactEmail || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Phone:</span>
+                        <p className="font-medium">{formData.contactPhone || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Location:</span>
+                        <p className="font-medium">{formData.location || "Not provided"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Project Details Review */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        Project Details
+                      </h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => goToStep(2)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Project Description:</span>
+                        <p className="font-medium mt-1 whitespace-pre-wrap">{formData.projectDescription || "Not provided"}</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-muted-foreground">Funding Requested:</span>
+                          <p className="font-medium">${formData.fundingAmountRequested || "Not provided"}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Team Size:</span>
+                          <p className="font-medium">{formData.teamSize || "Not provided"}</p>
+                        </div>
+                      </div>
+                      {formData.businessPlan && (
+                        <div>
+                          <span className="text-muted-foreground">Business Plan Summary:</span>
+                          <p className="font-medium mt-1 whitespace-pre-wrap">{formData.businessPlan}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Documents Review */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        Uploaded Documents
+                      </h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => goToStep(3)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                    </div>
+                    {formData.documents && formData.documents.length > 0 ? (
+                      <ul className="text-sm space-y-1">
+                        {formData.documents.map((doc, index) => (
+                          <li key={doc.id || index} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-3 w-3 text-green-500" />
+                            <span>{doc.fileName}</span>
+                            <span className="text-muted-foreground">
+                              ({(doc.fileSize / 1024).toFixed(1)} KB)
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No documents uploaded</p>
+                    )}
+                  </div>
+
+                  {/* Confirmation Notice */}
+                  <div className="bg-muted/50 border rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground">
+                      By submitting this application, you confirm that all the information provided is accurate and complete. 
+                      Your application will be reviewed by our team and you will be notified of the outcome via email.
+                    </p>
+                  </div>
                 </div>
               )}
 
