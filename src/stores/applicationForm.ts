@@ -13,7 +13,6 @@ export interface ApplicationFormData {
   
   // Step 3: Project Details
   projectDescription?: string;
-  fundingAmountRequested?: string;
   businessPlan?: string;
   teamSize?: number;
   
@@ -63,7 +62,6 @@ const defaultFormData: ApplicationFormData = {
   contactPhone: undefined,
   location: undefined,
   projectDescription: undefined,
-  fundingAmountRequested: undefined,
   businessPlan: undefined,
   teamSize: undefined,
   uploadedDocumentIds: [],
@@ -185,10 +183,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.location
             );
           case 2:
-            return !!(
-              formData.projectDescription &&
-              formData.fundingAmountRequested
-            );
+            return !!formData.projectDescription;
           case 3:
             // Documents are optional, but you can add validation here
             return true;

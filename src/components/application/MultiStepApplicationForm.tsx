@@ -44,7 +44,6 @@ const step1Schema = z.object({
 
 const step2Schema = z.object({
   projectDescription: z.string().min(50, "Description must be at least 50 characters"),
-  fundingAmountRequested: z.string().min(1, "Funding amount is required"),
   businessPlan: z.string().optional(),
   teamSize: z.preprocess(
     (val) => (val === "" || val === undefined ? undefined : Number(val)),
@@ -149,7 +148,6 @@ const MultiStepApplicationForm = () => {
       contactPhone: formData.contactPhone || "",
       location: formData.location || "",
       projectDescription: formData.projectDescription || "",
-      fundingAmountRequested: formData.fundingAmountRequested || "",
       businessPlan: formData.businessPlan || "",
       teamSize: formData.teamSize || undefined,
       documents: [],
@@ -169,7 +167,6 @@ const MultiStepApplicationForm = () => {
       contactPhone: formData.contactPhone || "",
       location: formData.location || "",
       projectDescription: formData.projectDescription || "",
-      fundingAmountRequested: formData.fundingAmountRequested || "",
       businessPlan: formData.businessPlan || "",
       teamSize: formData.teamSize || undefined,
       documents: [],
@@ -193,7 +190,6 @@ const MultiStepApplicationForm = () => {
         contactPhone: value.contactPhone,
         location: value.location,
         projectDescription: value.projectDescription,
-        fundingAmountRequested: value.fundingAmountRequested,
         businessPlan: value.businessPlan,
         teamSize: value.teamSize,
       });
@@ -254,7 +250,7 @@ const MultiStepApplicationForm = () => {
       }
 
       // Validate required fields from formData (collected across all steps)
-      if (!formData.companyName || !formData.contactEmail || !formData.projectDescription || !formData.fundingAmountRequested) {
+      if (!formData.companyName || !formData.contactEmail || !formData.projectDescription) {
         toast({
           title: "Missing Information",
           description: "Please complete all required fields before submitting.",
@@ -276,7 +272,6 @@ const MultiStepApplicationForm = () => {
             contact_phone: formData.contactPhone || null,
             location: formData.location || null,
             project_description: formData.projectDescription,
-            funding_amount_requested: formData.fundingAmountRequested,
             business_plan: formData.businessPlan || null,
             team_size: formData.teamSize || null,
             status: "pending",
@@ -300,7 +295,6 @@ const MultiStepApplicationForm = () => {
             contact_phone: formData.contactPhone || null,
             location: formData.location || null,
             project_description: formData.projectDescription,
-            funding_amount_requested: formData.fundingAmountRequested,
             business_plan: formData.businessPlan || null,
             team_size: formData.teamSize || null,
             status: "pending",
@@ -331,7 +325,6 @@ const MultiStepApplicationForm = () => {
         metadata: { 
           projectId: formData.projectId, 
           companyName: formData.companyName,
-          fundingAmount: formData.fundingAmountRequested,
         },
       });
       
@@ -504,7 +497,7 @@ const MultiStepApplicationForm = () => {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Project Details</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Provide details about your project and funding needs.
+                      Provide details about your project.
                     </p>
                   </div>
                   <CustomFormField
@@ -519,19 +512,6 @@ const MultiStepApplicationForm = () => {
                     required
                   />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <CustomFormField
-                      control={form.control}
-                      name="fundingAmountRequested"
-                      fieldType={FormFieldType.NUMBER}
-                      label="Funding Amount Requested"
-                      placeholder="50000"
-                      icon={DollarSign}
-                      iconPosition="left"
-                      min={1000}
-                      max={1000000}
-                      step={1000}
-                      required
-                    />
                     <CustomFormField
                       control={form.control}
                       name="teamSize"
@@ -648,15 +628,9 @@ const MultiStepApplicationForm = () => {
                         <span className="text-muted-foreground">Project Description:</span>
                         <p className="font-medium mt-1 whitespace-pre-wrap">{formData.projectDescription || "Not provided"}</p>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <span className="text-muted-foreground">Funding Requested:</span>
-                          <p className="font-medium">${formData.fundingAmountRequested || "Not provided"}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Team Size:</span>
-                          <p className="font-medium">{formData.teamSize || "Not provided"}</p>
-                        </div>
+                      <div>
+                        <span className="text-muted-foreground">Team Size:</span>
+                        <p className="font-medium">{formData.teamSize || "Not provided"}</p>
                       </div>
                       {formData.businessPlan && (
                         <div>

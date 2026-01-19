@@ -55,7 +55,6 @@ export const useAutoSaveDraft = ({
         contact_phone: formData.contactPhone || null,
         location: formData.location || null,
         project_description: formData.projectDescription || null,
-        funding_amount_requested: formData.fundingAmountRequested || null,
         business_plan: formData.businessPlan || null,
         team_size: formData.teamSize || null,
         status: "draft",
