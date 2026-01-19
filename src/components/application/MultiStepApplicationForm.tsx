@@ -37,12 +37,14 @@ const step1Schema = z.object({
   location: z.string().min(2, "Location is required"),
 });
 
-// Step 2: Project Details Schema
 const step2Schema = z.object({
   projectDescription: z.string().min(50, "Description must be at least 50 characters"),
   fundingAmountRequested: z.string().min(1, "Funding amount is required"),
   businessPlan: z.string().optional(),
-  teamSize: z.number().min(1, "Team size must be at least 1").optional(),
+  teamSize: z.preprocess(
+    (val) => (val === "" || val === undefined ? undefined : Number(val)),
+    z.number().min(1, "Team size must be at least 1").optional()
+  ),
 });
 
 // Step 3: Documents Schema (optional)
