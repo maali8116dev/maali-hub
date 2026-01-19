@@ -1,8 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { isDirectMode } from "@/lib/dataConfig";
 
 // Profile type matching both API and Supabase responses
 export type Profile = {
@@ -96,21 +94,7 @@ export function useProfile() {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-
-      if (isDirectMode()) {
-        return fetchProfileDirect(user.id);
-      }
-
-      try {
-        const data = await api.profiles.getMe();
-        return transformProfile(data);
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchProfileDirect(user.id);
-        }
-        throw error;
-      }
+      return fetchProfileDirect(user.id);
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
@@ -136,21 +120,7 @@ export function useUpdateProfile() {
       avatarUrl?: string;
     }) => {
       if (!user) throw new Error("Not authenticated");
-
-      if (isDirectMode()) {
-        return updateProfileDirect(user.id, data);
-      }
-
-      try {
-        const result = await api.profiles.update(data);
-        return transformProfile(result);
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return updateProfileDirect(user.id, data);
-        }
-        throw error;
-      }
+      return updateProfileDirect(user.id, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });

@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
-import { isDirectMode } from "@/lib/dataConfig";
 
 export type Project = {
   id: number;
@@ -106,37 +104,6 @@ async function fetchProjectsDirect(filters?: {
 }
 
 /**
- * Backend API query for projects
- */
-async function fetchProjectsApi(filters?: {
-  category?: string | null;
-  status?: string | null;
-  search?: string;
-  page?: number;
-  itemsPerPage?: number;
-}) {
-  const page = filters?.page || 1;
-  const itemsPerPage = filters?.itemsPerPage || 9;
-  const offset = (page - 1) * itemsPerPage;
-
-  const response = await api.projects.getAll({
-    category: filters?.category || undefined,
-    status: filters?.status || undefined,
-    search: filters?.search || undefined,
-    limit: itemsPerPage,
-    offset,
-  });
-
-  return {
-    projects: response.data.map(transformProject),
-    total: response.total,
-    page,
-    itemsPerPage,
-    totalPages: Math.ceil(response.total / itemsPerPage),
-  };
-}
-
-/**
  * Hook to fetch projects with optional filters
  */
 export function useProjects(filters?: {
@@ -150,20 +117,7 @@ export function useProjects(filters?: {
   return useQuery({
     queryKey: ["projects", filters],
     queryFn: async () => {
-      if (isDirectMode()) {
-        return fetchProjectsDirect(filters);
-      }
-      
-      try {
-        return await fetchProjectsApi(filters);
-      } catch (error: any) {
-        // Fallback to direct if API fails
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchProjectsDirect(filters);
-        }
-        throw error;
-      }
+      return fetchProjectsDirect(filters);
     },
     staleTime: 2 * 60 * 1000,
     retry: 1,
@@ -192,19 +146,7 @@ export function useProjectCategories() {
   return useQuery({
     queryKey: ["project-categories"],
     queryFn: async () => {
-      if (isDirectMode()) {
-        return fetchCategoriesDirect();
-      }
-
-      try {
-        return await api.projects.getCategories();
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchCategoriesDirect();
-        }
-        throw error;
-      }
+      return fetchCategoriesDirect();
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -232,20 +174,7 @@ export function useProjectLocations() {
   return useQuery({
     queryKey: ["project-locations"],
     queryFn: async () => {
-      if (isDirectMode()) {
-        return fetchLocationsDirect();
-      }
-
-      try {
-        // API doesn't have locations endpoint, use direct
-        return fetchLocationsDirect();
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchLocationsDirect();
-        }
-        throw error;
-      }
+      return fetchLocationsDirect();
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -275,24 +204,7 @@ export function useFeaturedProjects() {
   return useQuery({
     queryKey: ["featured-projects"],
     queryFn: async () => {
-      if (isDirectMode()) {
-        return fetchFeaturedProjectsDirect();
-      }
-
-      try {
-        // API fallback - filter featured from all projects
-        const response = await api.projects.getAll({ limit: 100 });
-        return response.data
-          .map(transformProject)
-          .filter((p) => p.featured && p.status !== "closed")
-          .slice(0, 6);
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchFeaturedProjectsDirect();
-        }
-        throw error;
-      }
+      return fetchFeaturedProjectsDirect();
     },
     staleTime: 5 * 60 * 1000,
   });

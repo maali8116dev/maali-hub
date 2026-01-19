@@ -1,6 +1,57 @@
 {
   "loading": "Chargement...",
   "error": "Une erreur s'est produite",
-  "tryAgain": "Réessayer"
+  "tryAgain": "Réessayer",
+  "cookieConsent": {
+    "title": "Nous respectons votre vie privée",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience de navigation, analyser le trafic du site et personnaliser le contenu. En cliquant sur \"Tout accepter\", vous acceptez notre utilisation des cookies. Lisez notre <privacyLink>Politique de confidentialité</privacyLink> et <cookieLink>Politique des cookies</cookieLink> pour plus d'informations.",
+    "privacyPolicy": "Politique de confidentialité",
+    "cookiePolicy": "Politique des cookies",
+    "rejectAll": "Tout refuser",
+    "acceptAll": "Tout accepter",
+    "customize": "Personnaliser",
+    "preferences": {
+      "title": "Préférences des cookies",
+      "essential": {
+        "label": "Cookies essentiels",
+        "description": "Nécessaires au fonctionnement du site Web. Ne peuvent pas être désactivés."
+      },
+      "analytics": {
+        "label": "Cookies d'analyse",
+        "description": "Nous aident à comprendre comment les visiteurs interagissent avec notre site Web."
+      },
+      "marketing": {
+        "label": "Cookies marketing",
+        "description": "Utilisés pour diffuser des publicités personnalisées."
+      },
+      "cancel": "Annuler",
+      "save": "Enregistrer les préférences"
+    }
+  },
+  "profileWizard": {
+    "title": "Complétez votre profil",
+    "description": "Configurons votre profil pour commencer. Cela ne prendra qu'une minute !",
+    "step": "Étape {{current}} sur {{total}}",
+    "complete": "Terminé",
+    "step1Title": "Informations de base",
+    "step2Title": "Détails de l'entreprise",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "Entrez votre prénom",
+    "lastName": "Nom de famille",
+    "lastNamePlaceholder": "Entrez votre nom de famille",
+    "country": "Pays",
+    "countryPlaceholder": "Sélectionnez votre pays",
+    "businessSector": "Secteur d'activité",
+    "businessSectorPlaceholder": "Sélectionnez votre secteur d'activité",
+    "businessName": "Nom de l'entreprise",
+    "businessNamePlaceholder": "Entrez le nom de votre entreprise (optionnel)",
+    "bio": "Biographie",
+    "bioPlaceholder": "Parlez-nous de vous et de votre entreprise...",
+    "skip": "Passer pour l'instant",
+    "back": "Retour",
+    "next": "Suivant",
+    "saving": "Enregistrement...",
+    "completionPrompt": "Complétez votre profil pour débloquer toutes les fonctionnalités"
+  }
 }
 

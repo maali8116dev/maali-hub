@@ -48,8 +48,43 @@ i18n
       escapeValue: false, // React already escapes values
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      // Detection order: localStorage (saved preference) → querystring → pathname → navigator (browser) → htmlTag
+      order: ['localStorage', 'querystring', 'pathname', 'navigator', 'htmlTag'],
+      // Cache the detected language
       caches: ['localStorage'],
+      // Look for language in URL query string (e.g., ?lang=fr)
+      lookupQuerystring: 'lang',
+      // Look for language in URL pathname (e.g., /fr/page)
+      lookupFromPathIndex: 0,
+      // Check HTML lang attribute
+      lookupFromSubdomainIndex: 0,
+      // Convert detected language codes (e.g., 'fr-FR' → 'fr', 'pt-BR' → 'pt')
+      convertDetectedLanguage: (lng: string) => {
+        // Map language codes to supported languages
+        const languageMap: Record<string, string> = {
+          'fr': 'fr',      // French (any variant)
+          'fr-FR': 'fr',   // French (France)
+          'fr-CA': 'fr',   // French (Canada)
+          'fr-BE': 'fr',   // French (Belgium)
+          'pt': 'pt',      // Portuguese (any variant)
+          'pt-BR': 'pt',   // Portuguese (Brazil)
+          'pt-PT': 'pt',   // Portuguese (Portugal)
+          'en': 'en',      // English (any variant)
+          'en-US': 'en',   // English (US)
+          'en-GB': 'en',   // English (UK)
+        };
+        
+        // Check if exact match exists
+        if (languageMap[lng]) {
+          return languageMap[lng];
+        }
+        
+        // Extract base language code (e.g., 'fr-FR' → 'fr')
+        const baseLang = lng.split('-')[0];
+        
+        // Return base language if supported, otherwise fallback to 'en'
+        return ['en', 'fr', 'pt'].includes(baseLang) ? baseLang : 'en';
+      },
     },
   });
 

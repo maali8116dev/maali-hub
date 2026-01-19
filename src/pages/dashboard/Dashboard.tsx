@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -8,11 +8,44 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
 import { useApplications, ApplicationWithProject } from "@/hooks/useApplications";
 import { useProfile } from "@/hooks/useProfile";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
+import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
+import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
   const { data: applications, isLoading: isLoadingApplications } = useApplications();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { isIncomplete, completionPercentage } = useProfileCompletion();
+  const { user } = useAuth();
+  const [showWizard, setShowWizard] = useState(false);
+  const [dismissedPrompt, setDismissedPrompt] = useState(false);
+
+  // Check if user just signed up (from localStorage or new OAuth user)
+  useEffect(() => {
+    const justSignedUp = localStorage.getItem('justSignedUp');
+    const isNewOAuthUser = user && (() => {
+      const createdAt = new Date(user.created_at);
+      const now = new Date();
+      const minutesSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+      // If account was created within last 5 minutes, consider it new
+      return minutesSinceCreation < 5;
+    })();
+
+    if ((justSignedUp === 'true' || isNewOAuthUser) && isIncomplete && !dismissedPrompt) {
+      setShowWizard(true);
+      localStorage.removeItem('justSignedUp');
+    }
+  }, [isIncomplete, user, dismissedPrompt]);
+
+  // Check if prompt was dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('profilePromptDismissed');
+    setDismissedPrompt(dismissed === 'true');
+  }, []);
 
   // Calculate stats from real applications
   const stats = useMemo(() => {
@@ -67,8 +100,63 @@ const Dashboard = () => {
 
   const isLoadingStats = isLoadingApplications;
 
+  const handleDismissPrompt = () => {
+    setDismissedPrompt(true);
+    localStorage.setItem('profilePromptDismissed', 'true');
+  };
+
+  const handleWizardComplete = () => {
+    setShowWizard(false);
+    setDismissedPrompt(true);
+    localStorage.setItem('profilePromptDismissed', 'true');
+  };
+
   return (
     <div className="space-y-6">
+      {/* Profile Setup Wizard */}
+      <ProfileSetupWizard
+        open={showWizard}
+        onOpenChange={setShowWizard}
+        onComplete={handleWizardComplete}
+      />
+
+      {/* Profile Completion Prompt */}
+      {isIncomplete && !dismissedPrompt && !showWizard && (
+        <Alert className="border-primary/50 bg-primary/5">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <AlertTitle>{t('profileWizard.completionPrompt')}</AlertTitle>
+              <AlertDescription className="mt-2">
+                {t('profileWizard.description')} ({completionPercentage}% {t('profileWizard.complete')})
+              </AlertDescription>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => setShowWizard(true)}
+                >
+                  {t('profileWizard.title')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDismissPrompt}
+                >
+                  {t('profileWizard.skip')}
+                </Button>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={handleDismissPrompt}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </Alert>
+      )}
+
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground mt-2">

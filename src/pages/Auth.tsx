@@ -25,6 +25,10 @@ const signUpSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
+}).refine((data) => data.password === data.passwordConfirmation, {
+  message: "Passwords do not match",
+  path: ["passwordConfirmation"],
 });
 
 type SignInFormValues = z.infer<typeof signInSchema>;
@@ -52,6 +56,7 @@ const Auth = () => {
       lastName: "",
       email: "",
       password: "",
+      passwordConfirmation: "",
     },
   });
 
@@ -112,7 +117,10 @@ const Auth = () => {
         });
         signUpForm.reset();
         
-        // Redirect to dashboard - verification banner will show there
+        // Mark that user just signed up to show profile wizard
+        localStorage.setItem('justSignedUp', 'true');
+        
+        // Redirect to dashboard - wizard will show there
         navigate("/dashboard");
       }
     } catch (error) {
@@ -246,7 +254,7 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           {/* Logo Placeholder */}
           <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-primary-foreground">
+            <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-white">
               <span className="text-2xl font-bold">M</span>
             </div>
           </div>
@@ -447,6 +455,16 @@ const Auth = () => {
                     fieldType={FormFieldType.PASSWORD}
                     label="Password"
                     placeholder="Create a strong password"
+                    icon={Lock}
+                    iconPosition="left"
+                    required
+                  />
+                  <CustomFormField
+                    control={signUpForm.control}
+                    name="passwordConfirmation"
+                    fieldType={FormFieldType.PASSWORD}
+                    label="Confirm Password"
+                    placeholder="Re-enter your password"
                     icon={Lock}
                     iconPosition="left"
                     required

@@ -1,6 +1,57 @@
 {
   "loading": "Loading...",
   "error": "An error occurred",
-  "tryAgain": "Try again"
+  "tryAgain": "Try again",
+  "cookieConsent": {
+    "title": "We value your privacy",
+    "description": "We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking \"Accept All\", you consent to our use of cookies. Read our <privacyLink>Privacy Policy</privacyLink> and <cookieLink>Cookie Policy</cookieLink> for more information.",
+    "privacyPolicy": "Privacy Policy",
+    "cookiePolicy": "Cookie Policy",
+    "rejectAll": "Reject All",
+    "acceptAll": "Accept All",
+    "customize": "Customize",
+    "preferences": {
+      "title": "Cookie Preferences",
+      "essential": {
+        "label": "Essential Cookies",
+        "description": "Required for the website to function. Cannot be disabled."
+      },
+      "analytics": {
+        "label": "Analytics Cookies",
+        "description": "Help us understand how visitors interact with our website."
+      },
+      "marketing": {
+        "label": "Marketing Cookies",
+        "description": "Used to deliver personalized advertisements."
+      },
+      "cancel": "Cancel",
+      "save": "Save Preferences"
+    }
+  },
+  "profileWizard": {
+    "title": "Complete Your Profile",
+    "description": "Let's set up your profile to get started. This will only take a minute!",
+    "step": "Step {{current}} of {{total}}",
+    "complete": "Complete",
+    "step1Title": "Basic Info",
+    "step2Title": "Business Details",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
+    "country": "Country",
+    "countryPlaceholder": "Select your country",
+    "businessSector": "Business Sector",
+    "businessSectorPlaceholder": "Select your business sector",
+    "businessName": "Business Name",
+    "businessNamePlaceholder": "Enter your business name (optional)",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself and your business...",
+    "skip": "Skip for now",
+    "back": "Back",
+    "next": "Next",
+    "saving": "Saving...",
+    "completionPrompt": "Complete your profile to unlock all features"
+  }
 }
 

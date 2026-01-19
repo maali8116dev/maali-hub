@@ -1,86 +1,43 @@
-# Backend Server Setup
+# Backend Setup
 
-## Quick Start
+## Note
 
-To use the profile API and other backend features, you need to start the backend server.
+The Hono backend server has been removed. The application now uses:
+- **Direct Supabase queries** (default) - Frontend queries Supabase directly
+- **Supabase Edge Functions** (when implemented) - Serverless functions for API endpoints
 
-### 1. Start the Backend Server
+No backend server needs to be started.
 
-In a separate terminal, run:
+## Environment Variables
 
-```bash
-npm run server:dev
-```
-
-The server will start on `http://localhost:3000` (or the port specified in your `.env` file).
-
-### 2. Environment Variables
-
-Make sure you have a `.env` file in the root directory with:
+For direct Supabase queries (current setup), ensure your frontend has:
 
 ```env
-# Backend Server
-PORT=3000
-FRONTEND_URL=http://localhost:5173
-
-# Database (for backend)
-# IMPORTANT: Get this from Supabase Dashboard > Settings > Database > Connection string
-# Use the "URI" connection string (direct connection, NOT the pooler)
-# Format will be: postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
-# OR: postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-# Copy the EXACT string from your Supabase dashboard
-DATABASE_URL=postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres
-
-# Supabase (for backend)
-SUPABASE_URL=https://[PROJECT-REF].supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# Supabase (already configured in src/integrations/supabase/client.ts)
+# These are automatically set from your Supabase project
 ```
 
-### 3. Frontend Environment Variable (Optional)
+**Note:** Database migrations are handled by Supabase SQL migrations in `supabase/migrations/`. No additional database connection is needed for the frontend.
 
-If your backend runs on a different URL, add to your `.env`:
+## Current Setup
 
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-If not set, it defaults to `http://localhost:3000`.
-
-## Fallback Behavior
-
-The `useProfile` hook automatically falls back to direct Supabase queries if the backend server is not available. This means:
-
-- ✅ **With backend running**: Uses your API endpoints (recommended for production)
-- ✅ **Without backend**: Falls back to direct Supabase queries (works for development)
+The application uses **direct Supabase queries** by default. This means:
+- ✅ Frontend queries Supabase directly (no backend server needed)
+- ✅ Uses Row Level Security (RLS) policies for data access
+- ✅ Simpler architecture, faster development
 
 ## Testing
 
-1. Start the backend: `npm run server:dev`
-2. Start the frontend: `npm run dev`
-3. Navigate to `/dashboard/profile` to see your real profile data
+1. Start the frontend: `npm run dev`
+2. Navigate to `/dashboard/profile` to see your profile data
+3. All data comes directly from Supabase
 
 ## Troubleshooting
-
-**Backend won't start?**
-- Check that your `.env` file has all required variables
-- Make sure port 3000 is not in use by another application
-- Check the terminal for error messages
 
 **Profile not loading?**
 - Make sure you're logged in
 - Check browser console for errors
 - Verify your Supabase connection is working
-- If backend is down, it will automatically use Supabase fallback
+- Check that RLS policies are properly configured in Supabase
 
-**Database connection error (ENOTFOUND)?**
-- The `DATABASE_URL` hostname is incorrect or the format is wrong
-- Go to Supabase Dashboard > Settings > Database
-- Find "Connection string" section
-- Copy the "URI" connection string (the direct connection, not the pooler)
-- Make sure you replace `[YOUR-PASSWORD]` with your actual database password
-- The connection string should look like one of these formats:
-  - `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres`
-  - `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
-  - `postgresql://postgres:[PASSWORD]@[HOST].supabase.co:5432/postgres`
-- Paste the EXACT string (with your password) into your `.env` file as `DATABASE_URL`
 

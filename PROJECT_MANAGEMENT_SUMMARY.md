@@ -3,7 +3,7 @@
 ## 🎯 Project Overview
 
 **Platform**: Funding opportunity hub for African entrepreneurs  
-**Tech Stack**: React + TypeScript, Hono Backend, Supabase, Drizzle ORM  
+**Tech Stack**: React + TypeScript, Supabase (Direct Queries + Edge Functions)  
 **Status**: In Development (Frontend UI complete, Backend API ready, Integration ~60% complete)
 
 ---
@@ -24,7 +24,7 @@
 
 ### 👤 **USER PROFILES**
 
-- [x] Profile schema (Drizzle)
+- [x] Profile schema (Supabase)
 - [x] Profile API endpoints (backend)
 - [x] Profile query functions
 - [x] Profile editing page (connected to API)
@@ -51,7 +51,7 @@
 
 ### 📝 **APPLICATIONS**
 
-- [x] Application schema (Drizzle)
+- [x] Application schema (Supabase)
 - [x] Application API endpoints (backend)
 - [x] Application query functions
 - [x] Application detail page (UI only)
@@ -66,7 +66,7 @@
 
 ### 📎 **DOCUMENTS**
 
-- [x] Document schema (Drizzle)
+- [x] Document schema (Supabase)
 - [x] Document API endpoints (backend)
 - [x] Document query functions
 - [ ] File upload functionality
@@ -180,7 +180,7 @@
 - [x] Application routes (CRUD)
 - [x] Document routes (CRUD)
 - [x] Projects routes (CRUD - public GET, protected POST/PATCH/DELETE)
-- [x] Database schema (Drizzle)
+- [x] Database schema (Supabase SQL migrations)
 - [x] Query functions (profiles, applications, documents, projects)
 
 #### ⚠️ **NEEDS CONFIGURATION**

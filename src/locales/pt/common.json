@@ -1,6 +1,57 @@
 {
   "loading": "Carregando...",
   "error": "Ocorreu um erro",
-  "tryAgain": "Tentar novamente"
+  "tryAgain": "Tentar novamente",
+  "cookieConsent": {
+    "title": "Valorizamos sua privacidade",
+    "description": "Usamos cookies para melhorar sua experiência de navegação, analisar o tráfego do site e personalizar o conteúdo. Ao clicar em \"Aceitar Tudo\", você consente com o uso de cookies. Leia nossa <privacyLink>Política de Privacidade</privacyLink> e <cookieLink>Política de Cookies</cookieLink> para mais informações.",
+    "privacyPolicy": "Política de Privacidade",
+    "cookiePolicy": "Política de Cookies",
+    "rejectAll": "Rejeitar Tudo",
+    "acceptAll": "Aceitar Tudo",
+    "customize": "Personalizar",
+    "preferences": {
+      "title": "Preferências de Cookies",
+      "essential": {
+        "label": "Cookies Essenciais",
+        "description": "Necessários para o funcionamento do site. Não podem ser desativados."
+      },
+      "analytics": {
+        "label": "Cookies de Análise",
+        "description": "Nos ajudam a entender como os visitantes interagem com nosso site."
+      },
+      "marketing": {
+        "label": "Cookies de Marketing",
+        "description": "Usados para exibir anúncios personalizados."
+      },
+      "cancel": "Cancelar",
+      "save": "Salvar Preferências"
+    }
+  },
+  "profileWizard": {
+    "title": "Complete seu perfil",
+    "description": "Vamos configurar seu perfil para começar. Isso levará apenas um minuto!",
+    "step": "Etapa {{current}} de {{total}}",
+    "complete": "Completo",
+    "step1Title": "Informações básicas",
+    "step2Title": "Detalhes do negócio",
+    "firstName": "Primeiro Nome",
+    "firstNamePlaceholder": "Digite seu primeiro nome",
+    "lastName": "Sobrenome",
+    "lastNamePlaceholder": "Digite seu sobrenome",
+    "country": "País",
+    "countryPlaceholder": "Selecione seu país",
+    "businessSector": "Setor de negócios",
+    "businessSectorPlaceholder": "Selecione seu setor de negócios",
+    "businessName": "Nome do negócio",
+    "businessNamePlaceholder": "Digite o nome do seu negócio (opcional)",
+    "bio": "Biografia",
+    "bioPlaceholder": "Conte-nos sobre você e seu negócio...",
+    "skip": "Pular por enquanto",
+    "back": "Voltar",
+    "next": "Próximo",
+    "saving": "Salvando...",
+    "completionPrompt": "Complete seu perfil para desbloquear todos os recursos"
+  }
 }
 

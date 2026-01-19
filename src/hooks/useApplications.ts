@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { isDirectMode } from "@/lib/dataConfig";
 
 export type ApplicationWithProject = {
   id: string;
@@ -102,62 +100,6 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
 }
 
 /**
- * Backend API query for applications
- */
-async function fetchApplicationsApi(userId: string): Promise<ApplicationWithProject[]> {
-  const applications = (await api.applications.getAll()) as any[];
-
-  if (!applications || applications.length === 0) {
-    return [];
-  }
-
-  const applicationsWithProjects = await Promise.all(
-    applications.map(async (app) => {
-      try {
-        const project = (await api.projects.getById(app.projectId)) as any;
-
-        return {
-          id: app.id,
-          projectId: app.projectId,
-          projectTitle: project?.title || "Unknown Project",
-          status: statusMap[app.status] || "pending",
-          submittedAt: app.createdAt,
-          sector: project?.category || "Unknown",
-          country: app.location || "Unknown",
-          fundingAmount: app.fundingAmountRequested,
-          companyName: app.companyName,
-          contactEmail: app.contactEmail,
-          contactPhone: app.contactPhone,
-          projectDescription: app.projectDescription,
-          createdAt: app.createdAt,
-          updatedAt: app.updatedAt,
-        } as ApplicationWithProject;
-      } catch (error) {
-        console.error(`Error fetching project ${app.projectId}:`, error);
-        return {
-          id: app.id,
-          projectId: app.projectId,
-          projectTitle: "Unknown Project",
-          status: statusMap[app.status] || "pending",
-          submittedAt: app.createdAt,
-          sector: "Unknown",
-          country: app.location || "Unknown",
-          fundingAmount: app.fundingAmountRequested,
-          companyName: app.companyName,
-          contactEmail: app.contactEmail,
-          contactPhone: app.contactPhone,
-          projectDescription: app.projectDescription,
-          createdAt: app.createdAt,
-          updatedAt: app.updatedAt,
-        } as ApplicationWithProject;
-      }
-    })
-  );
-
-  return applicationsWithProjects;
-}
-
-/**
  * Hook to fetch user applications with project details
  */
 export function useApplications() {
@@ -169,20 +111,7 @@ export function useApplications() {
       if (!user?.id) {
         return [];
       }
-
-      if (isDirectMode()) {
-        return fetchApplicationsDirect(user.id);
-      }
-
-      try {
-        return await fetchApplicationsApi(user.id);
-      } catch (error: any) {
-        if (error.message?.includes("fetch") || error.message?.includes("Failed to fetch")) {
-          console.warn("Backend API unavailable, falling back to direct Supabase");
-          return fetchApplicationsDirect(user.id);
-        }
-        throw error;
-      }
+      return fetchApplicationsDirect(user.id);
     },
     enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
