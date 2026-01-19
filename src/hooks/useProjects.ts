@@ -6,7 +6,7 @@ export type Project = {
   title: string;
   description: string;
   category: string;
-  status: "new" | "open" | "closing-soon" | "closed";
+  status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string;
   fundingAmount: string;
   location: string;

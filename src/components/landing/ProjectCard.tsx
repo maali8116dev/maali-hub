@@ -61,6 +61,8 @@ const ProjectCard = (props: ProjectCardProps) => {
         return 'bg-muted text-muted-foreground';
       case 'new':
         return 'bg-blue-500 text-white';
+      case 'archived':
+        return 'bg-slate-500 text-white';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -76,6 +78,8 @@ const ProjectCard = (props: ProjectCardProps) => {
         return 'Closed';
       case 'new':
         return 'New';
+      case 'archived':
+        return 'Archived';
       default:
         return 'Unknown';
     }

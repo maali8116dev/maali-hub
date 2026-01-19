@@ -173,6 +173,7 @@ const Projects = () => {
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="closing-soon">Closing Soon</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

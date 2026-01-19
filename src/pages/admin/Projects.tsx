@@ -39,6 +39,8 @@ const AdminProjects = () => {
         return <Badge variant="secondary">Closed</Badge>;
       case "new":
         return <Badge variant="default">New</Badge>;
+      case "archived":
+        return <Badge className="bg-slate-500 text-white">Archived</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

@@ -41,6 +41,8 @@ const ProjectDetails = () => {
         return "bg-muted text-muted-foreground";
       case "new":
         return "bg-blue-500 text-white";
+      case "archived":
+        return "bg-slate-500 text-white";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -56,6 +58,8 @@ const ProjectDetails = () => {
         return "Closed";
       case "new":
         return "New";
+      case "archived":
+        return "Archived";
       default:
         return "Unknown";
     }
