@@ -313,8 +313,8 @@ const MultiStepApplicationForm = () => {
         application = data;
       }
 
-      // Update uploaded documents with application_id if any
-      if (formData.documents && formData.documents.length > 0 && application) {
+      // Always link any orphaned documents from this user to the application
+      if (application) {
         await supabase
           .from("application_documents")
           .update({ application_id: application.id })
