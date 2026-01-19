@@ -33,6 +33,7 @@ interface ApplicationFormStore {
   formData: ApplicationFormData;
   isDirty: boolean;
   lastSaved?: Date;
+  draftId?: string;
   
   // Step navigation
   setCurrentStep: (step: number) => void;
@@ -52,6 +53,7 @@ interface ApplicationFormStore {
   // State management
   setDirty: (dirty: boolean) => void;
   markAsSaved: () => void;
+  setDraftId: (id: string | null) => void;
   reset: () => void;
   
   // Validation helpers
@@ -80,6 +82,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
+      draftId: undefined,
 
       // Step navigation
       setCurrentStep: (step) => {
@@ -165,12 +168,17 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
         set({ isDirty: false, lastSaved: new Date() });
       },
 
+      setDraftId: (id) => {
+        set({ draftId: id || undefined });
+      },
+
       reset: () => {
         set({
           currentStep: 1,
           formData: defaultFormData,
           isDirty: false,
           lastSaved: undefined,
+          draftId: undefined,
         });
       },
 
