@@ -60,22 +60,46 @@ const ApplicationDetails = () => {
 
   // Fetch documents for this application
   const { data: documents = [], isLoading: documentsLoading } = useQuery({
-    queryKey: ["application-documents", id],
+    queryKey: ["application-documents", id, application?.user_id],
     queryFn: async () => {
       if (!id) return [];
 
-      const { data, error } = await supabase
+      // First, try to get documents linked to this application
+      const { data: linkedDocs, error: linkedError } = await supabase
         .from("application_documents")
         .select("*")
         .eq("application_id", id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching documents:", error);
-        return [];
+      if (linkedError) {
+        console.error("Error fetching linked documents:", linkedError);
       }
 
-      return (data || []).map((doc) => ({
+      // Also get unlinked documents from the same user (fallback for documents 
+      // uploaded during application process but not properly linked)
+      let unlinkedDocs: typeof linkedDocs = [];
+      if (application?.user_id) {
+        const { data: userDocs, error: userError } = await supabase
+          .from("application_documents")
+          .select("*")
+          .eq("user_id", application.user_id)
+          .is("application_id", null)
+          .order("created_at", { ascending: false });
+
+        if (userError) {
+          console.error("Error fetching user documents:", userError);
+        } else {
+          unlinkedDocs = userDocs || [];
+        }
+      }
+
+      // Combine and deduplicate
+      const allDocs = [...(linkedDocs || []), ...unlinkedDocs];
+      const uniqueDocs = allDocs.filter(
+        (doc, index, self) => index === self.findIndex((d) => d.id === doc.id)
+      );
+
+      return uniqueDocs.map((doc) => ({
         id: doc.id,
         fileName: doc.file_name,
         filePath: doc.file_path,
@@ -85,7 +109,7 @@ const ApplicationDetails = () => {
         applicationId: doc.application_id || undefined,
       })) as UploadedDocument[];
     },
-    enabled: !!id,
+    enabled: !!id && !!application,
   });
 
   const getStatusBadge = (status: string) => {
