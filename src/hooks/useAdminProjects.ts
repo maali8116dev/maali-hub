@@ -8,7 +8,7 @@ export type Project = {
   title: string;
   description: string;
   category: string;
-  status: "new" | "open" | "closing-soon" | "closed";
+  status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string;
   fundingAmount: string;
   location: string;
@@ -28,7 +28,7 @@ export type ProjectFormData = {
   title: string;
   description: string;
   category: string;
-  status: "new" | "open" | "closing-soon" | "closed";
+  status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string; // YYYY-MM-DD format
   fundingAmount: string;
   location: string;

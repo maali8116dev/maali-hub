@@ -18,7 +18,7 @@ const projectSchema = z.object({
   title: z.string().min(1, "Title is required").min(5, "Title must be at least 5 characters"),
   description: z.string().min(1, "Description is required").min(50, "Description must be at least 50 characters"),
   category: z.string().min(1, "Category is required"),
-  status: z.enum(["new", "open", "closing-soon", "closed"]),
+  status: z.enum(["new", "open", "closing-soon", "closed", "archived"]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be in YYYY-MM-DD format"),
   fundingAmount: z.string().min(1, "Funding amount is required"),
   location: z.string().min(1, "Location is required"),
@@ -222,7 +222,7 @@ const ProjectForm = () => {
                     <Label htmlFor="status">Status *</Label>
                     <Select
                       value={status}
-                      onValueChange={(value) => setValue("status", value as "new" | "open" | "closing-soon" | "closed")}
+                      onValueChange={(value) => setValue("status", value as "new" | "open" | "closing-soon" | "closed" | "archived")}
                     >
                       <SelectTrigger id="status">
                         <SelectValue />
@@ -232,6 +232,7 @@ const ProjectForm = () => {
                         <SelectItem value="open">Open</SelectItem>
                         <SelectItem value="closing-soon">Closing Soon</SelectItem>
                         <SelectItem value="closed">Closed</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
