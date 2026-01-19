@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
@@ -71,6 +71,8 @@ const stepTitles = [
 
 const MultiStepApplicationForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isNewApplication = searchParams.get("new") === "true";
   const { toast } = useToast();
   const { logActivity } = useActivityLogger();
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -104,10 +106,10 @@ const MultiStepApplicationForm = () => {
     onSaved: markAsSaved,
   });
 
-  // Load existing draft on mount
+  // Load existing draft on mount (unless starting a new application)
   useEffect(() => {
     const loadDraft = async () => {
-      if (formData.projectId && !draftLoaded) {
+      if (formData.projectId && !draftLoaded && !isNewApplication) {
         const existingData = await loadExistingDraft();
         if (existingData) {
           setFormData({ ...formData, ...existingData });
@@ -117,10 +119,12 @@ const MultiStepApplicationForm = () => {
           });
         }
         setDraftLoaded(true);
+      } else if (isNewApplication) {
+        setDraftLoaded(true);
       }
     };
     loadDraft();
-  }, [formData.projectId, draftLoaded, loadExistingDraft, setFormData, toast]);
+  }, [formData.projectId, draftLoaded, isNewApplication, loadExistingDraft, setFormData, toast]);
 
   // Update draftId in store when it changes
   useEffect(() => {

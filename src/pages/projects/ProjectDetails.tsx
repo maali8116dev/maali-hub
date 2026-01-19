@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useProjectDraft } from "@/hooks/useUserDrafts";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -30,6 +31,9 @@ const ProjectDetails = () => {
     },
     enabled: !!id,
   });
+
+  // Check if user has a draft for this project
+  const { data: draft } = useProjectDraft(id ? parseInt(id) : undefined);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -245,21 +249,56 @@ const ProjectDetails = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {isDisabled 
-                    ? "This opportunity is no longer accepting applications."
-                    : "Ready to apply for this grant? Click below to begin the application process."
-                  }
-                </p>
-                <Button 
-                  className="w-full" 
-                  variant="hero"
-                  size="lg"
-                  disabled={isDisabled}
-                  onClick={() => navigate(`/projects/${id}/apply`)}
-                >
-                  {isDisabled ? "Application Closed" : "Begin Application"}
-                </Button>
+                {draft ? (
+                  <>
+                    <div className="bg-muted/50 rounded-lg p-3 mb-4">
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        You have a saved draft
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Last saved: {new Date(draft.updated_at).toLocaleDateString()} at{" "}
+                        {new Date(draft.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <Button 
+                      className="w-full mb-2" 
+                      variant="hero"
+                      size="lg"
+                      disabled={isDisabled}
+                      onClick={() => navigate(`/projects/${id}/apply`)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Continue Draft
+                    </Button>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      size="lg"
+                      disabled={isDisabled}
+                      onClick={() => navigate(`/projects/${id}/apply?new=true`)}
+                    >
+                      Start New Application
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {isDisabled 
+                        ? "This opportunity is no longer accepting applications."
+                        : "Ready to apply for this grant? Click below to begin the application process."
+                      }
+                    </p>
+                    <Button 
+                      className="w-full" 
+                      variant="hero"
+                      size="lg"
+                      disabled={isDisabled}
+                      onClick={() => navigate(`/projects/${id}/apply`)}
+                    >
+                      {isDisabled ? "Application Closed" : "Begin Application"}
+                    </Button>
+                  </>
+                )}
                 
                 {/* Application Stats */}
                 <div className="mt-4 pt-4 border-t border-border">
