@@ -29,11 +29,13 @@ import {
 interface DocumentUploadSectionProps {
   applicationId?: string;
   onDocumentsChange?: (documents: UploadedDocument[]) => void;
+  initialDocumentIds?: string[];
 }
 
 const DocumentUploadSection = ({ 
   applicationId, 
-  onDocumentsChange 
+  onDocumentsChange,
+  initialDocumentIds,
 }: DocumentUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<UploadedDocument | null>(null);

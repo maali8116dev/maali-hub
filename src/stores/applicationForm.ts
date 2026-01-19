@@ -17,14 +17,8 @@ export interface ApplicationFormData {
   businessPlan?: string;
   teamSize?: number;
   
-  // Step 4: Documents (file references)
-  documents?: {
-    id: string;
-    file: File;
-    fileName: string;
-    fileType: string;
-    fileSize: number;
-  }[];
+  // Step 4: Documents - track uploaded document IDs for this session
+  uploadedDocumentIds?: string[];
 }
 
 interface ApplicationFormStore {
@@ -45,10 +39,11 @@ interface ApplicationFormStore {
   updateFormData: (data: Partial<ApplicationFormData>) => void;
   setFormData: (data: ApplicationFormData) => void;
   
-  // Document management
-  addDocument: (file: File) => void;
-  removeDocument: (id: string) => void;
-  clearDocuments: () => void;
+  // Document management - track uploaded document IDs
+  addUploadedDocumentId: (id: string) => void;
+  removeUploadedDocumentId: (id: string) => void;
+  clearUploadedDocumentIds: () => void;
+  getUploadedDocumentIds: () => string[];
   
   // State management
   setDirty: (dirty: boolean) => void;
@@ -71,7 +66,7 @@ const defaultFormData: ApplicationFormData = {
   fundingAmountRequested: undefined,
   businessPlan: undefined,
   teamSize: undefined,
-  documents: [],
+  uploadedDocumentIds: [],
 };
 
 export const useApplicationFormStore = create<ApplicationFormStore>()(
@@ -125,40 +120,36 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
         set({ formData: data, isDirty: true });
       },
 
-      // Document management
-      addDocument: (file) => {
-        const document = {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          file,
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-        };
-
+      // Document management - track uploaded document IDs
+      addUploadedDocumentId: (id: string) => {
         set((state) => ({
           formData: {
             ...state.formData,
-            documents: [...(state.formData.documents || []), document],
+            uploadedDocumentIds: [...(state.formData.uploadedDocumentIds || []), id],
           },
           isDirty: true,
         }));
       },
 
-      removeDocument: (id) => {
+      removeUploadedDocumentId: (id: string) => {
         set((state) => ({
           formData: {
             ...state.formData,
-            documents: state.formData.documents?.filter((doc) => doc.id !== id) || [],
+            uploadedDocumentIds: state.formData.uploadedDocumentIds?.filter((docId) => docId !== id) || [],
           },
           isDirty: true,
         }));
       },
 
-      clearDocuments: () => {
+      clearUploadedDocumentIds: () => {
         set((state) => ({
-          formData: { ...state.formData, documents: [] },
+          formData: { ...state.formData, uploadedDocumentIds: [] },
           isDirty: true,
         }));
+      },
+
+      getUploadedDocumentIds: () => {
+        return get().formData.uploadedDocumentIds || [];
       },
 
       // State management
@@ -213,13 +204,9 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
     }),
     {
       name: 'maali-application-form',
-      // Only persist formData (without File objects) and currentStep
-      // File objects can't be serialized, so documents are excluded from persistence
+      // Persist formData including uploadedDocumentIds
       partialize: (state) => ({
-        formData: {
-          ...state.formData,
-          documents: [], // Exclude File objects from persistence
-        },
+        formData: state.formData,
         currentStep: state.currentStep,
         lastSaved: state.lastSaved,
       }),
