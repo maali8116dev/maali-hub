@@ -21,8 +21,7 @@ import {
   Circle,
   ChevronLeft,
   ChevronRight,
-  Cloud,
-  CloudOff,
+  Save,
   Loader2,
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
@@ -92,19 +91,17 @@ const MultiStepApplicationForm = () => {
     setDraftId,
   } = useApplicationFormStore();
 
-  // Auto-save hook
+  // Manual save hook
   const {
     isSaving,
     lastSavedAt,
     draftId,
+    saveDraft,
     loadExistingDraft,
     deleteDraft,
   } = useAutoSaveDraft({
     formData,
-    isDirty,
     onSaved: markAsSaved,
-    debounceMs: 5000,
-    enabled: !!formData.projectId,
   });
 
   // Load existing draft on mount
@@ -365,28 +362,28 @@ const MultiStepApplicationForm = () => {
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Step {currentStep} of {totalSteps}</span>
           <div className="flex items-center gap-4">
-            {/* Auto-save Status */}
-            {formData.projectId && (
-              <div className="flex items-center gap-1.5 text-xs">
+            {/* Save Draft Button */}
+            {formData.projectId && currentStep < totalSteps && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={saveDraft}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 text-xs h-7"
+              >
                 {isSaving ? (
-                  <>
-                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                    <span>Saving...</span>
-                  </>
-                ) : lastSavedAt ? (
-                  <>
-                    <Cloud className="h-3 w-3 text-green-500" />
-                    <span className="text-green-600">
-                      Saved {new Date(lastSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </>
-                ) : isDirty ? (
-                  <>
-                    <CloudOff className="h-3 w-3 text-amber-500" />
-                    <span className="text-amber-600">Unsaved changes</span>
-                  </>
-                ) : null}
-              </div>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Save className="h-3 w-3" />
+                )}
+                {isSaving ? "Saving..." : "Save Draft"}
+              </Button>
+            )}
+            {lastSavedAt && (
+              <span className="text-xs text-muted-foreground">
+                Last saved: {new Date(lastSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
             )}
             <span>{Math.round(progressPercentage)}% Complete</span>
           </div>
