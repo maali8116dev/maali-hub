@@ -5,10 +5,7 @@ import { ApplicationFormData } from "@/stores/applicationForm";
 
 interface UseAutoSaveDraftOptions {
   formData: ApplicationFormData;
-  isDirty: boolean;
   onSaved: () => void;
-  debounceMs?: number;
-  enabled?: boolean;
 }
 
 interface AutoSaveState {
@@ -20,10 +17,7 @@ interface AutoSaveState {
 
 export const useAutoSaveDraft = ({
   formData,
-  isDirty,
   onSaved,
-  debounceMs = 5000, // Save every 5 seconds when dirty
-  enabled = true,
 }: UseAutoSaveDraftOptions) => {
   const { toast } = useToast();
   const [state, setState] = useState<AutoSaveState>({
@@ -32,29 +26,16 @@ export const useAutoSaveDraft = ({
     draftId: null,
     error: null,
   });
-  
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastSavedDataRef = useRef<string>("");
 
   const saveDraft = useCallback(async () => {
     // Don't save if no project is selected or no meaningful data
-    if (!formData.projectId) return;
-    
-    // Check if data has actually changed
-    const currentDataString = JSON.stringify({
-      projectId: formData.projectId,
-      companyName: formData.companyName,
-      contactEmail: formData.contactEmail,
-      contactPhone: formData.contactPhone,
-      location: formData.location,
-      projectDescription: formData.projectDescription,
-      fundingAmountRequested: formData.fundingAmountRequested,
-      businessPlan: formData.businessPlan,
-      teamSize: formData.teamSize,
-    });
-    
-    if (currentDataString === lastSavedDataRef.current) {
-      return; // No changes to save
+    if (!formData.projectId) {
+      toast({
+        title: "Cannot save draft",
+        description: "Please select a project first",
+        variant: "destructive",
+      });
+      return;
     }
 
     try {
@@ -132,18 +113,27 @@ export const useAutoSaveDraft = ({
         draftId: result.data?.id || prev.draftId,
       }));
       
-      lastSavedDataRef.current = currentDataString;
       onSaved();
       
+      toast({
+        title: "Draft saved",
+        description: "Your application draft has been saved",
+      });
+      
     } catch (error) {
-      console.error("Auto-save error:", error);
+      console.error("Save draft error:", error);
       setState(prev => ({
         ...prev,
         isSaving: false,
         error: "Failed to save draft",
       }));
+      toast({
+        title: "Failed to save",
+        description: "Could not save your draft. Please try again.",
+        variant: "destructive",
+      });
     }
-  }, [formData, state.draftId, onSaved]);
+  }, [formData, state.draftId, onSaved, toast]);
 
   // Load existing draft on mount
   const loadExistingDraft = useCallback(async () => {
@@ -198,39 +188,6 @@ export const useAutoSaveDraft = ({
       console.error("Error deleting draft:", error);
     }
   }, [state.draftId]);
-
-  // Auto-save effect with debounce
-  useEffect(() => {
-    if (!enabled || !isDirty || !formData.projectId) return;
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Set new timeout for debounced save
-    saveTimeoutRef.current = setTimeout(() => {
-      saveDraft();
-    }, debounceMs);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [enabled, isDirty, formData, debounceMs, saveDraft]);
-
-  // Save on page unload
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (isDirty && formData.projectId) {
-        saveDraft();
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty, formData.projectId, saveDraft]);
 
   return {
     ...state,
