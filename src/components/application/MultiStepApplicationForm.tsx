@@ -313,13 +313,13 @@ const MultiStepApplicationForm = () => {
         application = data;
       }
 
-      // Always link any orphaned documents from this user to the application
-      if (application) {
+      // Link only the documents uploaded during this session to the application
+      const uploadedDocIds = formData.uploadedDocumentIds || [];
+      if (application && uploadedDocIds.length > 0) {
         await supabase
           .from("application_documents")
           .update({ application_id: application.id })
-          .eq("user_id", user.id)
-          .is("application_id", null);
+          .in("id", uploadedDocIds);
       }
       
       // Log activity for application submission
@@ -567,7 +567,13 @@ const MultiStepApplicationForm = () => {
                     </p>
                   </div>
                   
-                  <DocumentUploadSection />
+                  <DocumentUploadSection 
+                    onDocumentsChange={(docs) => {
+                      // Track document IDs in the form store
+                      const newIds = docs.map(d => d.id);
+                      updateFormData({ uploadedDocumentIds: newIds });
+                    }}
+                  />
                 </div>
               )}
 
@@ -679,18 +685,10 @@ const MultiStepApplicationForm = () => {
                         Edit
                       </Button>
                     </div>
-                    {formData.documents && formData.documents.length > 0 ? (
-                      <ul className="text-sm space-y-1">
-                        {formData.documents.map((doc, index) => (
-                          <li key={doc.id || index} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-3 w-3 text-green-500" />
-                            <span>{doc.fileName}</span>
-                            <span className="text-muted-foreground">
-                              ({(doc.fileSize / 1024).toFixed(1)} KB)
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
+                    {formData.uploadedDocumentIds && formData.uploadedDocumentIds.length > 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        {formData.uploadedDocumentIds.length} document(s) uploaded for this application
+                      </p>
                     ) : (
                       <p className="text-sm text-muted-foreground">No documents uploaded</p>
                     )}
