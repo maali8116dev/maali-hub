@@ -142,11 +142,11 @@ const Applications = () => {
                   </div>
                   <div className="flex gap-2">
                     {app.status === "draft" ? (
-                      <Link to={`/projects/${app.id}/apply`}>
+                      <Link to={`/projects/${app.projectId}/apply`}>
                         <Button variant="outline">Continue Application</Button>
                       </Link>
                     ) : (
-                      <Link to={`/projects/${app.id}`}>
+                      <Link to={`/projects/${app.projectId}`}>
                         <Button variant="outline">View Details</Button>
                       </Link>
                     )}
