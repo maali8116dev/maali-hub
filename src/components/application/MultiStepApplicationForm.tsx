@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +20,10 @@ import {
   Edit2,
   Circle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Cloud,
+  CloudOff,
+  Loader2,
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import DocumentUploadSection from "./DocumentUploadSection";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
+import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -70,19 +74,63 @@ const MultiStepApplicationForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { logActivity } = useActivityLogger();
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const {
     currentStep,
     totalSteps,
     formData,
+    isDirty,
     nextStep,
     previousStep,
     goToStep,
     updateFormData,
+    setFormData,
     canProceedToNextStep,
     isStepValid,
     reset,
     markAsSaved,
+    setDraftId,
   } = useApplicationFormStore();
+
+  // Auto-save hook
+  const {
+    isSaving,
+    lastSavedAt,
+    draftId,
+    loadExistingDraft,
+    deleteDraft,
+  } = useAutoSaveDraft({
+    formData,
+    isDirty,
+    onSaved: markAsSaved,
+    debounceMs: 5000,
+    enabled: !!formData.projectId,
+  });
+
+  // Load existing draft on mount
+  useEffect(() => {
+    const loadDraft = async () => {
+      if (formData.projectId && !draftLoaded) {
+        const existingData = await loadExistingDraft();
+        if (existingData) {
+          setFormData({ ...formData, ...existingData });
+          toast({
+            title: "Draft Restored",
+            description: "Your previously saved draft has been loaded.",
+          });
+        }
+        setDraftLoaded(true);
+      }
+    };
+    loadDraft();
+  }, [formData.projectId, draftLoaded, loadExistingDraft, setFormData, toast]);
+
+  // Update draftId in store when it changes
+  useEffect(() => {
+    if (draftId) {
+      setDraftId(draftId);
+    }
+  }, [draftId, setDraftId]);
 
   // Step 4 has no schema - it's just review
   const step4Schema = z.object({});
@@ -214,26 +262,55 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
-      // Insert application into database using formData from store (collected across all steps)
-      const { data: application, error } = await supabase
-        .from("applications")
-        .insert({
-          user_id: user.id,
-          project_id: formData.projectId,
-          company_name: formData.companyName,
-          contact_email: formData.contactEmail,
-          contact_phone: formData.contactPhone || null,
-          location: formData.location || null,
-          project_description: formData.projectDescription,
-          funding_amount_requested: formData.fundingAmountRequested,
-          business_plan: formData.businessPlan || null,
-          team_size: formData.teamSize || null,
-          status: "pending",
-        })
-        .select()
-        .single();
+      let application;
+      
+      // Check if we have an existing draft to convert to submission
+      if (draftId) {
+        // Update existing draft to submitted application
+        const { data, error } = await supabase
+          .from("applications")
+          .update({
+            company_name: formData.companyName,
+            contact_email: formData.contactEmail,
+            contact_phone: formData.contactPhone || null,
+            location: formData.location || null,
+            project_description: formData.projectDescription,
+            funding_amount_requested: formData.fundingAmountRequested,
+            business_plan: formData.businessPlan || null,
+            team_size: formData.teamSize || null,
+            status: "pending",
+            is_draft: false,
+          })
+          .eq("id", draftId)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
+        application = data;
+      } else {
+        // Insert new application
+        const { data, error } = await supabase
+          .from("applications")
+          .insert({
+            user_id: user.id,
+            project_id: formData.projectId,
+            company_name: formData.companyName,
+            contact_email: formData.contactEmail,
+            contact_phone: formData.contactPhone || null,
+            location: formData.location || null,
+            project_description: formData.projectDescription,
+            funding_amount_requested: formData.fundingAmountRequested,
+            business_plan: formData.businessPlan || null,
+            team_size: formData.teamSize || null,
+            status: "pending",
+            is_draft: false,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        application = data;
+      }
 
       // Update uploaded documents with application_id if any
       if (formData.documents && formData.documents.length > 0 && application) {
@@ -265,6 +342,7 @@ const MultiStepApplicationForm = () => {
       // Reset form after successful submission
       reset();
       form.reset();
+      setDraftLoaded(false);
       
       // Redirect to dashboard applications
       navigate("/dashboard/applications");
@@ -286,7 +364,32 @@ const MultiStepApplicationForm = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Step {currentStep} of {totalSteps}</span>
-          <span>{Math.round(progressPercentage)}% Complete</span>
+          <div className="flex items-center gap-4">
+            {/* Auto-save Status */}
+            {formData.projectId && (
+              <div className="flex items-center gap-1.5 text-xs">
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <span>Saving...</span>
+                  </>
+                ) : lastSavedAt ? (
+                  <>
+                    <Cloud className="h-3 w-3 text-green-500" />
+                    <span className="text-green-600">
+                      Saved {new Date(lastSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </>
+                ) : isDirty ? (
+                  <>
+                    <CloudOff className="h-3 w-3 text-amber-500" />
+                    <span className="text-amber-600">Unsaved changes</span>
+                  </>
+                ) : null}
+              </div>
+            )}
+            <span>{Math.round(progressPercentage)}% Complete</span>
+          </div>
         </div>
         <Progress value={progressPercentage} className="h-2" />
         

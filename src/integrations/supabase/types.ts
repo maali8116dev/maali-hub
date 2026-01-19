@@ -98,14 +98,15 @@ export type Database = {
         Row: {
           application_fee_paid: boolean | null
           business_plan: string | null
-          company_name: string
-          contact_email: string
+          company_name: string | null
+          contact_email: string | null
           contact_phone: string | null
           created_at: string
-          funding_amount_requested: string
+          funding_amount_requested: string | null
           id: string
+          is_draft: boolean
           location: string | null
-          project_description: string
+          project_description: string | null
           project_id: number
           status: string | null
           stripe_payment_intent_id: string | null
@@ -116,14 +117,15 @@ export type Database = {
         Insert: {
           application_fee_paid?: boolean | null
           business_plan?: string | null
-          company_name: string
-          contact_email: string
+          company_name?: string | null
+          contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
-          funding_amount_requested: string
+          funding_amount_requested?: string | null
           id?: string
+          is_draft?: boolean
           location?: string | null
-          project_description: string
+          project_description?: string | null
           project_id: number
           status?: string | null
           stripe_payment_intent_id?: string | null
@@ -134,14 +136,15 @@ export type Database = {
         Update: {
           application_fee_paid?: boolean | null
           business_plan?: string | null
-          company_name?: string
-          contact_email?: string
+          company_name?: string | null
+          contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
-          funding_amount_requested?: string
+          funding_amount_requested?: string | null
           id?: string
+          is_draft?: boolean
           location?: string | null
-          project_description?: string
+          project_description?: string | null
           project_id?: number
           status?: string | null
           stripe_payment_intent_id?: string | null
