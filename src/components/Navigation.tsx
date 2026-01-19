@@ -94,9 +94,9 @@ const Navigation = () => {
             </div>
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-muted-foreground">
-                  {t('navigation:welcomeBack')}
-                </span>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+                  {t('navigation:dashboard')}
+                </Button>
                 <Button variant="outline" onClick={signOut}>
                   {t('navigation:signOut')}
                 </Button>
@@ -150,9 +150,14 @@ const Navigation = () => {
                 <ThemeToggle />
               </div>
               {user ? (
-                <Button variant="outline" className="w-full" onClick={signOut}>
-                  {t('navigation:signOut')}
-                </Button>
+                <>
+                  <Button variant="ghost" className="w-full" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}>
+                    {t('navigation:dashboard')}
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={signOut}>
+                    {t('navigation:signOut')}
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
