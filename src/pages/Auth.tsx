@@ -31,11 +31,21 @@ const signUpSchema = z.object({
   path: ["passwordConfirmation"],
 });
 
+const resetPasswordSchema = z.object({
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
+}).refine((data) => data.password === data.passwordConfirmation, {
+  message: "Passwords do not match",
+  path: ["passwordConfirmation"],
+});
+
 type SignInFormValues = z.infer<typeof signInSchema>;
 type SignUpFormValues = z.infer<typeof signUpSchema>;
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -60,16 +70,45 @@ const Auth = () => {
     },
   });
 
-  // Check if user is already logged in
+  // Reset Password Form
+  const resetPasswordForm = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      passwordConfirmation: "",
+    },
+  });
+
+  // Check if user is already logged in or arriving from password reset
   useEffect(() => {
     const checkAuth = async () => {
+      // Check for password reset flow (recovery token in URL)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const type = hashParams.get("type");
+      const accessToken = hashParams.get("access_token");
+      
+      if (type === "recovery" && accessToken) {
+        // User is coming from password reset email
+        setIsPasswordReset(true);
+        return;
+      }
+      
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && !isPasswordReset) {
         navigate("/");
       }
     };
     checkAuth();
-  }, [navigate]);
+
+    // Listen for auth state changes (handles the recovery flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsPasswordReset(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, isPasswordReset]);
 
   const handleSignUp = async (data: SignUpFormValues) => {
     setIsLoading(true);
@@ -217,6 +256,40 @@ const Auth = () => {
     }
   };
 
+  const handlePasswordUpdate = async (data: ResetPasswordFormValues) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: data.password,
+      });
+
+      if (error) {
+        toast({
+          title: "Password update failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password updated!",
+          description: "Your password has been successfully updated. You can now sign in.",
+        });
+        setIsPasswordReset(false);
+        // Clear the hash from URL
+        window.history.replaceState(null, "", window.location.pathname);
+        resetPasswordForm.reset();
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleOAuthSignIn = async (provider: "google" | "facebook") => {
     setIsLoading(true);
     try {
@@ -247,6 +320,68 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  // Password Reset View
+  if (isPasswordReset) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="flex justify-center mb-4">
+              <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-white">
+                <span className="text-2xl font-bold">M</span>
+              </div>
+            </div>
+            <CardTitle className="text-2xl text-center">Set New Password</CardTitle>
+            <CardDescription className="text-center">
+              Enter your new password below
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...resetPasswordForm}>
+              <form onSubmit={resetPasswordForm.handleSubmit(handlePasswordUpdate)} className="space-y-4">
+                <CustomFormField
+                  control={resetPasswordForm.control}
+                  name="password"
+                  fieldType={FormFieldType.PASSWORD}
+                  label="New Password"
+                  placeholder="Enter your new password"
+                  icon={Lock}
+                  iconPosition="left"
+                  required
+                />
+                <CustomFormField
+                  control={resetPasswordForm.control}
+                  name="passwordConfirmation"
+                  fieldType={FormFieldType.PASSWORD}
+                  label="Confirm New Password"
+                  placeholder="Re-enter your new password"
+                  icon={Lock}
+                  iconPosition="left"
+                  required
+                />
+                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                  {isLoading ? "Updating password..." : "Update Password"}
+                </Button>
+              </form>
+            </Form>
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPasswordReset(false);
+                  window.history.replaceState(null, "", window.location.pathname);
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
