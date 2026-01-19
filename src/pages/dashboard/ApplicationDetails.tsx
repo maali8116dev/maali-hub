@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +16,18 @@ import {
   Phone, 
   DollarSign,
   Users,
-  ExternalLink
+  ExternalLink,
+  Download,
+  FolderOpen,
+  Loader2
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getDocumentDownloadUrl, type UploadedDocument } from "@/hooks/useDocumentUpload";
 
 const ApplicationDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { data: application, isLoading, error } = useQuery({
     queryKey: ["application", id],
@@ -52,6 +58,36 @@ const ApplicationDetails = () => {
     enabled: !!id,
   });
 
+  // Fetch documents for this application
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+    queryKey: ["application-documents", id],
+    queryFn: async () => {
+      if (!id) return [];
+
+      const { data, error } = await supabase
+        .from("application_documents")
+        .select("*")
+        .eq("application_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching documents:", error);
+        return [];
+      }
+
+      return (data || []).map((doc) => ({
+        id: doc.id,
+        fileName: doc.file_name,
+        filePath: doc.file_path,
+        fileSize: doc.file_size || 0,
+        fileType: doc.file_type || "",
+        createdAt: doc.created_at,
+        applicationId: doc.application_id || undefined,
+      })) as UploadedDocument[];
+    },
+    enabled: !!id,
+  });
+
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       pending: "bg-warning/10 text-warning border-warning/20",
@@ -68,6 +104,31 @@ const ApplicationDetails = () => {
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const getFileTypeLabel = (fileType: string): string => {
+    if (fileType.includes("pdf")) return "PDF";
+    if (fileType.includes("word") || fileType.includes("doc")) return "DOC";
+    if (fileType.includes("text")) return "TXT";
+    return "File";
+  };
+
+  const handleDownload = async (doc: UploadedDocument) => {
+    setDownloadingId(doc.id);
+    try {
+      const url = await getDocumentDownloadUrl(doc.filePath);
+      if (url) {
+        window.open(url, "_blank");
+      }
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   if (isLoading) {
@@ -276,6 +337,67 @@ const ApplicationDetails = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Documents */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="h-5 w-5" />
+              Supporting Documents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {documentsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : documents.length > 0 ? (
+              <div className="space-y-3">
+                {documents.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{doc.fileName}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span>{formatFileSize(doc.fileSize)}</span>
+                          <span>•</span>
+                          <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="flex-shrink-0">
+                        {getFileTypeLabel(doc.fileType)}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownload(doc)}
+                      disabled={downloadingId === doc.id}
+                      className="ml-4"
+                    >
+                      {downloadingId === doc.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FolderOpen className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">No documents uploaded for this application</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Timeline */}
         <Card className="md:col-span-2">
