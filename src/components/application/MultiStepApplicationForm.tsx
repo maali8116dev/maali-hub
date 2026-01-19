@@ -173,7 +173,7 @@ const MultiStepApplicationForm = () => {
   };
 
 
-  const handleSubmit = async (data: ApplicationFormValues) => {
+  const handleSubmit = async () => {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -197,20 +197,30 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
-      // Insert application into database
+      // Validate required fields from formData (collected across all steps)
+      if (!formData.companyName || !formData.contactEmail || !formData.projectDescription || !formData.fundingAmountRequested) {
+        toast({
+          title: "Missing Information",
+          description: "Please complete all required fields before submitting.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Insert application into database using formData from store (collected across all steps)
       const { data: application, error } = await supabase
         .from("applications")
         .insert({
           user_id: user.id,
           project_id: formData.projectId,
-          company_name: data.companyName,
-          contact_email: data.contactEmail,
-          contact_phone: data.contactPhone || null,
-          location: data.location || null,
-          project_description: data.projectDescription,
-          funding_amount_requested: data.fundingAmountRequested,
-          business_plan: data.businessPlan || null,
-          team_size: data.teamSize || null,
+          company_name: formData.companyName,
+          contact_email: formData.contactEmail,
+          contact_phone: formData.contactPhone || null,
+          location: formData.location || null,
+          project_description: formData.projectDescription,
+          funding_amount_requested: formData.fundingAmountRequested,
+          business_plan: formData.businessPlan || null,
+          team_size: formData.teamSize || null,
           status: "pending",
         })
         .select()
@@ -235,8 +245,8 @@ const MultiStepApplicationForm = () => {
         description: `Submitted application for project ID: ${formData.projectId}`,
         metadata: { 
           projectId: formData.projectId, 
-          companyName: data.companyName,
-          fundingAmount: data.fundingAmountRequested,
+          companyName: formData.companyName,
+          fundingAmount: formData.fundingAmountRequested,
         },
       });
       
