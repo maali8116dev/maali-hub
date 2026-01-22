@@ -61,9 +61,6 @@ export const initPostHog = () => {
       // Disable decide endpoint to prevent CORS errors with config.js loading
       // This endpoint tries to load configuration from PostHog CDN which can fail
       advanced_disable_decide: true,
-      
-      // Disable feature flags if decide is disabled (they require decide endpoint)
-      disable_feature_flags: true,
     });
 
     isInitialized = true;
