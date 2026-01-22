@@ -4,15 +4,15 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requireAuth?: boolean; // Allow bypassing auth for development
+  requireAuth?: boolean; // Require authentication by default
 }
 
-const ProtectedRoute = ({ children, requireAuth = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireAuth = true }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // For development: allow access without auth if requireAuth is false
-  if (!requireAuth) {
+  // Allow bypassing auth only if explicitly set to false (for development)
+  if (requireAuth === false) {
     return <>{children}</>;
   }
 

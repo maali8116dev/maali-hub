@@ -116,7 +116,7 @@ const Auth = () => {
     try {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -143,6 +143,44 @@ const Auth = () => {
           });
         }
       } else {
+        // Check if user was automatically signed in (session exists)
+        const hasSession = !!signUpData?.session;
+        const newUser = signUpData?.user;
+        
+        // Ensure profile is created (fallback if trigger hasn't run yet)
+        if (newUser) {
+          try {
+            // Wait a moment for trigger to potentially create profile
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Check if profile exists, if not create it
+            const { data: existingProfile, error: checkError } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("user_id", newUser.id)
+              .single();
+            
+            if (!existingProfile && checkError?.code === 'PGRST116') {
+              // Profile doesn't exist yet, create it directly
+              const { error: profileError } = await supabase
+                .from("profiles")
+                .insert({
+                  user_id: newUser.id,
+                  first_name: data.firstName,
+                  last_name: data.lastName,
+                });
+              
+              if (profileError) {
+                console.error("Failed to create profile:", profileError);
+                // Continue anyway - trigger might create it later
+              }
+            }
+          } catch (err) {
+            // Profile might already exist or trigger is creating it
+            console.log("Profile creation check:", err);
+          }
+        }
+        
         // Send welcome email after signup (async, don't block)
         sendWelcomeEmail(
           data.email,
@@ -150,17 +188,55 @@ const Auth = () => {
           `${window.location.origin}/projects`
         ).catch(err => console.error("Failed to send welcome email:", err));
         
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
-        signUpForm.reset();
-        
-        // Mark that user just signed up to show profile wizard
-        localStorage.setItem('justSignedUp', 'true');
-        
-        // Redirect to dashboard - wizard will show there
-        navigate("/dashboard");
+        if (hasSession) {
+          // User is signed in (email auto-confirmed or confirmation disabled)
+          toast({
+            title: "Account created!",
+            description: "Welcome! You've been signed in.",
+          });
+          signUpForm.reset();
+          
+          // Mark that user just signed up to show profile wizard
+          localStorage.setItem('justSignedUp', 'true');
+          
+          // Redirect to dashboard
+          navigate("/dashboard");
+        } else {
+          // Email confirmation required, but allow access anyway
+          // Sign the user in programmatically if possible
+          // Note: This requires Supabase to be configured to allow unverified sign-ins
+          try {
+            // Try to sign in with the credentials to get a session
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: data.email,
+              password: data.password,
+            });
+            
+            if (signInError) {
+              // If sign-in fails, user needs to verify email first
+              toast({
+                title: "Account created!",
+                description: "Please check your email to verify your account. You can access the dashboard after verification.",
+              });
+            } else {
+              // Successfully signed in (Supabase allows unverified sign-ins)
+              toast({
+                title: "Account created!",
+                description: "Welcome! Please verify your email to submit applications.",
+              });
+              signUpForm.reset();
+              localStorage.setItem('justSignedUp', 'true');
+              navigate("/dashboard");
+            }
+          } catch (err) {
+            // Fallback: show message but don't redirect
+            toast({
+              title: "Account created!",
+              description: "Please check your email to verify your account.",
+            });
+          }
+          signUpForm.reset();
+        }
       }
     } catch (error) {
       toast({

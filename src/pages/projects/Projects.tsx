@@ -33,7 +33,7 @@ const Projects = () => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; // Show 9 projects per page (3 columns × 3 rows)
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Show projects per page
 
   // Fetch projects with filters
   const { data, isLoading, error } = useProjects({
@@ -59,6 +59,12 @@ const Projects = () => {
     setSelectedCategory(null);
     setSelectedStatus(null);
     setSelectedLocation(null);
+    setCurrentPage(1);
+  };
+
+  // Reset to page 1 when items per page changes
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
     setCurrentPage(1);
   };
 
@@ -231,95 +237,126 @@ const Projects = () => {
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination and Results Per Page */}
+            {total > 0 && (
               <div className="mt-8">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        className={
-                          currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        }
-                      />
-                    </PaginationItem>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* Results count */}
+                  <div className="text-sm text-muted-foreground order-3 sm:order-1">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, total)} of{" "}
+                    {total} project{total !== 1 ? "s" : ""}
+                  </div>
 
-                    {(() => {
-                      const pages: (number | "ellipsis")[] = [];
-                      const maxVisiblePages = 5;
-
-                      if (totalPages <= maxVisiblePages) {
-                        for (let i = 1; i <= totalPages; i++) {
-                          pages.push(i);
-                        }
-                      } else {
-                        pages.push(1);
-                        if (currentPage <= 3) {
-                          for (let i = 2; i <= 4; i++) {
-                            pages.push(i);
-                          }
-                          pages.push("ellipsis");
-                          pages.push(totalPages);
-                        } else if (currentPage >= totalPages - 2) {
-                          pages.push("ellipsis");
-                          for (let i = totalPages - 3; i <= totalPages; i++) {
-                            pages.push(i);
-                          }
-                        } else {
-                          pages.push("ellipsis");
-                          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-                            pages.push(i);
-                          }
-                          pages.push("ellipsis");
-                          pages.push(totalPages);
-                        }
-                      }
-
-                      return pages.map((page, index) => {
-                        if (page === "ellipsis") {
-                          return (
-                            <PaginationItem key={`ellipsis-${index}`}>
-                              <PaginationEllipsis />
-                            </PaginationItem>
-                          );
-                        }
-
-                        return (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className="cursor-pointer"
-                            >
-                              {page}
-                            </PaginationLink>
+                  {/* Pagination controls - only show if more than one page */}
+                  {totalPages > 1 && (
+                    <div className="order-1 sm:order-2">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                              className={
+                                currentPage === 1
+                                  ? "pointer-events-none opacity-50"
+                                  : "cursor-pointer"
+                              }
+                            />
                           </PaginationItem>
-                        );
-                      });
-                    })()}
 
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() =>
-                          setCurrentPage((p) => Math.min(totalPages, p + 1))
-                        }
-                        className={
-                          currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        }
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+                          {(() => {
+                            const pages: (number | "ellipsis")[] = [];
+                            const maxVisiblePages = 5;
 
-                {/* Results count */}
-                <div className="text-center mt-4 text-sm text-muted-foreground">
-                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, total)} of{" "}
-                  {total} project{total !== 1 ? "s" : ""}
+                            if (totalPages <= maxVisiblePages) {
+                              for (let i = 1; i <= totalPages; i++) {
+                                pages.push(i);
+                              }
+                            } else {
+                              pages.push(1);
+                              if (currentPage <= 3) {
+                                for (let i = 2; i <= 4; i++) {
+                                  pages.push(i);
+                                }
+                                pages.push("ellipsis");
+                                pages.push(totalPages);
+                              } else if (currentPage >= totalPages - 2) {
+                                pages.push("ellipsis");
+                                for (let i = totalPages - 3; i <= totalPages; i++) {
+                                  pages.push(i);
+                                }
+                              } else {
+                                pages.push("ellipsis");
+                                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                                  pages.push(i);
+                                }
+                                pages.push("ellipsis");
+                                pages.push(totalPages);
+                              }
+                            }
+
+                            return pages.map((page, index) => {
+                              if (page === "ellipsis") {
+                                return (
+                                  <PaginationItem key={`ellipsis-${index}`}>
+                                    <PaginationEllipsis />
+                                  </PaginationItem>
+                                );
+                              }
+
+                              return (
+                                <PaginationItem key={page}>
+                                  <PaginationLink
+                                    onClick={() => setCurrentPage(page)}
+                                    isActive={currentPage === page}
+                                    className="cursor-pointer"
+                                  >
+                                    {page}
+                                  </PaginationLink>
+                                </PaginationItem>
+                              );
+                            });
+                          })()}
+
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={() =>
+                                setCurrentPage((p) => Math.min(totalPages, p + 1))
+                              }
+                              className={
+                                currentPage === totalPages
+                                  ? "pointer-events-none opacity-50"
+                                  : "cursor-pointer"
+                              }
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+
+                  {/* Results per page dropdown */}
+                  <div className="flex items-center gap-2 order-2 sm:order-3">
+                    <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
+                      Show:
+                    </Label>
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={handleItemsPerPageChange}
+                    >
+                      <SelectTrigger id="items-per-page" className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="30">30</SelectItem>
+                        <SelectItem value="40">40</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      per page
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

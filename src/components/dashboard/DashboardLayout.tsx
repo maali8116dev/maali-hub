@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Settings,
   LogOut,
   Bell,
+  CreditCard,
 } from "lucide-react";
 import NotificationsDropdown from "./NotificationsDropdown";
 import EmailVerificationBanner from "./EmailVerificationBanner";
@@ -37,6 +39,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  
+  // Get display name: profile name > email > "Guest User"
+  // Always prefer email over "Guest User" if user is available
+  const displayName = profile?.firstName && profile?.lastName
+    ? `${profile.firstName} ${profile.lastName}`
+    : user?.email || "Guest User";
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -44,6 +53,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { href: "/dashboard/documents", label: "Documents", icon: FolderOpen },
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
     { href: "/dashboard/profile", label: "Profile", icon: User },
+    { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
@@ -110,6 +120,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     if (location.pathname === "/dashboard/documents") return "Documents";
     if (location.pathname === "/dashboard/notifications") return "Notifications";
     if (location.pathname === "/dashboard/profile") return "Profile";
+    if (location.pathname === "/dashboard/billing") return "Billing";
     if (location.pathname === "/dashboard/settings") return "Settings";
     return "Dashboard";
   };
@@ -201,7 +212,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <User className="h-4 w-4 text-primary" />
               </div>
               <span className="text-sm font-medium">
-                {user?.email || "Guest User"}
+                {displayName}
               </span>
             </div>
           </div>
@@ -225,7 +236,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <User className="h-4 w-4 text-primary" />
               </div>
               <span className="text-sm font-medium">
-                {user?.email || "Guest User"}
+                {displayName}
               </span>
             </div>
           </div>

@@ -85,11 +85,3 @@ BEFORE UPDATE ON public.projects
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
--- Add foreign key constraint from applications to projects
--- Note: This will only work if applications.project_id is INTEGER (which it is)
-ALTER TABLE public.applications 
-ADD CONSTRAINT applications_project_id_fkey 
-FOREIGN KEY (project_id) 
-REFERENCES public.projects(id) 
-ON DELETE RESTRICT;
-

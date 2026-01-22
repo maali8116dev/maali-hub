@@ -13,6 +13,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from "@/hooks/useAdminProjects";
 import { useProjectCategories } from "@/hooks/useProjects";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useImageUpload } from "@/hooks/useImageUpload";
+
+// Helper to safely handle optional numeric inputs that may come through as NaN
+const optionalNumber = (schema: z.ZodNumber) =>
+  z.preprocess((val) => {
+    // react-hook-form with valueAsNumber passes NaN for empty fields
+    if (val === "" || val === null || (typeof val === "number" && isNaN(val))) {
+      return undefined;
+    }
+    return val;
+  }, schema.optional());
 
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required").min(5, "Title must be at least 5 characters"),
@@ -22,12 +34,12 @@ const projectSchema = z.object({
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be in YYYY-MM-DD format"),
   fundingAmount: z.string().min(1, "Funding amount is required"),
   location: z.string().min(1, "Location is required"),
-  imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional().or(z.literal("")),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
-  applicationFee: z.number().min(0, "Application fee must be 0 or greater").optional(),
-  maxApplicants: z.number().int().positive("Max applicants must be a positive number").optional(),
-  currentApplicants: z.number().int().min(0, "Current applicants cannot be negative").optional(),
+  applicationFee: optionalNumber(z.number().min(0, "Application fee must be 0 or greater")),
+  maxApplicants: optionalNumber(z.number().int().positive("Max applicants must be a positive number")),
+  currentApplicants: optionalNumber(z.number().int().min(0, "Current applicants cannot be negative")),
   featured: z.boolean().optional(),
 });
 
@@ -43,6 +55,13 @@ const ProjectForm = () => {
   const { data: categories = [] } = useProjectCategories();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
+
+  // Image upload hook
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
+    bucket: "project-images",
+    folder: "projects",
+    maxSizeMB: 5,
+  });
 
   const {
     register,
@@ -73,6 +92,20 @@ const ProjectForm = () => {
 
   const status = watch("status");
   const imageUrl = watch("imageUrl");
+  
+  // Handle image deletion - also delete from storage if it's a Supabase URL
+  const handleImageDelete = async (url: string): Promise<boolean> => {
+    if (url && url.includes("storage/v1/object/public/project-images")) {
+      const deleted = await deleteImage(url);
+      if (deleted) {
+        setValue("imageUrl", "");
+        return true;
+      }
+      return false;
+    }
+    setValue("imageUrl", "");
+    return true;
+  };
 
   // Load project data when editing
   useEffect(() => {
@@ -316,32 +349,26 @@ const ProjectForm = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Project Image</CardTitle>
+                <CardDescription>Upload an image for this project (optional)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    {...register("imageUrl")}
-                    placeholder="https://example.com/image.jpg"
-                    className={errors.imageUrl ? "border-destructive" : ""}
-                  />
-                  {errors.imageUrl && (
-                    <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>
-                  )}
-                  {imageUrl && (
-                    <div className="relative w-full h-32 rounded-lg overflow-hidden border mt-2">
-                      <img
-                        src={imageUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
+                <ImageUpload
+                  value={imageUrl || undefined}
+                  onChange={(url) => setValue("imageUrl", url || "")}
+                  onUpload={uploadImage}
+                  onDelete={handleImageDelete}
+                  isUploading={isUploading}
+                  uploadProgress={uploadProgress}
+                  variant="banner"
+                  placeholder="Upload Project Image"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                />
+                {errors.imageUrl && (
+                  <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Supported formats: JPG, PNG, WebP, GIF. Max size: 5MB
+                </p>
               </CardContent>
             </Card>
 

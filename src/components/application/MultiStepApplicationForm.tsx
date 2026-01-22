@@ -8,6 +8,7 @@ import CustomFormField, { FormFieldType } from "@/components/form/CustomFormFiel
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Building2, 
   Mail, 
@@ -23,6 +24,7 @@ import {
   ChevronRight,
   Save,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DocumentUploadSection from "./DocumentUploadSection";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
+import { useAuth } from "@/hooks/useAuth";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -74,7 +77,9 @@ const MultiStepApplicationForm = () => {
   const isNewApplication = searchParams.get("new") === "true";
   const { toast } = useToast();
   const { logActivity } = useActivityLogger();
+  const { user } = useAuth();
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const isEmailVerified = user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const {
     currentStep,
     totalSteps,
@@ -237,6 +242,16 @@ const MultiStepApplicationForm = () => {
           variant: "destructive",
         });
         navigate("/auth");
+        return;
+      }
+
+      // Check if email is verified
+      if (!user.email_confirmed_at) {
+        toast({
+          title: "Email Verification Required",
+          description: "Please verify your email address before submitting an application. Check your inbox for the verification link.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -435,6 +450,19 @@ const MultiStepApplicationForm = () => {
       {/* Form Content */}
       <Card>
         <CardContent className="pt-6">
+          {/* Email Verification Alert */}
+          {user && !isEmailVerified && (
+            <Alert className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+              <AlertTitle className="text-amber-800 dark:text-amber-200">
+                Email Verification Required
+              </AlertTitle>
+              <AlertDescription className="text-amber-700 dark:text-amber-300">
+                Please verify your email address before submitting an application. Check your inbox for the verification link, or visit your dashboard to resend it.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               {/* Step 1: Company Information */}
@@ -707,8 +735,16 @@ const MultiStepApplicationForm = () => {
                     type="submit"
                     variant="hero"
                     className="flex items-center gap-2"
+                    disabled={!isEmailVerified}
                   >
-                    Submit Application
+                    {!isEmailVerified ? (
+                      <>
+                        <AlertTriangle className="h-4 w-4" />
+                        Verify Email to Submit
+                      </>
+                    ) : (
+                      "Submit Application"
+                    )}
                   </Button>
                 )}
               </div>

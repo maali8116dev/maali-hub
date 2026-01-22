@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDraft } from "@/hooks/useUserDrafts";
 
@@ -197,44 +197,86 @@ const ProjectDetails = () => {
 
             {/* Requirements */}
             {project.requirements && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-5 w-5" />
+              <Card className="border-l-4 border-l-primary">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
                     Requirements
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {project.requirements.split('\n').filter(line => line.trim()).map((item, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-primary mt-1.5">•</span>
-                        <span>{item.replace(/^[-•]\s*/, '').trim()}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="space-y-3">
+                    {project.requirements.split('\n').filter(line => line.trim()).map((item, index) => {
+                      const cleanedItem = item.replace(/^[-•]\s*/, '').trim();
+                      const isNumbered = /^\d+[\.\)]\s/.test(cleanedItem);
+                      const displayText = cleanedItem.replace(/^\d+[\.\)]\s/, '');
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
+                        >
+                          <div className="flex-shrink-0 mt-0.5">
+                            {isNumbered ? (
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                                {cleanedItem.match(/^\d+/)?.[0]}
+                              </div>
+                            ) : (
+                              <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-foreground leading-relaxed flex-1 pt-0.5">
+                            {displayText || cleanedItem}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             )}
 
             {/* Eligibility Criteria */}
             {project.eligibility_criteria && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Target className="h-5 w-5" />
+              <Card className="border-l-4 border-l-success">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <div className="p-2 bg-success/10 rounded-lg">
+                      <Target className="h-5 w-5 text-success" />
+                    </div>
                     Eligibility Criteria
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {project.eligibility_criteria.split('\n').filter(line => line.trim()).map((item, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className="text-primary mt-1.5">•</span>
-                        <span>{item.replace(/^[-•]\s*/, '').trim()}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="space-y-3">
+                    {project.eligibility_criteria.split('\n').filter(line => line.trim()).map((item, index) => {
+                      const cleanedItem = item.replace(/^[-•]\s*/, '').trim();
+                      const isNumbered = /^\d+[\.\)]\s/.test(cleanedItem);
+                      const displayText = cleanedItem.replace(/^\d+[\.\)]\s/, '');
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className="flex items-start gap-3 p-3 rounded-lg bg-success/5 hover:bg-success/10 transition-colors border border-success/10"
+                        >
+                          <div className="flex-shrink-0 mt-0.5">
+                            {isNumbered ? (
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-success/20 text-success text-sm font-semibold">
+                                {cleanedItem.match(/^\d+/)?.[0]}
+                              </div>
+                            ) : (
+                              <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-foreground leading-relaxed flex-1 pt-0.5">
+                            {displayText || cleanedItem}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             )}

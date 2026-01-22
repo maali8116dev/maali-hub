@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   ClipboardCheck,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
     { href: "/reviewer", label: "Dashboard", icon: LayoutDashboard },
     { href: "/reviewer/applications", label: "Applications", icon: FileText },
     { href: "/reviewer/pending", label: "Pending Review", icon: ClipboardCheck },
+    { href: "/reviewer/notifications", label: "Notifications", icon: Bell },
     { href: "/reviewer/settings", label: "Settings", icon: Settings },
   ];
 
@@ -52,6 +54,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
     if (location.pathname === "/reviewer") return "Reviewer Dashboard";
     if (location.pathname === "/reviewer/applications") return "All Applications";
     if (location.pathname === "/reviewer/pending") return "Pending Review";
+    if (location.pathname === "/reviewer/notifications") return "Notifications";
     if (location.pathname === "/reviewer/settings") return "Reviewer Settings";
     return "Reviewer Dashboard";
   };

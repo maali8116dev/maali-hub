@@ -58,16 +58,26 @@ CREATE POLICY "Users can create their own documents" ON public.application_docum
 CREATE POLICY "Users can delete their own documents" ON public.application_documents FOR DELETE USING (auth.uid() = user_id);
 
 -- ============ APPLICATIONS ============
-DROP POLICY IF EXISTS "Users can view their own applications" ON public.applications;
-DROP POLICY IF EXISTS "Admins and reviewers can view all applications" ON public.applications;
-DROP POLICY IF EXISTS "Users can create their own applications" ON public.applications;
-DROP POLICY IF EXISTS "Users can update their own applications" ON public.applications;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'applications'
+  ) THEN
+    DROP POLICY IF EXISTS "Users can view their own applications" ON public.applications;
+    DROP POLICY IF EXISTS "Admins and reviewers can view all applications" ON public.applications;
+    DROP POLICY IF EXISTS "Users can create their own applications" ON public.applications;
+    DROP POLICY IF EXISTS "Users can update their own applications" ON public.applications;
+    DROP POLICY IF EXISTS "Admins can update applications" ON public.applications;
 
-CREATE POLICY "Users can view their own applications" ON public.applications FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Admins and reviewers can view all applications" ON public.applications FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.user_id = auth.uid() AND profiles.role IN ('admin', 'reviewer')));
-CREATE POLICY "Users can create their own applications" ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own applications" ON public.applications FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Admins can update applications" ON public.applications FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.user_id = auth.uid() AND profiles.role = 'admin'));
+    CREATE POLICY "Users can view their own applications" ON public.applications FOR SELECT USING (auth.uid() = user_id);
+    CREATE POLICY "Admins and reviewers can view all applications" ON public.applications FOR SELECT USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.user_id = auth.uid() AND profiles.role IN ('admin', 'reviewer')));
+    CREATE POLICY "Users can create their own applications" ON public.applications FOR INSERT WITH CHECK (auth.uid() = user_id);
+    CREATE POLICY "Users can update their own applications" ON public.applications FOR UPDATE USING (auth.uid() = user_id);
+    CREATE POLICY "Admins can update applications" ON public.applications FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.user_id = auth.uid() AND profiles.role = 'admin'));
+  END IF;
+END $$;
 
 -- ============ PROFILES ============
 DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;

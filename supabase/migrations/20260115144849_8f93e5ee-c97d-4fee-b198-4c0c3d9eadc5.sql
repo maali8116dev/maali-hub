@@ -74,7 +74,8 @@ EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create storage bucket for resource files
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('resource-files', 'resource-files', true);
+VALUES ('resource-files', 'resource-files', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies for resource files
 CREATE POLICY "Resource files are publicly accessible"

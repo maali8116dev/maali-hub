@@ -9,11 +9,21 @@ export function useProfileCompletion() {
   const { data: profile, isLoading } = useProfile();
 
   const { isIncomplete, completionPercentage, missingFields } = useMemo(() => {
-    if (!profile || isLoading) {
+    // If profile is loading, return loading state
+    if (isLoading) {
       return {
         isIncomplete: false,
         completionPercentage: 0,
         missingFields: [],
+      };
+    }
+    
+    // If profile doesn't exist yet (new user), consider it incomplete
+    if (!profile) {
+      return {
+        isIncomplete: true,
+        completionPercentage: 0,
+        missingFields: ['firstName', 'lastName', 'country', 'businessSector'],
       };
     }
 

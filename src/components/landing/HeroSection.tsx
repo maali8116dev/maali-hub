@@ -77,7 +77,7 @@ const HeroSection = () => {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="group border-white text-primary hover:bg-white hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
+                className="group  text-primary  hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={() => navigate("/projects")}
               >
                 {t('hero.browseProjects')}
@@ -88,9 +88,9 @@ const HeroSection = () => {
             <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <Users className="h-6 w-6 text-accent mr-2" />
+                  <Users className="h-6 w-6 text-success mr-2" />
                 </div>
-                <div className="text-3xl md:text-4xl font-bold text-accent mb-1">500+</div>
+                <div className="text-3xl md:text-4xl font-bold text-success mb-1">500+</div>
                 <div className="text-sm text-white/90 font-medium">{t('hero.entrepreneurs')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">

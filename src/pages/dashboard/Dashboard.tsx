@@ -24,22 +24,10 @@ const Dashboard = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [dismissedPrompt, setDismissedPrompt] = useState(false);
 
-  // Check if user just signed up (from localStorage or new OAuth user)
+  // Clear the justSignedUp flag when component mounts
   useEffect(() => {
-    const justSignedUp = localStorage.getItem('justSignedUp');
-    const isNewOAuthUser = user && (() => {
-      const createdAt = new Date(user.created_at);
-      const now = new Date();
-      const minutesSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60);
-      // If account was created within last 5 minutes, consider it new
-      return minutesSinceCreation < 5;
-    })();
-
-    if ((justSignedUp === 'true' || isNewOAuthUser) && isIncomplete && !dismissedPrompt) {
-      setShowWizard(true);
-      localStorage.removeItem('justSignedUp');
-    }
-  }, [isIncomplete, user, dismissedPrompt]);
+    localStorage.removeItem('justSignedUp');
+  }, []);
 
   // Check if prompt was dismissed
   useEffect(() => {

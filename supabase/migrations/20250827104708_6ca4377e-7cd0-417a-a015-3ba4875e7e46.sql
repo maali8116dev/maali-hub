@@ -69,7 +69,9 @@ FOR DELETE
 USING (auth.uid() = user_id);
 
 -- Create storage bucket for application documents
-INSERT INTO storage.buckets (id, name, public) VALUES ('application-docs', 'application-docs', false);
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('application-docs', 'application-docs', false)
+ON CONFLICT (id) DO NOTHING;
 
 -- Create storage policies for application documents
 CREATE POLICY "Users can upload their own documents" 

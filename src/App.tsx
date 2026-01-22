@@ -29,6 +29,7 @@ import Documents from "./pages/dashboard/Documents";
 import Notifications from "./pages/dashboard/Notifications";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
+import Billing from "./pages/dashboard/Billing";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/Projects";
 import AdminApplications from "./pages/admin/Applications";
@@ -51,6 +52,7 @@ import ReviewerApplications from "./pages/reviewer/Applications";
 import ReviewerPending from "./pages/reviewer/Pending";
 import ReviewApplication from "./pages/reviewer/ReviewApplication";
 import ReviewerSettings from "./pages/reviewer/Settings";
+import ReviewerNotifications from "./pages/reviewer/Notifications";
 import Apply from "./pages/Apply";
 import Partners from "./pages/Partners";
 import SuccessStories from "./pages/SuccessStories";
@@ -117,61 +119,85 @@ const App = () => (
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/data-protection" element={<DataProtection />} />
           <Route path="/tests/error" element={<ErrorTest />} />
-          {/* Dashboard Routes - Accessible without auth for development */}
+          {/* Dashboard Routes - Protected, requires authentication */}
           <Route
             path="/dashboard"
             element={
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Dashboard />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/applications"
             element={
-              <DashboardLayout>
-                <Applications />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Applications />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/applications/:id"
             element={
-              <DashboardLayout>
-                <ApplicationDetails />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <ApplicationDetails />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/documents"
             element={
-              <DashboardLayout>
-                <Documents />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Documents />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/notifications"
             element={
-              <DashboardLayout>
-                <Notifications />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Notifications />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/profile"
             element={
-              <DashboardLayout>
-                <Profile />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard/settings"
             element={
-              <DashboardLayout>
-                <Settings />
-              </DashboardLayout>
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/billing"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <DashboardLayout>
+                  <Billing />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
 
@@ -383,6 +409,14 @@ const App = () => (
             element={
               <ReviewerLayout>
                 <ReviewerSettings />
+              </ReviewerLayout>
+            }
+          />
+          <Route
+            path="/reviewer/notifications"
+            element={
+              <ReviewerLayout>
+                <ReviewerNotifications />
               </ReviewerLayout>
             }
           />

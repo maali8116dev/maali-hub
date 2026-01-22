@@ -94,11 +94,27 @@ export function useProfile() {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) throw new Error("Not authenticated");
-      return fetchProfileDirect(user.id);
+      try {
+        return await fetchProfileDirect(user.id);
+      } catch (error: any) {
+        // If profile doesn't exist (404 or PGRST116), return null instead of throwing
+        // This allows the UI to handle missing profiles gracefully
+        if (error?.code === 'PGRST116' || error?.message?.includes('No rows')) {
+          return null;
+        }
+        throw error;
+      }
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
-    retry: 1,
+    retry: (failureCount, error: any) => {
+      // Don't retry if profile doesn't exist (404/PGRST116)
+      if (error?.code === 'PGRST116' || error?.message?.includes('No rows')) {
+        return false;
+      }
+      // Retry other errors up to 2 times
+      return failureCount < 2;
+    },
   });
 }
 

@@ -32,30 +32,46 @@ export const initPostHog = () => {
     return;
   }
 
-  posthog.init(POSTHOG_KEY, {
-    api_host: POSTHOG_HOST,
-    
-    // Capture page views automatically
-    capture_pageview: true,
-    capture_pageleave: true,
-    
-    // Session recording settings
-    disable_session_recording: false,
-    session_recording: {
-      maskAllInputs: true,
-      maskTextSelector: ".sensitive-data",
-    },
-    
-    // Privacy settings
-    respect_dnt: true,
-    
-    // Performance
-    loaded: () => {
-      console.log("PostHog initialized with consent");
-    },
-  });
+  try {
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
+      
+      // Capture page views automatically
+      capture_pageview: true,
+      capture_pageleave: true,
+      
+      // Session recording settings
+      disable_session_recording: false,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: ".sensitive-data",
+      },
+      
+      // Privacy settings
+      respect_dnt: true,
+      
+      // Handle initialization
+      loaded: (posthog) => {
+        console.log("PostHog initialized with consent");
+      },
+      
+      // Disable features that might cause CORS issues
+      autocapture: false,
+      
+      // Disable decide endpoint to prevent CORS errors with config.js loading
+      // This endpoint tries to load configuration from PostHog CDN which can fail
+      advanced_disable_decide: true,
+      
+      // Disable feature flags if decide is disabled (they require decide endpoint)
+      disable_feature_flags: true,
+    });
 
-  isInitialized = true;
+    isInitialized = true;
+  } catch (error) {
+    console.warn("PostHog initialization failed:", error);
+    // Don't break the app if PostHog fails to initialize
+    isInitialized = false;
+  }
 };
 
 // Disable tracking
@@ -75,12 +91,17 @@ export const identifyUser = (user: {
 }) => {
   if (!isInitialized) return;
   
-  posthog.identify(user.id, {
-    email: user.email,
-    role: user.role,
-    firstName: user.firstName,
-    lastName: user.lastName,
-  });
+  try {
+    posthog.identify(user.id, {
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+  } catch (error) {
+    // Silently fail if PostHog is unavailable
+    console.debug("PostHog identify failed:", error);
+  }
 };
 
 // Reset user on logout
@@ -95,7 +116,12 @@ export const trackEvent = (
   properties?: Record<string, unknown>
 ) => {
   if (!isInitialized) return;
-  posthog.capture(eventName, properties);
+  try {
+    posthog.capture(eventName, properties);
+  } catch (error) {
+    // Silently fail if PostHog is unavailable
+    console.debug("PostHog tracking failed:", error);
+  }
 };
 
 // Track page view manually (if needed)
