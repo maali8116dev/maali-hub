@@ -254,11 +254,10 @@ describe('useApplications', () => {
     });
 
     // Query should be disabled when user is null
-    // The hook returns [] when user?.id is falsy, but query is disabled
+    // When query is disabled, React Query doesn't run queryFn, so data is undefined
     expect(result.current.isFetching).toBe(false);
-    // When query is disabled, data might be undefined initially
-    // The hook's queryFn returns [] when !user?.id, so data should be []
-    expect(result.current.data).toBeDefined();
+    // When query is disabled, data is undefined (not []), because queryFn never runs
+    expect(result.current.data).toBeUndefined();
   });
 
   it('handles errors gracefully', async () => {

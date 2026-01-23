@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { User, Building, MapPin, CheckCircle2, Circle, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,10 +70,20 @@ const AFRICAN_COUNTRIES = [
 
 export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSetupWizardProps) => {
   const { t } = useTranslation('common');
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
   const { data: profile } = useProfile();
   const updateProfile = useUpdateProfile();
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+  // Image upload hook
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
+    bucket: "user-avatars",
+    folder: user?.id || "",
+    maxSizeMB: 5,
+  });
 
   // Step 1 form
   const step1Form = useForm<Step1Values>({
@@ -104,6 +118,7 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
         businessSector: profile.businessSector || "",
         bio: profile.bio || "",
       });
+      setAvatarUrl(profile.avatarUrl || "");
     }
   }, [profile, step1Form, step2Form]);
 
@@ -127,8 +142,28 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
   };
 
   const handleComplete = async () => {
-    const isValid = await step2Form.trigger();
-    if (!isValid) return;
+    // Validate both forms before submitting
+    const step1Valid = await step1Form.trigger();
+    const step2Valid = await step2Form.trigger();
+
+    if (!step1Valid || !step2Valid) {
+      // If step 1 is invalid, go back to step 1
+      if (!step1Valid) {
+        setCurrentStep(1);
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please complete all required fields in Step 1 before continuing.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please complete all required fields before submitting.",
+        });
+      }
+      return;
+    }
 
     try {
       const step1Data = step1Form.getValues();
@@ -141,12 +176,30 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
         businessName: step2Data.businessName || undefined,
         businessSector: step2Data.businessSector,
         bio: step2Data.bio || undefined,
+        avatarUrl: avatarUrl || undefined,
       });
 
+      // Show success message
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated!",
+      });
+
+      // Call onComplete callback and close dialog
       onComplete?.();
       onOpenChange(false);
+      
+      // Reset to step 1 for next time
+      setCurrentStep(1);
     } catch (error) {
       console.error("Failed to save profile:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to save profile. Please try again.",
+      });
     }
   };
 
@@ -213,6 +266,25 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
           {currentStep === 1 && (
             <Form {...step1Form}>
               <form className="space-y-4">
+                <FormItem>
+                  <FormLabel>{t('profileWizard.profilePicture', 'Profile Picture')}</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={avatarUrl || undefined}
+                      onChange={(url) => setAvatarUrl(url || "")}
+                      onUpload={uploadImage}
+                      onDelete={deleteImage}
+                      isUploading={isUploading}
+                      uploadProgress={uploadProgress}
+                      placeholder="Upload Profile Picture"
+                      variant="avatar"
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {t('profileWizard.profilePictureDescription', 'Upload a profile picture (optional)')}
+                  </p>
+                </FormItem>
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={step1Form.control}

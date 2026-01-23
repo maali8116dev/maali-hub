@@ -101,7 +101,7 @@ export const ImageUpload = ({
           {isUploading ? (
             <div className="w-32">
               <Progress value={uploadProgress} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">Uploading...</p>
+              <p className="text-xs text-muted-foreground mt-1">Loading...</p>
             </div>
           ) : (
             <div className="flex gap-2">
@@ -184,7 +184,7 @@ export const ImageUpload = ({
       ) : isUploading ? (
         <div className="p-8 text-center">
           <Progress value={uploadProgress} className="h-2 mb-2" />
-          <p className="text-sm text-muted-foreground">Uploading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       ) : (
         <button

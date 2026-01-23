@@ -51,7 +51,8 @@ async function fetchProfileDirect(userId: string): Promise<Profile> {
 }
 
 /**
- * Direct Supabase update for profile
+ * Direct Supabase update/insert for profile (upsert)
+ * Creates profile if it doesn't exist, updates if it does
  */
 async function updateProfileDirect(
   userId: string,
@@ -65,7 +66,8 @@ async function updateProfileDirect(
     avatarUrl?: string;
   }
 ): Promise<Profile> {
-  const { data: updatedData, error } = await supabase
+  // Try to update first
+  const { data: updatedData, error: updateError } = await supabase
     .from("profiles")
     .update({
       first_name: data.firstName,
@@ -80,8 +82,37 @@ async function updateProfileDirect(
     .select()
     .single();
 
-  if (error) throw error;
-  return transformProfile(updatedData);
+  // If update succeeded, return the updated profile
+  if (updatedData && !updateError) {
+    return transformProfile(updatedData);
+  }
+
+  // If update failed because profile doesn't exist (PGRST116), create it
+  if (updateError?.code === "PGRST116" || updateError?.message?.includes("No rows") || updateError?.message?.includes("0 rows")) {
+    const { data: insertedData, error: insertError } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: userId,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        business_name: data.businessName,
+        business_sector: data.businessSector,
+        country: data.country,
+        bio: data.bio,
+        avatar_url: data.avatarUrl,
+      })
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+    return transformProfile(insertedData);
+  }
+
+  // If it's a different error, throw it
+  if (updateError) throw updateError;
+
+  // Fallback (shouldn't reach here)
+  throw new Error("Failed to update or create profile");
 }
 
 /**

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { User, Mail, Building, Phone, MapPin, Loader2 } from "lucide-react";
 
 const Profile = () => {
@@ -22,6 +24,14 @@ const Profile = () => {
     bio: "",
     businessName: "",
     country: "",
+    avatarUrl: "",
+  });
+
+  // Image upload hook
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
+    bucket: "user-avatars",
+    folder: user?.id || "",
+    maxSizeMB: 5,
   });
 
   // Helper to access profile fields (handles both camelCase from API and snake_case from Supabase)
@@ -33,12 +43,14 @@ const Profile = () => {
   // Update form data when profile loads
   useEffect(() => {
     if (profile) {
+      const avatarUrl = profile.avatarUrl && profile.avatarUrl.trim() ? profile.avatarUrl : "";
       setFormData({
         firstName: getProfileField("firstName", "first_name"),
         lastName: getProfileField("lastName", "last_name"),
         bio: getProfileField("bio", "bio"),
         businessName: getProfileField("businessName", "business_name"),
         country: getProfileField("country", "country"),
+        avatarUrl: avatarUrl,
       });
     }
   }, [profile]);
@@ -53,6 +65,7 @@ const Profile = () => {
         businessName: formData.businessName,
         country: formData.country,
         bio: formData.bio,
+        avatarUrl: formData.avatarUrl || undefined,
       });
       
       toast({
@@ -121,17 +134,12 @@ const Profile = () => {
           <CardTitle>Profile Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-12 w-12 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold">
-                {formData.firstName || getProfileField("firstName", "first_name") || "User"} {formData.lastName || getProfileField("lastName", "last_name") || ""}
-              </h2>
-              <p className="text-muted-foreground">{formData.businessName || getProfileField("businessName", "business_name") || "No company"}</p>
-              <p className="text-sm text-muted-foreground mt-1">{formData.country || getProfileField("country", "country") || "No location"}</p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-semibold">
+              {formData.firstName || getProfileField("firstName", "first_name") || "User"} {formData.lastName || getProfileField("lastName", "last_name") || ""}
+            </h2>
+            <p className="text-muted-foreground">{formData.businessName || getProfileField("businessName", "business_name") || "No company"}</p>
+            <p className="text-sm text-muted-foreground mt-1">{formData.country || getProfileField("country", "country") || "No location"}</p>
           </div>
         </CardContent>
       </Card>
@@ -143,6 +151,27 @@ const Profile = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label>Profile Picture</Label>
+              <ImageUpload
+                value={
+                  (formData.avatarUrl && formData.avatarUrl.trim()) || 
+                  (profile?.avatarUrl && profile.avatarUrl.trim()) || 
+                  undefined
+                }
+                onChange={(url) => setFormData({ ...formData, avatarUrl: url || "" })}
+                onUpload={uploadImage}
+                onDelete={deleteImage}
+                isUploading={isUploading}
+                uploadProgress={uploadProgress}
+                placeholder="Upload Profile Picture"
+                variant="avatar"
+              />
+              <p className="text-xs text-muted-foreground">
+                Upload a profile picture to personalize your account (JPG, PNG, WebP, GIF up to 5MB)
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -245,6 +274,7 @@ const Profile = () => {
                       bio: getProfileField("bio", "bio"),
                       businessName: getProfileField("businessName", "business_name"),
                       country: getProfileField("country", "country"),
+                      avatarUrl: getProfileField("avatarUrl", "avatar_url") || "",
                     });
                   }
                 }}

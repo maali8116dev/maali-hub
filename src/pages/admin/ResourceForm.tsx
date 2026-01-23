@@ -151,8 +151,8 @@ const ResourceForm = () => {
   }
 
   return (
-    <AdminLayout>
-      <div className="max-w-2xl mx-auto">
+    <>
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-foreground mb-6">
           {isEditing ? "Edit Resource" : "Add Resource"}
         </h1>
@@ -420,7 +420,7 @@ const ResourceForm = () => {
           </form>
         </Form>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 

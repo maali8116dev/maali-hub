@@ -72,12 +72,12 @@ export const useImageUpload = (options: UploadOptions) => {
         .getPublicUrl(data.path);
 
       setUploadProgress(100);
-      toast.success("Image uploaded successfully");
+      toast.success("Image loaded successfully");
       
       return publicUrl;
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload image");
+      toast.error("Failed to load image,Please try again");
       return null;
     } finally {
       setIsUploading(false);
