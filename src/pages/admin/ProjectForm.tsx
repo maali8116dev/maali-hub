@@ -70,6 +70,7 @@ const ProjectForm = () => {
     setValue,
     watch,
     reset,
+    getValues,
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -91,6 +92,7 @@ const ProjectForm = () => {
   });
 
   const status = watch("status");
+  const category = watch("category");
   const imageUrl = watch("imageUrl");
   
   // Handle image deletion - also delete from storage if it's a Supabase URL
@@ -232,8 +234,9 @@ const ProjectForm = () => {
                   <div>
                     <Label htmlFor="category">Category *</Label>
                     <Select
-                      value={watch("category")}
-                      onValueChange={(value) => setValue("category", value)}
+                      key={`category-${project?.id || 'new'}-${category}`}
+                      value={category || ""}
+                      onValueChange={(value) => setValue("category", value, { shouldValidate: true })}
                     >
                       <SelectTrigger id="category" className={errors.category ? "border-destructive" : ""}>
                         <SelectValue placeholder="Select category" />
@@ -254,11 +257,12 @@ const ProjectForm = () => {
                   <div>
                     <Label htmlFor="status">Status *</Label>
                     <Select
-                      value={status}
-                      onValueChange={(value) => setValue("status", value as "new" | "open" | "closing-soon" | "closed" | "archived")}
+                      key={`status-${project?.id || 'new'}-${status}`}
+                      value={status || "open"}
+                      onValueChange={(value) => setValue("status", value as "new" | "open" | "closing-soon" | "closed" | "archived", { shouldValidate: true })}
                     >
                       <SelectTrigger id="status">
-                        <SelectValue />
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">New</SelectItem>

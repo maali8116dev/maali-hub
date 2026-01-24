@@ -167,6 +167,16 @@ const ProjectDetails = () => {
                 <CardTitle className="text-2xl">{project.title}</CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Project Image */}
+                {project.image_url && (
+                  <div className="mb-6">
+                    <img
+                      src={project.image_url}
+                      alt={project.title}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
                 <p className="text-muted-foreground mb-6">
                   {project.description}
                 </p>
