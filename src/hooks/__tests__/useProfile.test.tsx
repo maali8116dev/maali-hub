@@ -581,6 +581,7 @@ describe('useUpdateProfile', () => {
         data: updatedProfile,
         error: null,
       }),
+      insert: undefined as any, // Should not be called when update succeeds
     };
 
     (supabase.from as any).mockReturnValue(mockQuery);
