@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,8 @@ import {
   Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 // Email integration - uncomment to enable status update emails
 // import { 
 //   sendApplicationApprovedEmail, 
@@ -30,9 +32,30 @@ import { useToast } from "@/hooks/use-toast";
 const ReviewApplication = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { data: profile } = useProfile();
   const [reviewNotes, setReviewNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Determine the back route based on user role or location state
+  const getBackRoute = () => {
+    // Check if location state indicates admin context
+    if (location.state?.fromAdmin) {
+      return "/admin/applications";
+    }
+    // Check if user is admin
+    if (profile?.role === "admin") {
+      return "/admin/applications";
+    }
+    // Default to reviewer route
+    return "/reviewer/applications";
+  };
+
+  // Check if user is a reviewer (only reviewers can perform review actions)
+  const isReviewer = profile?.role === "reviewer";
+  const isAdmin = profile?.role === "admin";
 
   // Mock data - replace with API call
   const application = {
@@ -92,6 +115,16 @@ const ReviewApplication = () => {
   };
 
   const handleApprove = async () => {
+    // Strict role check - only reviewers can approve
+    if (!isReviewer) {
+      toast({
+        title: "Access Denied",
+        description: "Only reviewers can approve applications. Please use a reviewer account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // API call to approve application
@@ -111,7 +144,7 @@ const ReviewApplication = () => {
         description: "The application has been approved successfully.",
       });
       
-      navigate("/reviewer/applications");
+      navigate(getBackRoute());
     } catch (error) {
       toast({
         title: "Error",
@@ -124,6 +157,16 @@ const ReviewApplication = () => {
   };
 
   const handleReject = async () => {
+    // Strict role check - only reviewers can reject
+    if (!isReviewer) {
+      toast({
+        title: "Access Denied",
+        description: "Only reviewers can reject applications. Please use a reviewer account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!reviewNotes.trim()) {
       toast({
         title: "Review Notes Required",
@@ -152,7 +195,7 @@ const ReviewApplication = () => {
         description: "The application has been rejected.",
       });
       
-      navigate("/reviewer/applications");
+      navigate(getBackRoute());
     } catch (error) {
       toast({
         title: "Error",
@@ -165,6 +208,16 @@ const ReviewApplication = () => {
   };
 
   const handleRequestMoreInfo = async () => {
+    // Strict role check - only reviewers can request more info
+    if (!isReviewer) {
+      toast({
+        title: "Access Denied",
+        description: "Only reviewers can request additional information. Please use a reviewer account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!reviewNotes.trim()) {
       toast({
         title: "Notes Required",
@@ -193,7 +246,7 @@ const ReviewApplication = () => {
         description: "The applicant has been notified to provide additional information.",
       });
       
-      navigate("/reviewer/applications");
+      navigate(getBackRoute());
     } catch (error) {
       toast({
         title: "Error",
@@ -210,7 +263,7 @@ const ReviewApplication = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/reviewer/applications")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate(getBackRoute())}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Applications
           </Button>
@@ -341,58 +394,104 @@ const ReviewApplication = () => {
 
         {/* Review Panel */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Review Actions</CardTitle>
-              <CardDescription>
-                Submit your review decision for this application
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="reviewNotes">Review Notes</Label>
-                <Textarea
-                  id="reviewNotes"
-                  placeholder="Add your review notes, feedback, or questions here..."
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  rows={6}
-                  className="mt-2"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Notes are required when rejecting an application
-                </p>
-              </div>
+          {isReviewer ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Actions</CardTitle>
+                <CardDescription>
+                  Submit your review decision for this application
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="reviewNotes">Review Notes</Label>
+                  <Textarea
+                    id="reviewNotes"
+                    placeholder="Add your review notes, feedback, or questions here..."
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    rows={6}
+                    className="mt-2"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Notes are required when rejecting an application
+                  </p>
+                </div>
 
-              <div className="flex flex-col gap-2">
-                <Button
-                  onClick={handleApprove}
-                  disabled={isSubmitting || application.status === "approved"}
-                  className="w-full bg-success hover:bg-success/90"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve Application
-                </Button>
-                <Button
-                  onClick={handleReject}
-                  disabled={isSubmitting || application.status === "rejected"}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Reject Application
-                </Button>
-                <Button
-                  onClick={handleRequestMoreInfo}
-                  disabled={isSubmitting}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Request More Information
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleApprove}
+                    disabled={isSubmitting || application.status === "approved"}
+                    className="w-full bg-success hover:bg-success/90"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve Application
+                  </Button>
+                  <Button
+                    onClick={handleReject}
+                    disabled={isSubmitting || application.status === "rejected"}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Reject Application
+                  </Button>
+                  <Button
+                    onClick={handleRequestMoreInfo}
+                    disabled={isSubmitting}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Request More Information
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : isAdmin ? (
+            <Card className="border-warning/50 bg-warning/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-warning" />
+                  Review Actions Restricted
+                </CardTitle>
+                <CardDescription>
+                  Administrative accounts cannot perform review actions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+                  <p className="text-sm text-foreground mb-2">
+                    <strong>Role Separation Policy:</strong>
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    To maintain proper separation of concerns and audit trails, administrative accounts can view applications but cannot approve, reject, or request changes.
+                  </p>
+                  <p className="text-sm text-foreground font-medium">
+                    To review this application, please use a reviewer account.
+                  </p>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• Admins manage users, projects, and system settings</p>
+                  <p>• Reviewers evaluate and make decisions on applications</p>
+                  <p>• This separation ensures clear accountability and audit trails</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-muted">
+              <CardHeader>
+                <CardTitle>Access Restricted</CardTitle>
+                <CardDescription>
+                  You do not have permission to review applications
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Only reviewers can perform review actions on applications.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Application Metadata */}
           <Card>
