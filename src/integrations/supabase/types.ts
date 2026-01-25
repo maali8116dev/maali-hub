@@ -735,6 +735,19 @@ export type Database = {
     }
     Functions: {
       generate_invoice_number: { Args: never; Returns: string }
+      get_all_users_for_admin: {
+        Args: never
+        Returns: {
+          applications_count: number
+          email: string
+          id: string
+          name: string
+          registered_at: string
+          role: Database["public"]["Enums"]["user_role"]
+          status: string
+          user_id: string
+        }[]
+      }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
     }
     Enums: {
