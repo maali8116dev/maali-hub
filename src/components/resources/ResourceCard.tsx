@@ -1,0 +1,170 @@
+import { Download, ExternalLink, FileText, Video, Table2, Presentation, Link as LinkIcon, Clock, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import type { Resource } from "@/hooks/useResources";
+
+interface ResourceCardProps {
+  resource: Resource;
+  onDownload: (resource: Resource) => void;
+  variant?: "default" | "featured";
+}
+
+const getFileIcon = (fileType: string) => {
+  const iconClass = "h-5 w-5";
+  switch (fileType) {
+    case "pdf":
+      return <FileText className={iconClass} />;
+    case "video":
+    case "webinar":
+      return <Video className={iconClass} />;
+    case "excel":
+      return <Table2 className={iconClass} />;
+    case "powerpoint":
+      return <Presentation className={iconClass} />;
+    case "word":
+      return <FileText className={iconClass} />;
+    case "link":
+    case "directory":
+    case "event":
+      return <LinkIcon className={iconClass} />;
+    default:
+      return <FileText className={iconClass} />;
+  }
+};
+
+const formatFileSize = (bytes: number | null): string => {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const getTypeLabel = (fileType: string): string => {
+  const labels: Record<string, string> = {
+    pdf: "PDF Document",
+    video: "Video",
+    webinar: "Webinar",
+    excel: "Spreadsheet",
+    powerpoint: "Presentation",
+    word: "Document",
+    link: "External Link",
+    directory: "Directory",
+    event: "Event"
+  };
+  return labels[fileType] || fileType;
+};
+
+const isExternalType = (fileType: string): boolean => {
+  return ["link", "directory", "event", "video", "webinar"].includes(fileType);
+};
+
+export function ResourceCard({ resource, onDownload, variant = "default" }: ResourceCardProps) {
+  const isFeatured = variant === "featured";
+  
+  return (
+    <Card 
+      className={cn(
+        "group relative overflow-hidden transition-all duration-300 hover:shadow-lg",
+        "border-border/50 hover:border-primary/30",
+        isFeatured && "ring-1 ring-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
+      )}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Icon */}
+          <div 
+            className={cn(
+              "flex-shrink-0 p-3 rounded-xl transition-colors",
+              "bg-muted group-hover:bg-primary/10",
+              isFeatured && "bg-primary/10"
+            )}
+          >
+            <span className="text-primary">{getFileIcon(resource.file_type)}</span>
+          </div>
+          
+          {/* Content */}
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                {resource.title}
+              </h3>
+              {resource.is_featured && variant === "default" && (
+                <Badge variant="secondary" className="flex-shrink-0 text-xs">
+                  Featured
+                </Badge>
+              )}
+            </div>
+            
+            {resource.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {resource.description}
+              </p>
+            )}
+            
+            {/* Meta info */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Badge variant="outline" className="text-xs font-normal">
+                {getTypeLabel(resource.file_type)}
+              </Badge>
+              
+              {resource.duration && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {resource.duration}
+                </span>
+              )}
+              
+              {resource.file_size && !resource.duration && (
+                <span className="text-xs text-muted-foreground">
+                  {formatFileSize(resource.file_size)}
+                </span>
+              )}
+              
+              {resource.download_count > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <Eye className="h-3 w-3" />
+                  {resource.download_count}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Action button */}
+          <div className="flex-shrink-0">
+            {resource.title === "Find a Mentor" ? (
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/mentors">
+                  View
+                  <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            ) : (
+              <Button 
+                size="sm" 
+                variant={isFeatured ? "default" : "outline"}
+                onClick={() => onDownload(resource)}
+                disabled={!resource.file_url}
+                className="group/btn"
+              >
+                {isExternalType(resource.file_type) ? (
+                  <>
+                    Open
+                    <ExternalLink className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+                  </>
+                ) : (
+                  <>
+                    Download
+                    <Download className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/btn:translate-y-0.5" />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
