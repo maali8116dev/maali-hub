@@ -92,27 +92,27 @@ const HeroSection = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0 animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
-              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <Users className="h-6 w-6 text-success mr-2" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-lg mx-auto lg:mx-0 animate-slide-in-right" style={{ animationDelay: '0.6s' }}>
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
+                <div className="flex items-center justify-center lg:justify-start mb-1 sm:mb-2">
+                  <Users className="h-5 sm:h-6 w-5 sm:w-6 text-success mr-2" />
                 </div>
-                <div className="text-3xl md:text-4xl font-bold text-success mb-1">500+</div>
-                <div className="text-sm text-white/90 font-medium">{t('hero.entrepreneurs')}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-success mb-0.5 sm:mb-1">500+</div>
+                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.entrepreneurs')}</div>
               </div>
-              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <Globe className="h-6 w-6 text-success mr-2" />
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
+                <div className="flex items-center justify-center lg:justify-start mb-1 sm:mb-2">
+                  <Globe className="h-5 sm:h-6 w-5 sm:w-6 text-success mr-2" />
                 </div>
-                <div className="text-3xl md:text-4xl font-bold text-success mb-1">25+</div>
-                <div className="text-sm text-white/90 font-medium">{t('hero.countries')}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-success mb-0.5 sm:mb-1">25+</div>
+                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.countries')}</div>
               </div>
-              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="flex items-center justify-center lg:justify-start mb-2">
-                  <TrendingUp className="h-6 w-6 text-warning mr-2" />
+              <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
+                <div className="flex items-center justify-center lg:justify-start mb-1 sm:mb-2">
+                  <TrendingUp className="h-5 sm:h-6 w-5 sm:w-6 text-warning mr-2" />
                 </div>
-                <div className="text-3xl md:text-4xl font-bold text-warning mb-1">$2M+</div>
-                <div className="text-sm text-white/90 font-medium">{t('hero.totalFunding')}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-warning mb-0.5 sm:mb-1">$2M+</div>
+                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.totalFunding')}</div>
               </div>
             </div>
           </div>

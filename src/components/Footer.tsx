@@ -73,13 +73,13 @@ const Footer = () => {
               {/* Newsletter Signup */}
               <div className="space-y-3">
                 <h4 className="font-semibold text-sm">Stay Updated</h4>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="flex-1 px-3 py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="flex-1 px-3 py-3 sm:py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[44px]"
                   />
-                  <Button variant="hero" size="sm">Subscribe</Button>
+                  <Button variant="hero" size="sm" className="min-h-[44px] sm:min-h-0">Subscribe</Button>
                 </div>
               </div>
 

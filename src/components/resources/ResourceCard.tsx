@@ -72,12 +72,13 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
         isFeatured && "ring-1 ring-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
       )}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-4 sm:p-5">
+        {/* Mobile: Stack layout, Desktop: Row layout */}
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
           {/* Icon */}
           <div 
             className={cn(
-              "flex-shrink-0 p-3 rounded-xl transition-colors",
+              "flex-shrink-0 p-2.5 sm:p-3 rounded-xl transition-colors w-fit",
               "bg-muted group-hover:bg-primary/10",
               isFeatured && "bg-primary/10"
             )}
@@ -87,12 +88,12 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
           
           {/* Content */}
           <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 sm:line-clamp-1">
                 {resource.title}
               </h3>
               {resource.is_featured && variant === "default" && (
-                <Badge variant="secondary" className="flex-shrink-0 text-xs">
+                <Badge variant="secondary" className="flex-shrink-0 text-xs w-fit">
                   Featured
                 </Badge>
               )}
@@ -105,7 +106,7 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
             )}
             
             {/* Meta info */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
               <Badge variant="outline" className="text-xs font-normal">
                 {getTypeLabel(resource.file_type)}
               </Badge>
@@ -132,10 +133,10 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
             </div>
           </div>
           
-          {/* Action button */}
-          <div className="flex-shrink-0">
+          {/* Action button - Full width on mobile, auto on desktop */}
+          <div className="flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
             {resource.title === "Find a Mentor" ? (
-              <Button size="sm" variant="outline" asChild>
+              <Button size="sm" variant="outline" asChild className="w-full sm:w-auto min-h-[44px] sm:min-h-0">
                 <Link to="/mentors">
                   View
                   <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
@@ -147,7 +148,7 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
                 variant={isFeatured ? "default" : "outline"}
                 onClick={() => onDownload(resource)}
                 disabled={!resource.file_url}
-                className="group/btn"
+                className="group/btn w-full sm:w-auto min-h-[44px] sm:min-h-0"
               >
                 {isExternalType(resource.file_type) ? (
                   <>

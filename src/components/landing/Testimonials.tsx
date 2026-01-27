@@ -36,36 +36,36 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="py-20 md:py-24 bg-background">
+    <section className="py-16 sm:py-20 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
             {t('testimonials.title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('testimonials.titleHighlight')}</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             {t('testimonials.subtitle')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 border-border">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4 mb-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-sm sm:text-base">
                       {testimonial.image}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="font-semibold text-foreground">{testimonial.name}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.company}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-foreground truncate">{testimonial.name}</div>
+                    <div className="text-sm text-muted-foreground truncate">{testimonial.company}</div>
                     <div className="text-xs text-muted-foreground">{testimonial.location}</div>
                   </div>
-                  <Quote className="h-6 w-6 text-primary/30 flex-shrink-0" />
+                  <Quote className="h-5 w-5 sm:h-6 sm:w-6 text-primary/30 flex-shrink-0" />
                 </div>
                 
-                <p className="text-muted-foreground leading-relaxed mb-4 italic">
+                <p className="text-muted-foreground leading-relaxed mb-4 italic text-sm sm:text-base">
                   "{testimonial.quote}"
                 </p>
                 

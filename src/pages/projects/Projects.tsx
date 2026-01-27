@@ -26,6 +26,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
 import { useProjects, useProjectCategories, useProjectLocations } from "@/hooks/useProjects";
 import ProjectCard from "@/components/landing/ProjectCard";
+import { cn } from "@/lib/utils";
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -240,26 +241,21 @@ const Projects = () => {
             {/* Pagination and Results Per Page */}
             {total > 0 && (
               <div className="mt-8">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  {/* Results count */}
-                  <div className="text-sm text-muted-foreground order-3 sm:order-1">
-                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, total)} of{" "}
-                    {total} project{total !== 1 ? "s" : ""}
-                  </div>
-
+                <div className="flex flex-col gap-4">
                   {/* Pagination controls - only show if more than one page */}
                   {totalPages > 1 && (
-                    <div className="order-1 sm:order-2">
+                    <div className="flex justify-center overflow-x-auto pb-2">
                       <Pagination>
-                        <PaginationContent>
+                        <PaginationContent className="gap-1">
                           <PaginationItem>
                             <PaginationPrevious
                               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                              className={
+                              className={cn(
+                                "min-h-[44px] min-w-[44px]",
                                 currentPage === 1
                                   ? "pointer-events-none opacity-50"
                                   : "cursor-pointer"
-                              }
+                              )}
                             />
                           </PaginationItem>
 
@@ -297,7 +293,7 @@ const Projects = () => {
                             return pages.map((page, index) => {
                               if (page === "ellipsis") {
                                 return (
-                                  <PaginationItem key={`ellipsis-${index}`}>
+                                  <PaginationItem key={`ellipsis-${index}`} className="hidden sm:flex">
                                     <PaginationEllipsis />
                                   </PaginationItem>
                                 );
@@ -308,7 +304,7 @@ const Projects = () => {
                                   <PaginationLink
                                     onClick={() => setCurrentPage(page)}
                                     isActive={currentPage === page}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer min-h-[44px] min-w-[44px]"
                                   >
                                     {page}
                                   </PaginationLink>
@@ -322,11 +318,12 @@ const Projects = () => {
                               onClick={() =>
                                 setCurrentPage((p) => Math.min(totalPages, p + 1))
                               }
-                              className={
+                              className={cn(
+                                "min-h-[44px] min-w-[44px]",
                                 currentPage === totalPages
                                   ? "pointer-events-none opacity-50"
                                   : "cursor-pointer"
-                              }
+                              )}
                             />
                           </PaginationItem>
                         </PaginationContent>
@@ -334,28 +331,33 @@ const Projects = () => {
                     </div>
                   )}
 
-                  {/* Results per page dropdown */}
-                  <div className="flex items-center gap-2 order-2 sm:order-3">
-                    <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
-                      Show:
-                    </Label>
-                    <Select
-                      value={itemsPerPage.toString()}
-                      onValueChange={handleItemsPerPageChange}
-                    >
-                      <SelectTrigger id="items-per-page" className="w-[100px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="20">20</SelectItem>
-                        <SelectItem value="30">30</SelectItem>
-                        <SelectItem value="40">40</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      per page
-                    </span>
+                  {/* Results info and per-page selector */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+                    <div className="text-muted-foreground order-2 sm:order-1">
+                      Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, total)} of{" "}
+                      {total} project{total !== 1 ? "s" : ""}
+                    </div>
+
+                    {/* Results per page dropdown */}
+                    <div className="flex items-center gap-2 order-1 sm:order-2">
+                      <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">
+                        Show:
+                      </Label>
+                      <Select
+                        value={itemsPerPage.toString()}
+                        onValueChange={handleItemsPerPageChange}
+                      >
+                        <SelectTrigger id="items-per-page" className="w-[80px] h-10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="30">30</SelectItem>
+                          <SelectItem value="40">40</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               </div>

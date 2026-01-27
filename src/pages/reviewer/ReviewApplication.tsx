@@ -131,13 +131,13 @@ const ReviewApplication = () => {
       // uploaded during application process but not properly linked)
       let unlinkedDocs: typeof linkedDocs = [];
       if (application?.user_id && application?.project_id) {
-        const { data: userDocs, error: userError } = await supabase
+        const { data: userDocs, error: userError } = await (supabase
           .from("application_documents")
           .select("*")
           .eq("user_id", application.user_id)
           .eq("project_id", application.project_id)
           .is("application_id", null)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false }) as any);
 
         if (userError) {
           console.error("Error fetching user documents:", userError);
@@ -473,16 +473,16 @@ const ReviewApplication = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(getBackRoute())}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(getBackRoute())} className="w-fit min-h-[44px]">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Applications
+            Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Review Application</h1>
-            <p className="text-muted-foreground mt-1">
-              Application ID: {application.id}
+            <h1 className="text-2xl sm:text-3xl font-bold">Review Application</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base break-all">
+              ID: {application.id}
             </p>
           </div>
         </div>
@@ -498,31 +498,31 @@ const ReviewApplication = () => {
               <CardTitle>Applicant Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
-                  <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Company Name</p>
-                    <p className="font-medium">{application.company_name || "N/A"}</p>
+                    <p className="font-medium break-words">{application.company_name || "N/A"}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Contact Email</p>
-                    <p className="font-medium">{application.contact_email || "N/A"}</p>
+                    <p className="font-medium break-all">{application.contact_email || "N/A"}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Contact Phone</p>
                     <p className="font-medium">{application.contact_phone || "N/A"}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Location</p>
                     <p className="font-medium">{application.location || "N/A"}</p>
                   </div>
@@ -545,17 +545,17 @@ const ReviewApplication = () => {
                 <Label className="text-sm text-muted-foreground">Project Description</Label>
                 <p className="mt-1 text-sm">{application.project_description || "N/A"}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-muted-foreground" />
-                  <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Funding Amount Requested</p>
                     <p className="font-medium">{application.funding_amount_requested || "N/A"}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Team Size</p>
                     <p className="font-medium">{application.team_size ? `${application.team_size} members` : "N/A"}</p>
                   </div>
@@ -652,27 +652,27 @@ const ReviewApplication = () => {
                   <Button
                     onClick={handleApprove}
                     disabled={isSubmitting || application.status === "approved"}
-                    className="w-full bg-success hover:bg-success/90"
+                    className="w-full min-h-[48px] bg-success hover:bg-success/90"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve Application
+                    Approve
                   </Button>
                   <Button
                     onClick={handleReject}
                     disabled={isSubmitting || application.status === "rejected"}
                     variant="destructive"
-                    className="w-full"
+                    className="w-full min-h-[48px]"
                   >
                     <XCircle className="h-4 w-4 mr-2" />
-                    Reject Application
+                    Reject
                   </Button>
                   <Button
                     onClick={handleRequestMoreInfo}
                     disabled={isSubmitting}
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-[48px]"
                   >
-                    Request More Information
+                    Request Info
                   </Button>
                 </div>
               </CardContent>

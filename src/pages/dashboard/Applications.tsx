@@ -59,17 +59,18 @@ const Applications = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
+          <div className="flex flex-col gap-4">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search applications..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11"
               />
             </div>
-            <div className="flex gap-2">
+            {/* Status filter buttons - scrollable on mobile */}
+            <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 scrollbar-hide">
               {[
                 { value: "all", label: "All" },
                 { value: "pending", label: "Pending" },
@@ -82,8 +83,11 @@ const Applications = () => {
                   variant={statusFilter === filter.value ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter(filter.value)}
+                  className="flex-shrink-0 min-h-[40px] px-3"
                 >
-                  {filter.label} ({statusCounts[filter.value as keyof typeof statusCounts]})
+                  <span className="hidden sm:inline">{filter.label}</span>
+                  <span className="sm:hidden">{filter.label.slice(0, 3)}</span>
+                  <span className="ml-1">({statusCounts[filter.value as keyof typeof statusCounts]})</span>
                 </Button>
               ))}
             </div>
@@ -108,46 +112,46 @@ const Applications = () => {
         <div className="space-y-4">
           {filteredApplications.map((app) => (
             <Card key={app.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl mb-2">{app.projectTitle}</CardTitle>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg sm:text-xl mb-2 line-clamp-2">{app.projectTitle}</CardTitle>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <FileText className="h-4 w-4" />
-                        <span>{app.sector}</span>
+                        <FileText className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{app.sector}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        <span>{app.country}</span>
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{app.country}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>Submitted {new Date(app.submittedAt).toLocaleDateString()}</span>
+                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                        <span className="whitespace-nowrap">{new Date(app.submittedAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
-                  <Badge className={getStatusBadge(app.status)}>
+                  <Badge className={`${getStatusBadge(app.status)} flex-shrink-0`}>
                     {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
+              <CardContent className="pt-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Funding Amount
                     </p>
                     <p className="text-lg font-semibold">{app.fundingAmount}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="w-full sm:w-auto">
                     {app.status === "draft" ? (
-                      <Link to={`/projects/${app.projectId}/apply`}>
-                        <Button variant="outline">Continue Application</Button>
+                      <Link to={`/projects/${app.projectId}/apply`} className="block">
+                        <Button variant="outline" className="w-full sm:w-auto min-h-[44px]">Continue Application</Button>
                       </Link>
                     ) : (
-                      <Link to={`/dashboard/applications/${app.id}`}>
-                        <Button variant="outline">View Details</Button>
+                      <Link to={`/dashboard/applications/${app.id}`} className="block">
+                        <Button variant="outline" className="w-full sm:w-auto min-h-[44px]">View Details</Button>
                       </Link>
                     )}
                   </div>

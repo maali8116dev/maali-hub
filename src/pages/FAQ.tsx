@@ -172,14 +172,14 @@ const FAQPage = () => {
               <p className="text-muted-foreground mb-4">
                 Can't find the answer you're looking for? Our support team is here to help.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/contact">
-                  <button className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="/contact" className="w-full sm:w-auto">
+                  <button className="w-full px-6 py-3 min-h-[48px] bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
                     Contact Support
                   </button>
                 </a>
-                <a href="/help">
-                  <button className="px-6 py-2 border border-border rounded-md hover:bg-muted transition-colors">
+                <a href="/help" className="w-full sm:w-auto">
+                  <button className="w-full px-6 py-3 min-h-[48px] border border-border rounded-md hover:bg-muted transition-colors">
                     Visit Help Center
                   </button>
                 </a>
