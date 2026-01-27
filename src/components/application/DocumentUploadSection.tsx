@@ -28,12 +28,14 @@ import {
 
 interface DocumentUploadSectionProps {
   applicationId?: string;
+  projectId?: number;
   onDocumentsChange?: (documents: UploadedDocument[]) => void;
   initialDocumentIds?: string[];
 }
 
 const DocumentUploadSection = ({ 
-  applicationId, 
+  applicationId,
+  projectId,
   onDocumentsChange,
   initialDocumentIds,
 }: DocumentUploadSectionProps) => {
@@ -68,7 +70,7 @@ const DocumentUploadSection = ({
     const files = e.target.files;
     if (files && files.length > 0) {
       try {
-        await uploadDocuments(Array.from(files), applicationId);
+        await uploadDocuments(Array.from(files), applicationId, projectId);
         // The useEffect will automatically notify parent when documents state updates
       } catch (error) {
         console.error("File upload error:", error);

@@ -1,40 +1,40 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 const ReviewerDashboard = () => {
-  // Mock data - replace with actual API calls
-  const stats = {
-    pending: 12,
-    underReview: 5,
-    approved: 48,
-    rejected: 23,
-    total: 88,
-    avgReviewTime: "2.5 days",
-  };
+  const navigate = useNavigate();
+  const { data: applications = [], isLoading, error } = useAdminApplications();
 
-  const recentApplications = [
-    {
-      id: "1",
-      applicantName: "Jane Doe",
-      projectTitle: "AgriTech Innovation Fund",
-      submittedAt: "2024-01-15",
-      status: "pending",
-    },
-    {
-      id: "2",
-      applicantName: "John Smith",
-      projectTitle: "Tech Startup Grant",
-      submittedAt: "2024-01-14",
-      status: "under_review",
-    },
-    {
-      id: "3",
-      applicantName: "Sarah Johnson",
-      projectTitle: "FinTech for Financial Inclusion",
-      submittedAt: "2024-01-13",
-      status: "pending",
-    },
-  ];
+  // Calculate stats from real data
+  const stats = useMemo(() => {
+    const pending = applications.filter((app) => app.status === "pending").length;
+    const approved = applications.filter((app) => app.status === "approved").length;
+    const rejected = applications.filter((app) => app.status === "rejected").length;
+    const total = applications.length;
+    const approvalRate = total > 0 ? Math.round((approved / total) * 100) : 0;
+
+    return {
+      pending,
+      approved,
+      rejected,
+      total,
+      approvalRate,
+    };
+  }, [applications]);
+
+  // Get recent applications (pending ones, sorted by date)
+  const recentApplications = useMemo(() => {
+    return applications
+      .filter((app) => app.status === "pending")
+      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .slice(0, 5);
+  }, [applications]);
 
   const statCards = [
     {
@@ -43,13 +43,6 @@ const ReviewerDashboard = () => {
       icon: Clock,
       description: "Applications awaiting review",
       className: "bg-warning/10 text-warning border-warning/20",
-    },
-    {
-      title: "Under Review",
-      value: stats.underReview,
-      icon: FileText,
-      description: "Currently being reviewed",
-      className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     },
     {
       title: "Approved",
@@ -65,7 +58,89 @@ const ReviewerDashboard = () => {
       description: "Total rejected applications",
       className: "bg-destructive/10 text-destructive border-destructive/20",
     },
+    {
+      title: "Total",
+      value: stats.total,
+      icon: FileText,
+      description: "All applications",
+      className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Reviewer Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Overview of applications and review statistics
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-32 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-48 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Reviewer Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Overview of applications and review statistics
+          </p>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-destructive">
+              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -109,14 +184,12 @@ const ReviewerDashboard = () => {
                 <span className="text-lg font-semibold">{stats.total}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Average Review Time</span>
-                <span className="text-lg font-semibold">{stats.avgReviewTime}</span>
+                <span className="text-sm text-muted-foreground">Approval Rate</span>
+                <span className="text-lg font-semibold">{stats.approvalRate}%</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Approval Rate</span>
-                <span className="text-lg font-semibold">
-                  {Math.round((stats.approved / stats.total) * 100)}%
-                </span>
+                <span className="text-sm text-muted-foreground">Pending Reviews</span>
+                <span className="text-lg font-semibold">{stats.pending}</span>
               </div>
             </div>
           </CardContent>
@@ -128,25 +201,36 @@ const ReviewerDashboard = () => {
             <CardDescription>Latest submissions requiring review</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div>
-                    <p className="font-medium text-sm">{app.applicantName}</p>
-                    <p className="text-xs text-muted-foreground">{app.projectTitle}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(app.submittedAt).toLocaleDateString()}
-                    </p>
+            {recentApplications.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No pending applications at this time.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentApplications.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{app.applicantName}</p>
+                      <p className="text-xs text-muted-foreground">{app.projectTitle}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(app.submittedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/reviewer/applications/${app.id}`)}
+                      className="ml-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded bg-muted">
-                    {app.status === "pending" ? "Pending" : "Under Review"}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

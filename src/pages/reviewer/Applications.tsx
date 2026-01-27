@@ -1,51 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ReviewerApplications = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Mock data - replace with API calls when backend is ready
-  const applications = [
-    {
-      id: "1",
-      applicantName: "John Doe",
-      projectTitle: "AgriTech Innovation Fund",
-      submittedAt: "2024-01-15",
-      status: "pending",
-      fundingAmount: "$50,000",
-    },
-    {
-      id: "2",
-      applicantName: "Jane Smith",
-      projectTitle: "Women in Tech Accelerator",
-      submittedAt: "2024-01-10",
-      status: "under_review",
-      fundingAmount: "$75,000",
-    },
-    {
-      id: "3",
-      applicantName: "Michael Johnson",
-      projectTitle: "Clean Energy Initiative",
-      submittedAt: "2024-01-08",
-      status: "approved",
-      fundingAmount: "$25,000",
-    },
-    {
-      id: "4",
-      applicantName: "Sarah Williams",
-      projectTitle: "FinTech for Financial Inclusion",
-      submittedAt: "2024-01-12",
-      status: "rejected",
-      fundingAmount: "$100,000",
-    },
-  ];
+  const { data: applications = [], isLoading, error } = useAdminApplications();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -54,13 +22,6 @@ const ReviewerApplications = () => {
           <Badge className="bg-warning/10 text-warning border-warning/20">
             <Clock className="h-3 w-3 mr-1" />
             Pending
-          </Badge>
-        );
-      case "under_review":
-        return (
-          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-            <Eye className="h-3 w-3 mr-1" />
-            Under Review
           </Badge>
         );
       case "approved":
@@ -82,13 +43,61 @@ const ReviewerApplications = () => {
     }
   };
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.projectTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredApplications = useMemo(() => {
+    return applications.filter((app) => {
+      const matchesSearch =
+        app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.projectTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [applications, searchQuery, statusFilter]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">All Applications</h1>
+          <p className="text-muted-foreground mt-2">
+            Review and manage all submitted applications
+          </p>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">All Applications</h1>
+          <p className="text-muted-foreground mt-2">
+            Review and manage all submitted applications
+          </p>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-destructive">
+              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -116,7 +125,6 @@ const ReviewerApplications = () => {
               {[
                 { value: "all", label: "All" },
                 { value: "pending", label: "Pending" },
-                { value: "under_review", label: "Under Review" },
                 { value: "approved", label: "Approved" },
                 { value: "rejected", label: "Rejected" },
               ].map((filter) => (
@@ -156,12 +164,16 @@ const ReviewerApplications = () => {
                       <h3 className="font-semibold">{app.applicantName}</h3>
                       {getStatusBadge(app.status)}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                       <span className="font-medium">{app.projectTitle}</span>
                       <span>•</span>
                       <span>Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span>{app.fundingAmount}</span>
+                      {app.fundingAmount && (
+                        <>
+                          <span>•</span>
+                          <span>{app.fundingAmount}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <Button

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
   CheckCircle,
@@ -22,6 +24,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
 // Email integration - uncomment to enable status update emails
 // import { 
 //   sendApplicationApprovedEmail, 
@@ -36,8 +40,10 @@ const ReviewApplication = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { data: profile } = useProfile();
+  const queryClient = useQueryClient();
   const [reviewNotes, setReviewNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Determine the back route based on user role or location state
   const getBackRoute = () => {
@@ -57,28 +63,110 @@ const ReviewApplication = () => {
   const isReviewer = profile?.role === "reviewer";
   const isAdmin = profile?.role === "admin";
 
-  // Mock data - replace with API call
-  const application = {
-    id: id || "1",
-    applicantName: "John Doe",
-    applicantEmail: "john.doe@example.com",
-    projectTitle: "AgriTech Innovation Fund",
-    submittedAt: "2024-01-15",
-    status: "pending",
-    companyName: "AgriTech Solutions",
-    contactEmail: "contact@agritech.com",
-    contactPhone: "+1234567890",
-    location: "Nairobi, Kenya",
-    projectDescription:
-      "We are developing innovative agricultural solutions using IoT sensors and AI to help small-scale farmers increase crop yields and reduce waste. Our platform provides real-time monitoring of soil conditions, weather patterns, and crop health.",
-    fundingAmountRequested: "$50,000",
-    businessPlan: "Our business plan focuses on sustainable agriculture practices and technology adoption in rural African communities.",
-    teamSize: 5,
-    documents: [
-      { id: "1", fileName: "business-plan.pdf", fileSize: 245000 },
-      { id: "2", fileName: "financial-projections.xlsx", fileSize: 89000 },
-    ],
-  };
+  // Fetch application data
+  const { data: application, isLoading, error } = useQuery({
+    queryKey: ["review-application", id],
+    queryFn: async () => {
+      if (!id) throw new Error("Application ID is required");
+
+      // Fetch application
+      const { data: app, error: appError } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (appError) throw appError;
+      if (!app) throw new Error("Application not found");
+
+      // Fetch project details
+      const { data: project } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", app.project_id)
+        .maybeSingle();
+
+      // Fetch applicant profile
+      const { data: applicantProfile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("user_id", app.user_id)
+        .maybeSingle();
+
+      const applicantName = applicantProfile
+        ? `${applicantProfile.first_name || ""} ${applicantProfile.last_name || ""}`.trim() || "Unknown Applicant"
+        : "Unknown Applicant";
+
+      return {
+        ...app,
+        projectTitle: project?.title || "Unknown Project",
+        applicantName,
+        applicantEmail: app.contact_email,
+        submittedAt: app.created_at,
+      };
+    },
+    enabled: !!id,
+  });
+
+  // Fetch documents for this application
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+    queryKey: ["review-application-documents", id, application?.user_id],
+    queryFn: async () => {
+      if (!id) return [];
+
+      // First, try to get documents linked to this application
+      const { data: linkedDocs, error: linkedError } = await supabase
+        .from("application_documents")
+        .select("*")
+        .eq("application_id", id)
+        .order("created_at", { ascending: false });
+
+      if (linkedError) {
+        console.error("Error fetching linked documents:", linkedError);
+      } else {
+        console.log(`Found ${linkedDocs?.length || 0} linked documents for application ${id}`);
+      }
+
+      // Also get unlinked documents from the same user and project (fallback for documents 
+      // uploaded during application process but not properly linked)
+      let unlinkedDocs: typeof linkedDocs = [];
+      if (application?.user_id && application?.project_id) {
+        const { data: userDocs, error: userError } = await supabase
+          .from("application_documents")
+          .select("*")
+          .eq("user_id", application.user_id)
+          .eq("project_id", application.project_id)
+          .is("application_id", null)
+          .order("created_at", { ascending: false });
+
+        if (userError) {
+          console.error("Error fetching user documents:", userError);
+        } else {
+          unlinkedDocs = userDocs || [];
+          console.log(`Found ${unlinkedDocs.length} unlinked documents for user ${application.user_id}`);
+        }
+      }
+
+      // Combine and deduplicate
+      const allDocs = [...(linkedDocs || []), ...unlinkedDocs];
+      const uniqueDocs = allDocs.filter(
+        (doc, index, self) => index === self.findIndex((d) => d.id === doc.id)
+      );
+
+      console.log(`Total documents found: ${uniqueDocs.length} (${linkedDocs?.length || 0} linked + ${unlinkedDocs.length} unlinked)`);
+
+      return uniqueDocs.map((doc) => ({
+        id: doc.id,
+        fileName: doc.file_name,
+        filePath: doc.file_path,
+        fileSize: doc.file_size || 0,
+        fileType: doc.file_type || "",
+        createdAt: doc.created_at,
+        applicationId: doc.application_id || undefined,
+      }));
+    },
+    enabled: !!id && !!application,
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -125,14 +213,27 @@ const ReviewApplication = () => {
       return;
     }
 
+    if (!id || !application) return;
+
     setIsSubmitting(true);
     try {
-      // API call to approve application
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const { error: updateError } = await supabase
+        .from("applications")
+        .update({
+          status: "approved",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
       
       // Email integration - uncomment to send approval email
       // await sendApplicationApprovedEmail(
-      //   application.contactEmail,
+      //   application.contact_email,
       //   application.applicantName,
       //   application.projectTitle,
       //   application.id,
@@ -146,9 +247,10 @@ const ReviewApplication = () => {
       
       navigate(getBackRoute());
     } catch (error) {
+      console.error("Error approving application:", error);
       toast({
         title: "Error",
-        description: "Failed to approve application. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to approve application. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -176,14 +278,27 @@ const ReviewApplication = () => {
       return;
     }
 
+    if (!id || !application) return;
+
     setIsSubmitting(true);
     try {
-      // API call to reject application
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const { error: updateError } = await supabase
+        .from("applications")
+        .update({
+          status: "rejected",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
       
       // Email integration - uncomment to send rejection email
       // await sendApplicationRejectedEmail(
-      //   application.contactEmail,
+      //   application.contact_email,
       //   application.applicantName,
       //   application.projectTitle,
       //   reviewNotes,
@@ -197,9 +312,10 @@ const ReviewApplication = () => {
       
       navigate(getBackRoute());
     } catch (error) {
+      console.error("Error rejecting application:", error);
       toast({
         title: "Error",
-        description: "Failed to reject application. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to reject application. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -227,14 +343,27 @@ const ReviewApplication = () => {
       return;
     }
 
+    if (!id || !application) return;
+
     setIsSubmitting(true);
     try {
-      // API call to request more info
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const { error: updateError } = await supabase
+        .from("applications")
+        .update({
+          status: "under_review",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
       
       // Email integration - uncomment to send under review email with info request
       // await sendApplicationUnderReviewEmail(
-      //   application.contactEmail,
+      //   application.contact_email,
       //   application.applicantName,
       //   application.projectTitle,
       //   application.id,
@@ -248,15 +377,98 @@ const ReviewApplication = () => {
       
       navigate(getBackRoute());
     } catch (error) {
+      console.error("Error requesting more info:", error);
       toast({
         title: "Error",
-        description: "Failed to send request. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to send request. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleDownload = async (doc: { id: string; filePath: string; fileName: string }) => {
+    setDownloadingId(doc.id);
+    try {
+      console.log("Attempting to download document:", {
+        fileName: doc.fileName,
+        filePath: doc.filePath,
+        docId: doc.id,
+      });
+
+      const url = await getDocumentDownloadUrl(doc.filePath);
+      if (url) {
+        window.open(url, "_blank");
+        toast({
+          title: "Download Started",
+          description: `Downloading ${doc.fileName}...`,
+        });
+      } else {
+        toast({
+          title: "Download Failed",
+          description: `Unable to download ${doc.fileName}. The file may not exist or you may not have permission to access it.`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to download document. Please try again.";
+      toast({
+        title: "Download Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-8 w-64" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !application) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(getBackRoute())}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Applications
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-destructive">
+              {error instanceof Error ? error.message : "Application not found"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -274,7 +486,7 @@ const ReviewApplication = () => {
             </p>
           </div>
         </div>
-        {getStatusBadge(application.status)}
+        {getStatusBadge(application.status || "pending")}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -291,28 +503,28 @@ const ReviewApplication = () => {
                   <Building2 className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Company Name</p>
-                    <p className="font-medium">{application.companyName}</p>
+                    <p className="font-medium">{application.company_name || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Contact Email</p>
-                    <p className="font-medium">{application.contactEmail}</p>
+                    <p className="font-medium">{application.contact_email || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Contact Phone</p>
-                    <p className="font-medium">{application.contactPhone}</p>
+                    <p className="font-medium">{application.contact_phone || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Location</p>
-                    <p className="font-medium">{application.location}</p>
+                    <p className="font-medium">{application.location || "N/A"}</p>
                   </div>
                 </div>
               </div>
@@ -331,42 +543,55 @@ const ReviewApplication = () => {
               </div>
               <div>
                 <Label className="text-sm text-muted-foreground">Project Description</Label>
-                <p className="mt-1 text-sm">{application.projectDescription}</p>
+                <p className="mt-1 text-sm">{application.project_description || "N/A"}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
                   <DollarSign className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Funding Amount Requested</p>
-                    <p className="font-medium">{application.fundingAmountRequested}</p>
+                    <p className="font-medium">{application.funding_amount_requested || "N/A"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Users className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Team Size</p>
-                    <p className="font-medium">{application.teamSize} members</p>
+                    <p className="font-medium">{application.team_size ? `${application.team_size} members` : "N/A"}</p>
                   </div>
                 </div>
               </div>
-              {application.businessPlan && (
+              {application.business_plan && (
                 <div>
                   <Label className="text-sm text-muted-foreground">Business Plan Summary</Label>
-                  <p className="mt-1 text-sm">{application.businessPlan}</p>
+                  <p className="mt-1 text-sm">{application.business_plan}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Documents */}
-          {application.documents && application.documents.length > 0 && (
+          {documentsLoading ? (
             <Card>
               <CardHeader>
                 <CardTitle>Supporting Documents</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {application.documents.map((doc) => (
+                  {[1, 2].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : documents && documents.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Supporting Documents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {documents.map((doc) => (
                     <div
                       key={doc.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
@@ -376,20 +601,25 @@ const ReviewApplication = () => {
                         <div>
                           <p className="font-medium text-sm">{doc.fileName}</p>
                           <p className="text-xs text-muted-foreground">
-                            {(doc.fileSize / 1024).toFixed(2)} KB
+                            {formatFileSize(doc.fileSize)}
                           </p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDownload(doc)}
+                        disabled={downloadingId === doc.id}
+                      >
                         <Download className="h-4 w-4 mr-2" />
-                        Download
+                        {downloadingId === doc.id ? "Downloading..." : "Download"}
                       </Button>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
-          )}
+          ) : null}
         </div>
 
         {/* Review Panel */}
@@ -502,12 +732,16 @@ const ReviewApplication = () => {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Submitted:</span>
                 <span className="font-medium">
-                  {new Date(application.submittedAt).toLocaleDateString()}
+                  {new Date(application.created_at).toLocaleDateString()}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>
-                {getStatusBadge(application.status)}
+                {getStatusBadge(application.status || "pending")}
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Applicant:</span>
+                <span className="font-medium">{application.applicantName}</span>
               </div>
             </CardContent>
           </Card>

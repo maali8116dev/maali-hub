@@ -75,14 +75,15 @@ const ApplicationDetails = () => {
         console.error("Error fetching linked documents:", linkedError);
       }
 
-      // Also get unlinked documents from the same user (fallback for documents 
+      // Also get unlinked documents from the same user and project (fallback for documents 
       // uploaded during application process but not properly linked)
       let unlinkedDocs: typeof linkedDocs = [];
-      if (application?.user_id) {
+      if (application?.user_id && application?.project_id) {
         const { data: userDocs, error: userError } = await supabase
           .from("application_documents")
           .select("*")
           .eq("user_id", application.user_id)
+          .eq("project_id", application.project_id)
           .is("application_id", null)
           .order("created_at", { ascending: false });
 

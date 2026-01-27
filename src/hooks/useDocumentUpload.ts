@@ -19,8 +19,8 @@ interface UploadProgress {
 }
 
 interface UseDocumentUploadReturn {
-  uploadDocument: (file: File, applicationId?: string) => Promise<UploadedDocument | null>;
-  uploadDocuments: (files: File[], applicationId?: string) => Promise<UploadedDocument[]>;
+  uploadDocument: (file: File, applicationId?: string, projectId?: number) => Promise<UploadedDocument | null>;
+  uploadDocuments: (files: File[], applicationId?: string, projectId?: number) => Promise<UploadedDocument[]>;
   deleteDocument: (document: UploadedDocument) => Promise<boolean>;
   fetchUserDocuments: () => Promise<UploadedDocument[]>;
   fetchApplicationDocuments: (applicationId: string) => Promise<UploadedDocument[]>;
@@ -58,7 +58,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
   const uploadDocument = useCallback(async (
     file: File,
-    applicationId?: string
+    applicationId?: string,
+    projectId?: number
   ): Promise<UploadedDocument | null> => {
     // Validate file
     const validationError = validateFile(file);
@@ -130,6 +131,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         .insert({
           user_id: user.id,
           application_id: applicationId || null,
+          project_id: projectId || null,
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
@@ -180,13 +182,14 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
   const uploadDocuments = useCallback(async (
     files: File[],
-    applicationId?: string
+    applicationId?: string,
+    projectId?: number
   ): Promise<UploadedDocument[]> => {
     setIsUploading(true);
     const results: UploadedDocument[] = [];
 
     for (const file of files) {
-      const result = await uploadDocument(file, applicationId);
+      const result = await uploadDocument(file, applicationId, projectId);
       if (result) {
         results.push(result);
       }
@@ -348,11 +351,32 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
  */
 export async function getDocumentDownloadUrl(filePath: string): Promise<string | null> {
   try {
+    // Validate file path
+    if (!filePath || filePath.trim() === "") {
+      console.error("Invalid file path provided:", filePath);
+      return null;
+    }
+
+    // Remove leading slash if present (Supabase storage paths shouldn't start with /)
+    const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath;
+
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .createSignedUrl(filePath, 3600); // 1 hour expiry
+      .createSignedUrl(cleanPath, 3600); // 1 hour expiry
 
     if (error) {
+      console.error("Storage error details:", {
+        error,
+        filePath: cleanPath,
+        bucket: BUCKET_NAME,
+        message: error.message,
+      });
+      
+      // Provide more specific error messages
+      if (error.message.includes("not found") || error.message.includes("Object not found")) {
+        console.error(`File not found in storage: ${cleanPath}`);
+        throw new Error(`Document file not found. The file may have been deleted or the path is incorrect.`);
+      }
       throw error;
     }
 

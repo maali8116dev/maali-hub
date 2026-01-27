@@ -25,6 +25,7 @@ import {
   Save,
   Loader2,
   AlertTriangle,
+  Info,
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +35,7 @@ import DocumentUploadSection from "./DocumentUploadSection";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { emailSchema } from "@/lib/emailValidation";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
@@ -79,7 +81,11 @@ const MultiStepApplicationForm = () => {
   const { toast } = useToast();
   const { logActivity } = useActivityLogger();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
+  const updateProfile = useUpdateProfile();
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [profileDataLoaded, setProfileDataLoaded] = useState(false);
+  const [useProfileData, setUseProfileData] = useState(true);
   const isEmailVerified = user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const {
     currentStep,
@@ -126,6 +132,8 @@ const MultiStepApplicationForm = () => {
         setDraftLoaded(true);
       } else if (isNewApplication) {
         setDraftLoaded(true);
+        setProfileDataLoaded(false); // Reset profile pre-fill state for new applications
+        setUseProfileData(true); // Re-enable profile pre-fill for new applications
       }
     };
     loadDraft();
@@ -137,6 +145,43 @@ const MultiStepApplicationForm = () => {
       setDraftId(draftId);
     }
   }, [draftId, setDraftId]);
+
+  // Pre-fill form from profile if no draft exists and form is empty
+  useEffect(() => {
+    if (
+      profile && 
+      draftLoaded && // Wait for draft to load first
+      !profileDataLoaded &&
+      !formData.companyName && // Only pre-fill if form is empty
+      useProfileData &&
+      !draftId // Don't pre-fill if there's a draft
+    ) {
+      const prefillData: Partial<typeof formData> = {};
+      
+      // Map profile fields to form fields
+      if (profile.businessName && !formData.companyName) {
+        prefillData.companyName = profile.businessName;
+      }
+      if (user?.email && !formData.contactEmail) {
+        prefillData.contactEmail = user.email;
+      }
+      if (profile.country && !formData.location) {
+        prefillData.location = profile.country;
+      }
+      
+      // Only update if we have data to pre-fill
+      if (Object.keys(prefillData).length > 0) {
+        updateFormData(prefillData);
+        setProfileDataLoaded(true);
+      } else {
+        // Mark as loaded even if no data to pre-fill
+        setProfileDataLoaded(true);
+      }
+    } else if (draftLoaded && !profile) {
+      // If no profile exists, mark as loaded to prevent re-checking
+      setProfileDataLoaded(true);
+    }
+  }, [profile, user, draftLoaded, profileDataLoaded, formData, useProfileData, draftId, updateFormData]);
 
   // Memoize the documents change callback to prevent infinite loops
   const handleDocumentsChange = useCallback((docs: any[]) => {
@@ -156,10 +201,10 @@ const MultiStepApplicationForm = () => {
       step4Schema
     ),
     defaultValues: {
-      companyName: formData.companyName || "",
-      contactEmail: formData.contactEmail || "",
+      companyName: formData.companyName || profile?.businessName || "",
+      contactEmail: formData.contactEmail || user?.email || "",
       contactPhone: formData.contactPhone || "",
-      location: formData.location || "",
+      location: formData.location || profile?.country || "",
       projectDescription: formData.projectDescription || "",
       businessPlan: formData.businessPlan || "",
       teamSize: formData.teamSize || undefined,
@@ -175,10 +220,10 @@ const MultiStepApplicationForm = () => {
   useEffect(() => {
     isResettingRef.current = true;
     form.reset({
-      companyName: formData.companyName || "",
-      contactEmail: formData.contactEmail || "",
+      companyName: formData.companyName || profile?.businessName || "",
+      contactEmail: formData.contactEmail || user?.email || "",
       contactPhone: formData.contactPhone || "",
-      location: formData.location || "",
+      location: formData.location || profile?.country || "",
       projectDescription: formData.projectDescription || "",
       businessPlan: formData.businessPlan || "",
       teamSize: formData.teamSize || undefined,
@@ -331,11 +376,15 @@ const MultiStepApplicationForm = () => {
       }
 
       // Link only the documents uploaded during this session to the application
+      // Also ensure project_id is set (in case it wasn't set during upload)
       const uploadedDocIds = formData.uploadedDocumentIds || [];
       if (application && uploadedDocIds.length > 0) {
         await supabase
           .from("application_documents")
-          .update({ application_id: application.id })
+          .update({ 
+            application_id: application.id,
+            project_id: application.project_id, // Ensure project_id is set
+          })
           .in("id", uploadedDocIds);
       }
       
@@ -350,6 +399,28 @@ const MultiStepApplicationForm = () => {
           companyName: formData.companyName,
         },
       });
+
+      // Optionally save application data to profile (if user wants to keep profile updated)
+      if (profile && useProfileData) {
+        try {
+          const profileUpdates: any = {};
+          
+          // Only update profile fields that are empty or match the application data
+          if (formData.companyName && (!profile.businessName || profile.businessName !== formData.companyName)) {
+            profileUpdates.businessName = formData.companyName;
+          }
+          if (formData.location && (!profile.country || profile.country !== formData.location)) {
+            profileUpdates.country = formData.location;
+          }
+          
+          if (Object.keys(profileUpdates).length > 0) {
+            await updateProfile.mutateAsync(profileUpdates);
+          }
+        } catch (error) {
+          // Don't fail submission if profile update fails
+          console.error("Failed to update profile:", error);
+        }
+      }
       
       toast({
         title: "Application Submitted",
@@ -360,6 +431,8 @@ const MultiStepApplicationForm = () => {
       reset();
       form.reset();
       setDraftLoaded(false);
+      setProfileDataLoaded(false);
+      setUseProfileData(true);
       
       // Redirect to dashboard applications
       navigate("/dashboard/applications");
@@ -482,6 +555,43 @@ const MultiStepApplicationForm = () => {
                       Tell us about your company.
                     </p>
                   </div>
+                  
+                  {/* Profile Pre-fill Indicator */}
+                  {profile && useProfileData && (formData.companyName || formData.contactEmail || formData.location) && (
+                    <Alert className="mb-4 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+                      <Info className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                      <AlertDescription className="text-blue-800 dark:text-blue-200">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <span>Some fields are pre-filled from your profile. You can edit them if needed.</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setUseProfileData(false);
+                              setProfileDataLoaded(false);
+                              // Clear pre-filled data
+                              updateFormData({
+                                companyName: "",
+                                contactEmail: "",
+                                location: "",
+                              });
+                              form.reset({
+                                ...form.watch(),
+                                companyName: "",
+                                contactEmail: "",
+                                location: "",
+                              });
+                            }}
+                            className="h-auto py-1 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100"
+                          >
+                            Clear Pre-filled Data
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <CustomFormField
                       control={form.control}
@@ -492,6 +602,13 @@ const MultiStepApplicationForm = () => {
                       icon={Building2}
                       iconPosition="left"
                       required
+                      description={
+                        profile?.businessName && 
+                        form.watch("companyName") === profile.businessName && 
+                        useProfileData
+                          ? "Pre-filled from your profile"
+                          : undefined
+                      }
                     />
                     <CustomFormField
                       control={form.control}
@@ -502,6 +619,13 @@ const MultiStepApplicationForm = () => {
                       icon={Mail}
                       iconPosition="left"
                       required
+                      description={
+                        user?.email && 
+                        form.watch("contactEmail") === user.email && 
+                        useProfileData
+                          ? "Pre-filled from your account"
+                          : undefined
+                      }
                     />
                     <CustomFormField
                       control={form.control}
@@ -522,6 +646,13 @@ const MultiStepApplicationForm = () => {
                       icon={MapPin}
                       iconPosition="left"
                       required
+                      description={
+                        profile?.country && 
+                        form.watch("location") === profile.country && 
+                        useProfileData
+                          ? "Pre-filled from your profile"
+                          : undefined
+                      }
                     />
                   </div>
                 </div>
@@ -584,6 +715,7 @@ const MultiStepApplicationForm = () => {
                   </div>
                   
                   <DocumentUploadSection 
+                    projectId={formData.projectId}
                     onDocumentsChange={handleDocumentsChange}
                   />
                 </div>
