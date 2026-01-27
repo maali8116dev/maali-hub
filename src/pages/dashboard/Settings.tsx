@@ -35,30 +35,30 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Manage your account settings and preferences
         </p>
       </div>
 
       {/* Notifications */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            <CardTitle>Notifications</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Notifications</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Choose what notifications you want to receive
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="email-notifications">Email Notifications</Label>
-              <p className="text-sm text-muted-foreground">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <Label htmlFor="email-notifications" className="text-sm">Email Notifications</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Receive email updates about your applications
               </p>
             </div>
@@ -68,13 +68,14 @@ const Settings = () => {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, emailNotifications: checked })
               }
+              className="flex-shrink-0"
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="application-updates">Application Updates</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <Label htmlFor="application-updates" className="text-sm">Application Updates</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Get notified when your application status changes
               </p>
             </div>
@@ -84,13 +85,14 @@ const Settings = () => {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, applicationUpdates: checked })
               }
+              className="flex-shrink-0"
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="newsletter">Newsletter</Label>
-              <p className="text-sm text-muted-foreground">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <Label htmlFor="newsletter" className="text-sm">Newsletter</Label>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Receive our monthly newsletter with funding opportunities
               </p>
             </div>
@@ -100,6 +102,7 @@ const Settings = () => {
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, newsletter: checked })
               }
+              className="flex-shrink-0"
             />
           </div>
         </CardContent>
@@ -107,16 +110,16 @@ const Settings = () => {
 
       {/* Preferences */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            <CardTitle>Preferences</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Preferences</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Customize your experience
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="language">Language</Label>
             <Select
@@ -125,7 +128,7 @@ const Settings = () => {
                 setSettings({ ...settings, language: value })
               }
             >
-              <SelectTrigger id="language">
+              <SelectTrigger id="language" className="h-11 sm:h-10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +151,7 @@ const Settings = () => {
                 });
               }}
             >
-              <SelectTrigger id="theme">
+              <SelectTrigger id="theme" className="h-11 sm:h-10">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -163,22 +166,23 @@ const Settings = () => {
 
       {/* Security */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            <CardTitle>Security</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Security</CardTitle>
           </div>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Manage your account security settings
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="current-password">Current Password</Label>
             <Input
               id="current-password"
               type="password"
               placeholder="Enter current password"
+              className="h-11 sm:h-10"
             />
           </div>
           <div className="space-y-2">
@@ -187,6 +191,7 @@ const Settings = () => {
               id="new-password"
               type="password"
               placeholder="Enter new password"
+              className="h-11 sm:h-10"
             />
           </div>
           <div className="space-y-2">
@@ -195,36 +200,37 @@ const Settings = () => {
               id="confirm-password"
               type="password"
               placeholder="Confirm new password"
+              className="h-11 sm:h-10"
             />
           </div>
-          <Button variant="outline">Update Password</Button>
+          <Button variant="outline" className="min-h-[44px]">Update Password</Button>
         </CardContent>
       </Card>
 
       {/* Danger Zone */}
       <Card className="border-destructive">
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-destructive text-base sm:text-lg">Danger Zone</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Irreversible and destructive actions
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-semibold">Delete Account</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-semibold text-sm sm:text-base">Delete Account</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <Button variant="destructive">Delete Account</Button>
+            <Button variant="destructive" className="min-h-[44px] w-full sm:w-auto">Delete Account</Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} size="lg">
+        <Button onClick={handleSave} disabled={saving} size="lg" className="min-h-[44px] w-full sm:w-auto">
           {saving ? "Saving..." : "Save Changes"}
         </Button>
       </div>

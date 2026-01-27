@@ -127,16 +127,16 @@ const Notifications = () => {
   const readNotifications = notifications.filter((n) => n.read);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Stay updated on your applications and account activity
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline">
+          <Button onClick={markAllAsRead} variant="outline" className="min-h-[44px] w-full sm:w-auto">
             <CheckCheck className="h-4 w-4 mr-2" />
             Mark all as read
           </Button>
@@ -144,29 +144,29 @@ const Notifications = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{notifications.length}</div>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{notifications.length}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Unread</CardTitle>
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Unread</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{unreadCount}</div>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-warning">{unreadCount}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Read</CardTitle>
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Read</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-muted-foreground">
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-muted-foreground">
               {readNotifications.length}
             </div>
           </CardContent>
@@ -175,25 +175,25 @@ const Notifications = () => {
 
       {/* Unread Notifications */}
       {unreadNotifications.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Unread</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold">Unread</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
                 {unreadNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="relative p-4 hover:bg-muted/50 transition-colors bg-primary/5"
+                    className="relative p-3 sm:p-4 hover:bg-muted/50 transition-colors bg-primary/5"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="mt-1 text-2xl">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="mt-1 text-xl sm:text-2xl hidden sm:block">
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold">{notification.title}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-sm sm:text-base">{notification.title}</h3>
                               <Badge
                                 variant="outline"
                                 className={cn("text-xs", getNotificationBadge(notification.type))}
@@ -201,7 +201,7 @@ const Notifications = () => {
                                 {notification.type}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            <p className="text-xs sm:text-sm text-muted-foreground mb-2">
                               {notification.message}
                             </p>
                             <p className="text-xs text-muted-foreground">
@@ -210,12 +210,12 @@ const Notifications = () => {
                               })}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => markAsRead(notification.id)}
-                              className="h-8 w-8"
+                              className="h-10 w-10 sm:h-8 sm:w-8"
                             >
                               <Check className="h-4 w-4" />
                             </Button>
@@ -223,7 +223,7 @@ const Notifications = () => {
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteNotification(notification.id)}
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-10 w-10 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -231,7 +231,7 @@ const Notifications = () => {
                         </div>
                         {notification.link && (
                           <Link to={notification.link}>
-                            <Button variant="link" className="p-0 h-auto mt-2 text-xs">
+                            <Button variant="link" className="p-0 h-auto mt-2 text-xs min-h-[44px] flex items-center">
                               View details →
                             </Button>
                           </Link>
@@ -249,25 +249,25 @@ const Notifications = () => {
 
       {/* Read Notifications */}
       {readNotifications.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Earlier</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold">Earlier</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
                 {readNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="relative p-4 hover:bg-muted/50 transition-colors"
+                    className="relative p-3 sm:p-4 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="mt-1 text-2xl opacity-50">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="mt-1 text-xl sm:text-2xl opacity-50 hidden sm:block">
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h3 className="font-medium text-muted-foreground text-sm sm:text-base">
                                 {notification.title}
                               </h3>
                               <Badge
@@ -277,7 +277,7 @@ const Notifications = () => {
                                 {notification.type}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            <p className="text-xs sm:text-sm text-muted-foreground mb-2">
                               {notification.message}
                             </p>
                             <p className="text-xs text-muted-foreground">
@@ -290,14 +290,14 @@ const Notifications = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => deleteNotification(notification.id)}
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            className="h-10 w-10 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                         {notification.link && (
                           <Link to={notification.link}>
-                            <Button variant="link" className="p-0 h-auto mt-2 text-xs">
+                            <Button variant="link" className="p-0 h-auto mt-2 text-xs min-h-[44px] flex items-center">
                               View details →
                             </Button>
                           </Link>
@@ -318,7 +318,7 @@ const Notifications = () => {
           <CardContent className="py-12 text-center">
             <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-semibold mb-2">No notifications</h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               You're all caught up! New notifications will appear here.
             </p>
           </CardContent>
