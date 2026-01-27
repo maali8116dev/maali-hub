@@ -471,7 +471,7 @@ const ReviewApplication = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -494,10 +494,10 @@ const ReviewApplication = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Applicant Information */}
           <Card>
-            <CardHeader>
-              <CardTitle>Applicant Information</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Applicant Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
                   <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
@@ -533,10 +533,10 @@ const ReviewApplication = () => {
 
           {/* Project Details */}
           <Card>
-            <CardHeader>
-              <CardTitle>Project Details</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Project Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div>
                 <Label className="text-sm text-muted-foreground">Project Title</Label>
                 <p className="font-medium mt-1">{application.projectTitle}</p>
@@ -586,10 +586,10 @@ const ReviewApplication = () => {
             </Card>
           ) : documents && documents.length > 0 ? (
             <Card>
-              <CardHeader>
-                <CardTitle>Supporting Documents</CardTitle>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Supporting Documents</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                 <div className="space-y-2">
                   {documents.map((doc) => (
                     <div
@@ -610,6 +610,7 @@ const ReviewApplication = () => {
                         size="sm"
                         onClick={() => handleDownload(doc)}
                         disabled={downloadingId === doc.id}
+                        className="min-h-[44px] sm:min-h-0"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         {downloadingId === doc.id ? "Downloading..." : "Download"}
@@ -626,13 +627,13 @@ const ReviewApplication = () => {
         <div className="space-y-6">
           {isReviewer ? (
             <Card>
-              <CardHeader>
-                <CardTitle>Review Actions</CardTitle>
-                <CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Review Actions</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Submit your review decision for this application
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <Label htmlFor="reviewNotes">Review Notes</Label>
                   <Textarea
@@ -679,16 +680,16 @@ const ReviewApplication = () => {
             </Card>
           ) : isAdmin ? (
             <Card className="border-warning/50 bg-warning/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-warning" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
                   Review Actions Restricted
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Administrative accounts cannot perform review actions
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
                   <p className="text-sm text-foreground mb-2">
                     <strong>Role Separation Policy:</strong>
@@ -709,13 +710,13 @@ const ReviewApplication = () => {
             </Card>
           ) : (
             <Card className="border-muted">
-              <CardHeader>
-                <CardTitle>Access Restricted</CardTitle>
-                <CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Access Restricted</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   You do not have permission to review applications
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                 <p className="text-sm text-muted-foreground">
                   Only reviewers can perform review actions on applications.
                 </p>
@@ -725,10 +726,10 @@ const ReviewApplication = () => {
 
           {/* Application Metadata */}
           <Card>
-            <CardHeader>
-              <CardTitle>Application Details</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Application Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-3 text-sm p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Submitted:</span>
                 <span className="font-medium">

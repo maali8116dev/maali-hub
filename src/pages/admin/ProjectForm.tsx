@@ -177,17 +177,21 @@ const ProjectForm = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             {isEditing ? "Edit Project" : "Create New Project"}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             {isEditing ? "Update project details" : "Fill in the details to create a new funding opportunity"}
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate("/admin/projects")}>
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/admin/projects")}
+          className="w-full sm:w-auto min-h-[44px]"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Projects
         </Button>
@@ -198,11 +202,11 @@ const ProjectForm = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Project Information</CardTitle>
-                <CardDescription>Enter the basic information for the funding opportunity</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Project Information</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Enter the basic information for the funding opportunity</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <Label htmlFor="title">Title *</Label>
                   <Input
@@ -230,7 +234,7 @@ const ProjectForm = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="category">Category *</Label>
                     <Select
@@ -275,7 +279,7 @@ const ProjectForm = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="deadline">Deadline *</Label>
                     <Input
@@ -319,11 +323,11 @@ const ProjectForm = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Additional Details</CardTitle>
-                <CardDescription>Optional information about requirements and eligibility</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Additional Details</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Optional information about requirements and eligibility</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <Label htmlFor="requirements">Requirements</Label>
                   <Textarea
@@ -351,11 +355,11 @@ const ProjectForm = () => {
           <div className="space-y-6">
             {/* Image */}
             <Card>
-              <CardHeader>
-                <CardTitle>Project Image</CardTitle>
-                <CardDescription>Upload an image for this project (optional)</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Project Image</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Upload an image for this project (optional)</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <ImageUpload
                   value={imageUrl || undefined}
                   onChange={(url) => setValue("imageUrl", url || "")}
@@ -378,10 +382,10 @@ const ProjectForm = () => {
 
             {/* Application Settings */}
             <Card>
-              <CardHeader>
-                <CardTitle>Application Settings</CardTitle>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Application Settings</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <Label htmlFor="applicationFee">Application Fee</Label>
                   <Input
@@ -439,13 +443,13 @@ const ProjectForm = () => {
 
             {/* Featured Toggle */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-500" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   Featured Project
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="featured">Show on Homepage</Label>
@@ -464,16 +468,16 @@ const ProjectForm = () => {
 
             {/* Actions */}
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="p-4 pt-6 sm:p-6">
                 <div className="space-y-2">
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full min-h-[44px]" disabled={isSubmitting}>
                     <Save className="h-4 w-4 mr-2" />
                     {isSubmitting ? "Saving..." : isEditing ? "Update Project" : "Create Project"}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full min-h-[44px]"
                     onClick={() => navigate("/admin/projects")}
                   >
                     Cancel

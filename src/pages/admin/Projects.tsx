@@ -73,15 +73,18 @@ const AdminProjects = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Manage Projects</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">Manage Projects</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Create, edit, and manage funding opportunities
           </p>
         </div>
-        <Button onClick={() => navigate("/admin/projects/new")}>
+        <Button 
+          onClick={() => navigate("/admin/projects/new")}
+          className="w-full sm:w-auto min-h-[44px]"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Create Project
         </Button>
@@ -126,48 +129,56 @@ const AdminProjects = () => {
           </CardHeader>
           <CardContent>
             {filteredProjects.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {filteredProjects.map((project) => (
                   <div
                     key={project.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold">{project.title}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="font-semibold text-sm sm:text-base truncate">{project.title}</h3>
                         {getStatusBadge(project.status)}
-                        <Badge variant="outline">{project.category}</Badge>
+                        <Badge variant="outline" className="text-xs">{project.category}</Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>Deadline: {new Date(project.deadline).toLocaleDateString()}</span>
-                        <span>{project.currentApplicants} applicants</span>
-                        <span>{project.fundingAmount}</span>
-                        <span>{project.location}</span>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                        <span className="whitespace-nowrap">Deadline: {new Date(project.deadline).toLocaleDateString()}</span>
+                        <span className="whitespace-nowrap">{project.currentApplicants} applicants</span>
+                        <span className="whitespace-nowrap">{project.fundingAmount}</span>
+                        <span className="whitespace-nowrap">{project.location}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => navigate(`/admin/projects/${project.id}`)}
+                        className="min-h-[44px] sm:min-h-0"
+                        title="View project"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4 w-4 sm:mr-0" />
+                        <span className="sm:hidden ml-2">View</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
+                        className="min-h-[44px] sm:min-h-0"
+                        title="Edit project"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-4 w-4 sm:mr-0" />
+                        <span className="sm:hidden ml-2">Edit</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-destructive"
+                        className="text-destructive min-h-[44px] sm:min-h-0"
                         onClick={() => handleDelete(project.id)}
                         disabled={deleteProject.isPending}
+                        title="Delete project"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 sm:mr-0" />
+                        <span className="sm:hidden ml-2">Delete</span>
                       </Button>
                     </div>
                   </div>

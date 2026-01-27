@@ -56,10 +56,10 @@ const ReviewerApplications = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">All Applications</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Review and manage all submitted applications
           </p>
         </div>
@@ -81,10 +81,10 @@ const ReviewerApplications = () => {
 
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">All Applications</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Review and manage all submitted applications
           </p>
         </div>
@@ -100,17 +100,17 @@ const ReviewerApplications = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">All Applications</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Review and manage all submitted applications
         </p>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -118,7 +118,7 @@ const ReviewerApplications = () => {
                 placeholder="Search by applicant name or project title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 min-h-[44px] sm:min-h-0"
               />
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -133,6 +133,7 @@ const ReviewerApplications = () => {
                   variant={statusFilter === filter.value ? "default" : "outline"}
                   size="sm"
                   onClick={() => setStatusFilter(filter.value)}
+                  className="min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial"
                 >
                   {filter.label}
                 </Button>
@@ -144,34 +145,34 @@ const ReviewerApplications = () => {
 
       {/* Applications List */}
       <Card>
-        <CardHeader>
-          <CardTitle>Applications ({filteredApplications.length})</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Applications ({filteredApplications.length})</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           {filteredApplications.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground text-sm sm:text-base">
               No applications found matching your criteria.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredApplications.map((app) => (
                 <div
                   key={app.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold">{app.applicantName}</h3>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                      <h3 className="font-semibold text-sm sm:text-base truncate">{app.applicantName}</h3>
                       {getStatusBadge(app.status)}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                      <span className="font-medium">{app.projectTitle}</span>
-                      <span>•</span>
-                      <span>Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                      <span className="font-medium truncate">{app.projectTitle}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="whitespace-nowrap">Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
                       {app.fundingAmount && (
                         <>
-                          <span>•</span>
-                          <span>{app.fundingAmount}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="whitespace-nowrap">{app.fundingAmount}</span>
                         </>
                       )}
                     </div>
@@ -180,6 +181,7 @@ const ReviewerApplications = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => navigate(`/reviewer/applications/${app.id}`)}
+                    className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Review
