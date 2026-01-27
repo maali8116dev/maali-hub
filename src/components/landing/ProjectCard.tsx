@@ -147,10 +147,10 @@ const ProjectCard = (props: ProjectCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter className="pt-0 flex gap-2">
+      <CardFooter className="pt-0 flex flex-col sm:flex-row gap-2">
         <Button 
           variant="outline" 
-          className="flex-1"
+          className="flex-1 min-h-[44px] w-full sm:w-auto"
           asChild
         >
           <Link to={`/projects/${id}`}>
@@ -160,7 +160,7 @@ const ProjectCard = (props: ProjectCardProps) => {
         </Button>
         <Button 
           variant={!isDisabled ? 'hero' : 'outline'} 
-          className="flex-1"
+          className="flex-1 min-h-[44px] w-full sm:w-auto"
           disabled={isDisabled}
           onClick={() => {
             if (isDisabled) return;

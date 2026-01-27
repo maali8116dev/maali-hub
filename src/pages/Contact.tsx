@@ -85,25 +85,25 @@ const Contact = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="Enter your first name" />
+                    <Input id="firstName" placeholder="Enter your first name" className="h-12 sm:h-10" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Enter your last name" />
+                    <Input id="lastName" placeholder="Enter your last name" className="h-12 sm:h-10" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter your email address" />
+                  <Input id="email" type="email" placeholder="Enter your email address" className="h-12 sm:h-10" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="Enter your phone number" />
+                  <Input id="phone" type="tel" placeholder="Enter your phone number" className="h-12 sm:h-10" />
                 </div>
 
                 <div className="space-y-2">
@@ -149,7 +149,7 @@ const Contact = () => {
                   />
                 </div>
 
-                <Button className="w-full" variant="hero" size="lg">
+                <Button className="w-full min-h-[48px]" variant="hero" size="lg">
                   Send Message
                 </Button>
               </CardContent>

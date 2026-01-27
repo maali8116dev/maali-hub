@@ -44,13 +44,13 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold bg-gradient-hero bg-clip-text text-transparent mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-hero bg-clip-text text-transparent mb-4 sm:mb-6">
             About Maali
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
             Maali is more than a platform – it's a movement to unlock the potential of African entrepreneurs 
             through accessible funding, mentorship, and community support.
           </p>
@@ -156,16 +156,16 @@ const About = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-gradient-primary rounded-2xl p-8 md:p-12 text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Business?</h2>
-          <p className="text-xl mb-8 opacity-90">
+        <div className="text-center bg-gradient-primary rounded-2xl p-6 sm:p-8 md:p-12 text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Ready to Transform Your Business?</h2>
+          <p className="text-lg sm:text-xl mb-6 sm:mb-8 opacity-90">
             Join thousands of African entrepreneurs who are building the future with Maali
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" size="lg">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button variant="secondary" size="lg" className="min-h-[48px]">
               Apply for Funding
             </Button>
-            <Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+            <Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20 min-h-[48px]">
               Become a Partner
             </Button>
           </div>

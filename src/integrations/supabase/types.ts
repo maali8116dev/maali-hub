@@ -62,6 +62,7 @@ export type Database = {
           file_size: number | null
           file_type: string | null
           id: string
+          project_id: number | null
           user_id: string | null
         }
         Insert: {
@@ -72,6 +73,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          project_id?: number | null
           user_id?: string | null
         }
         Update: {
@@ -82,6 +84,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          project_id?: number | null
           user_id?: string | null
         }
         Relationships: [
@@ -90,6 +93,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

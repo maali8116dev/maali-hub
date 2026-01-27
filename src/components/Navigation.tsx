@@ -113,11 +113,13 @@ const Navigation = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button - larger touch target */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-foreground hover:text-primary p-2"
+              className="text-foreground hover:text-primary p-3 -m-1 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -127,43 +129,61 @@ const Navigation = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-card border-t border-border">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="md:hidden bg-card border-t border-border max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="px-3 pt-3 pb-4 space-y-1">
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                  "block px-4 py-3 rounded-lg text-base font-medium transition-colors min-h-[48px] flex items-center",
                   location.pathname === item.href 
                     ? "text-primary bg-primary/10" 
-                    : "text-foreground hover:text-primary"
+                    : "text-foreground hover:text-primary hover:bg-muted/50"
                 )}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            <div className="pt-4 pb-2 space-y-2">
-              <div className="flex items-center justify-between px-3 py-2">
-                <span className="text-sm text-muted-foreground">Theme</span>
-                <ThemeToggle />
+            
+            {/* Language selector for mobile */}
+            <div className="px-4 py-3 border-t border-border mt-2">
+              <p className="text-sm text-muted-foreground mb-2">Language</p>
+              <div className="flex gap-2 flex-wrap">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={cn(
+                      "px-3 py-2 text-sm rounded-md min-h-[40px] transition-colors",
+                      currentLang === lang.code 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted hover:bg-muted/80"
+                    )}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
               </div>
+            </div>
+            
+            <div className="pt-3 pb-2 space-y-2 border-t border-border mt-2">
               {user ? (
                 <>
-                  <Button variant="ghost" className="w-full" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}>
+                  <Button variant="ghost" className="w-full min-h-[48px] justify-start" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}>
                     {t('navigation:dashboard')}
                   </Button>
-                  <Button variant="outline" className="w-full" onClick={signOut}>
+                  <Button variant="outline" className="w-full min-h-[48px]" onClick={signOut}>
                     {t('navigation:signOut')}
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
+                  <Button variant="outline" className="w-full min-h-[48px]" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>
                     {t('navigation:login')}
                   </Button>
-                  <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>
+                  <Button variant="hero" className="w-full min-h-[48px]" onClick={() => { navigate("/auth"); setIsMenuOpen(false); }}>
                     {t('navigation:getStarted')}
                   </Button>
                 </>

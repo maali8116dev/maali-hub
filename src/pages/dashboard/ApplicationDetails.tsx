@@ -79,13 +79,13 @@ const ApplicationDetails = () => {
       // uploaded during application process but not properly linked)
       let unlinkedDocs: typeof linkedDocs = [];
       if (application?.user_id && application?.project_id) {
-        const { data: userDocs, error: userError } = await supabase
+        const { data: userDocs, error: userError } = await (supabase
           .from("application_documents")
           .select("*")
           .eq("user_id", application.user_id)
           .eq("project_id", application.project_id)
           .is("application_id", null)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false }) as any);
 
         if (userError) {
           console.error("Error fetching user documents:", userError);
@@ -200,20 +200,20 @@ const ApplicationDetails = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="w-fit sm:w-10 h-10 min-w-[44px]">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">
               {application.project?.title || "Application Details"}
             </h1>
-            <p className="text-muted-foreground">
-              Application ID: {application.id.slice(0, 8)}...
+            <p className="text-muted-foreground text-sm break-all">
+              ID: {application.id.slice(0, 8)}...
             </p>
           </div>
         </div>
-        <Badge className={getStatusBadge(application.status || "pending")}>
+        <Badge className={`${getStatusBadge(application.status || "pending")} flex-shrink-0 w-fit`}>
           {formatStatus(application.status || "pending")}
         </Badge>
       </div>
@@ -470,13 +470,13 @@ const ApplicationDetails = () => {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-4">
-        <Button variant="outline" onClick={() => navigate("/dashboard/applications")}>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <Button variant="outline" onClick={() => navigate("/dashboard/applications")} className="min-h-[48px] w-full sm:w-auto">
           Back to Applications
         </Button>
         {application.status === "draft" && (
-          <Link to={`/projects/${application.project_id}/apply`}>
-            <Button>Continue Application</Button>
+          <Link to={`/projects/${application.project_id}/apply`} className="w-full sm:w-auto">
+            <Button className="min-h-[48px] w-full">Continue Application</Button>
           </Link>
         )}
       </div>
