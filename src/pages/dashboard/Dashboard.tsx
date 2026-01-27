@@ -146,8 +146,8 @@ const Dashboard = () => {
       )}
 
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Welcome back! Here's an overview of your activity.
         </p>
       </div>
@@ -156,54 +156,54 @@ const Dashboard = () => {
       {isLoadingStats ? (
         <DashboardStatsSkeleton />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalApplications}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.totalApplications}</div>
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 All time applications
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <Clock className="h-4 w-4 text-warning" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-warning hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pending}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.pending}</div>
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 Under review
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Approved</CardTitle>
-              <CheckCircle className="h-4 w-4 text-success" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Approved</CardTitle>
+              <CheckCircle className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.approved}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.approved}</div>
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 Successfully funded
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-              <XCircle className="h-4 w-4 text-destructive" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Rejected</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.rejected}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.rejected}</div>
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 Not selected
               </p>
             </CardContent>
@@ -212,41 +212,41 @@ const Dashboard = () => {
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
+            <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2 space-y-2">
             <Link to="/projects">
-              <Button variant="hero" className="w-full justify-start">
-                <Plus className="h-4 w-4 mr-2" />
-                Start New Application
-                <ArrowRight className="h-4 w-4 ml-auto" />
+              <Button variant="hero" className="w-full justify-start min-h-[44px]">
+                <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Start New Application</span>
+                <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
             <Link to="/projects">
-              <Button variant="outline" className="w-full justify-start">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Browse Opportunities
-                <ArrowRight className="h-4 w-4 ml-auto" />
+              <Button variant="outline" className="w-full justify-start min-h-[44px]">
+                <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Browse Opportunities</span>
+                <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
             <Link to="/dashboard/applications">
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="h-4 w-4 mr-2" />
-                View All Applications
-                <ArrowRight className="h-4 w-4 ml-auto" />
+              <Button variant="outline" className="w-full justify-start min-h-[44px]">
+                <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">View All Applications</span>
+                <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Profile Completion</CardTitle>
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
+            <CardTitle className="text-base sm:text-lg">Profile Completion</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Profile Status</span>
@@ -261,7 +261,7 @@ const Dashboard = () => {
                 ></div>
               </div>
               <Link to="/dashboard/profile">
-                <Button variant="link" className="p-0 h-auto">
+                <Button variant="link" className="p-0 h-auto min-h-[44px] flex items-center">
                   {profileCompletion < 100 ? "Complete your profile →" : "View your profile →"}
                 </Button>
               </Link>
@@ -272,36 +272,36 @@ const Dashboard = () => {
 
       {/* Recent Applications */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Applications</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Recent Applications</CardTitle>
           <Link to="/dashboard/applications">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="min-h-[44px] w-full sm:w-auto">
               View All
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           {isLoadingApplications ? (
             <ApplicationListSkeleton count={3} />
           ) : recentApplications.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentApplications.map((app: ApplicationWithProject) => (
                 <div
                   key={app.id}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors gap-3"
                 >
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{app.projectTitle}</h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span>{app.sector}</span>
-                      <span>•</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{app.projectTitle}</h3>
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
+                      <span className="truncate">{app.sector}</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>Submitted {formatDate(app.submittedAt)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border ${getStatusBadge(
                         app.status
                       )}`}
                     >

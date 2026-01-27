@@ -84,15 +84,15 @@ const Documents = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">My Documents</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Documents</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             View and manage your uploaded documents
           </p>
         </div>
-        <Button onClick={() => navigate("/projects")}>
+        <Button onClick={() => navigate("/projects")} className="w-full sm:w-auto min-h-[44px]">
           <Upload className="h-4 w-4 mr-2" />
           Apply for Funding
         </Button>
@@ -100,14 +100,14 @@ const Documents = () => {
 
       {/* Search */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="p-4 sm:pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search documents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-11 sm:h-10"
             />
           </div>
         </CardContent>
@@ -116,7 +116,7 @@ const Documents = () => {
       {/* Documents List */}
       {isLoading ? (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 sm:pt-6">
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
@@ -124,40 +124,44 @@ const Documents = () => {
         </Card>
       ) : filteredDocuments.length > 0 ? (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">
               {filteredDocuments.length} Document{filteredDocuments.length !== 1 ? "s" : ""}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3">
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-accent/50 transition-colors gap-3"
                 >
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{doc.fileName}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <p className="font-medium truncate text-sm sm:text-base">{doc.fileName}</p>
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
                         <span>{formatFileSize(doc.fileSize)}</span>
                         <span>•</span>
                         <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="flex-shrink-0">
+                    <Badge variant="secondary" className="flex-shrink-0 hidden sm:inline-flex">
                       {getFileTypeLabel(doc.fileType)}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-2 justify-end sm:ml-4">
+                    <Badge variant="secondary" className="flex-shrink-0 sm:hidden">
+                      {getFileTypeLabel(doc.fileType)}
+                    </Badge>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDownload(doc)}
                       disabled={downloadingId === doc.id}
+                      className="min-h-[44px] min-w-[44px]"
                     >
                       {downloadingId === doc.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -169,7 +173,7 @@ const Documents = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setDeleteConfirm(doc)}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 min-h-[44px] min-w-[44px]"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

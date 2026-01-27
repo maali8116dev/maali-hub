@@ -12,28 +12,28 @@ const AdminDashboard = () => {
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(10);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Overview of platform activity and statistics
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.totalUsers.toLocaleString() || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.totalUsers.toLocaleString() || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   Registered users
                 </p>
               </>
@@ -42,17 +42,17 @@ const AdminDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Projects</CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.totalProjects || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.totalProjects || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   {stats?.activeProjects || 0} active opportunities
                 </p>
               </>
@@ -61,17 +61,17 @@ const AdminDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.totalApplications.toLocaleString() || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.totalApplications.toLocaleString() || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   All time submissions
                 </p>
               </>
@@ -80,17 +80,17 @@ const AdminDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending Reviews</CardTitle>
+            <Clock className="h-4 w-4 text-warning hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.pendingApplications || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.pendingApplications || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   Awaiting review
                 </p>
               </>
@@ -99,17 +99,17 @@ const AdminDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Approved</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500 hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.approvedApplications || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.approvedApplications || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   Successfully approved
                 </p>
               </>
@@ -118,17 +118,17 @@ const AdminDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium">Rejected</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             {statsLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <>
-                <div className="text-2xl font-bold">{stats?.rejectedApplications || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl sm:text-2xl font-bold">{stats?.rejectedApplications || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                   Not approved
                 </p>
               </>
@@ -139,33 +139,33 @@ const AdminDashboard = () => {
 
       {/* Quick Actions */}
       <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <Link to="/admin/projects">
-              <Button variant="outline" className="w-full">
-                <Briefcase className="h-4 w-4 mr-2" />
-                Manage Projects
+              <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
+                <Briefcase className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="truncate">Manage Projects</span>
               </Button>
             </Link>
             <Link to="/admin/applications">
-              <Button variant="outline" className="w-full">
-                <FileText className="h-4 w-4 mr-2" />
-                Review Applications
+              <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
+                <FileText className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="truncate">Review Apps</span>
               </Button>
             </Link>
             <Link to="/admin/users">
-              <Button variant="outline" className="w-full">
-                <Users className="h-4 w-4 mr-2" />
-                Manage Users
+              <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
+                <Users className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="truncate">Manage Users</span>
               </Button>
             </Link>
             <Link to="/admin/activity-logs">
-              <Button variant="outline" className="w-full">
-                <Activity className="h-4 w-4 mr-2" />
-                View Activity Logs
+              <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
+                <Activity className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="truncate">Activity Logs</span>
               </Button>
             </Link>
           </div>
@@ -174,17 +174,17 @@ const AdminDashboard = () => {
 
       {/* Recent Activity */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recent Activity</CardTitle>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Recent Activity</CardTitle>
           <Link to="/admin/activity-logs">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="min-h-[44px] w-full sm:w-auto">
               View All
             </Button>
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           {activityLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex-1 space-y-2">
@@ -198,25 +198,25 @@ const AdminDashboard = () => {
           ) : !recentActivity || recentActivity.length === 0 ? (
             <div className="text-center py-8">
               <Activity className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mt-2">No recent activity</p>
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base">No recent activity</p>
               <p className="text-xs text-muted-foreground">
                 Activity will appear here as users interact with the platform
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2"
                 >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-medium truncate">{activity.description}</p>
                     <p className="text-xs text-muted-foreground capitalize">
                       {activity.actionType} · {activity.entityType.replace('_', ' ')}
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                   </span>
                 </div>

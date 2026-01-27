@@ -143,27 +143,27 @@ const ReviewerDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Reviewer Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold">Reviewer Dashboard</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Overview of applications and review statistics
         </p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.title} className={stat.className}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <Icon className="h-4 w-4" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">{stat.title}</CardTitle>
+                <Icon className="h-4 w-4 hidden sm:block" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+              <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+                <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground mt-1 hidden sm:block">{stat.description}</p>
               </CardContent>
             </Card>
           );
@@ -171,50 +171,50 @@ const ReviewerDashboard = () => {
       </div>
 
       {/* Additional Stats */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Review Performance</CardTitle>
-            <CardDescription>Your review statistics</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Review Performance</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Your review statistics</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Applications</span>
-                <span className="text-lg font-semibold">{stats.total}</span>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between py-1">
+                <span className="text-xs sm:text-sm text-muted-foreground">Total Applications</span>
+                <span className="text-base sm:text-lg font-semibold">{stats.total}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Approval Rate</span>
-                <span className="text-lg font-semibold">{stats.approvalRate}%</span>
+              <div className="flex items-center justify-between py-1">
+                <span className="text-xs sm:text-sm text-muted-foreground">Approval Rate</span>
+                <span className="text-base sm:text-lg font-semibold">{stats.approvalRate}%</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Pending Reviews</span>
-                <span className="text-lg font-semibold">{stats.pending}</span>
+              <div className="flex items-center justify-between py-1">
+                <span className="text-xs sm:text-sm text-muted-foreground">Pending Reviews</span>
+                <span className="text-base sm:text-lg font-semibold">{stats.pending}</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
-            <CardDescription>Latest submissions requiring review</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Recent Applications</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Latest submissions requiring review</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {recentApplications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No pending applications at this time.</p>
+                <p className="text-sm sm:text-base">No pending applications at this time.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {recentApplications.map((app) => (
                   <div
                     key={app.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors gap-2"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{app.applicantName}</p>
-                      <p className="text-xs text-muted-foreground">{app.projectTitle}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-xs sm:text-sm truncate">{app.applicantName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{app.projectTitle}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(app.submittedAt).toLocaleDateString()}
                       </p>
@@ -223,9 +223,10 @@ const ReviewerDashboard = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(`/reviewer/applications/${app.id}`)}
-                      className="ml-2"
+                      className="min-h-[44px] min-w-[44px] w-full sm:w-auto"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 sm:mr-0" />
+                      <span className="sm:hidden ml-2">View</span>
                     </Button>
                   </div>
                 ))}
