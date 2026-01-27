@@ -3,11 +3,13 @@ import { ArrowRight, Users, Globe, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-agriculture.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { t } = useTranslation('landing');
 
   const handleApplyClick = () => {
@@ -15,7 +17,12 @@ const HeroSection = () => {
       // User is logged in, redirect to projects or application form
       navigate("/projects");
     } else {
-      // User not logged in, redirect to auth page
+      // User not logged in, show toast and redirect to auth page
+      toast({
+        title: "Login Required",
+        description: "Please log in or create an account to start applying for funding opportunities.",
+        variant: "default",
+      });
       navigate("/auth");
     }
   };

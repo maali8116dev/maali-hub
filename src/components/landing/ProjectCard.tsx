@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, DollarSign, Users, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 // Props for legacy mock data (used in FeaturedProjects)
 interface LegacyProjectCardProps {
@@ -39,6 +41,8 @@ function isDatabaseProject(props: ProjectCardProps): props is DatabaseProjectCar
 
 const ProjectCard = (props: ProjectCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   // Normalize props based on type
   const id = props.id;
@@ -158,7 +162,19 @@ const ProjectCard = (props: ProjectCardProps) => {
           variant={!isDisabled ? 'hero' : 'outline'} 
           className="flex-1"
           disabled={isDisabled}
-          onClick={() => !isDisabled && navigate(`/projects/${id}/apply`)}
+          onClick={() => {
+            if (isDisabled) return;
+            if (!user) {
+              toast({
+                title: "Login Required",
+                description: "Please log in or create an account to apply for this opportunity.",
+                variant: "default",
+              });
+              navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
+            } else {
+              navigate(`/projects/${id}/apply`);
+            }
+          }}
         >
           {isDisabled ? 'Closed' : 'Apply'}
         </Button>

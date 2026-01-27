@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit, CheckCircle2, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDraft } from "@/hooks/useUserDrafts";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", id],
@@ -301,6 +306,18 @@ const ProjectDetails = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Login Banner */}
+                {!user && !isDisabled && (
+                  <Alert className="mb-4 border-blue-500/50 bg-blue-500/5">
+                    <LogIn className="h-4 w-4 text-blue-500" />
+                    <AlertTitle className="text-blue-800 dark:text-blue-200">
+                      Login Required
+                    </AlertTitle>
+                    <AlertDescription className="text-blue-700 dark:text-blue-300">
+                      Please log in or create an account to apply for this opportunity.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 {draft ? (
                   <>
                     <div className="bg-muted/50 rounded-lg p-3 mb-4">
@@ -317,7 +334,18 @@ const ProjectDetails = () => {
                       variant="hero"
                       size="lg"
                       disabled={isDisabled}
-                      onClick={() => navigate(`/projects/${id}/apply`)}
+                      onClick={() => {
+                        if (!user) {
+                          toast({
+                            title: "Login Required",
+                            description: "Please log in or create an account to continue your application.",
+                            variant: "default",
+                          });
+                          navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
+                        } else {
+                          navigate(`/projects/${id}/apply`);
+                        }
+                      }}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Continue Draft
@@ -327,7 +355,18 @@ const ProjectDetails = () => {
                       variant="outline"
                       size="lg"
                       disabled={isDisabled}
-                      onClick={() => navigate(`/projects/${id}/apply?new=true`)}
+                      onClick={() => {
+                        if (!user) {
+                          toast({
+                            title: "Login Required",
+                            description: "Please log in or create an account to start a new application.",
+                            variant: "default",
+                          });
+                          navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply?new=true` } } });
+                        } else {
+                          navigate(`/projects/${id}/apply?new=true`);
+                        }
+                      }}
                     >
                       Start New Application
                     </Button>
@@ -345,7 +384,18 @@ const ProjectDetails = () => {
                       variant="hero"
                       size="lg"
                       disabled={isDisabled}
-                      onClick={() => navigate(`/projects/${id}/apply`)}
+                      onClick={() => {
+                        if (!user) {
+                          toast({
+                            title: "Login Required",
+                            description: "Please log in or create an account to apply for this opportunity.",
+                            variant: "default",
+                          });
+                          navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
+                        } else {
+                          navigate(`/projects/${id}/apply`);
+                        }
+                      }}
                     >
                       {isDisabled ? "Application Closed" : "Begin Application"}
                     </Button>

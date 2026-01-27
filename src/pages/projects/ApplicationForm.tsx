@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, useNavigate, } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft } from "lucide-react";
 import MultiStepApplicationForm from "@/components/application/MultiStepApplicationForm";
 import { useApplicationFormStore } from "@/stores/applicationForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-const ApplicationForm = () => {
+const ApplicationFormContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { updateFormData } = useApplicationFormStore();
@@ -51,6 +52,14 @@ const ApplicationForm = () => {
       </main>
       <Footer />
     </div>
+  );
+};
+
+const ApplicationForm = () => {
+  return (
+    <ProtectedRoute>
+      <ApplicationFormContent />
+    </ProtectedRoute>
   );
 };
 

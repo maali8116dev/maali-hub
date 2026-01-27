@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -49,11 +49,30 @@ const DocumentUploadSection = ({
     documents,
   } = useDocumentUpload();
 
+  // Notify parent when documents change (using ref to prevent infinite loops)
+  const prevDocumentsRef = useRef<UploadedDocument[]>([]);
+  
+  useEffect(() => {
+    // Only notify if documents actually changed (by comparing IDs)
+    const prevIds = prevDocumentsRef.current.map(d => d.id).sort().join(',');
+    const currentIds = documents.map(d => d.id).sort().join(',');
+    
+    if (prevIds !== currentIds) {
+      prevDocumentsRef.current = documents;
+      onDocumentsChange?.(documents);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documents]); // onDocumentsChange intentionally omitted to prevent infinite loop
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const uploadedDocs = await uploadDocuments(Array.from(files), applicationId);
-      onDocumentsChange?.([...documents, ...uploadedDocs]);
+      try {
+        await uploadDocuments(Array.from(files), applicationId);
+        // The useEffect will automatically notify parent when documents state updates
+      } catch (error) {
+        console.error("File upload error:", error);
+      }
     }
     // Reset input so same file can be selected again
     if (fileInputRef.current) {

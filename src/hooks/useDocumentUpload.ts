@@ -95,11 +95,23 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       ]);
 
       // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
+        console.error("Storage upload error:", uploadError);
+        // Provide more specific error message
+        if (uploadError.message.includes("new row violates row-level security")) {
+          throw new Error("Permission denied. Please check your account permissions.");
+        } else if (uploadError.message.includes("Bucket not found")) {
+          throw new Error("Storage bucket not configured. Please contact support.");
+        } else if (uploadError.message.includes("duplicate")) {
+          throw new Error("A file with this name already exists. Please rename the file.");
+        }
         throw uploadError;
       }
 
@@ -146,16 +158,20 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       setDocuments((prev) => [...prev, uploadedDoc]);
 
       return uploadedDoc;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
       setUploadProgress((prev) =>
         prev.map((p) =>
           p.fileName === file.name ? { ...p, status: "error" } : p
         )
       );
+      
+      // Show more specific error message
+      const errorMessage = error?.message || error?.error_description || `Failed to upload "${file.name}". Please try again.`;
+      
       toast({
         title: "Upload Failed",
-        description: `Failed to upload "${file.name}". Please try again.`,
+        description: errorMessage,
         variant: "destructive",
       });
       return null;

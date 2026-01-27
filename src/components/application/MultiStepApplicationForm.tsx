@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,13 +34,14 @@ import DocumentUploadSection from "./DocumentUploadSection";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
+import { emailSchema } from "@/lib/emailValidation";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
 // Step 1: Company Information Schema
 const step1Schema = z.object({
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
-  contactEmail: z.string().email("Invalid email address"),
+  contactEmail: emailSchema,
   contactPhone: z.string().min(10, "Please enter a valid phone number"),
   location: z.string().min(2, "Location is required"),
 });
@@ -136,6 +137,13 @@ const MultiStepApplicationForm = () => {
       setDraftId(draftId);
     }
   }, [draftId, setDraftId]);
+
+  // Memoize the documents change callback to prevent infinite loops
+  const handleDocumentsChange = useCallback((docs: any[]) => {
+    // Track document IDs in the form store
+    const newIds = docs.map(d => d.id);
+    updateFormData({ uploadedDocumentIds: newIds });
+  }, [updateFormData]);
 
   // Step 4 has no schema - it's just review
   const step4Schema = z.object({});
@@ -576,11 +584,7 @@ const MultiStepApplicationForm = () => {
                   </div>
                   
                   <DocumentUploadSection 
-                    onDocumentsChange={(docs) => {
-                      // Track document IDs in the form store
-                      const newIds = docs.map(d => d.id);
-                      updateFormData({ uploadedDocumentIds: newIds });
-                    }}
+                    onDocumentsChange={handleDocumentsChange}
                   />
                 </div>
               )}

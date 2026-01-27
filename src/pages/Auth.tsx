@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,6 +13,7 @@ import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
+import { emailSchema } from "@/lib/emailValidation";
 
 // Form schemas
 const signInSchema = z.object({
@@ -23,7 +24,7 @@ const signInSchema = z.object({
 const signUpSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: emailSchema,
   password: z.string().min(6, "Password must be at least 6 characters"),
   passwordConfirmation: z.string().min(6, "Password confirmation is required"),
 }).refine((data) => data.password === data.passwordConfirmation, {
@@ -47,7 +48,14 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get return URL from location state, or default to dashboard
+  const getReturnUrl = () => {
+    const from = location.state?.from as { pathname?: string } | undefined;
+    return from?.pathname || "/dashboard";
+  };
 
   // Sign In Form
   const signInForm = useForm<SignInFormValues>({
@@ -79,10 +87,10 @@ const Auth = () => {
     },
   });
 
-  // Check if user is already logged in or arriving from password reset
+  // Check if user is already logged in or arriving from password reset/magic link
   useEffect(() => {
     const checkAuth = async () => {
-      // Check for password reset flow (recovery token in URL)
+      // Check for password reset or magic link flow (token in URL)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const type = hashParams.get("type");
       const accessToken = hashParams.get("access_token");
@@ -93,22 +101,56 @@ const Auth = () => {
         return;
       }
       
+      // ARCHIVED: Magic link callback handling - uncomment to re-enable
+      // Handle magic link callback
+      /*
+      if (type === "magiclink" && accessToken) {
+        // Magic link callback - wait for Supabase to process the token
+        // The onAuthStateChange listener will handle the actual sign-in
+        // Just clear the hash from URL
+        window.history.replaceState(null, "", window.location.pathname);
+        return;
+      }
+      */
+      
       const { data: { session } } = await supabase.auth.getSession();
       if (session && !isPasswordReset) {
-        navigate("/");
+        // If user is already logged in, redirect to return URL or dashboard
+        navigate(getReturnUrl());
       }
     };
     checkAuth();
 
-    // Listen for auth state changes (handles the recovery flow)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth state changes (handles the recovery and magic link flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         setIsPasswordReset(true);
+      } else if (event === "SIGNED_IN" && session) {
+        // ARCHIVED: Magic link sign-in handling - uncomment to re-enable
+        /*
+        // Handle magic link sign-in
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const type = hashParams.get("type");
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnTo = urlParams.get("returnTo");
+        
+        if (type === "magiclink") {
+          toast({
+            title: "Welcome!",
+            description: "You've been signed in successfully.",
+          });
+          // Use returnTo from URL if available, otherwise use getReturnUrl()
+          const redirectPath = returnTo || getReturnUrl();
+          navigate(redirectPath);
+          // Clear the hash and query params from URL
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+        */
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, isPasswordReset]);
+  }, [navigate, isPasswordReset, toast]);
 
   const handleSignUp = async (data: SignUpFormValues) => {
     setIsLoading(true);
@@ -199,8 +241,8 @@ const Auth = () => {
           // Mark that user just signed up to show profile wizard
           localStorage.setItem('justSignedUp', 'true');
           
-          // Redirect to dashboard
-          navigate("/dashboard");
+          // Redirect to return URL or dashboard
+          navigate(getReturnUrl());
         } else {
           // Email confirmation required, but allow access anyway
           // Sign the user in programmatically if possible
@@ -226,7 +268,7 @@ const Auth = () => {
               });
               signUpForm.reset();
               localStorage.setItem('justSignedUp', 'true');
-              navigate("/dashboard");
+              navigate(getReturnUrl());
             }
           } catch (err) {
             // Fallback: show message but don't redirect
@@ -277,12 +319,86 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
-        navigate("/dashboard");
+        navigate(getReturnUrl());
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ARCHIVED: Magic link sign-in handler - uncomment to re-enable
+  const handleMagicLinkSignIn = async () => {
+    const email = signInForm.getValues("email");
+    
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format (basic validation, not using emailSchema to avoid blocking legitimate emails)
+    try {
+      signInSchema.parse({ email, password: "dummy" }); // Just validate email format
+    } catch (error) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Use a simple redirect URL (must be whitelisted in Supabase dashboard)
+      const redirectUrl = `${window.location.origin}/auth`;
+      
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        console.error("Magic link error:", error);
+        
+        // Provide more specific error messages
+        let errorMessage = error.message;
+        if (error.message.includes("email rate limit")) {
+          errorMessage = "Too many requests. Please wait a few minutes before trying again.";
+        } else if (error.message.includes("redirect")) {
+          errorMessage = "Redirect URL not configured. Please contact support.";
+        } else if (error.message.includes("email")) {
+          errorMessage = "Unable to send email. Please check your email address and try again.";
+        }
+        
+        toast({
+          title: "Failed to send magic link",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } else {
+        // Success - magic link sent
+        toast({
+          title: "Check your email",
+          description: "We've sent you a magic link. Click the link in the email to sign in.",
+        });
+      }
+    } catch (error) {
+      console.error("Magic link exception:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -557,6 +673,16 @@ const Auth = () => {
                     required
                   />
                   <div className="flex items-center justify-end">
+                    {/* ARCHIVED: Magic link sign-in - uncomment to re-enable
+                    <button
+                      type="button"
+                      onClick={handleMagicLinkSignIn}
+                      disabled={isLoading}
+                      className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Sign in with magic link
+                    </button>
+                    */}
                     <button
                       type="button"
                       onClick={handleForgotPassword}
@@ -565,11 +691,11 @@ const Auth = () => {
                     >
                       Forgot password?
                     </button>
-                </div>
-                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
+                  </div>
+                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </form>
               </Form>
             </TabsContent>
             
