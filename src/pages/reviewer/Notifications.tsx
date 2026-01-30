@@ -1,104 +1,33 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle } from "lucide-react";
+import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "new_application" | "review_assigned" | "deadline_reminder" | "status_change" | "system";
-  read: boolean;
-  createdAt: string;
-  link?: string;
-}
+import { useNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead, useDeleteNotification, Notification } from "@/hooks/useNotifications";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Notifications = () => {
-  // Mock data - replace with API calls when backend is ready
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "New Application Assigned",
-      message: "A new application for 'AgriTech Innovation Fund' has been assigned to you for review.",
-      type: "new_application",
-      read: false,
-      createdAt: "2024-01-20T10:30:00Z",
-      link: "/reviewer/applications/1",
-    },
-    {
-      id: "2",
-      title: "Review Deadline Approaching",
-      message: "You have 2 days left to complete the review for 'FinTech Mobile Solutions' application.",
-      type: "deadline_reminder",
-      read: false,
-      createdAt: "2024-01-19T14:20:00Z",
-      link: "/reviewer/applications/2",
-    },
-    {
-      id: "3",
-      title: "Application Status Changed",
-      message: "The application for 'Green Energy Innovations' has been updated to 'Under Review'.",
-      type: "status_change",
-      read: false,
-      createdAt: "2024-01-18T09:15:00Z",
-      link: "/reviewer/applications/3",
-    },
-    {
-      id: "4",
-      title: "Review Completed",
-      message: "Your review for 'AI Healthcare Diagnostics' has been successfully submitted.",
-      type: "review_assigned",
-      read: true,
-      createdAt: "2024-01-17T16:45:00Z",
-      link: "/reviewer/applications/4",
-    },
-    {
-      id: "5",
-      title: "New Application Assigned",
-      message: "A new application for 'Women Empowerment Marketplace' requires your review.",
-      type: "new_application",
-      read: true,
-      createdAt: "2024-01-16T11:00:00Z",
-      link: "/reviewer/applications/5",
-    },
-    {
-      id: "6",
-      title: "System Update",
-      message: "Review guidelines have been updated. Please review the new criteria.",
-      type: "system",
-      read: true,
-      createdAt: "2024-01-15T13:30:00Z",
-      link: "/reviewer/settings",
-    },
-    {
-      id: "7",
-      title: "Review Reminder",
-      message: "You have 5 pending applications that need your attention.",
-      type: "deadline_reminder",
-      read: true,
-      createdAt: "2024-01-14T08:00:00Z",
-      link: "/reviewer/pending",
-    },
-  ]);
+  // Fetch real notifications
+  const { data: notifications = [], isLoading } = useNotifications();
+  const markAsRead = useMarkNotificationAsRead();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
+  const deleteNotification = useDeleteNotification();
+  
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAsRead = (id: string) => {
+    markAsRead.mutate(id);
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+  const handleDeleteNotification = (id: string) => {
+    deleteNotification.mutate(id);
   };
 
   const getNotificationIcon = (type: string) => {
@@ -142,13 +71,32 @@ const Notifications = () => {
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline">
+          <Button 
+            onClick={handleMarkAllAsRead} 
+            variant="outline"
+            disabled={markAllAsRead.isPending}
+            className="min-h-[44px]"
+          >
             <CheckCheck className="h-4 w-4 mr-2" />
-            Mark all as read
+            {markAllAsRead.isPending ? "Marking..." : "Mark all as read"}
           </Button>
         )}
       </div>
 
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 sm:p-6">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-3 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -220,7 +168,8 @@ const Notifications = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => markAsRead(notification.id)}
+                              onClick={() => handleMarkAsRead(notification.id)}
+                              disabled={markAsRead.isPending}
                               className="h-8 w-8"
                             >
                               <Check className="h-4 w-4" />
@@ -228,7 +177,8 @@ const Notifications = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => deleteNotification(notification.id)}
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              disabled={deleteNotification.isPending}
                               className="h-8 w-8 text-destructive hover:text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -295,7 +245,8 @@ const Notifications = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => deleteNotification(notification.id)}
+                            onClick={() => handleDeleteNotification(notification.id)}
+                              disabled={deleteNotification.isPending}
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -318,8 +269,11 @@ const Notifications = () => {
         </div>
       )}
 
+        </>
+      )}
+
       {/* Empty State */}
-      {notifications.length === 0 && (
+      {!isLoading && notifications.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
             <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />

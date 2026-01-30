@@ -1,104 +1,34 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCheck, Check, Bell, Trash2 } from "lucide-react";
+import { CheckCheck, Check, Bell, Trash2, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "application" | "system" | "reminder";
-  read: boolean;
-  createdAt: string;
-  link?: string;
-}
+import { useNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead, useDeleteNotification, useDeleteAllNotifications, Notification } from "@/hooks/useNotifications";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Notifications = () => {
-  // Mock data - replace with API calls when backend is ready
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "Application Status Updated",
-      message: "Your application for AgriTech Innovation Fund has been reviewed and is now pending approval.",
-      type: "application",
-      read: false,
-      createdAt: "2024-01-20T10:30:00Z",
-      link: "/dashboard/applications/1",
-    },
-    {
-      id: "2",
-      title: "Application Approved!",
-      message: "Congratulations! Your application for Women in Tech Accelerator has been approved.",
-      type: "application",
-      read: false,
-      createdAt: "2024-01-19T14:20:00Z",
-      link: "/dashboard/applications/2",
-    },
-    {
-      id: "3",
-      title: "Deadline Reminder",
-      message: "You have 3 days left to complete your application for Clean Energy Initiative.",
-      type: "reminder",
-      read: false,
-      createdAt: "2024-01-18T09:15:00Z",
-      link: "/application/3",
-    },
-    {
-      id: "4",
-      title: "Profile Incomplete",
-      message: "Complete your profile to increase your chances of getting funded. 60% complete.",
-      type: "system",
-      read: true,
-      createdAt: "2024-01-17T16:45:00Z",
-      link: "/dashboard/profile",
-    },
-    {
-      id: "5",
-      title: "New Funding Opportunity",
-      message: "A new funding opportunity matching your interests is now available: Healthcare Innovation Lab.",
-      type: "system",
-      read: true,
-      createdAt: "2024-01-16T11:00:00Z",
-      link: "/projects",
-    },
-    {
-      id: "6",
-      title: "Application Submitted",
-      message: "Your application for Fintech for Financial Inclusion has been successfully submitted.",
-      type: "application",
-      read: true,
-      createdAt: "2024-01-15T13:30:00Z",
-      link: "/dashboard/applications/5",
-    },
-    {
-      id: "7",
-      title: "Welcome to Maali!",
-      message: "Thank you for joining Maali. Start by completing your profile and browsing available opportunities.",
-      type: "system",
-      read: true,
-      createdAt: "2024-01-10T08:00:00Z",
-      link: "/dashboard/profile",
-    },
-  ]);
+  // Fetch real notifications
+  const { data: notifications = [], isLoading } = useNotifications();
+  const markAsRead = useMarkNotificationAsRead();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
+  const deleteNotification = useDeleteNotification();
+  const deleteAllNotifications = useDeleteAllNotifications();
+    
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAsRead = (id: string) => {
+    markAsRead.mutate(id);
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+  const handleDeleteNotification = (id: string) => {
+    deleteNotification.mutate(id);
   };
 
   const getNotificationIcon = (type: string) => {
@@ -126,6 +56,30 @@ const Notifications = () => {
   const unreadNotifications = notifications.filter((n) => !n.read);
   const readNotifications = notifications.filter((n) => n.read);
 
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
+            Stay updated on your applications and account activity
+          </p>
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 sm:p-6">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-3 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -136,9 +90,14 @@ const Notifications = () => {
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline" className="min-h-[44px] w-full sm:w-auto">
+          <Button 
+            onClick={handleMarkAllAsRead} 
+            variant="outline" 
+            className="min-h-[44px] w-full sm:w-auto"
+            disabled={markAllAsRead.isPending}
+          >
             <CheckCheck className="h-4 w-4 mr-2" />
-            Mark all as read
+            {markAllAsRead.isPending ? "Marking..." : "Mark all as read"}
           </Button>
         )}
       </div>
@@ -214,16 +173,18 @@ const Notifications = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => markAsRead(notification.id)}
+                              onClick={() => handleMarkAsRead(notification.id)}
                               className="h-10 w-10 sm:h-8 sm:w-8"
+                              disabled={markAsRead.isPending}
                             >
                               <Check className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => deleteNotification(notification.id)}
+                              onClick={() => handleDeleteNotification(notification.id)}
                               className="h-10 w-10 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
+                              disabled={deleteNotification.isPending}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -289,7 +250,7 @@ const Notifications = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => deleteNotification(notification.id)}
+                            onClick={() => handleDeleteNotification(notification.id)}
                             className="h-10 w-10 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />

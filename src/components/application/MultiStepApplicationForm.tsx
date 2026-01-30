@@ -37,6 +37,7 @@ import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { emailSchema } from "@/lib/emailValidation";
+import { createNotification } from "@/hooks/useNotifications";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -399,6 +400,51 @@ const MultiStepApplicationForm = () => {
           companyName: formData.companyName,
         },
       });
+
+      // Get project title for notification
+      const { data: project } = await supabase
+        .from("projects")
+        .select("title")
+        .eq("id", formData.projectId)
+        .single();
+
+      const projectTitle = project?.title || "the project";
+
+      // Create notification for the applicant
+      await createNotification(
+        user.id,
+        "Application Submitted",
+        `Your application for "${projectTitle}" has been successfully submitted and is now under review.`,
+        "application",
+        `/dashboard/applications/${application.id}`,
+        {
+          application_id: application.id,
+          project_id: formData.projectId,
+          status: "pending",
+        }
+      );
+
+      // Notify all reviewers about new application
+      const { data: reviewers } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("role", "reviewer");
+
+      if (reviewers) {
+        for (const reviewer of reviewers) {
+          await createNotification(
+            reviewer.user_id,
+            "New Application Assigned",
+            `A new application for "${projectTitle}" requires your review.`,
+            "new_application",
+            `/reviewer/applications/${application.id}`,
+            {
+              application_id: application.id,
+              project_id: formData.projectId,
+            }
+          );
+        }
+      }
 
       // Optionally save application data to profile (if user wants to keep profile updated)
       if (profile && useProfileData) {

@@ -1,60 +1,92 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, Clock, AlertCircle } from "lucide-react";
+import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ReviewerPending = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: applications = [], isLoading, error } = useAdminApplications();
 
-  // Mock data - replace with API calls when backend is ready
-  const pendingApplications = [
-    {
-      id: "1",
-      applicantName: "John Doe",
-      projectTitle: "AgriTech Innovation Fund",
-      submittedAt: "2024-01-15",
-      fundingAmount: "$50,000",
-      daysPending: 2,
-    },
-    {
-      id: "2",
-      applicantName: "Sarah Williams",
-      projectTitle: "FinTech for Financial Inclusion",
-      submittedAt: "2024-01-12",
-      fundingAmount: "$100,000",
-      daysPending: 5,
-    },
-    {
-      id: "3",
-      applicantName: "Michael Brown",
-      projectTitle: "Sustainable Agriculture Initiative",
-      submittedAt: "2024-01-14",
-      fundingAmount: "$30,000",
-      daysPending: 3,
-    },
-    {
-      id: "4",
-      applicantName: "Emily Davis",
-      projectTitle: "Tech Startup Grant",
-      submittedAt: "2024-01-11",
-      fundingAmount: "$75,000",
-      daysPending: 6,
-    },
-  ];
+  // Filter and process pending applications
+  const pendingApplications = useMemo(() => {
+    return applications
+      .filter((app) => app.status === "pending")
+      .map((app) => {
+        const submittedDate = new Date(app.submittedAt);
+        const today = new Date();
+        const daysPending = Math.floor(
+          (today.getTime() - submittedDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        return {
+          id: app.id,
+          applicantName: app.applicantName,
+          projectTitle: app.projectTitle,
+          submittedAt: app.submittedAt,
+          fundingAmount: app.fundingAmount,
+          daysPending,
+        };
+      });
+  }, [applications]);
 
-  const filteredApplications = pendingApplications.filter((app) =>
-    app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    app.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredApplications = useMemo(() => {
+    return pendingApplications.filter(
+      (app) =>
+        app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [pendingApplications, searchQuery]);
 
   // Sort by days pending (oldest first)
-  const sortedApplications = [...filteredApplications].sort(
-    (a, b) => b.daysPending - a.daysPending
-  );
+  const sortedApplications = useMemo(() => {
+    return [...filteredApplications].sort((a, b) => b.daysPending - a.daysPending);
+  }, [filteredApplications]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Pending Review</h1>
+          <p className="text-muted-foreground mt-2">Applications awaiting your review</p>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Pending Review</h1>
+          <p className="text-muted-foreground mt-2">Applications awaiting your review</p>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-destructive">
+              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

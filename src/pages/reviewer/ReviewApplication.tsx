@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
+import { createNotification } from "@/hooks/useNotifications";
 // Email integration - uncomment to enable status update emails
 // import { 
 //   sendApplicationApprovedEmail, 
@@ -227,6 +228,20 @@ const ReviewApplication = () => {
 
       if (updateError) throw updateError;
 
+      // Create notification for the applicant
+      await createNotification(
+        application.user_id,
+        "Application Approved!",
+        `Congratulations! Your application for "${application.projectTitle}" has been approved.`,
+        "application",
+        `/dashboard/applications/${id}`,
+        {
+          application_id: id,
+          project_id: application.project_id,
+          status: "approved",
+        }
+      );
+
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["review-application", id] });
       queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
@@ -291,6 +306,20 @@ const ReviewApplication = () => {
         .eq("id", id);
 
       if (updateError) throw updateError;
+
+      // Create notification for the applicant
+      await createNotification(
+        application.user_id,
+        "Application Status Updated",
+        `Your application for "${application.projectTitle}" has been reviewed. Please check your application details for more information.`,
+        "application",
+        `/dashboard/applications/${id}`,
+        {
+          application_id: id,
+          project_id: application.project_id,
+          status: "rejected",
+        }
+      );
 
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["review-application", id] });

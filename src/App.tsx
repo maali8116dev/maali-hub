@@ -35,6 +35,7 @@ import AdminProjects from "./pages/admin/Projects";
 import AdminApplications from "./pages/admin/Applications";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
+import AdminFinancial from "./pages/admin/Financial";
 import AdminBlog from "./pages/admin/Blog";
 import AdminBlogForm from "./pages/admin/BlogForm";
 import AdminFAQ from "./pages/admin/FAQ";
@@ -255,6 +256,14 @@ const App = () => (
             element={
               <AdminLayout>
                 <AdminUsers />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/financial"
+            element={
+              <AdminLayout>
+                <AdminFinancial />
               </AdminLayout>
             }
           />

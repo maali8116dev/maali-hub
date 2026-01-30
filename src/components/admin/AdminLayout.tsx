@@ -12,6 +12,7 @@ import {
   Activity,
   HelpCircle,
   FolderOpen,
+  DollarSign,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/projects", label: "Projects", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
+    { href: "/admin/financial", label: "Financial", icon: DollarSign },
     { href: "/admin/resources", label: "Resources", icon: FolderOpen },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
@@ -60,6 +62,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname === "/admin") return "Admin Dashboard";
     if (location.pathname === "/admin/projects") return "Manage Projects";
     if (location.pathname === "/admin/applications") return "Review Applications";
+    if (location.pathname === "/admin/financial") return "Financial Management";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
     if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
     if (location.pathname.startsWith("/admin/mentors")) return "Manage Mentors";

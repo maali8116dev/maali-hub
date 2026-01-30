@@ -15,7 +15,7 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: "application" | "system" | "reminder";
+  type: "application" | "system" | "reminder" | "new_application" | "review_assigned" | "deadline_reminder" | "status_change";
   read: boolean;
   createdAt: string;
   link?: string;
@@ -44,6 +44,14 @@ const NotificationsDropdown = ({
         return "⚙️";
       case "reminder":
         return "⏰";
+      case "new_application":
+        return "📋";
+      case "review_assigned":
+        return "✅";
+      case "deadline_reminder":
+        return "⏰";
+      case "status_change":
+        return "🔄";
       default:
         return "🔔";
     }

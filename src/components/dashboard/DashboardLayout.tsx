@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useNotifications, useUnreadNotificationCount, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -57,56 +57,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
-  // Mock notifications data - replace with API calls when backend is ready
-  const [notifications, setNotifications] = useState([
-    {
-      id: "1",
-      title: "Application Status Updated",
-      message: "Your application for AgriTech Innovation Fund has been reviewed.",
-      type: "application" as const,
-      read: false,
-      createdAt: "2024-01-20T10:30:00Z",
-      link: "/dashboard/applications/1",
-    },
-    {
-      id: "2",
-      title: "Application Approved!",
-      message: "Congratulations! Your application has been approved.",
-      type: "application" as const,
-      read: false,
-      createdAt: "2024-01-19T14:20:00Z",
-      link: "/dashboard/applications/2",
-    },
-    {
-      id: "3",
-      title: "Deadline Reminder",
-      message: "You have 3 days left to complete your application.",
-      type: "reminder" as const,
-      read: false,
-      createdAt: "2024-01-18T09:15:00Z",
-      link: "/application/3",
-    },
-    {
-      id: "4",
-      title: "Profile Incomplete",
-      message: "Complete your profile to increase your chances.",
-      type: "system" as const,
-      read: true,
-      createdAt: "2024-01-17T16:45:00Z",
-      link: "/dashboard/profile",
-    },
-  ]);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Fetch real notifications
+  const { data: notifications = [], isLoading: notificationsLoading } = useNotifications();
+  const unreadCount = useUnreadNotificationCount();
+  const markAsRead = useMarkNotificationAsRead();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
 
   const handleMarkAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    markAsRead.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    markAllAsRead.mutate();
   };
 
   const handleSignOut = async () => {

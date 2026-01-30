@@ -1,19 +1,87 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ReviewerSettings = () => {
   const { toast } = useToast();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { user } = useAuth();
+  const updateProfile = useUpdateProfile();
+  
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [dailyDigest, setDailyDigest] = useState(false);
+  const [urgentApplications, setUrgentApplications] = useState(true);
+  const [autoAssign, setAutoAssign] = useState(false);
 
-  const handleSave = () => {
-    toast({
-      title: "Settings Saved",
-      description: "Your reviewer settings have been updated.",
-    });
+  // Load profile data when available
+  useEffect(() => {
+    if (profile) {
+      setName(`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "");
+      setEmail(user?.email || "");
+    }
+  }, [profile, user]);
+
+  const handleSave = async () => {
+    try {
+      // Update profile information
+      if (profile) {
+        const nameParts = name.trim().split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        await updateProfile.mutateAsync({
+          firstName: firstName || profile.firstName,
+          lastName: lastName || profile.lastName,
+        });
+      }
+
+      // TODO: Save notification preferences to user settings table when available
+      // For now, we'll just show a success message
+      toast({
+        title: "Settings Saved",
+        description: "Your reviewer settings have been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save settings",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isLoadingProfile) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-96 mt-2" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -40,7 +108,7 @@ const ReviewerSettings = () => {
                 Receive email notifications for new applications
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -49,7 +117,7 @@ const ReviewerSettings = () => {
                 Receive a daily summary of pending applications
               </p>
             </div>
-            <Switch />
+            <Switch checked={dailyDigest} onCheckedChange={setDailyDigest} />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -58,7 +126,7 @@ const ReviewerSettings = () => {
                 Get notified immediately for applications pending 5+ days
               </p>
             </div>
-            <Switch defaultChecked />
+            <Switch checked={urgentApplications} onCheckedChange={setUrgentApplications} />
           </div>
         </CardContent>
       </Card>
@@ -86,7 +154,7 @@ const ReviewerSettings = () => {
             <p className="text-sm text-muted-foreground">
               Automatically assign new applications to your review queue
             </p>
-            <Switch />
+            <Switch checked={autoAssign} onCheckedChange={setAutoAssign} />
           </div>
         </CardContent>
       </Card>
@@ -102,7 +170,12 @@ const ReviewerSettings = () => {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" placeholder="Enter your full name" defaultValue="Reviewer Name" />
+            <Input
+              id="name"
+              placeholder="Enter your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -110,18 +183,19 @@ const ReviewerSettings = () => {
               id="email"
               type="email"
               placeholder="your.email@example.com"
-              defaultValue="reviewer@example.com"
+              value={email}
+              disabled
+              className="bg-muted"
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="department">Department</Label>
-            <Input id="department" placeholder="Enter your department" />
+            <p className="text-xs text-muted-foreground">Email cannot be changed here</p>
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave}>Save Settings</Button>
+        <Button onClick={handleSave} disabled={updateProfile.isPending}>
+          {updateProfile.isPending ? "Saving..." : "Save Settings"}
+        </Button>
       </div>
     </div>
   );
