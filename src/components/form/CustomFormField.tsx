@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -28,6 +30,7 @@ export enum FormFieldType {
   EMAIL = "email",
   NUMBER = "number",
   TEL = "tel",
+  PHONE_INTERNATIONAL = "phone_international",
   URL = "url",
   TEXTAREA = "textarea",
   CHECKBOX = "checkbox",
@@ -69,6 +72,14 @@ interface InputFieldProps<TFieldValues extends FieldValues = FieldValues>
   step?: number;
 }
 
+interface PhoneInternationalFieldProps<TFieldValues extends FieldValues = FieldValues>
+  extends BaseFieldProps<TFieldValues> {
+  fieldType: FormFieldType.PHONE_INTERNATIONAL;
+  defaultCountry?: string;
+  icon?: LucideIcon;
+  iconPosition?: "left" | "right";
+}
+
 interface TextareaFieldProps<TFieldValues extends FieldValues = FieldValues>
   extends BaseFieldProps<TFieldValues> {
   fieldType: FormFieldType.TEXTAREA;
@@ -100,7 +111,8 @@ export type CustomFormFieldProps<TFieldValues extends FieldValues = FieldValues>
   | TextareaFieldProps<TFieldValues>
   | CheckboxFieldProps<TFieldValues>
   | SelectFieldProps<TFieldValues>
-  | FileFieldProps<TFieldValues>;
+  | FileFieldProps<TFieldValues>
+  | PhoneInternationalFieldProps<TFieldValues>;
 
 const FieldRenderer = <TFieldValues extends FieldValues = FieldValues>({
   field,
@@ -206,20 +218,59 @@ const FieldRenderer = <TFieldValues extends FieldValues = FieldValues>({
       return <FormControl>{inputElement}</FormControl>;
     }
 
+    case FormFieldType.PHONE_INTERNATIONAL: {
+      const phoneProps = props as PhoneInternationalFieldProps<TFieldValues>;
+      const { defaultCountry = "International" } = phoneProps;
+      
+      return (
+        <FormControl>
+          <PhoneInput
+            international
+            defaultCountry={defaultCountry as any}
+            value={field.value as string | undefined}
+            onChange={(value) => field.onChange(value || "")}
+            disabled={disabled}
+            placeholder={placeholder}
+            className={cn("PhoneInput", props.className)}
+            numberInputProps={{
+              className: cn(
+                "flex h-9 w-full bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+              ),
+            }}
+          />
+        </FormControl>
+      );
+    }
+
     case FormFieldType.TEXTAREA: {
       const textareaProps = props as TextareaFieldProps<TFieldValues>;
       const { rows, maxLength } = textareaProps;
+      const currentLength = field.value?.length || 0;
+      const remaining = maxLength ? maxLength - currentLength : null;
+      
       return (
-        <FormControl>
-          <Textarea
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={rows}
-            maxLength={maxLength}
-            {...field}
-            className={props.className}
-          />
-        </FormControl>
+        <div className="space-y-1">
+          <FormControl>
+            <Textarea
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={rows}
+              maxLength={maxLength}
+              {...field}
+              className={props.className}
+            />
+          </FormControl>
+          {maxLength && (
+            <div className="flex justify-end">
+              <span className={cn(
+                "text-xs text-muted-foreground",
+                remaining !== null && remaining < maxLength * 0.1 && "text-destructive"
+              )}>
+                {currentLength} / {maxLength} characters
+              </span>
+            </div>
+          )}
+        </div>
       );
     }
 

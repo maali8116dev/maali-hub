@@ -5,19 +5,56 @@ export interface ApplicationFormData {
   // Step 1: Project Selection
   projectId?: number;
   
-  // Step 2: Company Information
+  // Step 2: Applicant Information
+  applicantType?: 'Individual' | 'Organization' | 'Startup / SME' | 'NGO / Non-profit' | 'Research / Academic';
+  fullLegalName?: string;
+  organizationName?: string;
+  registrationIdNumber?: string;
+  countryOfResidence?: string;
+  cityRegion?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  
+  // Step 3: Organizational Background (if applicable)
+  yearEstablished?: number;
+  coreMissionPurpose?: string;
+  primarySectors?: string[]; // Array of sectors: Health, Education, Technology, Agriculture, Environment, Creative, Other
+  primarySectorOther?: string;
+  numberOfTeamMembers?: number;
+  keyTeamMembersRoles?: string;
+  previousGrantsFundingReceived?: boolean;
+  previousGrantsFundingDetails?: string;
+  
+  // Step 4: Project Overview
+  projectTitle?: string;
+  projectSummary?: string;
+  problemStatement?: string;
+  proposedSolution?: string;
+  targetBeneficiaries?: string;
+  geographicFocus?: string;
+  
+  // Step 5: Compliance & Declarations
+  informationAccurateConfirmed?: boolean;
+  conflictOfInterestDeclared?: boolean;
+  reportingRequirementsAgreed?: boolean;
+  dataProcessingConsented?: boolean;
+  declarationDate?: Date;
+  
+  // Legacy fields (keeping for backward compatibility)
   companyName?: string;
   contactEmail?: string;
   contactPhone?: string;
   location?: string;
-  
-  // Step 3: Project Details
   projectDescription?: string;
   businessPlan?: string;
   teamSize?: number;
   
-  // Step 4: Documents - track uploaded document IDs for this session
+  // Step 6: Documents - track uploaded document IDs for this session
   uploadedDocumentIds?: string[];
+  
+  // Payment status
+  paymentCompleted?: boolean;
+  paymentIntentId?: string;
 }
 
 interface ApplicationFormStore {
@@ -57,6 +94,33 @@ interface ApplicationFormStore {
 
 const defaultFormData: ApplicationFormData = {
   projectId: undefined,
+  applicantType: undefined,
+  fullLegalName: undefined,
+  organizationName: undefined,
+  registrationIdNumber: undefined,
+  countryOfResidence: undefined,
+  cityRegion: undefined,
+  emailAddress: undefined,
+  phoneNumber: undefined,
+  yearEstablished: undefined,
+  coreMissionPurpose: undefined,
+  primarySectors: [],
+  primarySectorOther: undefined,
+  numberOfTeamMembers: undefined,
+  keyTeamMembersRoles: undefined,
+  previousGrantsFundingReceived: false,
+  previousGrantsFundingDetails: undefined,
+  projectTitle: undefined,
+  projectSummary: undefined,
+  problemStatement: undefined,
+  proposedSolution: undefined,
+  targetBeneficiaries: undefined,
+  geographicFocus: undefined,
+  informationAccurateConfirmed: false,
+  conflictOfInterestDeclared: false,
+  reportingRequirementsAgreed: false,
+  dataProcessingConsented: false,
+  declarationDate: undefined,
   companyName: undefined,
   contactEmail: undefined,
   contactPhone: undefined,
@@ -65,13 +129,15 @@ const defaultFormData: ApplicationFormData = {
   businessPlan: undefined,
   teamSize: undefined,
   uploadedDocumentIds: [],
+  paymentCompleted: false,
+  paymentIntentId: undefined,
 };
 
 export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 4,
+      totalSteps: 7,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
@@ -177,15 +243,50 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
         
         switch (step) {
           case 1:
+            // Applicant Information - required fields
             return !!(
-              formData.companyName &&
-              formData.contactEmail &&
-              formData.location
+              formData.applicantType &&
+              formData.fullLegalName &&
+              formData.countryOfResidence &&
+              formData.emailAddress &&
+              formData.phoneNumber
             );
           case 2:
-            return !!formData.projectDescription;
+            // Organizational Background - only required if not Individual
+            if (formData.applicantType === 'Individual') {
+              return true; // Skip this step for individuals
+            }
+            return !!(
+              formData.yearEstablished &&
+              formData.coreMissionPurpose &&
+              formData.primarySectors &&
+              formData.primarySectors.length > 0 &&
+              formData.numberOfTeamMembers
+            );
           case 3:
-            // Documents are optional, but you can add validation here
+            // Project Overview - required fields
+            return !!(
+              formData.projectTitle &&
+              formData.projectSummary &&
+              formData.problemStatement &&
+              formData.proposedSolution &&
+              formData.targetBeneficiaries &&
+              formData.geographicFocus
+            );
+          case 4:
+            // Compliance & Declarations - all must be confirmed
+            return !!(
+              formData.informationAccurateConfirmed &&
+              formData.conflictOfInterestDeclared &&
+              formData.reportingRequirementsAgreed &&
+              formData.dataProcessingConsented
+            );
+          case 5:
+            // Documents are optional
+            return true;
+          case 6:
+            // Payment - validation handled in component based on project fee
+            // If no fee, step is always valid
             return true;
           default:
             return false;

@@ -6,6 +6,7 @@ import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,44 +36,132 @@ import DocumentUploadSection from "./DocumentUploadSection";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { emailSchema } from "@/lib/emailValidation";
 import { createNotification } from "@/hooks/useNotifications";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { PaymentStep } from "./PaymentStep";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
-// Step 1: Company Information Schema
+// Phone number validation schema
+const phoneNumberSchema = z.string()
+  .min(1, "Phone number is required")
+  .refine((value) => {
+    if (!value) return false;
+    try {
+      return isValidPhoneNumber(value);
+    } catch {
+      return false;
+    }
+  }, {
+    message: "Please enter a valid international phone number",
+  });
+
+// Step 1: Applicant Information Schema
 const step1Schema = z.object({
-  companyName: z.string().min(2, "Company name must be at least 2 characters"),
-  contactEmail: emailSchema,
-  contactPhone: z.string().min(10, "Please enter a valid phone number"),
-  location: z.string().min(2, "Location is required"),
+  applicantType: z.enum(['Individual', 'Organization', 'Startup / SME', 'NGO / Non-profit', 'Research / Academic'], {
+    required_error: "Please select an applicant type",
+  }),
+  fullLegalName: z.string().min(2, "Full legal name must be at least 2 characters"),
+  organizationName: z.string().optional(),
+  registrationIdNumber: z.string().optional(),
+  countryOfResidence: z.string().min(2, "Country of residence is required"),
+  cityRegion: z.string().min(1, "City/region is required"),
+  emailAddress: emailSchema,
+  phoneNumber: phoneNumberSchema,
 });
 
+// Step 2: Organizational Background Schema (conditional - only required if not Individual)
 const step2Schema = z.object({
-  projectDescription: z.string().min(50, "Description must be at least 50 characters"),
-  businessPlan: z.string().optional(),
-  teamSize: z.preprocess(
+  yearEstablished: z.preprocess(
     (val) => (val === "" || val === undefined ? undefined : Number(val)),
-    z.number().min(1, "Team size must be at least 1").optional()
+    z.number().min(1900, "Please enter a valid year").max(new Date().getFullYear(), "Year cannot be in the future").optional()
   ),
+  coreMissionPurpose: z.string().max(1000, "Core mission / purpose must not exceed 1000 characters").optional(),
+  primarySectors: z.array(z.string()).min(1, "Please select at least one primary sector").optional(),
+  primarySectorOther: z.string().optional(),
+  numberOfTeamMembers: z.preprocess(
+    (val) => (val === "" || val === undefined ? undefined : Number(val)),
+    z.number().min(1, "Number of team members must be at least 1").optional()
+  ),
+  keyTeamMembersRoles: z.string().max(1000, "Key team members & roles must not exceed 1000 characters").optional(),
+  previousGrantsFundingReceived: z.boolean().default(false),
+  previousGrantsFundingDetails: z.string().max(2000, "Previous grants / funding details must not exceed 2000 characters").optional(),
+}).refine((data) => {
+  // If previous grants received is true, details are required
+  if (data.previousGrantsFundingReceived && !data.previousGrantsFundingDetails) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Please provide details about previous grants or funding",
+  path: ["previousGrantsFundingDetails"],
 });
 
-// Step 3: Documents Schema (optional)
+// Step 3: Project Overview Schema
 const step3Schema = z.object({
+  projectTitle: z.string().min(5, "Project title must be at least 5 characters"),
+  projectSummary: z.string()
+    .min(150, "Project summary must be at least 150 characters")
+    .max(2000, "Project summary must not exceed 2000 characters"),
+  problemStatement: z.string()
+    .min(50, "Problem statement must be at least 50 characters")
+    .max(2000, "Problem statement must not exceed 2000 characters"),
+  proposedSolution: z.string()
+    .min(50, "Proposed solution must be at least 50 characters")
+    .max(2000, "Proposed solution must not exceed 2000 characters"),
+  targetBeneficiaries: z.string()
+    .min(20, "Please describe target beneficiaries")
+    .max(1000, "Target beneficiaries must not exceed 1000 characters"),
+  geographicFocus: z.string().min(2, "Geographic focus is required"),
+});
+
+// Step 4: Compliance & Declarations Schema
+const step4Schema = z.object({
+  informationAccurateConfirmed: z.boolean().refine((val) => val === true, {
+    message: "You must confirm that the information provided is accurate",
+  }),
+  conflictOfInterestDeclared: z.boolean().refine((val) => val === true, {
+    message: "You must declare any conflicts of interest",
+  }),
+  reportingRequirementsAgreed: z.boolean().refine((val) => val === true, {
+    message: "You must agree to reporting requirements",
+  }),
+  dataProcessingConsented: z.boolean().refine((val) => val === true, {
+    message: "You must consent to data processing",
+  }),
+  declarationDate: z.date().optional(),
+});
+
+// Step 5: Documents Schema (optional)
+const step5Schema = z.object({
   documents: z.array(z.any()).optional(),
 });
 
 // Combined schema for final validation
-const applicationSchema = step1Schema.merge(step2Schema).merge(step3Schema);
+// Note: step2Schema uses .refine() which returns ZodEffects, so we use type assertion for merge
+const applicationSchema = step1Schema.merge(step2Schema as any).merge(step3Schema).merge(step4Schema).merge(step5Schema);
 
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
 const stepTitles = [
-  "Company Information",
-  "Project Details",
+  "Applicant Information",
+  "Organizational Background",
+  "Project Overview",
+  "Compliance & Declarations",
   "Upload Documents",
+  "Payment",
   "Review & Submit",
+];
+
+const PRIMARY_SECTORS = [
+  { value: "Health", label: "Health" },
+  { value: "Education", label: "Education" },
+  { value: "Technology", label: "Technology" },
+  { value: "Agriculture", label: "Agriculture" },
+  { value: "Environment", label: "Environment" },
+  { value: "Creative", label: "Creative" },
+  { value: "Other", label: "Other" },
 ];
 
 const MultiStepApplicationForm = () => {
@@ -82,11 +171,7 @@ const MultiStepApplicationForm = () => {
   const { toast } = useToast();
   const { logActivity } = useActivityLogger();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
-  const updateProfile = useUpdateProfile();
   const [draftLoaded, setDraftLoaded] = useState(false);
-  const [profileDataLoaded, setProfileDataLoaded] = useState(false);
-  const [useProfileData, setUseProfileData] = useState(true);
   const isEmailVerified = user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const {
     currentStep,
@@ -133,8 +218,6 @@ const MultiStepApplicationForm = () => {
         setDraftLoaded(true);
       } else if (isNewApplication) {
         setDraftLoaded(true);
-        setProfileDataLoaded(false); // Reset profile pre-fill state for new applications
-        setUseProfileData(true); // Re-enable profile pre-fill for new applications
       }
     };
     loadDraft();
@@ -146,43 +229,6 @@ const MultiStepApplicationForm = () => {
       setDraftId(draftId);
     }
   }, [draftId, setDraftId]);
-
-  // Pre-fill form from profile if no draft exists and form is empty
-  useEffect(() => {
-    if (
-      profile && 
-      draftLoaded && // Wait for draft to load first
-      !profileDataLoaded &&
-      !formData.companyName && // Only pre-fill if form is empty
-      useProfileData &&
-      !draftId // Don't pre-fill if there's a draft
-    ) {
-      const prefillData: Partial<typeof formData> = {};
-      
-      // Map profile fields to form fields
-      if (profile.businessName && !formData.companyName) {
-        prefillData.companyName = profile.businessName;
-      }
-      if (user?.email && !formData.contactEmail) {
-        prefillData.contactEmail = user.email;
-      }
-      if (profile.country && !formData.location) {
-        prefillData.location = profile.country;
-      }
-      
-      // Only update if we have data to pre-fill
-      if (Object.keys(prefillData).length > 0) {
-        updateFormData(prefillData);
-        setProfileDataLoaded(true);
-      } else {
-        // Mark as loaded even if no data to pre-fill
-        setProfileDataLoaded(true);
-      }
-    } else if (draftLoaded && !profile) {
-      // If no profile exists, mark as loaded to prevent re-checking
-      setProfileDataLoaded(true);
-    }
-  }, [profile, user, draftLoaded, profileDataLoaded, formData, useProfileData, draftId, updateFormData]);
 
   // Memoize the documents change callback to prevent infinite loops
   const handleDocumentsChange = useCallback((docs: any[]) => {
@@ -197,18 +243,40 @@ const MultiStepApplicationForm = () => {
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(
       currentStep === 1 ? step1Schema :
-      currentStep === 2 ? step2Schema :
+      currentStep === 2 ? (formData.applicantType === "Individual" ? z.object({}) : step2Schema) :
       currentStep === 3 ? step3Schema :
-      step4Schema
-    ),
+      currentStep === 4 ? step4Schema :
+      currentStep === 5 ? step5Schema :
+      z.object({})
+    ) as any,
     defaultValues: {
-      companyName: formData.companyName || profile?.businessName || "",
-      contactEmail: formData.contactEmail || user?.email || "",
-      contactPhone: formData.contactPhone || "",
-      location: formData.location || profile?.country || "",
-      projectDescription: formData.projectDescription || "",
-      businessPlan: formData.businessPlan || "",
-      teamSize: formData.teamSize || undefined,
+      applicantType: formData.applicantType || undefined,
+      fullLegalName: formData.fullLegalName || "",
+      organizationName: formData.organizationName || "",
+      registrationIdNumber: formData.registrationIdNumber || "",
+      countryOfResidence: formData.countryOfResidence || "",
+      cityRegion: formData.cityRegion || "",
+      emailAddress: formData.emailAddress || "",
+      phoneNumber: formData.phoneNumber || "",
+      yearEstablished: formData.yearEstablished || undefined,
+      coreMissionPurpose: formData.coreMissionPurpose || "",
+      primarySectors: formData.primarySectors || [],
+      primarySectorOther: formData.primarySectorOther || "",
+      numberOfTeamMembers: formData.numberOfTeamMembers || undefined,
+      keyTeamMembersRoles: formData.keyTeamMembersRoles || "",
+      previousGrantsFundingReceived: formData.previousGrantsFundingReceived || false,
+      previousGrantsFundingDetails: formData.previousGrantsFundingDetails || "",
+      projectTitle: formData.projectTitle || "",
+      projectSummary: formData.projectSummary || "",
+      problemStatement: formData.problemStatement || "",
+      proposedSolution: formData.proposedSolution || "",
+      targetBeneficiaries: formData.targetBeneficiaries || "",
+      geographicFocus: formData.geographicFocus || "",
+      informationAccurateConfirmed: formData.informationAccurateConfirmed || false,
+      conflictOfInterestDeclared: formData.conflictOfInterestDeclared || false,
+      reportingRequirementsAgreed: formData.reportingRequirementsAgreed || false,
+      dataProcessingConsented: formData.dataProcessingConsented || false,
+      declarationDate: formData.declarationDate || undefined,
       documents: [],
     },
     mode: "onChange",
@@ -221,13 +289,33 @@ const MultiStepApplicationForm = () => {
   useEffect(() => {
     isResettingRef.current = true;
     form.reset({
-      companyName: formData.companyName || profile?.businessName || "",
-      contactEmail: formData.contactEmail || user?.email || "",
-      contactPhone: formData.contactPhone || "",
-      location: formData.location || profile?.country || "",
-      projectDescription: formData.projectDescription || "",
-      businessPlan: formData.businessPlan || "",
-      teamSize: formData.teamSize || undefined,
+      applicantType: formData.applicantType || undefined,
+      fullLegalName: formData.fullLegalName || "",
+      organizationName: formData.organizationName || "",
+      registrationIdNumber: formData.registrationIdNumber || "",
+      countryOfResidence: formData.countryOfResidence || "",
+      cityRegion: formData.cityRegion || "",
+      emailAddress: formData.emailAddress || "",
+      phoneNumber: formData.phoneNumber || "",
+      yearEstablished: formData.yearEstablished || undefined,
+      coreMissionPurpose: formData.coreMissionPurpose || "",
+      primarySectors: formData.primarySectors || [],
+      primarySectorOther: formData.primarySectorOther || "",
+      numberOfTeamMembers: formData.numberOfTeamMembers || undefined,
+      keyTeamMembersRoles: formData.keyTeamMembersRoles || "",
+      previousGrantsFundingReceived: formData.previousGrantsFundingReceived || false,
+      previousGrantsFundingDetails: formData.previousGrantsFundingDetails || "",
+      projectTitle: formData.projectTitle || "",
+      projectSummary: formData.projectSummary || "",
+      problemStatement: formData.problemStatement || "",
+      proposedSolution: formData.proposedSolution || "",
+      targetBeneficiaries: formData.targetBeneficiaries || "",
+      geographicFocus: formData.geographicFocus || "",
+      informationAccurateConfirmed: formData.informationAccurateConfirmed || false,
+      conflictOfInterestDeclared: formData.conflictOfInterestDeclared || false,
+      reportingRequirementsAgreed: formData.reportingRequirementsAgreed || false,
+      dataProcessingConsented: formData.dataProcessingConsented || false,
+      declarationDate: formData.declarationDate || undefined,
       documents: [],
     });
     // Reset the flag after the next frame to allow form.reset to complete
@@ -244,13 +332,33 @@ const MultiStepApplicationForm = () => {
       if (isResettingRef.current) return;
       
       updateFormData({
-        companyName: value.companyName,
-        contactEmail: value.contactEmail,
-        contactPhone: value.contactPhone,
-        location: value.location,
-        projectDescription: value.projectDescription,
-        businessPlan: value.businessPlan,
-        teamSize: value.teamSize,
+        applicantType: value.applicantType as typeof formData.applicantType,
+        fullLegalName: value.fullLegalName as string | undefined,
+        organizationName: value.organizationName as string | undefined,
+        registrationIdNumber: value.registrationIdNumber as string | undefined,
+        countryOfResidence: value.countryOfResidence as string | undefined,
+        cityRegion: value.cityRegion as string | undefined,
+        emailAddress: value.emailAddress as string | undefined,
+        phoneNumber: value.phoneNumber as string | undefined,
+        yearEstablished: value.yearEstablished as number | undefined,
+        coreMissionPurpose: value.coreMissionPurpose as string | undefined,
+        primarySectors: value.primarySectors as string[] | undefined,
+        primarySectorOther: value.primarySectorOther as string | undefined,
+        numberOfTeamMembers: value.numberOfTeamMembers as number | undefined,
+        keyTeamMembersRoles: value.keyTeamMembersRoles as string | undefined,
+        previousGrantsFundingReceived: value.previousGrantsFundingReceived as boolean | undefined,
+        previousGrantsFundingDetails: value.previousGrantsFundingDetails as string | undefined,
+        projectTitle: value.projectTitle as string | undefined,
+        projectSummary: value.projectSummary as string | undefined,
+        problemStatement: value.problemStatement as string | undefined,
+        proposedSolution: value.proposedSolution as string | undefined,
+        targetBeneficiaries: value.targetBeneficiaries as string | undefined,
+        geographicFocus: value.geographicFocus as string | undefined,
+        informationAccurateConfirmed: value.informationAccurateConfirmed as boolean,
+        conflictOfInterestDeclared: value.conflictOfInterestDeclared as boolean,
+        reportingRequirementsAgreed: value.reportingRequirementsAgreed as boolean,
+        dataProcessingConsented: value.dataProcessingConsented as boolean,
+        declarationDate: value.declarationDate as Date | undefined,
       });
     });
     
@@ -319,7 +427,10 @@ const MultiStepApplicationForm = () => {
       }
 
       // Validate required fields from formData (collected across all steps)
-      if (!formData.companyName || !formData.contactEmail || !formData.projectDescription) {
+      if (!formData.applicantType || !formData.fullLegalName || !formData.countryOfResidence || 
+          !formData.emailAddress || !formData.phoneNumber || !formData.projectTitle || 
+          !formData.projectSummary || !formData.problemStatement || !formData.proposedSolution ||
+          !formData.targetBeneficiaries || !formData.geographicFocus) {
         toast({
           title: "Missing Information",
           description: "Please complete all required fields before submitting.",
@@ -328,23 +439,99 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
+      // Validate organizational background if not Individual
+      if (formData.applicantType !== "Individual") {
+        if (!formData.yearEstablished || !formData.coreMissionPurpose || 
+            !formData.primarySectors || formData.primarySectors.length === 0 ||
+            !formData.numberOfTeamMembers) {
+          toast({
+            title: "Missing Information",
+            description: "Please complete all required organizational background fields.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      // Validate compliance & declarations
+      if (!formData.informationAccurateConfirmed || !formData.conflictOfInterestDeclared ||
+          !formData.reportingRequirementsAgreed || !formData.dataProcessingConsented) {
+        toast({
+          title: "Compliance Required",
+          description: "Please confirm all compliance declarations before submitting.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if payment is required and completed
+      const { data: projectData } = await supabase
+        .from("projects")
+        .select("application_fee")
+        .eq("id", formData.projectId)
+        .single();
+
+      if (projectData?.application_fee && projectData.application_fee > 0) {
+        if (!formData.paymentCompleted) {
+          toast({
+            title: "Payment Required",
+            description: "Please complete the payment step before submitting your application.",
+            variant: "destructive",
+          });
+          goToStep(6); // Go to payment step
+          return;
+        }
+      }
+
       let application;
       
+      // Prepare application data with all new fields
+      const applicationData: any = {
+        applicant_type: formData.applicantType,
+        full_legal_name: formData.fullLegalName,
+        organization_name: formData.organizationName || null,
+        registration_id_number: formData.registrationIdNumber || null,
+        country_of_residence: formData.countryOfResidence,
+        city_region: formData.cityRegion,
+        contact_email: formData.emailAddress,
+        contact_phone: formData.phoneNumber,
+        project_title: formData.projectTitle,
+        project_summary: formData.projectSummary,
+        problem_statement: formData.problemStatement,
+        proposed_solution: formData.proposedSolution,
+        target_beneficiaries: formData.targetBeneficiaries,
+        geographic_focus: formData.geographicFocus,
+        information_accurate_confirmed: formData.informationAccurateConfirmed,
+        conflict_of_interest_declared: formData.conflictOfInterestDeclared,
+        reporting_requirements_agreed: formData.reportingRequirementsAgreed,
+        data_processing_consented: formData.dataProcessingConsented,
+        declaration_date: new Date().toISOString(),
+        status: "pending",
+        is_draft: false,
+        application_fee_paid: formData.paymentCompleted || false,
+        stripe_payment_intent_id: formData.paymentIntentId || null,
+      };
+
+      // Add organizational background fields if not Individual
+      if (formData.applicantType !== "Individual") {
+        applicationData.year_established = formData.yearEstablished || null;
+        applicationData.core_mission_purpose = formData.coreMissionPurpose || null;
+        applicationData.primary_sectors = formData.primarySectors ? JSON.stringify(formData.primarySectors) : null;
+        applicationData.primary_sector_other = formData.primarySectorOther || null;
+        applicationData.team_size = formData.numberOfTeamMembers || null;
+        applicationData.key_team_members_roles = formData.keyTeamMembersRoles || null;
+        applicationData.previous_grants_funding_received = formData.previousGrantsFundingReceived || false;
+        applicationData.previous_grants_funding_details = formData.previousGrantsFundingDetails || null;
+      }
+
       // Check if we have an existing draft to convert to submission
       if (draftId) {
         // Update existing draft to submitted application
         const { data, error } = await supabase
           .from("applications")
           .update({
-            company_name: formData.companyName,
-            contact_email: formData.contactEmail,
-            contact_phone: formData.contactPhone || null,
-            location: formData.location || null,
-            project_description: formData.projectDescription,
-            business_plan: formData.businessPlan || null,
-            team_size: formData.teamSize || null,
-            status: "pending",
-            is_draft: false,
+            ...applicationData,
+            project_id: formData.projectId,
           })
           .eq("id", draftId)
           .select()
@@ -359,15 +546,7 @@ const MultiStepApplicationForm = () => {
           .insert({
             user_id: user.id,
             project_id: formData.projectId,
-            company_name: formData.companyName,
-            contact_email: formData.contactEmail,
-            contact_phone: formData.contactPhone || null,
-            location: formData.location || null,
-            project_description: formData.projectDescription,
-            business_plan: formData.businessPlan || null,
-            team_size: formData.teamSize || null,
-            status: "pending",
-            is_draft: false,
+            ...applicationData,
           })
           .select()
           .single();
@@ -397,7 +576,8 @@ const MultiStepApplicationForm = () => {
         description: `Submitted application for project ID: ${formData.projectId}`,
         metadata: { 
           projectId: formData.projectId, 
-          companyName: formData.companyName,
+          applicantType: formData.applicantType,
+          projectTitle: formData.projectTitle,
         },
       });
 
@@ -446,28 +626,6 @@ const MultiStepApplicationForm = () => {
         }
       }
 
-      // Optionally save application data to profile (if user wants to keep profile updated)
-      if (profile && useProfileData) {
-        try {
-          const profileUpdates: any = {};
-          
-          // Only update profile fields that are empty or match the application data
-          if (formData.companyName && (!profile.businessName || profile.businessName !== formData.companyName)) {
-            profileUpdates.businessName = formData.companyName;
-          }
-          if (formData.location && (!profile.country || profile.country !== formData.location)) {
-            profileUpdates.country = formData.location;
-          }
-          
-          if (Object.keys(profileUpdates).length > 0) {
-            await updateProfile.mutateAsync(profileUpdates);
-          }
-        } catch (error) {
-          // Don't fail submission if profile update fails
-          console.error("Failed to update profile:", error);
-        }
-      }
-      
       toast({
         title: "Application Submitted",
         description: "Your application has been submitted successfully!",
@@ -477,8 +635,6 @@ const MultiStepApplicationForm = () => {
       reset();
       form.reset();
       setDraftLoaded(false);
-      setProfileDataLoaded(false);
-      setUseProfileData(true);
       
       // Redirect to dashboard applications
       navigate("/dashboard/applications");
@@ -592,166 +748,474 @@ const MultiStepApplicationForm = () => {
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              {/* Step 1: Company Information */}
+              {/* Step 1: Applicant Information */}
               {currentStep === 1 && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Company Information</h3>
+                    <h3 className="text-lg font-semibold mb-2">Applicant Information</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Tell us about your company.
+                      Tell us about yourself or your organization.
                     </p>
                   </div>
                   
-                  {/* Profile Pre-fill Indicator */}
-                  {profile && useProfileData && (formData.companyName || formData.contactEmail || formData.location) && (
-                    <Alert className="mb-4 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
-                      <Info className="h-4 w-4 text-blue-600 dark:text-blue-500" />
-                      <AlertDescription className="text-blue-800 dark:text-blue-200">
-                        <div className="flex items-center justify-between flex-wrap gap-2">
-                          <span>Some fields are pre-filled from your profile. You can edit them if needed.</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setUseProfileData(false);
-                              setProfileDataLoaded(false);
-                              // Clear pre-filled data
-                              updateFormData({
-                                companyName: "",
-                                contactEmail: "",
-                                location: "",
-                              });
-                              form.reset({
-                                ...form.watch(),
-                                companyName: "",
-                                contactEmail: "",
-                                location: "",
-                              });
-                            }}
-                            className="h-auto py-1 text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100"
-                          >
-                            Clear Pre-filled Data
-                          </Button>
-                        </div>
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  <CustomFormField
+                    control={form.control}
+                    name="applicantType"
+                    fieldType={FormFieldType.SELECT}
+                    label="Applicant Type"
+                    placeholder="Select applicant type"
+                    required
+                    options={[
+                      { value: "Individual", label: "Individual" },
+                      { value: "Organization", label: "Organization" },
+                      { value: "Startup / SME", label: "Startup / SME" },
+                      { value: "NGO / Non-profit", label: "NGO / Non-profit" },
+                      { value: "Research / Academic", label: "Research / Academic" },
+                    ]}
+                  />
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <CustomFormField
                       control={form.control}
-                      name="companyName"
+                      name="fullLegalName"
                       fieldType={FormFieldType.INPUT}
-                      label="Company Name"
-                      placeholder="Enter company name"
-                      icon={Building2}
-                      iconPosition="left"
+                      label="Full Legal Name"
+                      placeholder="Enter full legal name"
                       required
-                      description={
-                        profile?.businessName && 
-                        form.watch("companyName") === profile.businessName && 
-                        useProfileData
-                          ? "Pre-filled from your profile"
-                          : undefined
-                      }
+                    />
+                        {form.watch("applicantType") && (form.watch("applicantType") === "Organization" || form.watch("applicantType") === "Startup / SME" || form.watch("applicantType") === "NGO / Non-profit" || form.watch("applicantType") === "Research / Academic") && (
+                      <CustomFormField
+                        control={form.control}
+                        name="organizationName"
+                        fieldType={FormFieldType.INPUT}
+                        label="Organization Name"
+                        placeholder="Enter organization name"
+                        icon={Building2}
+                        iconPosition="left"
+                      />
+                    )}
+                    <CustomFormField
+                      control={form.control}
+                      name="registrationIdNumber"
+                      fieldType={FormFieldType.INPUT}
+                      label="Registration / ID Number"
+                      placeholder="Enter registration or ID number"
                     />
                     <CustomFormField
                       control={form.control}
-                      name="contactEmail"
+                      name="countryOfResidence"
+                      fieldType={FormFieldType.INPUT}
+                      label="Country of Residence / Registration"
+                      placeholder="Enter country"
+                      icon={MapPin}
+                      iconPosition="left"
+                      required
+                    />
+                    <CustomFormField
+                      control={form.control}
+                      name="cityRegion"
+                      fieldType={FormFieldType.INPUT}
+                      label="City / Region"
+                      placeholder="Enter city or region"
+                      required
+                    />
+                    <CustomFormField
+                      control={form.control}
+                      name="emailAddress"
                       fieldType={FormFieldType.EMAIL}
-                      label="Contact Email"
+                      label="Email Address"
                       placeholder="your.email@example.com"
                       icon={Mail}
                       iconPosition="left"
                       required
-                      description={
-                        user?.email && 
-                        form.watch("contactEmail") === user.email && 
-                        useProfileData
-                          ? "Pre-filled from your account"
-                          : undefined
-                      }
                     />
                     <CustomFormField
                       control={form.control}
-                      name="contactPhone"
-                      fieldType={FormFieldType.TEL}
-                      label="Contact Phone"
-                      placeholder="+1234567890"
+                      name="phoneNumber"
+                      fieldType={FormFieldType.PHONE_INTERNATIONAL}
+                      label="Phone Number"
+                      placeholder="Enter phone number"
                       icon={Phone}
                       iconPosition="left"
+                      defaultCountry="US"
                       required
                     />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Organizational Background */}
+              {currentStep === 2 && (
+                <div className="space-y-4">
+                  {formData.applicantType === "Individual" ? (
+                    <Alert className="mb-4 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+                      <Info className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                      <AlertDescription className="text-blue-800 dark:text-blue-200">
+                        This section is not applicable for individual applicants. You can proceed to the next step.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Organizational Background</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Tell us about your organization's credibility and capacity.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <CustomFormField
+                          control={form.control}
+                          name="yearEstablished"
+                          fieldType={FormFieldType.NUMBER}
+                          label="Year Established"
+                          placeholder="2020"
+                          min={1900}
+                          max={new Date().getFullYear()}
+                          required={true}
+                        />
+                        <CustomFormField
+                          control={form.control}
+                          name="numberOfTeamMembers"
+                          fieldType={FormFieldType.NUMBER}
+                          label="Number of Team Members"
+                          placeholder="10"
+                          icon={Users}
+                          iconPosition="left"
+                          min={1}
+                          required={true}
+                        />
+                      </div>
+                      
+                      <CustomFormField
+                        control={form.control}
+                        name="coreMissionPurpose"
+                        fieldType={FormFieldType.TEXTAREA}
+                        label="Core Mission / Purpose"
+                        placeholder="Briefly describe your organization's core mission and purpose..."
+                        rows={4}
+                        maxLength={1000}
+                        required={true}
+                      />
+                      
+                      {/* Primary Sectors - Checkbox Group */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 after:content-['*'] after:ml-0.5 after:text-destructive">
+                          Primary Sector(s)
+                        </label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {PRIMARY_SECTORS.map((sector) => (
+                            <div key={sector.value} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`sector-${sector.value}`}
+                                checked={form.watch("primarySectors")?.includes(sector.value) || false}
+                                onCheckedChange={(checked) => {
+                                  const current = form.watch("primarySectors") || [];
+                                  const updated = checked
+                                    ? [...current, sector.value]
+                                    : current.filter((s) => s !== sector.value);
+                                  form.setValue("primarySectors", updated);
+                                  updateFormData({ primarySectors: updated });
+                                }}
+                              />
+                              <label
+                                htmlFor={`sector-${sector.value}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                              >
+                                {sector.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        {form.watch("primarySectors")?.includes("Other") && (
+                          <CustomFormField
+                            control={form.control}
+                            name="primarySectorOther"
+                            fieldType={FormFieldType.INPUT}
+                            label="Other Sector (Please specify)"
+                            placeholder="Enter other sector"
+                            className="mt-2"
+                          />
+                        )}
+                        {form.formState.errors.primarySectors && (
+                          <p className="text-sm text-destructive mt-1">
+                            {String(form.formState.errors.primarySectors.message)}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <CustomFormField
+                        control={form.control}
+                        name="keyTeamMembersRoles"
+                        fieldType={FormFieldType.TEXTAREA}
+                        label="Key Team Members & Roles"
+                        placeholder="List key team members and their roles..."
+                        rows={4}
+                        maxLength={1000}
+                      />
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="previousGrants"
+                            checked={form.watch("previousGrantsFundingReceived") || false}
+                            onCheckedChange={(checked) => {
+                              form.setValue("previousGrantsFundingReceived", checked as boolean);
+                              updateFormData({ previousGrantsFundingReceived: checked as boolean });
+                            }}
+                          />
+                          <label
+                            htmlFor="previousGrants"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Previous grants or funding received
+                          </label>
+                        </div>
+                        {form.watch("previousGrantsFundingReceived") && (
+                          <CustomFormField
+                            control={form.control}
+                            name="previousGrantsFundingDetails"
+                            fieldType={FormFieldType.TEXTAREA}
+                            label="Previous Grants / Funding Details"
+                            placeholder="Provide details about previous grants or funding received..."
+                            rows={4}
+                            maxLength={2000}
+                            required
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Step 3: Project Overview */}
+              {currentStep === 3 && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Project Overview</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Tell us what you want funding for.
+                    </p>
+                  </div>
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="projectTitle"
+                    fieldType={FormFieldType.INPUT}
+                    label="Project Title"
+                    placeholder="Enter project title"
+                    required
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="projectSummary"
+                    fieldType={FormFieldType.TEXTAREA}
+                    label="Project Summary"
+                    placeholder="Provide a summary of your project (150-300 words)..."
+                    description="Project summary must be between 150 and 2000 characters (max 2000 characters)"
+                    rows={6}
+                    maxLength={2000}
+                    required
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="problemStatement"
+                    fieldType={FormFieldType.TEXTAREA}
+                    label="Problem Statement"
+                    placeholder="What issue are you addressing?"
+                    description="Describe the problem your project aims to solve (minimum 50 characters, max 2000 characters)"
+                    rows={5}
+                    maxLength={2000}
+                    required
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="proposedSolution"
+                    fieldType={FormFieldType.TEXTAREA}
+                    label="Proposed Solution"
+                    placeholder="What are you doing differently?"
+                    description="Explain your proposed solution and what makes it unique (minimum 50 characters, max 2000 characters)"
+                    rows={5}
+                    maxLength={2000}
+                    required
+                  />
+                  
+                  
                     <CustomFormField
                       control={form.control}
-                      name="location"
+                      name="targetBeneficiaries"
+                      fieldType={FormFieldType.TEXTAREA}
+                      label="Target Beneficiaries"
+                      placeholder="Who benefits and how many?"
+                      description="Describe who will benefit from your project and estimate the number (minimum 20 characters, max 1000 characters)"
+                      rows={4}
+                      maxLength={1000}
+                      required
+                    />
+                  
+                  <CustomFormField
+                      control={form.control}
+                      name="geographicFocus"
                       fieldType={FormFieldType.INPUT}
-                      label="Location"
-                      placeholder="City, Country"
+                      label="Geographic Focus"
+                      placeholder="Where will the project run?"
                       icon={MapPin}
                       iconPosition="left"
                       required
-                      description={
-                        profile?.country && 
-                        form.watch("location") === profile.country && 
-                        useProfileData
-                          ? "Pre-filled from your profile"
-                          : undefined
-                      }
                     />
-                  </div>
                 </div>
               )}
 
-              {/* Step 2: Project Details */}
-              {currentStep === 2 && (
+              {/* Step 4: Compliance & Declarations */}
+              {currentStep === 4 && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Project Details</h3>
+                    <h3 className="text-lg font-semibold mb-2">Compliance & Declarations</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Provide details about your project.
+                      Please read and confirm the following declarations. All fields are required for governance purposes.
                     </p>
                   </div>
-                  <CustomFormField
-                    control={form.control}
-                    name="projectDescription"
-                    fieldType={FormFieldType.TEXTAREA}
-                    label="Project Description"
-                    placeholder="Describe your project in detail..."
-                    description="Provide a detailed description of your project (minimum 50 characters)"
-                    rows={6}
-                    maxLength={1000}
-                    required
-                  />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <CustomFormField
-                      control={form.control}
-                      name="teamSize"
-                      fieldType={FormFieldType.NUMBER}
-                      label="Team Size"
-                      placeholder="5"
-                      icon={Users}
-                      iconPosition="left"
-                      min={1}
-                      max={100}
-                      required={false}
-                    />
+                  
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="informationAccurate"
+                          checked={!!form.watch("informationAccurateConfirmed")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("informationAccurateConfirmed", !!checked);
+                            updateFormData({ informationAccurateConfirmed: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="informationAccurate"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Confirmation that information is accurate
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I confirm that all information provided in this application is accurate, complete, and truthful to the best of my knowledge.
+                          </p>
+                        </div>
+                      </div>
+                      {form.formState.errors.informationAccurateConfirmed && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.informationAccurateConfirmed.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="conflictOfInterest"
+                          checked={!!form.watch("conflictOfInterestDeclared")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("conflictOfInterestDeclared", !!checked);
+                            updateFormData({ conflictOfInterestDeclared: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="conflictOfInterest"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Conflict of interest declaration
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I declare that I have disclosed any potential conflicts of interest that may affect this application or its evaluation.
+                          </p>
+                        </div>
+                      </div>
+                        {form.formState.errors.conflictOfInterestDeclared && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.conflictOfInterestDeclared.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="reportingRequirements"
+                          checked={!!form.watch("reportingRequirementsAgreed")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("reportingRequirementsAgreed", !!checked);
+                            updateFormData({ reportingRequirementsAgreed: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="reportingRequirements"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Agreement to reporting requirements
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I agree to provide regular progress reports, financial statements, and other documentation as required by the funding organization.
+                          </p>
+                        </div>
+                      </div>
+                        {form.formState.errors.reportingRequirementsAgreed && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.reportingRequirementsAgreed.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="dataProcessing"
+                          checked={!!form.watch("dataProcessingConsented")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("dataProcessingConsented", !!checked);
+                            updateFormData({ dataProcessingConsented: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="dataProcessing"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Consent to data processing
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I consent to the processing of my personal data and application information for the purposes of evaluation, administration, and communication related to this application.
+                          </p>
+                        </div>
+                      </div>
+                        {form.formState.errors.dataProcessingConsented && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.dataProcessingConsented.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="bg-muted/50 border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Declaration Date:</strong> {new Date().toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <CustomFormField
-                    control={form.control}
-                    name="businessPlan"
-                    fieldType={FormFieldType.TEXTAREA}
-                    label="Business Plan Summary"
-                    placeholder="Brief summary of your business plan..."
-                    rows={4}
-                    required={false}
-                  />
                 </div>
               )}
 
-              {/* Step 3: Documents */}
-              {currentStep === 3 && (
+              {/* Step 5: Documents */}
+              {currentStep === 5 && (
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
@@ -767,8 +1231,19 @@ const MultiStepApplicationForm = () => {
                 </div>
               )}
 
-              {/* Step 4: Review & Submit */}
-              {currentStep === 4 && (
+              {/* Step 6: Payment */}
+              {currentStep === 6 && formData.projectId && (
+                <PaymentStep
+                  projectId={formData.projectId}
+                  applicationId={draftId}
+                  onPaymentSuccess={() => {
+                    updateFormData({ paymentCompleted: true });
+                  }}
+                />
+              )}
+
+              {/* Step 7: Review & Submit */}
+              {currentStep === 7 && (
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Review Your Application</h3>
@@ -777,12 +1252,12 @@ const MultiStepApplicationForm = () => {
                     </p>
                   </div>
                   
-                  {/* Company Information Review */}
+                  {/* Applicant Information Review */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-primary" />
-                        Company Information
+                        <Users className="h-4 w-4 text-primary" />
+                        Applicant Information
                       </h4>
                       <Button
                         type="button"
@@ -797,36 +1272,119 @@ const MultiStepApplicationForm = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Company Name:</span>
-                        <p className="font-medium">{formData.companyName || "Not provided"}</p>
+                        <span className="text-muted-foreground">Applicant Type:</span>
+                        <p className="font-medium">{formData.applicantType || "Not provided"}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Contact Email:</span>
-                        <p className="font-medium">{formData.contactEmail || "Not provided"}</p>
+                        <span className="text-muted-foreground">Full Legal Name:</span>
+                        <p className="font-medium">{formData.fullLegalName || "Not provided"}</p>
+                      </div>
+                      {formData.organizationName && (
+                        <div>
+                          <span className="text-muted-foreground">Organization Name:</span>
+                          <p className="font-medium">{formData.organizationName}</p>
+                        </div>
+                      )}
+                      {formData.registrationIdNumber && (
+                        <div>
+                          <span className="text-muted-foreground">Registration / ID Number:</span>
+                          <p className="font-medium">{formData.registrationIdNumber}</p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-muted-foreground">Country of Residence:</span>
+                        <p className="font-medium">{formData.countryOfResidence || "Not provided"}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Phone:</span>
-                        <p className="font-medium">{formData.contactPhone || "Not provided"}</p>
+                        <span className="text-muted-foreground">City / Region:</span>
+                        <p className="font-medium">{formData.cityRegion || "Not provided"}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Location:</span>
-                        <p className="font-medium">{formData.location || "Not provided"}</p>
+                        <span className="text-muted-foreground">Email Address:</span>
+                        <p className="font-medium">{formData.emailAddress || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Phone Number:</span>
+                        <p className="font-medium">{formData.phoneNumber || "Not provided"}</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Project Details Review */}
+                  {/* Organizational Background Review */}
+                  {formData.applicantType && formData.applicantType !== "Individual" && (
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-primary" />
+                          Organizational Background
+                        </h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => goToStep(2)}
+                          className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                          Edit
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {formData.yearEstablished && (
+                          <div>
+                            <span className="text-muted-foreground">Year Established:</span>
+                            <p className="font-medium">{formData.yearEstablished}</p>
+                          </div>
+                        )}
+                        {formData.numberOfTeamMembers && (
+                          <div>
+                            <span className="text-muted-foreground">Number of Team Members:</span>
+                            <p className="font-medium">{formData.numberOfTeamMembers}</p>
+                          </div>
+                        )}
+                        {formData.coreMissionPurpose && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Core Mission / Purpose:</span>
+                            <p className="font-medium mt-1 whitespace-pre-wrap">{formData.coreMissionPurpose}</p>
+                          </div>
+                        )}
+                        {formData.primarySectors && formData.primarySectors.length > 0 && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Primary Sector(s):</span>
+                            <p className="font-medium mt-1">
+                              {formData.primarySectors.join(", ")}
+                              {formData.primarySectorOther && ` (${formData.primarySectorOther})`}
+                            </p>
+                          </div>
+                        )}
+                        {formData.keyTeamMembersRoles && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Key Team Members & Roles:</span>
+                            <p className="font-medium mt-1 whitespace-pre-wrap">{formData.keyTeamMembersRoles}</p>
+                          </div>
+                        )}
+                        {formData.previousGrantsFundingReceived && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Previous Grants / Funding:</span>
+                            <p className="font-medium mt-1 whitespace-pre-wrap">{formData.previousGrantsFundingDetails || "Yes"}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project Overview Review */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium flex items-center gap-2">
                         <FileText className="h-4 w-4 text-primary" />
-                        Project Details
+                        Project Overview
                       </h4>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => goToStep(2)}
+                        onClick={() => goToStep(3)}
                         className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                       >
                         <Edit2 className="h-3 w-3" />
@@ -835,19 +1393,31 @@ const MultiStepApplicationForm = () => {
                     </div>
                     <div className="space-y-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Project Description:</span>
-                        <p className="font-medium mt-1 whitespace-pre-wrap">{formData.projectDescription || "Not provided"}</p>
+                        <span className="text-muted-foreground">Project Title:</span>
+                        <p className="font-medium">{formData.projectTitle || "Not provided"}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Team Size:</span>
-                        <p className="font-medium">{formData.teamSize || "Not provided"}</p>
+                        <span className="text-muted-foreground">Project Summary:</span>
+                        <p className="font-medium mt-1 whitespace-pre-wrap">{formData.projectSummary || "Not provided"}</p>
                       </div>
-                      {formData.businessPlan && (
+                      <div>
+                        <span className="text-muted-foreground">Problem Statement:</span>
+                        <p className="font-medium mt-1 whitespace-pre-wrap">{formData.problemStatement || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Proposed Solution:</span>
+                        <p className="font-medium mt-1 whitespace-pre-wrap">{formData.proposedSolution || "Not provided"}</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <span className="text-muted-foreground">Business Plan Summary:</span>
-                          <p className="font-medium mt-1 whitespace-pre-wrap">{formData.businessPlan}</p>
+                          <span className="text-muted-foreground">Target Beneficiaries:</span>
+                          <p className="font-medium mt-1 whitespace-pre-wrap">{formData.targetBeneficiaries || "Not provided"}</p>
                         </div>
-                      )}
+                        <div>
+                          <span className="text-muted-foreground">Geographic Focus:</span>
+                          <p className="font-medium">{formData.geographicFocus || "Not provided"}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -862,7 +1432,7 @@ const MultiStepApplicationForm = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => goToStep(3)}
+                        onClick={() => goToStep(5)}
                         className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                       >
                         <Edit2 className="h-3 w-3" />
@@ -876,6 +1446,52 @@ const MultiStepApplicationForm = () => {
                     ) : (
                       <p className="text-sm text-muted-foreground">No documents uploaded</p>
                     )}
+                  </div>
+
+                  {/* Compliance & Declarations Review */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        Compliance & Declarations
+                      </h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => goToStep(4)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-muted-foreground">Information accuracy confirmed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-muted-foreground">Conflict of interest declared</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-muted-foreground">Reporting requirements agreed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-muted-foreground">Data processing consented</span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t">
+                        <span className="text-muted-foreground">Declaration Date:</span>
+                        <p className="font-medium">{new Date().toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Confirmation Notice */}
@@ -939,4 +1555,5 @@ const MultiStepApplicationForm = () => {
 };
 
 export default MultiStepApplicationForm;
+
 

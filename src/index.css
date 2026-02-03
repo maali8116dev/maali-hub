@@ -212,3 +212,94 @@
     padding-top: env(safe-area-inset-top);
   }
 }
+
+/* React Phone Number Input Styling */
+@layer components {
+  .PhoneInput {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid hsl(var(--input));
+    background-color: hsl(var(--background));
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  .PhoneInput:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+    border-color: hsl(var(--ring));
+  }
+
+  .PhoneInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .PhoneInputInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: hsl(var(--foreground));
+    padding: 0;
+    margin-left: 0.5rem;
+  }
+
+  .PhoneInputInput::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .PhoneInputInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .PhoneInputCountry {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    padding-right: 0.5rem;
+    position: relative;
+  }
+
+  .PhoneInputCountryIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    object-fit: cover;
+  }
+
+  .PhoneInputCountrySelect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    border: none;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .PhoneInputCountrySelectArrow {
+    opacity: 0.5;
+    margin-left: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Dark mode adjustments */
+  .dark .PhoneInput {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--input));
+  }
+}
