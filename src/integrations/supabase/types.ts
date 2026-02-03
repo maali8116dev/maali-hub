@@ -106,61 +106,133 @@ export type Database = {
       }
       applications: {
         Row: {
+          applicant_type: string | null
           application_fee_paid: boolean | null
           business_plan: string | null
+          city_region: string | null
           company_name: string | null
+          conflict_of_interest_declared: boolean | null
           contact_email: string | null
           contact_phone: string | null
+          core_mission_purpose: string | null
+          country_of_residence: string | null
           created_at: string
+          data_processing_consented: boolean | null
+          declaration_date: string | null
+          full_legal_name: string | null
           funding_amount_requested: string | null
+          geographic_focus: string | null
           id: string
+          information_accurate_confirmed: boolean | null
           is_draft: boolean
+          key_team_members_roles: string | null
           location: string | null
+          organization_name: string | null
+          previous_grants_funding_details: string | null
+          previous_grants_funding_received: boolean | null
+          primary_sector_other: string | null
+          primary_sectors: Json | null
+          problem_statement: string | null
           project_description: string | null
           project_id: number
+          project_summary: string | null
+          project_title: string | null
+          proposed_solution: string | null
+          registration_id_number: string | null
+          reporting_requirements_agreed: boolean | null
           status: string | null
           stripe_payment_intent_id: string | null
+          target_beneficiaries: string | null
           team_size: number | null
           updated_at: string
           user_id: string | null
+          year_established: number | null
         }
         Insert: {
+          applicant_type?: string | null
           application_fee_paid?: boolean | null
           business_plan?: string | null
+          city_region?: string | null
           company_name?: string | null
+          conflict_of_interest_declared?: boolean | null
           contact_email?: string | null
           contact_phone?: string | null
+          core_mission_purpose?: string | null
+          country_of_residence?: string | null
           created_at?: string
+          data_processing_consented?: boolean | null
+          declaration_date?: string | null
+          full_legal_name?: string | null
           funding_amount_requested?: string | null
+          geographic_focus?: string | null
           id?: string
+          information_accurate_confirmed?: boolean | null
           is_draft?: boolean
+          key_team_members_roles?: string | null
           location?: string | null
+          organization_name?: string | null
+          previous_grants_funding_details?: string | null
+          previous_grants_funding_received?: boolean | null
+          primary_sector_other?: string | null
+          primary_sectors?: Json | null
+          problem_statement?: string | null
           project_description?: string | null
           project_id: number
+          project_summary?: string | null
+          project_title?: string | null
+          proposed_solution?: string | null
+          registration_id_number?: string | null
+          reporting_requirements_agreed?: boolean | null
           status?: string | null
           stripe_payment_intent_id?: string | null
+          target_beneficiaries?: string | null
           team_size?: number | null
           updated_at?: string
           user_id?: string | null
+          year_established?: number | null
         }
         Update: {
+          applicant_type?: string | null
           application_fee_paid?: boolean | null
           business_plan?: string | null
+          city_region?: string | null
           company_name?: string | null
+          conflict_of_interest_declared?: boolean | null
           contact_email?: string | null
           contact_phone?: string | null
+          core_mission_purpose?: string | null
+          country_of_residence?: string | null
           created_at?: string
+          data_processing_consented?: boolean | null
+          declaration_date?: string | null
+          full_legal_name?: string | null
           funding_amount_requested?: string | null
+          geographic_focus?: string | null
           id?: string
+          information_accurate_confirmed?: boolean | null
           is_draft?: boolean
+          key_team_members_roles?: string | null
           location?: string | null
+          organization_name?: string | null
+          previous_grants_funding_details?: string | null
+          previous_grants_funding_received?: boolean | null
+          primary_sector_other?: string | null
+          primary_sectors?: Json | null
+          problem_statement?: string | null
           project_description?: string | null
           project_id?: number
+          project_summary?: string | null
+          project_title?: string | null
+          proposed_solution?: string | null
+          registration_id_number?: string | null
+          reporting_requirements_agreed?: boolean | null
           status?: string | null
           stripe_payment_intent_id?: string | null
+          target_beneficiaries?: string | null
           team_size?: number | null
           updated_at?: string
           user_id?: string | null
+          year_established?: number | null
         }
         Relationships: [
           {
@@ -379,6 +451,42 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -744,6 +852,17 @@ export type Database = {
       }
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_link?: string
+          p_message: string
+          p_metadata?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_invoice_number: { Args: never; Returns: string }
       get_all_users_for_admin: {
         Args: never
@@ -759,6 +878,14 @@ export type Database = {
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
+      mark_all_notifications_read: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role: "admin" | "reviewer" | "applicant"
