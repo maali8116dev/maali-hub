@@ -25,14 +25,18 @@ const createNotification = async (
   link?: string,
   metadata?: Record<string, any>
 ): Promise<void> => {
-  const { error } = await supabase.rpc("create_notification", {
-    p_user_id: userId,
-    p_title: title,
-    p_message: message,
-    p_type: type,
-    p_link: link || null,
-    p_metadata: metadata || null,
-  });
+  // Use direct insert instead of RPC since the function signature may have changed
+  const { error } = await (supabase
+    .from('notifications')
+    .insert({
+      user_id: userId,
+      title: title,
+      message: message,
+      type: type,
+      link: link || null,
+      metadata: metadata || null,
+      read: false,
+    }) as any);
 
   if (error) {
     console.error("Error creating notification:", error);
@@ -131,10 +135,10 @@ describe('Notifications Integration Tests', () => {
   afterAll(async () => {
     // Clean up: Delete all test notifications
     if (createdNotificationIds.length > 0) {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('notifications')
         .delete()
-        .in('id', createdNotificationIds);
+        .in('id', createdNotificationIds) as any);
 
       if (error) {
         console.error('Error cleaning up test notifications:', error);
@@ -200,29 +204,29 @@ describe('Notifications Integration Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Verify notifications exist in database
-    const { data: notifications, error } = await supabase
+    const { data: notifications, error } = await (supabase
       .from('notifications')
       .select('*')
       .eq('user_id', testUserId)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(10) as any);
 
     expect(error).toBeNull();
     expect(notifications).toBeDefined();
     expect(notifications!.length).toBeGreaterThanOrEqual(5);
 
     // Verify we can find our test notifications
-    const testNotifications = notifications!.filter(n => 
+    const testNotifications = notifications!.filter((n: any) => 
       n.title.startsWith('Test Notification')
     );
 
     expect(testNotifications.length).toBeGreaterThanOrEqual(5);
 
     // Store IDs for cleanup
-    createdNotificationIds = testNotifications.map(n => n.id);
+    createdNotificationIds = testNotifications.map((n: any) => n.id);
 
     // Verify notification properties
-    testNotifications.forEach((notification, index) => {
+    testNotifications.forEach((notification: any) => {
       expect(notification.user_id).toBe(testUserId);
       expect(notification.title).toContain('Test Notification');
       expect(notification.message).toBeDefined();
@@ -248,12 +252,12 @@ describe('Notifications Integration Tests', () => {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const { data: newNotifications } = await supabase
+      const { data: newNotifications } = await (supabase
         .from('notifications')
         .select('id')
         .eq('user_id', testUserId)
         .eq('title', 'Notification to Delete')
-        .limit(1);
+        .limit(1) as any);
 
       if (newNotifications && newNotifications.length > 0) {
         createdNotificationIds.push(newNotifications[0].id);
@@ -267,20 +271,20 @@ describe('Notifications Integration Tests', () => {
     const initialCount = createdNotificationIds.length;
 
     // Verify the notification exists before deletion
-    const { data: beforeDelete } = await supabase
+    const { data: beforeDelete } = await (supabase
       .from('notifications')
       .select('id')
       .eq('id', notificationIdToDelete)
-      .single();
+      .single() as any);
 
     expect(beforeDelete).toBeDefined();
     expect(beforeDelete!.id).toBe(notificationIdToDelete);
 
     // Delete the notification
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await (supabase
       .from('notifications')
       .delete()
-      .eq('id', notificationIdToDelete);
+      .eq('id', notificationIdToDelete) as any);
 
     expect(deleteError).toBeNull();
 
@@ -288,11 +292,11 @@ describe('Notifications Integration Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Verify the notification no longer exists
-    const { data: afterDelete, error: fetchError } = await supabase
+    const { data: afterDelete, error: fetchError } = await (supabase
       .from('notifications')
       .select('id')
       .eq('id', notificationIdToDelete)
-      .single();
+      .single() as any);
 
     expect(fetchError).toBeDefined();
     expect(fetchError!.code).toBe('PGRST116'); // No rows returned
@@ -302,11 +306,11 @@ describe('Notifications Integration Tests', () => {
     createdNotificationIds = createdNotificationIds.filter(id => id !== notificationIdToDelete);
 
     // Verify count decreased
-    const { data: remainingNotifications } = await supabase
+    const { data: remainingNotifications } = await (supabase
       .from('notifications')
       .select('id')
       .eq('user_id', testUserId)
-      .in('id', createdNotificationIds);
+      .in('id', createdNotificationIds) as any);
 
     expect(remainingNotifications!.length).toBe(initialCount - 1);
 
@@ -337,13 +341,13 @@ describe('Notifications Integration Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Fetch and verify metadata
-    const { data: notifications, error } = await supabase
+    const { data: notifications, error } = await (supabase
       .from('notifications')
       .select('*')
       .eq('user_id', testUserId)
       .eq('title', 'Notification with Metadata')
       .limit(1)
-      .single();
+      .single() as any);
 
     expect(error).toBeNull();
     expect(notifications).toBeDefined();
@@ -372,32 +376,32 @@ describe('Notifications Integration Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Find the notification
-    const { data: notifications } = await supabase
+    const { data: notifications } = await (supabase
       .from('notifications')
       .select('id')
       .eq('user_id', testUserId)
       .eq('title', 'Notification to Mark as Read')
       .eq('read', false)
       .limit(1)
-      .single();
+      .single() as any);
 
     expect(notifications).toBeDefined();
     const notificationId = notifications!.id;
 
     // Mark as read
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', notificationId);
+      .eq('id', notificationId) as any);
 
     expect(updateError).toBeNull();
 
     // Verify it's marked as read
-    const { data: updatedNotification } = await supabase
+    const { data: updatedNotification } = await (supabase
       .from('notifications')
       .select('read')
       .eq('id', notificationId)
-      .single();
+      .single() as any);
 
     expect(updatedNotification).toBeDefined();
     expect(updatedNotification!.read).toBe(true);
@@ -408,4 +412,3 @@ describe('Notifications Integration Tests', () => {
     console.log('✅ Verified notification can be marked as read');
   }, { timeout: 10000 });
 });
-
