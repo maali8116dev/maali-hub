@@ -47,7 +47,7 @@ function transformProject(data: any): Project {
     id: data.id,
     title: data.title,
     description: data.description,
-    category: data.category,
+    category: data.categories?.name || 'Uncategorized',
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount,
@@ -65,24 +65,59 @@ function transformProject(data: any): Project {
   };
 }
 
-// Transform camelCase to snake_case for Supabase
-function toSnakeCase(data: ProjectFormData): Record<string, any> {
-  return {
-    title: data.title,
-    description: data.description,
-    category: data.category,
-    status: data.status,
-    deadline: data.deadline,
-    funding_amount: data.fundingAmount,
-    location: data.location,
-    image_url: data.imageUrl || null,
-    requirements: data.requirements || null,
-    eligibility_criteria: data.eligibilityCriteria || null,
-    application_fee: data.applicationFee || 0,
-    max_applicants: data.maxApplicants || null,
-    current_applicants: data.currentApplicants || 0,
-    featured: data.featured ?? false,
-  };
+// Helper function to look up category_id from category name
+async function getCategoryId(categoryName: string | undefined): Promise<number | null> {
+  if (!categoryName) return null;
+  
+  const { data: categoryData, error } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("name", categoryName)
+    .eq("is_active", true)
+    .single();
+  
+  if (!error && categoryData) {
+    return categoryData.id;
+  }
+  
+  // If category not found, return null (will be handled gracefully)
+  if (error && error.code !== 'PGRST116') {
+    console.warn(`Error looking up category "${categoryName}":`, error.message);
+  }
+  
+  return null;
+}
+
+// Transform camelCase to snake_case for Supabase (handles partial updates)
+async function toSnakeCase(data: Partial<ProjectFormData>): Promise<Record<string, any>> {
+  const result: Record<string, any> = {};
+  
+  // Only include fields that are present in the data
+  if (data.title !== undefined) result.title = data.title;
+  if (data.description !== undefined) result.description = data.description;
+  if (data.status !== undefined) result.status = data.status;
+  if (data.deadline !== undefined) result.deadline = data.deadline;
+  if (data.fundingAmount !== undefined) result.funding_amount = data.fundingAmount;
+  if (data.location !== undefined) result.location = data.location;
+  if (data.imageUrl !== undefined) result.image_url = data.imageUrl || null;
+  if (data.requirements !== undefined) result.requirements = data.requirements || null;
+  if (data.eligibilityCriteria !== undefined) result.eligibility_criteria = data.eligibilityCriteria || null;
+  if (data.applicationFee !== undefined) result.application_fee = data.applicationFee || 0;
+  if (data.maxApplicants !== undefined) result.max_applicants = data.maxApplicants || null;
+  if (data.currentApplicants !== undefined) result.current_applicants = data.currentApplicants || 0;
+  if (data.featured !== undefined) result.featured = data.featured ?? false;
+  
+  // Handle category - convert category name to category_id
+  if (data.category !== undefined) {
+    // Look up category_id from category name
+    const categoryId = await getCategoryId(data.category);
+    if (categoryId === null) {
+      throw new Error(`Category "${data.category}" not found. Please select a valid category.`);
+    }
+    result.category_id = categoryId;
+  }
+  
+  return result;
 }
 
 /**
@@ -94,7 +129,10 @@ export function useAdminProjects() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -116,7 +154,10 @@ export function useProject(id: number | undefined) {
       
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .eq("id", id)
         .single();
 
@@ -141,10 +182,32 @@ export function useCreateProject() {
       const { data: session } = await supabase.auth.getSession();
       const userId = session?.session?.user?.id;
       
+      // Look up category_id from category name
+      let categoryId: number | null = null;
+      if (data.category) {
+        const { data: categoryData, error: categoryError } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("name", data.category)
+          .eq("is_active", true)
+          .single();
+        
+        if (!categoryError && categoryData) {
+          categoryId = categoryData.id;
+        } else if (categoryError && categoryError.code !== 'PGRST116') {
+          // PGRST116 is "not found" - we'll allow it but log a warning
+          console.warn(`Category "${data.category}" not found in categories table. category_id will be null.`);
+        }
+      }
+      
+      if (!categoryId) {
+        throw new Error(`Category "${data.category}" not found. Please select a valid category.`);
+      }
+
       const insertData = {
         title: data.title,
         description: data.description,
-        category: data.category,
+        category_id: categoryId,
         status: data.status,
         deadline: data.deadline,
         funding_amount: data.fundingAmount,
@@ -162,7 +225,10 @@ export function useCreateProject() {
       const { data: result, error } = await supabase
         .from("projects")
         .insert(insertData)
-        .select()
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .single();
 
       if (error) throw error;
@@ -207,13 +273,16 @@ export function useUpdateProject() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<ProjectFormData> }) => {
-      const updateData = toSnakeCase(data as ProjectFormData);
+      const updateData = await toSnakeCase(data as ProjectFormData);
       
       const { data: result, error } = await supabase
         .from("projects")
         .update(updateData)
         .eq("id", id)
-        .select()
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .single();
 
       if (error) throw error;

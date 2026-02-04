@@ -13,6 +13,8 @@ import {
   HelpCircle,
   FolderOpen,
   DollarSign,
+  ClipboardCheck,
+  Tag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,7 +45,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/projects", label: "Projects", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
+    { href: "/admin/review-management", label: "Review Management", icon: ClipboardCheck },
     { href: "/admin/financial", label: "Financial", icon: DollarSign },
+    { href: "/admin/categories", label: "Categories", icon: Tag },
     { href: "/admin/resources", label: "Resources", icon: FolderOpen },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
@@ -67,6 +71,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
     if (location.pathname.startsWith("/admin/mentors")) return "Manage Mentors";
     if (location.pathname === "/admin/users") return "Manage Users";
+    if (location.pathname === "/admin/categories") return "Manage Categories";
     if (location.pathname === "/admin/activity-logs") return "Activity Logs";
     if (location.pathname === "/admin/settings") return "Admin Settings";
     return "Admin Dashboard";
@@ -105,7 +110,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     (item.href === "/admin/blog" && location.pathname.startsWith("/admin/blog")) ||
                     (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
                     (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors")) ||
-                    (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources"));
+                    (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources")) ||
+                    (item.href === "/admin/categories" && location.pathname.startsWith("/admin/categories"));
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton

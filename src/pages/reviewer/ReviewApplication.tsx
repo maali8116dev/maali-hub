@@ -27,6 +27,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
 import { createNotification } from "@/hooks/useNotifications";
+import { useActivityLogger } from "@/hooks/useActivityLogger";
 // Email integration - uncomment to enable status update emails
 // import { 
 //   sendApplicationApprovedEmail, 
@@ -41,6 +42,7 @@ const ReviewApplication = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { data: profile } = useProfile();
+  const { logActivity } = useActivityLogger();
   const queryClient = useQueryClient();
   const [reviewNotes, setReviewNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -218,15 +220,38 @@ const ReviewApplication = () => {
 
     setIsSubmitting(true);
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const now = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("applications")
         .update({
           status: "approved",
-          updated_at: new Date().toISOString(),
+          reviewed_by: user.id,
+          reviewed_at: now,
+          review_notes: reviewNotes.trim() || null,
+          updated_at: now,
         })
         .eq("id", id);
 
       if (updateError) throw updateError;
+
+      // Log activity for approval
+      await logActivity({
+        actionType: "approve",
+        entityType: "application",
+        entityId: id,
+        description: `Approved application for "${application.projectTitle}"`,
+        metadata: {
+          application_id: id,
+          project_id: application.project_id,
+          project_title: application.projectTitle,
+          reviewer_id: user.id,
+          review_notes: reviewNotes.trim() || null,
+        },
+      });
 
       // Create notification for the applicant
       await createNotification(
@@ -297,15 +322,38 @@ const ReviewApplication = () => {
 
     setIsSubmitting(true);
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const now = new Date().toISOString();
       const { error: updateError } = await supabase
         .from("applications")
         .update({
           status: "rejected",
-          updated_at: new Date().toISOString(),
+          reviewed_by: user.id,
+          reviewed_at: now,
+          review_notes: reviewNotes.trim() || null,
+          updated_at: now,
         })
         .eq("id", id);
 
       if (updateError) throw updateError;
+
+      // Log activity for rejection
+      await logActivity({
+        actionType: "reject",
+        entityType: "application",
+        entityId: id,
+        description: `Rejected application for "${application.projectTitle}"`,
+        metadata: {
+          application_id: id,
+          project_id: application.project_id,
+          project_title: application.projectTitle,
+          reviewer_id: user.id,
+          review_notes: reviewNotes.trim() || null,
+        },
+      });
 
       // Create notification for the applicant
       await createNotification(

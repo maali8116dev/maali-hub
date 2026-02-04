@@ -45,8 +45,10 @@ import AdminMentorForm from "./pages/admin/MentorForm";
 import AdminResources from "./pages/admin/Resources";
 import AdminResourceForm from "./pages/admin/ResourceForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
+import ReviewManagement from "./pages/admin/ReviewManagement";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
+import AdminCategories from "./pages/admin/Categories";
 import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
 import ReviewerDashboard from "./pages/reviewer/Dashboard";
 import ReviewerApplications from "./pages/reviewer/Applications";
@@ -276,10 +278,26 @@ const App = () => (
             }
           />
           <Route
+            path="/admin/categories"
+            element={
+              <AdminLayout>
+                <AdminCategories />
+              </AdminLayout>
+            }
+          />
+          <Route
             path="/admin/settings"
             element={
               <AdminLayout>
                 <AdminSettings />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/review-management"
+            element={
+              <AdminLayout>
+                <ReviewManagement />
               </AdminLayout>
             }
           />

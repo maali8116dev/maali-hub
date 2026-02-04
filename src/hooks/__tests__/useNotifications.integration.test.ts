@@ -24,24 +24,23 @@ const createNotification = async (
   type: 'application' | 'system' | 'reminder' | 'new_application' | 'review_assigned' | 'deadline_reminder' | 'status_change',
   link?: string,
   metadata?: Record<string, any>
-): Promise<void> => {
-  // Use direct insert instead of RPC since the function signature may have changed
-  const { error } = await (supabase
-    .from('notifications')
-    .insert({
-      user_id: userId,
-      title: title,
-      message: message,
-      type: type,
-      link: link || null,
-      metadata: metadata || null,
-      read: false,
-    }) as any);
+): Promise<string | null> => {
+  // Use RPC function which bypasses RLS policies (SECURITY DEFINER)
+  const { data, error } = await supabase.rpc('create_notification', {
+    p_user_id: userId,
+    p_title: title,
+    p_message: message,
+    p_type: type,
+    p_link: link || null,
+    p_metadata: metadata || null,
+  });
 
   if (error) {
     console.error("Error creating notification:", error);
     throw error; // Throw in tests so we can catch failures
   }
+
+  return data;
 };
 
 /**
@@ -190,7 +189,7 @@ describe('Notifications Integration Tests', () => {
 
     // Create all notifications
     for (const notification of notificationsToCreate) {
-      await createNotification(
+      const notificationId = await createNotification(
         testUserId,
         notification.title,
         notification.message,
@@ -198,6 +197,9 @@ describe('Notifications Integration Tests', () => {
         notification.link || undefined,
         notification.metadata
       );
+      if (notificationId) {
+        createdNotificationIds.push(notificationId);
+      }
     }
 
     // Wait a bit for database to process
@@ -243,12 +245,15 @@ describe('Notifications Integration Tests', () => {
     // First, ensure we have notifications to delete
     if (createdNotificationIds.length === 0) {
       // Create a notification if we don't have any
-      await createNotification(
+      const notificationId = await createNotification(
         testUserId,
         'Notification to Delete',
         'This notification will be deleted',
         'system'
       );
+      if (notificationId) {
+        createdNotificationIds.push(notificationId);
+      }
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -329,7 +334,7 @@ describe('Notifications Integration Tests', () => {
       timestamp: new Date().toISOString(),
     };
 
-    await createNotification(
+    const notificationId = await createNotification(
       testUserId,
       'Notification with Metadata',
       'This notification has complex metadata',
@@ -337,6 +342,9 @@ describe('Notifications Integration Tests', () => {
       '/dashboard/applications/test-app-123',
       complexMetadata
     );
+    if (notificationId) {
+      createdNotificationIds.push(notificationId);
+    }
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -366,27 +374,31 @@ describe('Notifications Integration Tests', () => {
 
   it('should verify notifications can be marked as read', async () => {
     // Create a notification
-    await createNotification(
+    const notificationId = await createNotification(
       testUserId,
       'Notification to Mark as Read',
       'This notification will be marked as read',
       'application'
     );
+    
+    expect(notificationId).toBeDefined();
+    expect(notificationId).not.toBeNull();
+    
+    if (notificationId) {
+      createdNotificationIds.push(notificationId);
+    }
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Find the notification
-    const { data: notifications } = await (supabase
+    // Verify the notification exists before marking as read
+    const { data: notification } = await (supabase
       .from('notifications')
-      .select('id')
-      .eq('user_id', testUserId)
-      .eq('title', 'Notification to Mark as Read')
-      .eq('read', false)
-      .limit(1)
+      .select('id, read')
+      .eq('id', notificationId)
       .single() as any);
 
-    expect(notifications).toBeDefined();
-    const notificationId = notifications!.id;
+    expect(notification).toBeDefined();
+    expect(notification!.read).toBe(false);
 
     // Mark as read
     const { error: updateError } = await (supabase

@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { trackEvent } from "@/lib/posthog";
+import { shouldLogToDatabase } from "@/config/activityLogging";
 
 export type ActionType = 
   | 'create' 
@@ -50,7 +51,7 @@ export function useActivityLogger() {
     metadata,
   }: LogActivityParams) => {
     try {
-      // Send to PostHog for analytics
+      // Always send to PostHog for analytics (regardless of DB logging)
       trackEvent(`${entityType}_${actionType}`, {
         entity_type: entityType,
         entity_id: entityId,
@@ -58,6 +59,11 @@ export function useActivityLogger() {
         description,
         ...metadata,
       });
+
+      // Only log to database if configured to do so
+      if (!shouldLogToDatabase(actionType, entityType)) {
+        return; // Skip database logging, but PostHog already tracked it
+      }
 
       const insertData: ActivityLogInsert = {
         user_id: user?.id || null,
@@ -94,7 +100,7 @@ export async function logActivityDirect({
   metadata,
 }: LogActivityParams & { userId?: string }) {
   try {
-    // Send to PostHog for analytics
+    // Always send to PostHog for analytics (regardless of DB logging)
     trackEvent(`${entityType}_${actionType}`, {
       entity_type: entityType,
       entity_id: entityId,
@@ -103,6 +109,11 @@ export async function logActivityDirect({
       description,
       ...metadata,
     });
+
+    // Only log to database if configured to do so
+    if (!shouldLogToDatabase(actionType, entityType)) {
+      return; // Skip database logging, but PostHog already tracked it
+    }
 
     const insertData: ActivityLogInsert = {
       user_id: userId || null,

@@ -604,26 +604,39 @@ const MultiStepApplicationForm = () => {
         }
       );
 
-      // Notify all reviewers about new application
-      const { data: reviewers } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("role", "reviewer");
+      // Assign reviewers using workload-balanced assignment system
+      try {
+        const { data: assignments, error: assignError } = await supabase.rpc(
+          'assign_reviewers_to_application',
+          {
+            p_application_id: application.id,
+            p_num_reviewers: 2, // Assign 2 reviewers (can be made configurable)
+          }
+        );
 
-      if (reviewers) {
-        for (const reviewer of reviewers) {
-          await createNotification(
-            reviewer.user_id,
-            "New Application Assigned",
-            `A new application for "${projectTitle}" requires your review.`,
-            "new_application",
-            `/reviewer/applications/${application.id}`,
-            {
-              application_id: application.id,
-              project_id: formData.projectId,
-            }
-          );
+        if (assignError) {
+          console.warn('Failed to assign reviewers:', assignError);
+          // Continue even if assignment fails - admin can assign manually
+        } else if (assignments && assignments.length > 0) {
+          // Notify assigned reviewers
+          for (const assignment of assignments) {
+            await createNotification(
+              assignment.reviewer_id,
+              "New Application Assigned",
+              `A new application for "${projectTitle}" has been assigned to you for review.`,
+              "review_assigned",
+              `/reviewer/applications/${application.id}`,
+              {
+                application_id: application.id,
+                project_id: formData.projectId,
+                assignment_id: assignment.assignment_id,
+              }
+            );
+          }
         }
+      } catch (assignErr) {
+        console.warn('Error assigning reviewers:', assignErr);
+        // Don't fail the submission if assignment fails
       }
 
       toast({

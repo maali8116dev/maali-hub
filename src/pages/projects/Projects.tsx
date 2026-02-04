@@ -334,7 +334,7 @@ const Projects = () => {
                   {/* Results info and per-page selector */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
                     <div className="text-muted-foreground order-2 sm:order-1">
-                      Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, total)} of{" "}
+                      Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, total)} of{" "}
                       {total} project{total !== 1 ? "s" : ""}
                     </div>
 

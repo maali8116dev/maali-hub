@@ -43,12 +43,20 @@ const ApplicationDetails = () => {
       if (appError) throw appError;
       if (!app) throw new Error("Application not found");
 
-      // Fetch project details
+      // Fetch project details with category
       const { data: project } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .eq("id", app.project_id)
         .maybeSingle();
+      
+      // Transform project to include category name
+      if (project) {
+        project.category = project.categories?.name || 'Uncategorized';
+      }
 
       return {
         ...app,

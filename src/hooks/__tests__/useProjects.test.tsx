@@ -102,7 +102,7 @@ describe('useProjects', () => {
     });
 
     await waitFor(() => {
-      expect(mockQuery.eq).toHaveBeenCalledWith('category', 'Technology');
+      expect(mockQuery.eq).toHaveBeenCalledWith('categories.name', 'Technology');
     });
   });
 
@@ -206,19 +206,30 @@ describe('useProjects', () => {
 describe('useProjectCategories', () => {
   it('fetches unique categories', async () => {
     const mockData = [
-      { category: 'Technology' },
-      { category: 'Agriculture' },
-      { category: 'Technology' }, // Duplicate
+      { name: 'Technology' },
+      { name: 'Agriculture' },
+      { name: 'Technology' }, // Duplicate (should be deduplicated)
     ];
 
-    const mockQuery = {
-      select: vi.fn().mockResolvedValue({
-        data: mockData,
-        error: null,
-      }),
-    };
+    // Create a chainable mock that supports .select().eq().order()
+    const mockOrder = vi.fn().mockResolvedValue({
+      data: mockData,
+      error: null,
+    });
+    
+    const mockEq = vi.fn().mockReturnValue({
+      order: mockOrder,
+    });
+    
+    const mockSelect = vi.fn().mockReturnValue({
+      eq: mockEq,
+    });
 
-    (supabase.from as any).mockReturnValue(mockQuery);
+    const mockFrom = vi.fn().mockReturnValue({
+      select: mockSelect,
+    });
+
+    (supabase.from as any).mockImplementation(mockFrom);
 
     const { result } = renderHook(() => useProjectCategories(), {
       wrapper: createWrapper(),
@@ -226,10 +237,14 @@ describe('useProjectCategories', () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, { timeout: 3000 });
 
-    // Should return unique categories
+    // Should return unique category names (deduplicated)
     expect(result.current.data).toEqual(['Technology', 'Agriculture']);
+    expect(mockFrom).toHaveBeenCalledWith('categories');
+    expect(mockSelect).toHaveBeenCalledWith('name');
+    expect(mockEq).toHaveBeenCalledWith('is_active', true);
+    expect(mockOrder).toHaveBeenCalledWith('name', { ascending: true });
   });
 });
 

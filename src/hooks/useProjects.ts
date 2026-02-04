@@ -28,7 +28,7 @@ function transformProject(data: any): Project {
     id: data.id,
     title: data.title,
     description: data.description,
-    category: data.category,
+    category: data.categories?.name || 'Uncategorized',
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount || data.fundingAmount,
@@ -63,11 +63,15 @@ async function fetchProjectsDirect(filters?: {
 
   let query = supabase
     .from("projects")
-    .select("*", { count: "exact" });
+    .select(`
+      *,
+      categories:category_id(name)
+    `, { count: "exact" });
 
   // Apply filters
   if (filters?.category) {
-    query = query.eq("category", filters.category);
+    // Filter by category name using the joined categories table
+    query = query.eq("categories.name", filters.category);
   }
 
   if (filters?.status) {
@@ -81,8 +85,10 @@ async function fetchProjectsDirect(filters?: {
   if (filters?.search) {
     const searchTerm = filters.search.toLowerCase();
     query = query.or(
-      `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%,funding_amount.ilike.%${searchTerm}%`
+      `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,funding_amount.ilike.%${searchTerm}%`
     );
+    // Note: Category search would need to be done via the joined categories table
+    // For now, we'll search in the main fields only
   }
 
   // Apply pagination
@@ -125,28 +131,24 @@ export function useProjects(filters?: {
 }
 
 /**
- * Direct Supabase query for categories
- */
-async function fetchCategoriesDirect(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("projects")
-    .select("category");
-
-  if (error) throw error;
-
-  return Array.from(
-    new Set((data || []).map((p) => p.category).filter(Boolean))
-  ) as string[];
-}
-
-/**
- * Hook to fetch project categories
+ * Hook to fetch project categories from the centralized categories table
+ * Returns category names for backward compatibility
  */
 export function useProjectCategories() {
   return useQuery({
     queryKey: ["project-categories"],
-    queryFn: async () => {
-      return fetchCategoriesDirect();
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("name")
+        .eq("is_active", true)
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+
+      // Return unique category names (deduplicate)
+      const uniqueNames = Array.from(new Set((data || []).map((c) => c.name)));
+      return uniqueNames;
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -186,7 +188,10 @@ export function useProjectLocations() {
 async function fetchFeaturedProjectsDirect(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select(`
+      *,
+      categories:category_id(name)
+    `)
     .eq("featured", true)
     .neq("status", "closed")
     .order("created_at", { ascending: false })

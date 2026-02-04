@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from "@/hooks/useAdminProjects";
-import { useProjectCategories } from "@/hooks/useProjects";
+import { useCategories } from "@/hooks/useCategories";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
@@ -52,7 +52,7 @@ const ProjectForm = () => {
   const projectId = id ? parseInt(id) : undefined;
 
   const { data: project, isLoading: isLoadingProject } = useProject(projectId);
-  const { data: categories = [] } = useProjectCategories();
+  const { data: categories = [] } = useCategories();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
 
@@ -247,8 +247,8 @@ const ProjectForm = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
+                          <SelectItem key={cat.id} value={cat.name}>
+                            {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

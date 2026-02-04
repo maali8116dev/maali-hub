@@ -13,6 +13,9 @@ import { useProjectDraft } from "@/hooks/useUserDrafts";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { SEO } from "@/components/seo/SEO";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { getSiteUrl, getImageUrl, truncateDescription } from "@/utils/seo";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -144,9 +147,41 @@ const ProjectDetails = () => {
 
   const isDisabled = project.status === "closed";
 
+  const projectUrl = `${getSiteUrl()}/projects/${project.id}`;
+  const projectImage = project.image_url ? getImageUrl(project.image_url) : undefined;
+  const projectDescription = truncateDescription(project.description || project.title);
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <>
+      <SEO
+        title={project.title}
+        description={projectDescription}
+        // Keywords are optional - modern search engines ignore meta keywords
+        // The description and structured data provide better SEO value
+        image={projectImage}
+        url={projectUrl}
+        type="website"
+        canonical={projectUrl}
+      />
+      {project && (
+        <StructuredData
+          type="Project"
+          data={{
+            name: project.title,
+            description: project.description || project.title,
+            image: projectImage,
+            url: projectUrl,
+            fundingAmount: project.funding_amount,
+            location: project.location ? { name: project.location } : undefined,
+            startDate: project.created_at,
+            endDate: project.deadline,
+            category: project.category,
+          }}
+          id="project-schema"
+        />
+      )}
+      <div className="min-h-screen bg-background">
+        <Navigation />
       <main className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <Button 
@@ -432,6 +467,7 @@ const ProjectDetails = () => {
       </main>
       <Footer />
     </div>
+    </>
   );
 };
 

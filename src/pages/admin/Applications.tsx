@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, CheckCircle, XCircle, Clock, X } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock, X, ChevronDown, ChevronUp, UserCheck, UserX, MessageSquare } from "lucide-react";
 import { useAdminApplications } from "@/hooks/useAdminApplications";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +13,7 @@ const AdminApplications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [expandedApplications, setExpandedApplications] = useState<Set<string>>(new Set());
 
   const { data: applications = [], isLoading, error } = useAdminApplications();
 
@@ -184,34 +185,170 @@ const AdminApplications = () => {
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
-              {filteredApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                      <h3 className="font-semibold text-sm sm:text-base truncate">{app.applicantName}</h3>
-                      {getStatusBadge(app.status)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                      <span className="truncate">{app.projectTitle}</span>
-                      <span className="whitespace-nowrap">Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
-                      <span className="whitespace-nowrap">{app.fundingAmount}</span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/reviewer/applications/${app.id}`, { state: { fromAdmin: true } })}
-                    title="View application details (review actions require reviewer account)"
-                    className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+              {filteredApplications.map((app) => {
+                const isExpanded = expandedApplications.has(app.id);
+                const hasReviewerDecisions = app.reviewerDecisions && app.reviewerDecisions.length > 0;
+                
+                return (
+                  <div
+                    key={app.id}
+                    className="border rounded-lg hover:bg-muted/50 transition-colors"
                   >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 gap-3 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                          <h3 className="font-semibold text-sm sm:text-base truncate">{app.applicantName}</h3>
+                          {getStatusBadge(app.status)}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                          <span className="truncate">{app.projectTitle}</span>
+                          <span className="whitespace-nowrap">Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
+                          {app.reviewedByName && app.reviewedAt && (
+                            <>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="whitespace-nowrap">
+                                Final Decision: {app.status === "approved" ? "Approved" : app.status === "rejected" ? "Rejected" : "Reviewed"} by {app.reviewedByName} on {new Date(app.reviewedAt).toLocaleDateString()}
+                              </span>
+                            </>
+                          )}
+                          <span className="whitespace-nowrap">{app.fundingAmount}</span>
+                          {hasReviewerDecisions && (
+                            <>
+                              <span className="hidden sm:inline">•</span>
+                              <span className="whitespace-nowrap">
+                                {app.reviewerDecisions!.length} Reviewer{app.reviewerDecisions!.length !== 1 ? 's' : ''} Decision{app.reviewerDecisions!.length !== 1 ? 's' : ''}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {hasReviewerDecisions && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newExpanded = new Set(expandedApplications);
+                              if (isExpanded) {
+                                newExpanded.delete(app.id);
+                              } else {
+                                newExpanded.add(app.id);
+                              }
+                              setExpandedApplications(newExpanded);
+                            }}
+                            className="min-h-[44px] sm:min-h-0"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-4 w-4 mr-2" />
+                                Hide Decisions
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-4 w-4 mr-2" />
+                                Show Decisions
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/reviewer/applications/${app.id}`, { state: { fromAdmin: true } })}
+                          title="View application details (review actions require reviewer account)"
+                          className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Reviewer Decisions Section */}
+                    {isExpanded && hasReviewerDecisions && (
+                      <div className="border-t p-4 bg-muted/30">
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-sm mb-3">Individual Reviewer Decisions</h4>
+                          {app.reviewerDecisions!.map((decision, idx) => (
+                            <div key={idx} className="p-3 bg-background border rounded-lg">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-sm">{decision.reviewerName}</span>
+                                  {decision.recommendation === 'approve' && (
+                                    <Badge className="bg-success/10 text-success border-success/20">
+                                      <UserCheck className="h-3 w-3 mr-1" />
+                                      Approve
+                                    </Badge>
+                                  )}
+                                  {decision.recommendation === 'reject' && (
+                                    <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+                                      <UserX className="h-3 w-3 mr-1" />
+                                      Reject
+                                    </Badge>
+                                  )}
+                                  {decision.recommendation === 'request_info' && (
+                                    <Badge variant="secondary">
+                                      <MessageSquare className="h-3 w-3 mr-1" />
+                                      Request Info
+                                    </Badge>
+                                  )}
+                                  {!decision.recommendation && (
+                                    <Badge variant="outline">No Recommendation</Badge>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {decision.submittedAt 
+                                    ? new Date(decision.submittedAt).toLocaleString()
+                                    : 'Not submitted'}
+                                </div>
+                              </div>
+                              {decision.overallScore !== null && (
+                                <div className="text-sm text-muted-foreground mb-1">
+                                  Overall Score: <span className="font-semibold">{decision.overallScore.toFixed(1)}/10</span>
+                                </div>
+                              )}
+                              {decision.comments && (
+                                <div className="text-sm mt-2 p-2 bg-muted rounded">
+                                  <span className="font-medium">Comments: </span>
+                                  <span className="text-muted-foreground">{decision.comments}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {/* Final Decision Section */}
+                          {app.reviewedByName && app.reviewedAt && (
+                            <div className="mt-4 pt-4 border-t">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-semibold text-sm">Final Decision</h4>
+                                <Badge className={
+                                  app.status === "approved" 
+                                    ? "bg-success/10 text-success border-success/20"
+                                    : app.status === "rejected"
+                                    ? "bg-destructive/10 text-destructive border-destructive/20"
+                                    : ""
+                                }>
+                                  {app.status === "approved" ? "Approved" : app.status === "rejected" ? "Rejected" : app.status}
+                                </Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                <p>Made by: <span className="font-medium">{app.reviewedByName}</span></p>
+                                <p>Date: {new Date(app.reviewedAt).toLocaleString()}</p>
+                                {app.reviewNotes && (
+                                  <div className="mt-2 p-2 bg-muted rounded">
+                                    <span className="font-medium">Notes: </span>
+                                    <span>{app.reviewNotes}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>

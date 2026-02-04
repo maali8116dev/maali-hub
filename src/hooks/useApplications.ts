@@ -50,7 +50,10 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
       try {
         const { data: project, error: projectError } = await supabase
           .from("projects")
-          .select("*")
+          .select(`
+            *,
+            categories:category_id(name)
+          `)
           .eq("id", app.project_id)
           .single();
 
@@ -64,7 +67,7 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
           projectTitle: project?.title || "Unknown Project",
           status: statusMap[app.status || "pending"] || "pending",
           submittedAt: app.created_at,
-          sector: project?.category || "Unknown",
+          sector: project?.categories?.name || "Unknown",
           country: app.location || "Unknown",
           fundingAmount: app.funding_amount_requested,
           companyName: app.company_name,

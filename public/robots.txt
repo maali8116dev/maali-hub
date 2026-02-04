@@ -1,8 +1,23 @@
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Disallow admin and dashboard pages
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /auth/
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Allow specific bots
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +25,5 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Sitemap location (update with your actual domain)
+# Sitemap: https://yourdomain.com/sitemap.xml
