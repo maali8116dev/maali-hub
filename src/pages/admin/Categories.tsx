@@ -72,7 +72,12 @@ const Categories = () => {
 
   const handleCreate = async (data: CategoryFormValues) => {
     try {
-      await createCategory.mutateAsync(data);
+      await createCategory.mutateAsync({
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        is_active: data.is_active,
+      });
       setIsCreateDialogOpen(false);
       form.reset();
     } catch (error) {

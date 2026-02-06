@@ -51,7 +51,7 @@ const ReviewScoringForm = ({
     enabled: !!applicationId,
   });
 
-  const category = application?.projects?.categories?.name || application?.projects?.category || '';
+  const category = (application?.projects as any)?.categories?.name || '';
   const { data: rubric } = useCategoryRubric(category);
 
   // Build schema dynamically based on rubric

@@ -55,7 +55,7 @@ const ApplicationDetails = () => {
       
       // Transform project to include category name
       if (project) {
-        project.category = project.categories?.name || 'Uncategorized';
+        (project as any).category = (project as any).categories?.name || 'Uncategorized';
       }
 
       return {
@@ -310,7 +310,7 @@ const ApplicationDetails = () => {
 
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Category</p>
-                  <Badge variant="outline">{application.project.category}</Badge>
+                  <Badge variant="outline">{(application.project as any).category}</Badge>
                 </div>
 
                 <div>

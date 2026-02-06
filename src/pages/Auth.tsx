@@ -604,7 +604,7 @@ const Auth = () => {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => handleOAuthSignIn("google")}
+                  onClick={() => handleOAuthSignIn()}
                   disabled={isLoading}
                 >
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
