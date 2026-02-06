@@ -25,7 +25,7 @@ interface AuthHookPayload {
     token: string;
     token_hash: string;
     redirect_to?: string;
-    email_action_type: "signup" | "password_reset" | "email_change" | "magiclink" | "email_change_token_new" | "email_change_token_current";
+    email_action_type: "signup" | "password_reset" | "recovery" | "email_change" | "magiclink" | "email_change_token_new" | "email_change_token_current" | string;
   };
 }
 
@@ -50,8 +50,12 @@ const getEmailContent = (
   recipientName: string,
   redirectUrl: string
 ) => {
-  switch (emailActionType) {
+  // Normalize the action type to handle variations (Supabase may send "recovery" for password reset)
+  const normalizedType = typeof emailActionType === "string" ? emailActionType.toLowerCase() : emailActionType;
+  
+  switch (normalizedType) {
     case "password_reset":
+    case "recovery": // Supabase sends "recovery" for password reset emails
       return {
         subject: "Reset Your Password - Maali",
         html: `
@@ -193,6 +197,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Supabase Auth Hook sends the payload directly
     const payload: AuthHookPayload = await req.json();
 
+    // Log the payload for debugging
+    console.log("Auth email hook received payload:", JSON.stringify({
+      user_id: payload.user?.id,
+      email: payload.user?.email,
+      email_action_type: payload.email_data?.email_action_type,
+      has_redirect_to: !!payload.email_data?.redirect_to,
+    }, null, 2));
+
     if (!payload.user || !payload.email_data) {
       console.error("Invalid payload structure:", payload);
       return new Response(
@@ -204,6 +216,8 @@ const handler = async (req: Request): Promise<Response> => {
     const { user, email_data } = payload;
     const { email, user_metadata } = user;
     const { email_action_type, redirect_to } = email_data;
+    
+    console.log(`Processing email for action type: "${email_action_type}"`);
 
     // Get recipient name from user_metadata or fetch from profiles table
     let recipientName = "User";
