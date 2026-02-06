@@ -144,7 +144,7 @@ export const useApplicationAssignments = (applicationId: string) => {
         'get_application_assignments_with_reviewers' as any,
         { p_application_id: applicationId }
       );
-
+      
       if (error) throw error;
       const rows = (data || []) as RpcAssignmentWithReviewerRow[];
 
@@ -173,13 +173,13 @@ export const useReviewerAssignments = (reviewerId?: string) => {
     queryKey: ['reviewer-assignments', reviewerId],
     queryFn: async () => {
       if (!reviewerId) return [];
-
+      
       // Server-side join (assignment + application + category label) to avoid client joins
       const { data, error } = await supabase.rpc(
         'get_reviewer_assignments_with_application' as any,
         { p_reviewer_id: reviewerId }
       );
-
+      
       if (error) throw error;
       return data || [];
     },
@@ -349,7 +349,7 @@ export const useApplicationReviewScores = (applicationId: string) => {
         'get_application_review_scores_with_reviewers' as any,
         { p_application_id: applicationId }
       );
-
+      
       if (error) throw error;
       const rows = (data || []) as RpcReviewScoreWithReviewerRow[];
 
@@ -403,7 +403,7 @@ export const useReviewAggregation = (applicationId: string, totalAssignedOverrid
         'get_application_review_scores_with_reviewers' as any,
         { p_application_id: applicationId }
       );
-
+      
       if (error) throw error;
       
       const scoreRows = ((scores || []) as RpcReviewScoreWithReviewerRow[]).map((row) => ({

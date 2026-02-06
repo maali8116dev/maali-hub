@@ -47,6 +47,7 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [isSessionReady, setIsSessionReady] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -97,7 +98,23 @@ const Auth = () => {
       
       if (type === "recovery" && accessToken) {
         // User is coming from password reset email
+        // Supabase automatically processes recovery tokens from URL hash
         setIsPasswordReset(true);
+        
+        // Wait for Supabase to process the token and establish session
+        // Check session after a short delay
+        setTimeout(async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            setIsSessionReady(true);
+          } else {
+            // If no session after delay, check again
+            setTimeout(async () => {
+              const { data: { session: retrySession } } = await supabase.auth.getSession();
+              setIsSessionReady(!!retrySession);
+            }, 1000);
+          }
+        }, 500);
         return;
       }
       
@@ -124,7 +141,10 @@ const Auth = () => {
     // Listen for auth state changes (handles the recovery and magic link flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        // Password recovery token was processed, session should be available
         setIsPasswordReset(true);
+        setIsSessionReady(!!session);
+        console.log("Password recovery event detected, session:", !!session);
       } else if (event === "SIGNED_IN" && session) {
         // ARCHIVED: Magic link sign-in handling - uncomment to re-enable
         /*
@@ -451,6 +471,27 @@ const Auth = () => {
   const handlePasswordUpdate = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
     try {
+      // First, ensure we have a session (Supabase should have established it from the token)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // If no session, try to get it again (token might still be processing)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const { data: { session: retrySession } } = await supabase.auth.getSession();
+        
+        if (!retrySession) {
+          toast({
+            title: "Session expired",
+            description: "The password reset link has expired or is invalid. Please request a new one.",
+            variant: "destructive",
+          });
+          setIsPasswordReset(false);
+          window.history.replaceState(null, "", window.location.pathname);
+          return;
+        }
+      }
+
+      // Update the password
       const { error } = await supabase.auth.updateUser({
         password: data.password,
       });
@@ -474,7 +515,7 @@ const Auth = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -552,9 +593,14 @@ const Auth = () => {
                   iconPosition="left"
                   required
                 />
-                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                  {isLoading ? "Updating password..." : "Update Password"}
+                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading || !isSessionReady}>
+                  {isLoading ? "Updating password..." : !isSessionReady ? "Verifying link..." : "Update Password"}
                 </Button>
+                {!isSessionReady && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Please wait while we verify your password reset link...
+                  </p>
+                )}
               </form>
             </Form>
             <div className="mt-4 text-center">
