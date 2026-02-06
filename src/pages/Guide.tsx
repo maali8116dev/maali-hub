@@ -11,7 +11,7 @@ const Guide = () => {
     {
       number: 1,
       title: "Create Your Account",
-      description: "Start by creating a free account on Maali. You can sign up with your email or use Google/Facebook for faster registration.",
+      description: "Start by creating a free account on Maali. You can sign up with your email or use Google for faster registration.",
       icon: CheckCircle,
       tips: [
         "Use a professional email address",

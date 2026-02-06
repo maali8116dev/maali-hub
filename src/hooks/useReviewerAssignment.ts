@@ -21,6 +21,34 @@ export interface ApplicationAssignment {
   };
 }
 
+type RpcAssignmentWithReviewerRow = {
+  id: string;
+  application_id: string;
+  reviewer_id: string;
+  assigned_at: string;
+  status: string;
+  reviewer_user_id: string | null;
+  reviewer_first_name: string | null;
+  reviewer_last_name: string | null;
+};
+
+type RpcReviewScoreWithReviewerRow = {
+  id: string;
+  application_id: string;
+  reviewer_id: string;
+  assignment_id: string;
+  scores: any;
+  overall_score: number | null;
+  comments: string | null;
+  recommendation: 'approve' | 'reject' | 'request_info' | null;
+  submitted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewer_user_id: string | null;
+  reviewer_first_name: string | null;
+  reviewer_last_name: string | null;
+};
+
 export interface ReviewerConflict {
   id: string;
   reviewer_id: string;
@@ -109,34 +137,30 @@ export const useApplicationAssignments = (applicationId: string) => {
   return useQuery({
     queryKey: ['application-assignments', applicationId],
     queryFn: async () => {
-      const { data: assignments, error } = await supabase
-        .from('application_assignments')
-        .select('*')
-        .eq('application_id', applicationId)
-        .order('assigned_at', { ascending: true });
-      
-      if (error) throw error;
-      if (!assignments || assignments.length === 0) return [];
+      if (!applicationId) return [];
 
-      // Fetch reviewer profiles separately
-      const reviewerIds = assignments.map(a => a.reviewer_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', reviewerIds);
-      
-      if (profilesError) throw profilesError;
-
-      // Create a map of reviewer profiles
-      const profilesMap = new Map(
-        (profiles || []).map(profile => [profile.user_id, profile])
+      // Server-side join (assignments + reviewer profile) to avoid extra round trips
+      const { data, error } = await supabase.rpc(
+        'get_application_assignments_with_reviewers' as any,
+        { p_application_id: applicationId }
       );
 
-      // Join assignments with profiles
-      return assignments.map(assignment => ({
-        ...assignment,
-        status: assignment.status as 'pending' | 'in_progress' | 'completed' | 'declined',
-        reviewer: profilesMap.get(assignment.reviewer_id) || undefined,
+      if (error) throw error;
+      const rows = (data || []) as RpcAssignmentWithReviewerRow[];
+
+      return rows.map((row) => ({
+        id: row.id,
+        application_id: row.application_id,
+        reviewer_id: row.reviewer_id,
+        assigned_at: row.assigned_at,
+        status: (row.status as ApplicationAssignment['status']) || 'pending',
+        reviewer: row.reviewer_user_id
+          ? {
+              user_id: row.reviewer_user_id,
+              first_name: row.reviewer_first_name || '',
+              last_name: row.reviewer_last_name || '',
+            }
+          : undefined,
       })) as ApplicationAssignment[];
     },
     enabled: !!applicationId,
@@ -149,26 +173,15 @@ export const useReviewerAssignments = (reviewerId?: string) => {
     queryKey: ['reviewer-assignments', reviewerId],
     queryFn: async () => {
       if (!reviewerId) return [];
-      
-      const { data, error } = await supabase
-        .from('application_assignments')
-        .select(`
-          *,
-          application:applications!application_id(
-            id,
-            project_title,
-            project_id,
-            status,
-            created_at,
-            is_draft
-          )
-        `)
-        .eq('reviewer_id', reviewerId)
-        .order('assigned_at', { ascending: false });
-      
+
+      // Server-side join (assignment + application + category label) to avoid client joins
+      const { data, error } = await supabase.rpc(
+        'get_reviewer_assignments_with_application' as any,
+        { p_reviewer_id: reviewerId }
+      );
+
       if (error) throw error;
-      // Filter out drafts - only show submitted applications (applicants should see their own drafts)
-      return (data || []).filter((item: any) => !item.application?.is_draft);
+      return data || [];
     },
     enabled: !!reviewerId,
   });
@@ -329,33 +342,36 @@ export const useApplicationReviewScores = (applicationId: string) => {
   return useQuery({
     queryKey: ['review-scores', applicationId],
     queryFn: async () => {
-      const { data: scores, error } = await supabase
-        .from('review_scores')
-        .select('*')
-        .eq('application_id', applicationId)
-        .order('submitted_at', { ascending: false });
-      
-      if (error) throw error;
-      if (!scores || scores.length === 0) return [];
+      if (!applicationId) return [];
 
-      // Fetch reviewer profiles separately
-      const reviewerIds = scores.map(s => s.reviewer_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', reviewerIds);
-      
-      if (profilesError) throw profilesError;
-
-      // Create a map of reviewer profiles
-      const profilesMap = new Map(
-        (profiles || []).map(profile => [profile.user_id, profile])
+      // Server-side join (scores + reviewer profile) to avoid extra round trips
+      const { data, error } = await supabase.rpc(
+        'get_application_review_scores_with_reviewers' as any,
+        { p_application_id: applicationId }
       );
 
-      // Join scores with profiles
-      return scores.map(score => ({
-        ...score,
-        reviewer: profilesMap.get(score.reviewer_id) || undefined,
+      if (error) throw error;
+      const rows = (data || []) as RpcReviewScoreWithReviewerRow[];
+
+      return rows.map((row) => ({
+        id: row.id,
+        application_id: row.application_id,
+        reviewer_id: row.reviewer_id,
+        assignment_id: row.assignment_id,
+        scores: (row.scores || {}) as Record<string, number>,
+        overall_score: row.overall_score,
+        comments: row.comments,
+        recommendation: row.recommendation,
+        submitted_at: row.submitted_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        reviewer: row.reviewer_user_id
+          ? {
+              user_id: row.reviewer_user_id,
+              first_name: row.reviewer_first_name || '',
+              last_name: row.reviewer_last_name || '',
+            }
+          : undefined,
       })) as ReviewScore[];
     },
     enabled: !!applicationId,
@@ -363,28 +379,45 @@ export const useApplicationReviewScores = (applicationId: string) => {
 };
 
 // Get aggregated review results
-export const useReviewAggregation = (applicationId: string) => {
-  return useQuery({
-    queryKey: ['review-aggregation', applicationId],
-    queryFn: async () => {
-      // Get all assignments to determine total expected reviewers
-      const { data: assignments, error: assignmentsError } = await supabase
-        .from('application_assignments')
-        .select('reviewer_id')
-        .eq('application_id', applicationId);
-      
-      if (assignmentsError) throw assignmentsError;
-      const totalAssigned = assignments?.length || 0;
+export const useReviewAggregation = (applicationId: string, totalAssignedOverride?: number) => {
+  const queryClient = useQueryClient();
 
-      // Get all submitted review scores
-      const { data: scores, error } = await supabase
-        .from('review_scores')
-        .select('*')
-        .eq('application_id', applicationId);
-      
+  return useQuery({
+    queryKey: ['review-aggregation', applicationId, totalAssignedOverride ?? 'auto'],
+    queryFn: async () => {
+      if (!applicationId) return null;
+
+      // Fetch assignments via cache (if already loaded) to avoid extra network calls
+      // Fallback to 0 if not present.
+      const cachedAssignments = queryClient.getQueryData<ApplicationAssignment[]>([
+        'application-assignments',
+        applicationId,
+      ]);
+      const totalAssigned =
+        typeof totalAssignedOverride === 'number'
+          ? totalAssignedOverride
+          : cachedAssignments?.length || 0;
+
+      // Get all submitted review scores with reviewer info in one call
+      const { data: scores, error } = await supabase.rpc(
+        'get_application_review_scores_with_reviewers' as any,
+        { p_application_id: applicationId }
+      );
+
       if (error) throw error;
       
-      if (!scores || scores.length === 0) {
+      const scoreRows = ((scores || []) as RpcReviewScoreWithReviewerRow[]).map((row) => ({
+        ...row,
+        reviewer: row.reviewer_user_id
+          ? {
+              user_id: row.reviewer_user_id,
+              first_name: row.reviewer_first_name || '',
+              last_name: row.reviewer_last_name || '',
+            }
+          : undefined,
+      })) as any[];
+
+      if (!scoreRows || scoreRows.length === 0) {
         // Return null if no reviews, but we can still track pending
         return totalAssigned > 0 ? {
           total_reviews: 0,
@@ -397,33 +430,13 @@ export const useReviewAggregation = (applicationId: string) => {
           scores: [],
         } : null;
       }
-
-      // Fetch reviewer profiles separately
-      const reviewerIds = scores.map(s => s.reviewer_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .in('user_id', reviewerIds);
-      
-      if (profilesError) throw profilesError;
-
-      // Create a map of reviewer profiles
-      const profilesMap = new Map(
-        (profiles || []).map(profile => [profile.user_id, profile])
-      );
-
-      // Join scores with profiles
-      const scoresWithReviewers = scores.map(score => ({
-        ...score,
-        reviewer: profilesMap.get(score.reviewer_id) || undefined,
-      }));
       
       // Calculate pending reviewers (assigned but not yet submitted)
-      const submittedReviewerIds = new Set(scores.map(s => s.reviewer_id));
-      const pendingReviewers = totalAssigned - submittedReviewerIds.size;
+      const submittedReviewerIds = new Set(scoreRows.map(s => s.reviewer_id));
+      const pendingReviewers = Math.max(0, totalAssigned - submittedReviewerIds.size);
       
       // Calculate overall average score
-      const overallScores = scoresWithReviewers.map(s => s.overall_score || 0).filter(s => s > 0);
+      const overallScores = scoreRows.map(s => s.overall_score || 0).filter(s => s > 0);
       const averageScore = overallScores.length > 0
         ? overallScores.reduce((sum, s) => sum + s, 0) / overallScores.length
         : 0;
@@ -435,7 +448,7 @@ export const useReviewAggregation = (applicationId: string) => {
 
       // Collect all criterion names from all scores
       const allCriteria = new Set<string>();
-      scoresWithReviewers.forEach(score => {
+      scoreRows.forEach(score => {
         if (score.scores && typeof score.scores === 'object') {
           Object.keys(score.scores).forEach(key => allCriteria.add(key));
         }
@@ -447,7 +460,7 @@ export const useReviewAggregation = (applicationId: string) => {
 
       allCriteria.forEach(criterion => {
         // Get all scores for this criterion across all reviewers
-        const criterionScores = scoresWithReviewers
+        const criterionScores = scoreRows
           .map(score => {
             if (score.scores && typeof score.scores === 'object') {
               const value = score.scores[criterion];
@@ -472,18 +485,18 @@ export const useReviewAggregation = (applicationId: string) => {
 
       // Aggregate scores
       const aggregated: ReviewAggregation = {
-        total_reviews: scoresWithReviewers.length,
-        pending_reviewers: Math.max(0, pendingReviewers),
+        total_reviews: scoreRows.length,
+        pending_reviewers: pendingReviewers,
         average_score: averageScore,
         score_variance: scoreVariance,
         per_criterion_averages: perCriterionAverages,
         per_criterion_variances: perCriterionVariances,
         recommendations: {
-          approve: scoresWithReviewers.filter(s => s.recommendation === 'approve').length,
-          reject: scoresWithReviewers.filter(s => s.recommendation === 'reject').length,
-          request_info: scoresWithReviewers.filter(s => s.recommendation === 'request_info').length,
+          approve: scoreRows.filter(s => s.recommendation === 'approve').length,
+          reject: scoreRows.filter(s => s.recommendation === 'reject').length,
+          request_info: scoreRows.filter(s => s.recommendation === 'request_info').length,
         },
-        scores: scoresWithReviewers as any[], // Include reviewer profile data
+        scores: scoreRows as any[], // Include reviewer profile data
       };
       
       return aggregated;
@@ -640,7 +653,7 @@ export const useDecisionEngine = (
   expectedReviewers: number = 2,
   config?: Partial<DecisionEngineConfig>
 ) => {
-  const { data: aggregation } = useReviewAggregation(applicationId);
+  const { data: aggregation } = useReviewAggregation(applicationId, expectedReviewers);
   
   return useQuery({
     queryKey: ['decision-engine', applicationId, expectedReviewers, config],

@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffect as ReactUseEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,10 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
-  useApplicationAssignments,
-  useReviewAggregation,
   useReviewerCategories,
-  useDecisionEngine,
 } from '@/hooks/useReviewerAssignment';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -50,42 +47,10 @@ import { Textarea } from '@/components/ui/textarea';
 
 // Hook to manage reviewers per assignment setting
 const useReviewersPerAssignment = () => {
-  const [numReviewers, setNumReviewers] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('review-management-num-reviewers');
-      return stored ? parseInt(stored, 10) : 2;
-    }
-    return 2;
-  });
-
-  // Listen for storage changes to sync across components
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('review-management-num-reviewers');
-        if (stored) {
-          setNumReviewers(parseInt(stored, 10));
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Also listen for custom event for same-tab updates
-    window.addEventListener('reviewers-setting-changed', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('reviewers-setting-changed', handleStorageChange);
-    };
-  }, []);
+  const [numReviewers, setNumReviewers] = useState<number>(3);
 
   const updateNumReviewers = (value: number) => {
     setNumReviewers(value);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('review-management-num-reviewers', value.toString());
-      // Dispatch custom event for same-tab updates
-      window.dispatchEvent(new Event('reviewers-setting-changed'));
-    }
   };
 
   return { numReviewers, updateNumReviewers };
@@ -94,8 +59,6 @@ const useReviewersPerAssignment = () => {
 const ReviewManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
-  const { numReviewers } = useReviewersPerAssignment();
 
   // Get all reviewers
   const { data: reviewers = [] } = useQuery({
@@ -109,70 +72,6 @@ const ReviewManagement = () => {
       
       if (error) throw error;
       return data;
-    },
-  });
-
-  // Get all applications (excluding drafts - only submitted applications)
-  const { data: applications = [] } = useQuery({
-    queryKey: ['all-applications-for-review'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          id,
-          project_title,
-          project_id,
-          status,
-          created_at,
-          reviewed_by,
-          reviewed_at,
-          review_notes,
-          projects!inner(
-            id,
-            category_id,
-            categories:category_id(name)
-          )
-        `)
-        .eq('is_draft', false) // Exclude drafts - only show submitted applications
-        .order('created_at', { ascending: false })
-        .limit(50);
-      
-      if (error) throw error;
-      
-      // Fetch reviewer names for final decisions
-      const reviewerIds = [...new Set(
-        (data || [])
-          .map((app: any) => app.reviewed_by)
-          .filter(Boolean)
-      )];
-      
-      let reviewerMap = new Map();
-      if (reviewerIds.length > 0) {
-        const { data: reviewers } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name')
-          .in('user_id', reviewerIds);
-        
-        reviewerMap = new Map(
-          (reviewers || []).map((r: any) => [
-            r.user_id,
-            `${r.first_name || ''} ${r.last_name || ''}`.trim() || 'Unknown'
-          ])
-        );
-      }
-      
-      // Add reviewer names to applications and deduplicate by id
-      const mapped = (data || []).map((app: any) => ({
-        ...app,
-        reviewedByName: app.reviewed_by ? reviewerMap.get(app.reviewed_by) : null,
-      }));
-      
-      // Deduplicate by application id to prevent duplicates
-      const unique = Array.from(
-        new Map(mapped.map(app => [app.id, app])).values()
-      );
-      
-      return unique;
     },
   });
 
@@ -200,11 +99,11 @@ const ReviewManagement = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="assignments-rubrics" className="space-y-4">
+      <Tabs defaultValue="rubrics" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="assignments-rubrics">
+          <TabsTrigger value="rubrics">
             <FileText className="h-4 w-4 mr-2" />
-            Assignments & Rubrics
+            Rubrics
           </TabsTrigger>
           <TabsTrigger value="reviewers">
             <Users className="h-4 w-4 mr-2" />
@@ -224,9 +123,9 @@ const ReviewManagement = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Assignments & Rubrics Tab */}
-        <TabsContent value="assignments-rubrics" className="space-y-4">
-          <AssignmentsRubricsTab applications={applications} categories={categories} numReviewers={numReviewers} />
+        {/* Rubrics Tab */}
+        <TabsContent value="rubrics" className="space-y-4">
+          <RubricsTab categories={categories} />
         </TabsContent>
 
         {/* Reviewer Categories Tab */}
@@ -253,339 +152,6 @@ const ReviewManagement = () => {
   );
 };
 
-// Combined Assignments & Rubrics Tab Component
-const AssignmentsRubricsTab = ({ 
-  applications, 
-  categories,
-  numReviewers 
-}: { 
-  applications: any[]; 
-  categories: string[];
-  numReviewers: number;
-}) => {
-  return (
-    <div className="space-y-6">
-      {/* Assignments Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Application Reviews</CardTitle>
-          <CardDescription>
-            Monitor review progress and status for applications. Reviewers are automatically assigned when applications are submitted ({numReviewers} reviewer{numReviewers !== 1 ? 's' : ''} per application).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {applications.map((app) => (
-              <ApplicationAssignmentCard
-                key={app.id}
-                application={app}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Rubrics Section */}
-      <RubricsTab categories={categories} />
-    </div>
-  );
-};
-
-// Application Assignment Card
-const ApplicationAssignmentCard = ({
-  application,
-}: {
-  application: any;
-}) => {
-  const { data: assignments = [] } = useApplicationAssignments(application.id);
-  const { data: aggregation } = useReviewAggregation(application.id);
-  const { data: decision } = useDecisionEngine(application.id, assignments.length || 2);
-  const [showDecisions, setShowDecisions] = useState(false);
-  const [showMetrics, setShowMetrics] = useState(false);
-
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg">{application.project_title}</h3>
-            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-              <span>Category: {application.projects?.categories?.name || 'Uncategorized'}</span>
-              <span>•</span>
-              <span>Application Status: <span className="font-medium capitalize">{application.status}</span></span>
-            </div>
-            
-            {assignments.length > 0 ? (
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium">Assigned Reviewers:</p>
-                <div className="flex flex-wrap gap-2">
-                  {assignments.map((assignment: any) => (
-                    <Badge key={assignment.id} variant="outline">
-                      {assignment.reviewer?.first_name} {assignment.reviewer?.last_name}
-                      <span className="ml-2 text-xs">({assignment.status})</span>
-                    </Badge>
-                  ))}
-                </div>
-                
-                {aggregation && (
-                  <div className="mt-4 space-y-3">
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm font-medium mb-2">Review Summary:</p>
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Average Score:</span>
-                          <span className="ml-2 font-semibold">
-                            {aggregation.average_score.toFixed(1)}/10
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Approve:</span>
-                          <span className="ml-2 font-semibold text-success">
-                            {aggregation.recommendations.approve}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Reject:</span>
-                          <span className="ml-2 font-semibold text-destructive">
-                            {aggregation.recommendations.reject}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-2 pt-2 border-t grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Variance:</span>
-                          {aggregation.score_variance !== null ? (
-                            <>
-                              <span className={`ml-2 font-semibold ${
-                                aggregation.score_variance > 1.5 ? 'text-warning' : 'text-success'
-                              }`}>
-                                {aggregation.score_variance.toFixed(2)}
-                              </span>
-                              <span className="text-xs text-muted-foreground ml-1">
-                                {aggregation.score_variance > 1.5 ? '(High disagreement)' : '(Agreement)'}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="ml-2 font-semibold text-muted-foreground">
-                              N/A (need 2+ reviews)
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Total Reviews:</span>
-                          <span className="ml-2 font-semibold">
-                            {aggregation.total_reviews}
-                            {aggregation.pending_reviewers > 0 && (
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ({aggregation.pending_reviewers} pending)
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Decision Engine Recommendation */}
-                    {decision && (
-                      <div className="p-3 border rounded-lg bg-background">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium">Decision Engine Recommendation:</p>
-                          <Badge className={
-                            decision.recommendedDecision === 'approve' 
-                              ? 'bg-success/10 text-success border-success/20'
-                              : decision.recommendedDecision === 'reject'
-                              ? 'bg-destructive/10 text-destructive border-destructive/20'
-                              : 'bg-warning/10 text-warning border-warning/20'
-                          }>
-                            {decision.recommendedDecision.replace('_', ' ').toUpperCase()}
-                          </Badge>
-                        </div>
-                        <div className="text-sm space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Confidence:</span>
-                            <span className="font-semibold">{(decision.confidence * 100).toFixed(0)}%</span>
-                            {decision.canAutoApprove && (
-                              <Badge variant="outline" className="text-xs">Can Auto-Approve</Badge>
-                            )}
-                          </div>
-                          <div className="mt-2 pt-2 border-t">
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Reasoning:</p>
-                            <ul className="text-xs space-y-1 list-disc list-inside">
-                              {decision.reasoning.map((reason, idx) => (
-                                <li key={idx} className="text-muted-foreground">{reason}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Enhanced Metrics Toggle */}
-                    {(Object.keys(aggregation.per_criterion_averages).length > 0 || Object.keys(aggregation.per_criterion_variances).length > 0) && (
-                      <div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowMetrics(!showMetrics)}
-                          className="text-xs"
-                        >
-                          {showMetrics ? (
-                            <>
-                              <ChevronUp className="h-3 w-3 mr-1" />
-                              Hide Per-Criterion Metrics
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3 w-3 mr-1" />
-                              Show Per-Criterion Metrics
-                            </>
-                          )}
-                        </Button>
-                        
-                        {showMetrics && (
-                          <div className="mt-2 p-3 bg-background border rounded-lg">
-                            <p className="text-xs font-medium mb-2">Per-Criterion Analysis:</p>
-                            <div className="space-y-2">
-                              {Object.entries(aggregation.per_criterion_averages).map(([criterion, avg]) => (
-                                <div key={criterion} className="text-xs">
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium capitalize">{criterion}:</span>
-                                    <div className="flex items-center gap-2">
-                                      <span>Avg: {avg.toFixed(2)}/10</span>
-                                      <span className="text-muted-foreground">
-                                        (Var: {aggregation.per_criterion_variances[criterion]?.toFixed(2) || '0.00'})
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {aggregation.scores && aggregation.scores.length > 0 && (
-                      <div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowDecisions(!showDecisions)}
-                          className="text-xs"
-                        >
-                          {showDecisions ? (
-                            <>
-                              <ChevronUp className="h-3 w-3 mr-1" />
-                              Hide Individual Decisions
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3 w-3 mr-1" />
-                              Show Individual Decisions ({aggregation.scores.length})
-                            </>
-                          )}
-                        </Button>
-                        
-                        {showDecisions && (
-                          <div className="mt-2 space-y-2">
-                            {aggregation.scores.map((score: any) => {
-                              const reviewerName = score.reviewer
-                                ? `${score.reviewer.first_name || ''} ${score.reviewer.last_name || ''}`.trim() || 'Unknown Reviewer'
-                                : 'Unknown Reviewer';
-                              
-                              return (
-                                <div key={score.id} className="p-3 bg-background border rounded-lg">
-                                  <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium text-sm">{reviewerName}</span>
-                                      {score.recommendation === 'approve' && (
-                                        <Badge className="bg-success/10 text-success border-success/20">
-                                          <UserCheck className="h-3 w-3 mr-1" />
-                                          Approve
-                                        </Badge>
-                                      )}
-                                      {score.recommendation === 'reject' && (
-                                        <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-                                          <UserX className="h-3 w-3 mr-1" />
-                                          Reject
-                                        </Badge>
-                                      )}
-                                      {score.recommendation === 'request_info' && (
-                                        <Badge variant="secondary">
-                                          <MessageSquare className="h-3 w-3 mr-1" />
-                                          Request Info
-                                        </Badge>
-                                      )}
-                                      {!score.recommendation && (
-                                        <Badge variant="outline">No Recommendation</Badge>
-                                      )}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {score.submitted_at 
-                                        ? new Date(score.submitted_at).toLocaleString()
-                                        : 'Not submitted'}
-                                    </div>
-                                  </div>
-                                  {score.overall_score !== null && (
-                                    <div className="text-sm text-muted-foreground mb-1">
-                                      Overall Score: <span className="font-semibold">{score.overall_score.toFixed(1)}/10</span>
-                                    </div>
-                                  )}
-                                  {score.comments && (
-                                    <div className="text-sm mt-2 p-2 bg-muted rounded">
-                                      <span className="font-medium">Comments: </span>
-                                      <span className="text-muted-foreground">{score.comments}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Final Decision Section */}
-                    {application.reviewed_by && application.reviewed_at && (
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-2 mb-2">
-                          <p className="text-sm font-medium">Final Decision:</p>
-                          <Badge className={
-                            application.status === "approved" 
-                              ? "bg-success/10 text-success border-success/20"
-                              : application.status === "rejected"
-                              ? "bg-destructive/10 text-destructive border-destructive/20"
-                              : ""
-                          }>
-                            {application.status === "approved" ? "Approved" : application.status === "rejected" ? "Rejected" : application.status}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p>Made by: <span className="font-medium">{application.reviewedByName || 'Unknown'}</span></p>
-                          <p>Date: {new Date(application.reviewed_at).toLocaleString()}</p>
-                          {application.review_notes && (
-                            <div className="mt-2 p-2 bg-muted rounded">
-                              <span className="font-medium">Notes: </span>
-                              <span>{application.review_notes}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground mt-2">
-                No reviewers assigned yet. Reviewers will be automatically assigned when the application is submitted.
-              </p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 // Reviewer Categories Tab
 const ReviewerCategoriesTab = ({
@@ -599,6 +165,7 @@ const ReviewerCategoriesTab = ({
   const queryClient = useQueryClient();
   const [selectedReviewer, setSelectedReviewer] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   const { data: reviewerCategories = [] } = useQuery({
     queryKey: ['all-reviewer-categories'],
@@ -608,16 +175,30 @@ const ReviewerCategoriesTab = ({
         .select(`
           *,
           reviewer:profiles!reviewer_id(user_id, first_name, last_name),
-          categories:category_id(name)
+          category_info:categories!category_id(name)
         `);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reviewer categories:', error);
+        throw error;
+      }
       
       // Transform to include category name for display
-      const transformed = (data || []).map((item: any) => ({
-        ...item,
-        category: item.categories?.name || 'Unknown',
-      }));
+      const transformed = (data || []).map((item: any) => {
+        // Handle the joined category data structure
+        // The join creates category_info object with name property
+        const categoryName = item.category_info?.name || (item.category_id ? 'Category ID: ' + item.category_id : 'Unknown');
+        
+        // Log if category name is missing for debugging
+        if (!item.category_info?.name && item.category_id) {
+          console.warn('Category name not found for category_id:', item.category_id, 'Item:', item);
+        }
+        
+        return {
+          ...item,
+          category: categoryName,
+        };
+      });
       
       // Deduplicate by id to prevent duplicates
       const unique = Array.from(
@@ -631,29 +212,44 @@ const ReviewerCategoriesTab = ({
 
   const addCategory = useMutation({
     mutationFn: async ({ reviewerId, category }: { reviewerId: string; category: string }) => {
-      // Look up category_id from category name
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('name', category)
-        .eq('is_active', true)
-        .single();
+      // Use RPC function for atomic category assignment
+      // This handles validation, duplicate checking, and insertion in one call
+      const { data, error } = await supabase.rpc(
+        'assign_reviewer_category' as any,
+        {
+          p_reviewer_id: reviewerId,
+          p_category_name: category,
+        }
+      );
       
-      if (categoryError || !categoryData) {
-        throw new Error(`Category "${category}" not found`);
+      if (error) {
+        // RPC function provides clear error messages
+        throw new Error(error.message || `Failed to assign category "${category}"`);
       }
       
-      const { error } = await supabase
-        .from('reviewer_categories')
-        .insert({ reviewer_id: reviewerId, category_id: categoryData.id });
+      // Handle return value - RPC returns array or single object
+      const result = Array.isArray(data) ? data : (data ? [data] : []);
+      if (result.length === 0) {
+        throw new Error(`Failed to assign category "${category}"`);
+      }
       
-      if (error) throw error;
+      return result[0];
     },
     onSuccess: () => {
+      // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['all-reviewer-categories'] });
       queryClient.invalidateQueries({ queryKey: ['reviewer-categories'] });
+      // Close dialog and reset form
       setDialogOpen(false);
+      setSelectedReviewer(null);
       toast({ title: 'Category Added', description: 'Reviewer category added successfully.' });
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to add category assignment.',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -684,7 +280,10 @@ const ReviewerCategoriesTab = ({
         <CardContent>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
-            if (!open) {
+            if (open) {
+              // Increment form key to reset form when dialog opens
+              setFormKey(prev => prev + 1);
+            } else {
               // Reset form when dialog closes
               setSelectedReviewer(null);
             }
@@ -699,17 +298,16 @@ const ReviewerCategoriesTab = ({
               <DialogHeader>
                 <DialogTitle>Add Reviewer Category</DialogTitle>
               </DialogHeader>
-              {dialogOpen && (
-                <AddCategoryForm
-                  key={dialogOpen ? 'open' : 'closed'}
-                  reviewers={reviewers}
-                  categories={categories}
-                  onSubmit={(reviewerId, category) =>
-                    addCategory.mutate({ reviewerId, category })
-                  }
-                  isSubmitting={addCategory.isPending}
-                />
-              )}
+              <AddCategoryForm
+                key={formKey}
+                reviewers={reviewers}
+                categories={categories}
+                onSubmit={(reviewerId, category) =>
+                  addCategory.mutate({ reviewerId, category })
+                }
+                isSubmitting={addCategory.isPending}
+                onDialogClose={() => setDialogOpen(false)}
+              />
             </DialogContent>
           </Dialog>
 
@@ -765,11 +363,13 @@ const AddCategoryForm = ({
   categories,
   onSubmit,
   isSubmitting,
+  onDialogClose,
 }: {
   reviewers: any[];
   categories: string[];
   onSubmit: (reviewerId: string, category: string) => void;
   isSubmitting?: boolean;
+  onDialogClose?: () => void;
 }) => {
   const [reviewerId, setReviewerId] = useState('');
   const [category, setCategory] = useState('');
@@ -778,6 +378,7 @@ const AddCategoryForm = ({
     e.preventDefault();
     if (reviewerId && category && !isSubmitting) {
       onSubmit(reviewerId, category);
+      // Form will reset when dialog closes (via key prop remount)
     }
   };
 

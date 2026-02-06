@@ -204,247 +204,297 @@ const App = () => (
             }
           />
 
-          {/* Admin Routes - Accessible without auth for development */}
+          {/* Admin Routes - Protected, requires authentication */}
           <Route
             path="/admin"
             element={
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/projects"
             element={
-              <AdminLayout>
-                <AdminProjects />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminProjects />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/projects/new"
             element={
-              <AdminLayout>
-                <AdminProjectForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminProjectForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/projects/:id"
             element={
-              <AdminLayout>
-                <AdminProjectDetails />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminProjectDetails />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/projects/:id/edit"
             element={
-              <AdminLayout>
-                <AdminProjectForm />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/admin/applications"
-            element={
-              <AdminLayout>
-                <AdminApplications />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminProjectForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/users"
             element={
-              <AdminLayout>
-                <AdminUsers />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminUsers />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/financial"
             element={
-              <AdminLayout>
-                <AdminFinancial />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminFinancial />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/activity-logs"
             element={
-              <AdminLayout>
-                <AdminActivityLogs />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminActivityLogs />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/categories"
             element={
-              <AdminLayout>
-                <AdminCategories />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminCategories />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/settings"
             element={
-              <AdminLayout>
-                <AdminSettings />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminSettings />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/review-management"
             element={
-              <AdminLayout>
-                <ReviewManagement />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <ReviewManagement />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/blog"
             element={
-              <AdminLayout>
-                <AdminBlog />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminBlog />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/blog/new"
             element={
-              <AdminLayout>
-                <AdminBlogForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminBlogForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/blog/:id/edit"
             element={
-              <AdminLayout>
-                <AdminBlogForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminBlogForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/faq"
             element={
-              <AdminLayout>
-                <AdminFAQ />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminFAQ />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/faq/new"
             element={
-              <AdminLayout>
-                <AdminFAQForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminFAQForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/faq/:id/edit"
             element={
-              <AdminLayout>
-                <AdminFAQForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminFAQForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/mentors"
             element={
-              <AdminLayout>
-                <AdminMentors />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminMentors />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/mentors/new"
             element={
-              <AdminLayout>
-                <AdminMentorForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminMentorForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/mentors/:id/edit"
             element={
-              <AdminLayout>
-                <AdminMentorForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminMentorForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/resources"
             element={
-              <AdminLayout>
-                <AdminResources />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminResources />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/resources/new"
             element={
-              <AdminLayout>
-                <AdminResourceForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminResourceForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/resources/:id"
             element={
-              <AdminLayout>
-                <AdminResourceForm />
-              </AdminLayout>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminResourceForm />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
 
-          {/* Reviewer Routes - Accessible without auth for development */}
+          {/* Reviewer Routes - Protected, requires authentication */}
           <Route
             path="/reviewer"
             element={
-              <ReviewerLayout>
-                <ReviewerDashboard />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewerDashboard />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reviewer/applications"
             element={
-              <ReviewerLayout>
-                <ReviewerApplications />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewerApplications />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reviewer/applications/:id"
             element={
-              <ReviewerLayout>
-                <ReviewApplication />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewApplication />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reviewer/pending"
             element={
-              <ReviewerLayout>
-                <ReviewerPending />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewerPending />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reviewer/settings"
             element={
-              <ReviewerLayout>
-                <ReviewerSettings />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewerSettings />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/reviewer/notifications"
             element={
-              <ReviewerLayout>
-                <ReviewerNotifications />
-              </ReviewerLayout>
+              <ProtectedRoute requireAuth={true}>
+                <ReviewerLayout>
+                  <ReviewerNotifications />
+                </ReviewerLayout>
+              </ProtectedRoute>
             }
           />
           

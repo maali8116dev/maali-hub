@@ -1,7 +1,16 @@
--- Create notifications table for user notifications
--- This table stores all notifications for users (applicants, reviewers, admins)
+-- ============================================
+-- GROUP 6: Notifications
+-- ============================================
+-- This migration creates:
+-- - Notifications table
+-- - Notification functions
+-- - Notification triggers (currently disabled)
+-- ============================================
 
-CREATE TABLE public.notifications (
+-- ============================================
+-- NOTIFICATIONS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -22,44 +31,34 @@ CREATE TABLE public.notifications (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
-CREATE INDEX idx_notifications_read ON public.notifications(read);
-CREATE INDEX idx_notifications_created_at ON public.notifications(created_at DESC);
-CREATE INDEX idx_notifications_user_read ON public.notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON public.notifications(read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON public.notifications(user_id, read);
 
 -- Enable Row Level Security
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
--- Users can view their own notifications
 CREATE POLICY "Users can view their own notifications"
 ON public.notifications
 FOR SELECT
 USING (auth.uid() = user_id);
 
--- Users can update their own notifications (mark as read, delete)
 CREATE POLICY "Users can update their own notifications"
 ON public.notifications
 FOR UPDATE
 USING (auth.uid() = user_id);
 
--- Users can delete their own notifications
 CREATE POLICY "Users can delete their own notifications"
 ON public.notifications
 FOR DELETE
 USING (auth.uid() = user_id);
 
--- System can create notifications for any user (via service role or function)
--- This will be handled by a security definer function
-
--- Add comments
-COMMENT ON TABLE public.notifications IS 'Stores user notifications for various events like application status changes, reminders, etc.';
-COMMENT ON COLUMN public.notifications.type IS 'Type of notification: application, system, reminder, new_application, review_assigned, deadline_reminder, status_change';
-COMMENT ON COLUMN public.notifications.metadata IS 'Additional JSON data like application_id, project_id, reviewer_id, etc.';
-
+-- ============================================
+-- NOTIFICATION FUNCTIONS
+-- ============================================
 -- Function to create a notification
--- This function can be called by triggers or application code
--- SECURITY DEFINER allows it to bypass RLS when called from triggers
 CREATE OR REPLACE FUNCTION public.create_notification(
   p_user_id UUID,
   p_title TEXT,
@@ -159,10 +158,21 @@ BEGIN
 END;
 $$;
 
+-- Grant execute permissions
+GRANT EXECUTE ON FUNCTION public.create_notification TO authenticated;
+GRANT EXECUTE ON FUNCTION public.mark_notification_read TO authenticated;
+GRANT EXECUTE ON FUNCTION public.mark_all_notifications_read TO authenticated;
+
+-- ============================================
+-- NOTIFICATION TRIGGER FUNCTION
+-- ============================================
 -- Trigger function to create notification when application status changes
+-- NOTE: Triggers are currently disabled - notifications are created in application code instead
 CREATE OR REPLACE FUNCTION public.notify_application_status_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_project_title TEXT;
@@ -170,6 +180,7 @@ DECLARE
   v_notification_message TEXT;
   v_notification_link TEXT;
   v_notification_type TEXT;
+  v_notification_id UUID;
 BEGIN
   -- For INSERT, create submission notification
   IF TG_OP = 'INSERT' THEN
@@ -181,7 +192,7 @@ BEGIN
     -- Create notification for the applicant
     v_notification_link := format('/dashboard/applications/%s', NEW.id);
     
-    PERFORM public.create_notification(
+    v_notification_id := public.create_notification(
       NEW.user_id,
       'Application Submitted',
       format('Your application for "%s" has been successfully submitted and is now under review.', COALESCE(v_project_title, 'the project')),
@@ -213,7 +224,7 @@ BEGIN
   END IF;
 
   -- For UPDATE, only create notification if status actually changed
-  IF OLD.status = NEW.status THEN
+  IF OLD.status IS NOT DISTINCT FROM NEW.status THEN
     RETURN NEW;
   END IF;
 
@@ -250,7 +261,7 @@ BEGIN
   -- Create notification for the applicant
   v_notification_link := format('/dashboard/applications/%s', NEW.id);
   
-  PERFORM public.create_notification(
+  v_notification_id := public.create_notification(
     NEW.user_id,
     v_notification_title,
     v_notification_message,
@@ -264,20 +275,30 @@ BEGIN
     )
   );
 
+  -- If notification creation failed, log but don't fail the transaction
+  IF v_notification_id IS NULL THEN
+    RAISE WARNING 'Failed to create notification for application % status change from % to %', NEW.id, OLD.status, NEW.status;
+  END IF;
+
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Log the error but don't fail the transaction
+    RAISE WARNING 'Error in notification trigger for application %: %', NEW.id, SQLERRM;
+    RETURN NEW;
 END;
 $$;
 
--- Create trigger for application status changes
-CREATE TRIGGER application_status_change_notification
-AFTER UPDATE OF status ON public.applications
-FOR EACH ROW
-WHEN (OLD.status IS DISTINCT FROM NEW.status)
-EXECUTE FUNCTION public.notify_application_status_change();
+-- NOTE: Triggers are currently disabled - notifications are created in application code instead
+-- This allows for easier debugging and control
+-- The trigger function is kept in case we need to re-enable triggers in the future
+COMMENT ON FUNCTION public.notify_application_status_change() IS 
+'Trigger function for application notifications. Currently disabled - notifications are created in application code instead for easier debugging and control.';
 
--- Create trigger for new application submissions
-CREATE TRIGGER application_submitted_notification
-AFTER INSERT ON public.applications
-FOR EACH ROW
-EXECUTE FUNCTION public.notify_application_status_change();
+-- ============================================
+-- COMMENTS
+-- ============================================
+COMMENT ON TABLE public.notifications IS 'Stores user notifications for various events like application status changes, reminders, etc.';
+COMMENT ON COLUMN public.notifications.type IS 'Type of notification: application, system, reminder, new_application, review_assigned, deadline_reminder, status_change';
+COMMENT ON COLUMN public.notifications.metadata IS 'Additional JSON data like application_id, project_id, reviewer_id, etc.';
 

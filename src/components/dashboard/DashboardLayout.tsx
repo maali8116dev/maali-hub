@@ -41,11 +41,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, signOut } = useAuth();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   
-  // Get display name: profile name > email > "Guest User"
-  // Always prefer email over "Guest User" if user is available
+  // Get display name: profile name > email
+  // User must be authenticated to access dashboard (enforced by ProtectedRoute)
   const displayName = profile?.firstName && profile?.lastName
     ? `${profile.firstName} ${profile.lastName}`
-    : user?.email || "Guest User";
+    : user?.email || "User";
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

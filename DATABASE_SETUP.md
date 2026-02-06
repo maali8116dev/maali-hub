@@ -63,30 +63,87 @@ The Supabase CLI is already installed as a dev dependency. You can use npm scrip
 1. Go to your Supabase Dashboard
 2. Navigate to SQL Editor
 3. Run each migration file in order:
-   - `20250827101831_8d15b569-7705-4300-b163-093e3b76bbc2.sql` (Profiles)
-   - `20250827102215_b0cd49b0-3867-40f7-9208-7d75b2a0ceff.sql`
-   - `20250827102240_9de99128-d1a2-483b-84c1-340b380a5627.sql`
-   - `20250827104708_6ca4377e-7cd0-417a-a015-3ba4875e7e46.sql` (Applications)
-   - `20250829113314_0653d1cb-4f25-45b1-9c8d-d9555d6c70c0.sql`
-   - `20260107124324_create_projects_table.sql` (Projects - NEW)
-   - `20260107124325_create_blog_posts_table.sql` (Blog Posts - NEW)
+   - `20250827000000_01_core_schema.sql` (Core Schema Foundation)
+   - `20250827000000_02_user_management.sql` (User Management & Roles)
+   - `20250827000000_03_payment_system.sql` (Payment System)
+   - `20250827000000_04_reviewer_system.sql` (Reviewer Assignment System)
+   - `20250827000000_05_storage_documents.sql` (Storage & Documents)
+   - `20250827000000_06_notifications.sql` (Notifications)
+   - `20250827000000_07_application_enhancements.sql` (Application Enhancements)
+   - `20250827000000_08_miscellaneous.sql` (Miscellaneous Features)
 
 ### Option 3: Manual SQL Execution
 
 Copy and paste the SQL from each migration file into the Supabase SQL Editor and execute them in order.
 
+## Migration Structure
+
+The database migrations are organized into 8 logical groups:
+
+1. **Core Schema Foundation** (`01_core_schema.sql`)
+   - Profiles, applications, application_documents, projects, blog_posts
+   - Basic RLS policies and triggers
+
+2. **User Management & Roles** (`02_user_management.sql`)
+   - User role enum and role-based access control
+   - User management functions
+   - User avatars storage bucket
+
+3. **Payment System** (`03_payment_system.sql`)
+   - Payment methods, transactions, billing addresses
+   - Invoice generation and payment tracking
+
+4. **Reviewer Assignment System** (`04_reviewer_system.sql`)
+   - Categories, reviewer categories, application assignments
+   - Review scores, rubrics, conflicts
+   - Reviewer workload balancing functions
+
+5. **Storage & Documents** (`05_storage_documents.sql`)
+   - Project images bucket
+   - Application documents storage policies
+   - Reviewer document access
+
+6. **Notifications** (`06_notifications.sql`)
+   - Notifications table and functions
+   - Notification triggers (currently disabled - handled in application code)
+
+7. **Application Enhancements** (`07_application_enhancements.sql`)
+   - Comprehensive application fields
+   - Draft support
+   - Foreign key constraints
+
+8. **Miscellaneous Features** (`08_miscellaneous.sql`)
+   - Activity logs for tracking user interactions
+
 ## Tables Created
 
-### Existing Tables
+### Core Tables
 
-- ✅ `profiles` - User profiles
-- ✅ `applications` - Funding applications
+- ✅ `profiles` - User profiles with role-based access
+- ✅ `applications` - Funding applications with comprehensive fields
 - ✅ `application_documents` - Application file uploads
-
-### New Tables
-
 - ✅ `projects` - Funding opportunities/projects
 - ✅ `blog_posts` - Blog articles
+
+### Payment Tables
+
+- ✅ `payment_methods` - User payment methods
+- ✅ `transactions` - Payment history and billing records
+- ✅ `billing_addresses` - User billing information
+
+### Reviewer System Tables
+
+- ✅ `categories` - Centralized categories table
+- ✅ `reviewer_categories` - Maps reviewers to categories
+- ✅ `application_assignments` - Tracks reviewer assignments
+- ✅ `reviewer_conflicts` - Conflict of interest declarations
+- ✅ `review_scores` - Individual reviewer scores
+- ✅ `category_rubrics` - Scoring criteria per category
+
+### Other Tables
+
+- ✅ `notifications` - User notifications
+- ✅ `activity_logs` - Activity tracking
 
 ## Table Details
 
@@ -109,26 +166,41 @@ Copy and paste the SQL from each migration file into the Supabase SQL Editor and
 
 All tables have RLS enabled with appropriate policies:
 
-- **Profiles**: Viewable by everyone, users can update their own
-- **Applications**: Users can only view/update their own
-- **Application Documents**: Users can only manage their own
+- **Profiles**: Users can view/update their own; admins can view all
+- **Applications**: Users can manage their own; reviewers can view/update assigned applications
+- **Application Documents**: Users can manage their own; reviewers and admins can view all
 - **Projects**: Viewable by everyone, only admins can modify
 - **Blog Posts**: Published posts viewable by everyone, only admins can modify
+- **Payment Methods**: Users can manage their own
+- **Transactions**: Users can view their own; admins can view all
+- **Reviewer System**: Reviewers can view their own assignments/scores; admins can manage all
+- **Notifications**: Users can view/manage their own
+
+## User Roles
+
+The system uses a role-based access control (RBAC) system with three roles:
+
+- **admin** - Full system access
+- **reviewer** - Can review assigned applications
+- **applicant** - Default role for regular users
 
 ## Admin Access
 
-Admin access is determined by:
-
-1. User's profile `business_sector` field set to 'admin' or 'Admin'
-2. User's email ending with '@admin.maali.africa'
-
-You can update a user's profile to grant admin access:
+Admin access is determined by the `role` field in the `profiles` table:
 
 ```sql
+-- Grant admin access
 UPDATE public.profiles
-SET business_sector = 'admin'
+SET role = 'admin'
+WHERE user_id = 'USER_UUID_HERE';
+
+-- Grant reviewer access
+UPDATE public.profiles
+SET role = 'reviewer'
 WHERE user_id = 'USER_UUID_HERE';
 ```
+
+The `get_user_role()` function is used throughout the system to check user roles without RLS recursion issues.
 
 ## Verification
 
@@ -138,7 +210,23 @@ After running migrations, verify tables exist:
 SELECT table_name
 FROM information_schema.tables
 WHERE table_schema = 'public'
-AND table_name IN ('profiles', 'applications', 'application_documents', 'projects', 'blog_posts');
+ORDER BY table_name;
+```
+
+You should see all the tables listed above, including:
+- Core tables: profiles, applications, application_documents, projects, blog_posts
+- Payment tables: payment_methods, transactions, billing_addresses
+- Reviewer system tables: categories, reviewer_categories, application_assignments, reviewer_conflicts, review_scores, category_rubrics
+- Other tables: notifications, activity_logs
+
+You can also verify functions exist:
+
+```sql
+SELECT routine_name
+FROM information_schema.routines
+WHERE routine_schema = 'public'
+AND routine_type = 'FUNCTION'
+ORDER BY routine_name;
 ```
 
 ## Seeding Data
