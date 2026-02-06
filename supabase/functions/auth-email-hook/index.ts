@@ -22,8 +22,8 @@ interface AuthHookPayload {
     };
   };
   email_data: {
-    token: string;
-    token_hash: string;
+    token?: string;
+    token_hash?: string;
     redirect_to?: string;
     email_action_type: "signup" | "password_reset" | "recovery" | "email_change" | "magiclink" | "email_change_token_new" | "email_change_token_current" | string;
   };
@@ -215,7 +215,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { user, email_data } = payload;
     const { email, user_metadata } = user;
-    const { email_action_type, redirect_to } = email_data;
+    const { email_action_type, redirect_to, token } = email_data;
     
     console.log(`Processing email for action type: "${email_action_type}"`);
 
@@ -246,16 +246,48 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Build redirect URL - Supabase includes the token in redirect_to or we need to construct it
-    // For auth hooks, the redirect_to may already contain the full URL with token
-    // If not provided, construct from environment
+    // Build redirect URL with token in hash fragment
+    // Auth.tsx expects: /auth#access_token=TOKEN&type=recovery
+    // Supabase's redirect_to might already have the token, or we need to construct it
     let redirectUrl = redirect_to;
     
     if (!redirectUrl) {
       const siteUrl = Deno.env.get("SITE_URL") || "http://localhost:5173";
-      // Note: Without token_hash, this is just a base URL. Supabase handles token in redirect_to.
       redirectUrl = `${siteUrl}/auth`;
     }
+    
+    // Normalize the action type
+    const normalizedType = typeof email_action_type === "string" ? email_action_type.toLowerCase() : email_action_type;
+    
+    // Check if redirect_to already contains a hash (token already appended by Supabase)
+    const hasHash = redirectUrl.includes('#');
+    
+    // For password reset (recovery), ensure token is in hash fragment
+    if ((normalizedType === "password_reset" || normalizedType === "recovery")) {
+      if (!hasHash && token) {
+        // Token not in URL yet, construct it
+        const baseUrl = redirectUrl.split('#')[0].split('?')[0];
+        const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
+        // Construct URL with token in hash: /auth#access_token=TOKEN&type=recovery
+        redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=recovery`;
+      } else if (!hasHash) {
+        // No token available, log warning but use redirect_to as-is
+        console.warn("Password reset requested but no token available in payload");
+      }
+      // If hasHash is true, Supabase already constructed the URL correctly
+    } else if (normalizedType === "signup" && !hasHash && token) {
+      // For email verification
+      const baseUrl = redirectUrl.split('#')[0].split('?')[0];
+      const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
+      redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=signup`;
+    } else if (normalizedType === "magiclink" && !hasHash && token) {
+      // For magic link
+      const baseUrl = redirectUrl.split('#')[0].split('?')[0];
+      const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
+      redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=magiclink`;
+    }
+    
+    console.log(`Constructed redirect URL (first 150 chars): ${redirectUrl.substring(0, 150)}`);
 
     // Get email content based on action type
     const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl);
