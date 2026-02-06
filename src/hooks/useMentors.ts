@@ -29,11 +29,11 @@ export function useMentors() {
     queryKey: ['mentors', 'published'],
     queryFn: async () => {
       console.log('Fetching mentors...');
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .select('*')
         .eq('is_published', true)
-        .order('display_order', { ascending: true });
+        .order('display_order', { ascending: true }) as any);
 
       console.log('Mentors response:', { data, error });
       if (error) {
@@ -50,10 +50,10 @@ export function useAdminMentors() {
   return useQuery({
     queryKey: ['mentors', 'admin'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .select('*')
-        .order('display_order', { ascending: true });
+        .order('display_order', { ascending: true }) as any);
 
       if (error) throw error;
       return data as Mentor[];
@@ -67,11 +67,11 @@ export function useMentor(id: number | undefined) {
     queryKey: ['mentors', id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .select('*')
         .eq('id', id)
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data as Mentor;
@@ -102,11 +102,11 @@ export function useCreateMentor() {
         display_order: mentor.display_order,
         created_by: user.user?.id,
       };
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .insert(mentorData)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data as Mentor;
@@ -135,12 +135,12 @@ export function useUpdateMentor() {
 
   return useMutation({
     mutationFn: async ({ id, ...mentor }: Partial<Mentor> & { id: number }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .update(mentor)
         .eq('id', id)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data as Mentor;
@@ -170,13 +170,13 @@ export function useDeleteMentor() {
   return useMutation({
     mutationFn: async (id: number) => {
       // Fetch mentor name before deleting for logging
-      const { data: mentor } = await supabase
+      const { data: mentor } = await (supabase
         .from('mentors')
         .select('name')
         .eq('id', id)
-        .single();
+        .single() as any);
       
-      const { error } = await supabase.from('mentors').delete().eq('id', id);
+      const { error } = await (supabase.from('mentors').delete().eq('id', id) as any);
       if (error) throw error;
       return { id, name: mentor?.name || 'Unknown' };
     },
@@ -203,21 +203,21 @@ export function useToggleMentorPublished() {
 
   return useMutation({
     mutationFn: async ({ id, is_published }: { id: number; is_published: boolean }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('mentors')
         .update({ is_published })
         .eq('id', id)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
-      return data;
+      return data as Mentor;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: Mentor) => {
       queryClient.invalidateQueries({ queryKey: ['mentors'] });
       toast.success(data.is_published ? 'Mentor published' : 'Mentor unpublished');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error('Failed to update mentor: ' + error.message);
     },
   });

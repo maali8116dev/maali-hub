@@ -28,12 +28,12 @@ export const useFAQs = () => {
   return useQuery({
     queryKey: ["faqs", "published"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .select("*")
         .eq("is_published", true)
         .order("category", { ascending: true })
-        .order("display_order", { ascending: true });
+        .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
       return data as FAQ[];
@@ -46,11 +46,11 @@ export const useAdminFAQs = () => {
   return useQuery({
     queryKey: ["faqs", "admin"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .select("*")
         .order("category", { ascending: true })
-        .order("display_order", { ascending: true });
+        .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
       return data as FAQ[];
@@ -64,11 +64,11 @@ export const useFAQ = (id: number | undefined) => {
     queryKey: ["faqs", id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .select("*")
         .eq("id", id)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (error) throw error;
       return data as FAQ | null;
@@ -86,14 +86,14 @@ export const useCreateFAQ = () => {
     mutationFn: async (faq: FAQFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .insert({
           ...faq,
           created_by: user?.id,
         })
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data as FAQ;
@@ -123,12 +123,12 @@ export const useUpdateFAQ = () => {
 
   return useMutation({
     mutationFn: async ({ id, faq }: { id: number; faq: Partial<FAQFormData> }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .update(faq)
         .eq("id", id)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
       return data as FAQ;
@@ -159,13 +159,13 @@ export const useDeleteFAQ = () => {
   return useMutation({
     mutationFn: async (id: number) => {
       // Fetch FAQ before deleting for logging
-      const { data: faq } = await supabase
+      const { data: faq } = await (supabase
         .from("faqs")
         .select("question")
         .eq("id", id)
-        .single();
+        .single() as any);
       
-      const { error } = await supabase.from("faqs").delete().eq("id", id);
+      const { error } = await (supabase.from("faqs").delete().eq("id", id) as any);
 
       if (error) throw error;
       return { id, question: faq?.question || "Unknown" };
@@ -193,17 +193,17 @@ export const useToggleFAQPublished = () => {
 
   return useMutation({
     mutationFn: async ({ id, is_published }: { id: number; is_published: boolean }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("faqs")
         .update({ is_published })
         .eq("id", id)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
-      return data;
+      return data as FAQ;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: FAQ) => {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
       toast.success(data.is_published ? "FAQ published" : "FAQ unpublished");
     },

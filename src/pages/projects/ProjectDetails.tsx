@@ -30,12 +30,19 @@ const ProjectDetails = () => {
       
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(`
+          *,
+          categories:category_id(name)
+        `)
         .eq("id", parseInt(id))
         .single();
 
       if (error) throw error;
-      return data;
+      // Add category property from joined table
+      return {
+        ...data,
+        category: (data as any).categories?.name || 'Uncategorized'
+      };
     },
     enabled: !!id,
   });

@@ -7,7 +7,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Supabase Auth Hook payload structure
@@ -232,23 +232,26 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Build redirect URL - Supabase includes the token in redirect_to automatically
-    // The redirect_to from Supabase already contains the token hash in the URL
+    // Build redirect URL - Supabase includes the token in redirect_to or we need to construct it
+    // For auth hooks, the redirect_to may already contain the full URL with token
+    // If not provided, construct from environment
     let redirectUrl = redirect_to;
     
-    // If no redirect_to is provided, construct a default one
-    // Note: Supabase will append the token automatically, but we need to provide a base URL
     if (!redirectUrl) {
       const siteUrl = Deno.env.get("SITE_URL") || "http://localhost:5173";
+      // Note: Without token_hash, this is just a base URL. Supabase handles token in redirect_to.
       redirectUrl = `${siteUrl}/auth`;
     }
 
     // Get email content based on action type
     const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl);
 
+    // Get configured from email or fall back to default
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";
+
     // Send email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Maali <onboarding@resend.dev>",
+      from: fromEmail,
       to: [email],
       subject,
       html,

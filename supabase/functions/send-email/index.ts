@@ -7,7 +7,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 type EmailType = 
@@ -327,8 +327,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { subject, html } = getEmailContent(type, data || {});
 
+    // Get configured from email or fall back to default
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";
+
     const emailResponse = await resend.emails.send({
-      from: "Maali <onboarding@resend.dev>",
+      from: fromEmail,
       to: [to],
       subject,
       html,
