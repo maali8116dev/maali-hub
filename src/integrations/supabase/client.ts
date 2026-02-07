@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'; 
 import type { Database } from './types';
 
-// Use environment variables for local development, fallback to production values
+// Defaults to production values. Override with environment variables for local development.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ";
 
