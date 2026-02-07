@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProjects } from '@/hooks/useProjects';
 import { supabase } from '@/integrations/supabase/client';
 import { useDocumentUpload } from '@/hooks/useDocumentUpload';
+import { useApplicationFormStore } from '@/stores/applicationForm';
 import {
   createDummyPDF,
   createDummyDOC,
@@ -30,9 +31,13 @@ vi.mock('@/integrations/supabase/client', () => ({
     auth: {
       getUser: vi.fn(),
     },
+    rpc: vi.fn(),
   },
 }));
 vi.mock('@/hooks/useDocumentUpload');
+vi.mock('@/hooks/useNotifications', () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock('@/hooks/useActivityLogger', () => ({
   useActivityLogger: () => ({
     logActivity: vi.fn(),
@@ -98,15 +103,46 @@ describe('MultiStepApplicationForm Integration Test', () => {
     },
   ];
 
+  // Helper to create mock query chain
+  const createMockQuery = () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    const mockOrder = vi.fn().mockResolvedValue({ data: [], error: null });
+    
+    const mockQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      order: mockOrder,
+      single: mockSingle,
+    };
+    return mockQuery;
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Clear localStorage to reset Zustand persisted state
+    localStorage.clear();
+    
+    // Reset the Zustand store state
+    useApplicationFormStore.getState().reset();
 
     // Mock useAuth
     (useAuth as any).mockReturnValue({ user: mockUser });
 
-    // Mock useProjects
+    // Mock useProjects with correct paginated structure
     (useProjects as any).mockReturnValue({
-      data: [mockProject],
+      data: {
+        projects: [mockProject],
+        total: 1,
+        page: 1,
+        itemsPerPage: 9,
+        totalPages: 1,
+      },
       isLoading: false,
       isError: false,
     });
@@ -121,18 +157,18 @@ describe('MultiStepApplicationForm Integration Test', () => {
       isLoading: false,
     });
 
-    // Mock Supabase queries
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      in: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: null, error: null }),
-      order: vi.fn().mockResolvedValue({ data: [], error: null }),
-    };
+    // Mock supabase.auth.getUser
+    (supabase.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    });
 
-    (supabase.from as any).mockReturnValue(mockQuery);
+    // Mock supabase.rpc
+    (supabase as any).rpc.mockResolvedValue({ data: [], error: null });
+
+    // Mock Supabase queries with enhanced chain
+    (supabase.from as any).mockReturnValue(createMockQuery());
+    
     (supabase.storage.from as any).mockReturnValue({
       upload: vi.fn().mockResolvedValue({ data: { path: 'test-path' }, error: null }),
       remove: vi.fn().mockResolvedValue({ data: null, error: null }),
@@ -141,6 +177,7 @@ describe('MultiStepApplicationForm Integration Test', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('Step 1: Applicant Information', () => {
@@ -218,7 +255,7 @@ describe('MultiStepApplicationForm Integration Test', () => {
       const user = userEvent.setup();
       render(<MultiStepApplicationForm />, { wrapper: createWrapper() });
 
-      // First complete step 1
+      // First complete step 1 - use getAllByRole for consistent selection
       const comboboxes = screen.getAllByRole('combobox');
       const applicantTypeSelect = comboboxes[0];
       await user.click(applicantTypeSelect);
@@ -283,9 +320,13 @@ describe('MultiStepApplicationForm Integration Test', () => {
       const user = userEvent.setup();
       render(<MultiStepApplicationForm />, { wrapper: createWrapper() });
 
-      // Select Individual as applicant type
-      const applicantTypeSelect = screen.getByRole('combobox', { name: /Applicant Type/i });
+      // Select Individual as applicant type - use getAllByRole for consistency
+      const comboboxes = screen.getAllByRole('combobox');
+      const applicantTypeSelect = comboboxes[0];
       await user.click(applicantTypeSelect);
+      await waitFor(() => {
+        expect(screen.getByText('Individual')).toBeInTheDocument();
+      });
       await user.click(screen.getByText('Individual'));
 
       // Fill required fields for Individual
@@ -320,9 +361,13 @@ describe('MultiStepApplicationForm Integration Test', () => {
       const user = userEvent.setup();
       render(<MultiStepApplicationForm />, { wrapper: createWrapper() });
 
-      // Complete steps 1 and 2 first
-      const applicantTypeSelect = screen.getByRole('combobox', { name: /Applicant Type/i });
+      // Complete steps 1 and 2 first - use getAllByRole for consistency
+      const comboboxes = screen.getAllByRole('combobox');
+      const applicantTypeSelect = comboboxes[0];
       await user.click(applicantTypeSelect);
+      await waitFor(() => {
+        expect(screen.getByText('Organization')).toBeInTheDocument();
+      });
       await user.click(screen.getByText('Organization'));
 
       const fullLegalNameInput = screen.getByPlaceholderText(/Enter full legal name/i);
@@ -663,12 +708,14 @@ describe('MultiStepApplicationForm Integration Test', () => {
       const mockQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue(mockInsert()),
           }),
         }),
         update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
         in: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({ data: null, error: null }),
         order: vi.fn().mockResolvedValue({ data: [], error: null }),
@@ -678,9 +725,13 @@ describe('MultiStepApplicationForm Integration Test', () => {
 
       render(<MultiStepApplicationForm />, { wrapper: createWrapper() });
 
-      // Step 1: Applicant Information
-      const applicantTypeSelect = screen.getByRole('combobox', { name: /Applicant Type/i });
+      // Step 1: Applicant Information - use getAllByRole for consistency
+      const comboboxes = screen.getAllByRole('combobox');
+      const applicantTypeSelect = comboboxes[0];
       await user.click(applicantTypeSelect);
+      await waitFor(() => {
+        expect(screen.getByText('Organization')).toBeInTheDocument();
+      });
       await user.click(screen.getByText('Organization'));
 
       await user.type(screen.getByPlaceholderText(/Enter full legal name/i), 'John Doe');
@@ -737,4 +788,3 @@ describe('MultiStepApplicationForm Integration Test', () => {
     });
   });
 });
-
