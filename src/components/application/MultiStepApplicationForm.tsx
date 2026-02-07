@@ -605,38 +605,103 @@ const MultiStepApplicationForm = () => {
       );
 
       // Assign reviewers using workload-balanced assignment system
+      // This happens automatically after application submission
       try {
+        const NUM_REVIEWERS = 2; // Default number of reviewers per application
+        
         const { data: assignments, error: assignError } = await supabase.rpc(
           'assign_reviewers_to_application',
           {
             p_application_id: application.id,
-            p_num_reviewers: 2, // Assign 2 reviewers (can be made configurable)
+            p_num_reviewers: NUM_REVIEWERS,
           }
         );
 
         if (assignError) {
-          console.warn('Failed to assign reviewers:', assignError);
-          // Continue even if assignment fails - admin can assign manually
+          // Log the error but don't fail submission - admin can assign manually
+          console.warn('Failed to assign reviewers automatically:', assignError);
+          
+          // Log activity for failed assignment
+          await logActivity({
+            actionType: "error",
+            entityType: "application",
+            entityId: application.id,
+            description: `Failed to automatically assign reviewers: ${assignError.message}`,
+            metadata: {
+              application_id: application.id,
+              project_id: formData.projectId,
+              error: assignError.message,
+            },
+          });
         } else if (assignments && assignments.length > 0) {
-          // Notify assigned reviewers
+          // Log successful assignment
+          await logActivity({
+            actionType: "assign_reviewers",
+            entityType: "application",
+            entityId: application.id,
+            description: `Assigned ${assignments.length} reviewer(s) to application`,
+            metadata: {
+              application_id: application.id,
+              project_id: formData.projectId,
+              reviewer_count: assignments.length,
+              reviewer_ids: assignments.map(a => a.reviewer_id),
+            },
+          });
+
+          // Notify each assigned reviewer
           for (const assignment of assignments) {
-            await createNotification(
-              assignment.reviewer_id,
-              "New Application Assigned",
-              `A new application for "${projectTitle}" has been assigned to you for review.`,
-              "review_assigned",
-              `/reviewer/applications/${application.id}`,
-              {
-                application_id: application.id,
-                project_id: formData.projectId,
-                assignment_id: assignment.assignment_id,
-              }
-            );
+            try {
+              await createNotification(
+                assignment.reviewer_id,
+                "New Application Assigned",
+                `A new application for "${projectTitle}" has been assigned to you for review.`,
+                "review_assigned",
+                `/reviewer/applications/${application.id}`,
+                {
+                  application_id: application.id,
+                  project_id: formData.projectId,
+                  assignment_id: assignment.assignment_id,
+                }
+              );
+            } catch (notifError) {
+              // Log notification error but don't fail
+              console.warn(`Failed to notify reviewer ${assignment.reviewer_id}:`, notifError);
+            }
           }
+        } else {
+          // No reviewers available or assigned
+          console.warn('No reviewers were assigned to the application. This may be due to:');
+          console.warn('- No reviewers available for this project category');
+          console.warn('- All available reviewers have conflicts');
+          console.warn('- Insufficient reviewers in the system');
+          
+          await logActivity({
+            actionType: "warning",
+            entityType: "application",
+            entityId: application.id,
+            description: "No reviewers automatically assigned - manual assignment may be required",
+            metadata: {
+              application_id: application.id,
+              project_id: formData.projectId,
+            },
+          });
         }
       } catch (assignErr) {
-        console.warn('Error assigning reviewers:', assignErr);
-        // Don't fail the submission if assignment fails
+        // Catch any unexpected errors
+        console.error('Unexpected error during reviewer assignment:', assignErr);
+        
+        await logActivity({
+          actionType: "error",
+          entityType: "application",
+          entityId: application.id,
+          description: `Unexpected error during reviewer assignment: ${assignErr instanceof Error ? assignErr.message : 'Unknown error'}`,
+          metadata: {
+            application_id: application.id,
+            project_id: formData.projectId,
+          },
+        });
+        
+        // Don't fail the submission if assignment fails - admin can assign manually
       }
 
       toast({

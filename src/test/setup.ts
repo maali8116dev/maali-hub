@@ -3,14 +3,41 @@ import { cleanup } from '@testing-library/react';
 import { afterEach, vi, beforeAll, afterAll } from 'vitest';
 import { server } from './mocks/server';
 
+// Polyfill for Pointer Events API (required for Radix UI Select in JSDOM)
+if (typeof window !== 'undefined') {
+  if (!window.Element.prototype.hasPointerCapture) {
+    window.Element.prototype.hasPointerCapture = function() {
+      return false;
+    };
+  }
+  if (!window.Element.prototype.setPointerCapture) {
+    window.Element.prototype.setPointerCapture = function() {
+      // No-op
+    };
+  }
+  if (!window.Element.prototype.releasePointerCapture) {
+    window.Element.prototype.releasePointerCapture = function() {
+      // No-op
+    };
+  }
+  
+  // Polyfill for scrollIntoView (required for Radix UI Select in JSDOM)
+  if (!window.Element.prototype.scrollIntoView) {
+    window.Element.prototype.scrollIntoView = function() {
+      // No-op for JSDOM
+    };
+  }
+}
+
 // Suppress React act(...) warnings from Radix UI components
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: any[]) => {
     if (
       typeof args[0] === 'string' &&
-      args[0].includes('Warning: An update to') &&
-      args[0].includes('was not wrapped in act(...)')
+      (args[0].includes('Warning: An update to') ||
+       args[0].includes('was not wrapped in act(...)') ||
+       args[0].includes('target.hasPointerCapture is not a function'))
     ) {
       return;
     }

@@ -14,11 +14,32 @@ export const createDummyFile = (
   name: string,
   type: string,
   size: number = 1024,
-  content: string = 'dummy content'
+  content?: string
 ): File => {
-  const file = new File([content], name, { type });
-  Object.defineProperty(file, 'size', { value: size, writable: false });
-  return file;
+  // Generate content that matches the requested size exactly
+  // Use ArrayBuffer to ensure exact byte control
+  const buffer = new ArrayBuffer(size);
+  const view = new Uint8Array(buffer);
+  
+  if (content) {
+    // If content is provided, encode it and fill the buffer
+    const encoder = new TextEncoder();
+    const contentBytes = encoder.encode(content);
+    
+    // Fill buffer with content, repeating if necessary
+    for (let i = 0; i < size; i++) {
+      view[i] = contentBytes[i % contentBytes.length];
+    }
+  } else {
+    // Fill with a simple pattern
+    for (let i = 0; i < size; i++) {
+      view[i] = i % 256;
+    }
+  }
+  
+  // Create Blob from ArrayBuffer, then File
+  const blob = new Blob([buffer], { type });
+  return new File([blob], name, { type });
 };
 
 /**
