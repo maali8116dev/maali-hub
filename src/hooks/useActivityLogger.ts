@@ -12,7 +12,10 @@ export type ActionType =
   | 'logout' 
   | 'submit' 
   | 'approve' 
-  | 'reject';
+  | 'reject'
+  | 'error'
+  | 'warning'
+  | 'assign_reviewers';
 
 export type EntityType = 
   | 'project' 
