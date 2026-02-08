@@ -268,6 +268,7 @@
    - [ ] Feedback system (detailed comments)
 
 6. **Dashboard**
+
    - User dashboard (mentioned in footer)
    - Application tracking
    - Profile management
@@ -368,11 +369,6 @@
 
    - Multi-language support
    - Translation files
-
-3. **PWA Features**
-   - Offline support
-   - Service workers
-   - Install prompt
 
 ---
 
@@ -492,7 +488,7 @@
 ## 📝 **NOTES FOR PROJECT MANAGER**
 
 - **Current State**: Frontend UI is ~90% complete, Backend API is ~95% complete, Integration ~75% complete
-- **Recent Progress**: 
+- **Recent Progress**:
   - ✅ Application submission flow fully functional with automatic reviewer assignment
   - ✅ File upload system integrated with Supabase Storage
   - ✅ Comprehensive test suite (unit and integration tests)
