@@ -33,6 +33,11 @@ CREATE INDEX IF NOT EXISTS idx_categories_active ON public.categories(is_active)
 -- Enable RLS
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Active categories are viewable by everyone" ON public.categories;
+DROP POLICY IF EXISTS "Admins can view all categories" ON public.categories;
+DROP POLICY IF EXISTS "Admins can manage categories" ON public.categories;
+
 -- RLS Policies
 CREATE POLICY "Active categories are viewable by everyone"
 ON public.categories FOR SELECT
@@ -97,6 +102,10 @@ CREATE INDEX IF NOT EXISTS idx_reviewer_categories_category_id ON public.reviewe
 -- Enable RLS
 ALTER TABLE public.reviewer_categories ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can view their own categories" ON public.reviewer_categories;
+DROP POLICY IF EXISTS "Admins can manage reviewer categories" ON public.reviewer_categories;
+
 -- RLS Policies for reviewer_categories
 CREATE POLICY "Reviewers can view their own categories"
 ON public.reviewer_categories FOR SELECT
@@ -125,6 +134,12 @@ CREATE INDEX IF NOT EXISTS idx_assignments_reviewer_status ON public.application
 
 -- Enable RLS
 ALTER TABLE public.application_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can view their own assignments" ON public.application_assignments;
+DROP POLICY IF EXISTS "Admins can view all assignments" ON public.application_assignments;
+DROP POLICY IF EXISTS "Admins can create assignments" ON public.application_assignments;
+DROP POLICY IF EXISTS "Reviewers can update their own assignments" ON public.application_assignments;
 
 -- RLS Policies for application_assignments
 CREATE POLICY "Reviewers can view their own assignments"
@@ -160,6 +175,10 @@ CREATE INDEX IF NOT EXISTS idx_conflicts_application ON public.reviewer_conflict
 
 -- Enable RLS
 ALTER TABLE public.reviewer_conflicts ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can view their own conflicts" ON public.reviewer_conflicts;
+DROP POLICY IF EXISTS "Admins can manage conflicts" ON public.reviewer_conflicts;
 
 -- RLS Policies for reviewer_conflicts
 CREATE POLICY "Reviewers can view their own conflicts"
@@ -201,6 +220,11 @@ CREATE INDEX IF NOT EXISTS idx_review_scores_assignment ON public.review_scores(
 -- Enable RLS
 ALTER TABLE public.review_scores ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can view their own scores" ON public.review_scores;
+DROP POLICY IF EXISTS "Admins can view all scores" ON public.review_scores;
+DROP POLICY IF EXISTS "Reviewers can create/update their own scores" ON public.review_scores;
+
 -- RLS Policies for review_scores
 CREATE POLICY "Reviewers can view their own scores"
 ON public.review_scores FOR SELECT
@@ -230,6 +254,10 @@ CREATE INDEX IF NOT EXISTS idx_category_rubrics_category_id ON public.category_r
 
 -- Enable RLS
 ALTER TABLE public.category_rubrics ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Everyone can view rubrics" ON public.category_rubrics;
+DROP POLICY IF EXISTS "Admins can manage rubrics" ON public.category_rubrics;
 
 -- RLS Policies for category_rubrics
 CREATE POLICY "Everyone can view rubrics"
@@ -262,6 +290,8 @@ COMMENT ON COLUMN public.applications.review_notes IS 'Notes from the reviewer a
 -- REVIEWER RLS POLICIES FOR APPLICATIONS
 -- ============================================
 -- Allow reviewers to update applications for review actions (approve/reject)
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can update applications" ON public.applications;
 DROP POLICY IF EXISTS "Admins can update applications" ON public.applications;
 
 CREATE POLICY "Reviewers can update applications"
@@ -277,6 +307,10 @@ USING (public.get_user_role(auth.uid()) = 'admin');
 -- ============================================
 -- REVIEWER DOCUMENT ACCESS POLICIES
 -- ============================================
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Reviewers can view application documents" ON public.application_documents;
+DROP POLICY IF EXISTS "Reviewers can view all application documents in storage" ON storage.objects;
+
 -- Allow reviewers to view application documents
 CREATE POLICY "Reviewers can view application documents"
 ON public.application_documents
@@ -483,6 +517,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trigger_update_review_score_overall ON public.review_scores;
 CREATE TRIGGER trigger_update_review_score_overall
 BEFORE INSERT OR UPDATE OF scores ON public.review_scores
 FOR EACH ROW
@@ -517,7 +552,7 @@ BEGIN
   END IF;
 
   -- Look up category by name and validate it's active
-  SELECT id, name INTO v_category_id, v_category_name
+  SELECT public.categories.id, public.categories.name INTO v_category_id, v_category_name
   FROM public.categories
   WHERE name = p_category_name AND is_active = true;
 
@@ -536,7 +571,7 @@ BEGIN
   -- Insert the assignment
   INSERT INTO public.reviewer_categories (reviewer_id, category_id)
   VALUES (p_reviewer_id, v_category_id)
-  RETURNING id INTO v_assignment_id;
+  RETURNING public.reviewer_categories.id INTO v_assignment_id;
 
   -- Return the created assignment
   RETURN QUERY

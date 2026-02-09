@@ -15,7 +15,6 @@ export interface Resource {
   is_featured: boolean;
   is_published: boolean;
   download_count: number;
-  display_order: number;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -31,7 +30,6 @@ export interface ResourceFormData {
   duration?: string;
   is_featured?: boolean;
   is_published?: boolean;
-  display_order?: number;
 }
 
 const RESOURCE_CATEGORIES = [
@@ -69,7 +67,7 @@ export const useResources = (filters?: { category?: string; fileType?: string })
         .select("*")
         .eq("is_published", true)
         .order("category")
-        .order("display_order");
+        .order("title", { ascending: true });
 
       if (filters?.category) {
         query = query.eq("category", filters.category);
@@ -95,7 +93,7 @@ export const useAdminResources = () => {
         .from("resources")
         .select("*")
         .order("category")
-        .order("display_order");
+        .order("title", { ascending: true });
 
       if (error) throw error;
       return data as Resource[];

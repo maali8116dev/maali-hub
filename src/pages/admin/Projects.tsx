@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAdminProjects, useDeleteProject } from "@/hooks/useAdminProjects";
-import { ApplicationListSkeleton } from "@/components/ui/skeletons";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +22,6 @@ import { Briefcase } from "lucide-react";
 
 const AdminProjects = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
@@ -46,18 +45,125 @@ const AdminProjects = () => {
     }
   };
 
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) =>
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [projects, searchQuery]);
-
   const handleDelete = (id: number) => {
     setProjectToDelete(id);
     setDeleteDialogOpen(true);
   };
+
+  // Define columns for the projects table
+  const projectColumns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: 'title',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Title" />
+      ),
+      cell: ({ row }) => {
+        return <span className="font-medium">{row.original.title}</span>;
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        return getStatusBadge(row.original.status);
+      },
+    },
+    {
+      accessorKey: 'category',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Category" />
+      ),
+      cell: ({ row }) => {
+        return <Badge variant="outline">{row.original.category}</Badge>;
+      },
+    },
+    {
+      accessorKey: 'deadline',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Deadline" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <span className="text-sm text-muted-foreground">
+            {new Date(row.original.deadline).toLocaleDateString()}
+          </span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.deadline).getTime();
+        const dateB = new Date(rowB.original.deadline).getTime();
+        return dateA - dateB;
+      },
+    },
+    {
+      accessorKey: 'currentApplicants',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Applicants" />
+      ),
+      cell: ({ row }) => {
+        return <span>{row.original.currentApplicants}</span>;
+      },
+    },
+    {
+      accessorKey: 'fundingAmount',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Funding" />
+      ),
+      cell: ({ row }) => {
+        return <span>{row.original.fundingAmount}</span>;
+      },
+    },
+    {
+      accessorKey: 'location',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Location" />
+      ),
+      cell: ({ row }) => {
+        return <span className="text-sm">{row.original.location}</span>;
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const project = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/admin/projects/${project.id}`)}
+              title="View project"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
+              title="Edit project"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive"
+              onClick={() => handleDelete(project.id)}
+              disabled={deleteProject.isPending}
+              title="Delete project"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ], [navigate, deleteProject, handleDelete]);
+
+
 
   const confirmDelete = async () => {
     if (projectToDelete) {
@@ -90,123 +196,45 @@ const AdminProjects = () => {
         </Button>
       </div>
 
-      {/* Search */}
+      {/* Projects Table */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+        <CardHeader>
+          <CardTitle>All Projects ({projects.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-destructive">
+              <p>Error loading projects: {error instanceof Error ? error.message : "Unknown error"}</p>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="font-medium mb-2">No projects found</p>
+              <p className="text-sm mb-4">Start by creating your first funding opportunity.</p>
+              <Button onClick={() => navigate("/admin/projects/new")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Button>
+            </div>
+          ) : (
+            <DataTable
+              columns={projectColumns}
+              data={projects}
+              searchPlaceholder="Search by title, category, or location..."
+              pageSize={10}
+              enableSorting={true}
+              enablePagination={true}
+              exportFileName="projects"
             />
-          </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Projects List */}
-      {isLoading ? (
-        <Card>
-          <CardContent className="pt-6">
-            <ApplicationListSkeleton count={5} />
-          </CardContent>
-        </Card>
-      ) : error ? (
-        <Card>
-          <CardContent className="pt-6">
-            <EmptyState
-              icon={Briefcase}
-              title="Error loading projects"
-              description="There was an error loading projects. Please try again later."
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Projects ({filteredProjects.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {filteredProjects.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {filteredProjects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                        <h3 className="font-semibold text-sm sm:text-base truncate">{project.title}</h3>
-                        {getStatusBadge(project.status)}
-                        <Badge variant="outline" className="text-xs">{project.category}</Badge>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                        <span className="whitespace-nowrap">Deadline: {new Date(project.deadline).toLocaleDateString()}</span>
-                        <span className="whitespace-nowrap">{project.currentApplicants} applicants</span>
-                        <span className="whitespace-nowrap">{project.fundingAmount}</span>
-                        <span className="whitespace-nowrap">{project.location}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/projects/${project.id}`)}
-                        className="min-h-[44px] sm:min-h-0"
-                        title="View project"
-                      >
-                        <Eye className="h-4 w-4 sm:mr-0" />
-                        <span className="sm:hidden ml-2">View</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
-                        className="min-h-[44px] sm:min-h-0"
-                        title="Edit project"
-                      >
-                        <Edit className="h-4 w-4 sm:mr-0" />
-                        <span className="sm:hidden ml-2">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive min-h-[44px] sm:min-h-0"
-                        onClick={() => handleDelete(project.id)}
-                        disabled={deleteProject.isPending}
-                        title="Delete project"
-                      >
-                        <Trash2 className="h-4 w-4 sm:mr-0" />
-                        <span className="sm:hidden ml-2">Delete</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={Briefcase}
-                title="No projects found"
-                description={
-                  searchQuery
-                    ? "Try adjusting your search criteria to find more projects."
-                    : "Start by creating your first funding opportunity."
-                }
-                action={
-                  !searchQuery
-                    ? {
-                        label: "Create Project",
-                        onClick: () => navigate("/admin/projects/new"),
-                        variant: "hero",
-                      }
-                    : undefined
-                }
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

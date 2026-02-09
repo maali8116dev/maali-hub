@@ -46,6 +46,7 @@ import AdminResources from "./pages/admin/Resources";
 import AdminResourceForm from "./pages/admin/ResourceForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import ReviewManagement from "./pages/admin/ReviewManagement";
+import { ReviewerDetails } from "./pages/admin/ReviewerDetails";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
 import AdminCategories from "./pages/admin/Categories";
@@ -266,6 +267,16 @@ const App = () => (
             }
           />
           <Route
+            path="/admin/applications"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminApplications />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/financial"
             element={
               <ProtectedRoute requireAuth={true}>
@@ -311,6 +322,16 @@ const App = () => (
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <ReviewManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reviewers/:reviewerId"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <ReviewerDetails />
                 </AdminLayout>
               </ProtectedRoute>
             }

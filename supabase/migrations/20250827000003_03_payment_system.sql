@@ -39,6 +39,12 @@ CREATE INDEX IF NOT EXISTS idx_payment_methods_provider_id ON public.payment_met
 -- Enable Row Level Security
 ALTER TABLE public.payment_methods ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own payment methods" ON public.payment_methods;
+DROP POLICY IF EXISTS "Users can create their own payment methods" ON public.payment_methods;
+DROP POLICY IF EXISTS "Users can update their own payment methods" ON public.payment_methods;
+DROP POLICY IF EXISTS "Users can delete their own payment methods" ON public.payment_methods;
+
 -- Create policies for payment methods
 CREATE POLICY "Users can view their own payment methods"
 ON public.payment_methods
@@ -80,6 +86,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger to enforce single default payment method
+DROP TRIGGER IF EXISTS ensure_single_default_payment_method_trigger ON public.payment_methods;
 CREATE TRIGGER ensure_single_default_payment_method_trigger
 BEFORE INSERT OR UPDATE ON public.payment_methods
 FOR EACH ROW
@@ -96,6 +103,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_payment_methods_updated_at ON public.payment_methods;
 CREATE TRIGGER update_payment_methods_updated_at
 BEFORE UPDATE ON public.payment_methods
 FOR EACH ROW
@@ -155,6 +163,13 @@ CREATE INDEX IF NOT EXISTS idx_transactions_invoice_number ON public.transaction
 
 -- Enable Row Level Security
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own transactions" ON public.transactions;
+DROP POLICY IF EXISTS "Users can create their own transactions" ON public.transactions;
+DROP POLICY IF EXISTS "Users can update their own transactions" ON public.transactions;
+DROP POLICY IF EXISTS "Admins can view all transactions" ON public.transactions;
+DROP POLICY IF EXISTS "Admins can update all transactions" ON public.transactions;
 
 -- Create policies for transactions
 CREATE POLICY "Users can view their own transactions"
@@ -250,6 +265,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to auto-generate invoice numbers
+DROP TRIGGER IF EXISTS auto_generate_invoice_number_trigger ON public.transactions;
 CREATE TRIGGER auto_generate_invoice_number_trigger
 BEFORE INSERT OR UPDATE ON public.transactions
 FOR EACH ROW
@@ -265,6 +281,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_transactions_updated_at ON public.transactions;
 CREATE TRIGGER update_transactions_updated_at
 BEFORE UPDATE ON public.transactions
 FOR EACH ROW
@@ -314,6 +331,12 @@ CREATE INDEX IF NOT EXISTS idx_billing_addresses_user_default ON public.billing_
 -- Enable Row Level Security
 ALTER TABLE public.billing_addresses ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own billing addresses" ON public.billing_addresses;
+DROP POLICY IF EXISTS "Users can create their own billing addresses" ON public.billing_addresses;
+DROP POLICY IF EXISTS "Users can update their own billing addresses" ON public.billing_addresses;
+DROP POLICY IF EXISTS "Users can delete their own billing addresses" ON public.billing_addresses;
+
 -- Create policies for billing addresses
 CREATE POLICY "Users can view their own billing addresses"
 ON public.billing_addresses
@@ -355,6 +378,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger to enforce single default billing address
+DROP TRIGGER IF EXISTS ensure_single_default_billing_address_trigger ON public.billing_addresses;
 CREATE TRIGGER ensure_single_default_billing_address_trigger
 BEFORE INSERT OR UPDATE ON public.billing_addresses
 FOR EACH ROW
@@ -371,6 +395,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_billing_addresses_updated_at ON public.billing_addresses;
 CREATE TRIGGER update_billing_addresses_updated_at
 BEFORE UPDATE ON public.billing_addresses
 FOR EACH ROW

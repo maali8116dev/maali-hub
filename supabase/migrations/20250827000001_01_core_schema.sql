@@ -29,6 +29,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- Enable RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+
 -- Create policies for profiles
 CREATE POLICY "Users can view their own profile" 
 ON public.profiles 
@@ -71,6 +76,11 @@ CREATE TABLE IF NOT EXISTS public.applications (
 -- Enable Row Level Security
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own applications" ON public.applications;
+DROP POLICY IF EXISTS "Users can create their own applications" ON public.applications;
+DROP POLICY IF EXISTS "Users can update their own applications" ON public.applications;
+
 -- Create policies for applications
 CREATE POLICY "Users can view their own applications" 
 ON public.applications 
@@ -110,6 +120,10 @@ CREATE TABLE IF NOT EXISTS public.projects (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
+-- Ensure legacy column exists when table already exists
+ALTER TABLE public.projects
+ADD COLUMN IF NOT EXISTS category TEXT;
+
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_projects_status ON public.projects(status);
 CREATE INDEX IF NOT EXISTS idx_projects_category ON public.projects(category);
@@ -117,6 +131,9 @@ CREATE INDEX IF NOT EXISTS idx_projects_deadline ON public.projects(deadline);
 
 -- Enable Row Level Security
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Projects are viewable by everyone" ON public.projects;
 
 -- Create policies for projects
 CREATE POLICY "Projects are viewable by everyone" 
@@ -145,6 +162,11 @@ ON public.application_documents(project_id);
 
 -- Enable Row Level Security
 ALTER TABLE public.application_documents ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Users can view their own documents" ON public.application_documents;
+DROP POLICY IF EXISTS "Users can create their own documents" ON public.application_documents;
+DROP POLICY IF EXISTS "Users can delete their own documents" ON public.application_documents;
 
 -- Create policies for application documents
 CREATE POLICY "Users can view their own documents" 
@@ -231,30 +253,35 @@ $$;
 -- TRIGGERS
 -- ============================================
 -- Create trigger for automatic timestamp updates on profiles
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create trigger for automatic timestamp updates on applications
+DROP TRIGGER IF EXISTS update_applications_updated_at ON public.applications;
 CREATE TRIGGER update_applications_updated_at
 BEFORE UPDATE ON public.applications
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create trigger for automatic timestamp updates on projects
+DROP TRIGGER IF EXISTS update_projects_updated_at ON public.projects;
 CREATE TRIGGER update_projects_updated_at
 BEFORE UPDATE ON public.projects
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create trigger for automatic timestamp updates on blog_posts
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON public.blog_posts;
 CREATE TRIGGER update_blog_posts_updated_at
 BEFORE UPDATE ON public.blog_posts
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Create trigger to automatically create profile on user signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
 FOR EACH ROW
@@ -272,6 +299,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger to set published_at
+DROP TRIGGER IF EXISTS set_blog_post_published_at_trigger ON public.blog_posts;
 CREATE TRIGGER set_blog_post_published_at_trigger
 BEFORE UPDATE ON public.blog_posts
 FOR EACH ROW
@@ -284,6 +312,11 @@ EXECUTE FUNCTION public.set_blog_post_published_at();
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('application-docs', 'application-docs', false)
 ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing storage policies (idempotent)
+DROP POLICY IF EXISTS "Users can upload their own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view their own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own documents" ON storage.objects;
 
 -- Create storage policies for application documents
 CREATE POLICY "Users can upload their own documents" 

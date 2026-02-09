@@ -41,8 +41,79 @@ const Resources = () => {
 
   const handleDownload = async (resource: Resource) => {
     if (resource.file_url) {
-      await incrementDownload.mutateAsync(resource.id);
-      window.open(resource.file_url, "_blank");
+      try {
+        await incrementDownload.mutateAsync(resource.id);
+        
+        // Fetch the file as a blob to preserve the filename
+        const response = await fetch(resource.file_url);
+        if (!response.ok) {
+          throw new Error('Failed to fetch file');
+        }
+        
+        const blob = await response.blob();
+        
+        // Try to get filename from Content-Disposition header
+        let filename = '';
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1].replace(/['"]/g, '');
+            // Decode URI if needed
+            try {
+              filename = decodeURIComponent(filename);
+            } catch {
+              // If decoding fails, use as is
+            }
+          }
+        }
+        
+        // If no filename from header, try to extract from URL
+        if (!filename) {
+          try {
+            const urlPath = new URL(resource.file_url).pathname;
+            const urlFilename = urlPath.split('/').pop() || '';
+            if (urlFilename && urlFilename.includes('.')) {
+              filename = urlFilename;
+            }
+          } catch {
+            // If URL parsing fails, continue to generate filename
+          }
+        }
+        
+        // If still no filename, generate from resource title and file type
+        if (!filename) {
+          const fileExtension = resource.file_type === 'pdf' ? 'pdf' :
+                               resource.file_type === 'excel' ? 'xlsx' :
+                               resource.file_type === 'word' ? 'docx' :
+                               resource.file_type === 'powerpoint' ? 'pptx' :
+                               resource.file_type === 'video' ? 'mp4' :
+                               resource.file_type === 'webinar' ? 'mp4' :
+                               'file';
+          
+          // Sanitize the title to be a valid filename
+          const sanitizedTitle = resource.title
+            .replace(/[^a-z0-9]/gi, '_')
+            .replace(/_+/g, '_')
+            .toLowerCase();
+          
+          filename = `${sanitizedTitle}.${fileExtension}`;
+        }
+        
+        // Create a download link with the proper filename
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error downloading file:', error);
+        // Fallback to opening in new tab if download fails
+        window.open(resource.file_url, "_blank");
+      }
     }
   };
 

@@ -47,7 +47,6 @@ const resourceSchema = z.object({
   duration: z.string().optional(),
   is_featured: z.boolean().default(false),
   is_published: z.boolean().default(true),
-  display_order: z.number().default(0),
 });
 
 const ResourceForm = () => {
@@ -74,7 +73,6 @@ const ResourceForm = () => {
       duration: "",
       is_featured: false,
       is_published: true,
-      display_order: 0,
     },
   });
 
@@ -93,7 +91,6 @@ const ResourceForm = () => {
         duration: resource.duration || "",
         is_featured: resource.is_featured,
         is_published: resource.is_published,
-        display_order: resource.display_order,
       });
       if (resource.file_url && !isExternalType) {
         const urlParts = resource.file_url.split("/");
@@ -326,27 +323,6 @@ const ResourceForm = () => {
                     )}
                   />
                 )}
-
-                <FormField
-                  control={form.control}
-                  name="display_order"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Display Order</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Lower numbers appear first within category
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
 

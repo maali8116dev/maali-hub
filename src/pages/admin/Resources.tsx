@@ -1,17 +1,12 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ColumnDef } from "@tanstack/react-table";
 import { Plus, Pencil, Trash2, Eye, EyeOff, Download, ExternalLink, FileText, Video, Table2, Presentation, FileSpreadsheet, Link as LinkIcon } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,29 +63,169 @@ const formatFileSize = (bytes: number | null): string => {
 };
 
 const Resources = () => {
-  const { data: resources, isLoading } = useAdminResources();
+  const navigate = useNavigate();
+  const { data: resources = [], isLoading } = useAdminResources();
   const deleteResource = useDeleteResource();
   const togglePublished = useToggleResourcePublished();
   
   const [deleteConfirm, setDeleteConfirm] = useState<Resource | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  const filteredResources = resources?.filter(resource => 
-    categoryFilter === "all" || resource.category === categoryFilter
-  );
+  // Filter resources by category (DataTable handles search internally)
+  const filteredResources = useMemo(() => {
+    if (categoryFilter === "all") return resources;
+    return resources.filter(resource => resource.category === categoryFilter);
+  }, [resources, categoryFilter]);
+
+  const handleTogglePublished = useCallback(async (resource: Resource) => {
+    await togglePublished.mutateAsync({
+      id: resource.id,
+      is_published: !resource.is_published,
+    });
+  }, [togglePublished]);
+
+  // Define columns for the resources table
+  const resourceColumns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: 'title',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Title" />
+      ),
+      cell: ({ row }) => {
+        const resource = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            {getFileIcon(resource.file_type)}
+            <span className="font-medium">{resource.title}</span>
+            {resource.is_featured && (
+              <Badge variant="secondary">Featured</Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'category',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Category" />
+      ),
+      cell: ({ row }) => {
+        return <span>{row.original.category}</span>;
+      },
+    },
+    {
+      accessorKey: 'file_type',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Type" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <Badge variant="outline" className="uppercase text-xs">
+            {row.original.file_type}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'size',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Size" />
+      ),
+      cell: ({ row }) => {
+        const resource = row.original;
+        return (
+          <span className="text-sm text-muted-foreground">
+            {resource.duration || formatFileSize(resource.file_size)}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: 'download_count',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Downloads" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-1">
+            <Download className="h-3 w-3 text-muted-foreground" />
+            {row.original.download_count}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'is_published',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        const isPublished = row.original.is_published;
+        return (
+          <Badge variant={isPublished ? "default" : "secondary"}>
+            {isPublished ? "Published" : "Draft"}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const resource = row.original;
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleTogglePublished(resource)}
+              title={resource.is_published ? "Unpublish" : "Publish"}
+            >
+              {resource.is_published ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+            {resource.file_url && (
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                title="Open"
+              >
+                <a href={resource.file_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/admin/resources/${resource.id}`)}
+              title="Edit"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteConfirm(resource)}
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+        );
+      },
+    },
+  ], [navigate, handleTogglePublished]);
 
   const handleDelete = async () => {
     if (deleteConfirm) {
       await deleteResource.mutateAsync(deleteConfirm.id);
       setDeleteConfirm(null);
     }
-  };
-
-  const handleTogglePublished = async (resource: Resource) => {
-    await togglePublished.mutateAsync({
-      id: resource.id,
-      is_published: !resource.is_published,
-    });
   };
 
   return (
@@ -108,136 +243,57 @@ const Resources = () => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {RESOURCE_CATEGORIES.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Category Filter */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {RESOURCE_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Downloads</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  </TableRow>
-                ))
-              ) : filteredResources?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No resources found. Create your first resource.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredResources?.map((resource) => (
-                  <TableRow key={resource.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getFileIcon(resource.file_type)}
-                        <span className="font-medium">{resource.title}</span>
-                        {resource.is_featured && (
-                          <Badge variant="secondary">Featured</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{resource.category}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="uppercase text-xs">
-                        {resource.file_type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {resource.duration || formatFileSize(resource.file_size)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Download className="h-3 w-3 text-muted-foreground" />
-                        {resource.download_count}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={resource.is_published ? "default" : "secondary"}>
-                        {resource.is_published ? "Published" : "Draft"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleTogglePublished(resource)}
-                          title={resource.is_published ? "Unpublish" : "Publish"}
-                        >
-                          {resource.is_published ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        {resource.file_url && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            title="Open"
-                          >
-                            <a href={resource.file_url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                        >
-                          <Link to={`/admin/resources/${resource.id}`}>
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteConfirm(resource)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        {/* Resources Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All Resources ({filteredResources.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : filteredResources.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="font-medium mb-2">No resources found</p>
+                <p className="text-sm">Create your first resource to get started.</p>
+              </div>
+            ) : (
+              <DataTable
+                columns={resourceColumns}
+                data={filteredResources}
+                searchPlaceholder="Search by title, category, or type..."
+                pageSize={10}
+                enableSorting={true}
+                enablePagination={true}
+                exportFileName="resources"
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>

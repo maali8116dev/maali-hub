@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ColumnDef } from '@tanstack/react-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
 import {
   useReviewerCategories,
 } from '@/hooks/useReviewerAssignment';
@@ -25,6 +28,7 @@ import {
   ChevronDown,
   ChevronUp,
   Settings,
+  Eye,
 } from 'lucide-react';
 import {
   Dialog,
@@ -107,15 +111,11 @@ const ReviewManagement = () => {
           </TabsTrigger>
           <TabsTrigger value="reviewers">
             <Users className="h-4 w-4 mr-2" />
-            Reviewer Categories
+            Reviewers
           </TabsTrigger>
           <TabsTrigger value="conflicts">
             <AlertTriangle className="h-4 w-4 mr-2" />
             Conflicts
-          </TabsTrigger>
-          <TabsTrigger value="workload">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Workload
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
@@ -138,10 +138,6 @@ const ReviewManagement = () => {
           <ConflictsTab />
         </TabsContent>
 
-        {/* Workload Tab */}
-        <TabsContent value="workload" className="space-y-4">
-          <WorkloadTab reviewers={reviewers} />
-        </TabsContent>
 
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
@@ -153,7 +149,7 @@ const ReviewManagement = () => {
 };
 
 
-// Reviewer Categories Tab
+// Reviewers Tab (Combined: Categories + Workload)
 const ReviewerCategoriesTab = ({
   reviewers,
   categories,
@@ -163,40 +159,65 @@ const ReviewerCategoriesTab = ({
 }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [selectedReviewer, setSelectedReviewer] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
-  const { data: reviewerCategories = [] } = useQuery({
+  // Fetch reviewer categories
+  const { data: reviewerCategories = [], refetch: refetchCategories } = useQuery({
     queryKey: ['all-reviewer-categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch reviewer categories with category info
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('reviewer_categories')
         .select(`
           *,
-          reviewer:profiles!reviewer_id(user_id, first_name, last_name),
-          category_info:categories!category_id(name)
-        `);
+          category_info:categories!category_id(id, name)
+        `)
+        .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error fetching reviewer categories:', error);
-        throw error;
+      if (categoriesError) {
+        console.error('Error fetching reviewer categories:', categoriesError);
+        throw categoriesError;
       }
       
-      // Transform to include category name for display
-      const transformed = (data || []).map((item: any) => {
-        // Handle the joined category data structure
-        // The join creates category_info object with name property
-        const categoryName = item.category_info?.name || (item.category_id ? 'Category ID: ' + item.category_id : 'Unknown');
+      // Fetch profiles separately since reviewer_id references auth.users, not profiles directly
+      const reviewerIds = [...new Set((categoriesData || []).map((item: any) => item.reviewer_id))];
+      
+      let profilesMap: Record<string, any> = {};
+      if (reviewerIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, first_name, last_name')
+          .in('user_id', reviewerIds);
         
-        // Log if category name is missing for debugging
-        if (!item.category_info?.name && item.category_id) {
-          console.warn('Category name not found for category_id:', item.category_id, 'Item:', item);
+        if (profilesError) {
+          console.warn('Error fetching profiles:', profilesError);
+        } else {
+          profilesMap = (profilesData || []).reduce((acc: Record<string, any>, profile: any) => {
+            acc[profile.user_id] = profile;
+            return acc;
+          }, {});
         }
+      }
+      
+      // Transform to include category name and reviewer info for display
+      const transformed = (categoriesData || []).map((item: any) => {
+        // Get category name from joined category_info
+        const categoryName = item.category_info?.name || item.category_name || (item.category_id ? 'Category ID: ' + item.category_id : 'Unknown');
+        
+        // Get reviewer info from profiles map
+        const reviewer = profilesMap[item.reviewer_id] || null;
         
         return {
           ...item,
           category: categoryName,
+          reviewer: reviewer ? {
+            user_id: reviewer.user_id,
+            first_name: reviewer.first_name,
+            last_name: reviewer.last_name,
+          } : null,
         };
       });
       
@@ -209,6 +230,57 @@ const ReviewerCategoriesTab = ({
       return unique.sort((a: any, b: any) => a.category.localeCompare(b.category));
     },
   });
+
+  // Fetch workloads for all reviewers
+  const { data: workloads = [] } = useQuery({
+    queryKey: ['all-workloads'],
+    queryFn: async () => {
+      const workloads = await Promise.all(
+        reviewers.map(async (reviewer) => {
+          const { data, error } = await supabase.rpc('get_reviewer_workload', {
+            p_reviewer_id: reviewer.user_id,
+          });
+          if (error) {
+            console.warn(`Error fetching workload for reviewer ${reviewer.user_id}:`, error);
+            return {
+              reviewer_id: reviewer.user_id,
+              workload: 0,
+            };
+          }
+          return {
+            reviewer_id: reviewer.user_id,
+            workload: data || 0,
+          };
+        })
+      );
+      return workloads;
+    },
+  });
+
+  // Create workload map for quick lookup
+  const workloadMap = workloads.reduce((acc: Record<string, number>, w: any) => {
+    acc[w.reviewer_id] = w.workload;
+    return acc;
+  }, {});
+
+  // Transform reviewers data for the table
+  const reviewersTableData = useMemo(() => {
+    return reviewers.map((reviewer) => {
+      const reviewerCats = reviewerCategories.filter(
+        (rc: any) => rc.reviewer_id === reviewer.user_id
+      );
+      const workload = workloadMap[reviewer.user_id] || 0;
+      
+      return {
+        ...reviewer,
+        workload,
+        categories: reviewerCats.map((rc: any) => ({
+          id: rc.id,
+          name: rc.category,
+        })),
+      };
+    });
+  }, [reviewers, reviewerCategories, workloadMap]);
 
   const addCategory = useMutation({
     mutationFn: async ({ reviewerId, category }: { reviewerId: string; category: string }) => {
@@ -235,13 +307,23 @@ const ReviewerCategoriesTab = ({
       
       return result[0];
     },
-    onSuccess: () => {
-      // Invalidate queries to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ['all-reviewer-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['reviewer-categories'] });
-      // Close dialog and reset form
+    onSuccess: async () => {
+      // Close dialog and reset form first
       setDialogOpen(false);
       setSelectedReviewer(null);
+      
+      // Wait a brief moment to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Invalidate and refetch queries to refresh the UI
+      // Use refetchQueries to ensure immediate refetch
+      await queryClient.refetchQueries({ queryKey: ['all-reviewer-categories'] });
+      await queryClient.refetchQueries({ queryKey: ['reviewer-categories'] });
+      await queryClient.refetchQueries({ queryKey: ['all-workloads'] });
+      
+      // Also explicitly refetch to ensure UI updates
+      await refetchCategories();
+      
       toast({ title: 'Category Added', description: 'Reviewer category added successfully.' });
     },
     onError: (error: Error) => {
@@ -262,19 +344,130 @@ const ReviewerCategoriesTab = ({
       
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-reviewer-categories'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['all-reviewer-categories'] });
+      await queryClient.refetchQueries({ queryKey: ['all-workloads'] });
+      // Explicitly refetch to ensure UI updates
+      await refetchCategories();
       toast({ title: 'Category Removed', description: 'Reviewer category removed.' });
     },
   });
+
+  // Define columns for the reviewers table
+  const reviewerColumns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Reviewer" />
+      ),
+      cell: ({ row }) => {
+        const reviewer = row.original;
+        return (
+          <div>
+            <h3 
+              className="font-semibold cursor-pointer hover:underline"
+              onClick={() => navigate(`/admin/reviewers/${reviewer.user_id}`)}
+            >
+              {reviewer.first_name} {reviewer.last_name}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              ID: {reviewer.user_id.substring(0, 8)}...
+            </p>
+          </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const nameA = `${rowA.original.first_name} ${rowA.original.last_name}`;
+        const nameB = `${rowB.original.first_name} ${rowB.original.last_name}`;
+        return nameA.localeCompare(nameB);
+      },
+    },
+    {
+      accessorKey: 'workload',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Workload" />
+      ),
+      cell: ({ row }) => {
+        const workload = row.original.workload || 0;
+        return (
+          <Badge 
+            variant={workload > 5 ? 'destructive' : workload > 3 ? 'default' : 'secondary'}
+            className="flex items-center gap-1 w-fit"
+          >
+            <TrendingUp className="h-3 w-3" />
+            {workload} active assignment{workload !== 1 ? 's' : ''}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'categories',
+      header: 'Categories',
+      cell: ({ row }) => {
+        const categories = row.original.categories || [];
+        return (
+          <div className="flex flex-wrap gap-2 max-w-md">
+            {categories.length > 0 ? (
+              categories.map((cat: any) => (
+                <Badge key={cat.id} variant="secondary" className="flex items-center gap-1">
+                  {cat.name}
+                  <X
+                    className={`h-3 w-3 ${removeCategory.isPending ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:text-destructive'}`}
+                    onClick={() => {
+                      if (!removeCategory.isPending) {
+                        removeCategory.mutate(cat.id);
+                      }
+                    }}
+                  />
+                </Badge>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">No categories assigned</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const reviewer = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/admin/reviewers/${reviewer.user_id}`)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Details
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedReviewer(reviewer.user_id);
+                setDialogOpen(true);
+              }}
+              disabled={addCategory.isPending || removeCategory.isPending}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
+          </div>
+        );
+      },
+    },
+  ], [navigate, removeCategory, addCategory, setSelectedReviewer, setDialogOpen]);
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Reviewer Categories</CardTitle>
+          <CardTitle>Reviewers</CardTitle>
           <CardDescription>
-            Assign categories to reviewers. Reviewers can only review applications in their assigned categories.
+            Manage reviewer categories and view workload. Reviewers can only review applications in their assigned categories.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -289,10 +482,10 @@ const ReviewerCategoriesTab = ({
             }
           }}>
             <DialogTrigger asChild>
-              <Button disabled={addCategory.isPending || removeCategory.isPending}>
+              {/* <Button disabled={addCategory.isPending || removeCategory.isPending}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Category Assignment
-              </Button>
+              </Button> */}
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -302,6 +495,7 @@ const ReviewerCategoriesTab = ({
                 key={formKey}
                 reviewers={reviewers}
                 categories={categories}
+                selectedReviewerId={selectedReviewer}
                 onSubmit={(reviewerId, category) =>
                   addCategory.mutate({ reviewerId, category })
                 }
@@ -311,45 +505,15 @@ const ReviewerCategoriesTab = ({
             </DialogContent>
           </Dialog>
 
-          <div className="mt-6 space-y-4">
-            {reviewers.map((reviewer) => {
-              const reviewerCats = reviewerCategories.filter(
-                (rc: any) => rc.reviewer_id === reviewer.user_id
-              );
-              return (
-                <Card key={reviewer.user_id}>
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">
-                          {reviewer.first_name} {reviewer.last_name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">Reviewer ID: {reviewer.user_id.substring(0, 8)}...</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {reviewerCats.length > 0 ? (
-                          reviewerCats.map((rc: any) => (
-                            <Badge key={rc.id} variant="secondary" className="flex items-center gap-1">
-                              {rc.category}
-                              <X
-                                className={`h-3 w-3 ${removeCategory.isPending ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                                onClick={() => {
-                                  if (!removeCategory.isPending) {
-                                    removeCategory.mutate(rc.id);
-                                  }
-                                }}
-                              />
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-sm text-muted-foreground">No categories</span>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+          <div className="mt-6">
+            <DataTable
+              columns={reviewerColumns}
+              data={reviewersTableData}
+              searchPlaceholder="Search by reviewer name, category, or workload..."
+              pageSize={10}
+              enableSorting={true}
+              enablePagination={true}
+            />
           </div>
         </CardContent>
       </Card>
@@ -361,18 +525,30 @@ const ReviewerCategoriesTab = ({
 const AddCategoryForm = ({
   reviewers,
   categories,
+  selectedReviewerId,
   onSubmit,
   isSubmitting,
   onDialogClose,
 }: {
   reviewers: any[];
   categories: string[];
+  selectedReviewerId?: string | null;
   onSubmit: (reviewerId: string, category: string) => void;
   isSubmitting?: boolean;
   onDialogClose?: () => void;
 }) => {
-  const [reviewerId, setReviewerId] = useState('');
+  const [reviewerId, setReviewerId] = useState(selectedReviewerId || '');
   const [category, setCategory] = useState('');
+
+  // Update reviewerId when selectedReviewerId changes
+  useEffect(() => {
+    if (selectedReviewerId) {
+      setReviewerId(selectedReviewerId);
+    }
+  }, [selectedReviewerId]);
+
+  // Get the selected reviewer's name for display
+  const selectedReviewer = reviewers.find(r => r.user_id === reviewerId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,21 +563,34 @@ const AddCategoryForm = ({
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-      <div className="space-y-2">
-        <Label>Reviewer</Label>
-        <Select value={reviewerId} onValueChange={setReviewerId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select reviewer" />
-          </SelectTrigger>
-          <SelectContent>
-            {reviewers.map((reviewer) => (
-              <SelectItem key={reviewer.user_id} value={reviewer.user_id}>
-                {reviewer.first_name} {reviewer.last_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {selectedReviewerId ? (
+        // Show reviewer name if pre-selected
+        <div className="space-y-2">
+          <Label>Reviewer</Label>
+          <div className="px-3 py-2 border rounded-md bg-muted/50">
+            <p className="text-sm font-medium">
+              {selectedReviewer ? `${selectedReviewer.first_name} ${selectedReviewer.last_name}` : 'Selected Reviewer'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        // Show reviewer selector if not pre-selected
+        <div className="space-y-2">
+          <Label>Reviewer</Label>
+          <Select value={reviewerId} onValueChange={setReviewerId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select reviewer" />
+            </SelectTrigger>
+            <SelectContent>
+              {reviewers.map((reviewer) => (
+                <SelectItem key={reviewer.user_id} value={reviewer.user_id}>
+                  {reviewer.first_name} {reviewer.last_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <div className="space-y-2">
         <Label>Category</Label>
         <Select value={category} onValueChange={setCategory}>
@@ -730,56 +919,6 @@ const ConflictsTab = () => {
   );
 };
 
-// Workload Tab
-const WorkloadTab = ({ reviewers }: { reviewers: any[] }) => {
-  const { data: workloads = [] } = useQuery({
-    queryKey: ['all-workloads'],
-    queryFn: async () => {
-      const workloads = await Promise.all(
-        reviewers.map(async (reviewer) => {
-          const { data, error } = await supabase.rpc('get_reviewer_workload', {
-            p_reviewer_id: reviewer.user_id,
-          });
-          if (error) throw error;
-          return {
-            reviewer_id: reviewer.user_id,
-            reviewer_name: `${reviewer.first_name} ${reviewer.last_name}`,
-            workload: data || 0,
-          };
-        })
-      );
-      return workloads.sort((a, b) => b.workload - a.workload);
-    },
-  });
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Reviewer Workload</CardTitle>
-        <CardDescription>
-          Current workload distribution across reviewers (pending + in_progress assignments)
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {workloads.map((workload) => (
-            <div key={workload.reviewer_id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">{workload.reviewer_name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {workload.workload} active assignment{workload.workload !== 1 ? 's' : ''}
-                </p>
-              </div>
-              <Badge variant={workload.workload > 5 ? 'destructive' : workload.workload > 3 ? 'default' : 'secondary'}>
-                {workload.workload}
-              </Badge>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 // Settings Tab
 const SettingsTab = () => {

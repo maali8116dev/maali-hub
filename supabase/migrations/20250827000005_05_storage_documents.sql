@@ -15,6 +15,12 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('project-images', 'project-images', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing policies (idempotent)
+DROP POLICY IF EXISTS "Anyone can view project images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can upload project images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update project images" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete project images" ON storage.objects;
+
 -- Allow anyone to view project images (public bucket)
 CREATE POLICY "Anyone can view project images"
 ON storage.objects FOR SELECT
@@ -77,6 +83,7 @@ DROP POLICY IF EXISTS "Reviewers can view all application documents" ON storage.
 
 -- Recreate storage policies for application documents
 -- Path structure: user_id/timestamp_filename
+-- Note: DROP statements are already above
 CREATE POLICY "Users can upload their own documents" 
 ON storage.objects 
 FOR INSERT 
@@ -105,6 +112,7 @@ USING (
 );
 
 -- Also allow admins to view all documents
+-- Note: DROP statement is already above
 CREATE POLICY "Admins can view all application documents"
 ON storage.objects
 FOR SELECT
@@ -114,6 +122,7 @@ FOR SELECT
 );
 
 -- Allow reviewers to view all application documents (they need to review applications)
+-- Note: DROP statement is already above
 CREATE POLICY "Reviewers can view all application documents"
 ON storage.objects
 FOR SELECT

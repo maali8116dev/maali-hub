@@ -12,8 +12,18 @@
 -- ============================================
 -- USER ROLE ENUM
 -- ============================================
-CREATE TYPE public.user_role AS ENUM
-('admin', 'reviewer', 'applicant');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_type t
+    JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'user_role'
+      AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.user_role AS ENUM ('admin', 'reviewer', 'applicant');
+  END IF;
+END $$;
 
 -- Add role column to profiles table with default 'applicant'
 ALTER TABLE public.profiles
@@ -316,6 +326,12 @@ VALUES
     ('user-avatars', 'user-avatars', true)
 ON CONFLICT
 (id) DO NOTHING;
+
+-- Drop existing storage policies (idempotent)
+DROP POLICY IF EXISTS "Anyone can view user avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload their own avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own avatars" ON storage.objects;
 
 -- Allow anyone to view user avatars (public bucket)
 CREATE POLICY "Anyone can view user avatars"
