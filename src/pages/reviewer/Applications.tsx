@@ -2,16 +2,16 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { useAdminApplications } from "@/hooks/useAdminApplications";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 const ReviewerApplications = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("pending"); // Default to pending
 
   const { data: applications = [], isLoading, error } = useAdminApplications();
 
@@ -43,22 +43,151 @@ const ReviewerApplications = () => {
     }
   };
 
-  const filteredApplications = useMemo(() => {
-    return applications.filter((app) => {
-      const matchesSearch =
-        app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.projectTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.companyName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-      return matchesSearch && matchesStatus;
+  // Filter and process applications with days pending calculation
+  const processedApplications = useMemo(() => {
+    let filtered = applications.filter((app) => {
+      return statusFilter === "all" || app.status === statusFilter;
     });
-  }, [applications, searchQuery, statusFilter]);
+
+    // Add days pending calculation for all applications (useful for sorting)
+    return filtered.map((app) => {
+      const submittedDate = new Date(app.submittedAt);
+      const today = new Date();
+      const daysPending = Math.floor(
+        (today.getTime() - submittedDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      return {
+        ...app,
+        daysPending,
+      };
+    });
+  }, [applications, statusFilter]);
+
+  // Check if there are pending applications with 5+ days
+  const hasPriorityPending = useMemo(() => {
+    if (statusFilter !== "pending") return false;
+    return processedApplications.some((app) => app.daysPending >= 5);
+  }, [processedApplications, statusFilter]);
+
+  // Define columns - conditionally include days pending when viewing pending
+  const applicationColumns: ColumnDef<any>[] = useMemo(() => {
+    const baseColumns: ColumnDef<any>[] = [
+      {
+        accessorKey: 'applicantName',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Applicant" />
+        ),
+        cell: ({ row }) => {
+          return <span className="font-medium">{row.original.applicantName}</span>;
+        },
+      },
+      {
+        accessorKey: 'projectTitle',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Project" />
+        ),
+        cell: ({ row }) => {
+          return <span className="text-sm">{row.original.projectTitle}</span>;
+        },
+      },
+    ];
+
+    // Add days pending column only when viewing pending applications
+    if (statusFilter === "pending") {
+      baseColumns.push({
+        accessorKey: 'daysPending',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Days Pending" />
+        ),
+        cell: ({ row }) => {
+          const daysPending = row.original.daysPending;
+          return (
+            <Badge 
+              className={daysPending >= 5 ? "bg-warning/10 text-warning border-warning/20" : "bg-secondary"}
+            >
+              <Clock className="h-3 w-3 mr-1" />
+              {daysPending} {daysPending === 1 ? "day" : "days"}
+            </Badge>
+          );
+        },
+        sortingFn: (rowA, rowB) => {
+          return rowA.original.daysPending - rowB.original.daysPending;
+        },
+      });
+    }
+
+    // Add status column when not viewing all
+    if (statusFilter !== "all") {
+      baseColumns.push({
+        accessorKey: 'status',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => {
+          return getStatusBadge(row.original.status);
+        },
+        sortingFn: (rowA, rowB) => {
+          return rowA.original.status.localeCompare(rowB.original.status);
+        },
+      });
+    }
+
+    // Add remaining columns
+    baseColumns.push(
+      {
+        accessorKey: 'submittedAt',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Submitted" />
+        ),
+        cell: ({ row }) => {
+          return (
+            <span className="text-sm text-muted-foreground">
+              {new Date(row.original.submittedAt).toLocaleDateString()}
+            </span>
+          );
+        },
+        sortingFn: (rowA, rowB) => {
+          const dateA = new Date(rowA.original.submittedAt).getTime();
+          const dateB = new Date(rowB.original.submittedAt).getTime();
+          return dateA - dateB;
+        },
+      },
+      {
+        accessorKey: 'fundingAmount',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Funding Amount" />
+        ),
+        cell: ({ row }) => {
+          return <span className="text-sm">{row.original.fundingAmount || "N/A"}</span>;
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const app = row.original;
+          return (
+            <Button
+              variant={statusFilter === "pending" ? "default" : "outline"}
+              size="sm"
+              onClick={() => navigate(`/reviewer/applications/${app.id}`)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              {statusFilter === "pending" ? "Start Review" : "Review"}
+            </Button>
+          );
+        },
+      }
+    );
+
+    return baseColumns;
+  }, [statusFilter, navigate]);
 
   if (isLoading) {
     return (
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Review and manage all submitted applications
           </p>
@@ -83,7 +212,7 @@ const ReviewerApplications = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Review and manage all submitted applications
           </p>
@@ -102,94 +231,77 @@ const ReviewerApplications = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">All Applications</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Review and manage all submitted applications
+          Review and manage all submitted applications ({processedApplications.length})
         </p>
       </div>
 
-      {/* Filters */}
+      {/* Status Filter */}
       <Card>
         <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by applicant name or project title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 min-h-[44px] sm:min-h-0"
-              />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { value: "all", label: "All" },
-                { value: "pending", label: "Pending" },
-                { value: "approved", label: "Approved" },
-                { value: "rejected", label: "Rejected" },
-              ].map((filter) => (
-                <Button
-                  key={filter.value}
-                  variant={statusFilter === filter.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setStatusFilter(filter.value)}
-                  className="min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial"
-                >
-                  {filter.label}
-                </Button>
-              ))}
-            </div>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { value: "all", label: "All" },
+              { value: "pending", label: "Pending" },
+              { value: "approved", label: "Approved" },
+              { value: "rejected", label: "Rejected" },
+            ].map((filter) => (
+              <Button
+                key={filter.value}
+                variant={statusFilter === filter.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter(filter.value)}
+                className="min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial"
+              >
+                {filter.label}
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Applications List */}
+      {/* Priority Alert - only show when viewing pending applications */}
+      {hasPriorityPending && (
+        <Card className="border-warning/50 bg-warning/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              <div>
+                <p className="font-medium">Applications pending for 5+ days</p>
+                <p className="text-sm text-muted-foreground">
+                  Please prioritize reviewing these applications
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Applications Table */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Applications ({filteredApplications.length})</CardTitle>
+          <CardTitle className="text-base sm:text-lg">
+            {statusFilter === "all" 
+              ? "All Applications" 
+              : statusFilter === "pending"
+              ? "Pending Applications"
+              : statusFilter === "approved"
+              ? "Approved Applications"
+              : "Rejected Applications"} ({processedApplications.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {filteredApplications.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm sm:text-base">
-              No applications found matching your criteria.
-            </div>
-          ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {filteredApplications.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                      <h3 className="font-semibold text-sm sm:text-base truncate">{app.applicantName}</h3>
-                      {getStatusBadge(app.status)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                      <span className="font-medium truncate">{app.projectTitle}</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="whitespace-nowrap">Submitted: {new Date(app.submittedAt).toLocaleDateString()}</span>
-                      {app.fundingAmount && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="whitespace-nowrap">{app.fundingAmount}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/reviewer/applications/${app.id}`)}
-                    className="w-full sm:w-auto min-h-[44px] sm:min-h-0"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Review
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <DataTable
+            columns={applicationColumns}
+            data={processedApplications}
+            searchPlaceholder="Search by applicant name, project title, or company..."
+            pageSize={10}
+            enableSorting={true}
+            enablePagination={true}
+            enableExport={true}
+            exportFileName={`applications-${statusFilter}`}
+          />
         </CardContent>
       </Card>
     </div>
@@ -197,4 +309,3 @@ const ReviewerApplications = () => {
 };
 
 export default ReviewerApplications;
-

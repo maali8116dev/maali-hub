@@ -40,7 +40,6 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
   const menuItems = [
     { href: "/reviewer", label: "Dashboard", icon: LayoutDashboard },
     { href: "/reviewer/applications", label: "Applications", icon: FileText },
-    { href: "/reviewer/pending", label: "Pending Review", icon: ClipboardCheck },
     { href: "/reviewer/notifications", label: "Notifications", icon: Bell },
     { href: "/reviewer/settings", label: "Settings", icon: Settings },
   ];
@@ -52,8 +51,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
 
   const getPageTitle = () => {
     if (location.pathname === "/reviewer") return "Reviewer Dashboard";
-    if (location.pathname === "/reviewer/applications") return "All Applications";
-    if (location.pathname === "/reviewer/pending") return "Pending Review";
+    if (location.pathname === "/reviewer/applications") return "Applications";
     if (location.pathname === "/reviewer/notifications") return "Notifications";
     if (location.pathname === "/reviewer/settings") return "Reviewer Settings";
     return "Reviewer Dashboard";

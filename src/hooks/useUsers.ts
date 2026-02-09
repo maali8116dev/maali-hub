@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export type UserManagement = {
   id: string;
@@ -11,6 +12,13 @@ export type UserManagement = {
   registeredAt: string;
   applicationsCount: number;
   status: "active" | "suspended" | "deleted";
+  firstName?: string | null;
+  lastName?: string | null;
+  businessName?: string | null;
+  businessSector?: string | null;
+  country?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
 };
 
 /**
@@ -77,6 +85,13 @@ export function useUsers() {
           registeredAt: user.registered_at,
           applicationsCount: user.applications_count || 0,
           status: user.status as "active" | "suspended" | "deleted",
+          firstName: user.first_name ?? null,
+          lastName: user.last_name ?? null,
+          businessName: user.business_name ?? null,
+          businessSector: user.business_sector ?? null,
+          country: user.country ?? null,
+          bio: user.bio ?? null,
+          avatarUrl: user.avatar_url ?? null,
         }));
       } catch (err) {
         // Re-throw our custom errors
@@ -91,6 +106,116 @@ export function useUsers() {
     enabled: !!user,
     staleTime: 30 * 1000, // Cache for 30 seconds
     retry: 1,
+  });
+}
+
+/**
+ * Hook to suspend a user
+ */
+export function useSuspendUser() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await supabase.functions.invoke("manage-user", {
+        body: {
+          userId,
+          action: "suspend",
+          token: sessionData.session.access_token,
+        },
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        console.error("Edge Function error:", response.error);
+        const errorMessage = response.error.message || response.error.toString() || "Failed to suspend user";
+        throw new Error(errorMessage);
+      }
+
+      // Check if response.data contains an error
+      if (response.data && response.data.error) {
+        throw new Error(response.data.error);
+      }
+
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
+      toast({
+        title: "User suspended",
+        description: "The user has been suspended successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to suspend user",
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+/**
+ * Hook to activate a user
+ */
+export function useActivateUser() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await supabase.functions.invoke("manage-user", {
+        body: {
+          userId,
+          action: "activate",
+          token: sessionData.session.access_token,
+        },
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        console.error("Edge Function error:", response.error);
+        const errorMessage = response.error.message || response.error.toString() || "Failed to activate user";
+        throw new Error(errorMessage);
+      }
+
+      // Check if response.data contains an error
+      if (response.data && response.data.error) {
+        throw new Error(response.data.error);
+      }
+
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
+      toast({
+        title: "User activated",
+        description: "The user has been activated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to activate user",
+        variant: "destructive",
+      });
+    },
   });
 }
 

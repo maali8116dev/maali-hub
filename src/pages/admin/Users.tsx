@@ -1,16 +1,65 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Calendar, FileText, Shield, AlertCircle } from "lucide-react";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers, useSuspendUser, useActivateUser } from "@/hooks/useUsers";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminUsers = () => {
+  const navigate = useNavigate();
   const { data: users = [], isLoading, error } = useUsers();
+  const suspendUser = useSuspendUser();
+  const activateUser = useActivateUser();
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ userId: string; name: string } | null>(null);
+
+  const handleSuspendClick = (userId: string, userName: string) => {
+    setSelectedUser({ userId, name: userName });
+    setSuspendDialogOpen(true);
+  };
+
+  const handleActivateClick = (userId: string, userName: string) => {
+    setSelectedUser({ userId, name: userName });
+    setActivateDialogOpen(true);
+  };
+
+  const handleConfirmSuspend = () => {
+    if (selectedUser) {
+      suspendUser.mutate(selectedUser.userId, {
+        onSuccess: () => {
+          setSuspendDialogOpen(false);
+          setSelectedUser(null);
+        },
+      });
+    }
+  };
+
+  const handleConfirmActivate = () => {
+    if (selectedUser) {
+      activateUser.mutate(selectedUser.userId, {
+        onSuccess: () => {
+          setActivateDialogOpen(false);
+          setSelectedUser(null);
+        },
+      });
+    }
+  };
 
   // Define columns for the users table
   const userColumns: ColumnDef<any>[] = useMemo(() => [
@@ -121,16 +170,32 @@ const AdminUsers = () => {
         const user = row.original;
         return (
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/admin/users/${user.userId}`)}
+            >
               View Profile
             </Button>
             {user.role !== "admin" && user.status === "active" && (
-              <Button variant="outline" size="sm" className="text-destructive">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive"
+                onClick={() => handleSuspendClick(user.userId, user.name)}
+                disabled={suspendUser.isPending}
+              >
                 Suspend
               </Button>
             )}
             {user.status === "suspended" && (
-              <Button variant="outline" size="sm" className="text-success">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-success"
+                onClick={() => handleActivateClick(user.userId, user.name)}
+                disabled={activateUser.isPending}
+              >
                 Activate
               </Button>
             )}
@@ -192,6 +257,52 @@ const AdminUsers = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Suspend Confirmation Dialog */}
+      <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to suspend <strong>{selectedUser?.name}</strong>? 
+              They will not be able to access their account until reactivated.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={suspendUser.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSuspend}
+              disabled={suspendUser.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {suspendUser.isPending ? "Suspending..." : "Suspend User"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Activate Confirmation Dialog */}
+      <AlertDialog open={activateDialogOpen} onOpenChange={setActivateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Activate User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to activate <strong>{selectedUser?.name}</strong>? 
+              They will regain access to their account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={activateUser.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmActivate}
+              disabled={activateUser.isPending}
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
+              {activateUser.isPending ? "Activating..." : "Activate User"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

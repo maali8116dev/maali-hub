@@ -16,7 +16,7 @@
 - [x] Google OAuth integration
 - [x] Facebook OAuth integration
 - [x] User session management
-- [x] Auth middleware (backend)
+- [x] Auth middleware (Supabase RLS policies)
 - [x] Password reset flow
 - [x] Email verification flow (banner + resend functionality)
 - [x] Activity logging on login/logout
@@ -25,10 +25,10 @@
 ### 👤 **USER PROFILES**
 
 - [x] Profile schema (Supabase)
-- [x] Profile API endpoints (backend)
-- [x] Profile query functions
-- [x] Profile editing page (connected to API)
-- [x] Profile view page (connected to API)
+- [x] Profile queries (direct Supabase queries)
+- [x] Profile query functions (PostgreSQL RPC)
+- [x] Profile editing page (connected to Supabase)
+- [x] Profile view page (connected to Supabase)
 - [ ] Profile creation page
 - [ ] Avatar upload functionality
 - [ ] Profile completion tracking
@@ -43,17 +43,16 @@
 - [x] Project card button alignment (flexbox layout)
 - [x] Project search functionality
 - [x] Projects database schema
-- [x] Projects API endpoints (backend)
-- [x] Projects CRUD operations (backend)
-- [x] Project pagination (frontend and backend)
+- [x] Projects CRUD operations (direct Supabase queries)
+- [x] Project pagination (frontend)
 - [x] Activity logging on project CRUD operations
 - [ ] Project favorites/bookmarks
 
 ### 📝 **APPLICATIONS**
 
 - [x] Application schema (Supabase)
-- [x] Application API endpoints (backend)
-- [x] Application query functions
+- [x] Application queries (direct Supabase queries)
+- [x] Application query functions (PostgreSQL RPC)
 - [x] Application detail page (UI only)
 - [x] CustomFormField component (reusable form fields with validation)
 - [x] Full application form (Multi-step form with validation)
@@ -69,8 +68,8 @@
 ### 📎 **DOCUMENTS**
 
 - [x] Document schema (Supabase)
-- [x] Document API endpoints (backend)
-- [x] Document query functions
+- [x] Document queries (direct Supabase queries)
+- [x] Document query functions (PostgreSQL RPC)
 - [x] File upload functionality (Supabase Storage integration)
 - [x] Document upload component (DocumentUploadSection)
 - [x] Document validation (file type, size limits)
@@ -137,14 +136,14 @@
 
 #### ⚠️ **NEEDS BACKEND INTEGRATION**
 
-- [x] Connect Projects page to API (with Supabase fallback)
-- [ ] Connect Application page to API
+- [x] Connect Projects page to Supabase (direct queries)
+- [x] Connect Application page to Supabase (direct queries)
 - [ ] Connect Auth to profile creation
 - [x] User dashboard (UI created - mock data)
 - [x] Application tracking page (UI created - mock data)
-- [ ] Connect Dashboard to API
-- [ ] Connect Applications page to API
-- [x] Profile page connected to API
+- [ ] Connect Dashboard to Supabase
+- [x] Connect Applications page to Supabase (direct queries)
+- [x] Profile page connected to Supabase (direct queries)
 
 ### 🎨 **UI COMPONENTS**
 
@@ -174,26 +173,27 @@
 
 ### 🔧 **BACKEND API**
 
+**Architecture**: Direct Supabase queries (primary) + Supabase Edge Functions (for specific operations)
+
 #### ✅ **COMPLETED**
 
-- [x] Hono server setup
-- [x] Authentication middleware
-- [x] CORS configuration (fixed for localhost development)
-- [x] Error handling
-- [x] Profile routes (CRUD)
-- [x] Application routes (CRUD)
-- [x] Document routes (CRUD)
-- [x] Projects routes (CRUD - public GET, protected POST/PATCH/DELETE)
+- [x] Direct Supabase queries (frontend queries Supabase directly via client)
+- [x] Row Level Security (RLS) policies for data access control
+- [x] Supabase Edge Functions for specific operations:
+  - [x] `send-email` - Email notifications via Resend
+  - [x] `create-payment-intent` - Stripe payment intents
+  - [x] `stripe-webhook` - Stripe webhook handling
+  - [x] `auth-email-hook` - Auth email hooks
 - [x] Database schema (Supabase SQL migrations)
-- [x] Query functions (profiles, applications, documents, projects)
+- [x] PostgreSQL RPC functions (profiles, applications, documents, projects, reviewers)
+- [x] Request validation (Zod - implemented in frontend forms)
+- [x] Error handling in frontend hooks
 
 #### ⚠️ **NEEDS CONFIGURATION**
 
-- [x] Environment variables setup (documentation added, DATABASE_URL password needed)
-- [ ] Database connection testing (pending password configuration)
-- [ ] API endpoint testing
-- [ ] Rate limiting
-- [x] Request validation (Zod - implemented for projects, applications, profiles)
+- [x] Environment variables setup (Supabase keys configured)
+- [ ] Rate limiting (can be implemented via Supabase Edge Functions if needed)
+- [ ] Additional Edge Functions for complex business logic (if needed)
 
 ### 🗄️ **DATABASE**
 
@@ -291,9 +291,9 @@
 1. **Projects/Opportunities Management**
 
    - [x] Database table for projects
-   - [x] API endpoints for projects (backend)
-   - [x] Projects page connected to API (frontend)
-   - [ ] Admin interface to create/manage projects (backend ready, UI needed)
+   - [x] Projects CRUD operations (direct Supabase queries)
+   - [x] Projects page connected to Supabase (frontend)
+   - [x] Admin interface to create/manage projects (UI implemented)
 
 2. **Application Form**
 
@@ -305,11 +305,11 @@
 
 3. **Backend-Frontend Integration**
 
-   - [x] Projects page connected (with Supabase fallback)
-   - [x] Profile page connected (with Supabase fallback)
-   - [ ] Connect remaining pages to API
-   - [x] Error handling in frontend (fallback mechanisms)
-   - [x] API client created and integrated
+   - [x] Projects page connected (direct Supabase queries)
+   - [x] Profile page connected (direct Supabase queries)
+   - [x] Applications page connected (direct Supabase queries)
+   - [x] Error handling in frontend hooks
+   - [x] React Query integration for data fetching
 
 4. **User Dashboard**
 
@@ -351,9 +351,9 @@
    - [x] Admin dashboard UI (implemented)
    - [x] Activity logs page (fully functional with filtering, pagination, export)
    - [x] Admin applications page (view all applications with filtering)
-   - [x] Admin projects management (CRUD operations)
-   - [x] Reviewer assignment management
-   - [ ] User management (backend integration needed)
+   - [x] Admin projects management (CRUD operations via Supabase)
+   - [x] Reviewer assignment management (via Supabase RPC functions)
+   - [x] User management (direct Supabase queries with admin RPC functions)
 
 ### **LOW PRIORITY**
 
@@ -438,8 +438,8 @@
 1. Mock data still in use for some pages (Dashboard stats)
 2. No error boundaries implemented
 3. Loading states implemented (skeleton loaders)
-4. API client integrated (api.ts used in useProjects, useProfile hooks)
-5. Environment variable configuration documented (DATABASE_URL password needed)
+4. Legacy API client (api.ts) exists but unused - uses direct Supabase queries instead
+5. Environment variable configuration documented (Supabase keys configured)
 6. Testing setup complete (unit/integration tests) ✅
 7. No CI/CD pipeline
 8. Documentation improved (BACKEND_SETUP.md, DATABASE_SETUP.md)
@@ -459,13 +459,13 @@
 - ✅ Skeleton loaders implemented (Projects, Dashboard, Applications)
 - ✅ Empty state component created and integrated
 - ✅ Projects database table and migrations created
-- ✅ Projects API endpoints implemented (backend)
-- ✅ Projects page connected to real data (with Supabase fallback)
-- ✅ Profile page connected to real data (with Supabase fallback)
-- ✅ CORS configuration fixed for development
+- ✅ Projects CRUD operations via direct Supabase queries
+- ✅ Projects page connected to real data (direct Supabase queries)
+- ✅ Profile page connected to real data (direct Supabase queries)
+- ✅ Direct Supabase queries architecture (no separate backend server needed)
 - ✅ Blog CRUD functionality scaffolded
 - ✅ All footer link pages created
-- ✅ useProjects and useProfile hooks with API integration
+- ✅ useProjects and useProfile hooks with direct Supabase integration
 - ✅ Email verification banner with resend functionality
 - ✅ Email service via Resend (Supabase Edge Function)
 - ✅ Welcome email on signup
@@ -487,7 +487,7 @@
 
 ## 📝 **NOTES FOR PROJECT MANAGER**
 
-- **Current State**: Frontend UI is ~90% complete, Backend API is ~95% complete, Integration ~75% complete
+- **Current State**: Frontend UI is ~90% complete, Backend (Supabase) is ~95% complete, Integration ~85% complete
 - **Recent Progress**:
   - ✅ Application submission flow fully functional with automatic reviewer assignment
   - ✅ File upload system integrated with Supabase Storage
@@ -498,7 +498,8 @@
 - **Biggest Gap**: Admin user management UI, payment integration, advanced application status tracking
 - **Next Critical Step**: Complete payment integration (Stripe), then focus on admin user management
 - **Estimated Completion**: 4-6 weeks for full MVP (reduced from 5-8 weeks)
-- **Team Needs**: Backend developer, Frontend developer, Full-stack developer, or one person doing both
+- **Team Needs**: Frontend developer (Supabase handles backend), Full-stack developer preferred
+- **Architecture**: Direct Supabase queries (primary) + Edge Functions (for email, payments) - no separate backend server
 - **Testing**: Comprehensive test coverage for critical paths (application form, file uploads, authentication)
 
 ---

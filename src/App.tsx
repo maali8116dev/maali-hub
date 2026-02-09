@@ -34,6 +34,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProjects from "./pages/admin/Projects";
 import AdminApplications from "./pages/admin/Applications";
 import AdminUsers from "./pages/admin/Users";
+import AdminUserDetails from "./pages/admin/UserDetails";
 import AdminSettings from "./pages/admin/Settings";
 import AdminFinancial from "./pages/admin/Financial";
 import AdminBlog from "./pages/admin/Blog";
@@ -53,7 +54,6 @@ import AdminCategories from "./pages/admin/Categories";
 import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
 import ReviewerDashboard from "./pages/reviewer/Dashboard";
 import ReviewerApplications from "./pages/reviewer/Applications";
-import ReviewerPending from "./pages/reviewer/Pending";
 import ReviewApplication from "./pages/reviewer/ReviewApplication";
 import ReviewerSettings from "./pages/reviewer/Settings";
 import ReviewerNotifications from "./pages/reviewer/Notifications";
@@ -262,6 +262,16 @@ const App = () => (
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <AdminUsers />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users/:userId"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminUserDetails />
                 </AdminLayout>
               </ProtectedRoute>
             }
@@ -484,16 +494,6 @@ const App = () => (
               <ProtectedRoute requireAuth={true}>
                 <ReviewerLayout>
                   <ReviewApplication />
-                </ReviewerLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reviewer/pending"
-            element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewerPending />
                 </ReviewerLayout>
               </ProtectedRoute>
             }

@@ -1,25 +1,22 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Clock,
   CheckCircle,
   XCircle,
   RefreshCw,
-  Search,
   Download,
   FileText,
   Calendar,
   Filter,
 } from "lucide-react";
-import { useTransactions, useFinancialStats } from "@/hooks/useFinancialData";
+import { useTransactions, useFinancialStats, Transaction } from "@/hooks/useFinancialData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -27,9 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 const AdminFinancial = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
@@ -91,18 +89,6 @@ const AdminFinancial = () => {
   const filteredTransactions = useMemo(() => {
     let filtered = transactions;
 
-    // Search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (tx) =>
-          tx.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tx.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tx.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tx.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          tx.providerTransactionId?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
     // Status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((tx) => tx.status === statusFilter);
@@ -137,7 +123,7 @@ const AdminFinancial = () => {
     }
 
     return filtered;
-  }, [transactions, searchQuery, statusFilter, typeFilter, dateRange]);
+  }, [transactions, statusFilter, typeFilter, dateRange]);
 
   const formatCurrency = (amount: number, currency: string = "USD") => {
     return new Intl.NumberFormat("en-US", {
@@ -145,6 +131,148 @@ const AdminFinancial = () => {
       currency: currency,
     }).format(amount);
   };
+
+  // Define columns for the transactions table
+  const transactionColumns: ColumnDef<Transaction>[] = useMemo(() => [
+    {
+      accessorKey: 'amount',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Amount" />
+      ),
+      cell: ({ row }) => {
+        const tx = row.original;
+        return (
+          <span className="font-semibold">
+            {formatCurrency(tx.amount, tx.currency)}
+          </span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        return rowA.original.amount - rowB.original.amount;
+      },
+    },
+    {
+      accessorKey: 'userName',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="User" />
+      ),
+      cell: ({ row }) => {
+        const tx = row.original;
+        return (
+          <div>
+            <p className="font-medium">{tx.userName}</p>
+            <p className="text-xs text-muted-foreground">{tx.userEmail}</p>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'description',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Description" />
+      ),
+      cell: ({ row }) => {
+        return <span className="text-sm">{row.original.description}</span>;
+      },
+    },
+    {
+      accessorKey: 'type',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Type" />
+      ),
+      cell: ({ row }) => {
+        return getTypeBadge(row.original.type);
+      },
+      sortingFn: (rowA, rowB) => {
+        return rowA.original.type.localeCompare(rowB.original.type);
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        return getStatusBadge(row.original.status);
+      },
+      sortingFn: (rowA, rowB) => {
+        return rowA.original.status.localeCompare(rowB.original.status);
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Date" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <span className="text-sm text-muted-foreground">
+            {format(new Date(row.original.createdAt), "MMM d, yyyy")}
+          </span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.createdAt).getTime();
+        const dateB = new Date(rowB.original.createdAt).getTime();
+        return dateA - dateB;
+      },
+    },
+    {
+      accessorKey: 'projectTitle',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Project" />
+      ),
+      cell: ({ row }) => {
+        const projectTitle = row.original.projectTitle;
+        return projectTitle ? (
+          <span className="text-sm">{projectTitle}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">N/A</span>
+        );
+      },
+    },
+    {
+      accessorKey: 'invoiceNumber',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Invoice" />
+      ),
+      cell: ({ row }) => {
+        const invoiceNumber = row.original.invoiceNumber;
+        return invoiceNumber ? (
+          <span className="text-sm font-mono">{invoiceNumber}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">N/A</span>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const tx = row.original;
+        return (
+          <div className="flex items-center gap-2">
+            {tx.invoiceUrl && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={tx.invoiceUrl} target="_blank" rel="noopener noreferrer">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Invoice
+                </a>
+              </Button>
+            )}
+            {tx.receiptUrl && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={tx.receiptUrl} target="_blank" rel="noopener noreferrer">
+                  <Download className="h-4 w-4 mr-2" />
+                  Receipt
+                </a>
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ], []);
 
   if (transactionsLoading || statsLoading) {
     return (
@@ -345,15 +473,6 @@ const AdminFinancial = () => {
       <Card>
         <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by user, description, invoice..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 min-h-[44px] sm:min-h-0"
-              />
-            </div>
             <div className="flex gap-2 flex-wrap">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] sm:min-h-0">
@@ -399,90 +518,24 @@ const AdminFinancial = () => {
         </CardContent>
       </Card>
 
-      {/* Transactions List */}
+      {/* Transactions Table */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base sm:text-lg">
-              Transactions ({filteredTransactions.length})
-            </CardTitle>
-            <Button variant="outline" size="sm" className="min-h-[44px] sm:min-h-0">
-              <Download className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </div>
+          <CardTitle className="text-base sm:text-lg">
+            Transactions ({filteredTransactions.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {filteredTransactions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm sm:text-base">
-              No transactions found matching your criteria.
-            </div>
-          ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {filteredTransactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3 sm:gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                      <h3 className="font-semibold text-sm sm:text-base truncate">
-                        {formatCurrency(tx.amount, tx.currency)}
-                      </h3>
-                      {getStatusBadge(tx.status)}
-                      {getTypeBadge(tx.type)}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                      <span className="font-medium truncate">{tx.userName}</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="truncate">{tx.description}</span>
-                      {tx.projectTitle && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="truncate">{tx.projectTitle}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground mt-1">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(tx.createdAt), "MMM d, yyyy")}
-                      </span>
-                      {tx.invoiceNumber && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="flex items-center gap-1">
-                            <FileText className="h-3 w-3" />
-                            {tx.invoiceNumber}
-                          </span>
-                        </>
-                      )}
-                      {tx.provider && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span>{tx.provider}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {tx.invoiceUrl && (
-                      <Button variant="outline" size="sm" className="min-h-[44px] sm:min-h-0">
-                        <FileText className="h-4 w-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Invoice</span>
-                      </Button>
-                    )}
-                    {tx.receiptUrl && (
-                      <Button variant="outline" size="sm" className="min-h-[44px] sm:min-h-0">
-                        <Download className="h-4 w-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Receipt</span>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <DataTable
+            columns={transactionColumns}
+            data={filteredTransactions}
+            searchPlaceholder="Search by user, description, invoice, or transaction ID..."
+            pageSize={10}
+            enableSorting={true}
+            enablePagination={true}
+            enableExport={true}
+            exportFileName="transactions"
+          />
         </CardContent>
       </Card>
     </div>

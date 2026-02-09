@@ -29,20 +29,127 @@ interface AuthHookPayload {
   };
 }
 
-const baseStyles = `
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-    .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; }
-    .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none; }
-    .button { display: inline-block; background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-    .button:hover { background: #15803d; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 500; }
-    .status-approved { background: #dcfce7; color: #166534; }
-    .status-rejected { background: #fee2e2; color: #991b1b; }
-    .status-review { background: #fef3c7; color: #92400e; }
-  </style>
+// Base URL for logo and links
+const baseUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
+const logoUrl = `${baseUrl}/static/maali-logo.png`; // Update with your actual logo path
+
+// Primary gradient colors (Terra Cotta to Golden Orange)
+// hsl(15 75% 45%) = #C85A2E, hsl(35 85% 55%) = #F5A623
+const primaryGradient = "linear-gradient(135deg, #C85A2E 0%, #F5A623 100%)";
+
+// AWS-style email template helper
+const emailTemplate = (title: string, content: string) => `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: #eee;
+        margin: 0;
+        padding: 0;
+        color: #212121;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #eee;
+      }
+      .email-section {
+        background-color: #ffffff;
+      }
+      .header {
+        background: ${primaryGradient};
+        padding: 20px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 75px;
+        height: auto;
+      }
+      .content {
+        padding: 25px 35px;
+      }
+      .content h1 {
+        color: #333;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 0 0 15px 0;
+      }
+      .content p {
+        color: #333;
+        font-size: 14px;
+        line-height: 24px;
+        margin: 6px 0 14px 0;
+      }
+      .button {
+        display: inline-block;
+        background: ${primaryGradient};
+        color: #ffffff;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        margin: 20px 0;
+      }
+      .button:hover {
+        opacity: 0.9;
+      }
+      .button-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 0;
+      }
+      .footer {
+        padding: 25px 35px;
+      }
+      .footer p {
+        color: #333;
+        font-size: 14px;
+        margin: 0;
+      }
+      .footer-links {
+        color: #333;
+        font-size: 12px;
+        margin: 24px 0;
+        padding: 0 20px;
+      }
+      .footer-links a {
+        color: #2754C5;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="email-section">
+        <div class="header">
+          <img src="${logoUrl}" alt="Maali Logo" width="75" height="45" />
+        </div>
+        <div class="content">
+          <h1>${title}</h1>
+          ${content}
+        </div>
+        <hr class="divider" />
+        <div class="footer">
+          <p>Maali will never email you and ask you to disclose or verify your password, credit card, or banking account number.</p>
+        </div>
+      </div>
+      <p class="footer-links">
+        This message was produced and distributed by Maali Opportunity Hub. © ${new Date().getFullYear()}, Maali. All rights reserved. View our 
+        <a href="${baseUrl}/privacy" target="_blank">privacy policy</a>.
+      </p>
+    </div>
+  </body>
+  </html>
 `;
 
 const getEmailContent = (
@@ -58,80 +165,46 @@ const getEmailContent = (
     case "recovery": // Supabase sends "recovery" for password reset emails
       return {
         subject: "Reset Your Password - Maali",
-        html: `
-          ${baseStyles}
-          <div class="container">
-            <div class="header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-              <h1>🔐 Password Reset</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${recipientName},</p>
-              <p>We received a request to reset your password for your Maali account.</p>
-              <p>Click the button below to create a new password:</p>
-              ${redirectUrl ? `<a href="${redirectUrl}" class="button" style="background: #f59e0b;">Reset Password</a>` : ""}
-              <p>If you didn't request a password reset, please ignore this email or contact support if you have concerns.</p>
-              <p>This link will expire in 1 hour for security reasons.</p>
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
-              <p>If the button doesn't work, copy and paste this link into your browser:</p>
-              ${redirectUrl ? `<p style="word-break: break-all; color: #f59e0b;">${redirectUrl}</p>` : ""}
-            </div>
-          </div>
-        `,
+        html: emailTemplate(
+          "Reset your password",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
+            <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button button-warning">Reset Password</a></div>` : ''}
+            <p>This link will expire in 1 hour for security reasons.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
       };
 
     case "signup":
       return {
         subject: "Verify Your Email - Maali",
-        html: `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
-              <h1>✉️ Verify Your Email</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${recipientName},</p>
-              <p>Thank you for signing up for Maali! Please verify your email address to activate your account and access all features.</p>
-              ${redirectUrl ? `<a href="${redirectUrl}" class="button">Verify Email Address</a>` : ""}
-              <p>If you didn't create an account with Maali, you can safely ignore this email.</p>
-              <p>This verification link will expire in 24 hours.</p>
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
-              <p>If the button doesn't work, copy and paste this link into your browser:</p>
-              ${redirectUrl ? `<p style="word-break: break-all; color: #16a34a;">${redirectUrl}</p>` : ""}
-            </div>
-          </div>
-        `,
+        html: emailTemplate(
+          "Verify your email address",
+          `
+            <p>Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Verify Email Address</a></div>` : ''}
+            <p>This verification link will expire in 24 hours.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
       };
 
     case "magiclink":
       return {
         subject: "Sign In to Maali",
-        html: `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
-              <h1>🔗 Magic Link Sign In</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${recipientName},</p>
-              <p>Click the button below to sign in to your Maali account:</p>
-              ${redirectUrl ? `<a href="${redirectUrl}" class="button">Sign In</a>` : ""}
-              <p>If you didn't request this magic link, please ignore this email.</p>
-              <p>This link will expire in 1 hour.</p>
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
-              <p>If the button doesn't work, copy and paste this link into your browser:</p>
-              ${redirectUrl ? `<p style="word-break: break-all; color: #16a34a;">${redirectUrl}</p>` : ""}
-            </div>
-          </div>
-        `,
+        html: emailTemplate(
+          "Sign in to your account",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>Click the button below to sign in to your Maali account. If you didn't request this magic link, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Sign In</a></div>` : ''}
+            <p>This link will expire in 1 hour.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
       };
 
     case "email_change":
@@ -139,50 +212,31 @@ const getEmailContent = (
     case "email_change_token_current":
       return {
         subject: "Confirm Email Change - Maali",
-        html: `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
-              <h1>📧 Confirm Email Change</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${recipientName},</p>
-              <p>You requested to change your email address for your Maali account.</p>
-              <p>Click the button below to confirm this change:</p>
-              ${redirectUrl ? `<a href="${redirectUrl}" class="button">Confirm Email Change</a>` : ""}
-              <p>If you didn't request this change, please ignore this email or contact support immediately.</p>
-              <p>This link will expire in 1 hour.</p>
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
-              <p>If the button doesn't work, copy and paste this link into your browser:</p>
-              ${redirectUrl ? `<p style="word-break: break-all; color: #16a34a;">${redirectUrl}</p>` : ""}
-            </div>
-          </div>
-        `,
+        html: emailTemplate(
+          "Confirm email change",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>You requested to change your email address for your Maali account. We want to make sure it's really you.</p>
+            <p>Click the button below to confirm this change. If you didn't request this change, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Confirm Email Change</a></div>` : ''}
+            <p>This link will expire in 1 hour.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
       };
 
     default:
       return {
         subject: "Maali Account Notification",
-        html: `
-          ${baseStyles}
-          <div class="container">
-            <div class="header">
-              <h1>Maali Notification</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${recipientName},</p>
-              <p>You have a new notification from Maali.</p>
-              ${redirectUrl ? `<a href="${redirectUrl}" class="button">View Details</a>` : ""}
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Maali. All rights reserved.</p>
-            </div>
-          </div>
-        `,
+        html: emailTemplate(
+          "Maali Notification",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>You have a new notification from Maali.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">View Details</a></div>` : ''}
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
       };
   }
 };

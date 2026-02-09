@@ -103,12 +103,8 @@ const ReviewManagement = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="rubrics" className="space-y-4">
+      <Tabs defaultValue="reviewers" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="rubrics">
-            <FileText className="h-4 w-4 mr-2" />
-            Rubrics
-          </TabsTrigger>
           <TabsTrigger value="reviewers">
             <Users className="h-4 w-4 mr-2" />
             Reviewers
@@ -123,11 +119,6 @@ const ReviewManagement = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Rubrics Tab */}
-        <TabsContent value="rubrics" className="space-y-4">
-          <RubricsTab categories={categories} />
-        </TabsContent>
-
         {/* Reviewer Categories Tab */}
         <TabsContent value="reviewers" className="space-y-4">
           <ReviewerCategoriesTab reviewers={reviewers} categories={categories} />
@@ -138,10 +129,9 @@ const ReviewManagement = () => {
           <ConflictsTab />
         </TabsContent>
 
-
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
-          <SettingsTab />
+          <SettingsTab categories={categories} />
         </TabsContent>
       </Tabs>
     </div>
@@ -879,6 +869,85 @@ const ConflictsTab = () => {
     },
   });
 
+  const conflictColumns: ColumnDef<any>[] = useMemo(() => [
+    {
+      accessorKey: 'reviewer',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Reviewer" />
+      ),
+      cell: ({ row }) => {
+        const conflict = row.original;
+        const reviewer = conflict.reviewer;
+        return reviewer ? (
+          <span className="font-medium">
+            {reviewer.first_name} {reviewer.last_name}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground">Unknown</span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const nameA = `${rowA.original.reviewer?.first_name || ''} ${rowA.original.reviewer?.last_name || ''}`.trim();
+        const nameB = `${rowB.original.reviewer?.first_name || ''} ${rowB.original.reviewer?.last_name || ''}`.trim();
+        return nameA.localeCompare(nameB);
+      },
+    },
+    {
+      accessorKey: 'application',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Application" />
+      ),
+      cell: ({ row }) => {
+        const conflict = row.original;
+        const application = conflict.application;
+        return application?.project_title ? (
+          <span className="text-sm">{application.project_title}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">N/A</span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const titleA = rowA.original.application?.project_title || '';
+        const titleB = rowB.original.application?.project_title || '';
+        return titleA.localeCompare(titleB);
+      },
+    },
+    {
+      accessorKey: 'conflict_reason',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Reason" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <Badge variant="outline">
+            {row.original.conflict_reason}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'created_at',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Declared" />
+      ),
+      cell: ({ row }) => {
+        const createdAt = row.original.created_at;
+        return createdAt ? (
+          <span className="text-sm text-muted-foreground">
+            {new Date(createdAt).toLocaleDateString()}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">N/A</span>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.created_at || 0).getTime();
+        const dateB = new Date(rowB.original.created_at || 0).getTime();
+        return dateA - dateB;
+      },
+    },
+  ], []);
+
   return (
     <Card>
       <CardHeader>
@@ -888,32 +957,16 @@ const ConflictsTab = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {conflicts.length === 0 ? (
-          <p className="text-muted-foreground">No conflicts declared</p>
-        ) : (
-          <div className="space-y-4">
-            {conflicts.map((conflict: any) => (
-              <Card key={conflict.id}>
-                <CardContent className="pt-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">
-                        {conflict.reviewer?.first_name} {conflict.reviewer?.last_name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Application: {conflict.application?.project_title}
-                      </p>
-                      <p className="text-sm mt-2">
-                        Reason: <span className="font-medium">{conflict.conflict_reason}</span>
-                      </p>
-                    </div>
-                    <Badge variant="outline">{conflict.conflict_reason}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        <DataTable
+          columns={conflictColumns}
+          data={conflicts}
+          searchPlaceholder="Search by reviewer name, application title, or reason..."
+          pageSize={10}
+          enableSorting={true}
+          enablePagination={true}
+          enableExport={true}
+          exportFileName="conflicts"
+        />
       </CardContent>
     </Card>
   );
@@ -921,7 +974,7 @@ const ConflictsTab = () => {
 
 
 // Settings Tab
-const SettingsTab = () => {
+const SettingsTab = ({ categories }: { categories: string[] }) => {
   const { toast } = useToast();
   const { numReviewers, updateNumReviewers } = useReviewersPerAssignment();
   const [localNumReviewers, setLocalNumReviewers] = useState(numReviewers);
@@ -947,41 +1000,47 @@ const SettingsTab = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Review Management Settings</CardTitle>
-        <CardDescription>
-          Configure global settings for the review management system
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="num-reviewers">Number of Reviewers per Assignment</Label>
-            <p className="text-sm text-muted-foreground">
-              All new reviewer assignments will use this number. This ensures consistency across all applications.
-            </p>
-            <div className="flex items-center gap-4">
-              <Input
-                id="num-reviewers"
-                type="number"
-                min="1"
-                max="10"
-                value={localNumReviewers}
-                onChange={(e) => setLocalNumReviewers(parseInt(e.target.value, 10) || 1)}
-                className="w-32"
-              />
-              <span className="text-sm text-muted-foreground">
-                reviewer{localNumReviewers !== 1 ? 's' : ''} per application
-              </span>
+    <div className="space-y-6">
+      {/* Review Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Review Management Settings</CardTitle>
+          <CardDescription>
+            Configure global settings for the review management system
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="num-reviewers">Number of Reviewers per Assignment</Label>
+              <p className="text-sm text-muted-foreground">
+                All new reviewer assignments will use this number. This ensures consistency across all applications.
+              </p>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="num-reviewers"
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={localNumReviewers}
+                  onChange={(e) => setLocalNumReviewers(parseInt(e.target.value, 10) || 1)}
+                  className="w-32"
+                />
+                <span className="text-sm text-muted-foreground">
+                  reviewer{localNumReviewers !== 1 ? 's' : ''} per application
+                </span>
+              </div>
             </div>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Settings'}
+            </Button>
           </div>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save Settings'}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Rubrics Section */}
+      <RubricsTab categories={categories} />
+    </div>
   );
 };
 
