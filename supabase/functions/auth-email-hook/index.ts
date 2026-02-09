@@ -168,7 +168,6 @@ const getEmailContent = (
         html: emailTemplate(
           "Reset your password",
           `
-            <p>Dear ${recipientName},</p>
             <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
             <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
             ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button button-warning">Reset Password</a></div>` : ''}
@@ -198,7 +197,6 @@ const getEmailContent = (
         html: emailTemplate(
           "Sign in to your account",
           `
-            <p>Dear ${recipientName},</p>
             <p>Click the button below to sign in to your Maali account. If you didn't request this magic link, you can ignore this message.</p>
             ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Sign In</a></div>` : ''}
             <p>This link will expire in 1 hour.</p>
@@ -215,7 +213,6 @@ const getEmailContent = (
         html: emailTemplate(
           "Confirm email change",
           `
-            <p>Dear ${recipientName},</p>
             <p>You requested to change your email address for your Maali account. We want to make sure it's really you.</p>
             <p>Click the button below to confirm this change. If you didn't request this change, you can ignore this message.</p>
             ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Confirm Email Change</a></div>` : ''}
@@ -231,7 +228,6 @@ const getEmailContent = (
         html: emailTemplate(
           "Maali Notification",
           `
-            <p>Dear ${recipientName},</p>
             <p>You have a new notification from Maali.</p>
             ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">View Details</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>

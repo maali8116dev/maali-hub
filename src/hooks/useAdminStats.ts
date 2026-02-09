@@ -15,32 +15,22 @@ export function useAdminStats() {
   return useQuery({
     queryKey: ['admin-stats'],
     queryFn: async (): Promise<AdminStats> => {
-      // Fetch all counts in parallel
-      const [
-        profilesResult,
-        projectsResult,
-        applicationsResult,
-        activeProjectsResult,
-      ] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('projects').select('id', { count: 'exact', head: true }),
-        supabase.from('applications').select('id, status'),
-        supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      ]);
+      const { data, error } = await supabase.rpc('get_admin_stats');
 
-      const applications = applicationsResult.data || [];
-      const pendingCount = applications.filter(a => a.status === 'pending').length;
-      const approvedCount = applications.filter(a => a.status === 'approved').length;
-      const rejectedCount = applications.filter(a => a.status === 'rejected').length;
+      if (error) {
+        throw error;
+      }
+
+      const stats = data?.[0];
 
       return {
-        totalUsers: profilesResult.count || 0,
-        totalProjects: projectsResult.count || 0,
-        totalApplications: applications.length,
-        pendingApplications: pendingCount,
-        approvedApplications: approvedCount,
-        rejectedApplications: rejectedCount,
-        activeProjects: activeProjectsResult.count || 0,
+        totalUsers: Number(stats?.total_users ?? 0),
+        totalProjects: Number(stats?.total_projects ?? 0),
+        totalApplications: Number(stats?.total_applications ?? 0),
+        pendingApplications: Number(stats?.pending_applications ?? 0),
+        approvedApplications: Number(stats?.approved_applications ?? 0),
+        rejectedApplications: Number(stats?.rejected_applications ?? 0),
+        activeProjects: Number(stats?.active_projects ?? 0),
       };
     },
   });

@@ -45,141 +45,28 @@ const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> =
  * Includes applicant name from profiles and project title
  */
 async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
-  // Fetch all submitted applications (exclude drafts - only applicants should see their own drafts)
-  const { data: applicationsData, error: appsError } = await supabase
-    .from("applications")
-    .select("*")
-    .eq("is_draft", false) // Exclude drafts - only show submitted applications
-    .order("created_at", { ascending: false });
+  const { data, error } = await supabase.rpc("get_admin_applications");
 
-  if (appsError) throw appsError;
+  if (error) throw error;
 
-  if (!applicationsData || applicationsData.length === 0) {
+  if (!data || data.length === 0) {
     return [];
   }
 
-  // Get unique user IDs and project IDs
-  const userIds = [...new Set(applicationsData.map((app) => app.user_id))];
-  const projectIds = [...new Set(applicationsData.map((app) => app.project_id))];
-
-  // Fetch profiles for all applicants
-  const { data: profilesData, error: profilesError } = await supabase
-    .from("profiles")
-    .select("user_id, first_name, last_name")
-    .in("user_id", userIds);
-
-  if (profilesError) {
-    console.error("Error fetching profiles:", profilesError);
-  }
-
-  // Fetch projects for all applications
-  const { data: projectsData, error: projectsError } = await supabase
-    .from("projects")
-    .select("id, title")
-    .in("id", projectIds);
-
-  if (projectsError) {
-    console.error("Error fetching projects:", projectsError);
-  }
-
-  // Create lookup maps
-  const profilesMap = new Map(
-    (profilesData || []).map((profile) => [
-      profile.user_id,
-      {
-        firstName: profile.first_name || "",
-        lastName: profile.last_name || "",
-      },
-    ])
-  );
-
-  const projectsMap = new Map(
-    (projectsData || []).map((project) => [project.id, project.title])
-  );
-
-  // Get unique reviewer/admin IDs for reviewed applications
-  const reviewerIds = [
-    ...new Set(
-      applicationsData
-        .map((app) => app.reviewed_by)
-        .filter(Boolean)
-    ),
-  ];
-
-  // Fetch profiles for reviewers/admins who reviewed applications (only if there are any)
-  let reviewerProfilesMap = new Map<string, string>();
-  if (reviewerIds.length > 0) {
-    const { data: reviewerProfilesData } = await supabase
-      .from("profiles")
-      .select("user_id, first_name, last_name")
-      .in("user_id", reviewerIds);
-
-    reviewerProfilesMap = new Map(
-      (reviewerProfilesData || []).map((profile) => [
-        profile.user_id,
-        `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Unknown",
-      ])
-    );
-  }
-
-  // Get all application IDs to fetch reviewer decisions
-  const applicationIds = applicationsData.map((app) => app.id);
-
-  // Fetch all reviewer decisions for these applications
-  const { data: reviewScoresData } = await supabase
-    .from("review_scores")
-    .select(`
-      application_id,
-      reviewer_id,
-      recommendation,
-      overall_score,
-      comments,
-      submitted_at,
-      reviewer:profiles!reviewer_id(user_id, first_name, last_name)
-    `)
-    .in("application_id", applicationIds)
-    .order("submitted_at", { ascending: false });
-
-  // Create a map of application ID to reviewer decisions
-  const reviewerDecisionsMap = new Map<string, ReviewerDecision[]>();
-  if (reviewScoresData) {
-    reviewScoresData.forEach((score: any) => {
-      const appId = score.application_id;
-      if (!reviewerDecisionsMap.has(appId)) {
-        reviewerDecisionsMap.set(appId, []);
-      }
-      const decisions = reviewerDecisionsMap.get(appId)!;
-      decisions.push({
-        reviewerId: score.reviewer_id,
-        reviewerName: score.reviewer
-          ? `${score.reviewer.first_name || ""} ${score.reviewer.last_name || ""}`.trim() || "Unknown Reviewer"
-          : "Unknown Reviewer",
-        recommendation: score.recommendation,
-        overallScore: score.overall_score,
-        comments: score.comments,
-        submittedAt: score.submitted_at,
-      });
-    });
-  }
-
-  // Transform applications with applicant names and project titles
-  return applicationsData.map((app) => {
-    const profile = profilesMap.get(app.user_id);
-    const applicantName = profile
-      ? `${profile.firstName} ${profile.lastName}`.trim() || "Unknown Applicant"
-      : "Unknown Applicant";
-
-    const projectTitle = projectsMap.get(app.project_id) || "Unknown Project";
+  return data.map((app: any) => {
+    const reviewerDecisions = Array.isArray(app.reviewer_decisions)
+      ? app.reviewer_decisions
+      : [];
 
     return {
       id: app.id,
-      applicantName,
-      applicantEmail: app.contact_email || "No email",
-      projectTitle,
+      applicantName: app.applicant_name || "Unknown Applicant",
+      applicantEmail: app.applicant_email || "No email",
+      projectTitle: app.project_title || "Unknown Project",
       projectId: app.project_id,
-      submittedAt: app.created_at,
+      submittedAt: app.submitted_at,
       status: statusMap[app.status || "pending"] || "pending",
-      fundingAmount: app.funding_amount_requested || "N/A",
+      fundingAmount: app.funding_amount || "N/A",
       companyName: app.company_name || "N/A",
       contactEmail: app.contact_email || "N/A",
       contactPhone: app.contact_phone || undefined,
@@ -187,8 +74,15 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
       reviewedBy: app.reviewed_by || undefined,
       reviewedAt: app.reviewed_at || undefined,
       reviewNotes: app.review_notes || undefined,
-      reviewedByName: app.reviewed_by ? reviewerProfilesMap.get(app.reviewed_by) : undefined,
-      reviewerDecisions: reviewerDecisionsMap.get(app.id) || [],
+      reviewedByName: app.reviewed_by_name || undefined,
+      reviewerDecisions: reviewerDecisions.map((decision: any) => ({
+        reviewerId: decision.reviewerId,
+        reviewerName: decision.reviewerName,
+        recommendation: decision.recommendation,
+        overallScore: decision.overallScore,
+        comments: decision.comments,
+        submittedAt: decision.submittedAt,
+      })),
     };
   });
 }
