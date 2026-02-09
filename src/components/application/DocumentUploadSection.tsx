@@ -1,20 +1,12 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { 
   Upload, 
   FileText, 
   X, 
-  Loader2, 
-  Download, 
-  AlertCircle 
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  useDocumentUpload, 
-  type UploadedDocument,
-  getDocumentDownloadUrl 
-} from "@/hooks/useDocumentUpload";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,82 +18,104 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+interface SelectedFile {
+  file: File;
+  id: string; // Unique ID for the file
+}
+
 interface DocumentUploadSectionProps {
   applicationId?: string;
   projectId?: number;
-  onDocumentsChange?: (documents: UploadedDocument[]) => void;
+  onFilesChange?: (files: File[]) => void;
   initialDocumentIds?: string[];
 }
 
 const DocumentUploadSection = ({ 
-  applicationId,
   projectId,
-  onDocumentsChange,
-  initialDocumentIds,
+  onFilesChange,
 }: DocumentUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<UploadedDocument | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [deleteConfirm, setDeleteConfirm] = useState<SelectedFile | null>(null);
+  const fileIdCounter = useRef(0);
 
-  const {
-    uploadDocuments,
-    deleteDocument,
-    isUploading,
-    uploadProgress,
-    documents,
-  } = useDocumentUpload();
-
-  // Notify parent when documents change (using ref to prevent infinite loops)
-  const prevDocumentsRef = useRef<UploadedDocument[]>([]);
-  
+  // Notify parent when files change
   useEffect(() => {
-    // Only notify if documents actually changed (by comparing IDs)
-    const prevIds = prevDocumentsRef.current.map(d => d.id).sort().join(',');
-    const currentIds = documents.map(d => d.id).sort().join(',');
-    
-    if (prevIds !== currentIds) {
-      prevDocumentsRef.current = documents;
-      onDocumentsChange?.(documents);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documents]); // onDocumentsChange intentionally omitted to prevent infinite loop
+    const files = selectedFiles.map(sf => sf.file);
+    onFilesChange?.(files);
+  }, [selectedFiles, onFilesChange]);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const validateFile = (file: File): string | null => {
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_TYPES = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+
+    if (file.size > MAX_FILE_SIZE) {
+      return `File "${file.name}" is too large. Maximum size is 10MB.`;
+    }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT.`;
+    }
+    return null;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      try {
-        await uploadDocuments(Array.from(files), applicationId, projectId);
-        // The useEffect will automatically notify parent when documents state updates
-      } catch (error) {
-        console.error("File upload error:", error);
+      const newFiles: SelectedFile[] = [];
+      const errors: string[] = [];
+
+      Array.from(files).forEach((file) => {
+        const error = validateFile(file);
+        if (error) {
+          errors.push(error);
+        } else {
+          // Check for duplicates
+          const isDuplicate = selectedFiles.some(
+            sf => sf.file.name === file.name && sf.file.size === file.size
+          );
+          if (!isDuplicate) {
+            fileIdCounter.current += 1;
+            newFiles.push({
+              file,
+              id: `file-${fileIdCounter.current}-${Date.now()}`,
+            });
+          }
+        }
+      });
+
+      if (errors.length > 0) {
+        // Show first error
+        alert(errors[0]);
       }
-    }
-    // Reset input so same file can be selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+
+      if (newFiles.length > 0) {
+        setSelectedFiles(prev => [...prev, ...newFiles]);
+      }
+
+      // Reset input so same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (deleteConfirm) {
-      const success = await deleteDocument(deleteConfirm);
-      if (success) {
-        onDocumentsChange?.(documents.filter((d) => d.id !== deleteConfirm.id));
-      }
+      setSelectedFiles(prev => prev.filter(sf => sf.id !== deleteConfirm.id));
       setDeleteConfirm(null);
     }
   };
 
-  const handleDownload = async (doc: UploadedDocument) => {
-    setDownloadingId(doc.id);
-    try {
-      const url = await getDocumentDownloadUrl(doc.filePath);
-      if (url) {
-        window.open(url, "_blank");
-      }
-    } finally {
-      setDownloadingId(null);
-    }
+  const handlePreview = (selectedFile: SelectedFile) => {
+    const url = URL.createObjectURL(selectedFile.file);
+    window.open(url, "_blank");
+    // Clean up the URL after a delay
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -117,13 +131,11 @@ const DocumentUploadSection = ({
 
   return (
     <div className="space-y-4">
-      {/* Upload Area */}
+      {/* File Selection Area */}
       <div
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-          isUploading 
-            ? "border-primary/50 bg-primary/5" 
-            : "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
+          "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
         )}
       >
         <input
@@ -133,76 +145,44 @@ const DocumentUploadSection = ({
           className="hidden"
           onChange={handleFileSelect}
           accept=".pdf,.doc,.docx,.txt"
-          disabled={isUploading}
         />
         
-        {isUploading ? (
-          <div className="space-y-3">
-            <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Uploading files...</p>
+        <div className="space-y-3">
+          <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+          <div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Choose Files
+            </Button>
           </div>
-        ) : (
-          <div className="space-y-3">
-            <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-            <div>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Choose Files
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              PDF, DOC, DOCX, or TXT (max 10MB each)
-            </p>
-          </div>
-        )}
+          <p className="text-xs text-muted-foreground">
+            PDF, DOC, DOCX, or TXT (max 10MB each)
+          </p>
+          <p className="text-xs text-muted-foreground italic">
+            Files will be uploaded when you submit your application
+          </p>
+        </div>
       </div>
 
-      {/* Upload Progress */}
-      {uploadProgress.length > 0 && (
+      {/* Selected Files List */}
+      {selectedFiles.length > 0 && (
         <div className="space-y-2">
-          {uploadProgress.map((progress) => (
-            <div
-              key={progress.fileName}
-              className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
-            >
-              <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{progress.fileName}</p>
-                <Progress 
-                  value={progress.status === "completed" ? 100 : 50} 
-                  className="h-1 mt-1" 
-                />
-              </div>
-              {progress.status === "uploading" && (
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              )}
-              {progress.status === "error" && (
-                <AlertCircle className="h-4 w-4 text-destructive" />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Uploaded Documents List */}
-      {documents.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Uploaded Documents ({documents.length})</p>
+          <p className="text-sm font-medium">Selected Documents ({selectedFiles.length})</p>
           <div className="space-y-2">
-            {documents.map((doc) => (
+            {selectedFiles.map((selectedFile) => (
               <div
-                key={doc.id}
+                key={selectedFile.id}
                 className="flex items-center justify-between p-3 border rounded-lg bg-background"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {getFileIcon(doc.fileType)}
+                  {getFileIcon(selectedFile.file.type)}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{doc.fileName}</p>
+                    <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatFileSize(doc.fileSize)} • {new Date(doc.createdAt).toLocaleDateString()}
+                      {formatFileSize(selectedFile.file.size)} • Ready to upload
                     </p>
                   </div>
                 </div>
@@ -211,20 +191,15 @@ const DocumentUploadSection = ({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDownload(doc)}
-                    disabled={downloadingId === doc.id}
+                    onClick={() => handlePreview(selectedFile)}
                   >
-                    {downloadingId === doc.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4" />
-                    )}
+                    <Download className="h-4 w-4" />
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setDeleteConfirm(doc)}
+                    onClick={() => setDeleteConfirm(selectedFile)}
                     className="text-destructive hover:text-destructive"
                   >
                     <X className="h-4 w-4" />
@@ -240,15 +215,15 @@ const DocumentUploadSection = ({
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogTitle>Remove Document</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteConfirm?.fileName}"? This action cannot be undone.
+              Are you sure you want to remove "{deleteConfirm?.file.name}"? You can add it again before submitting.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

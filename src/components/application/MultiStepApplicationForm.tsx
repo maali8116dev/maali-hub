@@ -40,6 +40,7 @@ import { emailSchema } from "@/lib/emailValidation";
 import { createNotification } from "@/hooks/useNotifications";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { PaymentStep } from "./PaymentStep";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -230,12 +231,14 @@ const MultiStepApplicationForm = () => {
     }
   }, [draftId, setDraftId]);
 
-  // Memoize the documents change callback to prevent infinite loops
-  const handleDocumentsChange = useCallback((docs: any[]) => {
-    // Track document IDs in the form store
-    const newIds = docs.map(d => d.id);
-    updateFormData({ uploadedDocumentIds: newIds });
-  }, [updateFormData]);
+  // Track selected files (not uploaded yet)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { uploadDocuments } = useDocumentUpload();
+
+  // Memoize the files change callback
+  const handleFilesChange = useCallback((files: File[]) => {
+    setSelectedFiles(files);
+  }, []);
 
   // Step 4 has no schema - it's just review
   const step4Schema = z.object({});
@@ -464,24 +467,8 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
-      // Check if payment is required and completed
-      const { data: projectData } = await supabase
-        .from("projects")
-        .select("application_fee")
-        .eq("id", formData.projectId)
-        .single();
-
-      if (projectData?.application_fee && projectData.application_fee > 0) {
-        if (!formData.paymentCompleted) {
-          toast({
-            title: "Payment Required",
-            description: "Please complete the payment step before submitting your application.",
-            variant: "destructive",
-          });
-          goToStep(6); // Go to payment step
-          return;
-        }
-      }
+      // Payment validation skipped - Stripe payments not fully implemented yet
+      // Payment step will show "coming soon" message and allow proceeding
 
       let application;
       
@@ -555,17 +542,34 @@ const MultiStepApplicationForm = () => {
         application = data;
       }
 
-      // Link only the documents uploaded during this session to the application
-      // Also ensure project_id is set (in case it wasn't set during upload)
-      const uploadedDocIds = formData.uploadedDocumentIds || [];
-      if (application && uploadedDocIds.length > 0) {
-        await supabase
-          .from("application_documents")
-          .update({ 
-            application_id: application.id,
-            project_id: application.project_id, // Ensure project_id is set
-          })
-          .in("id", uploadedDocIds);
+      // Upload documents if any were selected
+      if (selectedFiles.length > 0 && application) {
+        try {
+          toast({
+            title: "Uploading Documents",
+            description: `Uploading ${selectedFiles.length} document${selectedFiles.length > 1 ? 's' : ''}...`,
+          });
+          
+          const uploadedDocs = await uploadDocuments(
+            selectedFiles,
+            application.id,
+            application.project_id
+          );
+          
+          if (uploadedDocs.length > 0) {
+            toast({
+              title: "Documents Uploaded",
+              description: `Successfully uploaded ${uploadedDocs.length} document${uploadedDocs.length > 1 ? 's' : ''}.`,
+            });
+          }
+        } catch (error) {
+          console.error("Error uploading documents:", error);
+          toast({
+            title: "Document Upload Warning",
+            description: "Some documents failed to upload. Your application was submitted successfully. You can upload documents later.",
+            variant: "destructive",
+          });
+        }
       }
       
       // Log activity for application submission
@@ -876,8 +880,8 @@ const MultiStepApplicationForm = () => {
                       control={form.control}
                       name="registrationIdNumber"
                       fieldType={FormFieldType.INPUT}
-                      label="Registration / ID Number"
-                      placeholder="Enter registration or ID number"
+                      label="Official ID / Registration Number"
+                      placeholder="Enter government ID or registration number"
                     />
                     <CustomFormField
                       control={form.control}
@@ -1304,7 +1308,7 @@ const MultiStepApplicationForm = () => {
                   
                   <DocumentUploadSection 
                     projectId={formData.projectId}
-                    onDocumentsChange={handleDocumentsChange}
+                    onFilesChange={handleFilesChange}
                   />
                 </div>
               )}

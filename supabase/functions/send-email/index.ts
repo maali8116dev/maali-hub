@@ -224,7 +224,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Your application for <strong>${projectTitle}</strong> has been successfully submitted.</p>
             ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
             <p>Our team will review your application and get back to you within 5-7 business days.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">View Application Status</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application Status</a></div>` : ''}
             <p>If you have any questions, please don't hesitate to contact us.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -241,7 +241,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>We are delighted to inform you that your application for <strong>${projectTitle}</strong> has been <span class="status-badge status-approved">Approved</span>!</p>
             ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
             ${statusMessage ? `<p>${statusMessage}</p>` : '<p>Our team will be in touch shortly with the next steps.</p>'}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">View Details</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Congratulations once again!</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -259,7 +259,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>After careful consideration, we regret to inform you that your application has not been successful at this time.</p>
             ${statusMessage ? `<p><strong>Feedback:</strong> ${statusMessage}</p>` : ''}
             <p>We encourage you to explore other opportunities on our platform and apply again in the future.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">Browse Opportunities</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Browse Opportunities</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
@@ -275,7 +275,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Your application for <strong>${projectTitle}</strong> is now <span class="status-badge status-review">Under Review</span>.</p>
             ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
             <p>Our team is carefully evaluating your submission. You will receive an update once a decision has been made.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">Track Application</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Track Application</a></div>` : ''}
             <p>Thank you for your patience.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -292,7 +292,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>There has been an update to your application${projectTitle ? ` for <strong>${projectTitle}</strong>` : ''}.</p>
             ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
             ${statusMessage ? `<p>${statusMessage}</p>` : ''}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">View Details</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
@@ -313,7 +313,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
               <li>Track your application status in real-time</li>
               <li>Receive notifications on new opportunities</li>
             </ul>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">Explore Opportunities</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Explore Opportunities</a></div>` : ''}
             <p>If you have any questions, our support team is here to help.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -327,7 +327,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           "Verify your email address",
           `
             <p>Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">Verify Email Address</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Verify Email Address</a></div>` : ''}
             <p>This verification link will expire in 24 hours.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -342,7 +342,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
             <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button button-warning">Reset Password</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button button-warning" style="color:#ffffff;text-decoration:none;">Reset Password</a></div>` : ''}
             <p>This link will expire in 1 hour for security reasons.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -357,7 +357,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             ${statusMessage ? `<p>${statusMessage}</p>` : '<p>You have a new notification from Maali.</p>'}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button">View Details</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>
           `
         ),

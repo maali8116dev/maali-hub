@@ -19,7 +19,14 @@ import {
   ExternalLink,
   Download,
   FolderOpen,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertCircle,
+  TrendingUp,
+  Award,
+  Briefcase
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDocumentDownloadUrl, type UploadedDocument } from "@/hooks/useDocumentUpload";
@@ -206,85 +213,130 @@ const ApplicationDetails = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="w-fit sm:w-10 h-10 min-w-[44px]">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold line-clamp-2">
-              {application.project?.title || "Application Details"}
-            </h1>
-            <p className="text-muted-foreground text-sm break-all">
-              ID: {application.id.slice(0, 8)}...
-            </p>
+      {/* Header with gradient background */}
+      <div className="relative overflow-hidden rounded-lg border bg-gradient-to-br from-primary/5 via-primary/3 to-transparent p-6 sm:p-8">
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate(-1)} 
+                className="flex-shrink-0 h-10 w-10"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold line-clamp-2 mb-1">
+                      {application.project?.title || "Application Details"}
+                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs font-medium"
+                      >
+                        {application.id.slice(0, 8).toUpperCase()}...
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(application.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Badge 
+              className={`${getStatusBadge(application.status || "pending")} flex-shrink-0 px-4 py-2 text-sm font-semibold`}
+            >
+              {formatStatus(application.status || "pending")}
+            </Badge>
           </div>
         </div>
-        <Badge className={`${getStatusBadge(application.status || "pending")} flex-shrink-0 w-fit`}>
-          {formatStatus(application.status || "pending")}
-        </Badge>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Application Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+        <Card className="border-2">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-primary" />
+              </div>
               Application Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div className="flex items-start gap-3">
-                <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company Name</p>
-                  <p className="font-medium">{application.company_name || "Not provided"}</p>
+          <CardContent className="space-y-5 pt-6">
+            <div className="grid gap-5">
+              <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Company Name</p>
+                  <p className="font-semibold text-base">{application.company_name || "Not provided"}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Contact Email</p>
-                  <p className="font-medium">{application.contact_email || "Not provided"}</p>
+              <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Contact Email</p>
+                  <p className="font-semibold text-base break-all">{application.contact_email || "Not provided"}</p>
                 </div>
               </div>
 
               {application.contact_phone && (
-                <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Contact Phone</p>
-                    <p className="font-medium">{application.contact_phone}</p>
+                <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Contact Phone</p>
+                    <p className="font-semibold text-base">{application.contact_phone}</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Location</p>
-                  <p className="font-medium">{application.location || "Not provided"}</p>
+              <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-5 w-5 text-orange-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Location</p>
+                  <p className="font-semibold text-base">{application.location || "Not provided"}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <DollarSign className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Funding Requested</p>
-                  <p className="font-medium">{application.funding_amount_requested || "Not specified"}</p>
+              <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Funding Requested</p>
+                  <p className="font-semibold text-base">{application.funding_amount_requested || "Not specified"}</p>
                 </div>
               </div>
 
               {application.team_size && (
-                <div className="flex items-start gap-3">
-                  <Users className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Team Size</p>
-                    <p className="font-medium">{application.team_size} members</p>
+                <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="h-10 w-10 rounded-lg bg-pink-500/10 flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-pink-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Team Size</p>
+                    <p className="font-semibold text-base">{application.team_size} members</p>
                   </div>
                 </div>
               )}
@@ -293,182 +345,239 @@ const ApplicationDetails = () => {
         </Card>
 
         {/* Project Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ExternalLink className="h-5 w-5" />
+        <Card className="border-2">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Award className="h-4 w-4 text-primary" />
+              </div>
               Project Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-6">
             {application.project ? (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Project Title</p>
-                  <p className="font-medium">{application.project.title}</p>
+              <div className="space-y-5">
+                <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Project Title</p>
+                  <p className="font-bold text-lg">{application.project.title}</p>
                 </div>
 
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Category</p>
-                  <Badge variant="outline">{(application.project as any).category}</Badge>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Category</p>
+                    <Badge variant="outline" className="font-semibold">{(application.project as any).category}</Badge>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Funding Amount</p>
+                    <p className="font-semibold text-base">{application.project.funding_amount}</p>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Funding Amount</p>
-                  <p className="font-medium">{application.project.funding_amount}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Location</p>
+                    <p className="font-semibold text-base">{application.project.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Deadline</p>
+                    <p className="font-semibold text-base">
+                      {new Date(application.project.deadline).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Location</p>
-                  <p className="font-medium">{application.project.location}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Deadline</p>
-                  <p className="font-medium">
-                    {new Date(application.project.deadline).toLocaleDateString()}
-                  </p>
-                </div>
-
-                <Separator />
+                <Separator className="my-4" />
 
                 <Link to={`/projects/${application.project_id}`}>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full h-11 font-semibold">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View Project Details
                   </Button>
                 </Link>
               </div>
             ) : (
-              <p className="text-muted-foreground">Project information unavailable</p>
+              <div className="text-center py-8">
+                <AlertCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground font-medium">Project information unavailable</p>
+              </div>
             )}
           </CardContent>
         </Card>
 
         {/* Project Description */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Project Description</CardTitle>
+        <Card className="md:col-span-2 border-2">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-primary" />
+              </div>
+              Project Description
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground whitespace-pre-wrap">
-              {application.project_description || "No description provided"}
-            </p>
+          <CardContent className="pt-6">
+            <div className="prose prose-sm max-w-none">
+              <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                {application.project_description || "No description provided"}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
         {/* Business Plan */}
         {application.business_plan && (
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Business Plan</CardTitle>
+          <Card className="md:col-span-2 border-2">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                </div>
+                Business Plan
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {application.business_plan}
-              </p>
+            <CardContent className="pt-6">
+              <div className="prose prose-sm max-w-none">
+                <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                  {application.business_plan}
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
 
         {/* Documents */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FolderOpen className="h-5 w-5" />
+        <Card className="md:col-span-2 border-2">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <FolderOpen className="h-4 w-4 text-primary" />
+              </div>
               Supporting Documents
+              {documents.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {documents.length}
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {documentsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : documents.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid gap-3">
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between p-4 border-2 rounded-lg hover:border-primary/30 hover:bg-primary/5 transition-all group"
                   >
                     <div className="flex items-center gap-4 min-w-0 flex-1">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-5 w-5 text-primary" />
+                      <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <FileText className="h-6 w-6 text-primary" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">{doc.fileName}</p>
+                        <p className="font-semibold text-base truncate mb-1">{doc.fileName}</p>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Badge variant="outline" className="text-xs">
+                            {getFileTypeLabel(doc.fileType)}
+                          </Badge>
+                          <span>•</span>
                           <span>{formatFileSize(doc.fileSize)}</span>
                           <span>•</span>
                           <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="flex-shrink-0">
-                        {getFileTypeLabel(doc.fileType)}
-                      </Badge>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDownload(doc)}
                       disabled={downloadingId === doc.id}
-                      className="ml-4"
+                      className="ml-4 h-10 w-10"
                     >
                       {downloadingId === doc.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        <Download className="h-4 w-4" />
+                        <Download className="h-5 w-5" />
                       )}
                     </Button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <FolderOpen className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No documents uploaded for this application</p>
+              <div className="text-center py-12">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <FolderOpen className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground font-medium">No documents uploaded for this application</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Timeline */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Timeline
+        <Card className="md:col-span-2 border-2">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
+              Timeline & Status
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-8">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Submitted</p>
-                <p className="font-medium">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-blue-500/5 to-transparent">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Submitted</p>
+                </div>
+                <p className="font-bold text-base">
                   {new Date(application.created_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {new Date(application.created_at).toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
-                <p className="font-medium">
+              <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-purple-500/5 to-transparent">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Last Updated</p>
+                </div>
+                <p className="font-bold text-base">
                   {new Date(application.updated_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {new Date(application.updated_at).toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Payment Status</p>
-                <Badge variant={application.application_fee_paid ? "default" : "secondary"}>
+              <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-emerald-500/5 to-transparent">
+                <div className="flex items-center gap-2 mb-2">
+                  {application.application_fee_paid ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-orange-600" />
+                  )}
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Payment Status</p>
+                </div>
+                <Badge 
+                  variant={application.application_fee_paid ? "default" : "secondary"}
+                  className="font-semibold"
+                >
                   {application.application_fee_paid ? "Paid" : "Unpaid"}
                 </Badge>
               </div>

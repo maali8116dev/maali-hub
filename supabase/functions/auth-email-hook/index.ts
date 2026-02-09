@@ -88,7 +88,7 @@ const emailTemplate = (title: string, content: string) => `
       .button {
         display: inline-block;
         background: ${primaryGradient};
-        color: #ffffff;
+        color: #ffffff !important;
         padding: 12px 24px;
         text-decoration: none;
         border-radius: 4px;
@@ -96,11 +96,15 @@ const emailTemplate = (title: string, content: string) => `
         font-weight: 500;
         margin: 20px 0;
       }
+      .button:visited {
+        color: #ffffff !important;
+      }
       .button:hover {
         opacity: 0.9;
       }
       .button-warning {
         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #ffffff !important;
       }
       .divider {
         border: none;
@@ -170,7 +174,7 @@ const getEmailContent = (
           `
             <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
             <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
-            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button button-warning">Reset Password</a></div>` : ''}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button button-warning" style="color:#ffffff;text-decoration:none;">Reset Password</a></div>` : ''}
             <p>This link will expire in 1 hour for security reasons.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -184,7 +188,7 @@ const getEmailContent = (
           "Verify your email address",
           `
             <p>Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.</p>
-            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Verify Email Address</a></div>` : ''}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Verify Email Address</a></div>` : ''}
             <p>This verification link will expire in 24 hours.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -198,7 +202,7 @@ const getEmailContent = (
           "Sign in to your account",
           `
             <p>Click the button below to sign in to your Maali account. If you didn't request this magic link, you can ignore this message.</p>
-            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Sign In</a></div>` : ''}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Sign In</a></div>` : ''}
             <p>This link will expire in 1 hour.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -215,7 +219,7 @@ const getEmailContent = (
           `
             <p>You requested to change your email address for your Maali account. We want to make sure it's really you.</p>
             <p>Click the button below to confirm this change. If you didn't request this change, you can ignore this message.</p>
-            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">Confirm Email Change</a></div>` : ''}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Confirm Email Change</a></div>` : ''}
             <p>This link will expire in 1 hour.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -229,7 +233,7 @@ const getEmailContent = (
           "Maali Notification",
           `
             <p>You have a new notification from Maali.</p>
-            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button">View Details</a></div>` : ''}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>
           `
         ),

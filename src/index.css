@@ -211,6 +211,13 @@
   .safe-area-inset-top {
     padding-top: env(safe-area-inset-top);
   }
+
+  /* Hide browser's native password reveal button */
+  input[type="password"]::-webkit-credentials-auto-fill-button,
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none !important;
+  }
 }
 
 /* React Phone Number Input Styling */

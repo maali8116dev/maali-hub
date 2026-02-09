@@ -1,25 +1,29 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
-import { StripeElementsProvider } from "@/components/payment/StripeElementsProvider";
-import { PaymentForm } from "@/components/payment/PaymentForm";
-import { useCreatePaymentIntent } from "@/hooks/usePayment";
-import { useToast } from "@/hooks/use-toast";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface PaymentStepProps {
   projectId: number;
-  applicationId?: string;
+  applicationId?: string; // Kept for future use when payment is fully implemented
   onPaymentSuccess: () => void;
 }
 
-export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: PaymentStepProps) {
-  const { toast } = useToast();
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const createPaymentIntent = useCreatePaymentIntent();
+export function PaymentStep({ projectId, onPaymentSuccess }: PaymentStepProps) {
+  const hasCalledSuccess = useRef(false);
+  
+  // Payment is not fully implemented yet - auto-complete to allow form submission
+  useEffect(() => {
+    // Automatically mark payment as completed since Stripe is not fully implemented
+    // Only call once on mount to prevent infinite loops
+    if (!hasCalledSuccess.current) {
+      hasCalledSuccess.current = true;
+      onPaymentSuccess();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run once on mount
 
   // Fetch project to get application fee
   const { data: project, isLoading: isLoadingProject } = useQuery({
@@ -37,50 +41,6 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     enabled: !!projectId,
   });
 
-  // Create payment intent when component mounts
-  useEffect(() => {
-    if (project?.application_fee && project.application_fee > 0 && !clientSecret && !paymentCompleted) {
-      createPaymentIntent.mutate(
-        {
-          amount: project.application_fee,
-          currency: "USD",
-          applicationId: applicationId,
-          projectId: projectId,
-          description: `Application fee for ${project.title}`,
-        },
-        {
-          onSuccess: (data) => {
-            setClientSecret(data.clientSecret);
-          },
-          onError: (error) => {
-            toast({
-              title: "Payment Error",
-              description: error.message || "Failed to initialize payment",
-              variant: "destructive",
-            });
-          },
-        }
-      );
-    }
-  }, [project, clientSecret, paymentCompleted, applicationId, projectId, createPaymentIntent, toast]);
-
-  const handlePaymentSuccess = () => {
-    setPaymentCompleted(true);
-    onPaymentSuccess();
-    toast({
-      title: "Payment Successful",
-      description: "Your application fee has been paid successfully.",
-    });
-  };
-
-  const handlePaymentError = (error: string) => {
-    toast({
-      title: "Payment Failed",
-      description: error,
-      variant: "destructive",
-    });
-  };
-
   if (isLoadingProject) {
     return (
       <Card>
@@ -93,7 +53,7 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     );
   }
 
-  // If no application fee, skip payment
+  // Payment feature is not fully implemented yet - show info message and allow proceeding
   if (!project?.application_fee || project.application_fee === 0) {
     return (
       <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
@@ -105,52 +65,22 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     );
   }
 
-  // If payment already completed
-  if (paymentCompleted) {
-    return (
-      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-800">
-        <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500" />
-        <AlertDescription className="text-green-800 dark:text-green-200">
-          Payment completed successfully. You can proceed to review and submit your application.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  // If creating payment intent
-  if (createPaymentIntent.isPending || !clientSecret) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Payment Required
-          </CardTitle>
-          <CardDescription>
-            Initializing secure payment...
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Show payment form
+  // Payment feature not fully implemented - show coming soon message
   return (
-    <StripeElementsProvider clientSecret={clientSecret}>
-      <PaymentForm
-        clientSecret={clientSecret}
-        amount={project.application_fee}
-        currency="USD"
-        description={`Application fee for ${project.title}`}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-      />
-    </StripeElementsProvider>
+    <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+      <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+      <AlertDescription className="text-amber-800 dark:text-amber-200">
+        <p className="font-semibold mb-1">Payment Processing Coming Soon</p>
+        <p>
+          Payment processing is currently being set up. You can proceed to review and submit your application without payment at this time.
+          {project.application_fee > 0 && (
+            <span className="block mt-1 text-sm">
+              Note: This project has an application fee of ${(project.application_fee / 100).toFixed(2)}, but payment will be handled separately.
+            </span>
+          )}
+        </p>
+      </AlertDescription>
+    </Alert>
   );
 }
 
