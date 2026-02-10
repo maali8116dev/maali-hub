@@ -10,12 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit, CheckCircle2, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDraft } from "@/hooks/useUserDrafts";
+import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SEO } from "@/components/seo/SEO";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { getSiteUrl, getImageUrl, truncateDescription } from "@/utils/seo";
+import { isProjectOpen } from "@/lib/projectAvailability";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -52,37 +54,22 @@ const ProjectDetails = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "bg-success text-success-foreground";
-      case "closing-soon":
-        return "bg-warning text-warning-foreground";
-      case "closed":
-        return "bg-muted text-muted-foreground";
-      case "new":
+      case "New":
         return "bg-blue-500 text-white";
-      case "archived":
+      case "Closing Soon":
+        return "bg-warning text-warning-foreground";
+      case "Open":
+        return "bg-success text-success-foreground";
+      case "Closed":
+        return "bg-muted text-muted-foreground";
+      case "Archived":
         return "bg-slate-500 text-white";
       default:
         return "bg-muted text-muted-foreground";
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "open":
-        return "Open";
-      case "closing-soon":
-        return "Closing Soon";
-      case "closed":
-        return "Closed";
-      case "new":
-        return "New";
-      case "archived":
-        return "Archived";
-      default:
-        return "Unknown";
-    }
-  };
+  const getStatusText = (status: string) => status;
 
   const formatDate = (dateString: string) => {
     try {
@@ -152,7 +139,7 @@ const ProjectDetails = () => {
     );
   }
 
-  const isDisabled = project.status === "closed";
+  const isDisabled = !isProjectOpen(project.status, project.deadline);
 
   const projectUrl = `${getSiteUrl()}/projects/${project.id}`;
   const projectImage = project.image_url ? getImageUrl(project.image_url) : undefined;
@@ -207,8 +194,22 @@ const ProjectDetails = () => {
               <CardHeader>
                 <div className="flex justify-between items-start mb-4">
                   <Badge variant="secondary">{project.category}</Badge>
-                  <Badge className={getStatusColor(project.status)}>
-                    {getStatusText(project.status)}
+                  <Badge
+                    className={getStatusColor(
+                      getProjectDisplayStatus(
+                        project.status,
+                        project.deadline,
+                        project.created_at,
+                      ),
+                    )}
+                  >
+                    {getStatusText(
+                      getProjectDisplayStatus(
+                        project.status,
+                        project.deadline,
+                        project.created_at,
+                      ),
+                    )}
                   </Badge>
                 </div>
                 <CardTitle className="text-2xl">{project.title}</CardTitle>

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDocumentDownloadUrl, type UploadedDocument } from "@/hooks/useDocumentUpload";
+import { isProjectOpen } from "@/lib/projectAvailability";
 
 const ApplicationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -592,9 +593,15 @@ const ApplicationDetails = () => {
           Back to Applications
         </Button>
         {application.status === "draft" && (
-          <Link to={`/projects/${application.project_id}/apply`} className="w-full sm:w-auto">
-            <Button className="min-h-[48px] w-full">Continue Application</Button>
-          </Link>
+          isProjectOpen(application.project?.status, application.project?.deadline) ? (
+            <Link to={`/projects/${application.project_id}/apply`} className="w-full sm:w-auto">
+              <Button className="min-h-[48px] w-full">Continue Application</Button>
+            </Link>
+          ) : (
+            <Button className="min-h-[48px] w-full sm:w-auto" variant="outline" disabled>
+              Application Closed
+            </Button>
+          )
         )}
       </div>
     </div>

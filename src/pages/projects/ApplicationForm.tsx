@@ -1,33 +1,76 @@
 import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import MultiStepApplicationForm from "@/components/application/MultiStepApplicationForm";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { supabase } from "@/integrations/supabase/client";
+import { isProjectOpen } from "@/lib/projectAvailability";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ApplicationFormContent = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { updateFormData } = useApplicationFormStore();
+  const { formData, updateFormData, reset } = useApplicationFormStore();
 
-  // Set projectId from URL if available
+  const projectId = id ? parseInt(id, 10) : undefined;
+  const isNewApplication = searchParams.get("new") === "true";
+
+  const { data: projectState, isLoading: isCheckingProject } = useQuery({
+    queryKey: ["project-application-state", projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, title, status, deadline")
+        .eq("id", projectId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  // Scope the form store by project & ?new=true
   useEffect(() => {
-    if (id) {
-      updateFormData({ projectId: parseInt(id) });
+    if (!projectId) return;
+
+    const currentProjectId = formData.projectId;
+
+    // Explicitly starting a new application for this project
+    if (isNewApplication) {
+      reset();
+      updateFormData({ projectId });
+      return;
     }
-  }, [id, updateFormData]);
+
+    // Switching between different projects
+    if (currentProjectId && currentProjectId !== projectId) {
+      reset();
+      updateFormData({ projectId });
+      return;
+    }
+
+    // First time for this project
+    if (!currentProjectId) {
+      updateFormData({ projectId });
+    }
+  }, [projectId, isNewApplication, formData.projectId, reset, updateFormData]);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate(id ? `/projects/${id}` : "/projects")}
           className="mb-6"
         >
@@ -46,7 +89,28 @@ const ApplicationFormContent = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MultiStepApplicationForm />
+            {isCheckingProject ? (
+              <p className="text-sm text-muted-foreground">Checking project availability...</p>
+            ) : projectState && !isProjectOpen(projectState.status, projectState.deadline) ? (
+              <div className="space-y-4">
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Applications Closed</AlertTitle>
+                  <AlertDescription>
+                    This project is closed. New applications and edits are disabled.
+                  </AlertDescription>
+                </Alert>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(`/projects/${projectState.id}`)}
+                >
+                  Back to Project
+                </Button>
+              </div>
+            ) : (
+              <MultiStepApplicationForm />
+            )}
           </CardContent>
         </Card>
       </main>

@@ -27,6 +27,7 @@ import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
 import { useProjects, useProjectCategories, useProjectLocations } from "@/hooks/useProjects";
 import ProjectCard from "@/components/landing/ProjectCard";
 import { cn } from "@/lib/utils";
+import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,7 +40,8 @@ const Projects = () => {
   // Fetch projects with filters
   const { data, isLoading, error } = useProjects({
     category: selectedCategory,
-    status: selectedStatus,
+    // Status filtering is done client-side using getProjectDisplayStatus
+    status: undefined,
     location: selectedLocation,
     search: searchQuery.trim() || undefined,
     page: currentPage,
@@ -54,6 +56,26 @@ const Projects = () => {
   const totalPages = data?.totalPages || 0;
   const total = data?.total || 0;
 
+  // Apply display-based status filtering (Open / Closed, with New & Closing Soon as visual variants of Open)
+  const filteredProjects = projects.filter((project) => {
+    if (!selectedStatus) return true;
+
+    const displayStatus = getProjectDisplayStatus(
+      project.status,
+      project.deadline,
+      project.createdAt,
+    );
+
+    switch (selectedStatus) {
+      case "open":
+        // Treat all non-closed, non-archived as open
+        return displayStatus === "Open" || displayStatus === "New" || displayStatus === "Closing Soon";
+      case "closed":
+        return displayStatus === "Closed";
+      default:
+        return true;
+    }
+  });
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -176,11 +198,8 @@ const Projects = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="new">New</SelectItem>
                       <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="closing-soon">Closing Soon</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -219,10 +238,10 @@ const Projects = () => {
               </div>
             </CardContent>
           </Card>
-        ) : projects.length > 0 ? (
+        ) : filteredProjects.length > 0 ? (
           <>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
+              {filteredProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   id={project.id}

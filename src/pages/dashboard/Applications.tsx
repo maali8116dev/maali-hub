@@ -135,11 +135,17 @@ const Applications = () => {
         const app = row.original;
         if (app.status === "draft") {
           return (
-            <Link to={`/projects/${app.projectId}/apply`}>
-              <Button variant="outline" size="sm">
-                Continue Application
+            app.isProjectOpen ? (
+              <Link to={`/projects/${app.projectId}/apply`}>
+                <Button variant="outline" size="sm">
+                  Continue Application
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" size="sm" disabled>
+                Application Closed
               </Button>
-            </Link>
+            )
           );
         }
         return (

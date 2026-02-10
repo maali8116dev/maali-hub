@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useAdminProjects, useDeleteProject } from "@/hooks/useAdminProjects";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
+import { getProjectApplicationStateLabel } from "@/lib/projectAvailability";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,6 +96,25 @@ const AdminProjects = () => {
         const dateA = new Date(rowA.original.deadline).getTime();
         const dateB = new Date(rowB.original.deadline).getTime();
         return dateA - dateB;
+      },
+    },
+    {
+      id: 'applicationWindow',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Application Window" />
+      ),
+      cell: ({ row }) => {
+        const label = getProjectApplicationStateLabel(row.original.status, row.original.deadline);
+        return (
+          <Badge variant={label === "Open for applications" ? "default" : "secondary"}>
+            {label}
+          </Badge>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const aLabel = getProjectApplicationStateLabel(rowA.original.status, rowA.original.deadline);
+        const bLabel = getProjectApplicationStateLabel(rowB.original.status, rowB.original.deadline);
+        return aLabel.localeCompare(bLabel);
       },
     },
     {

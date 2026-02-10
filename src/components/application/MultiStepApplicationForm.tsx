@@ -41,6 +41,7 @@ import { createNotification } from "@/hooks/useNotifications";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { PaymentStep } from "./PaymentStep";
 import { useDocumentUpload } from "@/hooks/useDocumentUpload";
+import { isProjectOpen } from "@/lib/projectAvailability";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -394,6 +395,30 @@ const MultiStepApplicationForm = () => {
     }
   };
 
+  const validateProjectIsOpen = async (projectId: number): Promise<boolean> => {
+    const { data: project, error } = await supabase
+      .from("projects")
+      .select("id, title, status, deadline")
+      .eq("id", projectId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!project || !isProjectOpen(project.status, project.deadline)) {
+      toast({
+        title: "Applications Closed",
+        description: "This project is closed. You can no longer submit or edit applications.",
+        variant: "destructive",
+      });
+      navigate(projectId ? `/projects/${projectId}` : "/projects");
+      return false;
+    }
+
+    return true;
+  };
+
 
   const handleSubmit = async () => {
     try {
@@ -426,6 +451,11 @@ const MultiStepApplicationForm = () => {
           description: "Please select a project to apply for.",
           variant: "destructive",
         });
+        return;
+      }
+
+      const isOpen = await validateProjectIsOpen(formData.projectId);
+      if (!isOpen) {
         return;
       }
 
@@ -722,6 +752,20 @@ const MultiStepApplicationForm = () => {
       navigate("/dashboard/applications");
     } catch (error) {
       console.error("Submission error:", error);
+
+      const errorMessage = error instanceof Error ? error.message : "";
+      if (
+        errorMessage.toLowerCase().includes("row-level security") ||
+        errorMessage.toLowerCase().includes("permission denied")
+      ) {
+        toast({
+          title: "Applications Closed",
+          description: "This project is no longer accepting applications or edits.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",

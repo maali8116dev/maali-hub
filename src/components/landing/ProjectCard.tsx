@@ -5,6 +5,7 @@ import { Calendar, MapPin, DollarSign, Users, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { getProjectDisplayStatus, isProjectOpen } from "@/lib/projectAvailability";
 
 // Props for legacy mock data (used in FeaturedProjects)
 interface LegacyProjectCardProps {
@@ -30,6 +31,7 @@ interface DatabaseProjectCardProps {
   deadline: string;
   currentApplicants: number;
   status: string;
+  createdAt?: string;
 }
 
 type ProjectCardProps = LegacyProjectCardProps | DatabaseProjectCardProps;
@@ -54,40 +56,26 @@ const ProjectCard = (props: ProjectCardProps) => {
   const deadline = props.deadline;
   const applicants = isDatabaseProject(props) ? props.currentApplicants : props.applicants;
   const status = props.status;
+  const createdAt = isDatabaseProject(props) ? props.createdAt : undefined;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open':
-        return 'bg-success text-success-foreground';
-      case 'closing-soon':
-        return 'bg-warning text-warning-foreground';
-      case 'closed':
-        return 'bg-muted text-muted-foreground';
-      case 'new':
+      case 'New':
         return 'bg-blue-500 text-white';
-      case 'archived':
+      case 'Closing Soon':
+        return 'bg-warning text-warning-foreground';
+      case 'Open':
+        return 'bg-success text-success-foreground';
+      case 'Closed':
+        return 'bg-muted text-muted-foreground';
+      case 'Archived':
         return 'bg-slate-500 text-white';
       default:
         return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'open':
-        return 'Open';
-      case 'closing-soon':
-        return 'Closing Soon';
-      case 'closed':
-        return 'Closed';
-      case 'new':
-        return 'New';
-      case 'archived':
-        return 'Archived';
-      default:
-        return 'Unknown';
-    }
-  };
+  const getStatusText = (status: string) => status;
 
   // Format deadline if it's a date string
   const formatDeadline = (deadline: string) => {
@@ -102,7 +90,13 @@ const ProjectCard = (props: ProjectCardProps) => {
     return deadline;
   };
 
-  const isDisabled = status === 'closed';
+  const displayStatus = isDatabaseProject(props)
+    ? getProjectDisplayStatus(status, deadline, createdAt)
+    : status;
+
+  const isDisabled = isDatabaseProject(props)
+    ? !isProjectOpen(status, deadline)
+    : status === 'closed';
 
   return (
     <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-border flex flex-col h-full">
@@ -111,8 +105,8 @@ const ProjectCard = (props: ProjectCardProps) => {
           <Badge variant="secondary" className="text-xs">
             {sector}
           </Badge>
-          <Badge className={getStatusColor(status)}>
-            {getStatusText(status)}
+          <Badge className={getStatusColor(displayStatus)}>
+            {getStatusText(displayStatus)}
           </Badge>
         </div>
         <Link to={`/projects/${id}`} className="block">

@@ -15,6 +15,7 @@ import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from 
 import { useCategories } from "@/hooks/useCategories";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { getProjectApplicationStateLabel } from "@/lib/projectAvailability";
 
 // Helper to safely handle optional numeric inputs that may come through as NaN
 const optionalNumber = (schema: z.ZodNumber) =>
@@ -94,6 +95,7 @@ const ProjectForm = () => {
   const status = watch("status");
   const category = watch("category");
   const imageUrl = watch("imageUrl");
+  const deadline = watch("deadline");
   
   // Handle image deletion - also delete from storage if it's a Supabase URL
   const handleImageDelete = async (url: string): Promise<boolean> => {
@@ -438,6 +440,23 @@ const ProjectForm = () => {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Application Window State</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Derived from project status and deadline.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                <p className="text-sm font-medium">
+                  {getProjectApplicationStateLabel(status, deadline)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Applicants can apply and edit drafts only while this is open.
+                </p>
               </CardContent>
             </Card>
 

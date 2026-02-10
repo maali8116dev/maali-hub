@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { isProjectOpen } from "@/lib/projectAvailability";
 
 export type ApplicationWithProject = {
   id: string;
@@ -11,6 +12,9 @@ export type ApplicationWithProject = {
   country: string;
   fundingAmount: string;
   projectId: number;
+  projectStatus?: string;
+  projectDeadline?: string;
+  isProjectOpen?: boolean;
   companyName: string;
   contactEmail: string;
   contactPhone?: string;
@@ -65,6 +69,9 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
           id: app.id,
           projectId: app.project_id,
           projectTitle: project?.title || "Unknown Project",
+          projectStatus: project?.status,
+          projectDeadline: project?.deadline,
+          isProjectOpen: isProjectOpen(project?.status, project?.deadline),
           status: statusMap[app.status || "pending"] || "pending",
           submittedAt: app.created_at,
           sector: project?.categories?.name || "Unknown",
@@ -83,6 +90,9 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
           id: app.id,
           projectId: app.project_id,
           projectTitle: "Unknown Project",
+          projectStatus: undefined,
+          projectDeadline: undefined,
+          isProjectOpen: false,
           status: statusMap[app.status || "pending"] || "pending",
           submittedAt: app.created_at,
           sector: "Unknown",
