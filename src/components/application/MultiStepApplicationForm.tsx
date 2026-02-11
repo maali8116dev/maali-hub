@@ -873,7 +873,7 @@ const MultiStepApplicationForm = () => {
           )}
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
               {/* Step 1: Applicant Information */}
               {currentStep === 1 && (
                 <div className="space-y-4">
@@ -1656,10 +1656,11 @@ const MultiStepApplicationForm = () => {
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type="button"
                     variant="hero"
                     className="flex items-center gap-2"
                     disabled={!isEmailVerified}
+                    onClick={handleSubmit}
                   >
                     {!isEmailVerified ? (
                       <>
