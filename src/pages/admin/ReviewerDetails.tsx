@@ -60,7 +60,8 @@ export const ReviewerDetails = () => {
     queryFn: async () => {
       if (!reviewerId) return [];
       
-      const { data, error } = await supabase
+      // Fetch completed reviews
+      const { data: completedReviews, error: reviewsError } = await supabase
         .from('review_scores')
         .select(`
           id,
@@ -85,11 +86,74 @@ export const ReviewerDetails = () => {
             )
           )
         `)
-        .eq('reviewer_id', reviewerId)
-        .order('submitted_at', { ascending: false });
+        .eq('reviewer_id', reviewerId);
       
-      if (error) throw error;
-      return data || [];
+      if (reviewsError) throw reviewsError;
+      
+      // Fetch pending assignments (where no review_scores exist yet)
+      const { data: assignments, error: assignmentsError } = await supabase
+        .from('application_assignments')
+        .select(`
+          id,
+          application_id,
+          assigned_at,
+          status,
+          application:applications!application_id(
+            id,
+            project_title,
+            status,
+            project_id,
+            project:projects!project_id(
+              id,
+              title,
+              category_id,
+              category:categories!category_id(name)
+            )
+          )
+        `)
+        .eq('reviewer_id', reviewerId)
+        .in('status', ['pending', 'in_progress']);
+      
+      if (assignmentsError) throw assignmentsError;
+      
+      // Filter out assignments that already have reviews
+      const assignmentIdsWithReviews = new Set((completedReviews || []).map((r: any) => r.application_id));
+      const pendingAssignments = (assignments || []).filter((a: any) => !assignmentIdsWithReviews.has(a.application_id));
+      
+      // Combine: completed reviews + pending assignments
+      // Format pending assignments to match review structure
+      const formattedPending = pendingAssignments.map((assignment: any) => ({
+        id: assignment.id,
+        application_id: assignment.application_id,
+        scores: null,
+        overall_score: null,
+        comments: null,
+        recommendation: null,
+        submitted_at: null,
+        created_at: assignment.assigned_at,
+        updated_at: assignment.assigned_at,
+        status: assignment.status, // 'pending' or 'in_progress'
+        application: assignment.application,
+      }));
+      
+      // Format completed reviews
+      const formattedCompleted = (completedReviews || []).map((review: any) => ({
+        ...review,
+        status: 'completed',
+      }));
+      
+      // Combine and sort: pending first, then completed by submitted_at
+      const combined = [...formattedPending, ...formattedCompleted].sort((a, b) => {
+        // Pending/in_progress first
+        if (a.status !== 'completed' && b.status === 'completed') return -1;
+        if (a.status === 'completed' && b.status !== 'completed') return 1;
+        // Then by submitted_at or created_at descending
+        const dateA = a.submitted_at || a.created_at || '';
+        const dateB = b.submitted_at || b.created_at || '';
+        return dateB.localeCompare(dateA);
+      });
+      
+      return combined;
     },
     enabled: !!reviewerId,
   });
@@ -132,17 +196,19 @@ export const ReviewerDetails = () => {
     enabled: !!reviewerId,
   });
 
-  // Calculate stats
+  // Calculate stats (only for completed reviews)
+  const completedReviews = reviews.filter((r: any) => r.status === 'completed');
   const stats = {
-    totalReviews: reviews.length,
+    totalReviews: completedReviews.length,
+    totalAssignments: reviews.length, // Includes pending + completed
     workload,
-    averageScore: reviews.length > 0
-      ? reviews.reduce((sum: number, r: any) => sum + (parseFloat(r.overall_score) || 0), 0) / reviews.length
+    averageScore: completedReviews.length > 0
+      ? completedReviews.reduce((sum: number, r: any) => sum + (parseFloat(r.overall_score) || 0), 0) / completedReviews.length
       : 0,
     recommendations: {
-      approve: reviews.filter((r: any) => r.recommendation === 'approve').length,
-      reject: reviews.filter((r: any) => r.recommendation === 'reject').length,
-      request_info: reviews.filter((r: any) => r.recommendation === 'request_info').length,
+      approve: completedReviews.filter((r: any) => r.recommendation === 'approve').length,
+      reject: completedReviews.filter((r: any) => r.recommendation === 'reject').length,
+      request_info: completedReviews.filter((r: any) => r.recommendation === 'request_info').length,
     },
   };
 
@@ -244,12 +310,41 @@ export const ReviewerDetails = () => {
       },
     },
     {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        const status = row.original.status;
+        if (status === 'completed') {
+          return <Badge variant="default">Completed</Badge>;
+        } else if (status === 'in_progress') {
+          return <Badge variant="secondary">In Progress</Badge>;
+        } else if (status === 'pending') {
+          return <Badge variant="outline">Pending</Badge>;
+        }
+        return <Badge variant="outline">Unknown</Badge>;
+      },
+    },
+    {
       accessorKey: 'recommendation',
       header: ({ column }) => (
         <SortableColumnHeader column={column} title="Recommendation" />
       ),
       cell: ({ row }) => {
+        const status = row.original.status;
         const recommendation = row.original.recommendation;
+        
+        // Show status badge for pending/in_progress assignments
+        if (status !== 'completed') {
+          return (
+            <Badge variant="outline">
+              {status === 'pending' ? 'Pending Review' : 'In Progress'}
+            </Badge>
+          );
+        }
+        
+        // Show recommendation for completed reviews
         return recommendation ? (
           <Badge
             variant={
@@ -270,14 +365,21 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'submitted_at',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Submitted" />
+        <SortableColumnHeader column={column} title="Submitted / Assigned" />
       ),
       cell: ({ row }) => {
+        const status = row.original.status;
         const submittedAt = row.original.submitted_at;
+        const createdAt = row.original.created_at;
+        
+        // For pending/in_progress, show assigned_at (created_at)
+        // For completed, show submitted_at
+        const dateToShow = status === 'completed' ? submittedAt : createdAt;
+        
         return (
           <span className="text-sm text-muted-foreground">
-            {submittedAt
-              ? new Date(submittedAt).toLocaleDateString('en-US', {
+            {dateToShow
+              ? new Date(dateToShow).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
@@ -449,7 +551,7 @@ export const ReviewerDetails = () => {
         <CardHeader>
           <CardTitle>Review History</CardTitle>
           <CardDescription>
-            All reviews submitted by this reviewer
+            All reviews and pending assignments for this reviewer
           </CardDescription>
         </CardHeader>
         <CardContent>

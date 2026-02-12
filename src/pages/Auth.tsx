@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
 import { emailSchema } from "@/lib/emailValidation";
+import { rateLimitedAuth } from "@/lib/rateLimitedAuth";
 
 // Form schemas
 const signInSchema = z.object({
@@ -177,7 +178,46 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/dashboard`;
-      
+
+      // Check rate limit via Edge Function first
+      const rlResult = await rateLimitedAuth("sign_up", {
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+          },
+        },
+      });
+
+      if (rlResult.error) {
+        if (rlResult.error.isRateLimited) {
+          toast({
+            title: "Too many attempts",
+            description: rlResult.error.message,
+            variant: "destructive",
+          });
+        } else if (rlResult.error.message.includes("already registered")) {
+          toast({
+            title: "Account already exists",
+            description: "Please sign in with your existing account or use a different email.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign up failed",
+            description: rlResult.error.message,
+            variant: "destructive",
+          });
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Rate limit passed — now do the real sign-up via the Supabase client
+      // so the local session is established.
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -315,13 +355,19 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await rateLimitedAuth("sign_in", {
         email: data.email,
         password: data.password,
       });
 
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
+      if (result.error) {
+        if (result.error.isRateLimited) {
+          toast({
+            title: "Too many attempts",
+            description: result.error.message,
+            variant: "destructive",
+          });
+        } else if (result.error.message.includes("Invalid login credentials")) {
           toast({
             title: "Invalid credentials",
             description: "Please check your email and password and try again.",
@@ -330,10 +376,25 @@ const Auth = () => {
         } else {
           toast({
             title: "Sign in failed",
-            description: error.message,
+            description: result.error.message,
             variant: "destructive",
           });
         }
+        return;
+      }
+
+      // Rate limit passed — establish local session
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Welcome back!",
@@ -381,39 +442,44 @@ const Auth = () => {
     try {
       // Use a simple redirect URL (must be whitelisted in Supabase dashboard)
       const redirectUrl = `${window.location.origin}/auth`;
-      
-      const { data, error } = await supabase.auth.signInWithOtp({
+
+      // Check rate limit via Edge Function first
+      const rlResult = await rateLimitedAuth("magic_link", {
         email,
-        options: {
-          emailRedirectTo: redirectUrl,
-        },
+        options: { emailRedirectTo: redirectUrl },
       });
 
-      if (error) {
-        console.error("Magic link error:", error);
-        
-        // Provide more specific error messages
-        let errorMessage = error.message;
-        if (error.message.includes("email rate limit")) {
-          errorMessage = "Too many requests. Please wait a few minutes before trying again.";
-        } else if (error.message.includes("redirect")) {
-          errorMessage = "Redirect URL not configured. Please contact support.";
-        } else if (error.message.includes("email")) {
-          errorMessage = "Unable to send email. Please check your email address and try again.";
+      if (rlResult.error) {
+        if (rlResult.error.isRateLimited) {
+          toast({
+            title: "Too many attempts",
+            description: rlResult.error.message,
+            variant: "destructive",
+          });
+        } else {
+          console.error("Magic link error:", rlResult.error);
+
+          let errorMessage = rlResult.error.message;
+          if (rlResult.error.message.includes("redirect")) {
+            errorMessage = "Redirect URL not configured. Please contact support.";
+          } else if (rlResult.error.message.includes("email")) {
+            errorMessage = "Unable to send email. Please check your email address and try again.";
+          }
+
+          toast({
+            title: "Failed to send magic link",
+            description: errorMessage,
+            variant: "destructive",
+          });
         }
-        
-        toast({
-          title: "Failed to send magic link",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      } else {
-        // Success - magic link sent
-        toast({
-          title: "Check your email",
-          description: "We've sent you a magic link. Click the link in the email to sign in.",
-        });
+        return;
       }
+
+      // Success - magic link sent
+      toast({
+        title: "Check your email",
+        description: "We've sent you a magic link. Click the link in the email to sign in.",
+      });
     } catch (error) {
       console.error("Magic link exception:", error);
       toast({
@@ -441,22 +507,34 @@ const Auth = () => {
     setIsLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/auth`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
+
+      // Check rate limit via Edge Function first
+      const rlResult = await rateLimitedAuth("password_reset", {
+        email,
+        options: { redirectTo: redirectUrl },
       });
 
-      if (error) {
-        toast({
-          title: "Password reset failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a password reset link. Please check your inbox.",
-        });
+      if (rlResult.error) {
+        if (rlResult.error.isRateLimited) {
+          toast({
+            title: "Too many attempts",
+            description: rlResult.error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Password reset failed",
+            description: rlResult.error.message,
+            variant: "destructive",
+          });
+        }
+        return;
       }
+
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link. Please check your inbox.",
+      });
     } catch (error) {
       toast({
         title: "Error",

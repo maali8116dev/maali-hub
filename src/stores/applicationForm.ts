@@ -137,7 +137,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 7,
+      totalSteps: 8,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
@@ -274,6 +274,12 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.geographicFocus
             );
           case 4:
+            // Documents are optional
+            return true;
+          case 5:
+            // Review - always valid (read-only step)
+            return true;
+          case 6:
             // Compliance & Declarations - all must be confirmed
             return !!(
               formData.informationAccurateConfirmed &&
@@ -281,12 +287,12 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.reportingRequirementsAgreed &&
               formData.dataProcessingConsented
             );
-          case 5:
-            // Documents are optional
-            return true;
-          case 6:
+          case 7:
             // Payment - validation handled in component based on project fee
             // If no fee, step is always valid
+            return true;
+          case 8:
+            // Submit - always valid (final step)
             return true;
           default:
             return false;

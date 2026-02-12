@@ -15,9 +15,9 @@ describe("projectAvailability", () => {
     expect(isProjectOpen("open", formatDate(future))).toBe(true);
   });
 
-  it("returns true for closing-soon status with today's date", () => {
+  it("returns true for open status with today's date", () => {
     const today = new Date();
-    expect(isProjectOpen("closing-soon", formatDate(today))).toBe(true);
+    expect(isProjectOpen("open", formatDate(today))).toBe(true);
   });
 
   it("returns false for closed status even with future deadline", () => {

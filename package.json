@@ -28,7 +28,8 @@
     "supabase:migration:list": "supabase migration list",
     "supabase:types": "supabase gen types typescript --local > src/integrations/supabase/types.ts",
     "supabase:types:remote": "supabase gen types typescript --linked > src/integrations/supabase/types.ts",
-    "supabase:seed": "node scripts/seed.js"
+    "supabase:seed": "node scripts/seed.js",
+    "seed:users": "node scripts/seed-users-and-reviewers.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

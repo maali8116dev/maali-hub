@@ -42,6 +42,7 @@ import { isValidPhoneNumber } from "libphonenumber-js";
 import { PaymentStep } from "./PaymentStep";
 import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 import { isProjectOpen } from "@/lib/projectAvailability";
+import { isRateLimitError } from "@/lib/rateLimits";
 // Email integration - uncomment to enable application confirmation emails
 // import { sendApplicationSubmittedEmail } from "@/lib/email";
 
@@ -150,10 +151,11 @@ const stepTitles = [
   "Applicant Information",
   "Organizational Background",
   "Project Overview",
-  "Compliance & Declarations",
   "Upload Documents",
+  "Review",
+  "Compliance & Declarations",
   "Payment",
-  "Review & Submit",
+  "Submit",
 ];
 
 const PRIMARY_SECTORS = [
@@ -249,9 +251,11 @@ const MultiStepApplicationForm = () => {
       currentStep === 1 ? step1Schema :
       currentStep === 2 ? (formData.applicantType === "Individual" ? z.object({}) : step2Schema) :
       currentStep === 3 ? step3Schema :
-      currentStep === 4 ? step4Schema :
-      currentStep === 5 ? step5Schema :
-      z.object({})
+      currentStep === 4 ? step5Schema : // Documents
+      currentStep === 5 ? z.object({}) : // Review (no schema)
+      currentStep === 6 ? step4Schema : // Compliance & Declarations
+      currentStep === 7 ? z.object({}) : // Payment (no schema)
+      z.object({}) // Submit (no schema)
     ) as any,
     defaultValues: {
       applicantType: formData.applicantType || undefined,
@@ -754,6 +758,16 @@ const MultiStepApplicationForm = () => {
       console.error("Submission error:", error);
 
       const errorMessage = error instanceof Error ? error.message : "";
+
+      if (isRateLimitError(errorMessage)) {
+        toast({
+          title: "Too Many Submissions",
+          description: "You've submitted too many applications recently. Please wait an hour and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (
         errorMessage.toLowerCase().includes("row-level security") ||
         errorMessage.toLowerCase().includes("permission denied")
@@ -1196,152 +1210,8 @@ const MultiStepApplicationForm = () => {
                 </div>
               )}
 
-              {/* Step 4: Compliance & Declarations */}
+              {/* Step 4: Documents */}
               {currentStep === 4 && (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Compliance & Declarations</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Please read and confirm the following declarations. All fields are required for governance purposes.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="informationAccurate"
-                          checked={!!form.watch("informationAccurateConfirmed")}
-                          onCheckedChange={(checked) => {
-                            form.setValue("informationAccurateConfirmed", !!checked);
-                            updateFormData({ informationAccurateConfirmed: !!checked });
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <label
-                            htmlFor="informationAccurate"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            Confirmation that information is accurate
-                          </label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            I confirm that all information provided in this application is accurate, complete, and truthful to the best of my knowledge.
-                          </p>
-                        </div>
-                      </div>
-                      {form.formState.errors.informationAccurateConfirmed && (
-                        <p className="text-sm text-destructive ml-7">
-                          {String(form.formState.errors.informationAccurateConfirmed.message)}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="conflictOfInterest"
-                          checked={!!form.watch("conflictOfInterestDeclared")}
-                          onCheckedChange={(checked) => {
-                            form.setValue("conflictOfInterestDeclared", !!checked);
-                            updateFormData({ conflictOfInterestDeclared: !!checked });
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <label
-                            htmlFor="conflictOfInterest"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            Conflict of interest declaration
-                          </label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            I declare that I have disclosed any potential conflicts of interest that may affect this application or its evaluation.
-                          </p>
-                        </div>
-                      </div>
-                        {form.formState.errors.conflictOfInterestDeclared && (
-                        <p className="text-sm text-destructive ml-7">
-                          {String(form.formState.errors.conflictOfInterestDeclared.message)}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="reportingRequirements"
-                          checked={!!form.watch("reportingRequirementsAgreed")}
-                          onCheckedChange={(checked) => {
-                            form.setValue("reportingRequirementsAgreed", !!checked);
-                            updateFormData({ reportingRequirementsAgreed: !!checked });
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <label
-                            htmlFor="reportingRequirements"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            Agreement to reporting requirements
-                          </label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            I agree to provide regular progress reports, financial statements, and other documentation as required by the funding organization.
-                          </p>
-                        </div>
-                      </div>
-                        {form.formState.errors.reportingRequirementsAgreed && (
-                        <p className="text-sm text-destructive ml-7">
-                          {String(form.formState.errors.reportingRequirementsAgreed.message)}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="dataProcessing"
-                          checked={!!form.watch("dataProcessingConsented")}
-                          onCheckedChange={(checked) => {
-                            form.setValue("dataProcessingConsented", !!checked);
-                            updateFormData({ dataProcessingConsented: !!checked });
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <label
-                            htmlFor="dataProcessing"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            Consent to data processing
-                          </label>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            I consent to the processing of my personal data and application information for the purposes of evaluation, administration, and communication related to this application.
-                          </p>
-                        </div>
-                      </div>
-                        {form.formState.errors.dataProcessingConsented && (
-                        <p className="text-sm text-destructive ml-7">
-                          {String(form.formState.errors.dataProcessingConsented.message)}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="bg-muted/50 border rounded-lg p-4">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Declaration Date:</strong> {new Date().toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 5: Documents */}
-              {currentStep === 5 && (
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
@@ -1357,24 +1227,13 @@ const MultiStepApplicationForm = () => {
                 </div>
               )}
 
-              {/* Step 6: Payment */}
-              {currentStep === 6 && formData.projectId && (
-                <PaymentStep
-                  projectId={formData.projectId}
-                  applicationId={draftId}
-                  onPaymentSuccess={() => {
-                    updateFormData({ paymentCompleted: true });
-                  }}
-                />
-              )}
-
-              {/* Step 7: Review & Submit */}
-              {currentStep === 7 && (
+              {/* Step 5: Review */}
+              {currentStep === 5 && (
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Review Your Application</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Please review all the information below before submitting your application.
+                      Please review all the information below before proceeding.
                     </p>
                   </div>
                   
@@ -1558,7 +1417,7 @@ const MultiStepApplicationForm = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => goToStep(5)}
+                        onClick={() => goToStep(4)}
                         className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                       >
                         <Edit2 className="h-3 w-3" />
@@ -1573,51 +1432,172 @@ const MultiStepApplicationForm = () => {
                       <p className="text-sm text-muted-foreground">No documents uploaded</p>
                     )}
                   </div>
+                </div>
+              )}
 
-                  {/* Compliance & Declarations Review */}
-                  <div className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                        Compliance & Declarations
-                      </h4>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => goToStep(4)}
-                        className="flex items-center gap-1 text-muted-foreground hover:text-primary"
-                      >
-                        <Edit2 className="h-3 w-3" />
-                        Edit
-                      </Button>
+              {/* Step 6: Compliance & Declarations */}
+              {currentStep === 6 && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Compliance & Declarations</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Please read and confirm the following declarations. All fields are required for governance purposes.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="informationAccurate"
+                          checked={!!form.watch("informationAccurateConfirmed")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("informationAccurateConfirmed", !!checked);
+                            updateFormData({ informationAccurateConfirmed: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="informationAccurate"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Confirmation that information is accurate
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I confirm that all information provided in this application is accurate, complete, and truthful to the best of my knowledge.
+                          </p>
+                        </div>
+                      </div>
+                      {form.formState.errors.informationAccurateConfirmed && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.informationAccurateConfirmed.message)}
+                        </p>
+                      )}
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-muted-foreground">Information accuracy confirmed</span>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="conflictOfInterest"
+                          checked={!!form.watch("conflictOfInterestDeclared")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("conflictOfInterestDeclared", !!checked);
+                            updateFormData({ conflictOfInterestDeclared: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="conflictOfInterest"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Conflict of interest declaration
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I declare that I have disclosed any potential conflicts of interest that may affect this application or its evaluation.
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-muted-foreground">Conflict of interest declared</span>
+                        {form.formState.errors.conflictOfInterestDeclared && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.conflictOfInterestDeclared.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="reportingRequirements"
+                          checked={!!form.watch("reportingRequirementsAgreed")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("reportingRequirementsAgreed", !!checked);
+                            updateFormData({ reportingRequirementsAgreed: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="reportingRequirements"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Agreement to reporting requirements
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I agree to provide regular progress reports, financial statements, and other documentation as required by the funding organization.
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-muted-foreground">Reporting requirements agreed</span>
+                        {form.formState.errors.reportingRequirementsAgreed && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.reportingRequirementsAgreed.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="dataProcessing"
+                          checked={!!form.watch("dataProcessingConsented")}
+                          onCheckedChange={(checked) => {
+                            form.setValue("dataProcessingConsented", !!checked);
+                            updateFormData({ dataProcessingConsented: !!checked });
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label
+                            htmlFor="dataProcessing"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            Consent to data processing
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            I consent to the processing of my personal data and application information for the purposes of evaluation, administration, and communication related to this application.
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-muted-foreground">Data processing consented</span>
-                      </div>
-                      <div className="mt-3 pt-3 border-t">
-                        <span className="text-muted-foreground">Declaration Date:</span>
-                        <p className="font-medium">{new Date().toLocaleDateString('en-US', { 
+                        {form.formState.errors.dataProcessingConsented && (
+                        <p className="text-sm text-destructive ml-7">
+                          {String(form.formState.errors.dataProcessingConsented.message)}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="bg-muted/50 border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Declaration Date:</strong> {new Date().toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'long', 
                           day: 'numeric' 
-                        })}</p>
-                      </div>
+                        })}
+                      </p>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 7: Payment */}
+              {currentStep === 7 && formData.projectId && (
+                <PaymentStep
+                  projectId={formData.projectId}
+                  applicationId={draftId}
+                  onPaymentSuccess={() => {
+                    updateFormData({ paymentCompleted: true });
+                  }}
+                />
+              )}
+
+              {/* Step 8: Submit */}
+              {currentStep === 8 && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Submit Your Application</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Review the confirmation notice below and click the submit button to finalize your application.
+                    </p>
                   </div>
 
                   {/* Confirmation Notice */}
@@ -1643,18 +1623,7 @@ const MultiStepApplicationForm = () => {
                   Previous
                 </Button>
 
-                {currentStep < totalSteps ? (
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!canProceedToNextStep()}
-                    className="flex items-center gap-2"
-                    variant="hero"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                ) : (
+                {currentStep === totalSteps ? (
                   <Button
                     type="button"
                     variant="hero"
@@ -1670,6 +1639,17 @@ const MultiStepApplicationForm = () => {
                     ) : (
                       "Submit Application"
                     )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceedToNextStep()}
+                    className="flex items-center gap-2"
+                    variant="hero"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 )}
               </div>
