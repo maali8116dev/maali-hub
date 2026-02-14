@@ -82,15 +82,16 @@ async function fetchConfigFromDB(): Promise<void> {
   }
 }
 
-/** Kick off the fetch once (non-blocking). */
+/**
+ * Kick off the fetch once (non-blocking).
+ * Call this explicitly during app initialization (e.g. in App.tsx or main.tsx),
+ * NOT as a module-level side effect (which would fire during tests/imports).
+ */
 export function initRateLimitConfig(): void {
   if (!fetchPromise) {
     fetchPromise = fetchConfigFromDB();
   }
 }
-
-// Auto-init on module load
-initRateLimitConfig();
 
 // ─── Public API ─────────────────────────────────────────────────────
 

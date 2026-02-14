@@ -1121,6 +1121,74 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_application_details: {
+        Args: { p_application_id: string }
+        Returns: {
+          application: Json
+          documents: Json
+          project: Json
+        }[]
+      }
+      get_user_applications_with_projects: {
+        Args: { p_user_id: string }
+        Returns: {
+          application: Json
+          project: Json
+        }[]
+      }
+      get_projects_with_filters: {
+        Args: {
+          p_category?: string | null
+          p_status?: string | null
+          p_location?: string | null
+          p_search?: string | null
+          p_page?: number
+          p_page_size?: number
+        }
+        Returns: {
+          projects: Json
+          total_count: number
+          page: number
+          total_pages: number
+        }[]
+      }
+      get_user_dashboard_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          total_applications: number
+          pending_applications: number
+          approved_applications: number
+          rejected_applications: number
+          draft_applications: number
+          total_projects_applied: number
+        }[]
+      }
+      get_all_reviewers_with_details: {
+        Args: never
+        Returns: {
+          reviewer_id: string
+          first_name: string
+          last_name: string
+          email: string
+          workload: number
+          categories: Json
+          total_reviews: number
+          average_score: number
+        }[]
+      }
+      get_reviewer_full_details: {
+        Args: { p_reviewer_id: string }
+        Returns: {
+          reviewer: Json
+          workload: number
+          total_reviews: number
+          total_assignments: number
+          average_score: number
+          completed_reviews: Json
+          pending_assignments: Json
+          categories: Json
+        }[]
+      }
       get_reviewer_workload: {
         Args: { p_reviewer_id: string }
         Returns: number

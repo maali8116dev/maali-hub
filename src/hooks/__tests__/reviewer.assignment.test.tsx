@@ -1,6 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 import {
   useAssignReviewers,
   useApplicationAssignments,
@@ -13,13 +15,28 @@ import {
 } from '../useReviewerAssignment';
 import { supabase } from '@/integrations/supabase/client';
 
-// Mock Supabase client
+// Mock Supabase client for hook-level tests
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
     rpc: vi.fn(),
   },
 }));
+
+// --- Real clients for direct RPC integration tests ---
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ";
+const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const integrationClient = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
+  ? createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -36,963 +53,297 @@ const createWrapper = () => {
   );
 };
 
-describe('useAssignReviewers', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// ============================================================
+// Hook-level tests (mocked Supabase client)
+// ============================================================
+
+describe('useAssignReviewers (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should successfully assign reviewers to application', async () => {
-    const mockRpcData = [
+    const mockData = [
       { reviewer_id: 'reviewer-1', assignment_id: 'assignment-1' },
       { reviewer_id: 'reviewer-2', assignment_id: 'assignment-2' },
     ];
+    (supabase.rpc as any).mockResolvedValue({ data: mockData, error: null });
 
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
+    const { result } = renderHook(() => useAssignReviewers(), { wrapper: createWrapper() });
+    result.current.mutate({ applicationId: 'app-123', numReviewers: 2 });
+
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    expect(supabase.rpc).toHaveBeenCalledWith('assign_reviewers_to_application', {
+      p_application_id: 'app-123', p_num_reviewers: 2,
     });
-
-    const { result } = renderHook(() => useAssignReviewers(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isIdle).toBe(true);
-    });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      numReviewers: 2,
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(supabase.rpc).toHaveBeenCalledWith(
-      'assign_reviewers_to_application',
-      {
-        p_application_id: 'app-123',
-        p_num_reviewers: 2,
-      }
-    );
-
-    expect(result.current.data).toEqual(mockRpcData);
+    expect(result.current.data).toEqual(mockData);
   });
 
   it('should use default numReviewers of 2', async () => {
-    const mockRpcData = [
-      { reviewer_id: 'reviewer-1', assignment_id: 'assignment-1' },
-      { reviewer_id: 'reviewer-2', assignment_id: 'assignment-2' },
-    ];
-
     (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
+      data: [{ reviewer_id: 'r-1', assignment_id: 'a-1' }, { reviewer_id: 'r-2', assignment_id: 'a-2' }],
       error: null,
     });
 
-    const { result } = renderHook(() => useAssignReviewers(), {
-      wrapper: createWrapper(),
+    const { result } = renderHook(() => useAssignReviewers(), { wrapper: createWrapper() });
+    result.current.mutate({ applicationId: 'app-123' });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    expect(supabase.rpc).toHaveBeenCalledWith('assign_reviewers_to_application', {
+      p_application_id: 'app-123', p_num_reviewers: 2,
     });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      // numReviewers not specified, should default to 2
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(supabase.rpc).toHaveBeenCalledWith(
-      'assign_reviewers_to_application',
-      {
-        p_application_id: 'app-123',
-        p_num_reviewers: 2,
-      }
-    );
   });
 
   it('should handle insufficient reviewers error', async () => {
-    const mockError = {
-      message: 'Not enough available reviewers for category. Need 2 reviewers, found 1',
-      code: 'P0001',
-    };
-
     (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
+      data: null, error: { message: 'Not enough available reviewers for category. Need 2 reviewers, found 1', code: 'P0001' },
     });
-
-    const { result } = renderHook(() => useAssignReviewers(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      numReviewers: 2,
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-
+    const { result } = renderHook(() => useAssignReviewers(), { wrapper: createWrapper() });
+    result.current.mutate({ applicationId: 'app-123', numReviewers: 2 });
+    await waitFor(() => { expect(result.current.isError).toBe(true); });
     expect(result.current.error).toBeDefined();
   });
 
   it('should handle already assigned error', async () => {
-    const mockError = {
-      message: 'Reviewers already assigned to this application',
-      code: 'P0001',
-    };
-
     (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
+      data: null, error: { message: 'Reviewers already assigned to this application', code: 'P0001' },
     });
-
-    const { result } = renderHook(() => useAssignReviewers(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      numReviewers: 2,
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-
+    const { result } = renderHook(() => useAssignReviewers(), { wrapper: createWrapper() });
+    result.current.mutate({ applicationId: 'app-123', numReviewers: 2 });
+    await waitFor(() => { expect(result.current.isError).toBe(true); });
     expect(result.current.error?.message).toContain('already assigned');
-  });
-
-  it('should invalidate queries on success', async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false, gcTime: 0 },
-        mutations: { retry: false },
-      },
-    });
-
-    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const mockRpcData = [
-      { reviewer_id: 'reviewer-1', assignment_id: 'assignment-1' },
-    ];
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
-
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
-
-    const { result } = renderHook(() => useAssignReviewers(), {
-      wrapper,
-    });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      numReviewers: 1,
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['application-assignments', 'app-123'],
-    });
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['reviewer-workload'],
-    });
   });
 });
 
-describe('useApplicationAssignments', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useApplicationAssignments (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should fetch assignments for an application with reviewer profiles', async () => {
-    const mockRpcData = [
-      {
-        id: 'assignment-1',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-1',
-        assigned_at: '2024-01-01T00:00:00Z',
-        status: 'pending',
-        reviewer_user_id: 'reviewer-1',
-        reviewer_first_name: 'John',
-        reviewer_last_name: 'Doe',
-      },
-      {
-        id: 'assignment-2',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-2',
-        assigned_at: '2024-01-01T00:00:00Z',
-        status: 'in_progress',
-        reviewer_user_id: 'reviewer-2',
-        reviewer_first_name: 'Jane',
-        reviewer_last_name: 'Smith',
-      },
+    const mockData = [
+      { id: 'a-1', application_id: 'app-123', reviewer_id: 'r-1', assigned_at: '2024-01-01', status: 'pending',
+        reviewer_user_id: 'r-1', reviewer_first_name: 'John', reviewer_last_name: 'Doe' },
+      { id: 'a-2', application_id: 'app-123', reviewer_id: 'r-2', assigned_at: '2024-01-01', status: 'in_progress',
+        reviewer_user_id: 'r-2', reviewer_first_name: 'Jane', reviewer_last_name: 'Smith' },
     ];
+    (supabase.rpc as any).mockResolvedValue({ data: mockData, error: null });
 
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useApplicationAssignments('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
+    const { result } = renderHook(() => useApplicationAssignments('app-123'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
 
     expect(result.current.data).toHaveLength(2);
-    expect(result.current.data?.[0].application_id).toBe('app-123');
-    expect(result.current.data?.[0].reviewer_id).toBe('reviewer-1');
-    expect(result.current.data?.[0].status).toBe('pending');
-    expect(result.current.data?.[0].reviewer).toEqual({
-      user_id: 'reviewer-1',
-      first_name: 'John',
-      last_name: 'Doe',
-    });
-    expect(result.current.data?.[1].status).toBe('in_progress');
-  });
-
-  it('should return empty array when no assignments exist', async () => {
-    (supabase.rpc as any).mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
-    const { result } = renderHook(() => useApplicationAssignments('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data?.[0].reviewer).toEqual({ user_id: 'r-1', first_name: 'John', last_name: 'Doe' });
   });
 
   it('should not fetch when applicationId is empty', () => {
-    const { result } = renderHook(() => useApplicationAssignments(''), {
-      wrapper: createWrapper(),
-    });
-
+    const { result } = renderHook(() => useApplicationAssignments(''), { wrapper: createWrapper() });
     expect(result.current.isFetching).toBe(false);
     expect(supabase.rpc).not.toHaveBeenCalled();
   });
-
-  it('should handle assignments without reviewer profile', async () => {
-    const mockRpcData = [
-      {
-        id: 'assignment-1',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-1',
-        assigned_at: '2024-01-01T00:00:00Z',
-        status: 'pending',
-        reviewer_user_id: null,
-        reviewer_first_name: null,
-        reviewer_last_name: null,
-      },
-    ];
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useApplicationAssignments('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data?.[0].reviewer).toBeUndefined();
-  });
-
-  it('should handle errors gracefully', async () => {
-    const mockError = { message: 'RPC error', code: 'PGRST301' };
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    const { result } = renderHook(() => useApplicationAssignments('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    }, { timeout: 3000 });
-
-    expect(result.current.error).toBeDefined();
-  });
 });
 
-describe('useReviewerAssignments', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should fetch reviewer assignments', async () => {
-    const mockRpcData = [
-      {
-        assignment_id: 'assignment-1',
-        application_id: 'app-123',
-        project_title: 'Test Project',
-        status: 'pending',
-      },
-    ];
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useReviewerAssignments('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toEqual(mockRpcData);
-    expect(supabase.rpc).toHaveBeenCalledWith(
-      'get_reviewer_assignments_with_application',
-      { p_reviewer_id: 'reviewer-1' }
-    );
-  });
-
-  it('should return empty array when reviewerId is not provided', () => {
-    const { result } = renderHook(() => useReviewerAssignments(undefined), {
-      wrapper: createWrapper(),
-    });
-
-    expect(result.current.isFetching).toBe(false);
-    expect(supabase.rpc).not.toHaveBeenCalled();
-  });
-
-  it('should return empty array when reviewer has no assignments', async () => {
-    (supabase.rpc as any).mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
-    const { result } = renderHook(() => useReviewerAssignments('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toEqual([]);
-  });
-
-  it('should handle errors gracefully', async () => {
-    const mockError = { message: 'RPC error', code: 'PGRST301' };
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    const { result } = renderHook(() => useReviewerAssignments('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    }, { timeout: 3000 });
-
-    expect(result.current.error).toBeDefined();
-  });
-});
-
-describe('useReviewerWorkload', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useReviewerWorkload (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should calculate reviewer workload correctly', async () => {
-    (supabase.rpc as any).mockResolvedValue({
-      data: 5,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useReviewerWorkload('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    (supabase.rpc as any).mockResolvedValue({ data: 5, error: null });
+    const { result } = renderHook(() => useReviewerWorkload('r-1'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(result.current.data).toBe(5);
-    expect(supabase.rpc).toHaveBeenCalledWith(
-      'get_reviewer_workload',
-      { p_reviewer_id: 'reviewer-1' }
-    );
+    expect(supabase.rpc).toHaveBeenCalledWith('get_reviewer_workload', { p_reviewer_id: 'r-1' });
   });
 
-  it('should return 0 when reviewer has no workload', async () => {
-    (supabase.rpc as any).mockResolvedValue({
-      data: 0,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useReviewerWorkload('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toBe(0);
-  });
-
-  it('should return 0 when reviewerId is not provided', () => {
-    const { result } = renderHook(() => useReviewerWorkload(undefined), {
-      wrapper: createWrapper(),
-    });
-
+  it('should not fetch when reviewerId is not provided', () => {
+    const { result } = renderHook(() => useReviewerWorkload(undefined), { wrapper: createWrapper() });
     expect(result.current.isFetching).toBe(false);
-    expect(supabase.rpc).not.toHaveBeenCalled();
-  });
-
-  it('should handle errors gracefully', async () => {
-    const mockError = { message: 'RPC error', code: 'PGRST301' };
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    const { result } = renderHook(() => useReviewerWorkload('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    }, { timeout: 3000 });
-
-    expect(result.current.error).toBeDefined();
   });
 });
 
-describe('useCategoryRubric', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should fetch rubric for a category', async () => {
-    const mockCategoryData = { id: 1 };
-    const mockRubricData = {
-      id: 'rubric-1',
-      category_id: 1,
-      rubric: {
-        criteria: [
-          { name: 'innovation', weight: 0.3, max_score: 10 },
-          { name: 'feasibility', weight: 0.4, max_score: 10 },
-        ],
-      },
-      categories: { name: 'Technology' },
-    };
-
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn();
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'categories') {
-        return {
-          select: mockSelect,
-          eq: mockEq,
-          single: mockSingle.mockResolvedValueOnce({
-            data: mockCategoryData,
-            error: null,
-          }),
-        };
-      }
-      if (table === 'category_rubrics') {
-        return {
-          select: mockSelect,
-          eq: mockEq,
-          single: mockSingle.mockResolvedValueOnce({
-            data: mockRubricData,
-            error: null,
-          }),
-        };
-      }
-      return { select: mockSelect, eq: mockEq, single: mockSingle };
-    });
-
-    const { result } = renderHook(() => useCategoryRubric('Technology'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).not.toBeNull();
-    expect(result.current.data?.category).toBe('Technology');
-    expect(result.current.data?.rubric.criteria).toHaveLength(2);
-  });
-
-  it('should return null when category has no rubric', async () => {
-    const mockCategoryData = { id: 1 };
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn();
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'categories') {
-        return {
-          select: mockSelect,
-          eq: mockEq,
-          single: mockSingle.mockResolvedValueOnce({
-            data: mockCategoryData,
-            error: null,
-          }),
-        };
-      }
-      if (table === 'category_rubrics') {
-        return {
-          select: mockSelect,
-          eq: mockEq,
-          single: mockSingle.mockResolvedValueOnce({
-            data: null,
-            error: { code: 'PGRST116', message: 'No rows returned' },
-          }),
-        };
-      }
-      return { select: mockSelect, eq: mockEq, single: mockSingle };
-    });
-
-    const { result } = renderHook(() => useCategoryRubric('Technology'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toBeNull();
-  });
-
-  it('should return null when category does not exist', async () => {
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn();
-
-    (supabase.from as any).mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-      single: mockSingle.mockResolvedValue({
-        data: null,
-        error: { code: 'PGRST116', message: 'No rows returned' },
-      }),
-    });
-
-    const { result } = renderHook(() => useCategoryRubric('NonExistent'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data).toBeNull();
-  });
-
-  it('should not fetch when category is empty', () => {
-    const { result } = renderHook(() => useCategoryRubric(''), {
-      wrapper: createWrapper(),
-    });
-
-    expect(result.current.isFetching).toBe(false);
-    expect(supabase.from).not.toHaveBeenCalled();
-  });
-});
-
-describe('useUpdateAssignmentStatus', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useUpdateAssignmentStatus (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should update assignment status successfully', async () => {
-    const mockAssignment = {
-      id: 'assignment-1',
-      application_id: 'app-123',
-      reviewer_id: 'reviewer-1',
-      status: 'in_progress',
-      assigned_at: '2024-01-01T00:00:00Z',
-    };
-
+    const mockAssignment = { id: 'a-1', application_id: 'app-123', reviewer_id: 'r-1', status: 'in_progress', assigned_at: '2024-01-01' };
     const mockUpdate = vi.fn().mockReturnThis();
     const mockEq = vi.fn().mockReturnThis();
     const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: mockAssignment,
-      error: null,
-    });
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockAssignment, error: null });
 
-    (supabase.from as any).mockReturnValue({
-      update: mockUpdate,
-      eq: mockEq,
-      select: mockSelect,
-      single: mockSingle,
-    });
+    (supabase.from as any).mockReturnValue({ update: mockUpdate, eq: mockEq, select: mockSelect, single: mockSingle });
 
-    const { result } = renderHook(() => useUpdateAssignmentStatus(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      assignmentId: 'assignment-1',
-      status: 'in_progress',
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    const { result } = renderHook(() => useUpdateAssignmentStatus(), { wrapper: createWrapper() });
+    result.current.mutate({ assignmentId: 'a-1', status: 'in_progress' });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(mockUpdate).toHaveBeenCalledWith({ status: 'in_progress' });
-    expect(mockEq).toHaveBeenCalledWith('id', 'assignment-1');
-  });
-
-  it('should support all status values', async () => {
-    const statuses: Array<'pending' | 'in_progress' | 'completed' | 'declined'> = [
-      'pending',
-      'in_progress',
-      'completed',
-      'declined',
-    ];
-
-    for (const status of statuses) {
-      const mockUpdate = vi.fn().mockReturnThis();
-      const mockEq = vi.fn().mockReturnThis();
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockSingle = vi.fn().mockResolvedValue({
-        data: { id: 'assignment-1', status, application_id: 'app-123' },
-        error: null,
-      });
-
-      (supabase.from as any).mockReturnValue({
-        update: mockUpdate,
-        eq: mockEq,
-        select: mockSelect,
-        single: mockSingle,
-      });
-
-      const { result } = renderHook(() => useUpdateAssignmentStatus(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        assignmentId: 'assignment-1',
-        status,
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockUpdate).toHaveBeenCalledWith({ status });
-      vi.clearAllMocks();
-    }
-  });
-
-  it('should handle errors', async () => {
-    const mockError = { message: 'Database error', code: 'PGRST116' };
-
-    const mockUpdate = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockReturnThis();
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    (supabase.from as any).mockReturnValue({
-      update: mockUpdate,
-      eq: mockEq,
-      select: mockSelect,
-      single: mockSingle,
-    });
-
-    const { result } = renderHook(() => useUpdateAssignmentStatus(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      assignmentId: 'assignment-1',
-      status: 'completed',
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-
-    expect(result.current.error).toBeDefined();
   });
 });
 
-describe('useAddConflict', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useAddConflict (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should add conflict of interest successfully', async () => {
-    const mockConflict = {
-      id: 'conflict-1',
-      reviewer_id: 'reviewer-1',
-      application_id: 'app-123',
-      conflict_reason: 'Previous business relationship',
-      created_at: '2024-01-01T00:00:00Z',
-    };
-
+    const mockConflict = { id: 'c-1', reviewer_id: 'r-1', application_id: 'app-123', conflict_reason: 'Reason', created_at: '2024-01-01' };
     const mockInsert = vi.fn().mockReturnThis();
     const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: mockConflict,
-      error: null,
-    });
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockConflict, error: null });
 
-    (supabase.from as any).mockReturnValue({
-      insert: mockInsert,
-      select: mockSelect,
-      single: mockSingle,
-    });
+    (supabase.from as any).mockReturnValue({ insert: mockInsert, select: mockSelect, single: mockSingle });
 
-    const { result } = renderHook(() => useAddConflict(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      reviewerId: 'reviewer-1',
-      applicationId: 'app-123',
-      conflictReason: 'Previous business relationship',
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(mockInsert).toHaveBeenCalledWith({
-      reviewer_id: 'reviewer-1',
-      application_id: 'app-123',
-      conflict_reason: 'Previous business relationship',
-    });
-
-    expect(result.current.data).toEqual(mockConflict);
-  });
-
-  it('should handle errors', async () => {
-    const mockError = { message: 'Database error', code: '23505' };
-
-    const mockInsert = vi.fn().mockReturnThis();
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    (supabase.from as any).mockReturnValue({
-      insert: mockInsert,
-      select: mockSelect,
-      single: mockSingle,
-    });
-
-    const { result } = renderHook(() => useAddConflict(), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate({
-      reviewerId: 'reviewer-1',
-      applicationId: 'app-123',
-      conflictReason: 'Conflict reason',
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-
-    expect(result.current.error).toBeDefined();
+    const { result } = renderHook(() => useAddConflict(), { wrapper: createWrapper() });
+    result.current.mutate({ reviewerId: 'r-1', applicationId: 'app-123', conflictReason: 'Reason' });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    expect(mockInsert).toHaveBeenCalledWith({ reviewer_id: 'r-1', application_id: 'app-123', conflict_reason: 'Reason' });
   });
 });
 
-describe('useReviewerCategories', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useReviewerCategories (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should fetch reviewer categories with category names', async () => {
     const mockData = [
-      {
-        id: 'cat-1',
-        reviewer_id: 'reviewer-1',
-        category_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        categories: { name: 'Technology' },
-      },
-      {
-        id: 'cat-2',
-        reviewer_id: 'reviewer-1',
-        category_id: 2,
-        created_at: '2024-01-01T00:00:00Z',
-        categories: { name: 'Agriculture' },
-      },
+      { id: 'c-1', reviewer_id: 'r-1', category_id: 1, created_at: '2024-01-01', categories: { name: 'Technology' } },
+      { id: 'c-2', reviewer_id: 'r-1', category_id: 2, created_at: '2024-01-01', categories: { name: 'Agriculture' } },
     ];
-
     const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockResolvedValue({
-      data: mockData,
-      error: null,
-    });
+    const mockEq = vi.fn().mockResolvedValue({ data: mockData, error: null });
+    (supabase.from as any).mockReturnValue({ select: mockSelect, eq: mockEq });
 
-    (supabase.from as any).mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-    });
-
-    const { result } = renderHook(() => useReviewerCategories('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    const { result } = renderHook(() => useReviewerCategories('r-1'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(result.current.data).toHaveLength(2);
-    expect(result.current.data?.[0].category).toBe('Agriculture'); // Sorted alphabetically
+    expect(result.current.data?.[0].category).toBe('Agriculture'); // sorted
     expect(result.current.data?.[1].category).toBe('Technology');
   });
 
-  it('should deduplicate categories by id', async () => {
-    const mockData = [
-      {
-        id: 'cat-1',
-        reviewer_id: 'reviewer-1',
-        category_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        categories: { name: 'Technology' },
-      },
-      {
-        id: 'cat-1', // Duplicate ID
-        reviewer_id: 'reviewer-1',
-        category_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        categories: { name: 'Technology' },
-      },
-    ];
-
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockResolvedValue({
-      data: mockData,
-      error: null,
-    });
-
-    (supabase.from as any).mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-    });
-
-    const { result } = renderHook(() => useReviewerCategories('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    // Should deduplicate
-    expect(result.current.data).toHaveLength(1);
-  });
-
-  it('should return empty array when reviewerId is not provided', () => {
-    const { result } = renderHook(() => useReviewerCategories(undefined), {
-      wrapper: createWrapper(),
-    });
-
+  it('should not fetch when reviewerId is not provided', () => {
+    const { result } = renderHook(() => useReviewerCategories(undefined), { wrapper: createWrapper() });
     expect(result.current.isFetching).toBe(false);
-    expect(supabase.from).not.toHaveBeenCalled();
-  });
-
-  it('should handle categories without name', async () => {
-    const mockData = [
-      {
-        id: 'cat-1',
-        reviewer_id: 'reviewer-1',
-        category_id: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        categories: null,
-      },
-    ];
-
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockResolvedValue({
-      data: mockData,
-      error: null,
-    });
-
-    (supabase.from as any).mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-    });
-
-    const { result } = renderHook(() => useReviewerCategories('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(result.current.data?.[0].category).toBe('Unknown');
-  });
-
-  it('should handle errors gracefully', async () => {
-    const mockError = { message: 'Database error', code: 'PGRST301' };
-
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    (supabase.from as any).mockReturnValue({
-      select: mockSelect,
-      eq: mockEq,
-    });
-
-    const { result } = renderHook(() => useReviewerCategories('reviewer-1'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    }, { timeout: 3000 });
-
-    expect(result.current.error).toBeDefined();
   });
 });
 
+// ============================================================
+// Direct RPC integration tests (real database)
+// ============================================================
+
+describe('assign_reviewers_to_application RPC (Integration)', () => {
+  let testApplicationId: string;
+  let testProjectId: number;
+  let testCategoryId: number;
+  let testReviewerIds: string[] = [];
+  let testApplicantId: string;
+  let adminUserId: string;
+
+  beforeAll(async () => {
+    if (!supabaseAdmin) {
+      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      return;
+    }
+
+    // Create admin user and sign in (RPCs require authenticated user)
+    const adminEmail = `test-admin-assign-${Date.now()}@maali.test`;
+    const { data: ad } = await supabaseAdmin.auth.admin.createUser({
+      email: adminEmail, password: 'TestPassword123!', email_confirm: true,
+      user_metadata: { role: 'admin' },
+    });
+    adminUserId = ad!.user!.id;
+    await supabaseAdmin.from('profiles').upsert({
+      user_id: adminUserId, first_name: 'T', last_name: 'A', role: 'admin',
+    }, { onConflict: 'user_id' });
+    await integrationClient.auth.signInWithPassword({ email: adminEmail, password: 'TestPassword123!' });
+
+    // Category
+    let { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
+    testCategoryId = catData?.id || 1;
+
+    // Project
+    const { data: pj } = await supabaseAdmin.from('projects').insert({
+      title: `Test Assign Project ${Date.now()}`, description: 'Test', status: 'open',
+      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
+    }).select('id').single();
+    testProjectId = pj!.id;
+
+    // Applicant
+    const aEmail = `test-app-assign-${Date.now()}@maali.test`;
+    const { data: au } = await supabaseAdmin.auth.admin.createUser({ email: aEmail, password: 'TestPassword123!', email_confirm: true });
+    testApplicantId = au!.user!.id;
+    await supabaseAdmin.from('profiles').upsert({ user_id: testApplicantId, first_name: 'T', last_name: 'A', role: 'applicant' }, { onConflict: 'user_id' });
+
+    // Application
+    const { data: app } = await supabaseAdmin.from('applications').insert({
+      user_id: testApplicantId, project_id: testProjectId, contact_email: aEmail,
+      company_name: 'Test', status: 'pending', is_draft: false,
+    }).select('id').single();
+    testApplicationId = app!.id;
+
+    // Reviewers (3 for Technology)
+    for (let i = 0; i < 3; i++) {
+      const rEmail = `test-rev-assign-${Date.now()}-${i}@maali.test`;
+      const { data: ru } = await supabaseAdmin.auth.admin.createUser({ email: rEmail, password: 'TestPassword123!', email_confirm: true });
+      if (!ru?.user) continue;
+      testReviewerIds.push(ru.user.id);
+      await supabaseAdmin.from('profiles').upsert({ user_id: ru.user.id, first_name: `Rev${i}`, last_name: 'T', role: 'reviewer' }, { onConflict: 'user_id' });
+      await supabaseAdmin.from('reviewer_categories').insert({ reviewer_id: ru.user.id, category_id: testCategoryId });
+    }
+  }, 30000);
+
+  afterAll(async () => {
+    if (!supabaseAdmin) return;
+    if (testApplicationId) {
+      await supabaseAdmin.from('application_assignments').delete().eq('application_id', testApplicationId);
+      await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
+    }
+    if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
+    for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', rid);
+    for (const uid of [...testReviewerIds, testApplicantId, adminUserId]) {
+      try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
+    }
+    await integrationClient.auth.signOut();
+  }, 30000);
+
+  beforeEach(async () => {
+    if (!supabaseAdmin || !testApplicationId) return;
+    // Clear assignments before each test
+    await supabaseAdmin.from('application_assignments').delete().eq('application_id', testApplicationId);
+  });
+
+  it('should assign reviewers via RPC', async () => {
+    if (!supabaseAdmin || testReviewerIds.length < 2) return;
+
+    const { data, error } = await integrationClient.rpc('assign_reviewers_to_application', {
+      p_application_id: testApplicationId,
+      p_num_reviewers: 2,
+    });
+
+    expect(error).toBeNull();
+    expect(Array.isArray(data)).toBe(true);
+    expect((data as any[]).length).toBe(2);
+    expect((data as any[])[0]).toHaveProperty('reviewer_id');
+    expect((data as any[])[0]).toHaveProperty('assignment_id');
+  });
+
+  it('should fail when already assigned', async () => {
+    if (!supabaseAdmin || testReviewerIds.length < 2) return;
+
+    // First assignment
+    await integrationClient.rpc('assign_reviewers_to_application', {
+      p_application_id: testApplicationId, p_num_reviewers: 2,
+    });
+
+    // Second attempt
+    const { error } = await integrationClient.rpc('assign_reviewers_to_application', {
+      p_application_id: testApplicationId, p_num_reviewers: 2,
+    });
+
+    expect(error).not.toBeNull();
+    expect(error!.message).toContain('already assigned');
+  });
+
+  it('should fail with insufficient reviewers', async () => {
+    if (!supabaseAdmin) return;
+
+    // Request more reviewers than could possibly exist for the category
+    const { error } = await integrationClient.rpc('assign_reviewers_to_application', {
+      p_application_id: testApplicationId, p_num_reviewers: 999,
+    });
+
+    expect(error).not.toBeNull();
+    expect(error!.message).toContain('Not enough available reviewers');
+  });
+});

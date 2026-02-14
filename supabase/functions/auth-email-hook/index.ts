@@ -1,14 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 // Supabase Auth Hook payload structure
 interface AuthHookPayload {
@@ -244,7 +239,7 @@ const getEmailContent = (
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -263,7 +258,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Invalid payload structure:", payload);
       return new Response(
         JSON.stringify({ error: "Invalid payload structure" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -274,10 +269,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Processing email for action type: "${email_action_type}"`);
 
     // Get recipient name from user_metadata or fetch from profiles table
+    // M1 FIX: HTML-escape the name to prevent injection in email templates
     let recipientName = "User";
     
     if (user_metadata?.first_name || user_metadata?.last_name) {
-      recipientName = `${user_metadata.first_name || ""} ${user_metadata.last_name || ""}`.trim() || "User";
+      const rawName = `${user_metadata.first_name || ""} ${user_metadata.last_name || ""}`.trim() || "User";
+      recipientName = escapeHtml(rawName);
     } else {
       // Try to fetch from profiles table
       try {
@@ -293,7 +290,8 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
         
         if (profile?.first_name || profile?.last_name) {
-          recipientName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "User";
+          const rawName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "User";
+          recipientName = escapeHtml(rawName);
         }
       } catch (err) {
         console.log("Could not fetch profile, using default name:", err);
@@ -362,7 +360,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Return 200 to indicate success to Supabase
     return new Response(
       JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     console.error("Error in auth-email-hook:", error);
@@ -372,7 +370,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Log the error for monitoring instead
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   }
 };

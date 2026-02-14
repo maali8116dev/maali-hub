@@ -33,83 +33,45 @@ const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> =
 };
 
 /**
- * Direct Supabase query for applications
+ * RPC-based query for applications with projects (optimized: 1 query instead of N+1)
  */
 async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithProject[]> {
-  const { data: applicationsData, error: appsError } = await supabase
-    .from("applications")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+  const { data: rpcData, error: rpcError } = await supabase.rpc(
+    "get_user_applications_with_projects",
+    { p_user_id: userId }
+  );
 
-  if (appsError) throw appsError;
+  if (rpcError) throw rpcError;
 
-  if (!applicationsData || applicationsData.length === 0) {
+  if (!rpcData || rpcData.length === 0) {
     return [];
   }
 
-  // Fetch project details for each application
-  const applicationsWithProjects = await Promise.all(
-    applicationsData.map(async (app) => {
-      try {
-        const { data: project, error: projectError } = await supabase
-          .from("projects")
-          .select(`
-            *,
-            categories:category_id(name)
-          `)
-          .eq("id", app.project_id)
-          .single();
+  // Map RPC response to ApplicationWithProject type
+  return rpcData.map((row: { application: any; project: any }) => {
+    const app = row.application;
+    const project = row.project;
 
-        if (projectError) {
-          console.error(`Error fetching project ${app.project_id}:`, projectError);
-        }
-
-        return {
-          id: app.id,
-          projectId: app.project_id,
-          projectTitle: project?.title || "Unknown Project",
-          projectStatus: project?.status,
-          projectDeadline: project?.deadline,
-          isProjectOpen: isProjectOpen(project?.status, project?.deadline),
-          status: statusMap[app.status || "pending"] || "pending",
-          submittedAt: app.created_at,
-          sector: project?.categories?.name || "Unknown",
-          country: app.location || "Unknown",
-          fundingAmount: app.funding_amount_requested,
-          companyName: app.company_name,
-          contactEmail: app.contact_email,
-          contactPhone: app.contact_phone || undefined,
-          projectDescription: app.project_description,
-          createdAt: app.created_at,
-          updatedAt: app.updated_at,
-        } as ApplicationWithProject;
-      } catch (error) {
-        console.error(`Error processing application ${app.id}:`, error);
-        return {
-          id: app.id,
-          projectId: app.project_id,
-          projectTitle: "Unknown Project",
-          projectStatus: undefined,
-          projectDeadline: undefined,
-          isProjectOpen: false,
-          status: statusMap[app.status || "pending"] || "pending",
-          submittedAt: app.created_at,
-          sector: "Unknown",
-          country: app.location || "Unknown",
-          fundingAmount: app.funding_amount_requested,
-          companyName: app.company_name,
-          contactEmail: app.contact_email,
-          contactPhone: app.contact_phone || undefined,
-          projectDescription: app.project_description,
-          createdAt: app.created_at,
-          updatedAt: app.updated_at,
-        } as ApplicationWithProject;
-      }
-    })
-  );
-
-  return applicationsWithProjects;
+    return {
+      id: app.id,
+      projectId: app.project_id,
+      projectTitle: project?.title || "Unknown Project",
+      projectStatus: project?.status,
+      projectDeadline: project?.deadline,
+      isProjectOpen: isProjectOpen(project?.status, project?.deadline),
+      status: statusMap[app.status || "pending"] || "pending",
+      submittedAt: app.created_at,
+      sector: project?.category || "Unknown",
+      country: app.location || "Unknown",
+      fundingAmount: app.funding_amount_requested,
+      companyName: app.company_name,
+      contactEmail: app.contact_email,
+      contactPhone: app.contact_phone || undefined,
+      projectDescription: app.project_description,
+      createdAt: app.created_at,
+      updatedAt: app.updated_at,
+    } as ApplicationWithProject;
+  });
 }
 
 /**

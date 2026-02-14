@@ -1,14 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 type EmailType = 
   | "application_submitted"
@@ -33,7 +28,12 @@ interface SendEmailRequest {
 }
 
 const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
-  const { recipientName = "Applicant", projectTitle, applicationId, statusMessage, actionUrl } = data;
+  // M1 FIX: HTML-escape all user-provided data to prevent HTML injection in emails
+  const recipientName = escapeHtml(data.recipientName || "Applicant");
+  const projectTitle = data.projectTitle ? escapeHtml(data.projectTitle) : undefined;
+  const applicationId = data.applicationId ? escapeHtml(data.applicationId) : undefined;
+  const statusMessage = data.statusMessage ? escapeHtml(data.statusMessage) : undefined;
+  const actionUrl = data.actionUrl; // URLs are used in href attributes, not HTML-escaped
   
   // Base URL for logo and links
   const baseUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
@@ -368,7 +368,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -377,7 +377,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -393,7 +393,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (claimsError || !claimsData?.claims) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -402,7 +402,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!to || !type) {
       return new Response(
         JSON.stringify({ error: "Missing required fields: to, type" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -422,14 +422,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(
       JSON.stringify({ success: true, data: emailResponse }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     console.error("Error in send-email function:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   }
 };

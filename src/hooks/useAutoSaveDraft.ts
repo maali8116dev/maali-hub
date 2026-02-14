@@ -47,6 +47,22 @@ export const useAutoSaveDraft = ({
         return;
       }
 
+      // Guard: Check if draftId exists but the record was already converted to submission
+      // This prevents auto-save from trying to save after submission
+      if (state.draftId) {
+        const { data: existingApp } = await supabase
+          .from("applications")
+          .select("is_draft")
+          .eq("id", state.draftId)
+          .maybeSingle();
+        
+        if (existingApp && !existingApp.is_draft) {
+          // Draft was converted to submission, clear state and don't try to save
+          setState(prev => ({ ...prev, draftId: null, isSaving: false }));
+          return;
+        }
+      }
+
       const draftData = {
         user_id: user.id,
         project_id: formData.projectId,

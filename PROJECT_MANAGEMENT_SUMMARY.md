@@ -4,7 +4,7 @@
 
 **Platform**: Funding opportunity hub for African entrepreneurs  
 **Tech Stack**: React + TypeScript, Supabase (Direct Queries + Edge Functions), Vitest (Testing)  
-**Status**: In Development (Frontend UI complete, Backend API ready, Integration ~75% complete)
+**Status**: In Development (Frontend UI ~92% complete, Backend API ~96% complete, Integration ~88% complete)
 
 ---
 
@@ -53,7 +53,8 @@
 - [x] Application schema (Supabase)
 - [x] Application queries (direct Supabase queries)
 - [x] Application query functions (PostgreSQL RPC)
-- [x] Application detail page (UI only)
+- [x] Application detail page (UI with tabbed layout and expandable text)
+- [x] Admin application details page (with AdminLayout)
 - [x] CustomFormField component (reusable form fields with validation)
 - [x] Full application form (Multi-step form with validation)
 - [x] Activity logging on application submission
@@ -162,6 +163,8 @@
 - [x] Theme toggle component (light/dark mode)
 - [x] Date picker component (with date range support)
 - [x] Pagination component
+- [x] ExpandableText component (for long text sections)
+- [x] Tabbed layout for application details page
 
 #### 🔄 **NEEDS WORK**
 
@@ -180,20 +183,23 @@
 - [x] Direct Supabase queries (frontend queries Supabase directly via client)
 - [x] Row Level Security (RLS) policies for data access control
 - [x] Supabase Edge Functions for specific operations:
-  - [x] `send-email` - Email notifications via Resend
-  - [x] `create-payment-intent` - Stripe payment intents
-  - [x] `stripe-webhook` - Stripe webhook handling
-  - [x] `auth-email-hook` - Auth email hooks
+  - [x] `send-email` - Email notifications via Resend (XSS protection implemented)
+  - [x] `create-payment-intent` - Stripe payment intents (server-side validation)
+  - [x] `stripe-webhook` - Stripe webhook handling (error handling improved)
+  - [x] `auth-email-hook` - Auth email hooks (XSS protection implemented)
+  - [x] `rate-limited-auth` - Rate limiting for auth operations
+  - [x] `manage-user` - Admin user management
 - [x] Database schema (Supabase SQL migrations)
 - [x] PostgreSQL RPC functions (profiles, applications, documents, projects, reviewers)
 - [x] Request validation (Zod - implemented in frontend forms)
 - [x] Error handling in frontend hooks
+- [x] CORS configuration (dynamic origin-based CORS headers)
+- [x] Security hardening (XSS prevention, payment validation, metadata protection)
 
 #### ⚠️ **NEEDS CONFIGURATION**
 
 - [x] Environment variables setup (Supabase keys configured)
-- [ ] Rate limiting (can be implemented via Supabase Edge Functions if needed)
-- [ ] Additional Edge Functions for complex business logic (if needed)
+- [x] Rate limiting (implemented via Supabase Edge Functions and database triggers)
 
 ### 🗄️ **DATABASE**
 
@@ -218,6 +224,13 @@
 
 - [ ] Application status enums
 - [ ] Migration testing
+
+#### ✅ **RECENT FIXES**
+
+- [x] Fixed ambiguous column references in `assign_reviewers_to_application` RPC function
+- [x] Fixed trigger accessing `OLD` on `INSERT` operations (invoice number generation)
+- [x] Fixed broken avatar upload storage policy (bucket name correction)
+- [x] Added MIME type restrictions to storage policies (application-docs, project-images, user-avatars)
 
 ### 🌐 **INTEGRATIONS**
 
@@ -351,6 +364,7 @@
    - [x] Admin dashboard UI (implemented)
    - [x] Activity logs page (fully functional with filtering, pagination, export)
    - [x] Admin applications page (view all applications with filtering)
+   - [x] Admin application details page (with proper AdminLayout routing)
    - [x] Admin projects management (CRUD operations via Supabase)
    - [x] Reviewer assignment management (via Supabase RPC functions)
    - [x] User management (direct Supabase queries with admin RPC functions)
@@ -444,6 +458,29 @@
 7. No CI/CD pipeline
 8. Documentation improved (BACKEND_SETUP.md, DATABASE_SETUP.md)
 
+## 🔒 **SECURITY IMPROVEMENTS**
+
+1. **XSS Prevention**
+
+   - [x] DOMPurify integration for blog content rendering
+   - [x] HTML escaping in email templates (send-email, auth-email-hook)
+   - [x] Shared CORS utility with escapeHtml function
+
+2. **Payment Security**
+
+   - [x] Server-side payment amount validation (compares with project application_fee)
+   - [x] Payment metadata override protection (server-controlled fields)
+
+3. **CORS Configuration**
+
+   - [x] Dynamic origin-based CORS headers (replaces hardcoded "\*")
+   - [x] Shared CORS utility module for all Edge Functions
+
+4. **Database Security**
+   - [x] Storage policies with MIME type restrictions
+   - [x] Fixed broken storage policies (bucket name corrections)
+   - [x] RPC function security (ambiguous column fixes)
+
 **Recent Improvements:**
 
 - ✅ Auth forms now use react-hook-form with Zod validation
@@ -482,12 +519,18 @@
 - ✅ Draft auto-save functionality
 - ✅ Document upload and linking to applications
 - ✅ Reviewer notification system on assignment
+- ✅ Comprehensive code review and security fixes (XSS, payment validation, CORS)
+- ✅ Application details page UI improvements (tabbed layout, expandable text)
+- ✅ Admin application details route fixed (proper AdminLayout)
+- ✅ Database migration fixes (triggers, storage policies, RPC functions)
+- ✅ Rate limiting system improvements (explicit initialization)
+- ✅ Shared CORS utility module for Edge Functions
 
 ---
 
 ## 📝 **NOTES FOR PROJECT MANAGER**
 
-- **Current State**: Frontend UI is ~90% complete, Backend (Supabase) is ~95% complete, Integration ~85% complete
+- **Current State**: Frontend UI is ~92% complete, Backend (Supabase) is ~96% complete, Integration ~88% complete
 - **Recent Progress**:
   - ✅ Application submission flow fully functional with automatic reviewer assignment
   - ✅ File upload system integrated with Supabase Storage
@@ -495,12 +538,18 @@
   - ✅ Reviewer assignment system with workload balancing
   - ✅ Draft auto-save functionality
   - ✅ Email notifications for application submission and reviewer assignment
-- **Biggest Gap**: Admin user management UI, payment integration, advanced application status tracking
-- **Next Critical Step**: Complete payment integration (Stripe), then focus on admin user management
-- **Estimated Completion**: 4-6 weeks for full MVP (reduced from 5-8 weeks)
+  - ✅ Comprehensive code review and security fixes (XSS, payment validation, CORS)
+  - ✅ Application details page UI improvements (tabbed layout, expandable text)
+  - ✅ Admin application details route fixed (proper sidebar routing)
+  - ✅ Database migration fixes (triggers, storage policies, RPC functions)
+  - ✅ Security hardening across Edge Functions and frontend components
+- **Biggest Gap**: Payment integration (Stripe), advanced application status tracking, admin user management UI enhancements
+- **Next Critical Step**: Complete payment integration (Stripe), then focus on admin user management enhancements
+- **Estimated Completion**: 3-5 weeks for full MVP (reduced from 4-6 weeks)
 - **Team Needs**: Frontend developer (Supabase handles backend), Full-stack developer preferred
-- **Architecture**: Direct Supabase queries (primary) + Edge Functions (for email, payments) - no separate backend server
+- **Architecture**: Direct Supabase queries (primary) + Edge Functions (for email, payments, rate limiting) - no separate backend server
 - **Testing**: Comprehensive test coverage for critical paths (application form, file uploads, authentication)
+- **Security**: XSS prevention, payment validation, CORS configuration, and database security improvements implemented
 
 ---
 

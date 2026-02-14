@@ -10,6 +10,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
+import { initRateLimitConfig } from "@/lib/rateLimits";
 import Index from "./pages/Index";
 import Projects from "./pages/projects/Projects";
 import About from "./pages/About";
@@ -79,6 +80,9 @@ const TrackingInitializer = () => {
   const { canTrack } = useCookieConsent();
 
   useEffect(() => {
+    // Load rate limit config from DB on app startup (no consent needed)
+    initRateLimitConfig();
+
     if (canTrack) {
       initSentry();
       initPostHog();
@@ -282,6 +286,16 @@ const App = () => (
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <AdminApplications />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/applications/:id"
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <ApplicationDetails />
                 </AdminLayout>
               </ProtectedRoute>
             }

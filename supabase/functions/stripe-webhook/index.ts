@@ -73,10 +73,9 @@ serve(async (req: Request) => {
     );
   } catch (error) {
     console.error("Error processing webhook:", error);
+    // L3 FIX: Don't leak internal error details to the caller
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Webhook processing failed",
-      }),
+      JSON.stringify({ error: "Webhook processing failed" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

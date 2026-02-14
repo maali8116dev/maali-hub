@@ -141,8 +141,8 @@ const AdminApplications = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`/reviewer/applications/${app.id}`, { state: { fromAdmin: true } })}
-            title="View application details (review actions require reviewer account)"
+            onClick={() => navigate(`/admin/applications/${app.id}`)}
+            title="View application details"
           >
             <Eye className="h-4 w-4 mr-2" />
             View Details

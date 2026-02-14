@@ -1,17 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2024-11-20.acacia",
   httpClient: Stripe.createFetchHttpClient(),
 });
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 interface CreatePaymentIntentRequest {
   amount: number; // Amount in dollars
@@ -25,7 +20,7 @@ interface CreatePaymentIntentRequest {
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -34,7 +29,7 @@ serve(async (req: Request) => {
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -53,7 +48,7 @@ serve(async (req: Request) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
@@ -62,17 +57,50 @@ serve(async (req: Request) => {
     if (!body.amount || body.amount <= 0) {
       return new Response(
         JSON.stringify({ error: "Invalid amount" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
+    }
+
+    // C3 FIX: Server-side validation of payment amount against project fee
+    if (body.projectId) {
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+
+      const { data: project, error: projectError } = await supabaseAdmin
+        .from("projects")
+        .select("application_fee")
+        .eq("id", body.projectId)
+        .single();
+
+      if (projectError || !project) {
+        return new Response(
+          JSON.stringify({ error: "Project not found" }),
+          { status: 404, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
+
+      const expectedFee = parseFloat(project.application_fee);
+      if (!isNaN(expectedFee) && expectedFee > 0 && Math.abs(body.amount - expectedFee) > 0.01) {
+        return new Response(
+          JSON.stringify({
+            error: "Amount does not match project application fee",
+            expected: expectedFee,
+          }),
+          { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const currency = body.currency || "usd";
     const amountInCents = Math.round(body.amount * 100); // Convert to cents
 
-    // Create payment intent metadata
+    // H2 FIX: Create payment intent metadata - spread client metadata first,
+    // then set server-controlled fields so they cannot be overridden
     const metadata: Record<string, string> = {
-      userId: user.id,
       ...body.metadata,
+      userId: user.id, // Server-controlled, cannot be overridden by client
     };
 
     if (body.applicationId) {
@@ -130,7 +158,7 @@ serve(async (req: Request) => {
         paymentIntentId: paymentIntent.id,
         transactionId: transaction?.id,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     console.error("Error creating payment intent:", error);
@@ -138,7 +166,7 @@ serve(async (req: Request) => {
       JSON.stringify({
         error: error instanceof Error ? error.message : "Failed to create payment intent",
       }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   }
 });

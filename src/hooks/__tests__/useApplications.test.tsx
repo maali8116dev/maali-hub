@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 vi.mock('../useAuth');
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: vi.fn(),
+    rpc: vi.fn(),
   },
 }));
 
@@ -53,36 +53,19 @@ describe('useApplications', () => {
       id: 1,
       title: 'AgriTech Innovation Fund',
       category: 'Agriculture',
+      status: 'open',
+      deadline: '2024-12-31',
     };
 
-    // Mock applications query
-    const mockApplicationsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({
-        data: [mockApplication],
-        error: null,
-      }),
-    };
-
-    // Mock projects query
-    const mockProjectsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
-        data: mockProject,
-        error: null,
-      }),
-    };
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'applications') {
-        return mockApplicationsQuery;
-      }
-      if (table === 'projects') {
-        return mockProjectsQuery;
-      }
-      return mockApplicationsQuery;
+    // Mock RPC call
+    (supabase.rpc as any).mockResolvedValue({
+      data: [
+        {
+          application: mockApplication,
+          project: mockProject,
+        },
+      ],
+      error: null,
     });
 
     const { result } = renderHook(() => useApplications(), {
@@ -104,16 +87,11 @@ describe('useApplications', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' };
     (useAuth as any).mockReturnValue({ user: mockUser });
 
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      }),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    // Mock RPC call returning empty array
+    (supabase.rpc as any).mockResolvedValue({
+      data: [],
+      error: null,
+    });
 
     const { result } = renderHook(() => useApplications(), {
       wrapper: createWrapper(),
@@ -142,32 +120,15 @@ describe('useApplications', () => {
       updated_at: '2024-01-15T00:00:00Z',
     };
 
-    const mockApplicationsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({
-        data: [mockApplication],
-        error: null,
-      }),
-    };
-
-    const mockProjectsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Project not found' },
-      }),
-    };
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'applications') {
-        return mockApplicationsQuery;
-      }
-      if (table === 'projects') {
-        return mockProjectsQuery;
-      }
-      return mockApplicationsQuery;
+    // Mock RPC call with null project (project doesn't exist)
+    (supabase.rpc as any).mockResolvedValue({
+      data: [
+        {
+          application: mockApplication,
+          project: null, // Project not found
+        },
+      ],
+      error: null,
     });
 
     const { result } = renderHook(() => useApplications(), {
@@ -204,34 +165,19 @@ describe('useApplications', () => {
       id: 1,
       title: 'Test Project',
       category: 'Technology',
+      status: 'open',
+      deadline: '2024-12-31',
     };
 
-    const mockApplicationsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({
-        data: [mockApplication],
-        error: null,
-      }),
-    };
-
-    const mockProjectsQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({
-        data: mockProject,
-        error: null,
-      }),
-    };
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'applications') {
-        return mockApplicationsQuery;
-      }
-      if (table === 'projects') {
-        return mockProjectsQuery;
-      }
-      return mockApplicationsQuery;
+    // Mock RPC call
+    (supabase.rpc as any).mockResolvedValue({
+      data: [
+        {
+          application: mockApplication,
+          project: mockProject,
+        },
+      ],
+      error: null,
     });
 
     const { result } = renderHook(() => useApplications(), {
@@ -264,13 +210,11 @@ describe('useApplications', () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' };
     (useAuth as any).mockReturnValue({ user: mockUser });
 
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockRejectedValue(new Error('Database error')),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    // Mock RPC call with error
+    (supabase.rpc as any).mockResolvedValue({
+      data: null,
+      error: { message: 'Database error' },
+    });
 
     const { result } = renderHook(() => useApplications(), {
       wrapper: createWrapper(),

@@ -47,7 +47,7 @@ function transformProject(data: any): Project {
 }
 
 /**
- * Direct Supabase query for projects
+ * RPC-based query for projects with filters (optimized: single query with server-side filtering)
  */
 async function fetchProjectsDirect(filters?: {
   category?: string | null;
@@ -59,53 +59,37 @@ async function fetchProjectsDirect(filters?: {
 }) {
   const page = filters?.page || 1;
   const itemsPerPage = filters?.itemsPerPage || 9;
-  const offset = (page - 1) * itemsPerPage;
 
-  let query = supabase
-    .from("projects")
-    .select(`
-      *,
-      categories:category_id(name)
-    `, { count: "exact" });
-
-  // Apply filters
-  if (filters?.category) {
-    // Filter by category name using the joined categories table
-    query = query.eq("categories.name", filters.category);
-  }
-
-  if (filters?.status) {
-    query = query.eq("status", filters.status);
-  }
-
-  if (filters?.location) {
-    query = query.eq("location", filters.location);
-  }
-
-  if (filters?.search) {
-    const searchTerm = filters.search.toLowerCase();
-    query = query.or(
-      `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,funding_amount.ilike.%${searchTerm}%`
-    );
-    // Note: Category search would need to be done via the joined categories table
-    // For now, we'll search in the main fields only
-  }
-
-  // Apply pagination
-  query = query
-    .order("created_at", { ascending: false })
-    .range(offset, offset + itemsPerPage - 1);
-
-  const { data, error, count } = await query;
+  const { data: rpcData, error } = await supabase.rpc('get_projects_with_filters', {
+    p_category: filters?.category || null,
+    p_status: filters?.status || null,
+    p_location: filters?.location || null,
+    p_search: filters?.search?.trim() || null,
+    p_page: page,
+    p_page_size: itemsPerPage,
+  });
 
   if (error) throw error;
 
+  if (!rpcData || rpcData.length === 0) {
+    return {
+      projects: [],
+      total: 0,
+      page,
+      itemsPerPage,
+      totalPages: 0,
+    };
+  }
+
+  const result = rpcData[0];
+  const projects = (result.projects || []) as any[];
+
   return {
-    projects: (data || []).map(transformProject),
-    total: count || 0,
-    page,
+    projects: projects.map(transformProject),
+    total: Number(result.total_count || 0),
+    page: Number(result.page || page),
     itemsPerPage,
-    totalPages: Math.ceil((count || 0) / itemsPerPage),
+    totalPages: Number(result.total_pages || 0),
   };
 }
 

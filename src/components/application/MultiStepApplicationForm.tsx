@@ -751,6 +751,7 @@ const MultiStepApplicationForm = () => {
       reset();
       form.reset();
       setDraftLoaded(false);
+      setDraftId(null); // Clear draftId from store to prevent auto-save after submission
       
       // Redirect to dashboard applications
       navigate("/dashboard/applications");

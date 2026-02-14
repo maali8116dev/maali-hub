@@ -10,6 +10,8 @@
  * 
  * Usage:
  *   node scripts/seed-users-and-reviewers.js
+ *   node scripts/seed-users-and-reviewers.js --local
+ *   node scripts/seed-users-and-reviewers.js --help
  * 
  * Requirements:
  *   - SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env
@@ -19,22 +21,74 @@
 
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { lookup } from 'node:dns/promises';
 
 dotenv.config();
+const args = new Set(process.argv.slice(2));
+const useLocal = args.has('--local');
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+if (args.has('--help') || args.has('-h')) {
+  console.log('Usage:');
+  console.log('  node scripts/seed-users-and-reviewers.js');
+  console.log('  node scripts/seed-users-and-reviewers.js --local');
+  console.log('');
+  console.log('Options:');
+  console.log('  --local   Use local Supabase URL and service role key');
+  console.log('  --help    Show this help message');
+  console.log('');
+  console.log('Env vars (remote/default):');
+  console.log('  SUPABASE_URL or VITE_SUPABASE_URL');
+  console.log('  SUPABASE_SERVICE_ROLE_KEY or VITE_SUPABASE_SERVICE_ROLE_KEY');
+  console.log('');
+  console.log('Env vars (local mode):');
+  console.log('  SUPABASE_LOCAL_URL (optional, default: http://127.0.0.1:54321)');
+  console.log('  SUPABASE_LOCAL_SERVICE_ROLE_KEY (preferred)');
+  console.log('  SUPABASE_SERVICE_ROLE_KEY (fallback)');
+  process.exit(0);
+}
+
+function getEnvVar(...keys) {
+  for (const key of keys) {
+    const raw = process.env[key];
+    if (!raw) continue;
+    const trimmed = raw.trim().replace(/^['"]|['"]$/g, '');
+    if (trimmed) return trimmed;
+  }
+  return undefined;
+}
+
+const SUPABASE_URL = useLocal
+  ? getEnvVar('SUPABASE_LOCAL_URL') || 'http://127.0.0.1:54321'
+  : getEnvVar('SUPABASE_URL', 'VITE_SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = useLocal
+  ? getEnvVar('SUPABASE_LOCAL_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY')
+  : getEnvVar('SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY');
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('❌ Missing required environment variables:');
   console.error('   SUPABASE_URL:', SUPABASE_URL ? '✅' : '❌');
   console.error('   SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? '✅' : '❌');
-  console.error('\nPlease set these in your .env file:');
-  console.error('   VITE_SUPABASE_URL=your_supabase_url');
-  console.error('   VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key');
-  console.error('\nOr use:');
-  console.error('   SUPABASE_URL=your_supabase_url');
-  console.error('   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key');
+  if (useLocal) {
+    console.error('\nLocal mode requires:');
+    console.error('   SUPABASE_LOCAL_SERVICE_ROLE_KEY=your_local_service_role_key');
+    console.error('   (optional) SUPABASE_LOCAL_URL=http://127.0.0.1:54321');
+  } else {
+    console.error('\nPlease set these in your .env file:');
+    console.error('   VITE_SUPABASE_URL=your_supabase_url');
+    console.error('   VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key');
+    console.error('\nOr use:');
+    console.error('   SUPABASE_URL=your_supabase_url');
+    console.error('   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key');
+  }
+  process.exit(1);
+}
+
+let parsedSupabaseUrl;
+try {
+  parsedSupabaseUrl = new URL(SUPABASE_URL);
+} catch {
+  console.error('❌ Invalid SUPABASE_URL format:', SUPABASE_URL);
+  console.error('   Example: https://your-project-ref.supabase.co');
   process.exit(1);
 }
 
@@ -44,6 +98,21 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     persistSession: false,
   },
 });
+
+async function verifySupabaseHost() {
+  // Skip DNS preflight in local mode.
+  if (useLocal) return;
+
+  try {
+    await lookup(parsedSupabaseUrl.hostname);
+  } catch (error) {
+    console.error('❌ Supabase host is not reachable:', parsedSupabaseUrl.hostname);
+    console.error('   This usually means SUPABASE_URL is incorrect or points to a deleted project.');
+    console.error('   Update .env with the correct URL and rerun.');
+    console.error('\n   Checked URL:', SUPABASE_URL);
+    process.exit(1);
+  }
+}
 
 // Helper to delete user if exists (for idempotent seed runs)
 async function deleteUserIfExists(email) {
@@ -293,6 +362,8 @@ async function main() {
   console.log('🌱 Starting seed data creation...\n');
 
   try {
+    await verifySupabaseHost();
+
     // Cleanup existing seed data first
     await cleanupSeedData();
 

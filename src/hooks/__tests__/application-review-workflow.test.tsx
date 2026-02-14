@@ -22,12 +22,13 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 /**
- * Integration test for complete application review workflow
+ * Unit test for complete application review workflow (mocked)
  * Tests: Application Submission → Reviewer Assignment → Review Submission → Aggregation → Decision
  * 
- * This test focuses on business logic without UI rendering
+ * This test focuses on business logic without UI rendering.
+ * For real database integration tests, see the integration test suite.
  */
-describe('Application Review Workflow Integration', () => {
+describe('Application Review Workflow', () => {
   const mockApplicationId = 'app-123';
   const mockProjectId = 1;
   const mockCategory = 'technology';

@@ -64,18 +64,28 @@ const ReviewManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get all reviewers
+  // Get all reviewers with details (categories, workload, stats) in a single RPC call
   const { data: reviewers = [] } = useQuery({
-    queryKey: ['all-reviewers'],
+    queryKey: ['all-reviewers-with-details'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name')
-        .eq('role', 'reviewer')
-        .order('first_name');
+      const { data, error } = await supabase.rpc('get_all_reviewers_with_details');
       
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching reviewers with details:', error);
+        throw error;
+      }
+      
+      // Transform RPC response to match expected format
+      return (data || []).map((r: any) => ({
+        user_id: r.reviewer_id,
+        first_name: r.first_name,
+        last_name: r.last_name,
+        email: r.email,
+        workload: r.workload,
+        categories: r.categories || [],
+        total_reviews: r.total_reviews,
+        average_score: r.average_score,
+      }));
     },
   });
 
@@ -154,104 +164,34 @@ const ReviewerCategoriesTab = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
-  // Fetch reviewer categories
-  const { data: reviewerCategories = [], refetch: refetchCategories } = useQuery({
-    queryKey: ['all-reviewer-categories'],
-    queryFn: async () => {
-      // Fetch reviewer categories with category info
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('reviewer_categories')
-        .select(`
-          *,
-          category_info:categories!category_id(id, name)
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (categoriesError) {
-        console.error('Error fetching reviewer categories:', categoriesError);
-        throw categoriesError;
-      }
-      
-      // Fetch profiles separately since reviewer_id references auth.users, not profiles directly
-      const reviewerIds = [...new Set((categoriesData || []).map((item: any) => item.reviewer_id))];
-      
-      let profilesMap: Record<string, any> = {};
-      if (reviewerIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('user_id, first_name, last_name')
-          .in('user_id', reviewerIds);
-        
-        if (profilesError) {
-          console.warn('Error fetching profiles:', profilesError);
-        } else {
-          profilesMap = (profilesData || []).reduce((acc: Record<string, any>, profile: any) => {
-            acc[profile.user_id] = profile;
-            return acc;
-          }, {});
-        }
-      }
-      
-      // Transform to include category name and reviewer info for display
-      const transformed = (categoriesData || []).map((item: any) => {
-        // Get category name from joined category_info
-        const categoryName = item.category_info?.name || item.category_name || (item.category_id ? 'Category ID: ' + item.category_id : 'Unknown');
-        
-        // Get reviewer info from profiles map
-        const reviewer = profilesMap[item.reviewer_id] || null;
-        
-        return {
-          ...item,
-          category: categoryName,
-          reviewer: reviewer ? {
-            user_id: reviewer.user_id,
-            first_name: reviewer.first_name,
-            last_name: reviewer.last_name,
-          } : null,
-        };
-      });
-      
-      // Deduplicate by id to prevent duplicates
-      const unique = Array.from(
-        new Map(transformed.map(item => [item.id, item])).values()
-      );
-      
-      // Sort by category name
-      return unique.sort((a: any, b: any) => a.category.localeCompare(b.category));
-    },
-  });
-
-  // Fetch workloads for all reviewers
-  const { data: workloads = [] } = useQuery({
-    queryKey: ['all-workloads'],
-    queryFn: async () => {
-      const workloads = await Promise.all(
-        reviewers.map(async (reviewer) => {
-          const { data, error } = await supabase.rpc('get_reviewer_workload', {
-            p_reviewer_id: reviewer.user_id,
-          });
-          if (error) {
-            console.warn(`Error fetching workload for reviewer ${reviewer.user_id}:`, error);
-            return {
-              reviewer_id: reviewer.user_id,
-              workload: 0,
-            };
-          }
-          return {
+  // Extract reviewer categories from reviewers data (already included in RPC response)
+  const reviewerCategories = useMemo(() => {
+    const allCategories: any[] = [];
+    reviewers.forEach((reviewer: any) => {
+      if (reviewer.categories && Array.isArray(reviewer.categories)) {
+        reviewer.categories.forEach((cat: any) => {
+          allCategories.push({
+            id: cat.id,
             reviewer_id: reviewer.user_id,
-            workload: data || 0,
-          };
-        })
-      );
-      return workloads;
-    },
-  });
+            category_id: cat.category_id,
+            category: cat.category_name,
+            reviewer: {
+              user_id: reviewer.user_id,
+              first_name: reviewer.first_name,
+              last_name: reviewer.last_name,
+            },
+          });
+        });
+      }
+    });
+    // Sort by category name
+    return allCategories.sort((a: any, b: any) => a.category.localeCompare(b.category));
+  }, [reviewers]);
 
-  // Create workload map for quick lookup
-  const workloadMap = workloads.reduce((acc: Record<string, number>, w: any) => {
-    acc[w.reviewer_id] = w.workload;
-    return acc;
-  }, {});
+  // Refetch function for categories (will refetch reviewers which includes categories)
+  const refetchCategories = () => {
+    queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
+  };
 
   // Transform reviewers data for the table
   const reviewersTableData = useMemo(() => {
@@ -259,7 +199,7 @@ const ReviewerCategoriesTab = ({
       const reviewerCats = reviewerCategories.filter(
         (rc: any) => rc.reviewer_id === reviewer.user_id
       );
-      const workload = workloadMap[reviewer.user_id] || 0;
+      const workload = reviewer.workload || 0;
       
       return {
         ...reviewer,
@@ -270,7 +210,7 @@ const ReviewerCategoriesTab = ({
         })),
       };
     });
-  }, [reviewers, reviewerCategories, workloadMap]);
+  }, [reviewers, reviewerCategories]);
 
   const addCategory = useMutation({
     mutationFn: async ({ reviewerId, category }: { reviewerId: string; category: string }) => {
@@ -305,11 +245,8 @@ const ReviewerCategoriesTab = ({
       // Wait a brief moment to ensure database transaction is committed
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Invalidate and refetch queries to refresh the UI
-      // Use refetchQueries to ensure immediate refetch
-      await queryClient.refetchQueries({ queryKey: ['all-reviewer-categories'] });
-      await queryClient.refetchQueries({ queryKey: ['reviewer-categories'] });
-      await queryClient.refetchQueries({ queryKey: ['all-workloads'] });
+      // Invalidate reviewers query (which includes categories and workload)
+      await queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
       
       // Also explicitly refetch to ensure UI updates
       await refetchCategories();
@@ -335,8 +272,8 @@ const ReviewerCategoriesTab = ({
       if (error) throw error;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['all-reviewer-categories'] });
-      await queryClient.refetchQueries({ queryKey: ['all-workloads'] });
+      // Invalidate reviewers query (which includes categories and workload)
+      await queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
       // Explicitly refetch to ensure UI updates
       await refetchCategories();
       toast({ title: 'Category Removed', description: 'Reviewer category removed.' });

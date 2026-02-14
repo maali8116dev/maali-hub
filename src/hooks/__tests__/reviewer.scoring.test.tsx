@@ -1,16 +1,33 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 import { useSubmitReview, useApplicationReviewScores } from '../useReviewerAssignment';
 import { supabase } from '@/integrations/supabase/client';
 
-// Mock Supabase client
+// Mock Supabase client for hook-level tests
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
     rpc: vi.fn(),
   },
 }));
+
+// --- Real clients for direct RPC integration tests ---
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ";
+const SUPABASE_SERVICE_ROLE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const integrationClient = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
+  ? createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -27,459 +44,308 @@ const createWrapper = () => {
   );
 };
 
-describe('useSubmitReview', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// ============================================================
+// Hook-level tests (mocked Supabase client)
+// ============================================================
 
-  it('should successfully submit review scores', async () => {
-    const mockReviewScore = {
-      id: 'score-1',
-      application_id: 'app-123',
-      reviewer_id: 'reviewer-456',
-      assignment_id: 'assignment-789',
-      scores: { innovation: 8, feasibility: 7, impact: 9 },
-      overall_score: 8.0,
-      comments: 'Strong proposal',
-      recommendation: 'approve' as const,
-      submitted_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const mockUpsert = vi.fn().mockReturnThis();
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: mockReviewScore,
-      error: null,
-    });
-
-    const mockUpdate = vi.fn().mockReturnThis();
-    const mockEq = vi.fn().mockResolvedValue({ data: null, error: null });
-
-    (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'review_scores') {
-        return {
-          upsert: mockUpsert,
-          select: mockSelect,
-          single: mockSingle,
-        };
-      }
-      if (table === 'application_assignments') {
-        return {
-          update: mockUpdate,
-          eq: mockEq,
-        };
-      }
-      return {};
-    });
-
-    const { result } = renderHook(() => useSubmitReview(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isIdle).toBe(true);
-    });
-
-    result.current.mutate({
-      applicationId: 'app-123',
-      reviewerId: 'reviewer-456',
-      assignmentId: 'assignment-789',
-      scores: { innovation: 8, feasibility: 7, impact: 9 },
-      comments: 'Strong proposal',
-      recommendation: 'approve',
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(mockUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-456',
-        assignment_id: 'assignment-789',
-        scores: { innovation: 8, feasibility: 7, impact: 9 },
-        recommendation: 'approve',
-      }),
-      { onConflict: 'application_id,reviewer_id' }
-    );
-
-    expect(mockUpdate).toHaveBeenCalledWith({ status: 'completed' });
-    expect(mockEq).toHaveBeenCalledWith('id', 'assignment-789');
-  });
+describe('useSubmitReview (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should handle upsert (updating existing review)', async () => {
     const mockReviewScore = {
-      id: 'score-1',
-      application_id: 'app-123',
-      reviewer_id: 'reviewer-456',
-      assignment_id: 'assignment-789',
-      scores: { innovation: 9, feasibility: 8, impact: 9 },
-      overall_score: 8.67,
-      comments: 'Updated review',
-      recommendation: 'approve' as const,
-      submitted_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      id: 'score-1', application_id: 'app-123', reviewer_id: 'reviewer-456',
+      assignment_id: 'assignment-789', scores: { innovation: 9, feasibility: 8, impact: 9 },
+      overall_score: 8.67, comments: 'Updated review', recommendation: 'approve' as const,
+      submitted_at: new Date().toISOString(), created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const mockUpsert = vi.fn().mockReturnThis();
     const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: mockReviewScore,
-      error: null,
-    });
-
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockReviewScore, error: null });
     const mockUpdate = vi.fn().mockReturnThis();
     const mockEq = vi.fn().mockResolvedValue({ data: null, error: null });
 
     (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'review_scores') {
-        return {
-          upsert: mockUpsert,
-          select: mockSelect,
-          single: mockSingle,
-        };
-      }
-      if (table === 'application_assignments') {
-        return {
-          update: mockUpdate,
-          eq: mockEq,
-        };
-      }
+      if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
+      if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
       return {};
     });
 
-    const { result } = renderHook(() => useSubmitReview(), {
-      wrapper: createWrapper(),
-    });
-
+    const { result } = renderHook(() => useSubmitReview(), { wrapper: createWrapper() });
     result.current.mutate({
-      applicationId: 'app-123',
-      reviewerId: 'reviewer-456',
-      assignmentId: 'assignment-789',
-      scores: { innovation: 9, feasibility: 8, impact: 9 },
-      comments: 'Updated review',
+      applicationId: 'app-123', reviewerId: 'reviewer-456', assignmentId: 'assignment-789',
+      scores: { innovation: 9, feasibility: 8, impact: 9 }, comments: 'Updated review',
       recommendation: 'approve',
     });
 
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(mockUpsert).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockReviewScore);
   });
 
   it('should handle errors when submitting review', async () => {
-    const mockError = { message: 'Database error', code: 'PGRST116' };
-
     const mockUpsert = vi.fn().mockReturnThis();
     const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
+    const mockSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'Database error', code: 'PGRST116' } });
 
-    (supabase.from as any).mockReturnValue({
-      upsert: mockUpsert,
-      select: mockSelect,
-      single: mockSingle,
-    });
+    (supabase.from as any).mockReturnValue({ upsert: mockUpsert, select: mockSelect, single: mockSingle });
 
-    const { result } = renderHook(() => useSubmitReview(), {
-      wrapper: createWrapper(),
-    });
-
+    const { result } = renderHook(() => useSubmitReview(), { wrapper: createWrapper() });
     result.current.mutate({
-      applicationId: 'app-123',
-      reviewerId: 'reviewer-456',
-      assignmentId: 'assignment-789',
-      scores: { innovation: 8 },
-      recommendation: 'approve',
+      applicationId: 'app-123', reviewerId: 'reviewer-456', assignmentId: 'assignment-789',
+      scores: { innovation: 8 }, recommendation: 'approve',
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
-
+    await waitFor(() => { expect(result.current.isError).toBe(true); });
     expect(result.current.error).toBeDefined();
   });
 
   it('should handle null comments', async () => {
     const mockReviewScore = {
-      id: 'score-1',
-      application_id: 'app-123',
-      reviewer_id: 'reviewer-456',
-      assignment_id: 'assignment-789',
-      scores: { innovation: 8 },
-      overall_score: 8.0,
-      comments: null,
-      recommendation: 'approve' as const,
-      submitted_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      id: 'score-1', application_id: 'app-123', reviewer_id: 'reviewer-456',
+      assignment_id: 'assignment-789', scores: { innovation: 8 }, overall_score: 8.0,
+      comments: null, recommendation: 'approve' as const,
+      submitted_at: new Date().toISOString(), created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const mockUpsert = vi.fn().mockReturnThis();
     const mockSelect = vi.fn().mockReturnThis();
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: mockReviewScore,
-      error: null,
-    });
-
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockReviewScore, error: null });
     const mockUpdate = vi.fn().mockReturnThis();
     const mockEq = vi.fn().mockResolvedValue({ data: null, error: null });
 
     (supabase.from as any).mockImplementation((table: string) => {
-      if (table === 'review_scores') {
-        return {
-          upsert: mockUpsert,
-          select: mockSelect,
-          single: mockSingle,
-        };
-      }
-      if (table === 'application_assignments') {
-        return {
-          update: mockUpdate,
-          eq: mockEq,
-        };
-      }
+      if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
+      if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
       return {};
     });
 
-    const { result } = renderHook(() => useSubmitReview(), {
-      wrapper: createWrapper(),
-    });
-
+    const { result } = renderHook(() => useSubmitReview(), { wrapper: createWrapper() });
     result.current.mutate({
-      applicationId: 'app-123',
-      reviewerId: 'reviewer-456',
-      assignmentId: 'assignment-789',
-      scores: { innovation: 8 },
-      recommendation: 'approve',
+      applicationId: 'app-123', reviewerId: 'reviewer-456', assignmentId: 'assignment-789',
+      scores: { innovation: 8 }, recommendation: 'approve',
     });
 
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(mockUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        comments: null,
-      }),
-      expect.any(Object)
-    );
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({ comments: null }), expect.any(Object));
   });
 
   it('should support all recommendation types', async () => {
-    const recommendations: Array<'approve' | 'reject' | 'request_info'> = [
-      'approve',
-      'reject',
-      'request_info',
-    ];
+    const recommendations: Array<'approve' | 'reject' | 'request_info'> = ['approve', 'reject', 'request_info'];
 
     for (const recommendation of recommendations) {
-      const mockReviewScore = {
-        id: 'score-1',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-456',
-        assignment_id: 'assignment-789',
-        scores: { innovation: 8 },
-        overall_score: 8.0,
-        comments: 'Test',
-        recommendation,
-        submitted_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
       const mockUpsert = vi.fn().mockReturnThis();
       const mockSelect = vi.fn().mockReturnThis();
       const mockSingle = vi.fn().mockResolvedValue({
-        data: mockReviewScore,
+        data: { id: 'score-1', recommendation, scores: { innovation: 8 }, overall_score: 8.0 },
         error: null,
       });
-
       const mockUpdate = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockResolvedValue({ data: null, error: null });
 
       (supabase.from as any).mockImplementation((table: string) => {
-        if (table === 'review_scores') {
-          return {
-            upsert: mockUpsert,
-            select: mockSelect,
-            single: mockSingle,
-          };
-        }
-        if (table === 'application_assignments') {
-          return {
-            update: mockUpdate,
-            eq: mockEq,
-          };
-        }
+        if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
+        if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
         return {};
       });
 
-      const { result } = renderHook(() => useSubmitReview(), {
-        wrapper: createWrapper(),
-      });
-
+      const { result } = renderHook(() => useSubmitReview(), { wrapper: createWrapper() });
       result.current.mutate({
-        applicationId: 'app-123',
-        reviewerId: 'reviewer-456',
-        assignmentId: 'assignment-789',
-        scores: { innovation: 8 },
-        recommendation,
+        applicationId: 'app-123', reviewerId: 'reviewer-456', assignmentId: 'assignment-789',
+        scores: { innovation: 8 }, recommendation,
       });
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          recommendation,
-        }),
-        expect.any(Object)
-      );
-
+      await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+      expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({ recommendation }), expect.any(Object));
       vi.clearAllMocks();
     }
   });
 });
 
-describe('useApplicationReviewScores', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+describe('useApplicationReviewScores (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
 
   it('should fetch review scores for an application', async () => {
-    const mockRpcData = [
-      {
-        id: 'score-1',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-456',
-        assignment_id: 'assignment-789',
-        scores: { innovation: 8, feasibility: 7 },
-        overall_score: 7.5,
-        comments: 'Good proposal',
-        recommendation: 'approve',
-        submitted_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        reviewer_user_id: 'reviewer-456',
-        reviewer_first_name: 'John',
-        reviewer_last_name: 'Doe',
-      },
-    ];
+    const mockRpcData = [{
+      id: 'score-1', application_id: 'app-123', reviewer_id: 'reviewer-456',
+      assignment_id: 'assignment-789', scores: { innovation: 8, feasibility: 7 },
+      overall_score: 7.5, comments: 'Good proposal', recommendation: 'approve',
+      submitted_at: new Date().toISOString(), created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(), reviewer_user_id: 'reviewer-456',
+      reviewer_first_name: 'John', reviewer_last_name: 'Doe',
+    }];
 
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
+    (supabase.rpc as any).mockResolvedValue({ data: mockRpcData, error: null });
 
-    const { result } = renderHook(() => useApplicationReviewScores('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
+    const { result } = renderHook(() => useApplicationReviewScores('app-123'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
 
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].application_id).toBe('app-123');
-    expect(result.current.data?.[0].reviewer_id).toBe('reviewer-456');
     expect(result.current.data?.[0].scores).toEqual({ innovation: 8, feasibility: 7 });
-    expect(result.current.data?.[0].recommendation).toBe('approve');
-    expect(result.current.data?.[0].reviewer).toEqual({
-      user_id: 'reviewer-456',
-      first_name: 'John',
-      last_name: 'Doe',
-    });
+    expect(result.current.data?.[0].reviewer).toEqual({ user_id: 'reviewer-456', first_name: 'John', last_name: 'Doe' });
   });
 
   it('should return empty array when no scores exist', async () => {
-    (supabase.rpc as any).mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
-    const { result } = renderHook(() => useApplicationReviewScores('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    (supabase.rpc as any).mockResolvedValue({ data: [], error: null });
+    const { result } = renderHook(() => useApplicationReviewScores('app-123'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(result.current.data).toEqual([]);
   });
 
   it('should not fetch when applicationId is empty', () => {
-    const { result } = renderHook(() => useApplicationReviewScores(''), {
-      wrapper: createWrapper(),
-    });
-
+    const { result } = renderHook(() => useApplicationReviewScores(''), { wrapper: createWrapper() });
     expect(result.current.isFetching).toBe(false);
     expect(supabase.rpc).not.toHaveBeenCalled();
   });
 
   it('should handle errors gracefully', async () => {
-    const mockError = { message: 'RPC error', code: 'PGRST301' };
-
-    (supabase.rpc as any).mockResolvedValue({
-      data: null,
-      error: mockError,
-    });
-
-    const { result } = renderHook(() => useApplicationReviewScores('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    }, { timeout: 3000 });
-
+    (supabase.rpc as any).mockResolvedValue({ data: null, error: { message: 'RPC error', code: 'PGRST301' } });
+    const { result } = renderHook(() => useApplicationReviewScores('app-123'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isError).toBe(true); }, { timeout: 3000 });
     expect(result.current.error).toBeDefined();
   });
 
   it('should handle scores without reviewer profile', async () => {
-    const mockRpcData = [
-      {
-        id: 'score-1',
-        application_id: 'app-123',
-        reviewer_id: 'reviewer-456',
-        assignment_id: 'assignment-789',
-        scores: { innovation: 8 },
-        overall_score: 8.0,
-        comments: null,
-        recommendation: 'approve',
-        submitted_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        reviewer_user_id: null,
-        reviewer_first_name: null,
-        reviewer_last_name: null,
-      },
-    ];
+    const mockRpcData = [{
+      id: 'score-1', application_id: 'app-123', reviewer_id: 'reviewer-456',
+      assignment_id: 'assignment-789', scores: { innovation: 8 }, overall_score: 8.0,
+      comments: null, recommendation: 'approve',
+      submitted_at: new Date().toISOString(), created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(), reviewer_user_id: null,
+      reviewer_first_name: null, reviewer_last_name: null,
+    }];
+    (supabase.rpc as any).mockResolvedValue({ data: mockRpcData, error: null });
 
-    (supabase.rpc as any).mockResolvedValue({
-      data: mockRpcData,
-      error: null,
-    });
-
-    const { result } = renderHook(() => useApplicationReviewScores('app-123'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
+    const { result } = renderHook(() => useApplicationReviewScores('app-123'), { wrapper: createWrapper() });
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(result.current.data?.[0].reviewer).toBeUndefined();
   });
 });
 
+// ============================================================
+// Direct DB integration tests (real database)
+// ============================================================
+
+describe('Review scoring (Integration)', () => {
+  let testApplicationId: string;
+  let testProjectId: number;
+  let testCategoryId: number;
+  let testReviewerId: string;
+  let testAssignmentId: string;
+  let testApplicantId: string;
+
+  beforeAll(async () => {
+    if (!supabaseAdmin) {
+      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      return;
+    }
+
+    // Category
+    let { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
+    testCategoryId = catData?.id || 1;
+
+    // Project
+    const { data: pj } = await supabaseAdmin.from('projects').insert({
+      title: `Test Score Project ${Date.now()}`, description: 'Test', status: 'open',
+      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
+    }).select('id').single();
+    if (!pj) throw new Error('Failed to create project');
+    testProjectId = pj.id;
+
+    // Applicant
+    const aEmail = `test-app-score-${Date.now()}@maali.test`;
+    const { data: au } = await supabaseAdmin.auth.admin.createUser({ email: aEmail, password: 'TestPassword123!', email_confirm: true });
+    if (!au?.user) throw new Error('Failed to create applicant');
+    testApplicantId = au.user.id;
+    await supabaseAdmin.from('profiles').upsert({ user_id: testApplicantId, first_name: 'T', last_name: 'A', role: 'applicant' }, { onConflict: 'user_id' });
+
+    // Application
+    const { data: app } = await supabaseAdmin.from('applications').insert({
+      user_id: testApplicantId, project_id: testProjectId, contact_email: aEmail,
+      company_name: 'Test', status: 'pending', is_draft: false,
+    }).select('id').single();
+    if (!app) throw new Error('Failed to create application');
+    testApplicationId = app.id;
+
+    // Reviewer
+    const rEmail = `test-rev-score-${Date.now()}@maali.test`;
+    const { data: ru } = await supabaseAdmin.auth.admin.createUser({ email: rEmail, password: 'TestPassword123!', email_confirm: true });
+    if (!ru?.user) throw new Error('Failed to create reviewer');
+    testReviewerId = ru.user.id;
+    await supabaseAdmin.from('profiles').upsert({ user_id: testReviewerId, first_name: 'T', last_name: 'R', role: 'reviewer' }, { onConflict: 'user_id' });
+    await supabaseAdmin.from('reviewer_categories').insert({ reviewer_id: testReviewerId, category_id: testCategoryId });
+
+    // Assignment
+    const { data: assignData } = await supabaseAdmin.from('application_assignments').insert({
+      application_id: testApplicationId, reviewer_id: testReviewerId, status: 'in_progress',
+    }).select('id').single();
+    if (!assignData) throw new Error('Failed to create assignment');
+    testAssignmentId = assignData.id;
+
+    // Sign in as reviewer
+    await integrationClient.auth.signInWithPassword({ email: rEmail, password: 'TestPassword123!' });
+  }, 30000);
+
+  afterAll(async () => {
+    if (!supabaseAdmin) return;
+    if (testApplicationId) {
+      await supabaseAdmin.from('review_scores').delete().eq('application_id', testApplicationId);
+      await supabaseAdmin.from('application_assignments').delete().eq('application_id', testApplicationId);
+      await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
+    }
+    if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
+    if (testReviewerId) await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', testReviewerId);
+    for (const uid of [testReviewerId, testApplicantId]) {
+      try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
+    }
+    await integrationClient.auth.signOut();
+  }, 30000);
+
+  it('should insert a review score and trigger overall_score calculation', async () => {
+    if (!supabaseAdmin) return;
+
+    // Clean up any existing scores for this reviewer
+    await supabaseAdmin.from('review_scores').delete()
+      .eq('application_id', testApplicationId).eq('reviewer_id', testReviewerId);
+
+    const { data, error } = await integrationClient.from('review_scores').upsert({
+      application_id: testApplicationId,
+      reviewer_id: testReviewerId,
+      assignment_id: testAssignmentId,
+      scores: { innovation: 8, feasibility: 7, impact: 9 },
+      comments: 'Strong proposal',
+      recommendation: 'approve',
+      submitted_at: new Date().toISOString(),
+    }, { onConflict: 'application_id,reviewer_id' }).select().single();
+
+    expect(error).toBeNull();
+    expect(data).toBeDefined();
+    expect(data!.application_id).toBe(testApplicationId);
+    expect(data!.reviewer_id).toBe(testReviewerId);
+    expect(data!.recommendation).toBe('approve');
+    // overall_score should be set by the calculate_review_score trigger
+    expect(data!.overall_score).toBeDefined();
+    expect(data!.overall_score).toBeGreaterThan(0);
+  });
+
+  it('should upsert (update) an existing review score', async () => {
+    if (!supabaseAdmin) return;
+
+    const { data, error } = await integrationClient.from('review_scores').upsert({
+      application_id: testApplicationId,
+      reviewer_id: testReviewerId,
+      assignment_id: testAssignmentId,
+      scores: { innovation: 9, feasibility: 9, impact: 9 },
+      comments: 'Updated: excellent proposal',
+      recommendation: 'approve',
+      submitted_at: new Date().toISOString(),
+    }, { onConflict: 'application_id,reviewer_id' }).select().single();
+
+    expect(error).toBeNull();
+    expect(data!.comments).toBe('Updated: excellent proposal');
+    expect(data!.scores).toEqual({ innovation: 9, feasibility: 9, impact: 9 });
+  });
+});

@@ -28,189 +28,87 @@ export const ReviewerDetails = () => {
     }
   }, [reviewerId]);
 
-  // Fetch reviewer profile
-  const { data: reviewer, isLoading: isLoadingReviewer, error: reviewerError } = useQuery({
-    queryKey: ['reviewer-profile', reviewerId],
+  // Fetch all reviewer details in a single RPC call
+  const { data: reviewerDetails, isLoading: isLoadingDetails, error: detailsError } = useQuery({
+    queryKey: ['reviewer-full-details', reviewerId],
     queryFn: async () => {
       if (!reviewerId) return null;
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, first_name, last_name, role')
-        .eq('user_id', reviewerId)
-        .single();
+      const { data, error } = await supabase.rpc('get_reviewer_full_details', {
+        p_reviewer_id: reviewerId,
+      });
       
       if (error) {
-        console.error('Error fetching reviewer profile:', error);
+        console.error('Error fetching reviewer details:', error);
         throw error;
       }
       
-      if (!data) {
+      if (!data || data.length === 0) {
         throw new Error('Reviewer not found');
       }
       
-      return data;
+      return data[0]; // RPC returns array, get first (and only) result
     },
     enabled: !!reviewerId,
   });
 
-  // Fetch all reviews for this reviewer with application and project info
-  const { data: reviews = [], isLoading: isLoadingReviews } = useQuery({
-    queryKey: ['reviewer-reviews', reviewerId],
-    queryFn: async () => {
-      if (!reviewerId) return [];
-      
-      // Fetch completed reviews
-      const { data: completedReviews, error: reviewsError } = await supabase
-        .from('review_scores')
-        .select(`
-          id,
-          application_id,
-          scores,
-          overall_score,
-          comments,
-          recommendation,
-          submitted_at,
-          created_at,
-          updated_at,
-          application:applications!application_id(
-            id,
-            project_title,
-            status,
-            project_id,
-            project:projects!project_id(
-              id,
-              title,
-              category_id,
-              category:categories!category_id(name)
-            )
-          )
-        `)
-        .eq('reviewer_id', reviewerId);
-      
-      if (reviewsError) throw reviewsError;
-      
-      // Fetch pending assignments (where no review_scores exist yet)
-      const { data: assignments, error: assignmentsError } = await supabase
-        .from('application_assignments')
-        .select(`
-          id,
-          application_id,
-          assigned_at,
-          status,
-          application:applications!application_id(
-            id,
-            project_title,
-            status,
-            project_id,
-            project:projects!project_id(
-              id,
-              title,
-              category_id,
-              category:categories!category_id(name)
-            )
-          )
-        `)
-        .eq('reviewer_id', reviewerId)
-        .in('status', ['pending', 'in_progress']);
-      
-      if (assignmentsError) throw assignmentsError;
-      
-      // Filter out assignments that already have reviews
-      const assignmentIdsWithReviews = new Set((completedReviews || []).map((r: any) => r.application_id));
-      const pendingAssignments = (assignments || []).filter((a: any) => !assignmentIdsWithReviews.has(a.application_id));
-      
-      // Combine: completed reviews + pending assignments
-      // Format pending assignments to match review structure
-      const formattedPending = pendingAssignments.map((assignment: any) => ({
-        id: assignment.id,
-        application_id: assignment.application_id,
-        scores: null,
-        overall_score: null,
-        comments: null,
-        recommendation: null,
-        submitted_at: null,
-        created_at: assignment.assigned_at,
-        updated_at: assignment.assigned_at,
-        status: assignment.status, // 'pending' or 'in_progress'
-        application: assignment.application,
-      }));
-      
-      // Format completed reviews
-      const formattedCompleted = (completedReviews || []).map((review: any) => ({
-        ...review,
-        status: 'completed',
-      }));
-      
-      // Combine and sort: pending first, then completed by submitted_at
-      const combined = [...formattedPending, ...formattedCompleted].sort((a, b) => {
-        // Pending/in_progress first
-        if (a.status !== 'completed' && b.status === 'completed') return -1;
-        if (a.status === 'completed' && b.status !== 'completed') return 1;
-        // Then by submitted_at or created_at descending
-        const dateA = a.submitted_at || a.created_at || '';
-        const dateB = b.submitted_at || b.created_at || '';
-        return dateB.localeCompare(dateA);
-      });
-      
-      return combined;
-    },
-    enabled: !!reviewerId,
-  });
+  // Extract data from RPC response
+  const reviewer = reviewerDetails?.reviewer || null;
+  const workload = reviewerDetails?.workload || 0;
+  const completedReviews = (reviewerDetails?.completed_reviews || []) as any[];
+  const pendingAssignments = (reviewerDetails?.pending_assignments || []) as any[];
+  const categories = (reviewerDetails?.categories || []).map((cat: any) => cat.category_name || 'Unknown') as string[];
 
-  // Fetch workload
-  const { data: workload = 0, isLoading: isLoadingWorkload } = useQuery({
-    queryKey: ['reviewer-workload', reviewerId],
-    queryFn: async () => {
-      if (!reviewerId) return 0;
-      const { data, error } = await supabase.rpc('get_reviewer_workload', {
-        p_reviewer_id: reviewerId,
-      });
-      if (error) {
-        console.warn('Error fetching workload:', error);
-        return 0;
-      }
-      return data || 0;
-    },
-    enabled: !!reviewerId,
-  });
+  // Combine and format reviews + assignments
+  const reviews = useMemo(() => {
+    // Format pending assignments to match review structure
+    const formattedPending = pendingAssignments.map((assignment: any) => ({
+      id: assignment.id,
+      application_id: assignment.application_id,
+      scores: null,
+      overall_score: null,
+      comments: null,
+      recommendation: null,
+      submitted_at: null,
+      created_at: assignment.assigned_at,
+      updated_at: assignment.assigned_at,
+      status: assignment.status, // 'pending' or 'in_progress'
+      application: assignment.application,
+    }));
+    
+    // Format completed reviews
+    const formattedCompleted = completedReviews.map((review: any) => ({
+      ...review,
+      status: 'completed',
+    }));
+    
+    // Combine and sort: pending first, then completed by submitted_at
+    return [...formattedPending, ...formattedCompleted].sort((a, b) => {
+      // Pending/in_progress first
+      if (a.status !== 'completed' && b.status === 'completed') return -1;
+      if (a.status === 'completed' && b.status !== 'completed') return 1;
+      // Then by submitted_at or created_at descending
+      const dateA = a.submitted_at || a.created_at || '';
+      const dateB = b.submitted_at || b.created_at || '';
+      return dateB.localeCompare(dateA);
+    });
+  }, [completedReviews, pendingAssignments]);
 
-  // Fetch assigned categories
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['reviewer-categories', reviewerId],
-    queryFn: async () => {
-      if (!reviewerId) return [];
-      const { data, error } = await supabase
-        .from('reviewer_categories')
-        .select(`
-          *,
-          category:categories!category_id(name)
-        `)
-        .eq('reviewer_id', reviewerId);
-      if (error) {
-        console.warn('Error fetching categories:', error);
-        return [];
-      }
-      return (data || []).map((item: any) => item.category?.name || 'Unknown');
-    },
-    enabled: !!reviewerId,
-  });
-
-  // Calculate stats (only for completed reviews)
-  const completedReviews = reviews.filter((r: any) => r.status === 'completed');
-  const stats = {
-    totalReviews: completedReviews.length,
-    totalAssignments: reviews.length, // Includes pending + completed
-    workload,
-    averageScore: completedReviews.length > 0
-      ? completedReviews.reduce((sum: number, r: any) => sum + (parseFloat(r.overall_score) || 0), 0) / completedReviews.length
-      : 0,
-    recommendations: {
-      approve: completedReviews.filter((r: any) => r.recommendation === 'approve').length,
-      reject: completedReviews.filter((r: any) => r.recommendation === 'reject').length,
-      request_info: completedReviews.filter((r: any) => r.recommendation === 'request_info').length,
-    },
-  };
+  // Calculate stats (using data from RPC)
+  const stats = useMemo(() => {
+    const completed = completedReviews;
+    return {
+      totalReviews: reviewerDetails?.total_reviews || 0,
+      totalAssignments: reviewerDetails?.total_assignments || 0,
+      workload: reviewerDetails?.workload || 0,
+      averageScore: reviewerDetails?.average_score || 0,
+      recommendations: {
+        approve: completed.filter((r: any) => r.recommendation === 'approve').length,
+        reject: completed.filter((r: any) => r.recommendation === 'reject').length,
+        request_info: completed.filter((r: any) => r.recommendation === 'request_info').length,
+      },
+    };
+  }, [reviewerDetails, completedReviews]);
 
   // Define columns for the reviews table
   const reviewColumns: ColumnDef<any>[] = useMemo(() => [
@@ -396,7 +294,7 @@ export const ReviewerDetails = () => {
     },
   ], []);
 
-  if (isLoadingReviewer) {
+  if (isLoadingDetails) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-10 w-64" />
@@ -410,7 +308,7 @@ export const ReviewerDetails = () => {
     );
   }
 
-  if (reviewerError || (!isLoadingReviewer && !reviewer)) {
+  if (detailsError || (!isLoadingDetails && !reviewer)) {
     return (
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate('/admin/review-management')}>
@@ -420,8 +318,8 @@ export const ReviewerDetails = () => {
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground">
-              {reviewerError 
-                ? `Error loading reviewer: ${reviewerError instanceof Error ? reviewerError.message : 'Unknown error'}`
+              {detailsError 
+                ? `Error loading reviewer: ${detailsError instanceof Error ? detailsError.message : 'Unknown error'}`
                 : 'Reviewer not found'}
             </p>
             {reviewerId && (
@@ -444,7 +342,7 @@ export const ReviewerDetails = () => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">
-            {reviewer.first_name} {reviewer.last_name}
+            {reviewer?.first_name} {reviewer?.last_name}
           </h1>
           <p className="text-muted-foreground">Reviewer Details</p>
         </div>
@@ -495,7 +393,7 @@ export const ReviewerDetails = () => {
           <CardContent>
             <div className="text-2xl font-bold">{categories.length}</div>
             <div className="flex flex-wrap gap-1 mt-2">
-              {isLoadingCategories ? (
+              {isLoadingDetails ? (
                 <Skeleton className="h-5 w-20" />
               ) : categories.length > 0 ? (
                 categories.slice(0, 3).map((cat: string) => (
@@ -555,7 +453,7 @@ export const ReviewerDetails = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoadingReviews ? (
+          {isLoadingDetails ? (
             <div className="space-y-2">
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />

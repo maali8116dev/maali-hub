@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 serve(async (req)=>{
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      headers: corsHeaders
+      headers: getCorsHeaders(req)
     });
   }
   try {
@@ -41,7 +38,7 @@ serve(async (req)=>{
       }), {
         status: 401,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -57,7 +54,7 @@ serve(async (req)=>{
       }), {
         status: 500,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -81,7 +78,7 @@ serve(async (req)=>{
       }), {
         status: 401,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -94,7 +91,7 @@ serve(async (req)=>{
       }), {
         status: 401,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -109,7 +106,7 @@ serve(async (req)=>{
       }), {
         status: 500,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -146,7 +143,7 @@ serve(async (req)=>{
       }), {
         status: 403,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -162,7 +159,7 @@ serve(async (req)=>{
       }), {
         status: 400,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -174,7 +171,7 @@ serve(async (req)=>{
       }), {
         status: 400,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -196,7 +193,7 @@ serve(async (req)=>{
           }), {
             status: 500,
             headers: {
-              ...corsHeaders,
+              ...getCorsHeaders(req),
               "Content-Type": "application/json"
             }
           });
@@ -209,7 +206,7 @@ serve(async (req)=>{
         }), {
           status: 200,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             "Content-Type": "application/json"
           }
         });
@@ -219,7 +216,7 @@ serve(async (req)=>{
         }), {
           status: 500,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             "Content-Type": "application/json"
           }
         });
@@ -238,7 +235,7 @@ serve(async (req)=>{
           }), {
             status: 500,
             headers: {
-              ...corsHeaders,
+              ...getCorsHeaders(req),
               "Content-Type": "application/json"
             }
           });
@@ -252,7 +249,7 @@ serve(async (req)=>{
         }), {
           status: 200,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             "Content-Type": "application/json"
           }
         });
@@ -262,7 +259,7 @@ serve(async (req)=>{
         }), {
           status: 500,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             "Content-Type": "application/json"
           }
         });
@@ -273,7 +270,7 @@ serve(async (req)=>{
       }), {
         status: 400,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           "Content-Type": "application/json"
         }
       });
@@ -285,7 +282,7 @@ serve(async (req)=>{
     }), {
       status: 500,
       headers: {
-        ...corsHeaders,
+        ...getCorsHeaders(req),
         "Content-Type": "application/json"
       }
     });

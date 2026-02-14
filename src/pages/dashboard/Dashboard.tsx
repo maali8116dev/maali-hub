@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
 import { useApplications, ApplicationWithProject } from "@/hooks/useApplications";
+import { useUserDashboardStats } from "@/hooks/useUserDashboardStats";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('common');
   const { data: applications, isLoading: isLoadingApplications } = useApplications();
+  const { data: dashboardStats, isLoading: isLoadingDashboardStats } = useUserDashboardStats();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   const { isIncomplete, completionPercentage } = useProfileCompletion();
   const { user } = useAuth();
@@ -35,8 +37,17 @@ const Dashboard = () => {
     setDismissedPrompt(dismissed === 'true');
   }, []);
 
-  // Calculate stats from real applications
+  // Use RPC stats (more efficient) with fallback to calculated stats
   const stats = useMemo(() => {
+    if (dashboardStats) {
+      return {
+        totalApplications: dashboardStats.totalApplications,
+        pending: dashboardStats.pendingApplications,
+        approved: dashboardStats.approvedApplications,
+        rejected: dashboardStats.rejectedApplications,
+      };
+    }
+    // Fallback to calculated stats from applications (for backward compatibility)
     if (!applications) {
       return { totalApplications: 0, pending: 0, approved: 0, rejected: 0 };
     }
@@ -46,7 +57,7 @@ const Dashboard = () => {
       approved: applications.filter((app) => app.status === "approved").length,
       rejected: applications.filter((app) => app.status === "rejected").length,
     };
-  }, [applications]);
+  }, [dashboardStats, applications]);
 
   // Get recent applications (last 3)
   const recentApplications = useMemo(() => {
@@ -86,7 +97,7 @@ const Dashboard = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const isLoadingStats = isLoadingApplications;
+  const isLoadingStats = isLoadingApplications || isLoadingDashboardStats;
 
   const handleDismissPrompt = () => {
     setDismissedPrompt(true);

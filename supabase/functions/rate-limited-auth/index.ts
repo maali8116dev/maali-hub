@@ -1,11 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 /** Allowed auth operations. Config is read from the rate_limit_config table. */
 const ALLOWED_OPERATIONS = new Set([
@@ -42,7 +37,7 @@ function parseClientIP(req: Request): string | null {
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(req) });
   }
 
   try {
@@ -55,14 +50,14 @@ serve(async (req: Request) => {
     if (!ALLOWED_OPERATIONS.has(operation as string)) {
       return new Response(
         JSON.stringify({ error: "Invalid operation", code: "INVALID_OPERATION" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
       );
     }
 
     if (!email) {
       return new Response(
         JSON.stringify({ error: "Email is required", code: "MISSING_EMAIL" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
       );
     }
 
@@ -126,7 +121,7 @@ serve(async (req: Request) => {
         {
           status: 429,
           headers: {
-            ...corsHeaders,
+            ...getCorsHeaders(req),
             "Content-Type": "application/json",
             ...(resetAt ? { "Retry-After": String(Math.ceil((new Date(resetAt).getTime() - Date.now()) / 1000)) } : {}),
           },
@@ -149,7 +144,7 @@ serve(async (req: Request) => {
         if (!password) {
           return new Response(
             JSON.stringify({ error: "Password is required", code: "MISSING_PASSWORD" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
           );
         }
         result = await supabase.auth.signInWithPassword({ email, password });
@@ -159,7 +154,7 @@ serve(async (req: Request) => {
         if (!password) {
           return new Response(
             JSON.stringify({ error: "Password is required", code: "MISSING_PASSWORD" }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
           );
         }
         result = await supabase.auth.signUp({
@@ -187,7 +182,7 @@ serve(async (req: Request) => {
       default:
         return new Response(
           JSON.stringify({ error: "Invalid operation", code: "INVALID_OPERATION" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
         );
     }
 
@@ -199,14 +194,14 @@ serve(async (req: Request) => {
         }),
         {
           status: result.error.status || 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
 
     return new Response(
       JSON.stringify({ data: result.data }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
     );
   } catch (error: unknown) {
     console.error("rate-limited-auth error:", error);
@@ -215,7 +210,7 @@ serve(async (req: Request) => {
         error: error instanceof Error ? error.message : "Internal server error",
         code: "INTERNAL_ERROR",
       }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
     );
   }
 });

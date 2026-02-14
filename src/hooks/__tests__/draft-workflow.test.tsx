@@ -19,12 +19,13 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 /**
- * Integration test for draft workflow
+ * Unit test for draft workflow (mocked)
  * Tests: Create Draft → Auto-save → Load Draft → Submit Application
  * 
- * This test focuses on business logic without UI rendering
+ * This test focuses on business logic without UI rendering.
+ * For real database integration tests, see the integration test suite.
  */
-describe('Draft Workflow Integration', () => {
+describe('Draft Workflow', () => {
   const mockUser = {
     id: 'user-123',
     email: 'test@example.com',
