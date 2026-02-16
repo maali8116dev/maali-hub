@@ -204,6 +204,15 @@ describe('useAutoSaveDraft', () => {
       };
 
       // Second save updates the draft
+      const mockDraftGuardQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({
+          data: { is_draft: true },
+          error: null,
+        }),
+      };
+
       const mockUpdateQuery = {
         update: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
@@ -220,7 +229,8 @@ describe('useAutoSaveDraft', () => {
           callCount++;
           if (callCount === 1) return mockCheckQuery; // First save: check
           if (callCount === 2) return mockInsertQuery; // First save: insert
-          if (callCount === 3) return mockUpdateQuery; // Second save: update
+          if (callCount === 3) return mockDraftGuardQuery; // Second save: guard check
+          if (callCount === 4) return mockUpdateQuery; // Second save: update
           return mockUpdateQuery;
         }
         return mockCheckQuery;

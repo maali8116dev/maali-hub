@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
 import { emailSchema } from "@/lib/emailValidation";
 import { rateLimitedAuth } from "@/lib/rateLimitedAuth";
+import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 
 // Form schemas
 const signInSchema = z.object({
@@ -26,16 +27,28 @@ const signUpSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: emailSchema,
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character"),
+  passwordConfirmation: z.string().min(8, "Password confirmation is required"),
 }).refine((data) => data.password === data.passwordConfirmation, {
   message: "Passwords do not match",
   path: ["passwordConfirmation"],
 });
 
 const resetPasswordSchema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character"),
+  passwordConfirmation: z.string().min(8, "Password confirmation is required"),
 }).refine((data) => data.password === data.passwordConfirmation, {
   message: "Passwords do not match",
   path: ["passwordConfirmation"],
@@ -661,6 +674,9 @@ const Auth = () => {
                   iconPosition="left"
                   required
                 />
+                <PasswordStrengthIndicator
+                  password={resetPasswordForm.watch("password") || ""}
+                />
                 <CustomFormField
                   control={resetPasswordForm.control}
                   name="passwordConfirmation"
@@ -895,6 +911,9 @@ const Auth = () => {
                     icon={Lock}
                     iconPosition="left"
                     required
+                  />
+                  <PasswordStrengthIndicator
+                    password={signUpForm.watch("password") || ""}
                   />
                   <CustomFormField
                     control={signUpForm.control}

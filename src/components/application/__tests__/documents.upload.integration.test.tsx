@@ -367,7 +367,7 @@ describe('Document Upload - Real Integration Tests', () => {
 
     console.log(`✅ Uploaded ${results.length} documents`);
     console.log(`   Document IDs: ${results.map(r => r.id).join(', ')}`);
-  });
+  }, 20000);
 
   it('should handle different file types (PDF, DOC, TXT)', async () => {
     if (!testUser) {
@@ -406,7 +406,7 @@ describe('Document Upload - Real Integration Tests', () => {
     expect(dbDocs?.find(d => d.file_type === 'text/plain')).toBeDefined();
 
     console.log(`✅ Uploaded 3 different file types`);
-  });
+  }, 20000);
 
   it('should verify files are accessible in storage', async () => {
     if (!testUser) {

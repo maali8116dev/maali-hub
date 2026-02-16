@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
+    rpc: vi.fn(),
   },
 }));
 
@@ -34,7 +35,7 @@ describe('useProjects', () => {
         id: 1,
         title: 'Test Project',
         description: 'Test Description',
-        category: 'Technology',
+        categories: { name: 'Technology' },
         status: 'open',
         deadline: '2024-12-31',
         funding_amount: '$50,000',
@@ -52,22 +53,16 @@ describe('useProjects', () => {
       },
     ];
 
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      neq: vi.fn().mockReturnThis(),
-      ilike: vi.fn().mockReturnThis(),
-      or: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
-    mockQuery.range.mockResolvedValue({
-      data: mockProjects,
+    (supabase.rpc as any).mockResolvedValue({
+      data: [
+        {
+          projects: mockProjects,
+          total_count: 1,
+          page: 1,
+          total_pages: 1,
+        },
+      ],
       error: null,
-      count: 1,
     });
 
     const { result } = renderHook(() => useProjects(), {
@@ -84,86 +79,61 @@ describe('useProjects', () => {
   });
 
   it('applies category filter', async () => {
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({
-        data: [],
-        error: null,
-        count: 0,
-      }),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    (supabase.rpc as any).mockResolvedValue({
+      data: [{ projects: [], total_count: 0, page: 1, total_pages: 0 }],
+      error: null,
+    });
 
     renderHook(() => useProjects({ category: 'Technology' }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(mockQuery.eq).toHaveBeenCalledWith('categories.name', 'Technology');
+      expect(supabase.rpc).toHaveBeenCalledWith('get_projects_with_filters', expect.objectContaining({
+        p_category: 'Technology',
+      }));
     });
   });
 
   it('applies status filter', async () => {
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({
-        data: [],
-        error: null,
-        count: 0,
-      }),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    (supabase.rpc as any).mockResolvedValue({
+      data: [{ projects: [], total_count: 0, page: 1, total_pages: 0 }],
+      error: null,
+    });
 
     renderHook(() => useProjects({ status: 'open' }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(mockQuery.eq).toHaveBeenCalledWith('status', 'open');
+      expect(supabase.rpc).toHaveBeenCalledWith('get_projects_with_filters', expect.objectContaining({
+        p_status: 'open',
+      }));
     });
   });
 
   it('applies search filter', async () => {
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      or: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({
-        data: [],
-        error: null,
-        count: 0,
-      }),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    (supabase.rpc as any).mockResolvedValue({
+      data: [{ projects: [], total_count: 0, page: 1, total_pages: 0 }],
+      error: null,
+    });
 
     renderHook(() => useProjects({ search: 'test' }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(mockQuery.or).toHaveBeenCalled();
+      expect(supabase.rpc).toHaveBeenCalledWith('get_projects_with_filters', expect.objectContaining({
+        p_search: 'test',
+      }));
     });
   });
 
   it('handles pagination correctly', async () => {
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockResolvedValue({
-        data: [],
-        error: null,
-        count: 20,
-      }),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    (supabase.rpc as any).mockResolvedValue({
+      data: [{ projects: [], total_count: 20, page: 2, total_pages: 2 }],
+      error: null,
+    });
 
     const { result } = renderHook(
       () => useProjects({ page: 2, itemsPerPage: 10 }),
@@ -176,20 +146,19 @@ describe('useProjects', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    // Should calculate offset as (2-1) * 10 = 10
-    expect(mockQuery.range).toHaveBeenCalledWith(10, 19);
+    expect(supabase.rpc).toHaveBeenCalledWith('get_projects_with_filters', expect.objectContaining({
+      p_page: 2,
+      p_page_size: 10,
+    }));
     expect(result.current.data?.page).toBe(2);
     expect(result.current.data?.totalPages).toBe(2);
   });
 
   it('handles errors gracefully', async () => {
-    const mockQuery = {
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockRejectedValue(new Error('Database error')),
-    };
-
-    (supabase.from as any).mockReturnValue(mockQuery);
+    (supabase.rpc as any).mockResolvedValue({
+      data: null,
+      error: new Error('Database error'),
+    });
 
     const { result } = renderHook(() => useProjects(), {
       wrapper: createWrapper(),

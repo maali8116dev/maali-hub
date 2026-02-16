@@ -7,12 +7,14 @@ import { useApplications } from '@/hooks/useApplications';
 import { useProfile } from '@/hooks/useProfile';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserDashboardStats } from '@/hooks/useUserDashboardStats';
 
 // Mock the hooks
 vi.mock('@/hooks/useApplications');
 vi.mock('@/hooks/useProfile');
 vi.mock('@/hooks/useProfileCompletion');
 vi.mock('@/hooks/useAuth');
+vi.mock('@/hooks/useUserDashboardStats');
 vi.mock('@/components/ProfileSetupWizard', () => ({
   ProfileSetupWizard: () => <div>Profile Setup Wizard</div>,
 }));
@@ -85,6 +87,11 @@ describe('Dashboard - Data Viewing', () => {
     vi.clearAllMocks();
     (useAuth as any).mockReturnValue({
       user: { id: 'user-123', email: 'test@example.com' },
+    });
+    (useUserDashboardStats as any).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
     });
   });
 
