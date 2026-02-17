@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
-import { rateLimitedAuth } from "@/lib/rateLimitedAuth";
+import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 
 // Form schemas
@@ -204,27 +204,28 @@ const Auth = () => {
 
       const redirectUrl = `${window.location.origin}/dashboard`;
 
-      // Check rate limit via Edge Function first
-      const rlResult = await rateLimitedAuth("sign_up", {
-        email: data.email,
-        password: data.password,
-        options: {
+      // Use rateLimitedSignUp which handles rate limiting AND establishes local session
+      // This prevents double signup (Edge Function creates user, then we establish session)
+      const result = await rateLimitedSignUp(
+        data.email,
+        data.password,
+        {
           emailRedirectTo: redirectUrl,
           data: {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-        },
-      });
+        }
+      );
 
-      if (rlResult.error) {
-        if (rlResult.error.isRateLimited) {
+      if (result.error) {
+        if (result.error.isRateLimited) {
           toast({
             title: "Too many attempts",
-            description: rlResult.error.message,
+            description: result.error.message,
             variant: "destructive",
           });
-        } else if (rlResult.error.message.includes("already registered")) {
+        } else if (result.error.message.includes("already registered") || result.error.message.includes("already exists")) {
           toast({
             title: "Account already exists",
             description: "Please sign in with your existing account or use a different email.",
@@ -233,7 +234,7 @@ const Auth = () => {
         } else {
           toast({
             title: "Sign up failed",
-            description: rlResult.error.message,
+            description: result.error.message,
             variant: "destructive",
           });
         }
@@ -241,35 +242,10 @@ const Auth = () => {
         return;
       }
 
-      // Rate limit passed — now do the real sign-up via the Supabase client
-      // so the local session is established.
-      const { data: signUpData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-          },
-        },
-      });
+      // Get signup data from result
+      const signUpData = result.data as { user: any; session: any } | null;
 
-      if (error) {
-        if (error.message.includes("already registered")) {
-          toast({
-            title: "Account already exists",
-            description: "Please sign in with your existing account or use a different email.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Sign up failed",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
+      if (signUpData) {
         // Check if user was automatically signed in (session exists)
         const hasSession = !!signUpData?.session;
         const newUser = signUpData?.user;
@@ -341,10 +317,14 @@ const Auth = () => {
             
             if (signInError) {
               // If sign-in fails, user needs to verify email first
+              // But still redirect to dashboard - they can verify email from there
               toast({
                 title: "Account created!",
                 description: "Please check your email to verify your account. You can access the dashboard after verification.",
               });
+              signUpForm.reset();
+              localStorage.setItem('justSignedUp', 'true');
+              navigate(getReturnUrl());
             } else {
               // Successfully signed in (Supabase allows unverified sign-ins)
               toast({
@@ -356,14 +336,25 @@ const Auth = () => {
               navigate(getReturnUrl());
             }
           } catch (err) {
-            // Fallback: show message but don't redirect
+            // Fallback: show message but still redirect
             toast({
               title: "Account created!",
               description: "Please check your email to verify your account.",
             });
+            signUpForm.reset();
+            localStorage.setItem('justSignedUp', 'true');
+            navigate(getReturnUrl());
           }
-          signUpForm.reset();
         }
+      } else {
+        // No signup data returned - should not happen, but handle gracefully
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
+        signUpForm.reset();
+        localStorage.setItem('justSignedUp', 'true');
+        navigate(getReturnUrl());
       }
     } catch (error) {
       toast({

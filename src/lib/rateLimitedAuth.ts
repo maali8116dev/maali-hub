@@ -119,6 +119,9 @@ export async function rateLimitedSignIn(email: string, password: string) {
 /**
  * Convenience: calls the Edge Function for sign-up, then establishes
  * the local Supabase session.
+ * 
+ * If signUp fails because user already exists (Edge Function created it),
+ * we try to sign in instead to establish the session.
  */
 export async function rateLimitedSignUp(
   email: string,
@@ -137,6 +140,29 @@ export async function rateLimitedSignUp(
   });
 
   if (error) {
+    // If signUp fails because user already exists (Edge Function created it),
+    // try to sign in instead to establish the session
+    if (error.message.includes("already registered") || error.message.includes("already exists")) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        return {
+          data: null,
+          error: {
+            message: signInError.message,
+            code: "AUTH_ERROR",
+            isRateLimited: false,
+          },
+        };
+      }
+
+      // Return sign-in data in the same format as sign-up
+      return { data: signInData as any, error: null };
+    }
+
     return {
       data: null,
       error: {
