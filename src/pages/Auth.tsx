@@ -13,7 +13,7 @@ import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
-import { emailSchema } from "@/lib/emailValidation";
+import { emailSchema, validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 
@@ -190,6 +190,18 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Validate email with Abstract API before proceeding
+      const emailValidation = await validateEmail(data.email);
+      if (!emailValidation.valid) {
+        toast({
+          title: "Invalid email",
+          description: emailValidation.message || "Please use a valid email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const redirectUrl = `${window.location.origin}/dashboard`;
 
       // Check rate limit via Edge Function first

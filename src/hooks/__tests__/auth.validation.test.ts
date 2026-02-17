@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import * as z from 'zod';
@@ -46,8 +46,20 @@ const TEST_USER_EMAIL = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.co
 const TEST_USER_PASSWORD = import.meta.env.VITE_TEST_USER_PASSWORD || 'testpassword123';
 
 describe('Auth Validation - Business Logic', () => {
+  // Mock fetch for Abstract API
+  const originalFetch = global.fetch;
+  
+  beforeEach(() => {
+    global.fetch = vi.fn();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.clearAllMocks();
+  });
+
   describe('Email Validation', () => {
-    it('should validate legitimate email addresses', () => {
+    it('should validate legitimate email addresses', async () => {
       const validEmails = [
         'user@gmail.com',
         'test@outlook.com',
@@ -56,14 +68,14 @@ describe('Auth Validation - Business Logic', () => {
         'user@icloud.com',
       ];
 
-      validEmails.forEach(email => {
-        const result = validateEmail(email);
+      for (const email of validEmails) {
+        const result = await validateEmail(email);
         expect(result.valid).toBe(true);
         expect(result.message).toBeUndefined();
-      });
+      }
     });
 
-    it('should reject blocked email domains', () => {
+    it('should reject blocked email domains', async () => {
       const blockedEmails = [
         'test@test.com',
         'user@example.com',
@@ -71,26 +83,44 @@ describe('Auth Validation - Business Logic', () => {
         'user@test.email',
       ];
 
-      blockedEmails.forEach(email => {
-        const result = validateEmail(email);
+      for (const email of blockedEmails) {
+        const result = await validateEmail(email);
         expect(result.valid).toBe(false);
         expect(result.message).toContain('not allowed');
-      });
+      }
     });
 
-    it('should reject disposable email addresses', () => {
-      // Common disposable email domains
-      const disposableEmails = [
-        'test@10minutemail.com',
-        'user@tempmail.com',
-        'test@guerrillamail.com',
+    it('should reject disposable email addresses', async () => {
+      // Mock Abstract API response for disposable emails
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          email: 'test@10minutemail.com',
+          is_valid_format: { value: true, text: 'VALID_FORMAT' },
+          is_disposable_email: { value: true, text: 'DISPOSABLE' },
+          deliverability: 'UNDELIVERABLE',
+          is_mx_found: { value: false, text: 'NO_MX_RECORDS' },
+        }),
+      });
+
+      const result = await validateEmail('test@10minutemail.com');
+      expect(result.valid).toBe(false);
+      expect(result.message).toContain('Temporary email');
+    });
+
+    it('should validate educational domains without API call', async () => {
+      const educationalEmails = [
+        'user@ma.nibs.edu.gh',
+        'student@university.edu',
+        'researcher@college.ac.uk',
       ];
 
-      disposableEmails.forEach(email => {
-        const result = validateEmail(email);
-        expect(result.valid).toBe(false);
-        expect(result.message).toContain('Temporary email');
-      });
+      for (const email of educationalEmails) {
+        const result = await validateEmail(email);
+        expect(result.valid).toBe(true);
+        // Should not call API for educational domains
+        expect(global.fetch).not.toHaveBeenCalled();
+      }
     });
 
     it('should validate email schema with Zod', () => {
@@ -219,8 +249,10 @@ describe('Auth Validation - Business Logic', () => {
       expect(() => signUpSchema.parse(invalidData)).toThrow();
     });
 
-    it('should reject disposable email addresses in sign up', () => {
-      const invalidData = {
+    it('should allow disposable email addresses in schema (validation happens async)', () => {
+      // Note: emailSchema only does synchronous validation (format + blocklist)
+      // Disposable email checking happens via async validateEmail() in Auth.tsx
+      const dataWithDisposableEmail = {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@10minutemail.com',
@@ -228,7 +260,10 @@ describe('Auth Validation - Business Logic', () => {
         passwordConfirmation: 'password123',
       };
 
-      expect(() => signUpSchema.parse(invalidData)).toThrow();
+      // Schema should accept it (format is valid, not in blocklist)
+      expect(() => signUpSchema.parse(dataWithDisposableEmail)).not.toThrow();
+      
+      // But async validateEmail should reject it (tested separately in Email Validation section)
     });
   });
 
@@ -277,30 +312,30 @@ describe('Auth Validation - Business Logic', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle email with special characters', () => {
+    it('should handle email with special characters', async () => {
       const validEmails = [
         'user.name@gmail.com',
         'user+tag@gmail.com',
         'user_name@outlook.com',
       ];
 
-      validEmails.forEach(email => {
-        const result = validateEmail(email);
+      for (const email of validEmails) {
+        const result = await validateEmail(email);
         expect(result.valid).toBe(true);
-      });
+      }
     });
 
-    it('should handle case-insensitive email validation', () => {
+    it('should handle case-insensitive email validation', async () => {
       const emails = [
         'USER@GMAIL.COM',
         'User@Gmail.Com',
         'user@gmail.com',
       ];
 
-      emails.forEach(email => {
-        const result = validateEmail(email);
+      for (const email of emails) {
+        const result = await validateEmail(email);
         expect(result.valid).toBe(true);
-      });
+      }
     });
 
     it('should validate minimum password length requirements', () => {
