@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 // List of blocked domains (test emails, common typos, etc.)
 const BLOCKED_DOMAINS = [
@@ -119,7 +120,7 @@ interface AbstractEmailValidationResponse {
 }
 
 /**
- * Validate email using Abstract API
+ * Validate email using server-side edge function (Abstract API)
  * Returns validation result with error message if invalid
  */
 export const validateEmail = async (
@@ -148,66 +149,23 @@ export const validateEmail = async (
     return { valid: true };
   }
 
-  // If no API key, skip validation (fallback for development)
-  const apiKey = import.meta.env.VITE_ABSTRACT_API_KEY;
-  if (!apiKey) {
-    console.warn("Abstract API key not configured, skipping email validation");
-    return { valid: true };
-  }
-
   try {
-    // Call Abstract API for validation
-    const response = await fetch(
-      `https://emailvalidation.abstractapi.com/v1/?api_key=${apiKey}&email=${encodeURIComponent(email)}`
-    );
+    const { data, error } = await supabase.functions.invoke('validate-email', {
+      body: { email },
+    });
 
-    if (!response.ok) {
-      console.error(`Abstract API error: ${response.status} ${response.statusText}`);
-      // On API error, be permissive to avoid blocking legitimate users
-      return { valid: true };
+    if (error) {
+      console.error("Email validation edge function error:", error);
+      return { valid: false, message: "Email validation failed. Please try again." };
     }
 
-    const data: AbstractEmailValidationResponse = await response.json();
-
-    // Check format validity first
-    if (!data.is_valid_format.value) {
-      return { 
-        valid: false, 
-        message: "Invalid email address format. Please check and try again." 
-      };
-    }
-
-    // Check if disposable email
-    if (data.is_disposable_email.value) {
-      return { 
-        valid: false, 
-        message: "Temporary email addresses are not allowed. Please use a valid email address." 
-      };
-    }
-
-    // Check deliverability
-    // Abstract API returns: "DELIVERABLE", "UNDELIVERABLE", "RISKY", "UNKNOWN"
-    if (data.deliverability === "UNDELIVERABLE") {
-      return { 
-        valid: false, 
-        message: "This email address cannot receive emails. Please use a valid email address." 
-      };
-    }
-
-    // If MX records not found, it's likely invalid
-    if (!data.is_mx_found.value) {
-      return { 
-        valid: false, 
-        message: "Invalid email domain. Please check and try again." 
-      };
-    }
-
-    // Email is valid
-    return { valid: true };
+    return { 
+      valid: data.valid, 
+      message: data.message 
+    };
   } catch (error) {
-    // On API error, be permissive to avoid blocking legitimate users
-    console.error("Abstract API error:", error);
-    return { valid: true };
+    console.error("Email validation error:", error);
+    return { valid: false, message: "Email validation failed. Please try again." };
   }
 };
 
