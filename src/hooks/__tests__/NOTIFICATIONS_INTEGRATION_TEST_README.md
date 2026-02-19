@@ -14,8 +14,16 @@ This file contains integration tests for the notifications system that interact 
 
 3. **Test User**: The tests will attempt to:
    - Use an existing authenticated session
-   - Sign in with `test@example.com` / `testpassword123`
-   - Create a new test user if authentication fails
+   - Sign in with seeded test user `applicant1@maali.test` / `TestPassword123!` (from seed script)
+   - Fall back to `applicant2@maali.test` if first fails
+   - Use `VITE_TEST_USER_ID` environment variable if set
+   - **Last resort**: Create a new test user (will be cleaned up automatically)
+   
+   **Recommended**: Run the seed script first:
+   ```bash
+   npm run seed:users:local  # For local Supabase
+   npm run seed:users        # For remote Supabase
+   ```
 
 ## Running the Tests
 
@@ -64,7 +72,11 @@ After running the tests, you can verify the results in your Supabase dashboard:
 
 ## Cleanup
 
-The tests automatically clean up created notifications in the `afterAll` hook. However, if tests fail or are interrupted, you may need to manually delete test notifications:
+The tests automatically clean up:
+- ✅ **Created notifications** in the `afterAll` hook
+- ✅ **Test users** created during tests (if SERVICE_ROLE_KEY is available)
+
+However, if tests fail or are interrupted, you may need to manually clean up:
 
 ```sql
 -- Delete test notifications (adjust user_id as needed)
@@ -72,7 +84,14 @@ DELETE FROM notifications
 WHERE title LIKE 'Test Notification%' 
    OR title LIKE 'Notification to%'
    OR title LIKE 'Notification with Metadata%';
+
+-- Delete test users created by tests (if any)
+-- Note: Seeded users (applicant1@maali.test, etc.) are NOT deleted
+DELETE FROM auth.users 
+WHERE email LIKE 'test-notifications-%@example.com';
 ```
+
+**Note**: Seeded users from `scripts/seed-users-and-reviewers.js` are **NOT** deleted by tests. They are managed by the seed script's cleanup function.
 
 ## Important Notes
 
@@ -84,8 +103,10 @@ WHERE title LIKE 'Test Notification%'
 ## Troubleshooting
 
 ### "Could not authenticate test user"
-- Create a test user in your Supabase dashboard
-- Or update the test credentials in the `beforeAll` hook
+- **Recommended**: Run the seed script first: `npm run seed:users:local` (or `npm run seed:users`)
+- Or set `VITE_TEST_USER_ID` environment variable with an existing user ID
+- Or create a test user manually in Supabase dashboard
+- Or sign in to the app first to create a session
 
 ### "Error creating notification"
 - Verify the `create_notification` RPC function exists in your database

@@ -1189,6 +1189,31 @@ export type Database = {
           categories: Json
         }[]
       }
+      get_reviewer_applications: {
+        Args: { p_reviewer_id?: string }
+        Returns: {
+          id: string
+          applicant_name: string
+          applicant_email: string
+          project_title: string
+          project_id: number
+          submitted_at: string
+          status: string
+          funding_amount: string
+          company_name: string
+          contact_email: string
+          contact_phone: string | null
+          location: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          review_notes: string | null
+          reviewed_by_name: string | null
+          reviewer_decisions: Json
+          assignment_id: string
+          assignment_status: string
+          assigned_at: string
+        }[]
+      }
       get_reviewer_workload: {
         Args: { p_reviewer_id: string }
         Returns: number

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
-import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { useReviewerApplications } from "@/hooks/useReviewerApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Eye } from "lucide-react";
 
 const ReviewerDashboard = () => {
   const navigate = useNavigate();
-  const { data: applications = [], isLoading, error } = useAdminApplications();
+  const { data: applications = [], isLoading, error } = useReviewerApplications();
 
   // Calculate stats from real data
   const stats = useMemo(() => {

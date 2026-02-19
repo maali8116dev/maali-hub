@@ -56,6 +56,8 @@ const createNotification = async (
 describe('Notifications Integration Tests', () => {
   let testUserId: string;
   let createdNotificationIds: string[] = [];
+  let testUserEmail: string;
+  let testUserCreated = false; // Track if we created a user that needs cleanup
 
   beforeAll(async () => {
     // Try multiple authentication methods
@@ -66,40 +68,66 @@ describe('Notifications Integration Tests', () => {
     
     if (!authError && user) {
       testUserId = user.id;
+      testUserEmail = user.email || '';
       authenticated = true;
       console.log('✅ Using existing authenticated session');
     }
     
-    // Method 2: Try to sign in with test credentials
+    // Method 2: Try to sign in with seeded test user credentials
+    // Use applicant1@maali.test from seed file (password: TestPassword123!)
     if (!authenticated) {
-      console.log('Attempting to sign in with test credentials...');
+      console.log('Attempting to sign in with seeded test user...');
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: 'test@example.com',
-        password: 'testpassword123',
+        email: 'applicant1@maali.test',
+        password: 'TestPassword123!',
       });
 
       if (!signInError && signInData.user) {
         testUserId = signInData.user.id;
+        testUserEmail = 'applicant1@maali.test';
         authenticated = true;
-        console.log('✅ Signed in with test credentials');
+        console.log('✅ Signed in with seeded test user (applicant1@maali.test)');
       } else {
         console.log('Sign in failed:', signInError?.message);
+        // Try alternative seeded user
+        const { data: altSignInData, error: altSignInError } = await supabase.auth.signInWithPassword({
+          email: 'applicant2@maali.test',
+          password: 'TestPassword123!',
+        });
+        
+        if (!altSignInError && altSignInData.user) {
+          testUserId = altSignInData.user.id;
+          testUserEmail = 'applicant2@maali.test';
+          authenticated = true;
+          console.log('✅ Signed in with alternative seeded test user (applicant2@maali.test)');
+        }
       }
     }
     
-    // Method 3: Try to sign up a new test user
+    // Method 3: Use environment variable test user ID
+    if (!authenticated && import.meta.env.VITE_TEST_USER_ID) {
+      testUserId = import.meta.env.VITE_TEST_USER_ID;
+      testUserEmail = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.com';
+      authenticated = true;
+      console.log('✅ Using test user ID from environment variable');
+    }
+
+    // Method 4: Last resort - create a new test user (should be avoided)
     if (!authenticated) {
-      console.log('Attempting to create a new test user...');
+      console.log('⚠️  Warning: Creating new test user. Consider running seed script first.');
+      console.log('   Run: npm run seed:users:local (or npm run seed:users for remote)');
       const testEmail = `test-notifications-${Date.now()}@example.com`;
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: testEmail,
-        password: 'testpassword123',
+        password: 'TestPassword123!',
       });
 
       if (!signUpError && signUpData.user) {
         testUserId = signUpData.user.id;
+        testUserEmail = testEmail;
+        testUserCreated = true; // Mark for cleanup
         authenticated = true;
-        console.log(`✅ Created new test user: ${testEmail}`);
+        console.log(`✅ Created new test user: ${testEmail} (will be cleaned up after tests)`);
         console.log('Note: If email confirmation is required, you may need to confirm the email first.');
       } else {
         console.error('Sign up failed:', signUpError);
@@ -108,20 +136,12 @@ describe('Notifications Integration Tests', () => {
         }
       }
     }
-    
-    // Method 4: Use a hardcoded test user ID if available
-    // You can set this in your environment or update the test file
-    if (!authenticated && import.meta.env.VITE_TEST_USER_ID) {
-      testUserId = import.meta.env.VITE_TEST_USER_ID;
-      authenticated = true;
-      console.log('✅ Using test user ID from environment variable');
-    }
 
     if (!authenticated || !testUserId) {
       throw new Error(
         'Could not authenticate test user.\n' +
         'Please either:\n' +
-        '1. Create a test user in Supabase dashboard with email: test@example.com, password: testpassword123\n' +
+        '1. Run the seed script: npm run seed:users:local (or npm run seed:users)\n' +
         '2. Set VITE_TEST_USER_ID environment variable with an existing user ID\n' +
         '3. Sign in to the app first to create a session\n' +
         '4. Disable email confirmation in Supabase Auth settings for testing'
@@ -129,6 +149,7 @@ describe('Notifications Integration Tests', () => {
     }
 
     console.log('Test User ID:', testUserId);
+    console.log('Test User Email:', testUserEmail);
   });
 
   afterAll(async () => {
@@ -143,6 +164,45 @@ describe('Notifications Integration Tests', () => {
         console.error('Error cleaning up test notifications:', error);
       } else {
         console.log(`Cleaned up ${createdNotificationIds.length} test notifications`);
+      }
+    }
+
+    // Clean up: Delete test user if we created one (not from seed)
+    if (testUserCreated && testUserEmail) {
+      try {
+        // Get service role key for admin operations
+        const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+        
+        if (serviceRoleKey) {
+          const adminClient = createClient<Database>(
+            SUPABASE_URL,
+            serviceRoleKey,
+            {
+              auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+              }
+            }
+          );
+
+          // Find user by email
+          const { data: users } = await adminClient.auth.admin.listUsers();
+          const userToDelete = users?.users?.find(u => u.email === testUserEmail);
+          
+          if (userToDelete) {
+            const { error: deleteError } = await adminClient.auth.admin.deleteUser(userToDelete.id);
+            if (deleteError) {
+              console.error(`Error deleting test user ${testUserEmail}:`, deleteError.message);
+            } else {
+              console.log(`✅ Cleaned up test user: ${testUserEmail}`);
+            }
+          }
+        } else {
+          console.log(`⚠️  Cannot delete test user ${testUserEmail}: SERVICE_ROLE_KEY not available`);
+          console.log('   Set VITE_SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_ROLE_KEY to enable cleanup');
+        }
+      } catch (err) {
+        console.error(`Error during test user cleanup:`, err);
       }
     }
   });

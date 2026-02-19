@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
-import { useAdminApplications } from "@/hooks/useAdminApplications";
+import { useReviewerApplications } from "@/hooks/useReviewerApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
@@ -13,7 +13,7 @@ const ReviewerApplications = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("pending"); // Default to pending
 
-  const { data: applications = [], isLoading, error } = useAdminApplications();
+  const { data: applications = [], isLoading, error } = useReviewerApplications();
 
   const getStatusBadge = (status: string) => {
     switch (status) {

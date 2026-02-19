@@ -323,7 +323,7 @@ async function cleanupSeedData() {
       'reviewer.fintech@maali.test',
       'reviewer.multi@maali.test',
       'reviewer.tech2@maali.test',
-      'applicant1@maali.test',
+      'applicant1@maali.test', // Used by notification integration tests
       'applicant2@maali.test',
       'applicant3@maali.test',
       'applicant4@maali.test',
@@ -455,6 +455,7 @@ async function main() {
         businessName: 'TechStart Ghana',
         country: 'Ghana',
         bio: 'Building innovative tech solutions',
+        // Note: This user is used by notification integration tests
       },
       {
         email: 'applicant2@maali.test',
