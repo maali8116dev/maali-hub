@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Calendar, MapPin, DollarSign, Users, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, DollarSign, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -54,7 +54,6 @@ const ProjectCard = (props: ProjectCardProps) => {
   const country = isDatabaseProject(props) ? props.location : props.country;
   const fundingAmount = props.fundingAmount;
   const deadline = props.deadline;
-  const applicants = isDatabaseProject(props) ? props.currentApplicants : props.applicants;
   const status = props.status;
   const createdAt = isDatabaseProject(props) ? props.createdAt : undefined;
 
@@ -98,6 +97,17 @@ const ProjectCard = (props: ProjectCardProps) => {
     ? !isProjectOpen(status, deadline)
     : status === 'closed';
 
+  // Parse location string to handle multiple countries (comma-separated)
+  const parseLocations = (locationString: string): string[] => {
+    if (!locationString) return [];
+    return locationString
+      .split(',')
+      .map(loc => loc.trim())
+      .filter(loc => loc.length > 0);
+  };
+
+  const locations = parseLocations(country);
+
   return (
     <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-border flex flex-col h-full">
       <CardHeader className="pb-3">
@@ -121,22 +131,30 @@ const ProjectCard = (props: ProjectCardProps) => {
           {description}
         </p>
         
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>{country}</span>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <DollarSign className="h-4 w-4" />
+              <span>{fundingAmount}</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDeadline(deadline)}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <DollarSign className="h-4 w-4" />
-            <span>{fundingAmount}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDeadline(deadline)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Users className="h-4 w-4" />
-            <span>{applicants} applied</span>
+          <div className={`flex items-start gap-2 text-muted-foreground ${locations.length > 1 ? '' : ''}`}>
+            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            {locations.length > 1 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {locations.map((loc, index) => (
+                  <Badge key={index} variant="outline" className="text-xs font-normal">
+                    {loc}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <span className="break-words">{locations[0] || country}</span>
+            )}
           </div>
         </div>
       </CardContent>

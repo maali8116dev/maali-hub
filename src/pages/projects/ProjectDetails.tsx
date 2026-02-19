@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Users, FileText, Target, Edit, CheckCircle2, LogIn } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Calendar, FileText, Target, Edit, CheckCircle2, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDraft } from "@/hooks/useUserDrafts";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
@@ -242,13 +242,6 @@ const ProjectDetails = () => {
                     <Calendar className="h-5 w-5 text-muted-foreground" />
                     <span>Deadline: {formatDate(project.deadline)}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                    <span>
-                      {project.current_applicants || 0} applications
-                      {project.max_applicants && ` (max ${project.max_applicants})`}
-                    </span>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -444,24 +437,6 @@ const ProjectDetails = () => {
                     </Button>
                   </>
                 )}
-                
-                {/* Application Stats */}
-                <div className="mt-4 pt-4 border-t border-border">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Applications
-                    </span>
-                    <span className="font-medium">
-                      {project.current_applicants || 0}
-                      {project.max_applicants && (
-                        <span className="text-muted-foreground font-normal">
-                          {" "}/ {project.max_applicants}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </div>
 
                 {project.application_fee && Number(project.application_fee) > 0 && (
                   <p className="text-xs text-muted-foreground mt-3 text-center">
