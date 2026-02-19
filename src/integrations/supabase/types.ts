@@ -701,6 +701,7 @@ export type Database = {
       projects: {
         Row: {
           application_fee: number | null
+          category: string | null
           category_id: number | null
           created_at: string
           created_by: string | null
@@ -721,6 +722,7 @@ export type Database = {
         }
         Insert: {
           application_fee?: number | null
+          category?: string | null
           category_id?: number | null
           created_at?: string
           created_by?: string | null
@@ -741,6 +743,7 @@ export type Database = {
         }
         Update: {
           application_fee?: number | null
+          category?: string | null
           category_id?: number | null
           created_at?: string
           created_by?: string | null
@@ -768,6 +771,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_config: {
+        Row: {
+          created_at: string
+          description: string | null
+          max_requests: number
+          operation_type: string
+          updated_at: string
+          window_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          max_requests: number
+          operation_type: string
+          updated_at?: string
+          window_minutes: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          max_requests?: number
+          operation_type?: string
+          updated_at?: string
+          window_minutes?: number
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          ip_address: unknown
+          operation_type: string
+          updated_at: string
+          user_id: string | null
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          operation_type: string
+          updated_at?: string
+          user_id?: string | null
+          window_start: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          operation_type?: string
+          updated_at?: string
+          user_id?: string | null
+          window_start?: string
+        }
+        Relationships: []
       }
       resources: {
         Row: {
@@ -1081,6 +1144,16 @@ export type Database = {
       }
     }
     Functions: {
+      assign_reviewer_category: {
+        Args: { p_category_name: string; p_reviewer_id: string }
+        Returns: {
+          category_id: number
+          category_name: string
+          created_at: string
+          id: string
+          reviewer_id: string
+        }[]
+      }
       assign_reviewers_to_application: {
         Args: { p_application_id: string; p_num_reviewers?: number }
         Returns: {
@@ -1092,6 +1165,17 @@ export type Database = {
         Args: { p_category: string; p_scores: Json }
         Returns: number
       }
+      check_and_increment_rate_limit: {
+        Args: {
+          p_ip_address: unknown
+          p_max_requests: number
+          p_operation_type: string
+          p_user_id: string
+          p_window_minutes: number
+        }
+        Returns: Json
+      }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           p_link?: string
@@ -1108,17 +1192,84 @@ export type Database = {
         Returns: string
       }
       generate_invoice_number: { Args: never; Returns: string }
+      get_admin_applications: {
+        Args: never
+        Returns: {
+          applicant_email: string
+          applicant_name: string
+          company_name: string
+          contact_email: string
+          contact_phone: string
+          funding_amount: string
+          id: string
+          location: string
+          project_id: number
+          project_title: string
+          review_notes: string
+          reviewed_at: string
+          reviewed_by: string
+          reviewed_by_name: string
+          reviewer_decisions: Json
+          status: string
+          submitted_at: string
+        }[]
+      }
+      get_admin_stats: {
+        Args: never
+        Returns: {
+          active_projects: number
+          approved_applications: number
+          pending_applications: number
+          rejected_applications: number
+          total_applications: number
+          total_projects: number
+          total_users: number
+        }[]
+      }
+      get_all_reviewers_with_details: {
+        Args: never
+        Returns: {
+          average_score: number
+          categories: Json
+          email: string
+          first_name: string
+          last_name: string
+          reviewer_id: string
+          total_reviews: number
+          workload: number
+        }[]
+      }
       get_all_users_for_admin: {
         Args: never
         Returns: {
           applications_count: number
+          avatar_url: string
+          bio: string
+          business_name: string
+          business_sector: string
+          country: string
           email: string
+          first_name: string
           id: string
+          last_name: string
           name: string
           registered_at: string
           role: Database["public"]["Enums"]["user_role"]
           status: string
           user_id: string
+        }[]
+      }
+      get_application_assignments_with_reviewers: {
+        Args: { p_application_id: string }
+        Returns: {
+          application_id: string
+          assigned_at: string
+          id: string
+          reviewer_first_name: string
+          reviewer_id: string
+          reviewer_last_name: string
+          reviewer_user_id: string
+          status: string
         }[]
       }
       get_application_details: {
@@ -1129,6 +1280,79 @@ export type Database = {
           project: Json
         }[]
       }
+      get_application_review_scores_with_reviewers: {
+        Args: { p_application_id: string }
+        Returns: {
+          application_id: string
+          assignment_id: string
+          comments: string
+          created_at: string
+          id: string
+          overall_score: number
+          recommendation: string
+          reviewer_first_name: string
+          reviewer_id: string
+          reviewer_last_name: string
+          reviewer_user_id: string
+          scores: Json
+          submitted_at: string
+          updated_at: string
+        }[]
+      }
+      get_projects_with_filters: {
+        Args: {
+          p_category?: string
+          p_location?: string
+          p_page?: number
+          p_page_size?: number
+          p_search?: string
+          p_status?: string
+        }
+        Returns: {
+          page: number
+          projects: Json
+          total_count: number
+          total_pages: number
+        }[]
+      }
+      get_rate_limit_config: {
+        Args: { p_operation_type: string }
+        Returns: Record<string, unknown>
+      }
+      get_reviewer_assignments_with_application: {
+        Args: { p_reviewer_id: string }
+        Returns: {
+          application_id: string
+          application_status: string
+          assigned_at: string
+          assignment_id: string
+          category_id: number
+          category_name: string
+          created_at: string
+          is_draft: boolean
+          project_id: number
+          project_title: string
+          reviewer_id: string
+          status: string
+        }[]
+      }
+      get_reviewer_full_details: {
+        Args: { p_reviewer_id: string }
+        Returns: {
+          average_score: number
+          categories: Json
+          completed_reviews: Json
+          pending_assignments: Json
+          reviewer: Json
+          total_assignments: number
+          total_reviews: number
+          workload: number
+        }[]
+      }
+      get_reviewer_workload: {
+        Args: { p_reviewer_id: string }
+        Returns: number
+      }
       get_user_applications_with_projects: {
         Args: { p_user_id: string }
         Returns: {
@@ -1136,89 +1360,19 @@ export type Database = {
           project: Json
         }[]
       }
-      get_projects_with_filters: {
-        Args: {
-          p_category?: string | null
-          p_status?: string | null
-          p_location?: string | null
-          p_search?: string | null
-          p_page?: number
-          p_page_size?: number
-        }
-        Returns: {
-          projects: Json
-          total_count: number
-          page: number
-          total_pages: number
-        }[]
-      }
       get_user_dashboard_stats: {
         Args: { p_user_id: string }
         Returns: {
-          total_applications: number
-          pending_applications: number
           approved_applications: number
-          rejected_applications: number
           draft_applications: number
+          pending_applications: number
+          rejected_applications: number
+          total_applications: number
           total_projects_applied: number
         }[]
       }
-      get_all_reviewers_with_details: {
-        Args: never
-        Returns: {
-          reviewer_id: string
-          first_name: string
-          last_name: string
-          email: string
-          workload: number
-          categories: Json
-          total_reviews: number
-          average_score: number
-        }[]
-      }
-      get_reviewer_full_details: {
-        Args: { p_reviewer_id: string }
-        Returns: {
-          reviewer: Json
-          workload: number
-          total_reviews: number
-          total_assignments: number
-          average_score: number
-          completed_reviews: Json
-          pending_assignments: Json
-          categories: Json
-        }[]
-      }
-      get_reviewer_applications: {
-        Args: { p_reviewer_id?: string }
-        Returns: {
-          id: string
-          applicant_name: string
-          applicant_email: string
-          project_title: string
-          project_id: number
-          submitted_at: string
-          status: string
-          funding_amount: string
-          company_name: string
-          contact_email: string
-          contact_phone: string | null
-          location: string | null
-          reviewed_by: string | null
-          reviewed_at: string | null
-          review_notes: string | null
-          reviewed_by_name: string | null
-          reviewer_decisions: Json
-          assignment_id: string
-          assignment_status: string
-          assigned_at: string
-        }[]
-      }
-      get_reviewer_workload: {
-        Args: { p_reviewer_id: string }
-        Returns: number
-      }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
+      is_project_open: { Args: { p_project_id: number }; Returns: boolean }
       mark_all_notifications_read: {
         Args: { p_user_id: string }
         Returns: number
