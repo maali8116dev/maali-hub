@@ -154,12 +154,15 @@ export type Database = {
           full_legal_name: string | null
           funding_amount_requested: string | null
           geographic_focus: string | null
+          github_url: string | null
           id: string
           information_accurate_confirmed: boolean | null
           is_draft: boolean
           key_team_members_roles: string | null
+          linkedin_url: string | null
           location: string | null
           organization_name: string | null
+          other_social_links: string | null
           previous_grants_funding_details: string | null
           previous_grants_funding_received: boolean | null
           primary_sector_other: string | null
@@ -179,8 +182,10 @@ export type Database = {
           stripe_payment_intent_id: string | null
           target_beneficiaries: string | null
           team_size: number | null
+          twitter_url: string | null
           updated_at: string
           user_id: string | null
+          website_url: string | null
           year_established: number | null
         }
         Insert: {
@@ -200,12 +205,15 @@ export type Database = {
           full_legal_name?: string | null
           funding_amount_requested?: string | null
           geographic_focus?: string | null
+          github_url?: string | null
           id?: string
           information_accurate_confirmed?: boolean | null
           is_draft?: boolean
           key_team_members_roles?: string | null
+          linkedin_url?: string | null
           location?: string | null
           organization_name?: string | null
+          other_social_links?: string | null
           previous_grants_funding_details?: string | null
           previous_grants_funding_received?: boolean | null
           primary_sector_other?: string | null
@@ -225,8 +233,10 @@ export type Database = {
           stripe_payment_intent_id?: string | null
           target_beneficiaries?: string | null
           team_size?: number | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
           year_established?: number | null
         }
         Update: {
@@ -246,12 +256,15 @@ export type Database = {
           full_legal_name?: string | null
           funding_amount_requested?: string | null
           geographic_focus?: string | null
+          github_url?: string | null
           id?: string
           information_accurate_confirmed?: boolean | null
           is_draft?: boolean
           key_team_members_roles?: string | null
+          linkedin_url?: string | null
           location?: string | null
           organization_name?: string | null
+          other_social_links?: string | null
           previous_grants_funding_details?: string | null
           previous_grants_funding_received?: boolean | null
           primary_sector_other?: string | null
@@ -271,8 +284,10 @@ export type Database = {
           stripe_payment_intent_id?: string | null
           target_beneficiaries?: string | null
           team_size?: number | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string | null
+          website_url?: string | null
           year_established?: number | null
         }
         Relationships: [
@@ -1318,6 +1333,31 @@ export type Database = {
       get_rate_limit_config: {
         Args: { p_operation_type: string }
         Returns: Record<string, unknown>
+      }
+      get_reviewer_applications: {
+        Args: { p_reviewer_id?: string }
+        Returns: {
+          applicant_email: string
+          applicant_name: string
+          assigned_at: string
+          assignment_id: string
+          assignment_status: string
+          company_name: string
+          contact_email: string
+          contact_phone: string
+          funding_amount: string
+          id: string
+          location: string
+          project_id: number
+          project_title: string
+          review_notes: string
+          reviewed_at: string
+          reviewed_by: string
+          reviewed_by_name: string
+          reviewer_decisions: Json
+          status: string
+          submitted_at: string
+        }[]
       }
       get_reviewer_assignments_with_application: {
         Args: { p_reviewer_id: string }
