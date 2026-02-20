@@ -28,9 +28,6 @@ export interface ApplicationFormData {
   // Step 4: Project Overview
   projectTitle?: string;
   projectSummary?: string;
-  problemStatement?: string;
-  proposedSolution?: string;
-  targetBeneficiaries?: string;
   geographicFocus?: string;
   
   // Step 5: Social Links
@@ -46,15 +43,6 @@ export interface ApplicationFormData {
   reportingRequirementsAgreed?: boolean;
   dataProcessingConsented?: boolean;
   declarationDate?: Date;
-  
-  // Legacy fields (keeping for backward compatibility)
-  companyName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  location?: string;
-  projectDescription?: string;
-  businessPlan?: string;
-  teamSize?: number;
   
   // Step 7: Documents - track uploaded document IDs for this session
   uploadedDocumentIds?: string[];
@@ -72,6 +60,10 @@ interface ApplicationFormStore {
   lastSaved?: Date;
   draftId?: string;
   
+  // Selected files for document upload (not persisted - File objects can't be serialized)
+  selectedFiles: File[];
+  selectedLibraryDocIds: string[];
+  
   // Step navigation
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
@@ -87,6 +79,11 @@ interface ApplicationFormStore {
   removeUploadedDocumentId: (id: string) => void;
   clearUploadedDocumentIds: () => void;
   getUploadedDocumentIds: () => string[];
+  
+  // Selected files management (for document upload step)
+  setSelectedFiles: (files: File[]) => void;
+  setSelectedLibraryDocIds: (ids: string[]) => void;
+  clearSelectedFiles: () => void;
   
   // State management
   setDirty: (dirty: boolean) => void;
@@ -119,9 +116,6 @@ const defaultFormData: ApplicationFormData = {
   previousGrantsFundingDetails: undefined,
   projectTitle: undefined,
   projectSummary: undefined,
-  problemStatement: undefined,
-  proposedSolution: undefined,
-  targetBeneficiaries: undefined,
   geographicFocus: undefined,
   linkedinUrl: undefined,
   githubUrl: undefined,
@@ -133,13 +127,6 @@ const defaultFormData: ApplicationFormData = {
   reportingRequirementsAgreed: false,
   dataProcessingConsented: false,
   declarationDate: undefined,
-  companyName: undefined,
-  contactEmail: undefined,
-  contactPhone: undefined,
-  location: undefined,
-  projectDescription: undefined,
-  businessPlan: undefined,
-  teamSize: undefined,
   uploadedDocumentIds: [],
   paymentCompleted: false,
   paymentIntentId: undefined,
@@ -154,6 +141,8 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
       isDirty: false,
       lastSaved: undefined,
       draftId: undefined,
+      selectedFiles: [],
+      selectedLibraryDocIds: [],
 
       // Step navigation
       setCurrentStep: (step) => {
@@ -228,6 +217,19 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
         return get().formData.uploadedDocumentIds || [];
       },
 
+      // Selected files management
+      setSelectedFiles: (files) => {
+        set({ selectedFiles: files, isDirty: true });
+      },
+
+      setSelectedLibraryDocIds: (ids) => {
+        set({ selectedLibraryDocIds: ids, isDirty: true });
+      },
+
+      clearSelectedFiles: () => {
+        set({ selectedFiles: [], selectedLibraryDocIds: [], isDirty: true });
+      },
+
       // State management
       setDirty: (dirty) => set({ isDirty: dirty }),
       
@@ -246,6 +248,8 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
           isDirty: false,
           lastSaved: undefined,
           draftId: undefined,
+          selectedFiles: [],
+          selectedLibraryDocIds: [],
         });
       },
 
@@ -264,25 +268,13 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.phoneNumber
             );
           case 2:
-            // Organizational Background - only required if not Individual
-            if (formData.applicantType === 'Individual') {
-              return true; // Skip this step for individuals
-            }
-            return !!(
-              formData.yearEstablished &&
-              formData.coreMissionPurpose &&
-              formData.primarySectors &&
-              formData.primarySectors.length > 0 &&
-              formData.numberOfTeamMembers
-            );
+            // Organizational Background is optional
+            return true;
           case 3:
             // Project Overview - required fields
             return !!(
               formData.projectTitle &&
               formData.projectSummary &&
-              formData.problemStatement &&
-              formData.proposedSolution &&
-              formData.targetBeneficiaries &&
               formData.geographicFocus
             );
           case 4:
@@ -322,10 +314,13 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
     {
       name: 'maali-application-form',
       // Persist formData including uploadedDocumentIds
+      // Note: selectedFiles and selectedLibraryDocIds are NOT persisted
+      // because File objects can't be serialized. They persist in memory during navigation.
       partialize: (state) => ({
         formData: state.formData,
         currentStep: state.currentStep,
         lastSaved: state.lastSaved,
+        // Explicitly exclude selectedFiles and selectedLibraryDocIds from persistence
       }),
     }
   )

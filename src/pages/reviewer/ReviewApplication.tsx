@@ -20,6 +20,15 @@ import {
   DollarSign,
   Users,
   Download,
+  User,
+  Calendar,
+  Target,
+  Globe,
+  Link as LinkIcon,
+  CheckCircle2,
+  AlertCircle,
+  Briefcase,
+  Award,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -576,13 +585,51 @@ const ReviewApplication = () => {
             </CardHeader>
             <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                  <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-muted-foreground">Company Name</p>
-                    <p className="font-medium break-words">{application.company_name || "N/A"}</p>
+                {application.applicant_type && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Applicant Type</p>
+                      <p className="font-medium">{application.applicant_type}</p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {application.full_legal_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Full Legal Name</p>
+                      <p className="font-medium break-words">{application.full_legal_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.organization_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Organization Name</p>
+                      <p className="font-medium break-words">{application.organization_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.company_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Company Name</p>
+                      <p className="font-medium break-words">{application.company_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.registration_id_number && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Registration ID Number</p>
+                      <p className="font-medium break-words">{application.registration_id_number}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
                   <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                   <div className="min-w-0">
@@ -597,16 +644,127 @@ const ReviewApplication = () => {
                     <p className="font-medium">{application.contact_phone || "N/A"}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                  <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-muted-foreground">Location</p>
-                    <p className="font-medium">{application.location || "N/A"}</p>
+                {application.country_of_residence && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Country of Residence</p>
+                      <p className="font-medium">{application.country_of_residence}</p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {application.city_region && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">City/Region</p>
+                      <p className="font-medium">{application.city_region}</p>
+                    </div>
+                  </div>
+                )}
+                {application.location && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="font-medium">{application.location}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Organizational Background (if applicable) */}
+          {application.applicant_type && application.applicant_type !== "Individual" && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Organizational Background</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {application.year_established && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Year Established</p>
+                        <p className="font-medium">{application.year_established}</p>
+                      </div>
+                    </div>
+                  )}
+                  {application.team_size && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Team Size</p>
+                        <p className="font-medium">{application.team_size} members</p>
+                      </div>
+                    </div>
+                  )}
+                  {application.previous_grants_funding_received !== undefined && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Previous Grants/Funding Received</p>
+                        <p className="font-medium">{application.previous_grants_funding_received ? "Yes" : "No"}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {application.core_mission_purpose && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Core Mission/Purpose</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.core_mission_purpose}</p>
+                  </div>
+                )}
+                {application.primary_sectors && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Primary Sectors</Label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {Array.isArray(application.primary_sectors) ? (
+                        application.primary_sectors.map((sector: string, idx: number) => (
+                          <Badge key={idx} variant="outline">{sector}</Badge>
+                        ))
+                      ) : typeof application.primary_sectors === 'string' ? (
+                        (() => {
+                          try {
+                            const sectors = JSON.parse(application.primary_sectors);
+                            return Array.isArray(sectors) ? (
+                              sectors.map((sector: string, idx: number) => (
+                                <Badge key={idx} variant="outline">{sector}</Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline">{application.primary_sectors}</Badge>
+                            );
+                          } catch {
+                            return <Badge variant="outline">{application.primary_sectors}</Badge>;
+                          }
+                        })()
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+                {application.primary_sector_other && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Other Primary Sector</Label>
+                    <p className="mt-1 text-sm">{application.primary_sector_other}</p>
+                  </div>
+                )}
+                {application.key_team_members_roles && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Key Team Members & Roles</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.key_team_members_roles}</p>
+                  </div>
+                )}
+                {application.previous_grants_funding_details && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Previous Grants/Funding Details</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.previous_grants_funding_details}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Project Details */}
           <Card>
@@ -614,38 +772,248 @@ const ReviewApplication = () => {
               <CardTitle className="text-base sm:text-lg">Project Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-              <div>
-                <Label className="text-sm text-muted-foreground">Project Title</Label>
-                <p className="font-medium mt-1">{application.projectTitle}</p>
-              </div>
-              <div>
-                <Label className="text-sm text-muted-foreground">Project Description</Label>
-                <p className="mt-1 text-sm">{application.project_description || "N/A"}</p>
-              </div>
+              {application.project_title && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Title</Label>
+                  <p className="font-medium mt-1">{application.project_title}</p>
+                </div>
+              )}
+              {!application.project_title && application.projectTitle && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Title</Label>
+                  <p className="font-medium mt-1">{application.projectTitle}</p>
+                </div>
+              )}
+              {application.project_summary && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Summary</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.project_summary}</p>
+                </div>
+              )}
+              {application.problem_statement && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Problem Statement</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.problem_statement}</p>
+                </div>
+              )}
+              {application.proposed_solution && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Proposed Solution</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.proposed_solution}</p>
+                </div>
+              )}
+              {application.target_beneficiaries && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Target Beneficiaries</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.target_beneficiaries}</p>
+                </div>
+              )}
+              {application.geographic_focus && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Geographic Focus</Label>
+                  <p className="mt-1 text-sm">{application.geographic_focus}</p>
+                </div>
+              )}
+              {application.project_description && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Description</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.project_description}</p>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                  <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-muted-foreground">Funding Amount Requested</p>
-                    <p className="font-medium">{application.funding_amount_requested || "N/A"}</p>
+                {application.funding_amount_requested && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Funding Amount Requested</p>
+                      <p className="font-medium">{application.funding_amount_requested}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
-                  <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-muted-foreground">Team Size</p>
-                    <p className="font-medium">{application.team_size ? `${application.team_size} members` : "N/A"}</p>
+                )}
+                {application.team_size && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Team Size</p>
+                      <p className="font-medium">{application.team_size} members</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               {application.business_plan && (
                 <div>
                   <Label className="text-sm text-muted-foreground">Business Plan Summary</Label>
-                  <p className="mt-1 text-sm">{application.business_plan}</p>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.business_plan}</p>
                 </div>
               )}
             </CardContent>
           </Card>
+
+          {/* Social Links */}
+          {(application.linkedin_url || application.github_url || application.twitter_url || application.website_url || application.other_social_links) && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Social Links & Online Presence</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {application.linkedin_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">LinkedIn</p>
+                        <a 
+                          href={application.linkedin_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.linkedin_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.github_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">GitHub</p>
+                        <a 
+                          href={application.github_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.github_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.twitter_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">Twitter</p>
+                        <a 
+                          href={application.twitter_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.twitter_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.website_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">Website</p>
+                        <a 
+                          href={application.website_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.website_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {application.other_social_links && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Other Social Links</Label>
+                    <p className="mt-1 text-sm break-all">{application.other_social_links}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Compliance & Declarations */}
+          {(application.information_accurate_confirmed !== undefined || 
+            application.conflict_of_interest_declared !== undefined || 
+            application.reporting_requirements_agreed !== undefined || 
+            application.data_processing_consented !== undefined) && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Compliance & Declarations</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="space-y-2">
+                  {application.information_accurate_confirmed !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.information_accurate_confirmed ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Information Accurate Confirmed</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.information_accurate_confirmed ? "Confirmed" : "Not confirmed"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.conflict_of_interest_declared !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.conflict_of_interest_declared ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Conflict of Interest Declared</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.conflict_of_interest_declared ? "Declared" : "Not declared"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.reporting_requirements_agreed !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.reporting_requirements_agreed ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Reporting Requirements Agreed</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.reporting_requirements_agreed ? "Agreed" : "Not agreed"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.data_processing_consented !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.data_processing_consented ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Data Processing Consented</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.data_processing_consented ? "Consented" : "Not consented"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {application.declaration_date && (
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      Declaration Date: {new Date(application.declaration_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Documents */}
           {documentsLoading ? (

@@ -1,22 +1,71 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Calendar, FileText, Shield, AlertCircle } from "lucide-react";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminUserDetails = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const { data: users = [], isLoading, error } = useUsers();
+  const updateUserRole = useUpdateUserRole();
+  const [roleChangeDialogOpen, setRoleChangeDialogOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"admin" | "reviewer" | "applicant" | null>(null);
 
   const user = useMemo(() => {
     if (!userId) return null;
     return users.find((item) => item.userId === userId) || null;
   }, [users, userId]);
+
+  const handleRoleChange = (newRole: "admin" | "reviewer" | "applicant") => {
+    if (!user) return;
+    // Only show dialog if role is actually changing
+    if (newRole === user.role) return;
+    setSelectedRole(newRole);
+    setRoleChangeDialogOpen(true);
+  };
+
+  const handleConfirmRoleChange = () => {
+    if (!user || !selectedRole) return;
+    
+    // Prevent changing own role
+    if (user.userId === currentUser?.id) {
+      return;
+    }
+
+    updateUserRole.mutate(
+      { userId: user.userId, role: selectedRole },
+      {
+        onSuccess: () => {
+          setRoleChangeDialogOpen(false);
+          setSelectedRole(null);
+        },
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -177,6 +226,87 @@ const AdminUserDetails = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Role Management Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Role Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Current Role</p>
+              <p className="text-xs text-muted-foreground">
+                Change the user's role to grant different permissions
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {user.role === "admin" ? (
+                <Badge variant="secondary">Admin</Badge>
+              ) : user.role === "reviewer" ? (
+                <Badge variant="outline">Reviewer</Badge>
+              ) : (
+                <Badge variant="outline">Applicant</Badge>
+              )}
+            </div>
+          </div>
+          {user.userId !== currentUser?.id ? (
+            <div className="flex items-center gap-2">
+              <Select
+                value={user.role}
+                onValueChange={(value) =>
+                  handleRoleChange(value as "admin" | "reviewer" | "applicant")
+                }
+                disabled={updateUserRole.isPending}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="applicant">Applicant</SelectItem>
+                  <SelectItem value="reviewer">Reviewer</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+              {updateUserRole.isPending && (
+                <span className="text-sm text-muted-foreground">Updating...</span>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              You cannot change your own role.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Role Change Confirmation Dialog */}
+      <AlertDialog open={roleChangeDialogOpen} onOpenChange={setRoleChangeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change User Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change <strong>{user.name}</strong>'s role from{" "}
+              <strong>{user.role}</strong> to <strong>{selectedRole}</strong>? This will
+              immediately affect their access permissions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateUserRole.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRoleChange}
+              disabled={updateUserRole.isPending}
+            >
+              {updateUserRole.isPending ? "Updating..." : "Change Role"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -28,6 +28,9 @@ import { useProjects, useProjectCategories, useProjectLocations } from "@/hooks/
 import ProjectCard from "@/components/landing/ProjectCard";
 import { cn } from "@/lib/utils";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +39,7 @@ const Projects = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Show projects per page
+  const { user } = useAuth();
 
   // Fetch projects with filters
   const { data, isLoading, error } = useProjects({
@@ -51,6 +55,30 @@ const Projects = () => {
   // Fetch categories and locations for dropdowns
   const { data: categories = [] } = useProjectCategories();
   const { data: locations = [] } = useProjectLocations();
+
+  // Fetch approved applications for the current user
+  const { data: approvedApplications = [] } = useQuery({
+    queryKey: ["user-approved-applications", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("applications")
+        .select("project_id")
+        .eq("user_id", user.id)
+        .eq("status", "approved")
+        .eq("is_draft", false);
+
+      if (error) {
+        console.error("Error fetching approved applications:", error);
+        return [];
+      }
+      return (data || []).map(app => app.project_id);
+    },
+    enabled: !!user,
+  });
+
+  // Create a Set for O(1) lookup
+  const approvedProjectIds = new Set(approvedApplications);
 
   const projects = data?.projects || [];
   const totalPages = data?.totalPages || 0;
@@ -253,6 +281,7 @@ const Projects = () => {
                   deadline={project.deadline}
                   currentApplicants={project.currentApplicants}
                   status={project.status}
+                  hasApprovedApplication={approvedProjectIds.has(project.id)}
                 />
               ))}
             </div>

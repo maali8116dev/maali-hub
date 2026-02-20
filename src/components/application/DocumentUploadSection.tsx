@@ -31,6 +31,7 @@ import {
   type UploadedDocument 
 } from "@/hooks/useDocumentUpload";
 import { useToast } from "@/hooks/use-toast";
+import { useApplicationFormStore } from "@/stores/applicationForm";
 
 interface SelectedFile {
   file: File;
@@ -41,22 +42,58 @@ interface DocumentUploadSectionProps {
   projectId?: number;
   onFilesChange?: (files: File[]) => void;
   onLibraryDocumentsChange?: (documentIds: string[]) => void;
+  applicantType?: "Individual" | "Organization" | "Startup / SME" | "NGO / Non-profit" | "Research / Academic";
 }
 
 const DocumentUploadSection = ({ 
   projectId,
   onFilesChange,
   onLibraryDocumentsChange,
+  applicantType,
 }: DocumentUploadSectionProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
-  const [selectedLibraryDocIds, setSelectedLibraryDocIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<SelectedFile | null>(null);
   const fileIdCounter = useRef(0);
 
+  // Get selected files from store (persists across navigation)
+  const { selectedFiles: storeFiles, selectedLibraryDocIds: storeLibraryIds, setSelectedFiles, setSelectedLibraryDocIds } = useApplicationFormStore();
+  
+  // Local state for SelectedFile[] (includes IDs for UI)
+  const [selectedFiles, setSelectedFilesLocal] = useState<SelectedFile[]>([]);
+  const [selectedLibraryDocIds, setSelectedLibraryDocIdsLocal] = useState<string[]>([]);
+
   const { fetchLibraryDocuments, isLoading: isLoadingLibrary } = useDocumentUpload();
   const [libraryDocuments, setLibraryDocuments] = useState<UploadedDocument[]>([]);
+
+  // Initialize from store on mount and when navigating back (store has files but local state is empty)
+  useEffect(() => {
+    // Only sync from store if:
+    // 1. Store has files but local state is empty (navigated back), OR
+    // 2. Store files are different from what we have (external update)
+    const hasStoreFiles = storeFiles.length > 0;
+    const hasLocalFiles = selectedFiles.length > 0;
+    const storeFileNames = storeFiles.map(f => `${f.name}-${f.size}`).sort().join(',');
+    const localFileNames = selectedFiles.map(sf => `${sf.file.name}-${sf.file.size}`).sort().join(',');
+    
+    if (hasStoreFiles && (!hasLocalFiles || storeFileNames !== localFileNames)) {
+      const restoredFiles: SelectedFile[] = storeFiles.map((file, index) => ({
+        file,
+        id: `restored-${index}-${Date.now()}`,
+      }));
+      setSelectedFilesLocal(restoredFiles);
+    }
+    
+    // Sync library document IDs similarly
+    const hasStoreIds = storeLibraryIds.length > 0;
+    const hasLocalIds = selectedLibraryDocIds.length > 0;
+    const storeIdsStr = storeLibraryIds.sort().join(',');
+    const localIdsStr = selectedLibraryDocIds.sort().join(',');
+    
+    if (hasStoreIds && (!hasLocalIds || storeIdsStr !== localIdsStr)) {
+      setSelectedLibraryDocIdsLocal(storeLibraryIds);
+    }
+  }, [storeFiles, storeLibraryIds]); // Re-run when store values change
 
   // Load library documents on mount
   useEffect(() => {
@@ -67,16 +104,18 @@ const DocumentUploadSection = ({
     loadLibrary();
   }, [fetchLibraryDocuments]);
 
-  // Notify parent when files change
+  // Sync local state changes to store and notify parent
   useEffect(() => {
     const files = selectedFiles.map(sf => sf.file);
-    onFilesChange?.(files);
-  }, [selectedFiles, onFilesChange]);
+    setSelectedFiles(files); // Update store
+    onFilesChange?.(files); // Notify parent
+  }, [selectedFiles, onFilesChange, setSelectedFiles]);
 
-  // Notify parent when library documents change
+  // Sync library document changes to store and notify parent
   useEffect(() => {
-    onLibraryDocumentsChange?.(selectedLibraryDocIds);
-  }, [selectedLibraryDocIds, onLibraryDocumentsChange]);
+    setSelectedLibraryDocIds(selectedLibraryDocIds); // Update store
+    onLibraryDocumentsChange?.(selectedLibraryDocIds); // Notify parent
+  }, [selectedLibraryDocIds, onLibraryDocumentsChange, setSelectedLibraryDocIds]);
 
   const validateFile = (file: File): string | null => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -143,7 +182,7 @@ const DocumentUploadSection = ({
       }
 
       if (newFiles.length > 0) {
-        setSelectedFiles(prev => [...prev, ...newFiles]);
+        setSelectedFilesLocal(prev => [...prev, ...newFiles]);
       }
 
       // Reset input so same file can be selected again
@@ -155,7 +194,7 @@ const DocumentUploadSection = ({
 
   const handleDelete = () => {
     if (deleteConfirm) {
-      setSelectedFiles(prev => prev.filter(sf => sf.id !== deleteConfirm.id));
+      setSelectedFilesLocal(prev => prev.filter(sf => sf.id !== deleteConfirm.id));
       setDeleteConfirm(null);
     }
   };
@@ -190,14 +229,48 @@ const DocumentUploadSection = ({
 
   const handleLibraryDocToggle = (docId: string, checked: boolean) => {
     if (checked) {
-      setSelectedLibraryDocIds(prev => [...prev, docId]);
+      setSelectedLibraryDocIdsLocal(prev => [...prev, docId]);
     } else {
-      setSelectedLibraryDocIds(prev => prev.filter(id => id !== docId));
+      setSelectedLibraryDocIdsLocal(prev => prev.filter(id => id !== docId));
     }
   };
 
+  const recommendedDocuments = applicantType === "Individual"
+    ? [
+        "Government-issued ID (if requested)",
+        "Project proposal or concept note",
+        "Budget or simple financial plan",
+        "CV/portfolio or relevant experience documents",
+      ]
+    : [
+        "Registration certificate or legal incorporation document",
+        "Organization profile or mission document",
+        "Project proposal or concept note",
+        "Budget/financial plan (plus statements where available)",
+        "Team CVs and key personnel profiles",
+      ];
+
   return (
     <div className="space-y-6">
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Recommended Supporting Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Upload any documents that strengthen your application. Recommended items:
+          </p>
+          <ul className="space-y-1 text-sm">
+            {recommendedDocuments.map((item) => (
+              <li key={item} className="text-foreground">- {item}</li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground italic">
+            You can upload all files in this one dropzone. Documents are optional but strongly encouraged.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Library Documents Section */}
       {libraryDocuments.length > 0 && (
         <Card>
@@ -286,7 +359,7 @@ const DocumentUploadSection = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              PDF, DOC, DOCX, or TXT (max 10MB each)
+              PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP (max 10MB each)
             </p>
             <p className="text-xs text-muted-foreground italic">
               Files will be uploaded when you submit your application

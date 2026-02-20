@@ -98,9 +98,6 @@ export interface ApplicationPayload {
   projectOverview: {
     title: string;
     summary: string;
-    problem: string;
-    solution: string;
-    beneficiaries: string;
     geography: string;
   };
   compliance: {
@@ -138,9 +135,6 @@ export const populateFormStore = (payload: ApplicationPayload) => {
     // Project overview
     projectTitle: payload.projectOverview.title,
     projectSummary: payload.projectOverview.summary,
-    problemStatement: payload.projectOverview.problem,
-    proposedSolution: payload.projectOverview.solution,
-    targetBeneficiaries: payload.projectOverview.beneficiaries,
     geographicFocus: payload.projectOverview.geography,
     
     // Compliance

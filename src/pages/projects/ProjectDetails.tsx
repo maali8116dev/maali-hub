@@ -52,6 +52,31 @@ const ProjectDetails = () => {
   // Check if user has a draft for this project
   const { data: draft } = useProjectDraft(id ? parseInt(id) : undefined);
 
+  // Check if user already has an approved application for this project
+  const { data: existingApplication } = useQuery({
+    queryKey: ["user-project-application", user?.id, id],
+    queryFn: async () => {
+      if (!user || !id) return null;
+      const { data, error } = await supabase
+        .from("applications")
+        .select("id, status, is_draft")
+        .eq("user_id", user.id)
+        .eq("project_id", parseInt(id))
+        .eq("is_draft", false)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking existing application:", error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!user && !!id,
+  });
+
+  const hasApprovedApplication = existingApplication?.status === "approved";
+  const hasExistingApplication = !!existingApplication && !hasApprovedApplication;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "New":
@@ -354,6 +379,18 @@ const ProjectDetails = () => {
                     </AlertDescription>
                   </Alert>
                 )}
+                {/* Approved Application Banner */}
+                {hasApprovedApplication && (
+                  <Alert className="mb-4 border-success/50 bg-success/5">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                    <AlertTitle className="text-success">
+                      Application Approved
+                    </AlertTitle>
+                    <AlertDescription className="text-success/80">
+                      Your application for this project has been approved. You cannot submit another application.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 {draft ? (
                   <>
                     <div className="bg-muted/50 rounded-lg p-3 mb-4">
@@ -369,7 +406,7 @@ const ProjectDetails = () => {
                       className="w-full mb-2" 
                       variant="hero"
                       size="lg"
-                      disabled={isDisabled}
+                      disabled={isDisabled || hasApprovedApplication}
                       onClick={() => {
                         if (!user) {
                           toast({
@@ -390,7 +427,7 @@ const ProjectDetails = () => {
                       className="w-full" 
                       variant="outline"
                       size="lg"
-                      disabled={isDisabled}
+                      disabled={isDisabled || hasApprovedApplication}
                       onClick={() => {
                         if (!user) {
                           toast({
@@ -419,7 +456,7 @@ const ProjectDetails = () => {
                       className="w-full" 
                       variant="hero"
                       size="lg"
-                      disabled={isDisabled}
+                      disabled={isDisabled || hasApprovedApplication}
                       onClick={() => {
                         if (!user) {
                           toast({

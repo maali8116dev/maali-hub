@@ -67,6 +67,7 @@ async function updateProfileDirect(
   }
 ): Promise<Profile> {
   // Try to update first
+  // Convert empty string to null for avatar_url to properly clear the field
   const { data: updatedData, error: updateError } = await supabase
     .from("profiles")
     .update({
@@ -76,7 +77,7 @@ async function updateProfileDirect(
       business_sector: data.businessSector,
       country: data.country,
       bio: data.bio,
-      avatar_url: data.avatarUrl,
+      avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
     })
     .eq("user_id", userId)
     .select()
@@ -99,7 +100,7 @@ async function updateProfileDirect(
         business_sector: data.businessSector,
         country: data.country,
         bio: data.bio,
-        avatar_url: data.avatarUrl,
+        avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
       })
       .select()
       .single();

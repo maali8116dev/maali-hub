@@ -65,7 +65,7 @@ const Profile = () => {
         businessName: formData.businessName,
         country: formData.country,
         bio: formData.bio,
-        avatarUrl: formData.avatarUrl || undefined,
+        avatarUrl: formData.avatarUrl && formData.avatarUrl.trim() ? formData.avatarUrl.trim() : undefined,
       });
       
       toast({
@@ -79,6 +79,33 @@ const Profile = () => {
         variant: "destructive",
       });
     }
+  };
+
+  // Handle image deletion - automatically save to database
+  const handleImageDelete = async (imageUrl: string) => {
+    const deleted = await deleteImage(imageUrl);
+    if (deleted) {
+      // Update local state
+      setFormData({ ...formData, avatarUrl: "" });
+      
+      // Automatically save the deletion to the database
+      try {
+        await updateProfile.mutateAsync({
+          avatarUrl: undefined, // Set to undefined to clear the field
+        });
+        toast({
+          title: "Profile picture removed",
+          description: "Your profile picture has been removed.",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Warning",
+          description: "Image deleted but failed to update profile. Please save your changes.",
+          variant: "destructive",
+        });
+      }
+    }
+    return deleted;
   };
 
   // Loading state
@@ -161,7 +188,7 @@ const Profile = () => {
                 }
                 onChange={(url) => setFormData({ ...formData, avatarUrl: url || "" })}
                 onUpload={uploadImage}
-                onDelete={deleteImage}
+                onDelete={handleImageDelete}
                 isUploading={isUploading}
                 uploadProgress={uploadProgress}
                 placeholder="Upload Profile Picture"

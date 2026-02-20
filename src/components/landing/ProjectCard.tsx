@@ -32,6 +32,7 @@ interface DatabaseProjectCardProps {
   currentApplicants: number;
   status: string;
   createdAt?: string;
+  hasApprovedApplication?: boolean;
 }
 
 type ProjectCardProps = LegacyProjectCardProps | DatabaseProjectCardProps;
@@ -97,6 +98,9 @@ const ProjectCard = (props: ProjectCardProps) => {
     ? !isProjectOpen(status, deadline)
     : status === 'closed';
 
+  const hasApprovedApplication = isDatabaseProject(props) && props.hasApprovedApplication;
+  const applyDisabled = isDisabled || hasApprovedApplication;
+
   // Parse location string to handle multiple countries (comma-separated)
   const parseLocations = (locationString: string): string[] => {
     if (!locationString) return [];
@@ -159,37 +163,47 @@ const ProjectCard = (props: ProjectCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter className="pt-0 flex flex-col sm:flex-row gap-2">
-        <Button 
-          variant="outline" 
-          className="flex-1 min-h-[44px] w-full sm:w-auto"
-          asChild
-        >
-          <Link to={`/projects/${id}`}>
-            View Details
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Link>
-        </Button>
-        <Button 
-          variant={!isDisabled ? 'hero' : 'outline'} 
-          className="flex-1 min-h-[44px] w-full sm:w-auto"
-          disabled={isDisabled}
-          onClick={() => {
-            if (isDisabled) return;
-            if (!user) {
-              toast({
-                title: "Login Required",
-                description: "Please log in or create an account to apply for this opportunity.",
-                variant: "default",
-              });
-              navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
-            } else {
-              navigate(`/projects/${id}/apply`);
-            }
-          }}
-        >
-          {isDisabled ? 'Closed' : 'Apply'}
-        </Button>
+      <CardFooter className="pt-0 flex flex-col gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            asChild
+          >
+            <Link to={`/projects/${id}`}>
+              View Details
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+          <Button 
+            variant={!applyDisabled ? 'hero' : 'outline'} 
+            className="flex-1"
+            disabled={applyDisabled}
+            onClick={() => {
+              if (applyDisabled) return;
+              if (hasApprovedApplication) {
+                toast({
+                  title: "Application Already Approved",
+                  description: "You already have an approved application for this project.",
+                  variant: "default",
+                });
+                return;
+              }
+              if (!user) {
+                toast({
+                  title: "Login Required",
+                  description: "Please log in or create an account to apply for this opportunity.",
+                  variant: "default",
+                });
+                navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
+              } else {
+                navigate(`/projects/${id}/apply`);
+              }
+            }}
+          >
+            {hasApprovedApplication ? 'Approved' : isDisabled ? 'Closed' : 'Apply'}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

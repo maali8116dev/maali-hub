@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications, useUnreadNotificationCount, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   FileText,
@@ -117,6 +118,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href;
+                  const isNotifications = item.href === "/dashboard/notifications";
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
@@ -124,9 +126,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         isActive={isActive}
                         tooltip={item.label}
                       >
-                        <Link to={item.href}>
+                        <Link to={item.href} className="relative">
                           <Icon />
                           <span>{item.label}</span>
+                          {isNotifications && unreadCount > 0 && (
+                            <Badge 
+                              variant="destructive" 
+                              className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs"
+                            >
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </Badge>
+                          )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

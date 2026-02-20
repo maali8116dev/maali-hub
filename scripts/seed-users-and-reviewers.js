@@ -117,38 +117,45 @@ async function verifySupabaseHost() {
   }
 }
 
-// Helper to delete user if exists (for idempotent seed runs)
-async function deleteUserIfExists(email) {
+// Helper to get existing user by email
+async function getUserByEmail(email) {
   try {
     const { data: users } = await supabase.auth.admin.listUsers();
-    const user = users?.users?.find(u => u.email === email);
-    
-    if (user) {
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
-      if (deleteError) {
-        console.log(`   ⚠️  Failed to delete existing user ${email}: ${deleteError.message}`);
-      } else {
-        console.log(`   🗑️  Deleted existing user: ${email}`);
-      }
-    }
+    return users?.users?.find(u => u.email === email) || null;
   } catch (error) {
-    // Ignore errors - user might not exist
-    console.log(`   ℹ️  User ${email} does not exist, skipping delete`);
+    return null;
   }
 }
 
-// Helper to create a user with profile
-async function createUserWithProfile(userData) {
-  const { email, password, firstName, lastName, role, businessName, country, bio } = userData;
+// Helper to delete user if exists (for idempotent seed runs)
+async function deleteUserIfExists(email) {
+  try {
+    const existingUser = await getUserByEmail(email);
+    
+    if (existingUser) {
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(existingUser.id);
+      if (deleteError) {
+        console.log(`   ⚠️  Failed to delete existing user ${email}: ${deleteError.message}`);
+        return false; // Return false if deletion failed
+      } else {
+        console.log(`   🗑️  Deleted existing user: ${email}`);
+        return true; // Return true if deletion succeeded
+      }
+    }
+    return true; // User doesn't exist, consider it "successful"
+  } catch (error) {
+    console.log(`   ⚠️  Error checking for user ${email}:`, error.message);
+    return false;
+  }
+}
+
+// Helper to update existing user
+async function updateExistingUser(userId, userData) {
+  const { password, firstName, lastName, role } = userData;
   
-  // Delete user if exists (for idempotent runs)
-  await deleteUserIfExists(email);
-  
-  // Create auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email,
+  // Update auth user metadata
+  const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
     password: password || 'TestPassword123!',
-    email_confirm: true,
     user_metadata: {
       first_name: firstName,
       last_name: lastName,
@@ -156,14 +163,100 @@ async function createUserWithProfile(userData) {
     },
   });
 
-  if (authError) {
-    console.error(`   ❌ User ${email} creation failed:`, authError.message);
-    throw authError;
+  if (updateError) {
+    console.error(`   ⚠️  Failed to update user metadata:`, updateError.message);
+    // Continue anyway - profile update is more important
   }
 
-  const userId = authData.user.id;
+  return userId;
+}
 
-  // Create/update profile
+// Helper to create a user with profile
+async function createUserWithProfile(userData) {
+  const { email, password, firstName, lastName, role, businessName, country, bio } = userData;
+  
+  // Check if user already exists
+  const existingUser = await getUserByEmail(email);
+  
+  let userId;
+  
+  if (existingUser) {
+    // User exists - try to delete first
+    const deleted = await deleteUserIfExists(email);
+    
+    if (!deleted) {
+      // Deletion failed (likely due to foreign key constraints from applications, etc.)
+      console.log(`   ℹ️  User ${email} exists and cannot be deleted (may have related data). Updating instead...`);
+      userId = existingUser.id;
+      
+      // Update existing user
+      await updateExistingUser(userId, userData);
+    } else {
+      // User was deleted successfully, create new one
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password: password || 'TestPassword123!',
+        email_confirm: true,
+        user_metadata: {
+          first_name: firstName,
+          last_name: lastName,
+          role: role,
+        },
+      });
+
+      if (authError) {
+        // If creation fails with email_exists, user was recreated elsewhere
+        if (authError.code === 'email_exists' || authError.message?.includes('already been registered')) {
+          console.log(`   ℹ️  User ${email} was recreated. Fetching existing user...`);
+          const recreatedUser = await getUserByEmail(email);
+          if (recreatedUser) {
+            userId = recreatedUser.id;
+            await updateExistingUser(userId, userData);
+          } else {
+            throw new Error(`Failed to find user ${email} after recreation`);
+          }
+        } else {
+          console.error(`   ❌ User ${email} creation failed:`, authError.message);
+          throw authError;
+        }
+      } else {
+        userId = authData.user.id;
+      }
+    }
+  } else {
+    // User doesn't exist, create new one
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password: password || 'TestPassword123!',
+      email_confirm: true,
+      user_metadata: {
+        first_name: firstName,
+        last_name: lastName,
+        role: role,
+      },
+    });
+
+    if (authError) {
+      // Handle case where user was created between check and creation
+      if (authError.code === 'email_exists' || authError.message?.includes('already been registered')) {
+        console.log(`   ℹ️  User ${email} was created elsewhere. Fetching existing user...`);
+        const createdUser = await getUserByEmail(email);
+        if (createdUser) {
+          userId = createdUser.id;
+          await updateExistingUser(userId, userData);
+        } else {
+          throw new Error(`Failed to find user ${email} after creation`);
+        }
+      } else {
+        console.error(`   ❌ User ${email} creation failed:`, authError.message);
+        throw authError;
+      }
+    } else {
+      userId = authData.user.id;
+    }
+  }
+
+  // Create/update profile (this will always work with upsert)
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
@@ -179,10 +272,11 @@ async function createUserWithProfile(userData) {
     });
 
   if (profileError) {
-    console.error(`   ❌ Failed to create profile for ${email}:`, profileError.message);
+    console.error(`   ❌ Failed to create/update profile for ${email}:`, profileError.message);
     throw profileError;
   }
 
+  console.log(`   ✅ User ${email} ready (${existingUser ? 'updated' : 'created'})`);
   return userId;
 }
 

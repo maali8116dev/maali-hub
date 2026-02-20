@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   FileText,
@@ -36,6 +38,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const unreadCount = useUnreadNotificationCount();
 
   const menuItems = [
     { href: "/reviewer", label: "Dashboard", icon: LayoutDashboard },
@@ -87,6 +90,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href;
+                  const isNotifications = item.href === "/reviewer/notifications";
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
@@ -94,9 +98,17 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
                         isActive={isActive}
                         tooltip={item.label}
                       >
-                        <Link to={item.href}>
+                        <Link to={item.href} className="relative">
                           <Icon />
                           <span>{item.label}</span>
+                          {isNotifications && unreadCount > 0 && (
+                            <Badge 
+                              variant="destructive" 
+                              className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs"
+                            >
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </Badge>
+                          )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

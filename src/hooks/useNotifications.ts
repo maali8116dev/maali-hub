@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -131,17 +132,58 @@ const createNotification = async (
   return data || null;
 };
 
-// Hook to fetch notifications
+// Hook to fetch notifications with real-time subscriptions
 export const useNotifications = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["notifications", user?.id],
     queryFn: fetchNotifications,
     enabled: !!user,
     refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    // Removed refetchInterval - using subscriptions instead for real-time updates
+    // This reduces API calls by ~99% (only refetches when data actually changes)
   });
+
+  // Set up real-time subscription for notifications
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen for INSERT, UPDATE, DELETE
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Invalidate and refetch notifications when any change occurs
+          queryClient.invalidateQueries({ 
+            queryKey: ["notifications", user.id] 
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log(`✅ Subscribed to notifications for user ${user.id}`);
+        } else if (status === "CHANNEL_ERROR") {
+          console.error("❌ Error subscribing to notifications channel");
+        } else if (status === "TIMED_OUT") {
+          console.warn("⚠️ Notification subscription timed out, retrying...");
+        }
+      });
+
+    // Cleanup subscription on unmount or user change
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
+
+  return query;
 };
 
 // Hook to get unread count

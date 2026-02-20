@@ -219,3 +219,43 @@ export function useActivateUser() {
   });
 }
 
+/**
+ * Hook to update a user's role
+ */
+export function useUpdateUserRole() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: "admin" | "reviewer" | "applicant" }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role })
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error updating user role:", error);
+        throw new Error(error.message || "Failed to update user role");
+      }
+
+      return { userId, role };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
+      queryClient.invalidateQueries({ queryKey: ["user-role", data.userId] });
+      queryClient.invalidateQueries({ queryKey: ["profile", data.userId] });
+      toast({
+        title: "Role updated",
+        description: `User role has been updated to ${data.role}.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user role",
+        variant: "destructive",
+      });
+    },
+  });
+}
+

@@ -44,10 +44,7 @@ describe('Step 3: Project Overview', () => {
   it('should store project overview information correctly', () => {
     const projectData = {
       projectTitle: 'Innovative Tech Solution',
-      projectSummary: 'This is a comprehensive project that aims to solve critical problems.',
-      problemStatement: 'The current technology landscape lacks innovative solutions.',
-      proposedSolution: 'We propose a comprehensive technology platform.',
-      targetBeneficiaries: 'Small businesses and entrepreneurs',
+      projectSummary: 'This is a comprehensive project that aims to solve critical problems in the community. The project will focus on providing innovative solutions through technology and collaboration. We aim to create sustainable impact and improve the quality of life for beneficiaries across multiple regions.',
       geographicFocus: 'West Africa',
     };
 
@@ -58,9 +55,6 @@ describe('Step 3: Project Overview', () => {
     const formData = useApplicationFormStore.getState().formData;
     expect(formData.projectTitle).toBe(projectData.projectTitle);
     expect(formData.projectSummary).toBe(projectData.projectSummary);
-    expect(formData.problemStatement).toBe(projectData.problemStatement);
-    expect(formData.proposedSolution).toBe(projectData.proposedSolution);
-    expect(formData.targetBeneficiaries).toBe(projectData.targetBeneficiaries);
     expect(formData.geographicFocus).toBe(projectData.geographicFocus);
   });
 
@@ -71,23 +65,17 @@ describe('Step 3: Project Overview', () => {
     store.updateFormData({
       projectTitle: '',
       projectSummary: '',
-      problemStatement: '',
-      proposedSolution: '',
-      targetBeneficiaries: '',
       geographicFocus: '',
     });
 
     // Step 3 should be invalid
     expect(store.isStepValid(3)).toBe(false);
 
-    // Test with all required fields
+    // Test with all required fields (projectSummary needs at least 30 words)
     store.updateFormData({
-      projectTitle: 'Test Project',
-      projectSummary: 'Test summary',
-      problemStatement: 'Test problem',
-      proposedSolution: 'Test solution',
-      targetBeneficiaries: 'Test beneficiaries',
-      geographicFocus: 'Test geography',
+      projectTitle: 'Innovative Tech Solution Project',
+      projectSummary: 'This is a comprehensive project summary that meets the minimum word count requirement. The project aims to solve critical problems through innovative approaches and sustainable solutions. We will work with local communities to ensure maximum impact and long-term success.',
+      geographicFocus: 'West Africa',
     });
 
     // Step 3 should be valid

@@ -5,142 +5,152 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ArrowLeft, 
-  FileText, 
-  Calendar, 
-  MapPin, 
-  Building2, 
-  Mail, 
-  Phone, 
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  FileText,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
   DollarSign,
   Users,
-  ExternalLink,
   Download,
-  FolderOpen,
-  Loader2,
+  User,
+  Calendar,
+  Globe,
+  Link as LinkIcon,
   CheckCircle2,
-  Clock,
-  XCircle,
   AlertCircle,
-  TrendingUp,
-  Award,
-  Briefcase,
-  ChevronDown,
-  ChevronUp
+  Clock,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getDocumentDownloadUrl, type UploadedDocument } from "@/hooks/useDocumentUpload";
+import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
 import { isProjectOpen } from "@/lib/projectAvailability";
-
-type ApplicationDetailsRpcRow = {
-  application: Record<string, any> | null;
-  project: Record<string, any> | null;
-  documents: Record<string, any>[] | null;
-};
-
-const mapRpcDocuments = (docs: Record<string, any>[] | null | undefined): UploadedDocument[] =>
-  (docs || []).map((doc) => ({
-    id: doc.id,
-    fileName: doc.file_name,
-    filePath: doc.file_path,
-    fileSize: doc.file_size || 0,
-    fileType: doc.file_type || "",
-    createdAt: doc.created_at,
-    applicationId: doc.application_id || undefined,
-  })) as UploadedDocument[];
-
-// ExpandableText component for long text sections
-const ExpandableText = ({ 
-  text, 
-  maxLength = 300, 
-  title 
-}: { 
-  text: string; 
-  maxLength?: number; 
-  title?: string;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const shouldTruncate = text.length > maxLength;
-  const displayText = isExpanded || !shouldTruncate ? text : `${text.slice(0, maxLength)}...`;
-
-  return (
-    <div>
-      <div className="prose prose-sm max-w-none">
-        <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-          {displayText}
-        </p>
-      </div>
-      {shouldTruncate && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-3"
-        >
-          {isExpanded ? (
-            <>
-              Show less <ChevronUp className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Read more <ChevronDown className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
-      )}
-    </div>
-  );
-};
 
 const ApplicationDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
+  // Fetch application data directly (like reviewer page)
   const { data: application, isLoading, error } = useQuery({
     queryKey: ["application", id],
     queryFn: async () => {
       if (!id) throw new Error("Application ID is required");
 
-      const { data, error: rpcError } = await supabase.rpc(
-        "get_application_details",
-        { p_application_id: id }
-      );
+      // Fetch application
+      const { data: app, error: appError } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
-      if (rpcError) throw rpcError;
-      const row = (data as ApplicationDetailsRpcRow[] | null)?.[0];
-      if (!row?.application) throw new Error("Application not found");
+      if (appError) throw appError;
+      if (!app) throw new Error("Application not found");
+
+      // Fetch project details
+      const { data: project } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", app.project_id)
+        .maybeSingle();
 
       return {
-        ...row.application,
-        project: row.project,
-        documents: mapRpcDocuments(row.documents),
+        ...app,
+        projectTitle: project?.title || "Unknown Project",
+        project: project,
       };
     },
     enabled: !!id,
   });
 
-  const documents = (application?.documents || []) as UploadedDocument[];
+  // Fetch documents for this application
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+    queryKey: ["application-documents", id, application?.user_id],
+    queryFn: async () => {
+      if (!id) return [];
+
+      // First, try to get documents linked to this application
+      const { data: linkedDocs, error: linkedError } = await supabase
+        .from("application_documents")
+        .select("*")
+        .eq("application_id", id)
+        .order("created_at", { ascending: false });
+
+      if (linkedError) {
+        console.error("Error fetching linked documents:", linkedError);
+      }
+
+      // Also get unlinked documents from the same user and project
+      let unlinkedDocs: typeof linkedDocs = [];
+      if (application?.user_id && application?.project_id) {
+        const { data: userDocs, error: userError } = await (supabase
+          .from("application_documents")
+          .select("*")
+          .eq("user_id", application.user_id)
+          .eq("project_id", application.project_id)
+          .is("application_id", null)
+          .order("created_at", { ascending: false }) as any);
+
+        if (!userError) {
+          unlinkedDocs = userDocs || [];
+        }
+      }
+
+      // Combine and deduplicate
+      const allDocs = [...(linkedDocs || []), ...unlinkedDocs];
+      const uniqueDocs = allDocs.filter(
+        (doc, index, self) => index === self.findIndex((d) => d.id === doc.id)
+      );
+
+      return uniqueDocs.map((doc) => ({
+        id: doc.id,
+        fileName: doc.file_name,
+        filePath: doc.file_path,
+        fileSize: doc.file_size || 0,
+        fileType: doc.file_type || "",
+        createdAt: doc.created_at,
+        applicationId: doc.application_id || undefined,
+      }));
+    },
+    enabled: !!id && !!application,
+  });
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      pending: "bg-warning/10 text-warning border-warning/20",
-      under_review: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-      approved: "bg-success/10 text-success border-success/20",
-      rejected: "bg-destructive/10 text-destructive border-destructive/20",
-      draft: "bg-muted text-muted-foreground border-border",
-    };
-    return styles[status] || styles.pending;
-  };
-
-  const formatStatus = (status: string) => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    switch (status) {
+      case "pending":
+        return (
+          <Badge className="bg-warning/10 text-warning border-warning/20">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      case "under_review":
+        return (
+          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+            Under Review
+          </Badge>
+        );
+      case "approved":
+        return (
+          <Badge className="bg-success/10 text-success border-success/20">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Approved
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+            <XCircle className="h-3 w-3 mr-1" />
+            Rejected
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -149,23 +159,15 @@ const ApplicationDetails = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const getFileTypeLabel = (fileType: string): string => {
-    if (fileType.includes("pdf")) return "PDF";
-    if (fileType.includes("word") || fileType.includes("doc")) return "DOC";
-    if (fileType.includes("text")) return "TXT";
-    if (fileType.includes("excel") || fileType.includes("spreadsheet") || fileType.includes("xls")) return "XLS";
-    if (fileType.includes("powerpoint") || fileType.includes("presentation") || fileType.includes("ppt")) return "PPT";
-    if (fileType.includes("image") || fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("gif") || fileType.includes("webp")) return "IMG";
-    return "File";
-  };
-
-  const handleDownload = async (doc: UploadedDocument) => {
+  const handleDownload = async (doc: { id: string; filePath: string; fileName: string }) => {
     setDownloadingId(doc.id);
     try {
       const url = await getDocumentDownloadUrl(doc.filePath);
       if (url) {
         window.open(url, "_blank");
       }
+    } catch (error) {
+      console.error("Error downloading document:", error);
     } finally {
       setDownloadingId(null);
     }
@@ -178,9 +180,12 @@ const ApplicationDetails = () => {
           <Skeleton className="h-10 w-10" />
           <Skeleton className="h-8 w-64" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
+          <Skeleton className="h-96" />
         </div>
       </div>
     );
@@ -189,10 +194,12 @@ const ApplicationDetails = () => {
   if (error || !application) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -212,416 +219,583 @@ const ApplicationDetails = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with gradient background */}
-      <div className="relative overflow-hidden rounded-lg border bg-gradient-to-br from-primary/5 via-primary/3 to-transparent p-6 sm:p-8">
-        <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-            <div className="flex items-start gap-4 flex-1 min-w-0">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate(-1)} 
-                className="flex-shrink-0 h-10 w-10"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Briefcase className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h1 className="text-2xl sm:text-3xl font-bold line-clamp-2 mb-1">
-                      {application.project?.title || "Application Details"}
-                    </h1>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge 
-                        variant="outline" 
-                        className="text-xs font-medium"
-                      >
-                        {application.id.slice(0, 8).toUpperCase()}...
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">•</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(application.created_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric"
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Badge 
-              className={`${getStatusBadge(application.status || "pending")} flex-shrink-0 px-4 py-2 text-sm font-semibold`}
-            >
-              {formatStatus(application.status || "pending")}
-            </Badge>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="w-fit min-h-[44px]">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Application Details</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base break-all">
+              ID: {application.id}
+            </p>
           </div>
         </div>
+        {getStatusBadge(application.status || "pending")}
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="documents">
-            Documents
-            {documents.length > 0 && (
-              <Badge variant="secondary" className="ml-2 text-xs">
-                {documents.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-        </TabsList>
-
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Application Info */}
-            <Card className="border-2">
-              <CardHeader className="border-b bg-muted/30">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-primary" />
-                  </div>
-                  Application Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5 pt-6">
-                <div className="grid gap-5">
-                  <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-5 w-5 text-blue-600" />
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Applicant Information */}
+          <Card>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Applicant Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {application.applicant_type && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Applicant Type</p>
+                      <p className="font-medium">{application.applicant_type}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Company Name</p>
-                      <p className="font-semibold text-base">{application.company_name || "Not provided"}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                      <Mail className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Contact Email</p>
-                      <p className="font-semibold text-base break-all">{application.contact_email || "Not provided"}</p>
-                    </div>
-                  </div>
-
-                  {application.contact_phone && (
-                    <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                        <Phone className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Contact Phone</p>
-                        <p className="font-semibold text-base">{application.contact_phone}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Location</p>
-                      <p className="font-semibold text-base">{application.location || "Not provided"}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                      <DollarSign className="h-5 w-5 text-emerald-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Funding Requested</p>
-                      <p className="font-semibold text-base">{application.funding_amount_requested || "Not specified"}</p>
-                    </div>
-                  </div>
-
-                  {application.team_size && (
-                    <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="h-10 w-10 rounded-lg bg-pink-500/10 flex items-center justify-center flex-shrink-0">
-                        <Users className="h-5 w-5 text-pink-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Team Size</p>
-                        <p className="font-semibold text-base">{application.team_size} members</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Project Info */}
-            <Card className="border-2">
-              <CardHeader className="border-b bg-muted/30">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Award className="h-4 w-4 text-primary" />
-                  </div>
-                  Project Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5 pt-6">
-                {application.project ? (
-                  <div className="space-y-5">
-                    <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Project Title</p>
-                      <p className="font-bold text-lg">{application.project.title}</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Category</p>
-                        <Badge variant="outline" className="font-semibold">{(application.project as any).category}</Badge>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Funding Amount</p>
-                        <p className="font-semibold text-base">{application.project.funding_amount}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Location</p>
-                        <p className="font-semibold text-base">{application.project.location}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Deadline</p>
-                        <p className="font-semibold text-base">
-                          {new Date(application.project.deadline).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Separator className="my-4" />
-
-                    <Link to={`/projects/${application.project_id}`}>
-                      <Button variant="outline" className="w-full h-11 font-semibold">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        View Project Details
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <AlertCircle className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-muted-foreground font-medium">Project information unavailable</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Description Tab */}
-        <TabsContent value="description" className="space-y-6 mt-6">
-          {/* Project Description */}
-          <Card className="border-2">
-            <CardHeader className="border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-primary" />
+                {application.full_legal_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <User className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Full Legal Name</p>
+                      <p className="font-medium break-words">{application.full_legal_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.organization_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Organization Name</p>
+                      <p className="font-medium break-words">{application.organization_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.company_name && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Company Name</p>
+                      <p className="font-medium break-words">{application.company_name}</p>
+                    </div>
+                  </div>
+                )}
+                {application.registration_id_number && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Registration ID Number</p>
+                      <p className="font-medium break-words">{application.registration_id_number}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Mail className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground">Contact Email</p>
+                    <p className="font-medium break-all">{application.contact_email || "N/A"}</p>
+                  </div>
                 </div>
-                Project Description
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <ExpandableText 
-                text={application.project_description || "No description provided"}
-                maxLength={300}
-              />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                  <Phone className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground">Contact Phone</p>
+                    <p className="font-medium">{application.contact_phone || "N/A"}</p>
+                  </div>
+                </div>
+                {application.country_of_residence && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Country of Residence</p>
+                      <p className="font-medium">{application.country_of_residence}</p>
+                    </div>
+                  </div>
+                )}
+                {application.city_region && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">City/Region</p>
+                      <p className="font-medium">{application.city_region}</p>
+                    </div>
+                  </div>
+                )}
+                {application.location && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="font-medium">{application.location}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Business Plan */}
-          {application.business_plan && (
-            <Card className="border-2">
-              <CardHeader className="border-b bg-muted/30">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
-                  Business Plan
-                </CardTitle>
+          {/* Organizational Background (if applicable) */}
+          {application.applicant_type && application.applicant_type !== "Individual" && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Organizational Background</CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <ExpandableText 
-                  text={application.business_plan}
-                  maxLength={300}
-                />
+              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {application.year_established && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Year Established</p>
+                        <p className="font-medium">{application.year_established}</p>
+                      </div>
+                    </div>
+                  )}
+                  {application.team_size && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Team Size</p>
+                        <p className="font-medium">{application.team_size} members</p>
+                      </div>
+                    </div>
+                  )}
+                  {application.number_of_team_members && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Number of Team Members</p>
+                        <p className="font-medium">{application.number_of_team_members} members</p>
+                      </div>
+                    </div>
+                  )}
+                  {application.previous_grants_funding_received !== undefined && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                      <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-sm text-muted-foreground">Previous Grants/Funding Received</p>
+                        <p className="font-medium">{application.previous_grants_funding_received ? "Yes" : "No"}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {application.core_mission_purpose && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Core Mission/Purpose</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.core_mission_purpose}</p>
+                  </div>
+                )}
+                {application.primary_sectors && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Primary Sectors</Label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {Array.isArray(application.primary_sectors) ? (
+                        application.primary_sectors.map((sector: string, idx: number) => (
+                          <Badge key={idx} variant="outline">{sector}</Badge>
+                        ))
+                      ) : typeof application.primary_sectors === 'string' ? (
+                        (() => {
+                          try {
+                            const sectors = JSON.parse(application.primary_sectors);
+                            return Array.isArray(sectors) ? (
+                              sectors.map((sector: string, idx: number) => (
+                                <Badge key={idx} variant="outline">{sector}</Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline">{application.primary_sectors}</Badge>
+                            );
+                          } catch {
+                            return <Badge variant="outline">{application.primary_sectors}</Badge>;
+                          }
+                        })()
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+                {application.primary_sector_other && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Other Primary Sector</Label>
+                    <p className="mt-1 text-sm">{application.primary_sector_other}</p>
+                  </div>
+                )}
+                {application.key_team_members_roles && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Key Team Members & Roles</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.key_team_members_roles}</p>
+                  </div>
+                )}
+                {application.previous_grants_funding_details && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Previous Grants/Funding Details</Label>
+                    <p className="mt-1 text-sm whitespace-pre-wrap">{application.previous_grants_funding_details}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
-        </TabsContent>
 
-        {/* Documents Tab */}
-        <TabsContent value="documents" className="mt-6">
-          <Card className="border-2">
-            <CardHeader className="border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FolderOpen className="h-4 w-4 text-primary" />
-                </div>
-                Supporting Documents
-                {documents.length > 0 && (
-                  <Badge variant="secondary" className="ml-2">
-                    {documents.length}
-                  </Badge>
-                )}
-              </CardTitle>
+          {/* Project Details */}
+          <Card>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Project Details</CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              {documents.length > 0 ? (
-                <div className="grid gap-3">
-                  {documents.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="flex items-center justify-between p-4 border-2 rounded-lg hover:border-primary/30 hover:bg-primary/5 transition-all group"
-                    >
-                      <div className="flex items-center gap-4 min-w-0 flex-1">
-                        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                          <FileText className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-base truncate mb-1">{doc.fileName}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {getFileTypeLabel(doc.fileType)}
-                            </Badge>
-                            <span>•</span>
-                            <span>{formatFileSize(doc.fileSize)}</span>
-                            <span>•</span>
-                            <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownload(doc)}
-                        disabled={downloadingId === doc.id}
-                        className="ml-4 h-10 w-10"
-                      >
-                        {downloadingId === doc.id ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : (
-                          <Download className="h-5 w-5" />
-                        )}
-                      </Button>
-                    </div>
-                  ))}
+            <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+              {application.project_title && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Title</Label>
+                  <p className="font-medium mt-1">{application.project_title}</p>
                 </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                    <FolderOpen className="h-8 w-8 text-muted-foreground" />
+              )}
+              {application.project_summary && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Summary</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.project_summary}</p>
+                </div>
+              )}
+              {application.problem_statement && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Problem Statement</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.problem_statement}</p>
+                </div>
+              )}
+              {application.proposed_solution && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Proposed Solution</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.proposed_solution}</p>
+                </div>
+              )}
+              {application.target_beneficiaries && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Target Beneficiaries</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.target_beneficiaries}</p>
+                </div>
+              )}
+              {application.geographic_focus && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Geographic Focus</Label>
+                  <p className="mt-1 text-sm">{application.geographic_focus}</p>
+                </div>
+              )}
+              {application.project_description && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Project Description</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.project_description}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {application.funding_amount_requested && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Funding Amount Requested</p>
+                      <p className="font-medium">{application.funding_amount_requested}</p>
+                    </div>
                   </div>
-                  <p className="text-muted-foreground font-medium">No documents uploaded for this application</p>
+                )}
+                {application.team_size && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Users className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Team Size</p>
+                      <p className="font-medium">{application.team_size} members</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {application.business_plan && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">Business Plan Summary</Label>
+                  <p className="mt-1 text-sm whitespace-pre-wrap">{application.business_plan}</p>
                 </div>
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        {/* Timeline Tab */}
-        <TabsContent value="timeline" className="mt-6">
-          <Card className="border-2">
-            <CardHeader className="border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Calendar className="h-4 w-4 text-primary" />
+          {/* Social Links */}
+          {(application.linkedin_url || application.github_url || application.twitter_url || application.website_url || application.other_social_links) && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Social Links & Online Presence</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {application.linkedin_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">LinkedIn</p>
+                        <a 
+                          href={application.linkedin_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.linkedin_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.github_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">GitHub</p>
+                        <a 
+                          href={application.github_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.github_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.twitter_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <LinkIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">Twitter</p>
+                        <a 
+                          href={application.twitter_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.twitter_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {application.website_url && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted-foreground">Website</p>
+                        <a 
+                          href={application.website_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-primary hover:underline break-all"
+                        >
+                          {application.website_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                Timeline & Status
-              </CardTitle>
+                {application.other_social_links && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Other Social Links</Label>
+                    <p className="mt-1 text-sm break-all">{application.other_social_links}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Compliance & Declarations */}
+          {(application.information_accurate_confirmed !== undefined || 
+            application.conflict_of_interest_declared !== undefined || 
+            application.reporting_requirements_agreed !== undefined || 
+            application.data_processing_consented !== undefined) && (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Compliance & Declarations</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="space-y-2">
+                  {application.information_accurate_confirmed !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.information_accurate_confirmed ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Information Accurate Confirmed</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.information_accurate_confirmed ? "Confirmed" : "Not confirmed"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.conflict_of_interest_declared !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.conflict_of_interest_declared ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Conflict of Interest Declared</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.conflict_of_interest_declared ? "Declared" : "Not declared"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.reporting_requirements_agreed !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.reporting_requirements_agreed ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Reporting Requirements Agreed</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.reporting_requirements_agreed ? "Agreed" : "Not agreed"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {application.data_processing_consented !== undefined && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      {application.data_processing_consented ? (
+                        <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Data Processing Consented</p>
+                        <p className="text-xs text-muted-foreground">
+                          {application.data_processing_consented ? "Consented" : "Not consented"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {application.declaration_date && (
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      Declaration Date: {new Date(application.declaration_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Documents */}
+          {documentsLoading ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Supporting Documents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : documents && documents.length > 0 ? (
+            <Card>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg">Supporting Documents</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium text-sm">{doc.fileName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(doc.fileSize)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDownload(doc)}
+                        disabled={downloadingId === doc.id}
+                        className="min-h-[44px] sm:min-h-0"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {downloadingId === doc.id ? "Downloading..." : "Download"}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Application Metadata */}
+          <Card>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Application Details</CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-blue-500/5 to-transparent">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Submitted</p>
-                  </div>
-                  <p className="font-bold text-base">
-                    {new Date(application.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {new Date(application.created_at).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-purple-500/5 to-transparent">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-purple-600" />
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Last Updated</p>
-                  </div>
-                  <p className="font-bold text-base">
-                    {new Date(application.updated_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {new Date(application.updated_at).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg border-2 bg-gradient-to-br from-emerald-500/5 to-transparent">
-                  <div className="flex items-center gap-2 mb-2">
-                    {application.application_fee_paid ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-orange-600" />
-                    )}
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Payment Status</p>
-                  </div>
-                  <Badge 
-                    variant={application.application_fee_paid ? "default" : "secondary"}
-                    className="font-semibold"
-                  >
-                    {application.application_fee_paid ? "Paid" : "Unpaid"}
-                  </Badge>
-                </div>
+            <CardContent className="space-y-3 text-sm p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Submitted:</span>
+                <span className="font-medium">
+                  {new Date(application.created_at).toLocaleDateString()}
+                </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status:</span>
+                {getStatusBadge(application.status || "pending")}
+              </div>
+              {application.project && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Project:</span>
+                    <span className="font-medium">{application.project.title}</span>
+                  </div>
+                  <Link to={`/projects/${application.project_id}`}>
+                    <Button variant="outline" className="w-full mt-4 min-h-[44px]">
+                      View Project Details
+                    </Button>
+                  </Link>
+                </>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
 
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Button variant="outline" onClick={() => navigate("/dashboard/applications")} className="min-h-[48px] w-full sm:w-auto">
-          Back to Applications
-        </Button>
-        {application.status === "draft" && (
-          isProjectOpen(application.project?.status, application.project?.deadline) ? (
-            <Link to={`/projects/${application.project_id}/apply`} className="w-full sm:w-auto">
-              <Button className="min-h-[48px] w-full">Continue Application</Button>
-            </Link>
-          ) : (
-            <Button className="min-h-[48px] w-full sm:w-auto" variant="outline" disabled>
-              Application Closed
-            </Button>
-          )
-        )}
+          {/* Actions */}
+          <Card>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/dashboard/applications")} 
+                className="w-full min-h-[44px]"
+              >
+                Back to Applications
+              </Button>
+              {application.status === "draft" && (
+                isProjectOpen(application.project?.status, application.project?.deadline) ? (
+                  <Link to={`/projects/${application.project_id}/apply`} className="w-full block">
+                    <Button className="w-full min-h-[44px]">
+                      Continue Application
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button className="w-full min-h-[44px]" variant="outline" disabled>
+                    Application Closed
+                  </Button>
+                )
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
