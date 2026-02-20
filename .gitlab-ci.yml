@@ -4,9 +4,9 @@ stages:
 mirror_from_github:
   stage: mirror
   script:
-    - git remote add github https://x-access-token:${GITHUB_PAT}@github.com/<user>/<repo>.git || true
-    - git fetch github --all --prune
-    - git push origin --all --force
-    - git push origin --tags --force
+    - git remote add github https:/${GITHUB_PAT}@github.com/<user>/<repo>.git || true
+    - git fetch github --prune
+    - git push origin '+refs/heads/*:refs/heads/*' --force
+    - git push origin '+refs/tags/*:refs/tags/*' --force
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
