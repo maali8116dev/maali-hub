@@ -1,10 +1,16 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { 
   Upload, 
   FileText, 
   X, 
-  Download
+  Download,
+  Library,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,6 +23,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { 
+  useDocumentUpload, 
+  type UploadedDocument 
+} from "@/hooks/useDocumentUpload";
+import { useToast } from "@/hooks/use-toast";
 
 interface SelectedFile {
   file: File;
@@ -24,26 +35,45 @@ interface SelectedFile {
 }
 
 interface DocumentUploadSectionProps {
-  applicationId?: string;
   projectId?: number;
   onFilesChange?: (files: File[]) => void;
-  initialDocumentIds?: string[];
+  onLibraryDocumentsChange?: (documentIds: string[]) => void;
 }
 
 const DocumentUploadSection = ({ 
   projectId,
   onFilesChange,
+  onLibraryDocumentsChange,
 }: DocumentUploadSectionProps) => {
+  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [selectedLibraryDocIds, setSelectedLibraryDocIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<SelectedFile | null>(null);
   const fileIdCounter = useRef(0);
+
+  const { fetchLibraryDocuments, isLoading: isLoadingLibrary } = useDocumentUpload();
+  const [libraryDocuments, setLibraryDocuments] = useState<UploadedDocument[]>([]);
+
+  // Load library documents on mount
+  useEffect(() => {
+    const loadLibrary = async () => {
+      const docs = await fetchLibraryDocuments();
+      setLibraryDocuments(docs);
+    };
+    loadLibrary();
+  }, [fetchLibraryDocuments]);
 
   // Notify parent when files change
   useEffect(() => {
     const files = selectedFiles.map(sf => sf.file);
     onFilesChange?.(files);
   }, [selectedFiles, onFilesChange]);
+
+  // Notify parent when library documents change
+  useEffect(() => {
+    onLibraryDocumentsChange?.(selectedLibraryDocIds);
+  }, [selectedLibraryDocIds, onLibraryDocumentsChange]);
 
   const validateFile = (file: File): string | null => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -89,8 +119,11 @@ const DocumentUploadSection = ({
       });
 
       if (errors.length > 0) {
-        // Show first error
-        alert(errors[0]);
+        toast({
+          title: "Invalid File",
+          description: errors[0],
+          variant: "destructive",
+        });
       }
 
       if (newFiles.length > 0) {
@@ -129,86 +162,191 @@ const DocumentUploadSection = ({
     return <FileText className="h-5 w-5 text-muted-foreground" />;
   };
 
+  const handleLibraryDocToggle = (docId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedLibraryDocIds(prev => [...prev, docId]);
+    } else {
+      setSelectedLibraryDocIds(prev => prev.filter(id => id !== docId));
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      {/* File Selection Area */}
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
-          "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
-        )}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={handleFileSelect}
-          accept=".pdf,.doc,.docx,.txt"
-        />
-        
-        <div className="space-y-3">
-          <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-          <div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Choose Files
-            </Button>
+    <div className="space-y-6">
+      {/* Library Documents Section */}
+      {libraryDocuments.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Library className="h-4 w-4" />
+              Select from Library
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Choose documents from your library to reuse for this application
+            </p>
+          </CardHeader>
+          <CardContent>
+            {isLoadingLibrary ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {libraryDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                  >
+                    <Checkbox
+                      id={`lib-doc-${doc.id}`}
+                      checked={selectedLibraryDocIds.includes(doc.id)}
+                      onCheckedChange={(checked) => handleLibraryDocToggle(doc.id, checked as boolean)}
+                    />
+                    <label
+                      htmlFor={`lib-doc-${doc.id}`}
+                      className="flex-1 flex items-center gap-3 cursor-pointer min-w-0"
+                    >
+                      <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{doc.fileName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(doc.fileSize)} • {new Date(doc.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Separator */}
+      {libraryDocuments.length > 0 && (
+        <div className="flex items-center gap-4">
+          <Separator className="flex-1" />
+          <span className="text-sm text-muted-foreground">OR</span>
+          <Separator className="flex-1" />
+        </div>
+      )}
+
+      {/* Upload New Files Section */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Upload New Documents</h3>
+        <div
+          className={cn(
+            "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
+            "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
+          )}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+            accept=".pdf,.doc,.docx,.txt"
+          />
+          
+          <div className="space-y-3">
+            <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+            <div>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Choose Files
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              PDF, DOC, DOCX, or TXT (max 10MB each)
+            </p>
+            <p className="text-xs text-muted-foreground italic">
+              Files will be uploaded when you submit your application
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            PDF, DOC, DOCX, or TXT (max 10MB each)
-          </p>
-          <p className="text-xs text-muted-foreground italic">
-            Files will be uploaded when you submit your application
-          </p>
         </div>
       </div>
 
-      {/* Selected Files List */}
-      {selectedFiles.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Selected Documents ({selectedFiles.length})</p>
-          <div className="space-y-2">
-            {selectedFiles.map((selectedFile) => (
-              <div
-                key={selectedFile.id}
-                className="flex items-center justify-between p-3 border rounded-lg bg-background"
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {getFileIcon(selectedFile.file.type)}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(selectedFile.file.size)} • Ready to upload
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePreview(selectedFile)}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeleteConfirm(selectedFile)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+      {/* Summary of Selected Documents */}
+      {(selectedFiles.length > 0 || selectedLibraryDocIds.length > 0) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">
+              Selected Documents ({selectedFiles.length + selectedLibraryDocIds.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Selected Library Documents */}
+            {selectedLibraryDocIds.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">From Library:</p>
+                {libraryDocuments
+                  .filter(doc => selectedLibraryDocIds.includes(doc.id))
+                  .map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center gap-3 p-2 border rounded bg-muted/30"
+                    >
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{doc.fileName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(doc.fileSize)}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">Library</Badge>
+                    </div>
+                  ))}
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+
+            {/* New Files to Upload */}
+            {selectedFiles.length > 0 && (
+              <div className="space-y-2">
+                {selectedLibraryDocIds.length > 0 && (
+                  <p className="text-sm font-medium text-muted-foreground mt-3">New Uploads:</p>
+                )}
+                {selectedFiles.map((selectedFile) => (
+                  <div
+                    key={selectedFile.id}
+                    className="flex items-center justify-between p-3 border rounded-lg bg-background"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {getFileIcon(selectedFile.file.type)}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatFileSize(selectedFile.file.size)} • Ready to upload
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePreview(selectedFile)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteConfirm(selectedFile)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Delete Confirmation Dialog */}

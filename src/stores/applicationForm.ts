@@ -33,7 +33,14 @@ export interface ApplicationFormData {
   targetBeneficiaries?: string;
   geographicFocus?: string;
   
-  // Step 5: Compliance & Declarations
+  // Step 5: Social Links
+  linkedinUrl?: string;
+  githubUrl?: string;
+  twitterUrl?: string;
+  websiteUrl?: string;
+  otherSocialLinks?: string;
+  
+  // Step 6: Compliance & Declarations
   informationAccurateConfirmed?: boolean;
   conflictOfInterestDeclared?: boolean;
   reportingRequirementsAgreed?: boolean;
@@ -49,7 +56,7 @@ export interface ApplicationFormData {
   businessPlan?: string;
   teamSize?: number;
   
-  // Step 6: Documents - track uploaded document IDs for this session
+  // Step 7: Documents - track uploaded document IDs for this session
   uploadedDocumentIds?: string[];
   
   // Payment status
@@ -116,6 +123,11 @@ const defaultFormData: ApplicationFormData = {
   proposedSolution: undefined,
   targetBeneficiaries: undefined,
   geographicFocus: undefined,
+  linkedinUrl: undefined,
+  githubUrl: undefined,
+  twitterUrl: undefined,
+  websiteUrl: undefined,
+  otherSocialLinks: undefined,
   informationAccurateConfirmed: false,
   conflictOfInterestDeclared: false,
   reportingRequirementsAgreed: false,
@@ -137,7 +149,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 8,
+      totalSteps: 9,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
@@ -274,12 +286,15 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.geographicFocus
             );
           case 4:
-            // Documents are optional
+            // Social Links - optional, always valid
             return true;
           case 5:
-            // Review - always valid (read-only step)
+            // Documents are optional
             return true;
           case 6:
+            // Review - always valid (read-only step)
+            return true;
+          case 7:
             // Compliance & Declarations - all must be confirmed
             return !!(
               formData.informationAccurateConfirmed &&
@@ -287,11 +302,11 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.reportingRequirementsAgreed &&
               formData.dataProcessingConsented
             );
-          case 7:
+          case 8:
             // Payment - validation handled in component based on project fee
             // If no fee, step is always valid
             return true;
-          case 8:
+          case 9:
             // Submit - always valid (final step)
             return true;
           default:

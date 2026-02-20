@@ -27,6 +27,7 @@ import {
   Loader2,
   AlertTriangle,
   Info,
+  Link,
 } from "lucide-react";
 import { useApplicationFormStore } from "@/stores/applicationForm";
 import { useToast } from "@/hooks/use-toast";
@@ -136,14 +137,35 @@ const step4Schema = z.object({
   declarationDate: z.date().optional(),
 });
 
-// Step 5: Documents Schema (optional)
+// Step 5: Social Links Schema (optional)
 const step5Schema = z.object({
+  linkedinUrl: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Please enter a valid LinkedIn URL" }
+  ),
+  githubUrl: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Please enter a valid GitHub URL" }
+  ),
+  twitterUrl: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Please enter a valid Twitter/X URL" }
+  ),
+  websiteUrl: z.string().optional().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "Please enter a valid website URL" }
+  ),
+  otherSocialLinks: z.string().max(500, "Other social links must not exceed 500 characters").optional(),
+});
+
+// Step 6: Documents Schema (optional)
+const step6Schema = z.object({
   documents: z.array(z.any()).optional(),
 });
 
 // Combined schema for final validation
 // Note: step2Schema uses .refine() which returns ZodEffects, so we use type assertion for merge
-const applicationSchema = step1Schema.merge(step2Schema as any).merge(step3Schema).merge(step4Schema).merge(step5Schema);
+const applicationSchema = step1Schema.merge(step2Schema as any).merge(step3Schema).merge(step4Schema).merge(step5Schema).merge(step6Schema);
 
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
@@ -151,6 +173,7 @@ const stepTitles = [
   "Applicant Information",
   "Organizational Background",
   "Project Overview",
+  "Social Links",
   "Upload Documents",
   "Review",
   "Compliance & Declarations",
@@ -236,11 +259,17 @@ const MultiStepApplicationForm = () => {
 
   // Track selected files (not uploaded yet)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const { uploadDocuments } = useDocumentUpload();
+  const [selectedLibraryDocIds, setSelectedLibraryDocIds] = useState<string[]>([]);
+  const { uploadDocuments, linkLibraryDocumentToApplication } = useDocumentUpload();
 
   // Memoize the files change callback
   const handleFilesChange = useCallback((files: File[]) => {
     setSelectedFiles(files);
+  }, []);
+
+  // Handle library document selection
+  const handleLibraryDocumentsChange = useCallback((documentIds: string[]) => {
+    setSelectedLibraryDocIds(documentIds);
   }, []);
 
   // Step 4 has no schema - it's just review
@@ -251,10 +280,11 @@ const MultiStepApplicationForm = () => {
       currentStep === 1 ? step1Schema :
       currentStep === 2 ? (formData.applicantType === "Individual" ? z.object({}) : step2Schema) :
       currentStep === 3 ? step3Schema :
-      currentStep === 4 ? step5Schema : // Documents
-      currentStep === 5 ? z.object({}) : // Review (no schema)
-      currentStep === 6 ? step4Schema : // Compliance & Declarations
-      currentStep === 7 ? z.object({}) : // Payment (no schema)
+      currentStep === 4 ? step5Schema : // Social Links
+      currentStep === 5 ? step6Schema : // Documents
+      currentStep === 6 ? z.object({}) : // Review (no schema)
+      currentStep === 7 ? step4Schema : // Compliance & Declarations
+      currentStep === 8 ? z.object({}) : // Payment (no schema)
       z.object({}) // Submit (no schema)
     ) as any,
     defaultValues: {
@@ -522,6 +552,11 @@ const MultiStepApplicationForm = () => {
         proposed_solution: formData.proposedSolution,
         target_beneficiaries: formData.targetBeneficiaries,
         geographic_focus: formData.geographicFocus,
+        linkedin_url: formData.linkedinUrl || null,
+        github_url: formData.githubUrl || null,
+        twitter_url: formData.twitterUrl || null,
+        website_url: formData.websiteUrl || null,
+        other_social_links: formData.otherSocialLinks || null,
         information_accurate_confirmed: formData.informationAccurateConfirmed,
         conflict_of_interest_declared: formData.conflictOfInterestDeclared,
         reporting_requirements_agreed: formData.reportingRequirementsAgreed,
@@ -576,7 +611,38 @@ const MultiStepApplicationForm = () => {
         application = data;
       }
 
-      // Upload documents if any were selected
+      // Link library documents to application if any were selected
+      if (selectedLibraryDocIds.length > 0 && application) {
+        try {
+          toast({
+            title: "Linking Documents",
+            description: `Linking ${selectedLibraryDocIds.length} document${selectedLibraryDocIds.length > 1 ? 's' : ''} from library...`,
+          });
+          
+          const linkPromises = selectedLibraryDocIds.map(docId =>
+            linkLibraryDocumentToApplication(docId, application.id, application.project_id)
+          );
+          
+          const linkedDocs = await Promise.all(linkPromises);
+          const successfulLinks = linkedDocs.filter(doc => doc !== null);
+          
+          if (successfulLinks.length > 0) {
+            toast({
+              title: "Documents Linked",
+              description: `Successfully linked ${successfulLinks.length} document${successfulLinks.length > 1 ? 's' : ''} from your library.`,
+            });
+          }
+        } catch (error) {
+          console.error("Error linking library documents:", error);
+          toast({
+            title: "Document Link Warning",
+            description: "Some library documents failed to link. Your application was submitted successfully.",
+            variant: "destructive",
+          });
+        }
+      }
+
+      // Upload new documents if any were selected
       if (selectedFiles.length > 0 && application) {
         try {
           toast({
@@ -1211,8 +1277,69 @@ const MultiStepApplicationForm = () => {
                 </div>
               )}
 
-              {/* Step 4: Documents */}
+              {/* Step 4: Social Links */}
               {currentStep === 4 && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Social Links</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Share your professional and social media profiles (optional). This helps us learn more about you and your work.
+                    </p>
+                  </div>
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="linkedinUrl"
+                    fieldType={FormFieldType.INPUT}
+                    label="LinkedIn Profile URL"
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    icon={Link}
+                    iconPosition="left"
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="githubUrl"
+                    fieldType={FormFieldType.INPUT}
+                    label="GitHub Profile URL"
+                    placeholder="https://github.com/yourusername"
+                    icon={Link}
+                    iconPosition="left"
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="twitterUrl"
+                    fieldType={FormFieldType.INPUT}
+                    label="Twitter/X Profile URL"
+                    placeholder="https://twitter.com/yourusername"
+                    icon={Link}
+                    iconPosition="left"
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="websiteUrl"
+                    fieldType={FormFieldType.INPUT}
+                    label="Website URL"
+                    placeholder="https://yourwebsite.com"
+                    icon={Link}
+                    iconPosition="left"
+                  />
+                  
+                  <CustomFormField
+                    control={form.control}
+                    name="otherSocialLinks"
+                    fieldType={FormFieldType.TEXTAREA}
+                    label="Other Social Links"
+                    placeholder="List any other relevant social media profiles or links (e.g., Instagram, Facebook, portfolio, etc.)"
+                    rows={3}
+                  />
+                </div>
+              )}
+
+              {/* Step 5: Documents */}
+              {currentStep === 5 && (
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
@@ -1224,12 +1351,13 @@ const MultiStepApplicationForm = () => {
                   <DocumentUploadSection 
                     projectId={formData.projectId}
                     onFilesChange={handleFilesChange}
+                    onLibraryDocumentsChange={handleLibraryDocumentsChange}
                   />
                 </div>
               )}
 
-              {/* Step 5: Review */}
-              {currentStep === 5 && (
+              {/* Step 6: Review */}
+              {currentStep === 6 && (
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Review Your Application</h3>
@@ -1407,37 +1535,122 @@ const MultiStepApplicationForm = () => {
                     </div>
                   </div>
 
+                  {/* Social Links Review */}
+                  {(formData.linkedinUrl || formData.githubUrl || formData.twitterUrl || formData.websiteUrl || formData.otherSocialLinks) && (
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-primary" />
+                          Social Links
+                        </h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => goToStep(4)}
+                          className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                          Edit
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {formData.linkedinUrl && (
+                          <div>
+                            <span className="text-muted-foreground">LinkedIn:</span>
+                            <p className="font-medium break-all">
+                              <a href={formData.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                {formData.linkedinUrl}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        {formData.githubUrl && (
+                          <div>
+                            <span className="text-muted-foreground">GitHub:</span>
+                            <p className="font-medium break-all">
+                              <a href={formData.githubUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                {formData.githubUrl}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        {formData.twitterUrl && (
+                          <div>
+                            <span className="text-muted-foreground">Twitter/X:</span>
+                            <p className="font-medium break-all">
+                              <a href={formData.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                {formData.twitterUrl}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        {formData.websiteUrl && (
+                          <div>
+                            <span className="text-muted-foreground">Website:</span>
+                            <p className="font-medium break-all">
+                              <a href={formData.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                {formData.websiteUrl}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        {formData.otherSocialLinks && (
+                          <div className="md:col-span-2">
+                            <span className="text-muted-foreground">Other Social Links:</span>
+                            <p className="font-medium mt-1 whitespace-pre-wrap">{formData.otherSocialLinks}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Documents Review */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium flex items-center gap-2">
                         <FileText className="h-4 w-4 text-primary" />
-                        Uploaded Documents
+                        Documents
                       </h4>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => goToStep(4)}
+                        onClick={() => goToStep(5)}
                         className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                       >
                         <Edit2 className="h-3 w-3" />
                         Edit
                       </Button>
                     </div>
-                    {formData.uploadedDocumentIds && formData.uploadedDocumentIds.length > 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        {formData.uploadedDocumentIds.length} document(s) uploaded for this application
-                      </p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No documents uploaded</p>
-                    )}
+                    <div className="space-y-2 text-sm">
+                      {selectedLibraryDocIds.length > 0 && (
+                        <div>
+                          <span className="text-muted-foreground">From Library: </span>
+                          <span className="font-medium">{selectedLibraryDocIds.length} document(s)</span>
+                        </div>
+                      )}
+                      {selectedFiles.length > 0 && (
+                        <div>
+                          <span className="text-muted-foreground">New Uploads: </span>
+                          <span className="font-medium">{selectedFiles.length} document(s)</span>
+                        </div>
+                      )}
+                      {selectedLibraryDocIds.length === 0 && selectedFiles.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No documents selected</p>
+                      )}
+                      {(selectedLibraryDocIds.length > 0 || selectedFiles.length > 0) && (
+                        <p className="text-xs text-muted-foreground italic mt-2">
+                          Documents will be linked/uploaded when you submit your application
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 6: Compliance & Declarations */}
-              {currentStep === 6 && (
+              {/* Step 7: Compliance & Declarations */}
+              {currentStep === 7 && (
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Compliance & Declarations</h3>
@@ -1581,7 +1794,7 @@ const MultiStepApplicationForm = () => {
               )}
 
               {/* Step 7: Payment */}
-              {currentStep === 7 && formData.projectId && (
+              {currentStep === 8 && formData.projectId && (
                 <PaymentStep
                   projectId={formData.projectId}
                   applicationId={draftId}
@@ -1592,7 +1805,7 @@ const MultiStepApplicationForm = () => {
               )}
 
               {/* Step 8: Submit */}
-              {currentStep === 8 && (
+              {currentStep === 9 && (
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Submit Your Application</h3>

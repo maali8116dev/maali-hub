@@ -94,6 +94,7 @@ export type Database = {
           file_size: number | null
           file_type: string | null
           id: string
+          is_library_document: boolean
           project_id: number | null
           user_id: string | null
         }
@@ -105,6 +106,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          is_library_document?: boolean
           project_id?: number | null
           user_id?: string | null
         }
@@ -116,6 +118,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
+          is_library_document?: boolean
           project_id?: number | null
           user_id?: string | null
         }

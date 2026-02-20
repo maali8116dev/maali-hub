@@ -10,6 +10,8 @@ export interface UploadedDocument {
   fileType: string;
   createdAt: string;
   applicationId?: string;
+  isLibraryDocument?: boolean;
+  projectId?: number;
 }
 
 interface UploadProgress {
@@ -19,10 +21,13 @@ interface UploadProgress {
 }
 
 interface UseDocumentUploadReturn {
-  uploadDocument: (file: File, applicationId?: string, projectId?: number) => Promise<UploadedDocument | null>;
-  uploadDocuments: (files: File[], applicationId?: string, projectId?: number) => Promise<UploadedDocument[]>;
+  uploadDocument: (file: File, applicationId?: string, projectId?: number, isLibrary?: boolean) => Promise<UploadedDocument | null>;
+  uploadDocuments: (files: File[], applicationId?: string, projectId?: number, isLibrary?: boolean) => Promise<UploadedDocument[]>;
+  uploadToLibrary: (file: File) => Promise<UploadedDocument | null>;
+  linkLibraryDocumentToApplication: (documentId: string, applicationId: string, projectId?: number) => Promise<UploadedDocument | null>;
   deleteDocument: (document: UploadedDocument) => Promise<boolean>;
   fetchUserDocuments: () => Promise<UploadedDocument[]>;
+  fetchLibraryDocuments: () => Promise<UploadedDocument[]>;
   fetchApplicationDocuments: (applicationId: string) => Promise<UploadedDocument[]>;
   isUploading: boolean;
   uploadProgress: UploadProgress[];
@@ -59,7 +64,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const uploadDocument = useCallback(async (
     file: File,
     applicationId?: string,
-    projectId?: number
+    projectId?: number,
+    isLibrary: boolean = false
   ): Promise<UploadedDocument | null> => {
     // Validate file
     const validationError = validateFile(file);
@@ -126,16 +132,18 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       );
 
       // Save metadata to database
+      // Library documents should have application_id = null
       const { data: docData, error: dbError } = await supabase
         .from("application_documents")
         .insert({
           user_id: user.id,
-          application_id: applicationId || null,
-          project_id: projectId || null,
+          application_id: isLibrary ? null : (applicationId || null),
+          project_id: isLibrary ? null : (projectId || null),
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
           file_type: file.type,
+          is_library_document: isLibrary,
         })
         .select()
         .single();
@@ -154,6 +162,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         fileType: docData.file_type || "",
         createdAt: docData.created_at,
         applicationId: docData.application_id || undefined,
+        isLibraryDocument: docData.is_library_document || false,
+        projectId: docData.project_id || undefined,
       };
 
       // Add to local state
@@ -183,13 +193,14 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const uploadDocuments = useCallback(async (
     files: File[],
     applicationId?: string,
-    projectId?: number
+    projectId?: number,
+    isLibrary: boolean = false
   ): Promise<UploadedDocument[]> => {
     setIsUploading(true);
     const results: UploadedDocument[] = [];
 
     for (const file of files) {
-      const result = await uploadDocument(file, applicationId, projectId);
+      const result = await uploadDocument(file, applicationId, projectId, isLibrary);
       if (result) {
         results.push(result);
       }
@@ -216,16 +227,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     document: UploadedDocument
   ): Promise<boolean> => {
     try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from(BUCKET_NAME)
-        .remove([document.filePath]);
-
-      if (storageError) {
-        throw storageError;
-      }
-
-      // Delete from database
+      // Delete the database record first
       const { error: dbError } = await supabase
         .from("application_documents")
         .delete()
@@ -233,6 +235,27 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       if (dbError) {
         throw dbError;
+      }
+
+      // Only delete from storage if no other document records reference the same file
+      const { count, error: countError } = await supabase
+        .from("application_documents")
+        .select("id", { count: "exact", head: true })
+        .eq("file_path", document.filePath);
+
+      if (countError) {
+        console.warn("Could not check for shared file references:", countError);
+      }
+
+      // If no other records reference this file, safe to delete from storage
+      if (!count || count === 0) {
+        const { error: storageError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .remove([document.filePath]);
+
+        if (storageError) {
+          console.warn("Storage cleanup failed (document record already removed):", storageError);
+        }
       }
 
       // Remove from local state
@@ -281,6 +304,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         fileType: doc.file_type || "",
         createdAt: doc.created_at,
         applicationId: doc.application_id || undefined,
+        isLibraryDocument: doc.is_library_document || false,
+        projectId: doc.project_id || undefined,
       }));
 
       setDocuments(docs);
@@ -321,6 +346,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         fileType: doc.file_type || "",
         createdAt: doc.created_at,
         applicationId: doc.application_id || undefined,
+        isLibraryDocument: doc.is_library_document || false,
+        projectId: doc.project_id || undefined,
       }));
 
       setDocuments(docs);
@@ -333,11 +360,138 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     }
   }, []);
 
+  // Upload document to library (reusable across applications)
+  const uploadToLibrary = useCallback(async (
+    file: File
+  ): Promise<UploadedDocument | null> => {
+    return uploadDocument(file, undefined, undefined, true);
+  }, [uploadDocument]);
+
+  // Link a library document to an application (creates a copy/reference)
+  const linkLibraryDocumentToApplication = useCallback(async (
+    documentId: string,
+    applicationId: string,
+    projectId?: number
+  ): Promise<UploadedDocument | null> => {
+    try {
+      // First, get the library document
+      const { data: libraryDoc, error: fetchError } = await supabase
+        .from("application_documents")
+        .select("*")
+        .eq("id", documentId)
+        .eq("is_library_document", true)
+        .is("application_id", null)
+        .single();
+
+      if (fetchError || !libraryDoc) {
+        throw new Error("Library document not found");
+      }
+
+      // Create a new document record linked to the application
+      // This references the same file_path but creates a new record for the application
+      const { data: docData, error: dbError } = await supabase
+        .from("application_documents")
+        .insert({
+          user_id: libraryDoc.user_id,
+          application_id: applicationId,
+          project_id: projectId || null,
+          file_name: libraryDoc.file_name,
+          file_path: libraryDoc.file_path, // Same file, different record
+          file_size: libraryDoc.file_size,
+          file_type: libraryDoc.file_type,
+          is_library_document: false, // This is now an application document
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      const linkedDoc: UploadedDocument = {
+        id: docData.id,
+        fileName: docData.file_name,
+        filePath: docData.file_path,
+        fileSize: docData.file_size || 0,
+        fileType: docData.file_type || "",
+        createdAt: docData.created_at,
+        applicationId: docData.application_id || undefined,
+        isLibraryDocument: false,
+        projectId: docData.project_id || undefined,
+      };
+
+      toast({
+        title: "Document Linked",
+        description: `"${libraryDoc.file_name}" has been added to your application.`,
+      });
+
+      return linkedDoc;
+    } catch (error: any) {
+      console.error("Link library document error:", error);
+      toast({
+        title: "Link Failed",
+        description: error?.message || "Failed to link document to application. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  }, [toast]);
+
+  // Fetch only library documents (reusable documents)
+  const fetchLibraryDocuments = useCallback(async (): Promise<UploadedDocument[]> => {
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from("application_documents")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_library_document", true)
+        .is("application_id", null)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      const docs: UploadedDocument[] = (data || []).map((doc) => ({
+        id: doc.id,
+        fileName: doc.file_name,
+        filePath: doc.file_path,
+        fileSize: doc.file_size || 0,
+        fileType: doc.file_type || "",
+        createdAt: doc.created_at,
+        applicationId: undefined,
+        isLibraryDocument: true,
+        projectId: undefined,
+      }));
+
+      return docs;
+    } catch (error) {
+      console.error("Fetch library documents error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load library documents. Please try again.",
+        variant: "destructive",
+      });
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
   return {
     uploadDocument,
     uploadDocuments,
+    uploadToLibrary,
+    linkLibraryDocumentToApplication,
     deleteDocument,
     fetchUserDocuments,
+    fetchLibraryDocuments,
     fetchApplicationDocuments,
     isUploading,
     uploadProgress,
