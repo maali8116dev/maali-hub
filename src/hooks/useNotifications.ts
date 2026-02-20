@@ -104,8 +104,8 @@ const createNotification = async (
   type: Notification["type"],
   link?: string,
   metadata?: Record<string, any>
-): Promise<void> => {
-  const { error } = await supabase.rpc("create_notification", {
+): Promise<string | null> => {
+  const { data, error } = await supabase.rpc("create_notification", {
     p_user_id: userId,
     p_title: title,
     p_message: message,
@@ -115,9 +115,20 @@ const createNotification = async (
   });
 
   if (error) {
-    console.error("Error creating notification:", error);
-    // Don't throw - notifications are not critical
+    console.error("Error creating notification:", {
+      userId,
+      title,
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
+    // Throw error so callers can handle it appropriately
+    throw new Error(`Failed to create notification: ${error.message}`);
   }
+
+  // Return the notification ID if successful
+  return data || null;
 };
 
 // Hook to fetch notifications

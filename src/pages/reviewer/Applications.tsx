@@ -116,21 +116,19 @@ const ReviewerApplications = () => {
       });
     }
 
-    // Add status column when not viewing all
-    if (statusFilter !== "all") {
-      baseColumns.push({
-        accessorKey: 'status',
-        header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Status" />
-        ),
-        cell: ({ row }) => {
-          return getStatusBadge(row.original.status);
-        },
-        sortingFn: (rowA, rowB) => {
-          return rowA.original.status.localeCompare(rowB.original.status);
-        },
-      });
-    }
+    // Add status column (always show, especially important for "all" tab)
+    baseColumns.push({
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <SortableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        return getStatusBadge(row.original.status);
+      },
+      sortingFn: (rowA, rowB) => {
+        return rowA.original.status.localeCompare(rowB.original.status);
+      },
+    });
 
     // Add remaining columns
     baseColumns.push(

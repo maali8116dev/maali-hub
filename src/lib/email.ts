@@ -8,7 +8,9 @@ type EmailType =
   | "status_update"
   | "welcome"
   | "email_verification"
-  | "password_reset";
+  | "password_reset"
+  | "contact_submission"
+  | "contact_confirmation";
 
 interface EmailData {
   recipientName?: string;
@@ -16,6 +18,15 @@ interface EmailData {
   applicationId?: string;
   statusMessage?: string;
   actionUrl?: string;
+  // Contact form specific fields
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  subject?: string;
+  message?: string;
+  submissionId?: string;
 }
 
 interface SendEmailParams {
@@ -27,18 +38,30 @@ interface SendEmailParams {
 /**
  * Send an email using the Resend edge function
  * @param params - Email parameters including recipient, type, and data
+ * @param allowPublic - Allow sending without authentication (for contact forms)
  * @returns Promise with the email send result
  */
-export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean; error?: string }> {
+export async function sendEmail(
+  params: SendEmailParams,
+  allowPublic: boolean = false
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
+    // For contact form emails, allow sending without authentication
+    const isContactEmail = params.type === "contact_confirmation" || params.type === "contact_submission";
     
-    if (!sessionData.session) {
-      return { success: false, error: "User not authenticated" };
+    if (!allowPublic && !isContactEmail) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        return { success: false, error: "User not authenticated" };
+      }
     }
 
     const response = await supabase.functions.invoke("send-email", {
-      body: params,
+      body: {
+        ...params,
+        allowPublic: allowPublic || isContactEmail,
+      },
     });
 
     if (response.error) {
@@ -220,4 +243,54 @@ export async function sendPasswordResetEmail(
       actionUrl: resetUrl,
     },
   });
+}
+
+/**
+ * Send contact form confirmation email to user
+ */
+export async function sendContactConfirmationEmail(
+  to: string,
+  firstName: string,
+  message: string,
+  submissionId?: string
+) {
+  return sendEmail({
+    to,
+    type: "contact_confirmation",
+    data: {
+      firstName,
+      message,
+      submissionId,
+    },
+  }, true); // Allow public (no auth required)
+}
+
+/**
+ * Send contact form notification email to admin
+ */
+export async function sendContactSubmissionEmail(
+  to: string,
+  firstName: string,
+  lastName: string,
+  email: string,
+  phone: string | null,
+  country: string | null,
+  subject: string,
+  message: string,
+  submissionId?: string
+) {
+  return sendEmail({
+    to,
+    type: "contact_submission",
+    data: {
+      firstName,
+      lastName,
+      email,
+      phone: phone || undefined,
+      country: country || undefined,
+      subject,
+      message,
+      submissionId,
+    },
+  }, true); // Allow public (no auth required)
 }

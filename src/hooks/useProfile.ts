@@ -137,7 +137,7 @@ export function useProfile() {
       }
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds - reduced from 5 minutes for faster role updates
     retry: (failureCount, error: any) => {
       // Don't retry if profile doesn't exist (404/PGRST116)
       if (error?.code === 'PGRST116' || error?.message?.includes('No rows')) {

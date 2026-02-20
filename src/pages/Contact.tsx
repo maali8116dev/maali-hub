@@ -1,3 +1,8 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useNavigate, Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +11,138 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Phone, MapPin, Clock, MessageSquare, Users } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, MessageSquare, Users, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { sendContactConfirmationEmail, sendContactSubmissionEmail } from "@/lib/email";
+import { useAuth } from "@/hooks/useAuth";
+import { emailSchema } from "@/lib/emailValidation";
+
+const contactFormSchema = z.object({
+  firstName: z.string().min(1, "First name is required").max(100, "First name is too long"),
+  lastName: z.string().min(1, "Last name is required").max(100, "Last name is too long"),
+  email: emailSchema,
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  subject: z.enum(["funding", "application", "partnership", "technical", "general"], {
+    required_error: "Please select a subject",
+  }),
+  message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 const Contact = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      country: "",
+      subject: undefined,
+      message: "",
+    },
+  });
+
+  const selectedSubject = watch("subject");
+  const selectedCountry = watch("country");
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+    setSubmitSuccess(false);
+
+    try {
+      // Save to database
+      const { data: submission, error: dbError } = await supabase
+        .from("contact_submissions")
+        .insert({
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          phone: data.phone || null,
+          country: data.country || null,
+          subject: data.subject,
+          message: data.message,
+          user_id: user?.id || null,
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        toast.error("Failed to submit your message. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Send confirmation email to user
+      const confirmationResult = await sendContactConfirmationEmail(
+        data.email,
+        data.firstName,
+        data.message,
+        submission.id
+      );
+
+      if (!confirmationResult.success) {
+        console.error("Failed to send confirmation email:", confirmationResult.error);
+        // Don't fail the submission if email fails
+      }
+
+      // Send notification email to admin
+      const adminEmail = "support@maali.africa"; // TODO: Make this configurable
+      const adminResult = await sendContactSubmissionEmail(
+        adminEmail,
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.phone || null,
+        data.country || null,
+        data.subject,
+        data.message,
+        submission.id
+      );
+
+      if (!adminResult.success) {
+        console.error("Failed to send admin notification:", adminResult.error);
+        // Don't fail the submission if email fails
+      }
+
+      setSubmitSuccess(true);
+      toast.success("Your message has been sent successfully! We'll get back to you within 24 hours.");
+
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        // Reset form
+        setValue("firstName", "");
+        setValue("lastName", "");
+        setValue("email", "");
+        setValue("phone", "");
+        setValue("country", "");
+        setValue("subject", undefined);
+        setValue("message", "");
+      }, 3000);
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const contactInfo = [
     {
       icon: Mail,
@@ -84,74 +218,173 @@ const Contact = () => {
                   Fill out the form below and we'll get back to you as soon as possible.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="Enter your first name" className="h-12 sm:h-10" />
+              <CardContent>
+                {submitSuccess ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <CheckCircle2 className="h-16 w-16 text-success mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Message Sent Successfully!</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Thank you for contacting us. We've received your message and will respond within 24 hours.
+                    </p>
+                    <Button onClick={() => setSubmitSuccess(false)} variant="outline">
+                      Send Another Message
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Enter your last name" className="h-12 sm:h-10" />
-                  </div>
-                </div>
+                ) : (
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name *</Label>
+                        <Input
+                          id="firstName"
+                          placeholder="Enter your first name"
+                          className="h-12 sm:h-10"
+                          {...register("firstName")}
+                        />
+                        {errors.firstName && (
+                          <p className="text-sm text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            {errors.firstName.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name *</Label>
+                        <Input
+                          id="lastName"
+                          placeholder="Enter your last name"
+                          className="h-12 sm:h-10"
+                          {...register("lastName")}
+                        />
+                        {errors.lastName && (
+                          <p className="text-sm text-destructive flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            {errors.lastName.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Enter your email address" className="h-12 sm:h-10" />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email address"
+                        className="h-12 sm:h-10"
+                        {...register("email")}
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="Enter your phone number" className="h-12 sm:h-10" />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        className="h-12 sm:h-10"
+                        {...register("phone")}
+                      />
+                      {errors.phone && (
+                        <p className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.phone.message}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nigeria">Nigeria</SelectItem>
-                      <SelectItem value="kenya">Kenya</SelectItem>
-                      <SelectItem value="south-africa">South Africa</SelectItem>
-                      <SelectItem value="ghana">Ghana</SelectItem>
-                      <SelectItem value="uganda">Uganda</SelectItem>
-                      <SelectItem value="tanzania">Tanzania</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="country">Country</Label>
+                      <Select
+                        value={selectedCountry}
+                        onValueChange={(value) => setValue("country", value)}
+                      >
+                        <SelectTrigger className="h-12 sm:h-10">
+                          <SelectValue placeholder="Select your country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nigeria">Nigeria</SelectItem>
+                          <SelectItem value="kenya">Kenya</SelectItem>
+                          <SelectItem value="south-africa">South Africa</SelectItem>
+                          <SelectItem value="ghana">Ghana</SelectItem>
+                          <SelectItem value="uganda">Uganda</SelectItem>
+                          <SelectItem value="tanzania">Tanzania</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.country && (
+                        <p className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.country.message}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="funding">Funding Inquiry</SelectItem>
-                      <SelectItem value="application">Application Support</SelectItem>
-                      <SelectItem value="partnership">Partnership</SelectItem>
-                      <SelectItem value="technical">Technical Support</SelectItem>
-                      <SelectItem value="general">General Inquiry</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Subject *</Label>
+                      <Select
+                        value={selectedSubject}
+                        onValueChange={(value) => setValue("subject", value as ContactFormData["subject"])}
+                      >
+                        <SelectTrigger className="h-12 sm:h-10">
+                          <SelectValue placeholder="Select a subject" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="funding">Funding Inquiry</SelectItem>
+                          <SelectItem value="application">Application Support</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="technical">Technical Support</SelectItem>
+                          <SelectItem value="general">General Inquiry</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.subject && (
+                        <p className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.subject.message}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea 
-                    id="message" 
-                    placeholder="Tell us how we can help you..."
-                    className="min-h-[120px]"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="message">Message *</Label>
+                      <Textarea
+                        id="message"
+                        placeholder="Tell us how we can help you..."
+                        className="min-h-[120px]"
+                        {...register("message")}
+                      />
+                      {errors.message && (
+                        <p className="text-sm text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.message.message}
+                        </p>
+                      )}
+                    </div>
 
-                <Button className="w-full min-h-[48px]" variant="hero" size="lg">
-                  Send Message
-                </Button>
+                    <Button
+                      type="submit"
+                      className="w-full min-h-[48px]"
+                      variant="hero"
+                      size="lg"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Send Message"
+                      )}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -206,8 +439,8 @@ const Contact = () => {
                   Need immediate assistance? Check our FAQ section or schedule a call with our team.
                 </p>
                 <div className="space-y-2">
-                  <Button variant="secondary" size="sm" className="w-full">
-                    View FAQ
+                  <Button variant="secondary" size="sm" className="w-full" asChild>
+                    <Link to="/faq">View FAQ</Link>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">
                     Schedule Call
@@ -225,11 +458,11 @@ const Contact = () => {
             Don't wait – explore funding opportunities available right now
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg">
-              Browse Projects
+            <Button variant="hero" size="lg" asChild>
+              <Link to="/projects">Browse Projects</Link>
             </Button>
-            <Button variant="outline" size="lg">
-              Create Account
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/auth">Create Account</Link>
             </Button>
           </div>
         </div>

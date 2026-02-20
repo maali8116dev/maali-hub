@@ -753,24 +753,41 @@ const MultiStepApplicationForm = () => {
           });
 
           // Notify each assigned reviewer
-          for (const assignment of assignments) {
-            try {
-              await createNotification(
-                assignment.reviewer_id,
-                "New Application Assigned",
-                `A new application for "${projectTitle}" has been assigned to you for review.`,
-                "review_assigned",
-                `/reviewer/applications/${application.id}`,
-                {
-                  application_id: application.id,
-                  project_id: formData.projectId,
-                  assignment_id: assignment.assignment_id,
-                }
-              );
-            } catch (notifError) {
-              // Log notification error but don't fail
-              console.warn(`Failed to notify reviewer ${assignment.reviewer_id}:`, notifError);
-            }
+          // NOTE: Notifications are also created automatically by database trigger,
+          // but we create them here too for immediate feedback and to catch any issues
+          const notificationResults = await Promise.allSettled(
+            assignments.map(async (assignment) => {
+              try {
+                const notificationId = await createNotification(
+                  assignment.reviewer_id,
+                  "New Application Assigned",
+                  `A new application for "${projectTitle}" has been assigned to you for review.`,
+                  "review_assigned",
+                  `/reviewer/applications/${application.id}`,
+                  {
+                    application_id: application.id,
+                    project_id: formData.projectId,
+                    assignment_id: assignment.assignment_id,
+                  }
+                );
+                return { reviewer_id: assignment.reviewer_id, notificationId, success: true };
+              } catch (notifError) {
+                console.error(`Failed to notify reviewer ${assignment.reviewer_id}:`, notifError);
+                return { reviewer_id: assignment.reviewer_id, error: notifError, success: false };
+              }
+            })
+          );
+
+          // Log notification results
+          const successful = notificationResults.filter(r => r.status === 'fulfilled' && r.value.success).length;
+          const failed = notificationResults.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+          
+          if (failed > 0) {
+            console.warn(`Failed to create ${failed} notification(s) for reviewer assignments. Notifications may still be created by database trigger.`);
+          }
+          
+          if (successful > 0) {
+            console.log(`Successfully created ${successful} notification(s) for reviewer assignments.`);
           }
         } else {
           // No reviewers available or assigned

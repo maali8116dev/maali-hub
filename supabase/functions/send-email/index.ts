@@ -13,27 +13,49 @@ type EmailType =
   | "status_update"
   | "welcome"
   | "email_verification"
-  | "password_reset";
+  | "password_reset"
+  | "contact_submission"
+  | "contact_confirmation";
 
 interface SendEmailRequest {
   to: string;
   type: EmailType;
+  allowPublic?: boolean;
   data: {
     recipientName?: string;
     projectTitle?: string;
     applicationId?: string;
     statusMessage?: string;
     actionUrl?: string;
+    // Contact form specific fields
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    subject?: string;
+    message?: string;
+    submissionId?: string;
   };
 }
 
 const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
   // M1 FIX: HTML-escape all user-provided data to prevent HTML injection in emails
-  const recipientName = escapeHtml(data.recipientName || "Applicant");
+  const recipientName = escapeHtml(data.recipientName || data.firstName || "Applicant");
   const projectTitle = data.projectTitle ? escapeHtml(data.projectTitle) : undefined;
   const applicationId = data.applicationId ? escapeHtml(data.applicationId) : undefined;
   const statusMessage = data.statusMessage ? escapeHtml(data.statusMessage) : undefined;
   const actionUrl = data.actionUrl; // URLs are used in href attributes, not HTML-escaped
+  
+  // Contact form fields (HTML-escaped)
+  const firstName = data.firstName ? escapeHtml(data.firstName) : undefined;
+  const lastName = data.lastName ? escapeHtml(data.lastName) : undefined;
+  const email = data.email ? escapeHtml(data.email) : undefined;
+  const phone = data.phone ? escapeHtml(data.phone) : undefined;
+  const country = data.country ? escapeHtml(data.country) : undefined;
+  const subject = data.subject ? escapeHtml(data.subject) : undefined;
+  const message = data.message ? escapeHtml(data.message) : undefined;
+  const submissionId = data.submissionId ? escapeHtml(data.submissionId) : undefined;
   
   // Base URL for logo and links
   const baseUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
@@ -349,6 +371,55 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
         ),
       };
 
+    case "contact_confirmation":
+      return {
+        subject: "Thank You for Contacting Maali",
+        html: emailTemplate(
+          "Message Received",
+          `
+            <p>Dear ${firstName || recipientName},</p>
+            <p>Thank you for reaching out to Maali! We have received your message and our team will get back to you within 24 hours.</p>
+            <p><strong>Your Message:</strong></p>
+            <p style="background-color: #f9fafb; padding: 15px; border-radius: 4px; margin: 15px 0;">${message || 'No message provided'}</p>
+            ${submissionId ? `<p>Reference ID: <strong>${submissionId}</strong></p>` : ''}
+            <p>If you have any urgent questions, please don't hesitate to contact us directly at support@maali.africa.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+
+    case "contact_submission":
+      const subjectLabels: Record<string, string> = {
+        funding: "Funding Inquiry",
+        application: "Application Support",
+        partnership: "Partnership",
+        technical: "Technical Support",
+        general: "General Inquiry"
+      };
+      const subjectLabel = subjectLabels[subject || 'general'] || subject || 'General Inquiry';
+      
+      return {
+        subject: `New Contact Form Submission: ${subjectLabel}`,
+        html: emailTemplate(
+          "New Contact Form Submission",
+          `
+            <p>A new contact form submission has been received:</p>
+            <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 20px 0;">
+              <p><strong>Name:</strong> ${firstName || ''} ${lastName || ''}</p>
+              <p><strong>Email:</strong> ${email || 'N/A'}</p>
+              ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+              ${country ? `<p><strong>Country:</strong> ${country}</p>` : ''}
+              <p><strong>Subject:</strong> ${subjectLabel}</p>
+              <p><strong>Message:</strong></p>
+              <p style="white-space: pre-wrap; margin-top: 10px;">${message || 'No message provided'}</p>
+            </div>
+            ${submissionId ? `<p>Submission ID: <strong>${submissionId}</strong></p>` : ''}
+            <p>Please respond to this inquiry within 24 hours.</p>
+            <p>Best regards,<br>Maali Contact System</p>
+          `
+        ),
+      };
+
     default:
       return {
         subject: "Notification from Maali",
@@ -372,36 +443,54 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Validate authorization
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    const { to, type, data, allowPublic }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
     
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
-      );
-    }
+    // Allow contact form emails without authentication
+    const isContactEmail = type === "contact_confirmation" || type === "contact_submission";
+    const isPublicAllowed = allowPublic === true && isContactEmail;
+    
+    if (!isPublicAllowed) {
+      // Validate authorization for non-contact emails
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
 
-    const { to, type, data }: SendEmailRequest = await req.json();
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+      
+      if (claimsError || !claimsData?.claims) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     if (!to || !type) {
       return new Response(
         JSON.stringify({ error: "Missing required fields: to, type" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate and sanitize email address
+    const sanitizedEmail = typeof to === 'string' ? to.trim() : '';
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email address format" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
@@ -413,7 +502,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: fromEmail,
-      to: [to],
+      to: [sanitizedEmail], // Use sanitized email
       subject,
       html,
     });

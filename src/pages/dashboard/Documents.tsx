@@ -125,6 +125,9 @@ const Documents = () => {
     if (fileType.includes("pdf")) return "PDF";
     if (fileType.includes("word") || fileType.includes("doc")) return "DOC";
     if (fileType.includes("text")) return "TXT";
+    if (fileType.includes("excel") || fileType.includes("spreadsheet") || fileType.includes("xls")) return "XLS";
+    if (fileType.includes("powerpoint") || fileType.includes("presentation") || fileType.includes("ppt")) return "PPT";
+    if (fileType.includes("image") || fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("gif") || fileType.includes("webp")) return "IMG";
     return "File";
   };
 
@@ -152,7 +155,7 @@ const Documents = () => {
             type="file"
             multiple
             className="hidden"
-            accept=".pdf,.doc,.docx,.txt"
+            accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp"
             onChange={handleFileSelect}
           />
           <Button onClick={() => navigate("/projects")} className="w-full sm:w-auto min-h-[44px]">

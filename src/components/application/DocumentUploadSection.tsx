@@ -10,7 +10,10 @@ import {
   X, 
   Download,
   Library,
-  Loader2
+  Loader2,
+  FileSpreadsheet,
+  Presentation,
+  Image as ImageIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -78,17 +81,30 @@ const DocumentUploadSection = ({
   const validateFile = (file: File): string | null => {
     const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     const ALLOWED_TYPES = [
+      // Documents
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
+      // Excel files
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      // PowerPoint files
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      // Images
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
     ];
 
     if (file.size > MAX_FILE_SIZE) {
       return `File "${file.name}" is too large. Maximum size is 10MB.`;
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT.`;
+      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP.`;
     }
     return null;
   };
@@ -158,7 +174,17 @@ const DocumentUploadSection = ({
   };
 
   const getFileIcon = (fileType: string) => {
-    // Could expand this for different file types
+    if (fileType.includes("pdf")) return <FileText className="h-5 w-5 text-red-500" />;
+    if (fileType.includes("word") || fileType.includes("doc")) return <FileText className="h-5 w-5 text-blue-500" />;
+    if (fileType.includes("excel") || fileType.includes("spreadsheet") || fileType.includes("xls")) {
+      return <FileSpreadsheet className="h-5 w-5 text-green-600" />;
+    }
+    if (fileType.includes("powerpoint") || fileType.includes("presentation") || fileType.includes("ppt")) {
+      return <Presentation className="h-5 w-5 text-orange-500" />;
+    }
+    if (fileType.includes("image") || fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("gif") || fileType.includes("webp")) {
+      return <ImageIcon className="h-5 w-5 text-purple-500" />;
+    }
     return <FileText className="h-5 w-5 text-muted-foreground" />;
   };
 
@@ -245,7 +271,7 @@ const DocumentUploadSection = ({
             multiple
             className="hidden"
             onChange={handleFileSelect}
-            accept=".pdf,.doc,.docx,.txt"
+            accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp"
           />
           
           <div className="space-y-3">

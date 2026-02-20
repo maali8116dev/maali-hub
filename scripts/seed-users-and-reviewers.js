@@ -22,6 +22,9 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { lookup } from 'node:dns/promises';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 dotenv.config();
 const args = new Set(process.argv.slice(2));
@@ -824,6 +827,96 @@ async function main() {
 
     console.log(`\n   ✅ Created ${applicationIds.length} applications\n`);
 
+    // Step 6.5: Add documents to applications
+    console.log('📄 Step 6.5: Adding documents to applications...');
+    const testFilesDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'test', 'files');
+    const testFiles = [
+      { name: 'test-document.pdf', mimeType: 'application/pdf' },
+      { name: 'test-document.doc', mimeType: 'application/msword' },
+      { name: 'test-document.txt.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+      { name: 'text-document.txt', mimeType: 'text/plain' },
+    ];
+
+    let documentsAdded = 0;
+    for (let i = 0; i < applicationIds.length; i++) {
+      const applicationId = applicationIds[i];
+      
+      // Get application details to find user_id and project_id
+      const { data: application, error: appError } = await supabase
+        .from('applications')
+        .select('user_id, project_id')
+        .eq('id', applicationId)
+        .single();
+
+      if (appError || !application) {
+        console.log(`   ⚠️  Could not find application ${applicationId}, skipping documents`);
+        continue;
+      }
+
+      // Add 1-3 random documents to each application
+      const numDocs = Math.floor(Math.random() * 3) + 1; // 1-3 documents
+      const selectedFiles = testFiles
+        .sort(() => Math.random() - 0.5)
+        .slice(0, numDocs);
+
+      for (const testFile of selectedFiles) {
+        try {
+          const filePath = join(testFilesDir, testFile.name);
+          const fileBuffer = readFileSync(filePath);
+          
+          // Generate unique file path for storage
+          const timestamp = Date.now() + Math.floor(Math.random() * 1000); // Add randomness to avoid collisions
+          const sanitizedFileName = testFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const storagePath = `${application.user_id}/${timestamp}_${sanitizedFileName}`;
+
+          // Upload to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('application-docs')
+            .upload(storagePath, fileBuffer, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: testFile.mimeType,
+            });
+
+          if (uploadError) {
+            console.log(`   ⚠️  Failed to upload ${testFile.name} for application ${applicationId}: ${uploadError.message}`);
+            continue;
+          }
+
+          // Create document entry in database
+          const { error: docError } = await supabase
+            .from('application_documents')
+            .insert({
+              user_id: application.user_id,
+              application_id: applicationId,
+              project_id: application.project_id,
+              file_name: testFile.name,
+              file_path: storagePath,
+              file_size: fileBuffer.length,
+              file_type: testFile.mimeType,
+              is_library_document: false,
+            });
+
+          if (docError) {
+            console.log(`   ⚠️  Failed to create document record for ${testFile.name}: ${docError.message}`);
+            // Try to clean up uploaded file
+            await supabase.storage.from('application-docs').remove([storagePath]);
+            continue;
+          }
+
+          documentsAdded++;
+        } catch (error) {
+          console.log(`   ⚠️  Error adding document ${testFile.name}: ${error.message}`);
+        }
+      }
+    }
+
+    if (documentsAdded > 0) {
+      console.log(`   ✅ Added ${documentsAdded} documents to applications\n`);
+    } else {
+      console.log(`   ⚠️  No documents were added (check file paths and permissions)\n`);
+    }
+
     // Verify assignments were created
     console.log('📝 Step 6: Verifying reviewer assignments...');
     let totalAssignments = 0;
@@ -856,6 +949,7 @@ async function main() {
     console.log(`   • ${reviewers.length} Reviewer users`);
     console.log(`   • ${applicants.length} Applicant users`);
     console.log(`   • ${applicationIds.length} Applications created (distributed across Technology, Agriculture, FinTech)`);
+    console.log(`   • ${documentsAdded} Documents added to applications`);
     console.log(`   • ${totalAssignments} Reviewer assignments created\n`);
     console.log('🔐 Login Credentials (all passwords: TestPassword123!):');
     console.log('   Admin: admin@maali.test');

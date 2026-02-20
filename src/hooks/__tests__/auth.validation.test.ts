@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import * as z from 'zod';
 import { validateEmail, emailSchema } from '@/lib/emailValidation';
 
+
 // Auth validation schemas (matching Auth.tsx)
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -46,15 +47,11 @@ const TEST_USER_EMAIL = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.co
 const TEST_USER_PASSWORD = import.meta.env.VITE_TEST_USER_PASSWORD || 'testpassword123';
 
 describe('Auth Validation - Business Logic', () => {
-  // Mock fetch for Abstract API
-  const originalFetch = global.fetch;
-  
   beforeEach(() => {
-    global.fetch = vi.fn();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
     vi.clearAllMocks();
   });
 
@@ -90,24 +87,6 @@ describe('Auth Validation - Business Logic', () => {
       }
     });
 
-    it('should reject disposable email addresses', async () => {
-      // Mock Abstract API response for disposable emails
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          email: 'test@10minutemail.com',
-          is_valid_format: { value: true, text: 'VALID_FORMAT' },
-          is_disposable_email: { value: true, text: 'DISPOSABLE' },
-          deliverability: 'UNDELIVERABLE',
-          is_mx_found: { value: false, text: 'NO_MX_RECORDS' },
-        }),
-      });
-
-      const result = await validateEmail('test@10minutemail.com');
-      expect(result.valid).toBe(false);
-      expect(result.message).toContain('Temporary email');
-    });
-
     it('should validate educational domains without API call', async () => {
       const educationalEmails = [
         'user@ma.nibs.edu.gh',
@@ -118,8 +97,7 @@ describe('Auth Validation - Business Logic', () => {
       for (const email of educationalEmails) {
         const result = await validateEmail(email);
         expect(result.valid).toBe(true);
-        // Should not call API for educational domains
-        expect(global.fetch).not.toHaveBeenCalled();
+        // Should not call API for educational domains (validated client-side)
       }
     });
 

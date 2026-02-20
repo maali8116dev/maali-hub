@@ -341,6 +341,19 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`Constructed redirect URL (first 150 chars): ${redirectUrl.substring(0, 150)}`);
 
+    // Validate and sanitize email address
+    const sanitizedEmail = typeof email === 'string' ? email.trim() : '';
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      console.error(`Invalid email format: ${email}`);
+      return new Response(
+        JSON.stringify({ error: "Invalid email address format" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
     // Get email content based on action type
     const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl);
 
@@ -350,7 +363,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email via Resend
     const emailResponse = await resend.emails.send({
       from: fromEmail,
-      to: [email],
+      to: [sanitizedEmail], // Use sanitized email
       subject,
       html,
     });

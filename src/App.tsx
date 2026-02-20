@@ -21,6 +21,7 @@ import ProjectDetails from "./pages/projects/ProjectDetails";
 import ApplicationForm from "./pages/projects/ApplicationForm";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleBasedRoute from "@/components/RoleBasedRoute";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import AdminLayout from "@/components/admin/AdminLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -127,409 +128,489 @@ const App = () => (
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/data-protection" element={<DataProtection />} />
           <Route path="/tests/error" element={<ErrorTest />} />
-          {/* Dashboard Routes - Protected, requires authentication */}
+          {/* Dashboard Routes - Protected, requires authentication, role-based redirect */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Dashboard />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Dashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/applications"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Applications />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Applications />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/applications/:id"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <ApplicationDetails />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <ApplicationDetails />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/documents"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Documents />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Documents />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/notifications"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Notifications />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Notifications />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/profile"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Profile />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Profile />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/settings"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Settings />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Settings />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/dashboard/billing"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Billing />
-                </DashboardLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout>
+                    <Billing />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
 
-          {/* Admin Routes - Protected, requires authentication */}
+          {/* Admin Routes - Protected, requires authentication and admin role */}
           <Route
             path="/admin"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminDashboard />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminDashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/projects"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminProjects />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminProjects />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/projects/new"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminProjectForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminProjectForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/projects/:id"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminProjectDetails />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminProjectDetails />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/projects/:id/edit"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminProjectForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminProjectForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/users"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminUsers />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminUsers />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/users/:userId"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminUserDetails />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminUserDetails />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/applications"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminApplications />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminApplications />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/applications/:id"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <ApplicationDetails />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <ApplicationDetails />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/financial"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminFinancial />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminFinancial />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/activity-logs"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminActivityLogs />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminActivityLogs />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/categories"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminCategories />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminCategories />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/settings"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminSettings />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminSettings />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/review-management"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <ReviewManagement />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <ReviewManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/reviewers/:reviewerId"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <ReviewerDetails />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <ReviewerDetails />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/blog"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminBlog />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminBlog />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/blog/new"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminBlogForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminBlogForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/blog/:id/edit"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminBlogForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminBlogForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/faq"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminFAQ />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminFAQ />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/faq/new"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminFAQForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminFAQForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/faq/:id/edit"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminFAQForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminFAQForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/mentors"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminMentors />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminMentors />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/mentors/new"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminMentorForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminMentorForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/mentors/:id/edit"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminMentorForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminMentorForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/resources"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminResources />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminResources />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/resources/new"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminResourceForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminResourceForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/admin/resources/:id"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminResourceForm />
-                </AdminLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <AdminLayout>
+                    <AdminResourceForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
 
-          {/* Reviewer Routes - Protected, requires authentication */}
+          {/* Reviewer Routes - Protected, requires authentication and reviewer role */}
           <Route
             path="/reviewer"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewerDashboard />
-                </ReviewerLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["reviewer", "admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <ReviewerLayout>
+                    <ReviewerDashboard />
+                  </ReviewerLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/reviewer/applications"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewerApplications />
-                </ReviewerLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["reviewer", "admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <ReviewerLayout>
+                    <ReviewerApplications />
+                  </ReviewerLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/reviewer/applications/:id"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewApplication />
-                </ReviewerLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["reviewer", "admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <ReviewerLayout>
+                    <ReviewApplication />
+                  </ReviewerLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/reviewer/settings"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewerSettings />
-                </ReviewerLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["reviewer", "admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <ReviewerLayout>
+                    <ReviewerSettings />
+                  </ReviewerLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           <Route
             path="/reviewer/notifications"
             element={
-              <ProtectedRoute requireAuth={true}>
-                <ReviewerLayout>
-                  <ReviewerNotifications />
-                </ReviewerLayout>
-              </ProtectedRoute>
+              <RoleBasedRoute allowedRoles={["reviewer", "admin"]}>
+                <ProtectedRoute requireAuth={true}>
+                  <ReviewerLayout>
+                    <ReviewerNotifications />
+                  </ReviewerLayout>
+                </ProtectedRoute>
+              </RoleBasedRoute>
             }
           />
           

@@ -153,6 +153,9 @@ const ApplicationDetails = () => {
     if (fileType.includes("pdf")) return "PDF";
     if (fileType.includes("word") || fileType.includes("doc")) return "DOC";
     if (fileType.includes("text")) return "TXT";
+    if (fileType.includes("excel") || fileType.includes("spreadsheet") || fileType.includes("xls")) return "XLS";
+    if (fileType.includes("powerpoint") || fileType.includes("presentation") || fileType.includes("ppt")) return "PPT";
+    if (fileType.includes("image") || fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("gif") || fileType.includes("webp")) return "IMG";
     return "File";
   };
 

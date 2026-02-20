@@ -145,10 +145,23 @@ $$;
 -- Restrict application-docs to safe document types only
 UPDATE storage.buckets
 SET allowed_mime_types = ARRAY[
+  -- Documents
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain'
+  'text/plain',
+  -- Excel files
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  -- PowerPoint files
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  -- Images
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp'
 ]
 WHERE id = 'application-docs';
 
