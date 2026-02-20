@@ -3,6 +3,8 @@ stages:
 
 mirror_from_github:
   stage: mirror
+  tags:
+    - mirror
   script:
     - git remote add github https:/${GITHUB_PAT}@github.com/<user>/<repo>.git || true
     - git fetch github --prune
