@@ -7,7 +7,7 @@ mirror_from_github:
     - mirror
   script:
     - git remote remove github
-    - git remote add github https:/${GITHUB_PAT}@github.com/jivogroup/maali-opportunity-hub.git || true
+    - git remote add github https://${GITHUB_PAT}@github.com/jivogroup/maali-opportunity-hub.git || true
     - git fetch github --prune
     - git push origin '+refs/heads/*:refs/heads/*' --force
     - git push origin '+refs/tags/*:refs/tags/*' --force
