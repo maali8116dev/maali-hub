@@ -1,0 +1,15 @@
+stages:
+  - mirror
+
+mirror_from_github:
+  stage: mirror
+  tags:
+    - mirror
+  script:
+    - git remote remove github
+    - git remote add github https://${GITHUB_PAT}@github.com/jivogroup/maali-opportunity-hub.git || true
+    - git fetch github --prune
+    - git push origin '+refs/heads/*:refs/heads/*' --force
+    - git push origin '+refs/tags/*:refs/tags/*' --force
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
