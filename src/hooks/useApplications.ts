@@ -10,15 +10,13 @@ export type ApplicationWithProject = {
   submittedAt: string;
   sector: string;
   country: string;
-  fundingAmount: string;
   projectId: number;
   projectStatus?: string;
   projectDeadline?: string;
   isProjectOpen?: boolean;
-  companyName: string;
   contactEmail: string;
   contactPhone?: string;
-  projectDescription: string;
+      projectSummary: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -62,12 +60,10 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithP
       status: statusMap[app.status || "pending"] || "pending",
       submittedAt: app.created_at,
       sector: project?.category || "Unknown",
-      country: app.location || "Unknown",
-      fundingAmount: app.funding_amount_requested,
-      companyName: app.company_name,
+      country: app.country_of_residence || app.city_region || "Unknown",
       contactEmail: app.contact_email,
       contactPhone: app.contact_phone || undefined,
-      projectDescription: app.project_description,
+      projectSummary: app.project_summary || app.project_title || "No description available",
       createdAt: app.created_at,
       updatedAt: app.updated_at,
     } as ApplicationWithProject;

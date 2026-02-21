@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Draft {
   id: string;
   project_id: number;
-  company_name: string | null;
+  organization_name: string | null;
   updated_at: string;
 }
 
@@ -17,7 +17,7 @@ export const useUserDrafts = () => {
 
       const { data, error } = await supabase
         .from("applications")
-        .select("id, project_id, company_name, updated_at")
+        .select("id, project_id, organization_name, updated_at")
         .eq("user_id", user.id)
         .eq("is_draft", true)
         .order("updated_at", { ascending: false });
@@ -39,7 +39,7 @@ export const useProjectDraft = (projectId: number | undefined) => {
 
       const { data, error } = await supabase
         .from("applications")
-        .select("id, company_name, updated_at")
+        .select("id, organization_name, updated_at")
         .eq("user_id", user.id)
         .eq("project_id", projectId)
         .eq("is_draft", true)

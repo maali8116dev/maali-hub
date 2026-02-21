@@ -12,11 +12,8 @@ RETURNS TABLE (
   project_id INTEGER,
   submitted_at TIMESTAMP WITH TIME ZONE,
   status TEXT,
-  funding_amount TEXT,
-  company_name TEXT,
   contact_email TEXT,
   contact_phone TEXT,
-  location TEXT,
   reviewed_by UUID,
   reviewed_at TIMESTAMP WITH TIME ZONE,
   review_notes TEXT,
@@ -75,11 +72,8 @@ BEGIN
       WHEN a.status IS NULL OR a.status = '' THEN 'pending'
       ELSE a.status
     END AS status,
-    COALESCE(a.funding_amount_requested, 'N/A') AS funding_amount,
-    COALESCE(a.company_name, 'N/A') AS company_name,
     COALESCE(a.contact_email, 'N/A') AS contact_email,
     NULLIF(a.contact_phone, '') AS contact_phone,
-    NULLIF(a.location, '') AS location,
     a.reviewed_by,
     a.reviewed_at,
     a.review_notes,

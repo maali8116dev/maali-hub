@@ -151,15 +151,6 @@ const ReviewerApplications = () => {
         },
       },
       {
-        accessorKey: 'fundingAmount',
-        header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Funding Amount" />
-        ),
-        cell: ({ row }) => {
-          return <span className="text-sm">{row.original.fundingAmount || "N/A"}</span>;
-        },
-      },
-      {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {

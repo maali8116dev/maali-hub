@@ -63,7 +63,6 @@ const AdminApplications = () => {
         return (
           <div>
             <p className="font-medium">{app.applicantName}</p>
-            <p className="text-xs text-muted-foreground">{app.companyName}</p>
           </div>
         );
       },
@@ -84,15 +83,6 @@ const AdminApplications = () => {
       ),
       cell: ({ row }) => {
         return getStatusBadge(row.original.status);
-      },
-    },
-    {
-      accessorKey: 'fundingAmount',
-      header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Funding Amount" />
-      ),
-      cell: ({ row }) => {
-        return <span>{row.original.fundingAmount}</span>;
       },
     },
     {

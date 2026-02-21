@@ -1,5 +1,5 @@
 /**
- * Seed script for users, applicants, reviewers, and reviewer assignments
+ * Seed script for users, applicants, reviewers, reviewer assignments, and review scores
  * 
  * This script creates:
  * - 1 Admin user
@@ -7,6 +7,7 @@
  * - 10 Applicant users
  * - 20 Applications from applicants (distributed across categories)
  * - Reviewer assignments using the actual RPC function (to test assignment logic)
+ * - Review scores for ~40% of assignments (simulating completed reviews with varied scores)
  * 
  * Usage:
  *   node scripts/seed-users-and-reviewers.js
@@ -1014,14 +1015,16 @@ async function main() {
     // Verify assignments were created
     console.log('📝 Step 6: Verifying reviewer assignments...');
     let totalAssignments = 0;
+    const allAssignments = [];
     for (const appId of applicationIds) {
       const { data: assignments, error } = await supabase
         .from('application_assignments')
-        .select('id, reviewer_id, status')
+        .select('id, reviewer_id, status, application_id')
         .eq('application_id', appId);
       
       if (!error && assignments && assignments.length > 0) {
         totalAssignments += assignments.length;
+        allAssignments.push(...assignments);
       }
     }
     
@@ -1035,6 +1038,113 @@ async function main() {
       console.log(`      - RPC function may have failed (check error messages above)\n`);
     }
 
+    // Step 7: Seed review scores for some assignments
+    console.log('📝 Step 7: Seeding review scores...');
+    let reviewScoresCreated = 0;
+    
+    if (allAssignments.length > 0) {
+      // Sample score sets for different scenarios (varied quality)
+      const scoreSets = [
+        { innovation: 9, feasibility: 8, impact: 9, team: 8, recommendation: 'approve', comment: 'Excellent proposal with strong potential and a capable team.' },
+        { innovation: 8, feasibility: 7, impact: 8, team: 7, recommendation: 'approve', comment: 'Strong proposal with clear market potential and solid execution plan.' },
+        { innovation: 7, feasibility: 6, impact: 7, team: 7, recommendation: 'approve', comment: 'Good proposal, some areas need improvement but overall promising.' },
+        { innovation: 6, feasibility: 6, impact: 6, team: 6, recommendation: 'request_info', comment: 'Needs more information about implementation timeline and resource requirements.' },
+        { innovation: 5, feasibility: 5, impact: 5, team: 5, recommendation: 'request_info', comment: 'Requires clarification on market validation and scalability plans.' },
+        { innovation: 4, feasibility: 3, impact: 4, team: 4, recommendation: 'reject', comment: 'Does not meet minimum requirements. Proposal lacks clarity and feasibility.' },
+        { innovation: 3, feasibility: 2, impact: 3, team: 3, recommendation: 'reject', comment: 'Insufficient detail and weak business case. Not ready for funding.' },
+      ];
+
+      // Seed scores for approximately 40% of assignments (to have a mix of reviewed and pending)
+      const assignmentsToScore = Math.floor(allAssignments.length * 0.4);
+      const shuffledAssignments = [...allAssignments].sort(() => Math.random() - 0.5);
+      const selectedAssignments = shuffledAssignments.slice(0, assignmentsToScore);
+
+      for (const assignment of selectedAssignments) {
+        // Skip if score already exists
+        const { data: existing } = await supabase
+          .from('review_scores')
+          .select('id')
+          .eq('application_id', assignment.application_id)
+          .eq('reviewer_id', assignment.reviewer_id)
+          .single();
+
+        if (existing) {
+          continue;
+        }
+
+        // Pick a random score set (weighted towards approve/request_info for more realistic distribution)
+        const rand = Math.random();
+        let scoreSet;
+        if (rand < 0.5) {
+          // 50% chance of approve
+          scoreSet = scoreSets[Math.floor(Math.random() * 3)]; // First 3 are approve
+        } else if (rand < 0.8) {
+          // 30% chance of request_info
+          scoreSet = scoreSets[3 + Math.floor(Math.random() * 2)]; // Next 2 are request_info
+        } else {
+          // 20% chance of reject
+          scoreSet = scoreSets[5 + Math.floor(Math.random() * 2)]; // Last 2 are reject
+        }
+
+        // Get application to find project category (for proper scoring)
+        const { data: application } = await supabase
+          .from('applications')
+          .select(`
+            id,
+            project_id,
+            projects!inner(
+              id,
+              category
+            )
+          `)
+          .eq('id', assignment.application_id)
+          .single();
+
+        if (!application) {
+          continue;
+        }
+
+        // Insert review score
+        const { error: scoreError } = await supabase
+          .from('review_scores')
+          .insert({
+            application_id: assignment.application_id,
+            reviewer_id: assignment.reviewer_id,
+            assignment_id: assignment.id,
+            scores: {
+              innovation: scoreSet.innovation,
+              feasibility: scoreSet.feasibility,
+              impact: scoreSet.impact,
+              team: scoreSet.team,
+            },
+            comments: scoreSet.comment,
+            recommendation: scoreSet.recommendation,
+            submitted_at: new Date().toISOString(),
+          });
+
+        if (scoreError) {
+          console.log(`   ⚠️  Failed to create review score for assignment ${assignment.id}: ${scoreError.message}`);
+          continue;
+        }
+
+        // Update assignment status to completed
+        await supabase
+          .from('application_assignments')
+          .update({ status: 'completed' })
+          .eq('id', assignment.id);
+
+        reviewScoresCreated++;
+      }
+
+      if (reviewScoresCreated > 0) {
+        console.log(`   ✅ Created ${reviewScoresCreated} review scores (${selectedAssignments.length} assignments reviewed)\n`);
+      } else {
+        console.log(`   ℹ️  No review scores created (assignments may already have scores)\n`);
+      }
+    } else {
+      console.log(`   ⚠️  No assignments found to seed scores for\n`);
+    }
+
     // Summary
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ Seed data creation complete!\n');
@@ -1044,15 +1154,17 @@ async function main() {
     console.log(`   • ${applicants.length} Applicant users`);
     console.log(`   • ${applicationIds.length} Applications created (distributed across Technology, Agriculture, FinTech)`);
     console.log(`   • ${documentsAdded} Documents added to applications`);
-    console.log(`   • ${totalAssignments} Reviewer assignments created\n`);
+    console.log(`   • ${totalAssignments} Reviewer assignments created`);
+    console.log(`   • ${reviewScoresCreated} Review scores created (simulating completed reviews)\n`);
     console.log('🔐 Login Credentials (all passwords: TestPassword123!):');
     console.log('   Admin: admin@maali.test');
     console.log('   Reviewers: reviewer.tech@maali.test, reviewer.agriculture@maali.test, etc.');
     console.log('   Applicants: applicant1@maali.test, applicant2@maali.test, etc.\n');
     console.log('💡 Next Steps:');
     console.log('   1. Log in as admin to view the dashboard');
-    console.log('   2. Check the Applications page to see reviewer assignments');
+    console.log('   2. Check the Applications page to see reviewer assignments and scores');
     console.log('   3. Log in as a reviewer to see their assigned applications');
+    console.log('   4. Some applications already have review scores for testing aggregation');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   } catch (error) {

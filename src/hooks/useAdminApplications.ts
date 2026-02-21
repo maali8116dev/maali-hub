@@ -19,11 +19,8 @@ export type AdminApplication = {
   projectId: number;
   submittedAt: string;
   status: "pending" | "approved" | "rejected" | "draft";
-  fundingAmount: string;
-  companyName: string;
   contactEmail: string;
   contactPhone?: string;
-  location?: string;
   reviewedBy?: string | null;
   reviewedAt?: string | null;
   reviewNotes?: string | null;
@@ -66,11 +63,8 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
       projectId: app.project_id,
       submittedAt: app.submitted_at,
       status: statusMap[app.status || "pending"] || "pending",
-      fundingAmount: app.funding_amount || "N/A",
-      companyName: app.company_name || "N/A",
       contactEmail: app.contact_email || "N/A",
       contactPhone: app.contact_phone || undefined,
-      location: app.location || undefined,
       reviewedBy: app.reviewed_by || undefined,
       reviewedAt: app.reviewed_at || undefined,
       reviewNotes: app.review_notes || undefined,
