@@ -168,43 +168,54 @@ const Billing = () => {
     }
   };
 
-  const handleDownloadInvoice = (transactionId: string, receiptUrl: string | null) => {
+  const handleDownloadInvoice = async (transactionId: string, receiptUrl: string | null) => {
     // If Stripe receipt URL exists, open it directly
     if (receiptUrl) {
       window.open(receiptUrl, "_blank");
       return;
     }
 
-    // Otherwise, generate and download PDF invoice via edge function
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    supabase.auth.getSession().then(({ data }) => {
-      const token = data.session?.access_token;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
       if (!token) {
         toast({ title: "Error", description: "You must be logged in to download invoices.", variant: "destructive" });
         return;
       }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const invoiceUrl = `${supabaseUrl}/functions/v1/generate-invoice?transactionId=${transactionId}`;
-      fetch(invoiceUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to generate invoice");
-          return res.blob();
-        })
-        .then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `invoice-${transactionId.substring(0, 8)}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        })
-        .catch(() => {
-          toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
-        });
-    });
+      
+      console.log("[Invoice] Fetching:", invoiceUrl);
+      
+      const res = await fetch(invoiceUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+      });
+
+      console.log("[Invoice] Response status:", res.status, res.statusText);
+
+      if (!res.ok) {
+        const errorBody = await res.text();
+        console.error("[Invoice] Error body:", errorBody);
+        throw new Error(`Failed to generate invoice: ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice-${transactionId.substring(0, 8)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[Invoice] Download failed:", err);
+      toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
+    }
   };
 
   const handleSaveBillingInfo = (e: React.FormEvent<HTMLFormElement>) => {

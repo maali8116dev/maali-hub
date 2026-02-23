@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
-import { jsPDF } from "https://esm.sh/jspdf@2.5.2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 const supabaseAdmin = createClient(
@@ -8,6 +7,86 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
+
+// Minimal PDF builder (no external dependencies)
+function buildPdf(lines: { label: string; value: string }[], title: string, subtitle: string): Uint8Array {
+  const objects: string[] = [];
+  let objectId = 0;
+
+  const addObject = (content: string) => {
+    objectId++;
+    objects.push(content);
+    return objectId;
+  };
+
+  // Build page content stream
+  const contentLines: string[] = [];
+  contentLines.push("BT");
+  contentLines.push("/F1 20 Tf");
+  contentLines.push("50 770 Td");
+  contentLines.push(`(${escPdf(title)}) Tj`);
+  contentLines.push("/F1 12 Tf");
+  contentLines.push("0 -25 Td");
+  contentLines.push(`(${escPdf(subtitle)}) Tj`);
+  contentLines.push("0 -15 Td");
+  contentLines.push("/F1 10 Tf");
+  contentLines.push("0 -20 Td");
+
+  for (const line of lines) {
+    contentLines.push(`(${escPdf(line.label + ": " + line.value)}) Tj`);
+    contentLines.push("0 -16 Td");
+  }
+
+  // Footer
+  contentLines.push("0 -30 Td");
+  contentLines.push("/F1 8 Tf");
+  contentLines.push(`(© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.) Tj`);
+  contentLines.push("ET");
+
+  const stream = contentLines.join("\n");
+
+  // PDF objects
+  const catalogId = addObject("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj");
+  const pagesId = addObject("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj");
+  const pageId = addObject(
+    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 4 0 R >> >> >>\nendobj"
+  );
+  const fontId = addObject(
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj"
+  );
+  const streamId = addObject(
+    `5 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj`
+  );
+
+  // Build PDF file
+  let pdf = "%PDF-1.4\n";
+  const offsets: number[] = [];
+
+  for (let i = 0; i < objects.length; i++) {
+    offsets.push(pdf.length);
+    pdf += objects[i] + "\n";
+  }
+
+  const xrefOffset = pdf.length;
+  pdf += "xref\n";
+  pdf += `0 ${objects.length + 1}\n`;
+  pdf += "0000000000 65535 f \n";
+  for (const offset of offsets) {
+    pdf += offset.toString().padStart(10, "0") + " 00000 n \n";
+  }
+
+  pdf += "trailer\n";
+  pdf += `<< /Size ${objects.length + 1} /Root 1 0 R >>\n`;
+  pdf += "startxref\n";
+  pdf += `${xrefOffset}\n`;
+  pdf += "%%EOF";
+
+  return new TextEncoder().encode(pdf);
+}
+
+function escPdf(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -41,7 +120,7 @@ serve(async (req: Request) => {
       });
     }
 
-    // Get transaction ID from query params
+    // Get transaction ID
     const url = new URL(req.url);
     const transactionId = url.searchParams.get("transactionId");
 
@@ -61,11 +140,7 @@ serve(async (req: Request) => {
 
     const isAdmin = profile?.role === "admin";
 
-    let query = supabaseAdmin
-      .from("transactions")
-      .select("*")
-      .eq("id", transactionId);
-
+    let query = supabaseAdmin.from("transactions").select("*").eq("id", transactionId);
     if (!isAdmin) {
       query = query.eq("user_id", user.id);
     }
@@ -90,15 +165,15 @@ serve(async (req: Request) => {
       ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "N/A"
       : "N/A";
 
-    // Get project title if available
-    let projectTitle = "";
+    // Get project title
+    let projectTitle = "N/A";
     if (tx.project_id) {
       const { data: project } = await supabaseAdmin
         .from("projects")
         .select("title")
         .eq("id", tx.project_id)
         .maybeSingle();
-      projectTitle = project?.title || "";
+      projectTitle = project?.title || "N/A";
     }
 
     // Format values
@@ -113,143 +188,31 @@ serve(async (req: Request) => {
     const statusLabel = tx.status === "completed" ? "Paid" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
     const billingEmail = tx.billing_email || user.email || "N/A";
 
-    // ─── Build PDF ───────────────────────────────────────────────────
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 20;
-    const contentWidth = pageWidth - margin * 2;
+    // Build PDF
+    const lines = [
+      { label: "Invoice Number", value: invoiceNumber },
+      { label: "Billed To", value: userName },
+      { label: "Email", value: billingEmail },
+      { label: "Payment Date", value: paymentDate },
+      { label: "Status", value: statusLabel },
+      { label: "", value: "" },
+      { label: "Description", value: tx.description || "Application Fee" },
+      { label: "Project", value: projectTitle },
+      { label: "Amount", value: `${currency} ${amount}` },
+      { label: "", value: "" },
+      { label: "Total", value: `${currency} ${amount}` },
+    ];
 
-    // ── Header bar ──
-    doc.setFillColor(200, 90, 46); // #C85A2E
-    doc.rect(0, 0, pageWidth, 38, "F");
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.text("INVOICE", margin, 18);
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(invoiceNumber, margin, 28);
-
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text("MAALI", pageWidth - margin, 18, { align: "right" });
-
-    // ── Meta section ──
-    let y = 52;
-    doc.setTextColor(107, 114, 128); // #6b7280
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text("BILLED TO", margin, y);
-    doc.text("PAYMENT DATE", margin + 70, y);
-    doc.text("STATUS", margin + 130, y);
-
-    y += 6;
-    doc.setTextColor(31, 41, 55); // #1f2937
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text(userName, margin, y);
-
-    doc.setFont("helvetica", "normal");
-    doc.text(paymentDate, margin + 70, y);
-
-    // Status badge
-    const statusBadgeX = margin + 130;
-    if (tx.status === "completed") {
-      doc.setFillColor(220, 252, 231); // green bg
-      doc.setTextColor(22, 101, 52);   // green text
-    } else if (tx.status === "refunded") {
-      doc.setFillColor(254, 243, 199);
-      doc.setTextColor(146, 64, 14);
-    } else {
-      doc.setFillColor(254, 226, 226);
-      doc.setTextColor(153, 27, 27);
-    }
-    const badgeWidth = doc.getTextWidth(statusLabel) + 8;
-    doc.roundedRect(statusBadgeX, y - 4, badgeWidth, 6, 2, 2, "F");
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text(statusLabel, statusBadgeX + 4, y);
-
-    // Billing email
-    y += 6;
-    doc.setTextColor(107, 114, 128);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(billingEmail, margin, y);
-
-    // ── Line items table ──
-    y += 14;
-    // Table header
-    doc.setFillColor(249, 250, 251); // #f9fafb
-    doc.rect(margin, y - 5, contentWidth, 10, "F");
-    doc.setDrawColor(229, 231, 235); // #e5e7eb
-    doc.line(margin, y + 5, margin + contentWidth, y + 5);
-
-    doc.setTextColor(107, 114, 128);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text("DESCRIPTION", margin + 4, y + 1);
-    doc.text("PROJECT", margin + 90, y + 1);
-    doc.text("AMOUNT", margin + contentWidth - 4, y + 1, { align: "right" });
-
-    // Table row
-    y += 14;
-    doc.setTextColor(31, 41, 55);
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(tx.description || "Application Fee", margin + 4, y);
-    doc.text(projectTitle || "—", margin + 90, y);
-    doc.text(`${currency} ${amount}`, margin + contentWidth - 4, y, { align: "right" });
-
-    // Separator
-    y += 6;
-    doc.setDrawColor(243, 244, 246);
-    doc.line(margin, y, margin + contentWidth, y);
-
-    // Total row
-    y += 10;
-    doc.setFillColor(249, 250, 251);
-    doc.rect(margin, y - 5, contentWidth, 12, "F");
-    doc.setTextColor(31, 41, 55);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("Total", margin + 90, y + 1);
-    doc.text(`${currency} ${amount}`, margin + contentWidth - 4, y + 1, { align: "right" });
-
-    // ── Transaction details ──
-    y += 18;
-    doc.setTextColor(156, 163, 175); // #9ca3af
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
     if (tx.provider_transaction_id) {
-      doc.text(`Transaction ID: ${tx.provider_transaction_id}`, margin, y);
-      y += 5;
+      lines.push({ label: "Transaction ID", value: tx.provider_transaction_id });
     }
     if (tx.application_id) {
-      doc.text(`Application ID: ${tx.application_id}`, margin, y);
-      y += 5;
+      lines.push({ label: "Application ID", value: tx.application_id });
     }
 
-    // ── Footer ──
-    const footerY = doc.internal.pageSize.getHeight() - 20;
-    doc.setDrawColor(229, 231, 235);
-    doc.line(margin, footerY - 6, margin + contentWidth, footerY - 6);
-    doc.setTextColor(156, 163, 175);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.`,
-      pageWidth / 2,
-      footerY,
-      { align: "center" }
-    );
+    const pdfBytes = buildPdf(lines, "INVOICE", `MAALI  -  ${invoiceNumber}`);
 
-    // ── Output ──
-    const pdfBuffer = doc.output("arraybuffer");
-
-    return new Response(pdfBuffer, {
+    return new Response(pdfBytes, {
       status: 200,
       headers: {
         ...getCorsHeaders(req),
