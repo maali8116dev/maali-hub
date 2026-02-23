@@ -137,10 +137,9 @@ beforeAll(async () => {
       user_id: ud.user.id,
       project_id: testProjectId,
       contact_email: email,
-      company_name: `IntTest Company ${i}`,
+      organization_name: `IntTest Company ${i}`,
       status: i === 0 ? 'pending' : 'approved',
       is_draft: false,
-      funding_amount_requested: '$50,000',
     }).select('id').single();
     if (appData) testApplicationIds.push(appData.id);
   }
@@ -188,7 +187,7 @@ describe('useAdminApplications — real user flow', () => {
     expect(ours[0]).toHaveProperty('applicantName');
     expect(ours[0]).toHaveProperty('projectTitle');
     expect(ours[0]).toHaveProperty('status');
-    expect(ours[0]).toHaveProperty('companyName');
+    expect(ours[0]).toHaveProperty('contactEmail');
   }, 20000);
 
   it('admin sees status "under_review" mapped to "pending"', async () => {

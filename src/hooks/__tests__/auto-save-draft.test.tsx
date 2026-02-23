@@ -437,13 +437,11 @@ describe('useAutoSaveDraft', () => {
         id: 'draft-1',
         user_id: 'user-1',
         project_id: 1,
-        company_name: 'Test Company',
+        organization_name: 'Test Company',
         contact_email: 'contact@test.com',
         contact_phone: '+1234567890',
-        location: 'Ghana',
-        project_description: 'Test project description',
-        funding_amount_requested: '$50,000',
-        business_plan: 'Test business plan',
+        country_of_residence: 'Ghana',
+        project_summary: 'Test project description',
         team_size: 10,
         is_draft: true,
       };
@@ -470,8 +468,8 @@ describe('useAutoSaveDraft', () => {
       });
 
       expect(loadedDraft).not.toBeNull();
-      expect(loadedDraft?.companyName).toBe('Test Company');
-      expect(loadedDraft?.contactEmail).toBe('contact@test.com');
+      expect(loadedDraft?.organizationName).toBe('Test Company');
+      expect(loadedDraft?.emailAddress).toBe('contact@test.com');
       expect(result.current.draftId).toBe('draft-1');
     });
 

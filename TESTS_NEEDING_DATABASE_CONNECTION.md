@@ -8,10 +8,10 @@
 
 ## 📊 **Summary**
 
-**Total Test Files**: 27  
-**Currently Using Real DB**: 4 (15%)  
-**Should Use Real DB**: 12 (44%)  
-**Correctly Mocked**: 11 (41%)
+**Total Test Files**: 30  
+**Currently Using Real DB**: 9 (30%)  
+**Should Use Real DB**: 9 (30%)  
+**Correctly Mocked**: 12 (40%)
 
 ---
 
@@ -38,8 +38,38 @@ These tests correctly use real Supabase connections:
    - **Status**: Correct
 
 4. **`src/hooks/__tests__/auth.validation.test.ts`** ✅ (Partial)
+
    - Has some real integration tests
    - **Status**: Correct (mixed approach is fine)
+
+5. **`src/hooks/__tests__/useProjects.integration.test.tsx`** ✅
+
+   - Uses real Supabase client
+   - Tests `get_projects_with_filters` RPC, category queries, location queries, featured projects
+   - **Status**: Correct
+
+6. **`src/hooks/__tests__/useApplications.integration.test.tsx`** ✅
+
+   - Uses real Supabase client
+   - Tests `get_user_applications_with_projects` RPC, join logic, status mapping
+   - **Status**: Correct
+
+7. **`src/hooks/__tests__/useProfile.integration.test.tsx`** ✅
+
+   - Uses real Supabase client
+   - Tests profile CRUD, update → insert fallback, PGRST116 handling
+   - **Status**: Correct
+
+8. **`src/hooks/__tests__/draft-workflow.integration.test.tsx`** ✅
+
+   - Uses real Supabase client
+   - Tests complete draft workflow (create → save → load → submit), multiple auto-saves
+   - **Status**: Correct
+
+9. **`src/hooks/__tests__/application-review-workflow.integration.test.tsx`** ✅ (NEW)
+   - Uses real Supabase client
+   - Tests complete review workflow (assignment → reviews → aggregation → decision), conflicting recommendations
+   - **Status**: Correct
 
 ---
 
@@ -47,31 +77,31 @@ These tests correctly use real Supabase connections:
 
 These tests mock database calls but test complex logic that would benefit from real database connections:
 
-### 1. **`src/hooks/__tests__/useApplications.test.tsx`** 🔴
+### 1. **`src/hooks/__tests__/useApplications.test.tsx`** ✅ (Now has integration tests)
 
 **Why**: Tests complex N+1 query pattern (applications + projects join)
 
-- Currently mocks both `applications` and `projects` queries
-- Tests data transformation and error handling
-- **Benefit**: Would catch real join issues, RLS policy problems, and data transformation bugs
+- **Status**: Now has `useApplications.integration.test.tsx` with real database connections ✅
+- Unit tests still mocked for fast execution
+- Integration tests verify: RPC function `get_user_applications_with_projects`, join logic, status mapping, error handling
 - **Complexity**: Medium (needs test data setup)
 
-### 2. **`src/hooks/__tests__/useProjects.test.tsx`** 🔴
+### 2. **`src/hooks/__tests__/useProjects.test.tsx`** ✅ (Now has integration tests)
 
 **Why**: Tests filtering, pagination, joins with categories
 
-- Currently mocks complex query chains (select, eq, neq, ilike, or, order, range)
-- Tests category joins, search, pagination
-- **Benefit**: Would catch real filtering bugs, join issues, pagination edge cases
+- **Status**: Now has `useProjects.integration.test.tsx` with real database connections ✅
+- Unit tests still mocked for fast execution
+- Integration tests verify: filtering, pagination, category joins, search, locations, featured projects
 - **Complexity**: Medium (needs test projects with categories)
 
-### 3. **`src/hooks/__tests__/useProfile.test.tsx`** 🔴
+### 3. **`src/hooks/__tests__/useProfile.test.tsx`** ✅ (Now has integration tests)
 
 **Why**: Tests profile CRUD with fallback logic (update → insert if not exists)
 
-- Currently mocks complex update/insert fallback pattern
-- Tests PGRST116 error handling (profile doesn't exist → create)
-- **Benefit**: Would catch real RLS policy issues, data transformation bugs
+- **Status**: Now has `useProfile.integration.test.tsx` with real database connections ✅
+- Unit tests still mocked for fast execution
+- Integration tests verify: profile CRUD, update → insert fallback, PGRST116 handling, data transformation
 - **Complexity**: Low (simple profile CRUD)
 
 ### 4. **`src/hooks/__tests__/admin.hooks.test.tsx`** 🔴
@@ -125,35 +155,32 @@ These tests mock database calls but test complex logic that would benefit from r
 
 These tests would benefit from real connections but are less critical:
 
-### 9. **`src/hooks/__tests__/auto-save-draft.test.tsx`** 🟡
+### 9. **`src/hooks/__tests__/auto-save-draft.test.tsx`** ✅ (Now has integration tests)
 
 **Why**: Tests draft save/load logic
 
-- Currently mocks Supabase calls
-- Tests draft creation, updates, loading
-- **Benefit**: Would catch RLS policy issues, draft state bugs
-- **Complexity**: Low (simple CRUD operations)
-- **Note**: Already has `draft-workflow.integration.test.tsx` but it's also mocked
-
-### 10. **`src/hooks/__tests__/draft-workflow.integration.test.tsx`** 🟡
-
-**Why**: Named "integration" but still mocks Supabase
-
-- Currently mocks all Supabase calls
-- Tests complete draft workflow (create → save → load → submit)
-- **Benefit**: Would catch real workflow bugs, state management issues
+- **Status**: Now has `draft-workflow.integration.test.tsx` with real database connections ✅
+- Unit tests still mocked for fast execution
+- Integration tests verify: complete draft workflow (create → save → load → submit), multiple auto-saves, RLS policies
 - **Complexity**: Medium (needs application setup)
-- **Note**: Should be a true integration test!
 
-### 11. **`src/hooks/__tests__/application-review-workflow.integration.test.tsx`** 🟡
+### 10. **`src/hooks/__tests__/draft-workflow.integration.test.tsx`** ✅ (Now uses real DB)
 
-**Why**: Named "integration" but still mocks Supabase
+**Why**: Named "integration" and now actually uses real database
 
-- Currently mocks all Supabase calls
-- Tests complete review workflow
-- **Benefit**: Would catch real workflow bugs, RPC function issues
+- **Status**: Converted to use real Supabase connections ✅
+- Tests complete draft workflow (create → save → load → submit)
+- **Benefit**: Catches real workflow bugs, state management issues, RLS policy problems
+- **Complexity**: Medium (needs application setup)
+
+### 11. **`src/hooks/__tests__/application-review-workflow.integration.test.tsx`** ✅ (Now uses real DB)
+
+**Why**: Named "integration" and now actually uses real database
+
+- **Status**: Converted to use real Supabase connections ✅
+- Tests complete review workflow (assignment → reviews → aggregation → decision)
+- **Benefit**: Catches real workflow bugs, RPC function issues, RLS policy problems
 - **Complexity**: High (needs full review system setup)
-- **Note**: Should be a true integration test!
 
 ---
 
@@ -295,9 +322,9 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 | Category                   | Mocked | Real DB | Total  |
 | -------------------------- | ------ | ------- | ------ |
 | RPC Function Tests         | 4      | 1       | 5      |
-| Data Fetching Tests        | 3      | 0       | 3      |
-| Integration Workflow Tests | 3      | 0       | 3      |
+| Data Fetching Tests        | 0      | 3       | 3      |
+| Integration Workflow Tests | 1      | 2       | 3      |
 | Component/UI Tests         | 11     | 0       | 11     |
-| **Total**                  | **21** | **1**   | **22** |
+| **Total**                  | **16** | **6**   | **22** |
 
 **Recommendation**: Convert at least the RPC function tests and integration workflow tests to use real database connections for better confidence in production behavior.

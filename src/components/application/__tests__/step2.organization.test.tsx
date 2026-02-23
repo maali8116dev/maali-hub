@@ -69,7 +69,7 @@ describe('Step 2: Organizational Background', () => {
       applicantType: 'Organization',
     });
 
-    // Test with missing required fields
+    // Test with missing fields - step 2 is optional, so it's always valid
     store.updateFormData({
       yearEstablished: undefined,
       coreMissionPurpose: '',
@@ -77,10 +77,10 @@ describe('Step 2: Organizational Background', () => {
       numberOfTeamMembers: undefined,
     });
 
-    // Step 2 should be invalid
-    expect(store.isStepValid(2)).toBe(false);
+    // Step 2 is optional, so it's always valid regardless of fields
+    expect(store.isStepValid(2)).toBe(true);
 
-    // Test with all required fields
+    // Test with all fields filled
     store.updateFormData({
       yearEstablished: 2020,
       coreMissionPurpose: 'Test mission',
@@ -88,7 +88,7 @@ describe('Step 2: Organizational Background', () => {
       numberOfTeamMembers: 10,
     });
 
-    // Step 2 should be valid
+    // Step 2 should still be valid
     expect(store.isStepValid(2)).toBe(true);
   });
 

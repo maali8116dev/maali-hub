@@ -357,7 +357,7 @@ describe('useUpdateProfile', () => {
       business_sector: 'Technology',
       country: 'Ghana',
       bio: 'New bio',
-      avatar_url: undefined,
+      avatar_url: null, // Supabase returns null instead of undefined for missing fields
     });
 
     // Verify the returned data is transformed correctly

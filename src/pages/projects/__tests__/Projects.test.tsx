@@ -2,12 +2,30 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import Projects from '../Projects';
 import { useProjects, useProjectCategories, useProjectLocations } from '@/hooks/useProjects';
 
 // Mock the hooks
 vi.mock('@/hooks/useProjects');
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null }),
+}));
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            data: [],
+            error: null,
+          })),
+        })),
+      })),
+    })),
+  },
+}));
 vi.mock('@/components/Navigation', () => ({
   default: () => <nav>Navigation</nav>,
 }));
@@ -19,6 +37,17 @@ vi.mock('@/components/landing/ProjectCard', () => ({
 }));
 
 describe('Projects Page - Data Viewing', () => {
+  const createWrapper = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  };
+
   const mockProjects = [
     {
       id: 1,
@@ -87,9 +116,12 @@ describe('Projects Page - Data Viewing', () => {
       data: ['Ghana', 'Nigeria'],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -114,9 +146,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -141,9 +176,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -174,9 +212,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -207,9 +248,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -243,9 +287,12 @@ describe('Projects Page - Data Viewing', () => {
       data: ['Ghana', 'Nigeria'],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -278,9 +325,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -320,9 +370,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -359,9 +412,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -394,9 +450,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 
@@ -426,9 +485,12 @@ describe('Projects Page - Data Viewing', () => {
       data: [],
     });
 
+    const Wrapper = createWrapper();
     render(
       <BrowserRouter>
-        <Projects />
+        <Wrapper>
+          <Projects />
+        </Wrapper>
       </BrowserRouter>
     );
 

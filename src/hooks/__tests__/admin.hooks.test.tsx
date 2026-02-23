@@ -231,8 +231,8 @@ describe('get_admin_applications RPC (Integration)', () => {
 
       const { data: appData } = await supabaseAdmin.from('applications').insert({
         user_id: ud.user.id, project_id: testProjectId, contact_email: email,
-        company_name: `Company ${i}`, status: i === 0 ? 'pending' : 'approved',
-        is_draft: false, funding_amount_requested: '$50,000',
+        organization_name: `Company ${i}`, status: i === 0 ? 'pending' : 'approved',
+        is_draft: false,
       }).select('id').single();
       if (appData) testApplicationIds.push(appData.id);
     }
