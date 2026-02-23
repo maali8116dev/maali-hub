@@ -168,13 +168,39 @@ const Billing = () => {
     }
   };
 
-  const handleDownloadInvoice = (receiptUrl: string | null, invoiceUrl: string | null) => {
-    const url = receiptUrl || invoiceUrl;
-    if (url) {
-      window.open(url, "_blank");
-    } else {
-      toast({ title: "No invoice available", description: "No invoice or receipt URL is available for this transaction." });
+  const handleDownloadInvoice = (transactionId: string, receiptUrl: string | null) => {
+    // If Stripe receipt URL exists, open it directly
+    if (receiptUrl) {
+      window.open(receiptUrl, "_blank");
+      return;
     }
+
+    // Otherwise, open our generated invoice via edge function
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const session = supabase.auth.getSession();
+    session.then(({ data }) => {
+      const token = data.session?.access_token;
+      if (!token) {
+        toast({ title: "Error", description: "You must be logged in to download invoices.", variant: "destructive" });
+        return;
+      }
+      const invoiceUrl = `${supabaseUrl}/functions/v1/generate-invoice?transactionId=${transactionId}`;
+      // Open in new tab with auth header via fetch + blob
+      fetch(invoiceUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to generate invoice");
+          return res.blob();
+        })
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank");
+        })
+        .catch(() => {
+          toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
+        });
+    });
   };
 
   const handleSaveBillingInfo = (e: React.FormEvent<HTMLFormElement>) => {
@@ -378,12 +404,11 @@ const Billing = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDownloadInvoice(item.receipt_url, item.invoice_url)}
+                      onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
                       className="w-full min-h-[44px]"
-                      disabled={!item.receipt_url && !item.invoice_url}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      {item.receipt_url || item.invoice_url ? "Download Invoice" : "No Invoice"}
+                      Download Invoice
                     </Button>
                   </div>
                 ))}
@@ -423,8 +448,7 @@ const Billing = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDownloadInvoice(item.receipt_url, item.invoice_url)}
-                            disabled={!item.receipt_url && !item.invoice_url}
+                            onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
                             className="min-h-[44px]"
                           >
                             <Download className="h-4 w-4 mr-2" />
