@@ -10,7 +10,8 @@ type EmailType =
   | "email_verification"
   | "password_reset"
   | "contact_submission"
-  | "contact_confirmation";
+  | "contact_confirmation"
+  | "payment_receipt";
 
 interface EmailData {
   recipientName?: string;

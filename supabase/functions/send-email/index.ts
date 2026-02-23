@@ -15,7 +15,8 @@ type EmailType =
   | "email_verification"
   | "password_reset"
   | "contact_submission"
-  | "contact_confirmation";
+  | "contact_confirmation"
+  | "payment_receipt";
 
 interface SendEmailRequest {
   to: string;
@@ -36,6 +37,12 @@ interface SendEmailRequest {
     subject?: string;
     message?: string;
     submissionId?: string;
+    // Payment receipt fields
+    amount?: string;
+    currency?: string;
+    paymentDate?: string;
+    invoiceNumber?: string;
+    transactionId?: string;
   };
 }
 
@@ -388,7 +395,39 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
         ),
       };
 
-    case "contact_submission":
+    case "payment_receipt": {
+      const amount = data.amount ? escapeHtml(data.amount) : "0.00";
+      const currency = data.currency ? escapeHtml(data.currency) : "USD";
+      const paymentDate = data.paymentDate ? escapeHtml(data.paymentDate) : new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const invoiceNum = data.invoiceNumber ? escapeHtml(data.invoiceNumber) : undefined;
+      const transactionIdVal = data.transactionId ? escapeHtml(data.transactionId) : undefined;
+
+      return {
+        subject: `Payment Receipt - ${projectTitle || "Maali"}`,
+        html: emailTemplate(
+          "Payment Receipt",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>Thank you for your payment. Here is your receipt:</p>
+            <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 20px 0;">
+              ${projectTitle ? `<p><strong>Project:</strong> ${projectTitle}</p>` : ''}
+              ${applicationId ? `<p><strong>Application ID:</strong> ${applicationId}</p>` : ''}
+              <p><strong>Amount:</strong> ${currency} ${amount}</p>
+              <p><strong>Date:</strong> ${paymentDate}</p>
+              <p><strong>Status:</strong> <span class="status-badge status-approved">Paid</span></p>
+              ${invoiceNum ? `<p><strong>Invoice #:</strong> ${invoiceNum}</p>` : ''}
+              ${transactionIdVal ? `<p><strong>Transaction ID:</strong> ${transactionIdVal}</p>` : ''}
+            </div>
+            <p>Your application fee has been confirmed and your application is now under review.</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application</a></div>` : ''}
+            <p>Please keep this email for your records. If you have any questions about this payment, please contact our support team.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+    }
+
+    case "contact_submission": {
       const subjectLabels: Record<string, string> = {
         funding: "Funding Inquiry",
         application: "Application Support",
@@ -419,6 +458,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
         ),
       };
+    }
 
     default:
       return {
@@ -447,7 +487,8 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Allow contact form emails without authentication
     const isContactEmail = type === "contact_confirmation" || type === "contact_submission";
-    const isPublicAllowed = allowPublic === true && isContactEmail;
+    const isPaymentReceipt = type === "payment_receipt";
+    const isPublicAllowed = (allowPublic === true && isContactEmail) || (allowPublic === true && isPaymentReceipt);
     
     if (!isPublicAllowed) {
       // Validate authorization for non-contact emails
