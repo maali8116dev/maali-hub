@@ -258,7 +258,7 @@ describe('Application Review Workflow', () => {
       expect(aggregation.average_score).toBeGreaterThanOrEqual(8.0); // Above approval threshold
 
       // Step 5: Test decision calculation
-      const decision = calculateDecision(aggregation);
+      const decision = calculateDecision({ ...aggregation, scores: [] });
       
       expect(decision).not.toBeNull();
       expect(decision?.recommendedDecision).toBe('approve');
@@ -297,7 +297,7 @@ describe('Application Review Workflow', () => {
         },
       };
 
-      const decision = calculateDecision(aggregation);
+      const decision = calculateDecision({ ...aggregation, scores: [] });
 
       expect(decision).not.toBeNull();
       expect(decision?.recommendedDecision).toBe('request_info');
@@ -320,7 +320,7 @@ describe('Application Review Workflow', () => {
         },
       };
 
-      const decision = calculateDecision(aggregation, 2, { requireAllReviewers: true });
+      const decision = calculateDecision({ ...aggregation, scores: [] }, 2, { requireAllReviewers: true });
 
       expect(decision).not.toBeNull();
       expect(decision?.recommendedDecision).toBe('insufficient_reviews');
@@ -343,7 +343,7 @@ describe('Application Review Workflow', () => {
         },
       };
 
-      const decision = calculateDecision(aggregation);
+      const decision = calculateDecision({ ...aggregation, scores: [] });
 
       expect(decision).not.toBeNull();
       expect(decision?.recommendedDecision).toBe('request_info');

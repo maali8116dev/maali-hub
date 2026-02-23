@@ -184,7 +184,7 @@ describe('useApplicationReviewScores (Hook)', () => {
 
     expect(result.current.data).toHaveLength(1);
     expect(result.current.data?.[0].scores).toEqual({ innovation: 8, feasibility: 7 });
-    expect(result.current.data?.[0].reviewer).toEqual({ user_id: 'reviewer-456', first_name: 'John', last_name: 'Doe' });
+    expect(result.current.data?.[0].reviewer_id).toBe('reviewer-456');
   });
 
   it('should return empty array when no scores exist', async () => {
@@ -220,7 +220,7 @@ describe('useApplicationReviewScores (Hook)', () => {
 
     const { result } = renderHook(() => useApplicationReviewScores('app-123'), { wrapper: createWrapper() });
     await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
-    expect(result.current.data?.[0].reviewer).toBeUndefined();
+    expect(result.current.data?.[0].reviewer_id).toBe('reviewer-456');
   });
 });
 

@@ -57,7 +57,7 @@ export const ReviewerDetails = () => {
   const workload = reviewerDetails?.workload || 0;
   const completedReviews = (reviewerDetails?.completed_reviews || []) as any[];
   const pendingAssignments = (reviewerDetails?.pending_assignments || []) as any[];
-  const categories = (reviewerDetails?.categories || []).map((cat: any) => cat.category_name || 'Unknown') as string[];
+  const categories = ((reviewerDetails?.categories || []) as any[]).map((cat: any) => cat.category_name || 'Unknown') as string[];
 
   // Combine and format reviews + assignments
   const reviews = useMemo(() => {
@@ -342,7 +342,7 @@ export const ReviewerDetails = () => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">
-            {reviewer?.first_name} {reviewer?.last_name}
+            {(reviewer as any)?.first_name} {(reviewer as any)?.last_name}
           </h1>
           <p className="text-muted-foreground">Reviewer Details</p>
         </div>

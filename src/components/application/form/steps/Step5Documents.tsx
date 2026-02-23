@@ -3,7 +3,7 @@ import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step5DocumentsProps {
   projectId?: number;
-  applicantType?: string;
+  applicantType?: "Individual" | "Organization" | "Startup / SME" | "NGO / Non-profit" | "Research / Academic";
   onFilesChange: (files: File[]) => void;
   onLibraryDocumentsChange: (documentIds: string[]) => void;
 }

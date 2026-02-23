@@ -197,7 +197,7 @@ export const useAutoSaveDraft = ({
       if (existingDraft) {
         let parsedPrimarySectors: string[] | undefined = undefined;
         if (Array.isArray(existingDraft.primary_sectors)) {
-          parsedPrimarySectors = existingDraft.primary_sectors;
+          parsedPrimarySectors = existingDraft.primary_sectors as string[];
         } else if (typeof existingDraft.primary_sectors === "string") {
           try {
             const parsed = JSON.parse(existingDraft.primary_sectors);

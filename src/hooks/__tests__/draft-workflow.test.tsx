@@ -42,13 +42,9 @@ describe('Draft Workflow', () => {
     cityRegion: 'Accra',
     emailAddress: 'john@example.com',
     phoneNumber: '+1234567890',
-    companyName: 'Test Company',
-    contactEmail: 'contact@test.com',
-    contactPhone: '+1234567890',
-    location: 'Ghana',
-    projectDescription: 'Test project description',
-    businessPlan: 'Test business plan',
-    teamSize: 10,
+    projectTitle: 'Test Project',
+    projectSummary: 'Test project description',
+    numberOfTeamMembers: 10,
   };
 
   beforeEach(() => {
@@ -81,8 +77,8 @@ describe('Draft Workflow', () => {
             id: mockDraftId,
             user_id: mockUser.id,
             project_id: mockProjectId,
-            company_name: mockFormData.companyName,
-            contact_email: mockFormData.contactEmail,
+            company_name: mockFormData.organizationName,
+            contact_email: mockFormData.emailAddress,
             status: 'draft',
             is_draft: true,
             created_at: '2024-01-01T00:00:00Z',
@@ -117,13 +113,13 @@ describe('Draft Workflow', () => {
         .insert({
           user_id: mockUser.id,
           project_id: mockProjectId,
-          company_name: mockFormData.companyName,
-          contact_email: mockFormData.contactEmail,
-          contact_phone: mockFormData.contactPhone,
-          location: mockFormData.location,
-          project_description: mockFormData.projectDescription,
-          business_plan: mockFormData.businessPlan,
-          team_size: mockFormData.teamSize,
+           company_name: mockFormData.organizationName,
+           contact_email: mockFormData.emailAddress,
+           contact_phone: mockFormData.phoneNumber,
+           location: mockFormData.countryOfResidence,
+           project_description: mockFormData.projectSummary,
+           business_plan: undefined,
+           team_size: mockFormData.numberOfTeamMembers,
           status: 'draft',
           is_draft: true,
         })
@@ -136,8 +132,8 @@ describe('Draft Workflow', () => {
       // Step 2: Auto-save draft (update existing)
       const updatedFormData = {
         ...mockFormData,
-        companyName: 'Updated Company Name',
-        projectDescription: 'Updated description',
+        organizationName: 'Updated Company Name',
+        projectSummary: 'Updated description',
       };
 
       const mockUpdateQuery = {
@@ -147,8 +143,8 @@ describe('Draft Workflow', () => {
         single: vi.fn().mockResolvedValue({
           data: {
             id: mockDraftId,
-            company_name: updatedFormData.companyName,
-            project_description: updatedFormData.projectDescription,
+             company_name: updatedFormData.organizationName,
+             project_description: updatedFormData.projectSummary,
             updated_at: '2024-01-01T01:00:00Z',
           },
           error: null,
@@ -159,16 +155,16 @@ describe('Draft Workflow', () => {
 
       const updateResult = await mockUpdateQuery
         .update({
-          company_name: updatedFormData.companyName,
-          project_description: updatedFormData.projectDescription,
+          company_name: updatedFormData.organizationName,
+          project_description: updatedFormData.projectSummary,
         })
         .eq('id', mockDraftId)
         .eq('is_draft', true)
         .select()
         .single();
 
-      expect(updateResult.data.company_name).toBe(updatedFormData.companyName);
-      expect(updateResult.data.project_description).toBe(updatedFormData.projectDescription);
+      expect(updateResult.data.company_name).toBe(updatedFormData.organizationName);
+      expect(updateResult.data.project_description).toBe(updatedFormData.projectSummary);
 
       // Step 3: Load existing draft
       const mockLoadQuery = {
@@ -179,13 +175,13 @@ describe('Draft Workflow', () => {
             id: mockDraftId,
             user_id: mockUser.id,
             project_id: mockProjectId,
-            company_name: updatedFormData.companyName,
-            contact_email: mockFormData.contactEmail,
-            contact_phone: mockFormData.contactPhone,
-            location: mockFormData.location,
-            project_description: updatedFormData.projectDescription,
-            business_plan: mockFormData.businessPlan,
-            team_size: mockFormData.teamSize,
+            company_name: updatedFormData.organizationName,
+            contact_email: mockFormData.emailAddress,
+            contact_phone: mockFormData.phoneNumber,
+            location: mockFormData.countryOfResidence,
+            project_description: updatedFormData.projectSummary,
+            business_plan: undefined,
+            team_size: mockFormData.numberOfTeamMembers,
             is_draft: true,
           },
           error: null,
@@ -203,7 +199,7 @@ describe('Draft Workflow', () => {
 
       expect(loadResult.data).not.toBeNull();
       expect(loadResult.data?.id).toBe(mockDraftId);
-      expect(loadResult.data?.company_name).toBe(updatedFormData.companyName);
+      expect(loadResult.data?.company_name).toBe(updatedFormData.organizationName);
 
       // Step 4: Submit application (convert draft to submitted)
       const mockSubmitQuery = {
