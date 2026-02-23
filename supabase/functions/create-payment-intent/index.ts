@@ -3,7 +3,11 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+if (!stripeKey) {
+  console.error("STRIPE_SECRET_KEY is not set");
+}
+const stripe = new Stripe(stripeKey || "", {
   apiVersion: "2024-11-20.acacia",
   httpClient: Stripe.createFetchHttpClient(),
 });
