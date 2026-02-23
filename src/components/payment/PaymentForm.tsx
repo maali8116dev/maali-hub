@@ -64,8 +64,7 @@ export function PaymentForm({
     });
   }, [stripe, onSuccess]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
 
     if (!stripe || !elements) {
       return;
@@ -120,7 +119,7 @@ export function PaymentForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form id="payment-form" onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <PaymentElement id="payment-element" options={{ layout: "tabs" }} />
           
           {message && (
@@ -136,7 +135,8 @@ export function PaymentForm({
           )}
 
           <Button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={isProcessing || !stripe || !elements}
             className="w-full min-h-[44px]"
           >
@@ -149,7 +149,7 @@ export function PaymentForm({
               `Pay ${formatAmount(amount, currency)}`
             )}
           </Button>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
