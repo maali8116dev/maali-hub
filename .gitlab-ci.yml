@@ -6,6 +6,7 @@ mirror_from_github:
   tags:
     - mirror
   script:
+    - git remote set-url origin https://${GITLAB_PAT}@code.jivo.group/maali/opportunity-hub.git
     - git remote remove github
     - git remote add github https://${GITHUB_PAT}@github.com/jivogroup/maali-opportunity-hub.git || true
     - git fetch github --prune
