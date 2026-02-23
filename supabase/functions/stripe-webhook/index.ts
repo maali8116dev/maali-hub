@@ -130,6 +130,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await sendPaymentReceiptEmail(applicationId, userId, session.amount_total, "usd", paymentIntentId);
   }
 
+  // Fetch Stripe receipt URL from the charge
+  let receiptUrl: string | null = null;
+  try {
+    const charges = await stripe.charges.list({ payment_intent: paymentIntentId, limit: 1 });
+    if (charges.data.length > 0) {
+      receiptUrl = charges.data[0].receipt_url || null;
+    }
+  } catch (chargeErr) {
+    console.error("Error fetching Stripe charge for receipt URL:", chargeErr);
+  }
+
   // Update transaction status
   const { error: txError } = await supabaseAdmin
     .from("transactions")
@@ -137,6 +148,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       status: "completed",
       provider_transaction_id: paymentIntentId,
       completed_at: new Date().toISOString(),
+      receipt_url: receiptUrl,
     })
     .eq("application_id", applicationId)
     .eq("status", "pending");
@@ -196,6 +208,17 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     }
   }
 
+  // Fetch Stripe receipt URL from the charge
+  let receiptUrl: string | null = null;
+  try {
+    const charges = await stripe.charges.list({ payment_intent: paymentIntent.id, limit: 1 });
+    if (charges.data.length > 0) {
+      receiptUrl = charges.data[0].receipt_url || null;
+    }
+  } catch (chargeErr) {
+    console.error("Error fetching Stripe charge for receipt URL:", chargeErr);
+  }
+
   // Update transaction status
   const { error: transactionError } = await supabaseAdmin
     .from("transactions")
@@ -203,6 +226,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       status: "completed",
       provider_transaction_id: paymentIntent.id,
       completed_at: new Date().toISOString(),
+      receipt_url: receiptUrl,
     })
     .eq("provider_payment_intent_id", paymentIntentId);
 
