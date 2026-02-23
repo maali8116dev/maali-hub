@@ -402,12 +402,12 @@ const Billing = () => {
                       <p className="text-xs text-muted-foreground">Invoice: {item.invoice_number}</p>
                     )}
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
-                      className="w-full min-h-[44px]"
+                      className="w-full min-h-[44px] gap-2 text-primary hover:text-primary"
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-4 w-4" />
                       Download Invoice
                     </Button>
                   </div>
@@ -446,12 +446,12 @@ const Billing = () => {
                         <TableCell>{getStatusBadge(item.status)}</TableCell>
                         <TableCell className="text-right">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
-                            className="min-h-[44px]"
+                            className="min-h-[44px] gap-2 text-primary hover:text-primary"
                           >
-                            <Download className="h-4 w-4 mr-2" />
+                            <Download className="h-4 w-4" />
                             Invoice
                           </Button>
                         </TableCell>
