@@ -223,7 +223,7 @@ serve(async (req: Request) => {
       headers: {
         ...getCorsHeaders(req),
         "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": `inline; filename="invoice-${invoiceNumber}.html"`,
+        "Content-Disposition": `attachment; filename="invoice-${invoiceNumber}.html"`,
       },
     });
   } catch (error: unknown) {
