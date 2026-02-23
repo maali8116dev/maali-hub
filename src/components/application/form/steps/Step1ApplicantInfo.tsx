@@ -1,10 +1,11 @@
-import { Control } from "react-hook-form";
+import { Control, useWatch } from "react-hook-form";
 import { Building2, Mail, Phone, MapPin } from "lucide-react";
 import CustomFormField, {
   FormFieldType,
 } from "@/components/form/CustomFormField";
 import { ApplicationFormValues } from "../schemas";
 import { APPLICANT_TYPES } from "../constants";
+import { COUNTRIES, getCountryCode } from "../countries";
 
 interface Step1ApplicantInfoProps {
   control: Control<ApplicationFormValues>;
@@ -15,6 +16,9 @@ export function Step1ApplicantInfo({
   control,
   applicantType,
 }: Step1ApplicantInfoProps) {
+  const selectedCountry = useWatch({ control, name: "countryOfResidence" });
+  const phoneCountryCode = getCountryCode(selectedCountry) || "US";
+
   return (
     <div className="space-y-4">
       <div>
@@ -71,12 +75,11 @@ export function Step1ApplicantInfo({
         <CustomFormField
           control={control}
           name="countryOfResidence"
-          fieldType={FormFieldType.INPUT}
+          fieldType={FormFieldType.SELECT}
           label="Country of Residence / Registration"
-          placeholder="Enter country"
-          icon={MapPin}
-          iconPosition="left"
+          placeholder="Select country"
           required
+          options={COUNTRIES}
         />
         <CustomFormField
           control={control}
@@ -97,6 +100,7 @@ export function Step1ApplicantInfo({
           required
         />
         <CustomFormField
+          key={phoneCountryCode}
           control={control}
           name="phoneNumber"
           fieldType={FormFieldType.PHONE_INTERNATIONAL}
@@ -104,11 +108,10 @@ export function Step1ApplicantInfo({
           placeholder="Enter phone number"
           icon={Phone}
           iconPosition="left"
-          defaultCountry="US"
+          defaultCountry={phoneCountryCode}
           required
         />
       </div>
     </div>
   );
 }
-
