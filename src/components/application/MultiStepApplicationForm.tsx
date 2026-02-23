@@ -61,6 +61,7 @@ const MultiStepApplicationForm = () => {
   const { logActivity } = useActivityLogger();
   const { user } = useAuth();
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEmailVerified =
     user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const {
@@ -336,6 +337,8 @@ const MultiStepApplicationForm = () => {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       // Get current user
       const {
@@ -906,6 +909,8 @@ const MultiStepApplicationForm = () => {
           "There was an error submitting your application. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1105,10 +1110,15 @@ const MultiStepApplicationForm = () => {
                     type="button"
                     variant="hero"
                     className="flex items-center gap-2"
-                    disabled={!isEmailVerified}
+                    disabled={!isEmailVerified || isSubmitting}
                     onClick={handleSubmit}
                   >
-                    {!isEmailVerified ? (
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Submitting…
+                      </>
+                    ) : !isEmailVerified ? (
                       <>
                         <AlertTriangle className="h-4 w-4" />
                         Verify Email to Submit
