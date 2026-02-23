@@ -74,11 +74,12 @@ export function PaymentForm({
     setIsProcessing(true);
     setMessage(null);
 
-    const { error } = await stripe.confirmPayment({
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/dashboard/applications?payment=success`,
       },
+      redirect: "if_required",
     });
 
     if (error) {
@@ -90,8 +91,10 @@ export function PaymentForm({
         description: errorMessage,
         variant: "destructive",
       });
+    } else if (paymentIntent?.status === "succeeded") {
+      setMessage("Payment succeeded!");
+      onSuccess();
     } else {
-      // Payment succeeded, but we'll wait for the redirect or webhook
       setMessage("Processing payment...");
     }
 
