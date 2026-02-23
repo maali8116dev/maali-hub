@@ -98,6 +98,18 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  // Idempotency: skip if already paid
+  const { data: app } = await supabaseAdmin
+    .from("applications")
+    .select("application_fee_paid")
+    .eq("id", applicationId)
+    .maybeSingle();
+
+  if (app?.application_fee_paid) {
+    console.log(`Application ${applicationId} already marked as paid, skipping checkout handler`);
+    return;
+  }
+
   // Update application: mark fee paid and change status from pending_payment to pending
   const { error: appError } = await supabaseAdmin
     .from("applications")
@@ -163,6 +175,20 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     if (tx) {
       applicationId = tx.application_id;
       userId = userId || tx.user_id;
+    }
+  }
+
+  // Idempotency: skip if already paid (checkout.session.completed may have handled it)
+  if (applicationId) {
+    const { data: app } = await supabaseAdmin
+      .from("applications")
+      .select("application_fee_paid")
+      .eq("id", applicationId)
+      .maybeSingle();
+
+    if (app?.application_fee_paid) {
+      console.log(`Application ${applicationId} already marked as paid, skipping payment_intent handler`);
+      return;
     }
   }
 
