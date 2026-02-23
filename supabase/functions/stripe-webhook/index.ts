@@ -148,8 +148,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const paymentIntentId = paymentIntent.id;
-  const userId = paymentIntent.metadata.userId;
-  const applicationId = paymentIntent.metadata.applicationId;
+  let userId = paymentIntent.metadata?.userId;
+  let applicationId = paymentIntent.metadata?.applicationId;
+
+  // If metadata is missing (e.g. payment created via Checkout Session),
+  // look up the transaction to find the application
+  if (!applicationId) {
+    const { data: tx } = await supabaseAdmin
+      .from("transactions")
+      .select("application_id, user_id")
+      .eq("provider_payment_intent_id", paymentIntentId)
+      .maybeSingle();
+
+    if (tx) {
+      applicationId = tx.application_id;
+      userId = userId || tx.user_id;
+    }
+  }
 
   // Update transaction status
   const { error: transactionError } = await supabaseAdmin
@@ -172,15 +187,34 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       .update({
         application_fee_paid: true,
         stripe_payment_intent_id: paymentIntentId,
+        status: "pending",
       })
       .eq("id", applicationId);
 
     if (applicationError) {
       console.error("Error updating application:", applicationError);
+    } else {
+      console.log(`Application ${applicationId} marked as paid and status set to pending`);
+    }
+
+    // Create notification for user
+    if (userId) {
+      try {
+        await supabaseAdmin.rpc("create_notification", {
+          p_user_id: userId,
+          p_title: "Payment Confirmed",
+          p_message: "Your application fee has been confirmed and your application is now under review.",
+          p_type: "payment",
+          p_link: `/dashboard/applications/${applicationId}`,
+          p_metadata: { application_id: applicationId },
+        });
+      } catch (notifErr) {
+        console.error("Error creating payment notification:", notifErr);
+      }
     }
   }
 
-  console.log(`Payment succeeded: ${paymentIntentId} for user ${userId}`);
+  console.log(`Payment succeeded: ${paymentIntentId} for user ${userId}, application ${applicationId}`);
 }
 
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
