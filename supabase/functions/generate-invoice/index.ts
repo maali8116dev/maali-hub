@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { jsPDF } from "https://esm.sh/jspdf@2.5.2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 const supabaseAdmin = createClient(
@@ -51,7 +52,7 @@ serve(async (req: Request) => {
       });
     }
 
-    // Fetch transaction — user can only access their own, admin can access all
+    // Fetch transaction
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("role")
@@ -109,121 +110,151 @@ serve(async (req: Request) => {
       month: "long",
       day: "numeric",
     });
-    const status = tx.status === "completed" ? "Paid" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
-    const statusColor = tx.status === "completed" ? "#166534" : tx.status === "refunded" ? "#92400e" : "#991b1b";
-    const statusBg = tx.status === "completed" ? "#dcfce7" : tx.status === "refunded" ? "#fef3c7" : "#fee2e2";
+    const statusLabel = tx.status === "completed" ? "Paid" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
+    const billingEmail = tx.billing_email || user.email || "N/A";
 
-    const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+    // ─── Build PDF ───────────────────────────────────────────────────
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
 
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice ${invoiceNumber}</title>
-  <style>
-    @media print {
-      body { margin: 0; padding: 0; }
-      .no-print { display: none !important; }
+    // ── Header bar ──
+    doc.setFillColor(200, 90, 46); // #C85A2E
+    doc.rect(0, 0, pageWidth, 38, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.text("INVOICE", margin, 18);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(invoiceNumber, margin, 28);
+
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("MAALI", pageWidth - margin, 18, { align: "right" });
+
+    // ── Meta section ──
+    let y = 52;
+    doc.setTextColor(107, 114, 128); // #6b7280
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.text("BILLED TO", margin, y);
+    doc.text("PAYMENT DATE", margin + 70, y);
+    doc.text("STATUS", margin + 130, y);
+
+    y += 6;
+    doc.setTextColor(31, 41, 55); // #1f2937
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text(userName, margin, y);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(paymentDate, margin + 70, y);
+
+    // Status badge
+    const statusBadgeX = margin + 130;
+    if (tx.status === "completed") {
+      doc.setFillColor(220, 252, 231); // green bg
+      doc.setTextColor(22, 101, 52);   // green text
+    } else if (tx.status === "refunded") {
+      doc.setFillColor(254, 243, 199);
+      doc.setTextColor(146, 64, 14);
+    } else {
+      doc.setFillColor(254, 226, 226);
+      doc.setTextColor(153, 27, 27);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #1f2937; background: #f3f4f6; }
-    .invoice-container { max-width: 800px; margin: 20px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #C85A2E 0%, #F5A623 100%); padding: 30px 40px; color: #fff; display: flex; justify-content: space-between; align-items: flex-start; }
-    .header h1 { font-size: 28px; font-weight: 700; }
-    .header .invoice-number { font-size: 14px; opacity: 0.9; margin-top: 4px; }
-    .header .logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; }
-    .body { padding: 40px; }
-    .meta-row { display: flex; justify-content: space-between; margin-bottom: 30px; flex-wrap: wrap; gap: 20px; }
-    .meta-block h3 { font-size: 12px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .meta-block p { font-size: 14px; line-height: 1.6; }
-    .table-wrapper { margin: 30px 0; }
-    table { width: 100%; border-collapse: collapse; }
-    thead th { background: #f9fafb; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
-    tbody td { padding: 16px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
-    .text-right { text-align: right; }
-    .total-row { background: #f9fafb; }
-    .total-row td { font-weight: 700; font-size: 16px; padding: 16px; }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
-    .footer { padding: 20px 40px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; text-align: center; }
-    .print-btn { display: inline-block; margin: 20px auto; padding: 10px 28px; background: linear-gradient(135deg, #C85A2E 0%, #F5A623 100%); color: #fff; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-decoration: none; }
-    .print-btn:hover { opacity: 0.9; }
-    .actions { text-align: center; padding: 10px 0 30px; }
-  </style>
-</head>
-<body>
-  <div class="invoice-container">
-    <div class="header">
-      <div>
-        <h1>INVOICE</h1>
-        <div class="invoice-number">${invoiceNumber}</div>
-      </div>
-      <div class="logo">MAALI</div>
-    </div>
-    <div class="body">
-      <div class="meta-row">
-        <div class="meta-block">
-          <h3>Billed To</h3>
-          <p><strong>${userName}</strong></p>
-          <p>${tx.billing_email || user.email || "N/A"}</p>
-        </div>
-        <div class="meta-block">
-          <h3>Payment Date</h3>
-          <p>${paymentDate}</p>
-        </div>
-        <div class="meta-block">
-          <h3>Status</h3>
-          <p><span class="status-badge" style="background:${statusBg};color:${statusColor};">${status}</span></p>
-        </div>
-      </div>
+    const badgeWidth = doc.getTextWidth(statusLabel) + 8;
+    doc.roundedRect(statusBadgeX, y - 4, badgeWidth, 6, 2, 2, "F");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.text(statusLabel, statusBadgeX + 4, y);
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Project</th>
-              <th class="text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${tx.description || "Application Fee"}</td>
-              <td>${projectTitle || "—"}</td>
-              <td class="text-right">${currency} ${amount}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr class="total-row">
-              <td colspan="2" class="text-right">Total</td>
-              <td class="text-right">${currency} ${amount}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+    // Billing email
+    y += 6;
+    doc.setTextColor(107, 114, 128);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(billingEmail, margin, y);
 
-      ${tx.provider_transaction_id ? `<p style="font-size:12px;color:#9ca3af;margin-top:10px;">Transaction ID: ${tx.provider_transaction_id}</p>` : ""}
-      ${tx.application_id ? `<p style="font-size:12px;color:#9ca3af;">Application ID: ${tx.application_id}</p>` : ""}
-    </div>
+    // ── Line items table ──
+    y += 14;
+    // Table header
+    doc.setFillColor(249, 250, 251); // #f9fafb
+    doc.rect(margin, y - 5, contentWidth, 10, "F");
+    doc.setDrawColor(229, 231, 235); // #e5e7eb
+    doc.line(margin, y + 5, margin + contentWidth, y + 5);
 
-    <div class="actions no-print">
-      <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
-    </div>
+    doc.setTextColor(107, 114, 128);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.text("DESCRIPTION", margin + 4, y + 1);
+    doc.text("PROJECT", margin + 90, y + 1);
+    doc.text("AMOUNT", margin + contentWidth - 4, y + 1, { align: "right" });
 
-    <div class="footer">
-      <p>&copy; ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.</p>
-      <p style="margin-top:4px;"><a href="${siteUrl}/privacy" style="color:#6b7280;">Privacy Policy</a> &middot; <a href="${siteUrl}/terms" style="color:#6b7280;">Terms of Service</a></p>
-    </div>
-  </div>
-</body>
-</html>`;
+    // Table row
+    y += 14;
+    doc.setTextColor(31, 41, 55);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(tx.description || "Application Fee", margin + 4, y);
+    doc.text(projectTitle || "—", margin + 90, y);
+    doc.text(`${currency} ${amount}`, margin + contentWidth - 4, y, { align: "right" });
 
-    return new Response(html, {
+    // Separator
+    y += 6;
+    doc.setDrawColor(243, 244, 246);
+    doc.line(margin, y, margin + contentWidth, y);
+
+    // Total row
+    y += 10;
+    doc.setFillColor(249, 250, 251);
+    doc.rect(margin, y - 5, contentWidth, 12, "F");
+    doc.setTextColor(31, 41, 55);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("Total", margin + 90, y + 1);
+    doc.text(`${currency} ${amount}`, margin + contentWidth - 4, y + 1, { align: "right" });
+
+    // ── Transaction details ──
+    y += 18;
+    doc.setTextColor(156, 163, 175); // #9ca3af
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    if (tx.provider_transaction_id) {
+      doc.text(`Transaction ID: ${tx.provider_transaction_id}`, margin, y);
+      y += 5;
+    }
+    if (tx.application_id) {
+      doc.text(`Application ID: ${tx.application_id}`, margin, y);
+      y += 5;
+    }
+
+    // ── Footer ──
+    const footerY = doc.internal.pageSize.getHeight() - 20;
+    doc.setDrawColor(229, 231, 235);
+    doc.line(margin, footerY - 6, margin + contentWidth, footerY - 6);
+    doc.setTextColor(156, 163, 175);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.`,
+      pageWidth / 2,
+      footerY,
+      { align: "center" }
+    );
+
+    // ── Output ──
+    const pdfBuffer = doc.output("arraybuffer");
+
+    return new Response(pdfBuffer, {
       status: 200,
       headers: {
         ...getCorsHeaders(req),
-        "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": `attachment; filename="invoice-${invoiceNumber}.html"`,
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="invoice-${invoiceNumber}.pdf"`,
       },
     });
   } catch (error: unknown) {
