@@ -168,6 +168,12 @@ const AdminApplications = () => {
   }
 
   if (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string' 
+      ? error 
+      : "Unknown error occurred";
+    
     return (
       <div className="space-y-6">
         <div>
@@ -178,9 +184,21 @@ const AdminApplications = () => {
         </div>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-destructive">
-              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
-            </p>
+            <div className="text-center space-y-4">
+              <p className="text-destructive font-medium">
+                Error loading applications
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {errorMessage}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+                className="mt-4"
+              >
+                Retry
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

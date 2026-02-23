@@ -1,5 +1,7 @@
 # RPC Optimization Recommendations
 
+> **Note (2026-02-24):** Database migrations have been consolidated. All RPC functions mentioned in this document are now included in the consolidated migration `20250827000000_consolidated_schema.sql`. Individual migration file references are kept for historical context.
+
 ## 🎯 **Goal**: Reduce Costs & Improve User Experience
 
 **Benefits of Moving to RPCs:**

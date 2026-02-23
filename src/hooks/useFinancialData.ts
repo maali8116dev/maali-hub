@@ -167,13 +167,12 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
 }
 
 /**
- * Calculate financial statistics
+ * Calculate financial statistics using optimized RPC function
+ * This fetches only aggregated stats instead of all transactions (90%+ cost reduction)
  */
 async function fetchFinancialStats(): Promise<FinancialStats> {
   try {
-    const { data: transactions, error } = await supabase
-      .from("transactions")
-      .select("amount, status, type, created_at, currency");
+    const { data, error } = await supabase.rpc("get_financial_stats");
 
     if (error) {
       console.error("Error fetching financial stats:", {
@@ -183,81 +182,50 @@ async function fetchFinancialStats(): Promise<FinancialStats> {
         hint: error.hint,
       });
       
-      // Check if table doesn't exist
-      if (error.code === "42P01" || error.message.includes("does not exist") || error.message.includes("relation")) {
-        throw new Error("Transactions table not found. Please ensure migrations are up to date.");
+      // Check if function doesn't exist
+      if (error.code === "42883" || error.message.includes("does not exist") || error.message.includes("function")) {
+        throw new Error("Financial stats function not found. Please ensure migrations are up to date.");
       }
       
       // Check for permission errors
       if (error.code === "42501" || error.message.includes("permission") || error.message.includes("denied")) {
-        throw new Error("Permission denied. Please ensure you have admin access and the transactions table has proper RLS policies.");
+        throw new Error("Permission denied. Please ensure you have admin access.");
       }
       
       throw new Error(error.message || `Failed to load financial stats: ${error.code || "Unknown error"}`);
     }
 
-  const now = new Date();
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    if (!data || data.length === 0) {
+      // Return zero stats if no data
+      return {
+        totalRevenue: 0,
+        totalTransactions: 0,
+        completedTransactions: 0,
+        pendingTransactions: 0,
+        failedTransactions: 0,
+        refundedAmount: 0,
+        applicationFees: 0,
+        subscriptions: 0,
+        thisMonthRevenue: 0,
+        lastMonthRevenue: 0,
+        revenueGrowth: 0,
+      };
+    }
 
-  const completed = transactions?.filter((t) => t.status === "completed") || [];
-  const pending = transactions?.filter((t) => t.status === "pending" || t.status === "processing") || [];
-  const failed = transactions?.filter((t) => t.status === "failed" || t.status === "cancelled") || [];
-  const refunded = transactions?.filter((t) => t.status === "refunded") || [];
-  const applicationFees = completed.filter((t) => t.type === "application_fee");
-  const subscriptions = completed.filter((t) => t.type === "subscription");
-
-  const thisMonth = completed.filter(
-    (t) => new Date(t.created_at) >= thisMonthStart
-  );
-  const lastMonth = completed.filter(
-    (t) =>
-      new Date(t.created_at) >= lastMonthStart &&
-      new Date(t.created_at) <= lastMonthEnd
-  );
-
-  const totalRevenue =
-    completed.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0) -
-    refunded.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
-
-  const thisMonthRevenue = thisMonth.reduce(
-    (sum, t) => sum + parseFloat(t.amount.toString()),
-    0
-  );
-  const lastMonthRevenue = lastMonth.reduce(
-    (sum, t) => sum + parseFloat(t.amount.toString()),
-    0
-  );
-
-    const revenueGrowth =
-      lastMonthRevenue > 0
-        ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
-        : thisMonthRevenue > 0
-        ? 100
-        : 0;
+    const stats = data[0];
 
     return {
-      totalRevenue,
-      totalTransactions: transactions?.length || 0,
-      completedTransactions: completed.length,
-      pendingTransactions: pending.length,
-      failedTransactions: failed.length,
-      refundedAmount: refunded.reduce(
-        (sum, t) => sum + parseFloat(t.amount.toString()),
-        0
-      ),
-      applicationFees: applicationFees.reduce(
-        (sum, t) => sum + parseFloat(t.amount.toString()),
-        0
-      ),
-      subscriptions: subscriptions.reduce(
-        (sum, t) => sum + parseFloat(t.amount.toString()),
-        0
-      ),
-      thisMonthRevenue,
-      lastMonthRevenue,
-      revenueGrowth: Math.round(revenueGrowth * 100) / 100,
+      totalRevenue: parseFloat(stats.total_revenue?.toString() || "0"),
+      totalTransactions: stats.total_transactions || 0,
+      completedTransactions: stats.completed_transactions || 0,
+      pendingTransactions: stats.pending_transactions || 0,
+      failedTransactions: stats.failed_transactions || 0,
+      refundedAmount: parseFloat(stats.refunded_amount?.toString() || "0"),
+      applicationFees: parseFloat(stats.application_fees?.toString() || "0"),
+      subscriptions: parseFloat(stats.subscriptions?.toString() || "0"),
+      thisMonthRevenue: parseFloat(stats.this_month_revenue?.toString() || "0"),
+      lastMonthRevenue: parseFloat(stats.last_month_revenue?.toString() || "0"),
+      revenueGrowth: parseFloat(stats.revenue_growth?.toString() || "0"),
     };
   } catch (err) {
     // Re-throw our custom errors

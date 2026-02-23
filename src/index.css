@@ -218,6 +218,30 @@
   input[type="password"]::-ms-clear {
     display: none !important;
   }
+
+  /* Hide React DevTools and debug overlays */
+  [data-react-devtools-portal],
+  [data-react-devtools-overlay],
+  [data-cursor-element-id]::after,
+  [data-lov-id]::after,
+  [data-component-path]::after {
+    display: none !important;
+  }
+
+  /* Hide debug numbers at bottom left of cards (React DevTools overlays) */
+  .rounded-lg.border.bg-card::before,
+  .rounded-lg.border.bg-card::after {
+    content: none !important;
+  }
+}
+
+/* Hide React DevTools overlay elements that show component indices */
+@layer base {
+  /* Hide any absolutely positioned debug overlays */
+  div[style*="position: absolute"][style*="z-index: 999999"],
+  div[style*="position: fixed"][style*="z-index: 999999"] {
+    display: none !important;
+  }
 }
 
 /* React Phone Number Input Styling */

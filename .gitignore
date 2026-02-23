@@ -30,3 +30,10 @@ dist-ssr
 
 # Drizzle
 server/drizzle
+
+.prettierignore
+.editorconfig
+reset_live_db.md
+
+supabase/migrations_backup/**
+supabase/migrations/**/*.sql

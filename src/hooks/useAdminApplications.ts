@@ -42,43 +42,66 @@ const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> =
  * Includes applicant name from profiles and project title
  */
 async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
-  const { data, error } = await supabase.rpc("get_admin_applications");
+  try {
+    const { data, error } = await supabase.rpc("get_admin_applications");
 
-  if (error) throw error;
+    if (error) {
+      console.error("Error fetching admin applications:", error);
+      throw new Error(error.message || "Failed to load applications");
+    }
 
-  if (!data || data.length === 0) {
-    return [];
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data.map((app: any) => {
+      // Handle reviewer_decisions - it might be JSONB (already parsed) or a string
+      let reviewerDecisions: any[] = [];
+      try {
+        if (app.reviewer_decisions) {
+          if (Array.isArray(app.reviewer_decisions)) {
+            reviewerDecisions = app.reviewer_decisions;
+          } else if (typeof app.reviewer_decisions === 'string') {
+            reviewerDecisions = JSON.parse(app.reviewer_decisions);
+          } else if (typeof app.reviewer_decisions === 'object') {
+            reviewerDecisions = app.reviewer_decisions;
+          }
+        }
+      } catch (parseError) {
+        console.warn("Error parsing reviewer_decisions for application", app.id, parseError);
+        reviewerDecisions = [];
+      }
+
+      return {
+        id: app.id,
+        applicantName: app.applicant_name || "Unknown Applicant",
+        applicantEmail: app.applicant_email || "No email",
+        projectTitle: app.project_title || "Unknown Project",
+        projectId: app.project_id,
+        submittedAt: app.submitted_at,
+        status: statusMap[app.status || "pending"] || "pending",
+        contactEmail: app.contact_email || "N/A",
+        contactPhone: app.contact_phone || undefined,
+        reviewedBy: app.reviewed_by || undefined,
+        reviewedAt: app.reviewed_at || undefined,
+        reviewNotes: app.review_notes || undefined,
+        reviewedByName: app.reviewed_by_name || undefined,
+        reviewerDecisions: Array.isArray(reviewerDecisions)
+          ? reviewerDecisions.map((decision: any) => ({
+              reviewerId: decision.reviewerId,
+              reviewerName: decision.reviewerName,
+              recommendation: decision.recommendation,
+              overallScore: decision.overallScore,
+              comments: decision.comments,
+              submittedAt: decision.submittedAt,
+            }))
+          : [],
+      };
+    });
+  } catch (err) {
+    console.error("Error in fetchAllApplicationsForAdmin:", err);
+    throw err instanceof Error ? err : new Error("Unknown error occurred while loading applications");
   }
-
-  return data.map((app: any) => {
-    const reviewerDecisions = Array.isArray(app.reviewer_decisions)
-      ? app.reviewer_decisions
-      : [];
-
-    return {
-      id: app.id,
-      applicantName: app.applicant_name || "Unknown Applicant",
-      applicantEmail: app.applicant_email || "No email",
-      projectTitle: app.project_title || "Unknown Project",
-      projectId: app.project_id,
-      submittedAt: app.submitted_at,
-      status: statusMap[app.status || "pending"] || "pending",
-      contactEmail: app.contact_email || "N/A",
-      contactPhone: app.contact_phone || undefined,
-      reviewedBy: app.reviewed_by || undefined,
-      reviewedAt: app.reviewed_at || undefined,
-      reviewNotes: app.review_notes || undefined,
-      reviewedByName: app.reviewed_by_name || undefined,
-      reviewerDecisions: reviewerDecisions.map((decision: any) => ({
-        reviewerId: decision.reviewerId,
-        reviewerName: decision.reviewerName,
-        recommendation: decision.recommendation,
-        overallScore: decision.overallScore,
-        comments: decision.comments,
-        submittedAt: decision.submittedAt,
-      })),
-    };
-  });
 }
 
 /**

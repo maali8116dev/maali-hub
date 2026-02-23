@@ -56,20 +56,20 @@ const Projects = () => {
   const { data: categories = [] } = useProjectCategories();
   const { data: locations = [] } = useProjectLocations();
 
-  // Fetch approved applications for the current user
-  const { data: approvedApplications = [] } = useQuery({
-    queryKey: ["user-approved-applications", user?.id],
+  // Fetch submitted (non-draft) applications for the current user.
+  // Used to disable "Apply" on projects they already applied to.
+  const { data: submittedApplications = [] } = useQuery({
+    queryKey: ["user-submitted-applications", user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("applications")
         .select("project_id")
         .eq("user_id", user.id)
-        .eq("status", "approved")
         .eq("is_draft", false);
 
       if (error) {
-        console.error("Error fetching approved applications:", error);
+        console.error("Error fetching submitted applications:", error);
         return [];
       }
       return (data || []).map(app => app.project_id);
@@ -78,7 +78,7 @@ const Projects = () => {
   });
 
   // Create a Set for O(1) lookup
-  const approvedProjectIds = new Set(approvedApplications);
+  const submittedProjectIds = new Set(submittedApplications);
 
   const projects = data?.projects || [];
   const totalPages = data?.totalPages || 0;
@@ -281,7 +281,7 @@ const Projects = () => {
                   deadline={project.deadline}
                   currentApplicants={project.currentApplicants}
                   status={project.status}
-                  hasApprovedApplication={approvedProjectIds.has(project.id)}
+                  hasSubmittedApplication={submittedProjectIds.has(project.id)}
                 />
               ))}
             </div>

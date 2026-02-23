@@ -8,7 +8,7 @@ import {
   useApplicationAssignments,
   useReviewerAssignments,
   useReviewerWorkload,
-  useCategoryRubric,
+  useSystemRubric,
   useUpdateAssignmentStatus,
   useAddConflict,
   useReviewerCategories,

@@ -32,7 +32,7 @@ interface DatabaseProjectCardProps {
   currentApplicants: number;
   status: string;
   createdAt?: string;
-  hasApprovedApplication?: boolean;
+  hasSubmittedApplication?: boolean;
 }
 
 type ProjectCardProps = LegacyProjectCardProps | DatabaseProjectCardProps;
@@ -98,8 +98,8 @@ const ProjectCard = (props: ProjectCardProps) => {
     ? !isProjectOpen(status, deadline)
     : status === 'closed';
 
-  const hasApprovedApplication = isDatabaseProject(props) && props.hasApprovedApplication;
-  const applyDisabled = isDisabled || hasApprovedApplication;
+  const hasSubmittedApplication = isDatabaseProject(props) && props.hasSubmittedApplication;
+  const applyDisabled = isDisabled || hasSubmittedApplication;
 
   // Parse location string to handle multiple countries (comma-separated)
   const parseLocations = (locationString: string): string[] => {
@@ -177,14 +177,15 @@ const ProjectCard = (props: ProjectCardProps) => {
           </Button>
           <Button 
             variant={!applyDisabled ? 'hero' : 'outline'} 
-            className="flex-1"
+            className="w-full sm:w-36 shrink-0"
+            
             disabled={applyDisabled}
             onClick={() => {
               if (applyDisabled) return;
-              if (hasApprovedApplication) {
+              if (hasSubmittedApplication) {
                 toast({
-                  title: "Application Already Approved",
-                  description: "You already have an approved application for this project.",
+                  title: "Already Applied",
+                  description: "You already submitted an application for this opportunity. You can view it from your dashboard.",
                   variant: "default",
                 });
                 return;
@@ -201,7 +202,7 @@ const ProjectCard = (props: ProjectCardProps) => {
               }
             }}
           >
-            {hasApprovedApplication ? 'Approved' : isDisabled ? 'Closed' : 'Apply'}
+            {hasSubmittedApplication ? 'Applied' : isDisabled ? 'Closed' : 'Apply'}
           </Button>
         </div>
       </CardFooter>

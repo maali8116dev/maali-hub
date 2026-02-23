@@ -42,7 +42,7 @@ function transformProfile(data: any): Profile {
 async function fetchProfileDirect(userId: string): Promise<Profile> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, user_id, first_name, last_name, business_name, business_sector, country, bio, avatar_url, role, created_at, updated_at")
     .eq("user_id", userId)
     .single();
 

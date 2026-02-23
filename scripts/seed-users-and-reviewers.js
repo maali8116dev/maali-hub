@@ -328,7 +328,7 @@ async function createApplication(applicationData) {
       contact_phone: contactPhone,
       location: location,
       project_description: projectDescription,
-      funding_amount_requested: fundingAmount,
+  
       status: 'pending',
       is_draft: false,
     })

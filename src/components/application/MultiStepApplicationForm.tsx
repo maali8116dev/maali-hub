@@ -379,23 +379,26 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
-      // Check if user already has an approved application for this project
+      // Check if user already has a submitted (non-draft) application for this project
       const { data: existingApplication, error: checkError } = await supabase
         .from("applications")
         .select("id, status")
         .eq("user_id", user.id)
         .eq("project_id", formData.projectId)
         .eq("is_draft", false)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (checkError) {
         console.error("Error checking existing application:", checkError);
       }
 
-      if (existingApplication?.status === "approved") {
+      if (existingApplication) {
         toast({
-          title: "Application Already Approved",
-          description: "You already have an approved application for this project. You cannot submit another application.",
+          title: "Already Applied",
+          description:
+            "You already submitted an application for this opportunity. You can’t submit another one.",
           variant: "destructive",
         });
         navigate(`/dashboard/applications/${existingApplication.id}`);
@@ -799,7 +802,13 @@ const MultiStepApplicationForm = () => {
     } catch (error) {
       console.error("Submission error:", error);
 
-      const errorMessage = error instanceof Error ? error.message : "";
+      const err: any = error;
+      const errorMessage =
+        typeof err?.message === "string"
+          ? err.message
+          : error instanceof Error
+            ? error.message
+            : "";
 
       if (isRateLimitError(errorMessage)) {
         toast({
@@ -808,6 +817,19 @@ const MultiStepApplicationForm = () => {
             "You've submitted too many applications recently. Please wait an hour and try again.",
           variant: "destructive",
         });
+        return;
+      }
+
+      // Unique constraint violation: user already has a non-draft application for this project
+      // (idx_applications_unique_user_project)
+      if (err?.code === "23505" || errorMessage.includes("idx_applications_unique_user_project")) {
+        toast({
+          title: "Already Applied",
+          description:
+            "You already submitted an application for this opportunity. You can view it from your dashboard.",
+          variant: "destructive",
+        });
+        navigate("/dashboard/applications");
         return;
       }
 

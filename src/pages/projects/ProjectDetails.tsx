@@ -52,7 +52,7 @@ const ProjectDetails = () => {
   // Check if user has a draft for this project
   const { data: draft } = useProjectDraft(id ? parseInt(id) : undefined);
 
-  // Check if user already has an approved application for this project
+  // Check if user already has a submitted (non-draft) application for this project
   const { data: existingApplication } = useQuery({
     queryKey: ["user-project-application", user?.id, id],
     queryFn: async () => {
@@ -63,6 +63,8 @@ const ProjectDetails = () => {
         .eq("user_id", user.id)
         .eq("project_id", parseInt(id))
         .eq("is_draft", false)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {
@@ -74,8 +76,8 @@ const ProjectDetails = () => {
     enabled: !!user && !!id,
   });
 
+  const hasSubmittedApplication = !!existingApplication;
   const hasApprovedApplication = existingApplication?.status === "approved";
-  const hasExistingApplication = !!existingApplication && !hasApprovedApplication;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -380,18 +382,28 @@ const ProjectDetails = () => {
                   </Alert>
                 )}
                 {/* Approved Application Banner */}
-                {hasApprovedApplication && (
-                  <Alert className="mb-4 border-success/50 bg-success/5">
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                    <AlertTitle className="text-success">
-                      Application Approved
+                {hasSubmittedApplication && (
+                  <Alert className={`mb-4 ${hasApprovedApplication ? "border-success/50 bg-success/5" : "border-primary/50 bg-primary/5"}`}>
+                    <CheckCircle2 className={`h-4 w-4 ${hasApprovedApplication ? "text-success" : "text-primary"}`} />
+                    <AlertTitle className={hasApprovedApplication ? "text-success" : "text-primary"}>
+                      {hasApprovedApplication ? "Application Approved" : "Application Submitted"}
                     </AlertTitle>
-                    <AlertDescription className="text-success/80">
-                      Your application for this project has been approved. You cannot submit another application.
+                    <AlertDescription className={hasApprovedApplication ? "text-success/80" : "text-primary/80"}>
+                      You already submitted an application for this opportunity (status: {existingApplication?.status || "pending"}). You can’t submit another one.
                     </AlertDescription>
                   </Alert>
                 )}
-                {draft ? (
+
+                {hasSubmittedApplication ? (
+                  <Button
+                    className="w-full"
+                    variant="hero"
+                    size="lg"
+                    onClick={() => navigate(`/dashboard/applications/${existingApplication!.id}`)}
+                  >
+                    View Your Application
+                  </Button>
+                ) : draft ? (
                   <>
                     <div className="bg-muted/50 rounded-lg p-3 mb-4">
                       <p className="text-sm font-medium text-foreground mb-1">
@@ -406,7 +418,7 @@ const ProjectDetails = () => {
                       className="w-full mb-2" 
                       variant="hero"
                       size="lg"
-                      disabled={isDisabled || hasApprovedApplication}
+                      disabled={isDisabled}
                       onClick={() => {
                         if (!user) {
                           toast({
@@ -427,7 +439,7 @@ const ProjectDetails = () => {
                       className="w-full" 
                       variant="outline"
                       size="lg"
-                      disabled={isDisabled || hasApprovedApplication}
+                      disabled={isDisabled}
                       onClick={() => {
                         if (!user) {
                           toast({
@@ -456,7 +468,7 @@ const ProjectDetails = () => {
                       className="w-full" 
                       variant="hero"
                       size="lg"
-                      disabled={isDisabled || hasApprovedApplication}
+                      disabled={isDisabled}
                       onClick={() => {
                         if (!user) {
                           toast({

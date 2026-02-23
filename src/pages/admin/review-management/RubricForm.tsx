@@ -6,27 +6,46 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Plus, X } from 'lucide-react';
 
 interface RubricFormProps {
-  categories: string[];
+  initialRubric?: {
+    criteria: Array<{
+      name: string;
+      weight: number;
+      max_score: number;
+      description?: string;
+    }>;
+  };
+  onSuccess?: () => void;
 }
 
-export const RubricForm = ({ categories }: RubricFormProps) => {
-  const [category, setCategory] = useState('');
-  const [criteria, setCriteria] = useState([
-    { name: '', weight: 0.25, max_score: 10, description: '' },
-  ]);
+export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
+  const [criteria, setCriteria] = useState<Array<{
+    id: string;
+    name: string;
+    weight: number;
+    max_score: number;
+    description?: string;
+  }>>(() => {
+    const initial = initialRubric?.criteria || [
+      { name: '', weight: 0.25, max_score: 10, description: '' },
+    ];
+    // Add unique IDs to each criterion for stable React keys
+    return initial.map((c, idx) => ({
+      ...c,
+      id: `criterion-${Date.now()}-${idx}`,
+    }));
+  });
 
   const addCriterion = () => {
-    setCriteria([...criteria, { name: '', weight: 0.25, max_score: 10, description: '' }]);
+    setCriteria([...criteria, { 
+      id: `criterion-${Date.now()}-${criteria.length}`,
+      name: '', 
+      weight: 0.25, 
+      max_score: 10, 
+      description: '' 
+    }]);
   };
 
   const updateCriterion = (index: number, field: string, value: any) => {
@@ -44,39 +63,47 @@ export const RubricForm = ({ categories }: RubricFormProps) => {
 
   const saveRubric = useMutation({
     mutationFn: async () => {
-      // Look up category_id from category name
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('name', category)
-        .eq('is_active', true)
-        .single();
-      
-      if (categoryError || !categoryData) {
-        throw new Error(`Category "${category}" not found`);
+      // Validate criteria before saving
+      const validCriteria = criteria.filter(c => c.name.trim() !== '');
+      if (validCriteria.length === 0) {
+        throw new Error('At least one criterion with a name is required');
       }
-      
-      // Normalize weights
-      const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
-      const normalizedCriteria = criteria.map((c) => ({
-        ...c,
+
+      // Normalize weights (only for criteria with names)
+      const totalWeight = validCriteria.reduce((sum, c) => sum + c.weight, 0);
+      if (totalWeight === 0) {
+        throw new Error('Total weight cannot be zero');
+      }
+
+      const normalizedCriteria = validCriteria.map(({ id, ...c }) => ({
+        name: c.name.trim(),
         weight: c.weight / totalWeight,
+        max_score: c.max_score,
+        description: c.description?.trim() || '',
       }));
 
       const { error } = await supabase
-        .from('category_rubrics')
+        .from('system_rubric')
         .upsert({
-          category_id: categoryData.id,
+          id: '00000000-0000-0000-0000-000000000001',
           rubric: { criteria: normalizedCriteria },
         }, {
-          onConflict: 'category_id',
+          onConflict: 'id',
         });
       
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-rubrics'] });
-      toast({ title: 'Rubric Saved', description: 'Category rubric saved successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['system-rubric'] });
+      toast({ title: 'Rubric Saved', description: 'System rubric saved successfully.' });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: 'Error Saving Rubric', 
+        description: error.message || 'Failed to save rubric. Please try again.',
+        variant: 'destructive'
+      });
     },
   });
 
@@ -84,28 +111,20 @@ export const RubricForm = ({ categories }: RubricFormProps) => {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (category && criteria.length > 0) {
+        // Validate that all criteria have names before saving
+        const hasValidCriteria = criteria.length > 0 && criteria.every(c => c.name.trim() !== '');
+        if (hasValidCriteria) {
           saveRubric.mutate();
+        } else {
+          toast({ 
+            title: 'Validation Error', 
+            description: 'Please ensure all criteria have names before saving.',
+            variant: 'destructive'
+          });
         }
       }}
       className="space-y-4"
     >
-      <div className="space-y-2">
-        <Label>Category</Label>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <Label>Scoring Criteria</Label>
@@ -116,7 +135,7 @@ export const RubricForm = ({ categories }: RubricFormProps) => {
         </div>
 
         {criteria.map((criterion, index) => (
-          <Card key={index}>
+          <Card key={criterion.id}>
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -153,7 +172,7 @@ export const RubricForm = ({ categories }: RubricFormProps) => {
                 <div className="space-y-2">
                   <Label>Description (optional)</Label>
                   <Input
-                    value={criterion.description}
+                    value={criterion.description || ''}
                     onChange={(e) => updateCriterion(index, 'description', e.target.value)}
                     placeholder="Brief description of this criterion"
                   />
@@ -176,8 +195,8 @@ export const RubricForm = ({ categories }: RubricFormProps) => {
         ))}
       </div>
 
-      <Button type="submit" className="w-full" disabled={!category || criteria.length === 0 || saveRubric.isPending}>
-        {saveRubric.isPending ? 'Saving...' : 'Save Rubric'}
+      <Button type="submit" className="w-full" disabled={criteria.length === 0 || saveRubric.isPending}>
+        {saveRubric.isPending ? 'Saving...' : 'Save System Rubric'}
       </Button>
     </form>
   );

@@ -28,7 +28,7 @@
     "supabase:migration:list": "supabase migration list",
     "supabase:types": "supabase gen types typescript --local > src/integrations/supabase/types.ts",
     "supabase:types:remote": "supabase gen types typescript --linked > src/integrations/supabase/types.ts",
-    "supabase:seed": "node scripts/seed.js",
+    "seed:projects": "node scripts/seed.js",
     "seed:users": "node scripts/seed-users-and-reviewers.js",
     "seed:users:local": "node scripts/seed-users-and-reviewers.js --local"
   },

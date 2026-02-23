@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,86 +10,106 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
 import { RubricForm } from './RubricForm';
 
 interface RubricsTabProps {
-  categories: string[];
+  categories?: string[]; // Kept for backward compatibility but not used
 }
 
 export const RubricsTab = ({ categories }: RubricsTabProps) => {
-  const { data: rubrics = [] } = useQuery({
-    queryKey: ['all-rubrics'],
+  const { data: rubric } = useQuery({
+    queryKey: ['system-rubric'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('category_rubrics')
-        .select(`
-          *,
-          categories:category_id(name)
-        `)
-        .order('categories(name)', { ascending: true });
+        .from('system_rubric')
+        .select('*')
+        .eq('id', '00000000-0000-0000-0000-000000000001')
+        .single();
       
-      if (error) throw error;
-      // Transform to include category name for display
-      return (data || []).map((item: any) => ({
-        ...item,
-        category: item.categories?.name || 'Unknown',
-      }));
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
     },
   });
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Category Rubrics</CardTitle>
+        <CardTitle>System Rubric</CardTitle>
         <CardDescription>
-          Define scoring criteria and weights for each category
+          Define scoring criteria and weights that apply to all applications
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Rubric
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create Category Rubric</DialogTitle>
-            </DialogHeader>
-            <RubricForm categories={categories} />
-          </DialogContent>
-        </Dialog>
-
-        <div className="mt-6 space-y-4">
-          {rubrics.map((rubric: any) => (
-            <Card key={rubric.id}>
-              <CardHeader>
-                <CardTitle>{rubric.category}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {rubric.rubric?.criteria?.map((criterion: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
-                      <div>
-                        <span className="font-medium capitalize">{criterion.name}</span>
-                        {criterion.description && (
-                          <span className="text-sm text-muted-foreground ml-2">
-                            - {criterion.description}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm">
-                        Weight: {(criterion.weight * 100).toFixed(0)}% • Max: {criterion.max_score}
-                      </div>
-                    </div>
-                  ))}
+        {rubric ? (
+          <>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Rubric
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Edit System Rubric</DialogTitle>
+                </DialogHeader>
+                <div className="overflow-y-auto flex-1 pr-2 -mr-2">
+                  <RubricForm 
+                    initialRubric={rubric.rubric} 
+                    onSuccess={() => setIsEditDialogOpen(false)}
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </DialogContent>
+            </Dialog>
+
+            <div className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Rubric Criteria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {rubric.rubric?.criteria?.map((criterion: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
+                        <div>
+                          <span className="font-medium capitalize">{criterion.name}</span>
+                          {criterion.description && (
+                            <span className="text-sm text-muted-foreground ml-2">
+                              - {criterion.description}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm">
+                          Weight: {(criterion.weight * 100).toFixed(0)}% • Max: {criterion.max_score}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create System Rubric
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Create System Rubric</DialogTitle>
+              </DialogHeader>
+              <div className="overflow-y-auto flex-1 pr-2 -mr-2">
+                <RubricForm />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardContent>
     </Card>
   );

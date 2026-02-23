@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { useSubmitReview, useCategoryRubric } from '@/hooks/useReviewerAssignment';
+import { useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,31 +28,8 @@ const ReviewScoringForm = ({
   const { toast } = useToast();
   const { mutate: submitReview, isPending } = useSubmitReview();
 
-  // Get project category to load appropriate rubric
-  const { data: application } = useQuery({
-    queryKey: ['application', applicationId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          project_id,
-          projects!inner(
-            id,
-            category_id,
-            categories:category_id(name)
-          )
-        `)
-        .eq('id', applicationId)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!applicationId,
-  });
-
-  const category = (application?.projects as any)?.categories?.name || '';
-  const { data: rubric } = useCategoryRubric(category);
+  // Get system rubric (applies to all applications)
+  const { data: rubric } = useSystemRubric();
 
   // Build schema dynamically based on rubric
   const buildSchema = () => {

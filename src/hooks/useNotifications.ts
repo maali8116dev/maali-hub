@@ -41,7 +41,7 @@ const fetchNotifications = async (): Promise<Notification[]> => {
 
   const { data, error } = await supabase
     .from("notifications")
-    .select("*")
+    .select("id, user_id, title, message, type, read, link, metadata, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -141,7 +141,7 @@ export const useNotifications = () => {
     queryKey: ["notifications", user?.id],
     queryFn: fetchNotifications,
     enabled: !!user,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Disabled - using realtime subscriptions instead
     // Removed refetchInterval - using subscriptions instead for real-time updates
     // This reduces API calls by ~99% (only refetches when data actually changes)
   });

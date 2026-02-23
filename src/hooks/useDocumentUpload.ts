@@ -301,7 +301,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("*")
+        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -343,7 +343,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     try {
       const { data, error } = await supabase
         .from("application_documents")
-        .select("*")
+        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false });
 
@@ -390,7 +390,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       // First, get the library document
       const { data: libraryDoc, error: fetchError } = await supabase
         .from("application_documents")
-        .select("*")
+        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("id", documentId)
         .eq("is_library_document", true)
         .is("application_id", null)
@@ -461,7 +461,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("*")
+        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("user_id", user.id)
         .eq("is_library_document", true)
         .is("application_id", null)

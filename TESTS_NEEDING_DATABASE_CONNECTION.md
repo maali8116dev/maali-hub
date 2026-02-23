@@ -1,5 +1,11 @@
 # Tests That Need Real Database Connections
 
+> **Note (2026-02-24):** Database migrations have been consolidated into two files:
+>
+> - `20250827000000_consolidated_schema.sql` (main schema with all RPC functions)
+> - `20250827000001_storage_buckets_and_policies.sql` (storage setup)
+>   All RPC functions and database schema are now in the consolidated migrations.
+
 ## 📊 **Summary**
 
 **Total Test Files**: 27  
@@ -195,7 +201,11 @@ Convert these to use real database: 5. `useApplications.test.tsx` - Test applica
 
 ### **Phase 3: Integration Workflow Tests** (Week 3)
 
-Convert these "integration" tests to actually use real DB: 8. `draft-workflow.integration.test.tsx` - Make it a true integration test 9. `application-review-workflow.integration.test.tsx` - Make it a true integration test 10. `auto-save-draft.test.tsx` - Add real DB version or convert existing
+Convert these "integration" tests to actually use real DB:
+
+8. `draft-workflow.integration.test.tsx` - Make it a true integration test
+9. `application-review-workflow.integration.test.tsx` - Make it a true integration test
+10. `auto-save-draft.test.tsx` - Add real DB version or convert existing
 
 ---
 
@@ -216,10 +226,15 @@ vi.mock("@/integrations/supabase/client", () => ({
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
+// For local testing, use Supabase local instance
 const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || "https://your-project.supabase.co";
+  import.meta.env.VITE_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  "http://127.0.0.1:54321"; // Local Supabase default
 const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || "your-anon-key";
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "your-anon-key";
 
 const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -230,6 +245,7 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 // Use real supabase client in tests
 // Clean up test data in afterEach/afterAll
+// Ensure migrations are applied: `supabase db reset` or `supabase migration up`
 ```
 
 ---
@@ -242,6 +258,9 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 - Clean up test data in `afterEach` or `afterAll`
 - Use unique identifiers (UUIDs, timestamps) to avoid conflicts
 - Consider using a test database or test schema
+- **Important**: Ensure consolidated migrations are applied before running tests
+  - Run `supabase db reset` for a clean state, or
+  - Run `supabase migration up` to apply migrations
 
 ### **Authentication**
 
@@ -251,8 +270,10 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 ### **RLS Policies**
 
-- Ensure
+- Ensure RLS policies are properly configured in the database
+- Test data setup may require bypassing RLS (use service role key)
 - May need to use service role key for setup/teardown
+- Verify policies work correctly with test user roles (admin, reviewer, applicant)
 
 ### **Performance**
 
@@ -264,7 +285,8 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 - Ensure CI environment has access to test database
 - Use environment variables for test credentials
-- Consider using Supabase local development for CI
+- Consider using Supabase local development for CI (`supabase start` + `supabase db reset`)
+- Run consolidated migrations before running integration tests
 
 ---
 

@@ -24,11 +24,17 @@ export type Project = {
 
 // Transform Supabase snake_case to camelCase
 function transformProject(data: any): Project {
+  // Handle category from different sources:
+  // - RPC returns: data.category (direct string)
+  // - Direct queries return: data.categories?.name (from join)
+  // - Fallback: 'Uncategorized'
+  const category = data.category || data.categories?.name || 'Uncategorized';
+  
   return {
     id: data.id,
     title: data.title,
     description: data.description,
-    category: data.categories?.name || 'Uncategorized',
+    category,
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount || data.fundingAmount,

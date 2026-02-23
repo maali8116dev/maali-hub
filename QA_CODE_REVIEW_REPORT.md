@@ -5,6 +5,11 @@
 **Scope:** Full codebase (frontend, Edge Functions, database migrations, scripts)  
 **Reviewer:** LLM Code Review
 
+> **Note (2026-02-24):** Database migrations have been consolidated. All fixes mentioned in this report have been incorporated into the consolidated migrations:
+> - `20250827000000_consolidated_schema.sql` (main schema)
+> - `20250827000001_storage_buckets_and_policies.sql` (storage setup)
+> Individual migration file references are kept for historical context.
+
 ---
 
 ## Executive Summary

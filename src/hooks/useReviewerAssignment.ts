@@ -71,10 +71,8 @@ export interface ReviewScore {
   updated_at: string;
 }
 
-export interface CategoryRubric {
+export interface SystemRubric {
   id: string;
-  category_id: number;
-  category?: string; // For backward compatibility, populated from JOIN
   rubric: {
     criteria: Array<{
       name: string;
@@ -241,44 +239,25 @@ export const useReviewerCategories = (reviewerId?: string) => {
   });
 };
 
-// Get category rubric by category name
-export const useCategoryRubric = (category: string) => {
+// Get system rubric (single rubric for all applications)
+export const useSystemRubric = () => {
   return useQuery({
-    queryKey: ['category-rubric', category],
+    queryKey: ['system-rubric'],
     queryFn: async () => {
-      // First, get category_id from category name
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('name', category)
-        .eq('is_active', true)
-        .single();
-      
-      if (categoryError || !categoryData) {
-        return null;
-      }
-      
-      // Then get rubric by category_id
       const { data, error } = await supabase
-        .from('category_rubrics')
-        .select(`
-          *,
-          categories:category_id(name)
-        `)
-        .eq('category_id', categoryData.id)
+        .from('system_rubric')
+        .select('*')
+        .eq('id', '00000000-0000-0000-0000-000000000001')
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
       if (!data) return null;
       
-      // Add category name for backward compatibility and properly type the rubric
       return {
         ...data,
-        category: data.categories?.name || category,
-        rubric: data.rubric as CategoryRubric['rubric'],
-      } as CategoryRubric;
+        rubric: data.rubric as SystemRubric['rubric'],
+      } as SystemRubric;
     },
-    enabled: !!category,
   });
 };
 
