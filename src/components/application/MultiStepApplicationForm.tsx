@@ -958,7 +958,7 @@ const MultiStepApplicationForm = () => {
         <Progress value={progressPercentage} className="h-2" />
 
         {/* Step Indicators */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           {stepTitles.map((title, index) => {
             const stepNumber = index + 1;
             const isCompleted = stepNumber < currentStep;
@@ -979,7 +979,7 @@ const MultiStepApplicationForm = () => {
               >
                 <div
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors shrink-0",
                     isCompleted &&
                       "bg-primary border-primary text-primary-foreground",
                     isCurrent && "border-primary bg-primary/10 text-primary",
