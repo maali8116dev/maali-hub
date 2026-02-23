@@ -57,7 +57,8 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     if (!project || !project.application_fee || project.application_fee === 0) return;
     if (formData.paymentCompleted || clientSecret) return;
 
-    const feeInDollars = project.application_fee / 100;
+    // application_fee is stored in dollars in the database
+    const feeInDollars = project.application_fee;
 
     createPaymentIntent.mutate(
       {
@@ -145,7 +146,7 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     );
   }
 
-  const feeInDollars = project.application_fee / 100;
+  const feeInDollars = project.application_fee;
 
   // Show Stripe payment form
   return (
