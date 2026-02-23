@@ -136,7 +136,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
   persist(
     (set, get) => ({
       currentStep: 1,
-      totalSteps: 9,
+      totalSteps: 8,
       formData: defaultFormData,
       isDirty: false,
       lastSaved: undefined,
@@ -295,10 +295,6 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
               formData.dataProcessingConsented
             );
           case 8:
-            // Payment - validation handled in component based on project fee
-            // If no fee, step is always valid
-            return true;
-          case 9:
             // Submit - always valid (final step)
             return true;
           default:

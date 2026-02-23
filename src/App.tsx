@@ -73,6 +73,8 @@ import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
 import DataProtection from "./pages/DataProtection";
 import ErrorTest from "./tests/ErrorTest";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import PaymentCancel from "./pages/payment/PaymentCancel";
 
 const queryClient = new QueryClient();
 
@@ -112,6 +114,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
           <Route path="/projects/:id/apply" element={<ApplicationForm />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/cancel" element={<PaymentCancel />} />
           
           {/* Footer Link Pages */}
           <Route path="/apply" element={<Apply />} />

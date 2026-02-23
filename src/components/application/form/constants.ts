@@ -6,7 +6,6 @@ export const stepTitles = [
   "Upload Documents",
   "Review",
   "Compliance & Declarations",
-  "Payment",
   "Submit",
 ];
 
