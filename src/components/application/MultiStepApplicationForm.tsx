@@ -25,7 +25,7 @@ import { useActivityLogger } from "@/hooks/useActivityLogger";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
 import { createNotification } from "@/hooks/useNotifications";
-import { PaymentStep } from "./PaymentStep";
+// PaymentStep removed - now using Stripe Checkout redirect after submission
 import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 import { isProjectOpen } from "@/lib/projectAvailability";
 import { isRateLimitError } from "@/lib/rateLimits";
@@ -163,8 +163,6 @@ const MultiStepApplicationForm = () => {
         ? z.object({}) // Review (no schema)
         : currentStep === 7
         ? step4Schema // Compliance & Declarations
-        : currentStep === 8
-        ? z.object({}) // Payment (no schema)
         : z.object({}) // Submit (no schema)
     ) as any,
     defaultValues: {
@@ -440,8 +438,16 @@ const MultiStepApplicationForm = () => {
         return;
       }
 
-      // Payment validation skipped - Stripe payments not fully implemented yet
-      // Payment step will show "coming soon" message and allow proceeding
+      // Determine if this project requires a fee
+      const { data: projectInfo } = await supabase
+        .from("projects")
+        .select("id, title, application_fee")
+        .eq("id", formData.projectId)
+        .single();
+
+      const feeValue = projectInfo?.application_fee ? Number(projectInfo.application_fee) : 0;
+      const hasFee = feeValue > 0;
+      const initialStatus = hasFee ? "pending_payment" : "pending";
 
       let application;
 
@@ -468,10 +474,10 @@ const MultiStepApplicationForm = () => {
         reporting_requirements_agreed: formData.reportingRequirementsAgreed,
         data_processing_consented: formData.dataProcessingConsented,
         declaration_date: new Date().toISOString(),
-        status: "pending",
+        status: initialStatus,
         is_draft: false,
-        application_fee_paid: formData.paymentCompleted || false,
-        stripe_payment_intent_id: formData.paymentIntentId || null,
+        application_fee_paid: false,
+        stripe_payment_intent_id: null,
       };
 
       // Add organizational background fields if not Individual
@@ -786,6 +792,54 @@ const MultiStepApplicationForm = () => {
         // Don't fail the submission if assignment fails - admin can assign manually
       }
 
+      // If project has a fee, redirect to Stripe Checkout instead of dashboard
+      if (hasFee && application) {
+        toast({
+          title: "Redirecting to Payment",
+          description: "You will be redirected to complete the application fee payment.",
+        });
+
+        try {
+          const baseUrl = window.location.origin;
+          const response = await supabase.functions.invoke("create-checkout-session", {
+            body: {
+              applicationId: application.id,
+              projectId: formData.projectId,
+              successUrl: `${baseUrl}/payment/success?application_id=${application.id}`,
+              cancelUrl: `${baseUrl}/payment/cancel?application_id=${application.id}`,
+            },
+          });
+
+          if (response.error) {
+            throw new Error(response.error.message || "Failed to create checkout session");
+          }
+
+          const { url } = response.data;
+          if (url) {
+            // Reset form before redirect
+            reset();
+            form.reset();
+            setDraftLoaded(false);
+            setDraftId(null);
+            window.location.href = url;
+            return;
+          }
+        } catch (checkoutError) {
+          console.error("Checkout session error:", checkoutError);
+          toast({
+            title: "Payment Setup Failed",
+            description: "Your application was saved. You can complete payment from your dashboard.",
+            variant: "destructive",
+          });
+          reset();
+          form.reset();
+          setDraftLoaded(false);
+          setDraftId(null);
+          navigate(`/dashboard/applications/${application.id}`);
+          return;
+        }
+      }
+
       toast({
         title: "Application Submitted",
         description: "Your application has been submitted successfully!",
@@ -795,7 +849,7 @@ const MultiStepApplicationForm = () => {
       reset();
       form.reset();
       setDraftLoaded(false);
-      setDraftId(null); // Clear draftId from store to prevent auto-save after submission
+      setDraftId(null);
 
       // Redirect to dashboard applications
       navigate("/dashboard/applications");
@@ -1030,19 +1084,8 @@ const MultiStepApplicationForm = () => {
                 />
               )}
 
-              {/* Step 7: Payment */}
-              {currentStep === 8 && formData.projectId && (
-                <PaymentStep
-                  projectId={formData.projectId}
-                  applicationId={draftId}
-                  onPaymentSuccess={() => {
-                    updateFormData({ paymentCompleted: true });
-                  }}
-                />
-              )}
-
               {/* Step 8: Submit */}
-              {currentStep === 9 && <Step9Submit />}
+              {currentStep === 8 && <Step9Submit />}
 
               {/* Navigation Buttons */}
               <div className="flex items-center justify-between pt-6 border-t">

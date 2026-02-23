@@ -3,7 +3,7 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2023-10-16",
   httpClient: Stripe.createFetchHttpClient(),
 });
 
@@ -45,6 +45,12 @@ serve(async (req: Request) => {
 
   try {
     switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(session);
+        break;
+      }
+
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         await handlePaymentSuccess(paymentIntent);
@@ -73,7 +79,6 @@ serve(async (req: Request) => {
     );
   } catch (error) {
     console.error("Error processing webhook:", error);
-    // L3 FIX: Don't leak internal error details to the caller
     return new Response(
       JSON.stringify({ error: "Webhook processing failed" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
@@ -81,25 +86,80 @@ serve(async (req: Request) => {
   }
 });
 
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const applicationId = session.metadata?.applicationId;
+  const userId = session.metadata?.userId;
+  const paymentIntentId = (session.payment_intent as string) || session.id;
+
+  console.log(`Checkout completed: session=${session.id}, application=${applicationId}, user=${userId}`);
+
+  if (!applicationId) {
+    console.error("No applicationId in checkout session metadata");
+    return;
+  }
+
+  // Update application: mark fee paid and change status from pending_payment to pending
+  const { error: appError } = await supabaseAdmin
+    .from("applications")
+    .update({
+      application_fee_paid: true,
+      stripe_payment_intent_id: paymentIntentId,
+      status: "pending",
+    })
+    .eq("id", applicationId);
+
+  if (appError) {
+    console.error("Error updating application after checkout:", appError);
+  } else {
+    console.log(`Application ${applicationId} marked as paid and status set to pending`);
+  }
+
+  // Update transaction status
+  const { error: txError } = await supabaseAdmin
+    .from("transactions")
+    .update({
+      status: "completed",
+      provider_transaction_id: paymentIntentId,
+      completed_at: new Date().toISOString(),
+    })
+    .eq("application_id", applicationId)
+    .eq("status", "pending");
+
+  if (txError) {
+    console.error("Error updating transaction after checkout:", txError);
+  }
+
+  // Create notification for user
+  if (userId) {
+    try {
+      await supabaseAdmin.rpc("create_notification", {
+        p_user_id: userId,
+        p_title: "Payment Confirmed",
+        p_message: "Your application fee has been confirmed and your application is now under review.",
+        p_type: "payment",
+        p_link: `/dashboard/applications/${applicationId}`,
+        p_metadata: { application_id: applicationId },
+      });
+    } catch (notifErr) {
+      console.error("Error creating payment notification:", notifErr);
+    }
+  }
+}
+
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const paymentIntentId = paymentIntent.id;
   const userId = paymentIntent.metadata.userId;
   const applicationId = paymentIntent.metadata.applicationId;
-  const projectId = paymentIntent.metadata.projectId
-    ? parseInt(paymentIntent.metadata.projectId)
-    : null;
 
   // Update transaction status
-  const { data: transaction, error: transactionError } = await supabaseAdmin
+  const { error: transactionError } = await supabaseAdmin
     .from("transactions")
     .update({
       status: "completed",
       provider_transaction_id: paymentIntent.id,
       completed_at: new Date().toISOString(),
     })
-    .eq("provider_payment_intent_id", paymentIntentId)
-    .select()
-    .single();
+    .eq("provider_payment_intent_id", paymentIntentId);
 
   if (transactionError) {
     console.error("Error updating transaction:", transactionError);
@@ -128,7 +188,6 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   const failureReason =
     paymentIntent.last_payment_error?.message || "Payment failed";
 
-  // Update transaction status
   const { error: transactionError } = await supabaseAdmin
     .from("transactions")
     .update({
@@ -147,7 +206,6 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
   const paymentIntentId = paymentIntent.id;
 
-  // Update transaction status
   const { error: transactionError } = await supabaseAdmin
     .from("transactions")
     .update({
@@ -161,4 +219,3 @@ async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
 
   console.log(`Payment canceled: ${paymentIntentId}`);
 }
-
