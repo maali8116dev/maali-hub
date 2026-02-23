@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  CreditCard, 
-  Plus, 
-  Trash2, 
-  Download, 
-  Receipt, 
+import {
+  CreditCard,
+  Plus,
+  Trash2,
+  Download,
+  Receipt,
   Calendar,
   CheckCircle2,
   XCircle,
@@ -34,122 +34,168 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-
-interface PaymentMethod {
-  id: string;
-  type: "card" | "bank";
-  last4: string;
-  brand?: string;
-  expiryMonth?: number;
-  expiryYear?: number;
-  isDefault: boolean;
-}
-
-interface BillingHistoryItem {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  status: "paid" | "pending" | "failed";
-  invoiceUrl?: string;
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Billing = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isAddingPaymentMethod, setIsAddingPaymentMethod] = useState(false);
+  const queryClient = useQueryClient();
   const [isDeletingPaymentMethod, setIsDeletingPaymentMethod] = useState<string | null>(null);
   const [showAddCardDialog, setShowAddCardDialog] = useState(false);
 
-  // Mock payment methods - replace with actual API call
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: "1",
-      type: "card",
-      last4: "4242",
-      brand: "Visa",
-      expiryMonth: 12,
-      expiryYear: 2025,
-      isDefault: true,
+  // Fetch payment methods from DB
+  const { data: paymentMethods = [], isLoading: loadingPaymentMethods } = useQuery({
+    queryKey: ["user-payment-methods", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("payment_methods")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
-  ]);
+    enabled: !!user,
+  });
 
-  // Mock billing history - replace with actual API call
-  const billingHistory: BillingHistoryItem[] = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      description: "Application Fee - AgriTech Innovation Fund",
-      amount: 50.00,
-      status: "paid",
+  // Fetch billing history (transactions) from DB
+  const { data: billingHistory = [], isLoading: loadingHistory } = useQuery({
+    queryKey: ["user-transactions", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
-    {
-      id: "2",
-      date: "2024-01-10",
-      description: "Application Fee - Tech Startup Grant",
-      amount: 75.00,
-      status: "paid",
-    },
-    {
-      id: "3",
-      date: "2024-01-05",
-      description: "Application Fee - Green Energy Initiative",
-      amount: 100.00,
-      status: "pending",
-    },
-  ];
+    enabled: !!user,
+  });
 
-  const handleAddPaymentMethod = async () => {
-    setIsAddingPaymentMethod(true);
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Payment method added",
-        description: "Your payment method has been added successfully.",
-      });
-      setIsAddingPaymentMethod(false);
-      setShowAddCardDialog(false);
-    }, 1500);
-  };
+  // Fetch billing address from DB
+  const { data: billingAddress, isLoading: loadingAddress } = useQuery({
+    queryKey: ["user-billing-address", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("billing_addresses")
+        .select("*")
+        .eq("is_default", true)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
+  // Save billing address mutation
+  const saveBillingAddress = useMutation({
+    mutationFn: async (formData: {
+      billing_email: string;
+      tax_id: string;
+      address_line1: string;
+      city: string;
+      state_province: string;
+      postal_code: string;
+      country: string;
+    }) => {
+      if (!user) throw new Error("Not authenticated");
+      if (billingAddress) {
+        const { error } = await supabase
+          .from("billing_addresses")
+          .update({
+            billing_email: formData.billing_email || null,
+            tax_id: formData.tax_id || null,
+            address_line1: formData.address_line1,
+            city: formData.city,
+            state_province: formData.state_province || null,
+            postal_code: formData.postal_code,
+            country: formData.country,
+          })
+          .eq("id", billingAddress.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("billing_addresses").insert({
+          user_id: user.id,
+          billing_email: formData.billing_email || null,
+          tax_id: formData.tax_id || null,
+          address_line1: formData.address_line1,
+          city: formData.city,
+          state_province: formData.state_province || null,
+          postal_code: formData.postal_code,
+          country: formData.country,
+          is_default: true,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-billing-address"] });
+      toast({ title: "Billing information saved", description: "Your billing address has been updated." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Delete (soft) payment method
   const handleDeletePaymentMethod = async (id: string) => {
     setIsDeletingPaymentMethod(id);
-    // Simulate API call
-    setTimeout(() => {
-      setPaymentMethods(paymentMethods.filter((pm) => pm.id !== id));
-      toast({
-        title: "Payment method removed",
-        description: "Your payment method has been removed.",
-      });
-      setIsDeletingPaymentMethod(null);
-    }, 1000);
+    const { error } = await supabase
+      .from("payment_methods")
+      .update({ deleted_at: new Date().toISOString(), is_active: false })
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
+      toast({ title: "Payment method removed", description: "Your payment method has been removed." });
+    }
+    setIsDeletingPaymentMethod(null);
   };
 
+  // Set default payment method
   const handleSetDefault = async (id: string) => {
-    setPaymentMethods(
-      paymentMethods.map((pm) => ({
-        ...pm,
-        isDefault: pm.id === id,
-      }))
-    );
-    toast({
-      title: "Default payment method updated",
-      description: "Your default payment method has been changed.",
+    const { error } = await supabase
+      .from("payment_methods")
+      .update({ is_default: true })
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
+      toast({ title: "Default payment method updated" });
+    }
+  };
+
+  const handleDownloadInvoice = (receiptUrl: string | null, invoiceUrl: string | null) => {
+    const url = receiptUrl || invoiceUrl;
+    if (url) {
+      window.open(url, "_blank");
+    } else {
+      toast({ title: "No invoice available", description: "No invoice or receipt URL is available for this transaction." });
+    }
+  };
+
+  const handleSaveBillingInfo = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    saveBillingAddress.mutate({
+      billing_email: formData.get("billingEmail") as string,
+      tax_id: formData.get("taxId") as string,
+      address_line1: formData.get("billingAddress") as string,
+      city: formData.get("city") as string,
+      state_province: formData.get("state") as string,
+      postal_code: formData.get("zipCode") as string,
+      country: formData.get("country") as string,
     });
   };
 
-  const handleDownloadInvoice = (invoiceId: string) => {
-    toast({
-      title: "Downloading invoice",
-      description: "Your invoice is being prepared for download.",
-    });
-    // Implement actual download logic
-  };
-
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currency: string = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency,
     }).format(amount);
   };
 
@@ -159,6 +205,34 @@ const Billing = () => {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="default" className="bg-green-500 text-xs">
+            <CheckCircle2 className="h-3 w-3 mr-1" /> Paid
+          </Badge>
+        );
+      case "pending":
+      case "processing":
+        return (
+          <Badge variant="secondary" className="text-xs">
+            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Pending
+          </Badge>
+        );
+      case "refunded":
+        return (
+          <Badge variant="outline" className="text-xs">Refunded</Badge>
+        );
+      default:
+        return (
+          <Badge variant="destructive" className="text-xs">
+            <XCircle className="h-3 w-3 mr-1" /> Failed
+          </Badge>
+        );
+    }
   };
 
   return (
@@ -183,79 +257,21 @@ const Billing = () => {
                 Manage your payment methods for application fees
               </CardDescription>
             </div>
-            <Dialog open={showAddCardDialog} onOpenChange={setShowAddCardDialog}>
-              <DialogTrigger asChild>
-                <Button className="min-h-[44px] w-full sm:w-auto">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Payment Method
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-[95vw] sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Add Payment Method</DialogTitle>
-                  <DialogDescription>
-                    Add a new credit or debit card to your account
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      placeholder="1234 5678 9012 3456"
-                      maxLength={19}
-                      className="h-11 sm:h-10"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="expiry">Expiry Date</Label>
-                      <Input id="expiry" placeholder="MM/YY" maxLength={5} className="h-11 sm:h-10" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input id="cvv" placeholder="123" maxLength={4} type="password" className="h-11 sm:h-10" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cardholderName">Cardholder Name</Label>
-                    <Input
-                      id="cardholderName"
-                      placeholder="John Doe"
-                      defaultValue={user?.email?.split("@")[0] || ""}
-                      className="h-11 sm:h-10"
-                    />
-                  </div>
-                </div>
-                <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddCardDialog(false)}
-                    className="min-h-[44px]"
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddPaymentMethod} disabled={isAddingPaymentMethod} className="min-h-[44px]">
-                    {isAddingPaymentMethod ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Adding...
-                      </>
-                    ) : (
-                      "Add Card"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {paymentMethods.length === 0 ? (
+          {loadingPaymentMethods ? (
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : paymentMethods.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No payment methods added yet</p>
-              <p className="text-xs sm:text-sm mt-2">Add a payment method to pay for application fees</p>
+              <p>No payment methods on file</p>
+              <p className="text-xs sm:text-sm mt-2">
+                Payment methods are saved automatically when you pay an application fee via Stripe
+              </p>
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
@@ -271,23 +287,21 @@ const Billing = () => {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-sm sm:text-base">
-                          {method.brand} •••• {method.last4}
+                          {method.brand || method.type} •••• {method.last4}
                         </p>
-                        {method.isDefault && (
-                          <Badge variant="secondary" className="text-xs">
-                            Default
-                          </Badge>
+                        {method.is_default && (
+                          <Badge variant="secondary" className="text-xs">Default</Badge>
                         )}
                       </div>
-                      {method.expiryMonth && method.expiryYear && (
+                      {method.expiry_month && method.expiry_year && (
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          Expires {method.expiryMonth}/{method.expiryYear}
+                          Expires {method.expiry_month}/{method.expiry_year}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 justify-end">
-                    {!method.isDefault && (
+                    {!method.is_default && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -330,7 +344,13 @@ const Billing = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {billingHistory.length === 0 ? (
+          {loadingHistory ? (
+            <div className="space-y-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : billingHistory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No billing history yet</p>
@@ -344,37 +364,31 @@ const Billing = () => {
                   <div key={item.id} className="p-3 border rounded-lg space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-medium text-sm flex-1">{item.description}</p>
-                      {item.status === "paid" ? (
-                        <Badge variant="default" className="bg-green-500 text-xs">
-                          Paid
-                        </Badge>
-                      ) : item.status === "pending" ? (
-                        <Badge variant="secondary" className="text-xs">
-                          Pending
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="text-xs">
-                          Failed
-                        </Badge>
-                      )}
+                      {getStatusBadge(item.status)}
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{formatDate(item.date)}</span>
-                      <span className="font-medium text-foreground">{formatCurrency(item.amount)}</span>
+                      <span>{formatDate(item.created_at)}</span>
+                      <span className="font-medium text-foreground">
+                        {formatCurrency(item.amount, item.currency)}
+                      </span>
                     </div>
+                    {item.invoice_number && (
+                      <p className="text-xs text-muted-foreground">Invoice: {item.invoice_number}</p>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDownloadInvoice(item.id)}
+                      onClick={() => handleDownloadInvoice(item.receipt_url, item.invoice_url)}
                       className="w-full min-h-[44px]"
+                      disabled={!item.receipt_url && !item.invoice_url}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Download Invoice
+                      {item.receipt_url || item.invoice_url ? "Download Invoice" : "No Invoice"}
                     </Button>
                   </div>
                 ))}
               </div>
-              
+
               {/* Desktop table view */}
               <div className="hidden sm:block overflow-x-auto">
                 <Table>
@@ -382,6 +396,7 @@ const Billing = () => {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Description</TableHead>
+                      <TableHead>Invoice #</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -393,36 +408,23 @@ const Billing = () => {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {formatDate(item.date)}
+                            {formatDate(item.created_at)}
                           </div>
                         </TableCell>
                         <TableCell>{item.description}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {item.invoice_number || "—"}
+                        </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatCurrency(item.amount)}
+                          {formatCurrency(item.amount, item.currency)}
                         </TableCell>
-                        <TableCell>
-                          {item.status === "paid" ? (
-                            <Badge variant="default" className="bg-green-500">
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Paid
-                            </Badge>
-                          ) : item.status === "pending" ? (
-                            <Badge variant="secondary">
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              Pending
-                            </Badge>
-                          ) : (
-                            <Badge variant="destructive">
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Failed
-                            </Badge>
-                          )}
-                        </TableCell>
+                        <TableCell>{getStatusBadge(item.status)}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDownloadInvoice(item.id)}
+                            onClick={() => handleDownloadInvoice(item.receipt_url, item.invoice_url)}
+                            disabled={!item.receipt_url && !item.invoice_url}
                             className="min-h-[44px]"
                           >
                             <Download className="h-4 w-4 mr-2" />
@@ -447,46 +449,109 @@ const Billing = () => {
             Update your billing address and tax information
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="billingEmail">Billing Email</Label>
-              <Input
-                id="billingEmail"
-                type="email"
-                defaultValue={user?.email || ""}
-                disabled
-                className="h-11 sm:h-10"
-              />
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+          {loadingAddress ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="taxId">Tax ID (Optional)</Label>
-              <Input id="taxId" placeholder="Enter your tax ID" className="h-11 sm:h-10" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="billingAddress">Billing Address</Label>
-            <Input id="billingAddress" placeholder="Street address" className="h-11 sm:h-10" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input id="city" placeholder="City" className="h-11 sm:h-10" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State/Province</Label>
-              <Input id="state" placeholder="State" className="h-11 sm:h-10" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="zipCode">ZIP/Postal Code</Label>
-              <Input id="zipCode" placeholder="ZIP Code" className="h-11 sm:h-10" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Input id="country" placeholder="Country" className="h-11 sm:h-10" />
-          </div>
-          <Button className="min-h-[44px] w-full sm:w-auto">Save Billing Information</Button>
+          ) : (
+            <form onSubmit={handleSaveBillingInfo} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="billingEmail">Billing Email</Label>
+                  <Input
+                    id="billingEmail"
+                    name="billingEmail"
+                    type="email"
+                    defaultValue={billingAddress?.billing_email || user?.email || ""}
+                    className="h-11 sm:h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="taxId">Tax ID (Optional)</Label>
+                  <Input
+                    id="taxId"
+                    name="taxId"
+                    placeholder="Enter your tax ID"
+                    defaultValue={billingAddress?.tax_id || ""}
+                    className="h-11 sm:h-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingAddress">Billing Address</Label>
+                <Input
+                  id="billingAddress"
+                  name="billingAddress"
+                  placeholder="Street address"
+                  defaultValue={billingAddress?.address_line1 || ""}
+                  required
+                  className="h-11 sm:h-10"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    placeholder="City"
+                    defaultValue={billingAddress?.city || ""}
+                    required
+                    className="h-11 sm:h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State/Province</Label>
+                  <Input
+                    id="state"
+                    name="state"
+                    placeholder="State"
+                    defaultValue={billingAddress?.state_province || ""}
+                    className="h-11 sm:h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                  <Input
+                    id="zipCode"
+                    name="zipCode"
+                    placeholder="ZIP Code"
+                    defaultValue={billingAddress?.postal_code || ""}
+                    required
+                    className="h-11 sm:h-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  name="country"
+                  placeholder="Country"
+                  defaultValue={billingAddress?.country || ""}
+                  required
+                  className="h-11 sm:h-10"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={saveBillingAddress.isPending}
+                className="min-h-[44px] w-full sm:w-auto"
+              >
+                {saveBillingAddress.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Billing Information"
+                )}
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -494,4 +559,3 @@ const Billing = () => {
 };
 
 export default Billing;
-
