@@ -175,17 +175,15 @@ const Billing = () => {
       return;
     }
 
-    // Otherwise, open our generated invoice via edge function
+    // Otherwise, generate and download PDF invoice via edge function
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const session = supabase.auth.getSession();
-    session.then(({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token;
       if (!token) {
         toast({ title: "Error", description: "You must be logged in to download invoices.", variant: "destructive" });
         return;
       }
       const invoiceUrl = `${supabaseUrl}/functions/v1/generate-invoice?transactionId=${transactionId}`;
-      // Open in new tab with auth header via fetch + blob
       fetch(invoiceUrl, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -195,7 +193,13 @@ const Billing = () => {
         })
         .then((blob) => {
           const url = URL.createObjectURL(blob);
-          window.open(url, "_blank");
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `invoice-${transactionId.substring(0, 8)}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
         })
         .catch(() => {
           toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
