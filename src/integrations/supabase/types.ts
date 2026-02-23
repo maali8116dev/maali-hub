@@ -94,7 +94,7 @@ export type Database = {
           file_size: number | null
           file_type: string | null
           id: string
-          is_library_document: boolean
+          is_library_document: boolean | null
           project_id: number | null
           user_id: string | null
         }
@@ -106,7 +106,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
-          is_library_document?: boolean
+          is_library_document?: boolean | null
           project_id?: number | null
           user_id?: string | null
         }
@@ -118,7 +118,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
-          is_library_document?: boolean
+          is_library_document?: boolean | null
           project_id?: number | null
           user_id?: string | null
         }
@@ -155,7 +155,6 @@ export type Database = {
           data_processing_consented: boolean | null
           declaration_date: string | null
           full_legal_name: string | null
-          funding_amount_requested: string | null
           geographic_focus: string | null
           github_url: string | null
           id: string
@@ -171,7 +170,6 @@ export type Database = {
           primary_sector_other: string | null
           primary_sectors: Json | null
           problem_statement: string | null
-          project_description: string | null
           project_id: number
           project_summary: string | null
           project_title: string | null
@@ -206,7 +204,6 @@ export type Database = {
           data_processing_consented?: boolean | null
           declaration_date?: string | null
           full_legal_name?: string | null
-          funding_amount_requested?: string | null
           geographic_focus?: string | null
           github_url?: string | null
           id?: string
@@ -222,7 +219,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_description?: string | null
           project_id: number
           project_summary?: string | null
           project_title?: string | null
@@ -257,7 +253,6 @@ export type Database = {
           data_processing_consented?: boolean | null
           declaration_date?: string | null
           full_legal_name?: string | null
-          funding_amount_requested?: string | null
           geographic_focus?: string | null
           github_url?: string | null
           id?: string
@@ -273,7 +268,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_description?: string | null
           project_id?: number
           project_summary?: string | null
           project_title?: string | null
@@ -453,37 +447,53 @@ export type Database = {
         }
         Relationships: []
       }
-      category_rubrics: {
+      contact_submissions: {
         Row: {
-          category_id: number | null
+          admin_notes: string | null
+          country: string | null
           created_at: string
+          email: string
+          first_name: string
           id: string
-          rubric: Json
+          last_name: string
+          message: string
+          phone: string | null
+          status: string
+          subject: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
-          category_id?: number | null
+          admin_notes?: string | null
+          country?: string | null
           created_at?: string
+          email: string
+          first_name: string
           id?: string
-          rubric: Json
+          last_name: string
+          message: string
+          phone?: string | null
+          status?: string
+          subject: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
-          category_id?: number | null
+          admin_notes?: string | null
+          country?: string | null
           created_at?: string
+          email?: string
+          first_name?: string
           id?: string
-          rubric?: Json
+          last_name?: string
+          message?: string
+          phone?: string | null
+          status?: string
+          subject?: string
           updated_at?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "category_rubrics_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: true
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       faqs: {
         Row: {
@@ -1022,6 +1032,27 @@ export type Database = {
           },
         ]
       }
+      system_rubric: {
+        Row: {
+          created_at: string
+          id: string
+          rubric: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rubric: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rubric?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -1179,10 +1210,9 @@ export type Database = {
           reviewer_id: string
         }[]
       }
-      calculate_review_score: {
-        Args: { p_category: string; p_scores: Json }
-        Returns: number
-      }
+      calculate_review_score:
+        | { Args: { p_scores: Json }; Returns: number }
+        | { Args: { p_category: string; p_scores: Json }; Returns: number }
       check_and_increment_rate_limit: {
         Args: {
           p_ip_address: unknown
@@ -1215,12 +1245,9 @@ export type Database = {
         Returns: {
           applicant_email: string
           applicant_name: string
-          company_name: string
           contact_email: string
           contact_phone: string
-          funding_amount: string
           id: string
-          location: string
           project_id: number
           project_title: string
           review_notes: string
@@ -1315,6 +1342,22 @@ export type Database = {
           scores: Json
           submitted_at: string
           updated_at: string
+        }[]
+      }
+      get_financial_stats: {
+        Args: never
+        Returns: {
+          application_fees: number
+          completed_transactions: number
+          failed_transactions: number
+          last_month_revenue: number
+          pending_transactions: number
+          refunded_amount: number
+          revenue_growth: number
+          subscriptions: number
+          this_month_revenue: number
+          total_revenue: number
+          total_transactions: number
         }[]
       }
       get_projects_with_filters: {
