@@ -187,7 +187,7 @@ describe('Notifications Integration Tests', () => {
 
           // Find user by email
           const { data: users } = await adminClient.auth.admin.listUsers();
-          const userToDelete = users?.users?.find(u => u.email === testUserEmail);
+          const userToDelete = (users?.users as any[])?.find((u: any) => u.email === testUserEmail);
           
           if (userToDelete) {
             const { error: deleteError } = await adminClient.auth.admin.deleteUser(userToDelete.id);

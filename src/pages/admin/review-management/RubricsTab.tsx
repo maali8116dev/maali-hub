@@ -58,7 +58,7 @@ export const RubricsTab = ({ categories }: RubricsTabProps) => {
                 </DialogHeader>
                 <div className="overflow-y-auto flex-1 pr-2 -mr-2">
                   <RubricForm 
-                    initialRubric={rubric.rubric} 
+                    initialRubric={rubric.rubric as any} 
                     onSuccess={() => setIsEditDialogOpen(false)}
                   />
                 </div>
@@ -72,7 +72,7 @@ export const RubricsTab = ({ categories }: RubricsTabProps) => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {rubric.rubric?.criteria?.map((criterion: any, idx: number) => (
+                    {(rubric.rubric as any)?.criteria?.map((criterion: any, idx: number) => (
                       <div key={idx} className="flex justify-between items-center p-2 bg-muted rounded">
                         <div>
                           <span className="font-medium capitalize">{criterion.name}</span>

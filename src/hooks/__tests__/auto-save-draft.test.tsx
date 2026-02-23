@@ -22,20 +22,16 @@ const createWrapper = () => {
 
 const mockFormData: ApplicationFormData = {
   projectId: 1,
-  applicantType: 'individual',
+  applicantType: 'Individual',
   fullLegalName: 'John Doe',
   organizationName: '',
-  country: 'Ghana',
-  city: 'Accra',
-  email: 'john@example.com',
-  phone: '+1234567890',
-  companyName: 'Test Company',
-  contactEmail: 'contact@test.com',
-  contactPhone: '+1234567890',
-  location: 'Ghana',
-  projectDescription: 'Test project description',
-  businessPlan: 'Test business plan',
-  teamSize: 10,
+  countryOfResidence: 'Ghana',
+  cityRegion: 'Accra',
+  emailAddress: 'john@example.com',
+  phoneNumber: '+1234567890',
+  projectTitle: 'Test Project',
+  projectSummary: 'Test project description',
+  numberOfTeamMembers: 10,
 };
 
 describe('useAutoSaveDraft', () => {

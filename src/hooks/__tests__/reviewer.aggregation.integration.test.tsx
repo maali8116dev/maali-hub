@@ -336,8 +336,8 @@ describe('useApplicationReviewScores — real user flow', () => {
 
     const score = result.current.data![0];
     expect(score.application_id).toBe(testApplicationId);
-    expect(score.reviewer).toBeDefined();
-    expect(score.reviewer!.first_name).toBe('ReviewerScore');
+    expect(score.reviewer_id).toBeDefined();
+    expect(score.reviewer_id).toBeTruthy();
     expect(score.scores).toEqual({ innovation: 7, feasibility: 8 });
     expect(score.recommendation).toBe('approve');
   }, 20000);

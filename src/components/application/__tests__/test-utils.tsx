@@ -98,6 +98,9 @@ export interface ApplicationPayload {
   projectOverview: {
     title: string;
     summary: string;
+    problem?: string;
+    solution?: string;
+    beneficiaries?: string;
     geography: string;
   };
   compliance: {
