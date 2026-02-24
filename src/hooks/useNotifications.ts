@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Notification {
   id: string;
@@ -136,6 +137,7 @@ const createNotification = async (
 export const useNotifications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const query = useQuery({
     queryKey: ["notifications", user?.id],
@@ -162,9 +164,19 @@ export const useNotifications = () => {
         },
         (payload) => {
           // Invalidate and refetch notifications when any change occurs
-          queryClient.invalidateQueries({ 
-            queryKey: ["notifications", user.id] 
+          queryClient.invalidateQueries({
+            queryKey: ["notifications", user.id],
           });
+
+          // If a new notification is created for this user, show a toast
+          if (payload.eventType === "INSERT" && payload.new) {
+            const newNotification: any = payload.new;
+
+            toast({
+              title: newNotification.title || "New notification",
+              description: newNotification.message,
+            });
+          }
         }
       )
       .subscribe((status) => {

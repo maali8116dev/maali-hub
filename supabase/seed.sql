@@ -71,7 +71,7 @@ VALUES
     'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800',
     'Technical architecture, AI/ML model documentation, data privacy compliance, use case validation',
     'AI/ML focused startup, clear technical roadmap, data-driven solution, ethical AI practices, African market focus',
-    0.00,
+    20.00,
     20,
     45,
     true
@@ -88,7 +88,7 @@ VALUES
     'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
     'Platform demo, business model, market analysis, user acquisition strategy',
     'E-commerce platform, focus on SMEs, operating in East Africa, early-stage to growth stage',
-    0.00,
+    10.00,
     40,
     0,
     false
@@ -106,7 +106,7 @@ VALUES
     'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
     'Project proposal, impact assessment, sustainability plan, community engagement strategy',
     'Agriculture-focused solution, rural community focus, sustainable practices, demonstrable impact on food security',
-    0.00,
+    10.00,
     60,
     156,
     false
@@ -158,7 +158,7 @@ VALUES
     'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800',
     'Technical documentation, security audit, regulatory compliance, user testing results',
     'Mobile payment solution, financial inclusion focus, security compliance, regulatory approval',
-    0.00,
+    15.00,
     45,
     123,
     false
@@ -175,7 +175,7 @@ VALUES
     'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800',
     'Blockchain architecture, whitepaper, use case validation, technical roadmap',
     'Blockchain/crypto solution, development focus, clear use case, technical feasibility',
-    0.00,
+    25.00,
     15,
     0,
     true
@@ -193,7 +193,7 @@ VALUES
     'https://images.unsplash.com/photo-1503676260728-1c6019ae5030?w=800',
     'Educational content, platform demo, impact assessment, scalability plan',
     'EdTech platform, rural focus, quality education access, scalable solution',
-    0.00,
+    5.00,
     50,
     167,
     false
@@ -227,7 +227,7 @@ VALUES
     'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800',
     'Technical specifications, environmental impact assessment, cost-benefit analysis, deployment strategy',
     'Renewable energy solution, clean energy focus, African community access, technical feasibility',
-    0.00,
+    20.00,
     20,
     67,
     true
@@ -244,7 +244,7 @@ VALUES
     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
     'Business model, technology solution, market analysis, scalability plan',
     'Transport/logistics solution, African market focus, innovative approach, scalable technology',
-    0.00,
+    10.00,
     40,
     0,
     false

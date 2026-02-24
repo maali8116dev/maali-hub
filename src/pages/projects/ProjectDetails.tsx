@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, DollarSign, Calendar, FileText, Target, Edit, CheckCircle2, LogIn } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, Calendar, FileText, Target, Edit, CheckCircle2, LogIn, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectDraft } from "@/hooks/useUserDrafts";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
@@ -268,6 +268,10 @@ const ProjectDetails = () => {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-muted-foreground" />
                     <span>Deadline: {formatDate(project.deadline)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-muted-foreground" />
+                    <span>Category: {project.category}</span>
                   </div>
                 </div>
               </CardContent>

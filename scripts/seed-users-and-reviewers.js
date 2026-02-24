@@ -314,21 +314,70 @@ async function assignReviewerToCategory(reviewerId, categoryName) {
   }
 }
 
-// Helper to create application
+// Helper to create application (matches current applications schema)
 async function createApplication(applicationData) {
-  const { userId, projectId, companyName, contactEmail, contactPhone, location, projectDescription, fundingAmount } = applicationData;
+  const {
+    userId,
+    projectId,
+    companyName,
+    contactEmail,
+    contactPhone,
+    location,
+    projectDescription,
+  } = applicationData;
+
+  // Map legacy "location" like "City, Country" into the new fields
+  let cityRegion = null;
+  let countryOfResidence = null;
+
+  if (location) {
+    const parts = location
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (parts.length === 1) {
+      countryOfResidence = parts[0];
+    } else if (parts.length >= 2) {
+      cityRegion = parts[0];
+      countryOfResidence = parts[parts.length - 1];
+    }
+  }
+
+  // Idempotency + unique (user_id, project_id) constraint:
+  // If an application already exists for this user/project, reuse it
+  const { data: existingApp, error: existingFetchError } = await supabase
+    .from('applications')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('project_id', projectId)
+    .maybeSingle();
+
+  if (existingFetchError) {
+    console.log(
+      `   ⚠️  Warning: could not check for existing application (user_id=${userId}, project_id=${projectId}):`,
+      existingFetchError.message
+    );
+  }
+
+  if (existingApp?.id) {
+    console.log(
+      `   ℹ️  Application already exists for user/project, reusing existing id: ${existingApp.id}`
+    );
+    return existingApp.id;
+  }
 
   const { data, error } = await supabase
     .from('applications')
     .insert({
       user_id: userId,
       project_id: projectId,
-      company_name: companyName,
+      organization_name: companyName,
       contact_email: contactEmail,
       contact_phone: contactPhone,
-      location: location,
-      project_description: projectDescription,
-  
+      city_region: cityRegion,
+      country_of_residence: countryOfResidence,
+      project_summary: projectDescription,
       status: 'pending',
       is_draft: false,
     })
@@ -336,6 +385,34 @@ async function createApplication(applicationData) {
     .single();
 
   if (error) {
+    // Handle unique (user_id, project_id) constraint defensively in case of race
+    if (
+      error.code === '23505' ||
+      error.message?.includes('idx_applications_unique_user_project')
+    ) {
+      console.log(
+        `   ℹ️  Duplicate application detected for user/project, attempting to reuse existing record`
+      );
+
+      const { data: existingAfterInsert, error: lookupError } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('project_id', projectId)
+        .maybeSingle();
+
+      if (!lookupError && existingAfterInsert?.id) {
+        console.log(
+          `   ℹ️  Reusing existing application id after duplicate error: ${existingAfterInsert.id}`
+        );
+        return existingAfterInsert.id;
+      }
+
+      console.log(
+        `   ⚠️  Duplicate error occurred but existing application could not be fetched; rethrowing original error`
+      );
+    }
+
     console.error(`   ❌ Failed to create application:`, error.message);
     throw error;
   }
