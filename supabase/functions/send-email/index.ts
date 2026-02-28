@@ -241,6 +241,33 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
     </html>
   `;
 
+  // Reusable summary section for application-related emails
+  const buildSummarySection = (
+    rows: { label: string; value?: string; monospace?: boolean }[],
+    sectionTitle?: string
+  ) => {
+    const visibleRows = rows.filter((row) => row.value);
+    if (visibleRows.length === 0) return "";
+
+    return `
+      <div style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
+        ${sectionTitle ? `<p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#374151;">${sectionTitle}</p>` : ""}
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#111827;">
+          ${visibleRows
+            .map(
+              (row) => `
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;">${row.label}</td>
+                  <td style="padding:4px 0;text-align:right;${row.monospace ? "font-family:monospace;" : ""}">${row.value}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </table>
+      </div>
+    `;
+  };
+
   switch (type) {
     case "application_submitted":
       return {
@@ -251,7 +278,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Dear ${recipientName},</p>
             <p>Thanks for submitting your application. We want to make sure we have everything we need.</p>
             <p>Your application for <strong>${projectTitle}</strong> has been successfully submitted.</p>
-            ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
+            ${buildSummarySection(
+              [
+                { label: "Project", value: projectTitle },
+                { label: "Application ID", value: applicationId, monospace: true },
+                { label: "Status", value: "Submitted" },
+              ],
+              "Application summary"
+            )}
             <p>Our team will review your application and get back to you within 5-7 business days.</p>
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application Status</a></div>` : ''}
             <p>If you have any questions, please don't hesitate to contact us.</p>
@@ -268,7 +302,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             <p>We are delighted to inform you that your application for <strong>${projectTitle}</strong> has been <span class="status-badge status-approved">Approved</span>!</p>
-            ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
+            ${buildSummarySection(
+              [
+                { label: "Project", value: projectTitle },
+                { label: "Application ID", value: applicationId, monospace: true },
+                { label: "Status", value: "Approved" },
+              ],
+              "Application summary"
+            )}
             ${statusMessage ? `<p>${statusMessage}</p>` : '<p>Our team will be in touch shortly with the next steps.</p>'}
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Congratulations once again!</p>
@@ -286,6 +327,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Dear ${recipientName},</p>
             <p>Thank you for your interest in <strong>${projectTitle}</strong>.</p>
             <p>After careful consideration, we regret to inform you that your application has not been successful at this time.</p>
+            ${buildSummarySection(
+              [
+                { label: "Project", value: projectTitle },
+                { label: "Application ID", value: applicationId, monospace: true },
+                { label: "Status", value: "Rejected" },
+              ],
+              "Application summary"
+            )}
             ${statusMessage ? `<p><strong>Feedback:</strong> ${statusMessage}</p>` : ''}
             <p>We encourage you to explore other opportunities on our platform and apply again in the future.</p>
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Browse Opportunities</a></div>` : ''}
@@ -302,7 +351,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             <p>Your application for <strong>${projectTitle}</strong> is now <span class="status-badge status-review">Under Review</span>.</p>
-            ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
+            ${buildSummarySection(
+              [
+                { label: "Project", value: projectTitle },
+                { label: "Application ID", value: applicationId, monospace: true },
+                { label: "Status", value: "Under review" },
+              ],
+              "Application summary"
+            )}
             <p>Our team is carefully evaluating your submission. You will receive an update once a decision has been made.</p>
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Track Application</a></div>` : ''}
             <p>Thank you for your patience.</p>
@@ -319,7 +375,13 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             <p>There has been an update to your application${projectTitle ? ` for <strong>${projectTitle}</strong>` : ''}.</p>
-            ${applicationId ? `<p>Application ID: <strong>${applicationId}</strong></p>` : ''}
+            ${buildSummarySection(
+              [
+                { label: "Project", value: projectTitle },
+                { label: "Application ID", value: applicationId, monospace: true },
+              ],
+              "Application summary"
+            )}
             ${statusMessage ? `<p>${statusMessage}</p>` : ''}
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
             <p>Best regards,<br>The Maali Team</p>
@@ -409,17 +471,50 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             <p>Thank you for your payment. Here is your receipt:</p>
-            <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 20px 0;">
-              ${projectTitle ? `<p><strong>Project:</strong> ${projectTitle}</p>` : ''}
-              ${applicationId ? `<p><strong>Application ID:</strong> ${applicationId}</p>` : ''}
-              <p><strong>Amount:</strong> ${currency} ${amount}</p>
-              <p><strong>Date:</strong> ${paymentDate}</p>
-              <p><strong>Status:</strong> <span class="status-badge status-approved">Paid</span></p>
-              ${invoiceNum ? `<p><strong>Invoice #:</strong> ${invoiceNum}</p>` : ''}
-              ${transactionIdVal ? `<p><strong>Transaction ID:</strong> ${transactionIdVal}</p>` : ''}
+            <div style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#111827;">
+                ${projectTitle ? `
+                  <tr>
+                    <td style="padding:4px 0;color:#6b7280;">Project</td>
+                    <td style="padding:4px 0;text-align:right;font-weight:500;">${projectTitle}</td>
+                  </tr>
+                ` : ''}
+                ${applicationId ? `
+                  <tr>
+                    <td style="padding:4px 0;color:#6b7280;">Application ID</td>
+                    <td style="padding:4px 0;text-align:right;font-family:monospace;">${applicationId}</td>
+                  </tr>
+                ` : ''}
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;">Amount</td>
+                  <td style="padding:4px 0;text-align:right;font-weight:600;">${currency} ${amount}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;">Date</td>
+                  <td style="padding:4px 0;text-align:right;">${paymentDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0;color:#6b7280;">Status</td>
+                  <td style="padding:4px 0;text-align:right;">
+                    <span class="status-badge status-approved">Paid</span>
+                  </td>
+                </tr>
+                ${invoiceNum ? `
+                  <tr>
+                    <td style="padding:4px 0;color:#6b7280;">Invoice #</td>
+                    <td style="padding:4px 0;text-align:right;">${invoiceNum}</td>
+                  </tr>
+                ` : ''}
+                ${transactionIdVal ? `
+                  <tr>
+                    <td style="padding:4px 0;color:#6b7280;">Transaction ID</td>
+                    <td style="padding:4px 0;text-align:right;font-family:monospace;">${transactionIdVal}</td>
+                  </tr>
+                ` : ''}
+              </table>
             </div>
             <p>Your application fee has been confirmed and your application is now under review.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align:center;margin:16px 0;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application</a></div>` : ''}
             <p>Please keep this email for your records. If you have any questions about this payment, please contact our support team.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
@@ -485,10 +580,19 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { to, type, data, allowPublic }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
     
-    // Allow contact form emails without authentication
+    // Determine request context
+    const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
+    const internalHeader = req.headers.get("X-Internal-Secret");
+    const isInternal = internalSecret && internalHeader === internalSecret;
+
+    // Allow certain emails without user JWT:
+    // - Contact emails (public site forms) when allowPublic is true
+    // - Payment receipts only from internal callers that know INTERNAL_EMAIL_SECRET
     const isContactEmail = type === "contact_confirmation" || type === "contact_submission";
     const isPaymentReceipt = type === "payment_receipt";
-    const isPublicAllowed = (allowPublic === true && isContactEmail) || (allowPublic === true && isPaymentReceipt);
+    const isPublicAllowed =
+      (allowPublic === true && isContactEmail) ||
+      (allowPublic === true && isPaymentReceipt && Boolean(isInternal));
     
     if (!isPublicAllowed) {
       // Validate authorization for non-contact emails

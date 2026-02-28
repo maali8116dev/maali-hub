@@ -52,6 +52,9 @@ const Billing = () => {
       const { data, error } = await supabase
         .from("payment_methods")
         .select("*")
+        .eq("user_id", user!.id)
+        .is("deleted_at", null)
+        .eq("is_active", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -66,6 +69,7 @@ const Billing = () => {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -80,6 +84,7 @@ const Billing = () => {
       const { data, error } = await supabase
         .from("billing_addresses")
         .select("*")
+        .eq("user_id", user!.id)
         .eq("is_default", true)
         .maybeSingle();
       if (error) throw error;
@@ -156,10 +161,27 @@ const Billing = () => {
 
   // Set default payment method
   const handleSetDefault = async (id: string) => {
+    if (!user) return;
+
+    // Unset previous defaults for this user first
+    const { error: unsetError } = await supabase
+      .from("payment_methods")
+      .update({ is_default: false })
+      .eq("user_id", user.id)
+      .eq("is_default", true)
+      .is("deleted_at", null);
+
+    if (unsetError) {
+      toast({ title: "Error", description: unsetError.message, variant: "destructive" });
+      return;
+    }
+
+    // Set the selected method as default
     const { error } = await supabase
       .from("payment_methods")
       .update({ is_default: true })
       .eq("id", id);
+
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {

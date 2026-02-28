@@ -85,32 +85,22 @@ describe('Application Review Workflow - Integration Tests', () => {
       return;
     }
 
-    // 1. Get or create a test category
-    const { data: existingCategory } = await supabaseAdmin
+    // 1. Create a dedicated test category to avoid picking unrelated reviewers
+    const { data: newCategory, error: categoryError } = await supabaseAdmin
       .from('categories')
+      .insert({
+        name: `IntTest Review Category ${testTimestamp}`,
+        slug: `inttest-review-${testTimestamp}`,
+        description: 'Integration test category for review workflow',
+        is_active: true,
+      })
       .select('id')
-      .eq('name', 'Technology')
       .single();
 
-    if (existingCategory) {
-      testCategoryId = existingCategory.id;
-    } else {
-      const { data: newCategory, error } = await supabaseAdmin
-        .from('categories')
-        .insert({
-          name: 'Technology',
-          slug: 'technology',
-          description: 'Test Technology category',
-          is_active: true,
-        })
-        .select('id')
-        .single();
-
-      if (error || !newCategory) {
-        throw new Error(`Failed to create category: ${error?.message}`);
-      }
-      testCategoryId = newCategory.id;
+    if (categoryError || !newCategory) {
+      throw new Error(`Failed to create category: ${categoryError?.message}`);
     }
+    testCategoryId = newCategory.id;
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
@@ -290,6 +280,14 @@ describe('Application Review Workflow - Integration Tests', () => {
         .eq('id', testProjectId);
     }
 
+    // Clean up category
+    if (testCategoryId) {
+      await supabaseAdmin
+        .from('categories')
+        .delete()
+        .eq('id', testCategoryId);
+    }
+
     // Clean up reviewer categories
     for (const reviewerId of testReviewerIds) {
       await supabaseAdmin
@@ -342,12 +340,21 @@ describe('Application Review Workflow - Integration Tests', () => {
       expect(assignments).toBeDefined();
       expect(assignments!.length).toBeGreaterThanOrEqual(2);
 
+      const reviewer1Id = testReviewerIds[0];
+      const reviewer2Id = testReviewerIds[1];
+
       // Store assignment IDs
       testAssignmentIds = assignments!.map(a => a.id);
+      
+      // Helper to map reviewer -> assignment dynamically (avoids relying on array order)
+      const getAssignmentIdForReviewer = (reviewerId: string) =>
+        assignments!.find((a) => a.reviewer_id === reviewerId)?.id as string;
 
       // Verify reviewers were assigned
       const assignedReviewerIds = assignments!.map(a => a.reviewer_id);
       expect(assignedReviewerIds.length).toBeGreaterThanOrEqual(2);
+      expect(getAssignmentIdForReviewer(reviewer1Id)).toBeDefined();
+      expect(getAssignmentIdForReviewer(reviewer2Id)).toBeDefined();
 
       // Step 2: Submit reviews as each reviewer
       const reviewScores: Array<{
@@ -358,15 +365,15 @@ describe('Application Review Workflow - Integration Tests', () => {
         recommendation: 'approve' | 'reject' | 'request_info';
       }> = [
         {
-          reviewerId: assignedReviewerIds[0],
-          assignmentId: testAssignmentIds[0],
+          reviewerId: reviewer1Id,
+          assignmentId: getAssignmentIdForReviewer(reviewer1Id),
           scores: { innovation: 9, feasibility: 8, impact: 9 },
           comments: 'Strong proposal with clear market potential',
           recommendation: 'approve',
         },
         {
-          reviewerId: assignedReviewerIds[1],
-          assignmentId: testAssignmentIds[1],
+          reviewerId: reviewer2Id,
+          assignmentId: getAssignmentIdForReviewer(reviewer2Id),
           scores: { innovation: 8, feasibility: 8, impact: 9 },
           comments: 'Good potential, well-structured plan',
           recommendation: 'approve',
@@ -388,7 +395,7 @@ describe('Application Review Workflow - Integration Tests', () => {
         review1Result.current.mutate({
           applicationId: testApplicationId,
           reviewerId: reviewScores[0].reviewerId,
-          assignmentId: reviewScores[0].assignmentId,
+          assignmentId: getAssignmentIdForReviewer(reviewScores[0].reviewerId),
           scores: reviewScores[0].scores,
           comments: reviewScores[0].comments,
           recommendation: reviewScores[0].recommendation,
@@ -397,6 +404,11 @@ describe('Application Review Workflow - Integration Tests', () => {
 
       await waitFor(
         () => {
+          if (review1Result.current.isError) {
+            // Helpful debug output when this integration test flakes
+            // eslint-disable-next-line no-console
+            console.log("REVIEW 1 ERROR:", review1Result.current.error);
+          }
           expect(review1Result.current.isSuccess).toBe(true);
         },
         { timeout: 15000 }
@@ -422,7 +434,7 @@ describe('Application Review Workflow - Integration Tests', () => {
         review2Result.current.mutate({
           applicationId: testApplicationId,
           reviewerId: reviewScores[1].reviewerId,
-          assignmentId: reviewScores[1].assignmentId,
+          assignmentId: getAssignmentIdForReviewer(reviewScores[1].reviewerId),
           scores: reviewScores[1].scores,
           comments: reviewScores[1].comments,
           recommendation: reviewScores[1].recommendation,
@@ -431,6 +443,11 @@ describe('Application Review Workflow - Integration Tests', () => {
 
       await waitFor(
         () => {
+          if (review2Result.current.isError) {
+            // Helpful debug output when this integration test flakes
+            // eslint-disable-next-line no-console
+            console.log("REVIEW 2 ERROR:", review2Result.current.error);
+          }
           expect(review2Result.current.isSuccess).toBe(true);
         },
         { timeout: 15000 }
@@ -534,6 +551,9 @@ describe('Application Review Workflow - Integration Tests', () => {
           { timeout: 15000 }
         );
 
+        const reviewer1Id = testReviewerIds[0];
+        const reviewer2Id = testReviewerIds[1];
+
         // Get assignments
         const { data: assignments } = await shared.realClient!
           .from('application_assignments')
@@ -542,6 +562,12 @@ describe('Application Review Workflow - Integration Tests', () => {
           .limit(2);
 
         if (!assignments || assignments.length < 2) return;
+
+        const getAssignmentIdForReviewer = (reviewerId: string) =>
+          assignments.find((a) => a.reviewer_id === reviewerId)?.id;
+
+        expect(getAssignmentIdForReviewer(reviewer1Id)).toBeDefined();
+        expect(getAssignmentIdForReviewer(reviewer2Id)).toBeDefined();
 
         // Submit conflicting reviews
         // Review 1: Approve
@@ -557,8 +583,8 @@ describe('Application Review Workflow - Integration Tests', () => {
         await act(async () => {
           review1Result.current.mutate({
             applicationId: conflictAppId,
-            reviewerId: assignments[0].reviewer_id,
-            assignmentId: assignments[0].id,
+            reviewerId: reviewer1Id,
+            assignmentId: getAssignmentIdForReviewer(reviewer1Id)!,
             scores: { innovation: 9, feasibility: 9, impact: 9 },
             comments: 'Excellent proposal',
             recommendation: 'approve',
@@ -585,8 +611,8 @@ describe('Application Review Workflow - Integration Tests', () => {
         await act(async () => {
           review2Result.current.mutate({
             applicationId: conflictAppId,
-            reviewerId: assignments[1].reviewer_id,
-            assignmentId: assignments[1].id,
+            reviewerId: reviewer2Id,
+            assignmentId: getAssignmentIdForReviewer(reviewer2Id)!,
             scores: { innovation: 3, feasibility: 2, impact: 3 },
             comments: 'Does not meet criteria',
             recommendation: 'reject',

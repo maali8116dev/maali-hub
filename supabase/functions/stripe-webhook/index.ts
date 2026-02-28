@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
-import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2023-10-16",
@@ -91,6 +90,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const applicationId = session.metadata?.applicationId;
   const userId = session.metadata?.userId;
   const paymentIntentId = (session.payment_intent as string) || session.id;
+  const checkoutSessionId = session.id;
 
   console.log(`Checkout completed: session=${session.id}, application=${applicationId}, user=${userId}`);
 
@@ -126,8 +126,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   } else {
     console.log(`Application ${applicationId} marked as paid and status set to pending`);
 
-    // Send invoice email to applicant
-    await sendPaymentReceiptEmail(applicationId, userId, session.amount_total, "usd", paymentIntentId);
+    // Queue payment receipt email
+    await enqueuePaymentReceiptEmail(applicationId, userId, session.amount_total, "usd", paymentIntentId);
   }
 
   // Fetch Stripe receipt URL from the charge
@@ -141,15 +141,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.error("Error fetching Stripe charge for receipt URL:", chargeErr);
   }
 
-  // Update transaction status
+  // Update transaction status — keep the original provider_transaction_id (session.id)
   const { error: txError } = await supabaseAdmin
     .from("transactions")
     .update({
       status: "completed",
-      provider_transaction_id: paymentIntentId,
+      provider_payment_intent_id: paymentIntentId,
       completed_at: new Date().toISOString(),
       receipt_url: receiptUrl,
     })
+    .eq("provider_transaction_id", checkoutSessionId)
     .eq("application_id", applicationId)
     .eq("status", "pending");
 
@@ -250,8 +251,8 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     } else {
       console.log(`Application ${applicationId} marked as paid and status set to pending`);
 
-      // Send invoice email to applicant
-      await sendPaymentReceiptEmail(applicationId, userId, paymentIntent.amount, paymentIntent.currency, paymentIntentId);
+      // Queue payment receipt email
+      await enqueuePaymentReceiptEmail(applicationId, userId, paymentIntent.amount, paymentIntent.currency, paymentIntentId);
     }
 
     // Create notification for user
@@ -311,7 +312,12 @@ async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
   console.log(`Payment canceled: ${paymentIntentId}`);
 }
 
-async function sendPaymentReceiptEmail(
+/**
+ * Enqueue a payment receipt email into the email_queue table.
+ * The process-email-queue worker will pick it up and route it through
+ * the send-email function, so all template logic stays in one place.
+ */
+async function enqueuePaymentReceiptEmail(
   applicationId: string,
   userId: string | undefined,
   amountInCents: number | null,
@@ -319,7 +325,7 @@ async function sendPaymentReceiptEmail(
   transactionId: string
 ) {
   try {
-    // Get applicant email and name, plus project title
+    // Look up recipient email and name
     const { data: appData } = await supabaseAdmin
       .from("applications")
       .select("contact_email, user_id, project_id, full_legal_name")
@@ -327,17 +333,15 @@ async function sendPaymentReceiptEmail(
       .maybeSingle();
 
     if (!appData) {
-      console.error("Cannot send receipt: application not found");
+      console.error("Cannot enqueue receipt: application not found");
       return;
     }
 
-    // Get user email from auth if contact_email not available
     let recipientEmail = appData.contact_email;
     let recipientName = appData.full_legal_name || "Applicant";
     const targetUserId = userId || appData.user_id;
 
     if (targetUserId) {
-      // Get profile name
       const { data: profile } = await supabaseAdmin
         .from("profiles")
         .select("first_name, last_name")
@@ -348,7 +352,6 @@ async function sendPaymentReceiptEmail(
         recipientName = `${profile.first_name} ${profile.last_name || ""}`.trim();
       }
 
-      // Get auth email if no contact email
       if (!recipientEmail) {
         const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(targetUserId);
         recipientEmail = authUser?.user?.email || null;
@@ -356,11 +359,11 @@ async function sendPaymentReceiptEmail(
     }
 
     if (!recipientEmail) {
-      console.error("Cannot send receipt: no email found for applicant");
+      console.error("Cannot enqueue receipt: no email found for applicant");
       return;
     }
 
-    // Get project title
+    // Look up project title
     let projectTitle = "Project";
     if (appData.project_id) {
       const { data: project } = await supabaseAdmin
@@ -373,94 +376,42 @@ async function sendPaymentReceiptEmail(
 
     const amount = amountInCents ? (amountInCents / 100).toFixed(2) : "0.00";
     const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
-
-    // Call the send-email edge function internally via Resend directly
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      console.error("Cannot send receipt: RESEND_API_KEY not configured");
-      return;
-    }
-
-    const resend = new Resend(resendApiKey);
-    const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";
-
-    const primaryGradient = "linear-gradient(135deg, #C85A2E 0%, #F5A623 100%)";
-    const baseUrl = siteUrl;
-    const logoUrl = `${baseUrl}/static/maali-logo.png`;
-    const paymentDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #eee; margin: 0; padding: 0; color: #212121; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #eee; }
-          .email-section { background-color: #ffffff; }
-          .header { background: ${primaryGradient}; padding: 20px; text-align: center; }
-          .header img { max-width: 75px; height: auto; }
-          .content { padding: 25px 35px; }
-          .content h1 { color: #333; font-size: 20px; font-weight: bold; margin: 0 0 15px 0; }
-          .content p { color: #333; font-size: 14px; line-height: 24px; margin: 6px 0 14px 0; }
-          .button { display: inline-block; background: ${primaryGradient}; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500; margin: 20px 0; }
-          .divider { border: none; border-top: 1px solid #e5e7eb; margin: 0; }
-          .footer { padding: 25px 35px; }
-          .footer p { color: #333; font-size: 14px; margin: 0; }
-          .footer-links { color: #333; font-size: 12px; margin: 24px 0; padding: 0 20px; }
-          .footer-links a { color: #2754C5; text-decoration: underline; font-size: 14px; }
-          .status-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 14px; font-weight: 500; background-color: #dcfce7; color: #166534; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="email-section">
-            <div class="header">
-              <img src="${logoUrl}" alt="Maali Logo" width="75" height="45" />
-            </div>
-            <div class="content">
-              <h1>Payment Receipt</h1>
-              <p>Dear ${recipientName},</p>
-              <p>Thank you for your payment. Here is your receipt:</p>
-              <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 20px 0;">
-                <p><strong>Project:</strong> ${projectTitle}</p>
-                <p><strong>Application ID:</strong> ${applicationId}</p>
-                <p><strong>Amount:</strong> ${currency.toUpperCase()} ${amount}</p>
-                <p><strong>Date:</strong> ${paymentDate}</p>
-                <p><strong>Status:</strong> <span class="status-badge">Paid</span></p>
-                <p><strong>Transaction ID:</strong> ${transactionId}</p>
-              </div>
-              <p>Your application fee has been confirmed and your application is now under review.</p>
-              <div style="text-align: center;">
-                <a href="${siteUrl}/dashboard/applications/${applicationId}" class="button" style="color:#ffffff;text-decoration:none;">View Application</a>
-              </div>
-              <p>Please keep this email for your records. If you have any questions about this payment, please contact our support team.</p>
-              <p>Best regards,<br>The Maali Team</p>
-            </div>
-            <hr class="divider" />
-            <div class="footer">
-              <p>Maali will never email you and ask you to disclose or verify your password, credit card, or banking account number.</p>
-            </div>
-          </div>
-          <p class="footer-links">
-            This message was produced and distributed by Maali Opportunity Hub. &copy; ${new Date().getFullYear()}, Maali. All rights reserved. View our
-            <a href="${baseUrl}/privacy" target="_blank">privacy policy</a>.
-          </p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const emailResponse = await resend.emails.send({
-      from: fromEmail,
-      to: [recipientEmail],
-      subject: `Payment Receipt - ${projectTitle}`,
-      html,
+    const paymentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
-    console.log(`Payment receipt email sent to ${recipientEmail}:`, emailResponse);
+    // Insert into email_queue — the worker calls send-email with this payload
+    const { error: queueError } = await supabaseAdmin
+      .from("email_queue")
+      .insert({
+        type: "payment_receipt",
+        to_email: recipientEmail,
+        payload: {
+          recipientName,
+          projectTitle,
+          applicationId,
+          amount,
+          currency: currency.toUpperCase(),
+          paymentDate,
+          transactionId,
+          actionUrl: `${siteUrl}/dashboard/applications/${applicationId}`,
+        },
+        idempotency_key: `payment_receipt:${applicationId}:${transactionId}`,
+      });
+
+    if (queueError) {
+      // idempotency_key conflict means we already queued this email — that's fine
+      if (queueError.code === "23505") {
+        console.log(`Payment receipt email already queued for application ${applicationId}`);
+      } else {
+        console.error("Error enqueuing payment receipt email:", queueError);
+      }
+    } else {
+      console.log(`Payment receipt email enqueued for ${recipientEmail} (application ${applicationId})`);
+    }
   } catch (err) {
-    console.error("Error sending payment receipt email:", err);
+    console.error("Error enqueuing payment receipt email:", err);
   }
 }

@@ -264,7 +264,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { user, email_data } = payload;
     const { email, user_metadata } = user;
-    const { email_action_type, redirect_to, token } = email_data;
+    const { email_action_type, redirect_to, token, token_hash } = email_data;
     
     console.log(`Processing email for action type: "${email_action_type}"`);
 
@@ -298,9 +298,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Build redirect URL with token in hash fragment
-    // Auth.tsx expects: /auth#access_token=TOKEN&type=recovery
-    // Supabase's redirect_to might already have the token, or we need to construct it
+    // Build redirect URL for auth flows
+    // For password reset we keep using hash-based access_token handling.
+    // For magic links we switch to token_hash + verifyOtp flow on the client.
     let redirectUrl = redirect_to;
     
     if (!redirectUrl) {
@@ -332,11 +332,13 @@ const handler = async (req: Request): Promise<Response> => {
       const baseUrl = redirectUrl.split('#')[0].split('?')[0];
       const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
       redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=signup`;
-    } else if (normalizedType === "magiclink" && !hasHash && token) {
-      // For magic link
+    } else if (normalizedType === "magiclink") {
+      // For magic link, prefer token_hash and use query params so the client can call verifyOtp
       const baseUrl = redirectUrl.split('#')[0].split('?')[0];
       const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
-      redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=magiclink`;
+      const th = token_hash || token;
+      // Construct URL like: /auth?type=magiclink&token_hash=HASH
+      redirectUrl = `${urlPath}?type=magiclink${th ? `&token_hash=${encodeURIComponent(th)}` : ""}`;
     }
     
     console.log(`Constructed redirect URL (first 150 chars): ${redirectUrl.substring(0, 150)}`);

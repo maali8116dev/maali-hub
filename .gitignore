@@ -37,3 +37,4 @@ reset_live_db.md
 
 supabase/migrations_backup/**
 supabase/migrations/**/*.sql
+

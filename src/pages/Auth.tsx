@@ -105,7 +105,54 @@ const Auth = () => {
   // Check if user is already logged in or arriving from password reset/magic link
   useEffect(() => {
     const checkAuth = async () => {
-      // Check for password reset or magic link flow (token in URL)
+      // Check for password reset (hash) or magic link (token_hash in query) flow
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlType = searchParams.get("type");
+      const tokenHash = searchParams.get("token_hash");
+
+      // Magic link flow using verifyOtp + token_hash
+      if (urlType === "magiclink" && tokenHash) {
+        try {
+          setIsLoading(true);
+
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "email",
+          } as any);
+
+          if (error) {
+            console.error("Magic link verification error:", error);
+            toast({
+              title: "Magic link error",
+              description: error.message || "The magic link is invalid or has expired. Please request a new one.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Welcome!",
+              description: "You've been signed in successfully.",
+            });
+
+            const returnTo = searchParams.get("returnTo");
+            const redirectPath = returnTo || getReturnUrl();
+            navigate(redirectPath);
+          }
+        } catch (err) {
+          console.error("Magic link verification exception:", err);
+          toast({
+            title: "Magic link error",
+            description: err instanceof Error ? err.message : "An unexpected error occurred. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          // Clean URL (remove token + type) and stop further processing
+          window.history.replaceState(null, "", window.location.pathname);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      // Password reset flow (recovery) uses access_token in hash
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const type = hashParams.get("type");
       const accessToken = hashParams.get("access_token");
@@ -132,18 +179,6 @@ const Auth = () => {
         return;
       }
       
-      // ARCHIVED: Magic link callback handling - uncomment to re-enable
-      // Handle magic link callback
-      /*
-      if (type === "magiclink" && accessToken) {
-        // Magic link callback - wait for Supabase to process the token
-        // The onAuthStateChange listener will handle the actual sign-in
-        // Just clear the hash from URL
-        window.history.replaceState(null, "", window.location.pathname);
-        return;
-      }
-      */
-      
       const { data: { session } } = await supabase.auth.getSession();
       if (session && !isPasswordReset) {
         // If user is already logged in, redirect to return URL or dashboard
@@ -159,27 +194,6 @@ const Auth = () => {
         setIsPasswordReset(true);
         setIsSessionReady(!!session);
         console.log("Password recovery event detected, session:", !!session);
-      } else if (event === "SIGNED_IN" && session) {
-        // ARCHIVED: Magic link sign-in handling - uncomment to re-enable
-        /*
-        // Handle magic link sign-in
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const type = hashParams.get("type");
-        const urlParams = new URLSearchParams(window.location.search);
-        const returnTo = urlParams.get("returnTo");
-        
-        if (type === "magiclink") {
-          toast({
-            title: "Welcome!",
-            description: "You've been signed in successfully.",
-          });
-          // Use returnTo from URL if available, otherwise use getReturnUrl()
-          const redirectPath = returnTo || getReturnUrl();
-          navigate(redirectPath);
-          // Clear the hash and query params from URL
-          window.history.replaceState(null, "", window.location.pathname);
-        }
-        */
       }
     });
 
@@ -429,7 +443,6 @@ const Auth = () => {
     }
   };
 
-  // ARCHIVED: Magic link sign-in handler - uncomment to re-enable
   const handleMagicLinkSignIn = async () => {
     const email = signInForm.getValues("email");
     
@@ -803,8 +816,7 @@ const Auth = () => {
                     iconPosition="left"
                     required
                   />
-                  <div className="flex items-center justify-end">
-                    {/* ARCHIVED: Magic link sign-in - uncomment to re-enable
+                  <div className="flex items-center justify-between">
                     <button
                       type="button"
                       onClick={handleMagicLinkSignIn}
@@ -813,7 +825,6 @@ const Auth = () => {
                     >
                       Sign in with magic link
                     </button>
-                    */}
                     <button
                       type="button"
                       onClick={handleForgotPassword}
