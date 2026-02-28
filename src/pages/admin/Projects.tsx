@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Briefcase } from "lucide-react";
+import { getProjectStatusBadge } from "@/lib/statusBadges";
 
 const AdminProjects = () => {
   const navigate = useNavigate();
@@ -29,22 +30,6 @@ const AdminProjects = () => {
   const { data: projects = [], isLoading, error, refetch, isFetching } = useAdminProjects();
   const deleteProject = useDeleteProject();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "open":
-        return <Badge className="bg-success text-success-foreground">Open</Badge>;
-      case "closing-soon":
-        return <Badge className="bg-warning text-warning-foreground">Closing Soon</Badge>;
-      case "closed":
-        return <Badge variant="secondary">Closed</Badge>;
-      case "new":
-        return <Badge variant="default">New</Badge>;
-      case "archived":
-        return <Badge className="bg-slate-500 text-white">Archived</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   const handleDelete = (id: number) => {
     setProjectToDelete(id);
@@ -68,7 +53,7 @@ const AdminProjects = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status);
+        return getProjectStatusBadge(row.original.status);
       },
     },
     {

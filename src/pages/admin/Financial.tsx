@@ -35,42 +35,6 @@ const AdminFinancial = () => {
   const { data: transactions = [], isLoading: transactionsLoading, error: transactionsError } = useTransactions();
   const { data: stats, isLoading: statsLoading, error: statsError } = useFinancialStats();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge className="bg-success/10 text-success border-success/20">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Completed
-          </Badge>
-        );
-      case "pending":
-      case "processing":
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20">
-            <Clock className="h-3 w-3 mr-1" />
-            {status === "pending" ? "Pending" : "Processing"}
-          </Badge>
-        );
-      case "failed":
-      case "cancelled":
-        return (
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-            <XCircle className="h-3 w-3 mr-1" />
-            {status === "failed" ? "Failed" : "Cancelled"}
-          </Badge>
-        );
-      case "refunded":
-        return (
-          <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Refunded
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
 
   const getTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
@@ -193,7 +157,7 @@ const AdminFinancial = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status);
+        return getPaymentStatusBadge(row.original.status);
       },
       sortingFn: (rowA, rowB) => {
         return rowA.original.status.localeCompare(rowB.original.status);

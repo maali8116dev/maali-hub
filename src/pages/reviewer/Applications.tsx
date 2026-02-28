@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,61 +8,31 @@ import { useReviewerApplications } from "@/hooks/useReviewerApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { InAppTip } from "@/components/onboarding/InAppTip";
+import { getApplicationStatusBadge } from "@/lib/statusBadges";
+import { formatDate } from "@/lib/dateUtils";
+import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 
 const ReviewerApplications = () => {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState<string>("pending"); // Default to pending
-
   const { data: applications = [], isLoading, error, refetch, isRefetching } = useReviewerApplications();
 
-  const getStatusBadge = (status: string, reviewProgress?: { completed: number; total: number }) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
-          </Badge>
-        );
-      case "under_review":
-        return (
-          <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400">
-            <Users className="h-3 w-3 mr-1" />
-            Under Review
-            {reviewProgress && (
-              <span className="ml-1 text-xs">
-                ({reviewProgress.completed}/{reviewProgress.total})
-              </span>
-            )}
-          </Badge>
-        );
-      case "approved":
-        return (
-          <Badge className="bg-success/10 text-success border-success/20">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Approved
-          </Badge>
-        );
-      case "rejected":
-        return (
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-            <XCircle className="h-3 w-3 mr-1" />
-            Rejected
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
+  const {
+    filteredApplications: baseFilteredApplications,
+    statusCounts,
+    statusFilter,
+    setStatusFilter,
+  } = useApplicationFilters({
+    applications,
+    defaultFilter: "pending",
+    statusValues: ["pending", "under_review", "approved", "rejected"],
+  });
 
   // Filter and process applications with days pending calculation
   const processedApplications = useMemo(() => {
-    let filtered = applications.filter((app) => {
-      return statusFilter === "all" || app.status === statusFilter;
-    });
-
     // Add days pending calculation for all applications (useful for sorting)
-    return filtered.map((app) => {
+    return baseFilteredApplications.map((app) => {
       const submittedDate = new Date(app.submittedAt);
       const today = new Date();
       const daysPending = Math.floor(
@@ -73,7 +43,7 @@ const ReviewerApplications = () => {
         daysPending,
       };
     });
-  }, [applications, statusFilter]);
+  }, [baseFilteredApplications]);
 
   // Check if there are pending applications with 5+ days
   const hasPriorityPending = useMemo(() => {
@@ -135,7 +105,26 @@ const ReviewerApplications = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status, row.original.reviewProgress);
+        const app = row.original;
+        const status = app.status;
+        const reviewProgress = app.reviewProgress;
+        
+        const statusDescriptions: Record<string, string> = {
+          pending: "Application is pending review by all assigned reviewers",
+          under_review: `Review in progress: ${reviewProgress?.completed || 0} of ${reviewProgress?.total || 0} reviewers have submitted`,
+          approved: "Application has been approved",
+          rejected: "Application has been rejected",
+        };
+        
+        return (
+          <div className="flex items-center gap-2">
+            {getApplicationStatusBadge(status, reviewProgress)}
+            <HelpTooltip 
+              content={statusDescriptions[status] || "Application status"}
+              side="top"
+            />
+          </div>
+        );
       },
       sortingFn: (rowA, rowB) => {
         return rowA.original.status.localeCompare(rowB.original.status);
@@ -150,11 +139,11 @@ const ReviewerApplications = () => {
           <SortableColumnHeader column={column} title="Submitted" />
         ),
         cell: ({ row }) => {
-          return (
-            <span className="text-sm text-muted-foreground">
-              {new Date(row.original.submittedAt).toLocaleDateString()}
-            </span>
-          );
+        return (
+          <span className="text-sm text-muted-foreground">
+            {formatDate(row.original.submittedAt)}
+          </span>
+        );
         },
         sortingFn: (rowA, rowB) => {
           const dateA = new Date(rowA.original.submittedAt).getTime();

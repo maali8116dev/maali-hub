@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,38 +9,26 @@ import { ApplicationListSkeleton } from "@/components/ui/skeletons";
 import { useApplications, type ApplicationWithProject } from "@/hooks/useApplications";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { InAppTip } from "@/components/onboarding/InAppTip";
+import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
+import { formatDate } from "@/lib/dateUtils";
+import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 
 const Applications = () => {
   const navigate = useNavigate();
   const { data: applications = [], isLoading, error, refetch, isRefetching } = useApplications();
 
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  const filteredApplications = useMemo(() => {
-    return applications.filter((app) => {
-      return statusFilter === "all" || app.status === statusFilter;
-    });
-  }, [applications, statusFilter]);
-
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      pending: "bg-warning/10 text-warning border-warning/20",
-      approved: "bg-success/10 text-success border-success/20",
-      rejected: "bg-destructive/10 text-destructive border-destructive/20",
-      draft: "bg-muted text-muted-foreground border-border",
-    };
-    return styles[status as keyof typeof styles] || styles.pending;
-  };
-
-  const statusCounts = useMemo(() => {
-    return {
-      all: applications.length,
-      pending: applications.filter((a) => a.status === "pending").length,
-      approved: applications.filter((a) => a.status === "approved").length,
-      rejected: applications.filter((a) => a.status === "rejected").length,
-      draft: applications.filter((a) => a.status === "draft").length,
-    };
-  }, [applications]);
+  const {
+    filteredApplications,
+    statusCounts,
+    statusFilter,
+    setStatusFilter,
+  } = useApplicationFilters({
+    applications,
+    defaultFilter: "all",
+    statusValues: ["pending", "approved", "rejected", "draft"],
+  });
 
   // Define columns for the applications table
   const applicationColumns: ColumnDef<ApplicationWithProject>[] = useMemo(() => [
@@ -88,10 +76,24 @@ const Applications = () => {
       ),
       cell: ({ row }) => {
         const status = row.original.status;
+        const statusDescriptions: Record<string, string> = {
+          pending: "Your application is being reviewed by our team",
+          approved: "Congratulations! Your application has been approved",
+          rejected: "Your application was not selected this time",
+          draft: "This application is saved but not yet submitted",
+          under_review: "Your application is currently under review",
+        };
+        
         return (
-          <Badge className={getStatusBadge(status)}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={getApplicationStatusBadgeClassName(status)}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Badge>
+            <HelpTooltip 
+              content={statusDescriptions[status] || "Application status"}
+              side="top"
+            />
+          </div>
         );
       },
       sortingFn: (rowA, rowB) => {
@@ -108,7 +110,7 @@ const Applications = () => {
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {new Date(row.original.submittedAt).toLocaleDateString()}
+              {formatDate(row.original.submittedAt)}
             </span>
           </div>
         );
@@ -151,14 +153,36 @@ const Applications = () => {
     },
   ], []);
 
+  const isFirstTime = applications.length === 0;
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Applications</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold">My Applications</h1>
+          <HelpTooltip 
+            content="Track the status of all your funding applications. You can filter by status, search, and view detailed information about each application."
+            side="right"
+          />
+        </div>
         <p className="text-muted-foreground mt-2">
           Track and manage your funding applications ({filteredApplications.length})
         </p>
       </div>
+
+      {/* First-time user tip */}
+      {isFirstTime && (
+        <InAppTip
+          id="first-application-tip"
+          type="tip"
+          title="Ready to apply for funding?"
+          description="Browse available opportunities and submit your first application. Make sure your profile is complete to increase your chances of approval."
+          action={{
+            label: "Browse Opportunities",
+            onClick: () => navigate("/projects"),
+          }}
+        />
+      )}
 
       {/* Status Filter */}
       <Card>
@@ -235,7 +259,11 @@ const Applications = () => {
           <CardContent className="pt-6">
             <EmptyState
               icon={FileText}
-              title="No applications found"
+              title={
+                statusFilter !== "all"
+                  ? `No ${statusFilter} applications`
+                  : "No applications yet"
+              }
               description={
                 statusFilter !== "all"
                   ? "Try adjusting your filter criteria to find more applications."
@@ -248,6 +276,30 @@ const Applications = () => {
                       onClick: () => navigate("/projects"),
                       variant: "hero",
                     }
+                  : {
+                      label: "Clear Filter",
+                      onClick: () => setStatusFilter("all"),
+                      variant: "outline",
+                    }
+              }
+              secondaryAction={
+                statusFilter === "all"
+                  ? {
+                      label: "View Guide",
+                      onClick: () => navigate("/guide"),
+                      variant: "outline",
+                    }
+                  : undefined
+              }
+              helpLink={statusFilter === "all" ? "/help" : undefined}
+              tips={
+                statusFilter === "all"
+                  ? [
+                      "Complete your profile to increase approval chances",
+                      "Read project requirements carefully before applying",
+                      "You can save applications as drafts and submit later",
+                      "Check application deadlines to avoid missing opportunities",
+                    ]
                   : undefined
               }
             />

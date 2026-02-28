@@ -12,6 +12,7 @@ import { useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment'
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 
 interface ReviewScoringFormProps {
   applicationId: string;
@@ -168,6 +169,7 @@ const ReviewScoringForm = ({
         scores: data.scores,
         comments: data.comments,
         recommendation: data.recommendation,
+        rubricVersionId: rubric?.id, // Pass the active rubric version ID
       },
       {
         onSuccess: async (savedReview) => {
@@ -196,7 +198,13 @@ const ReviewScoringForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Review Scoring</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle>Review Scoring</CardTitle>
+          <HelpTooltip 
+            content="Score each criterion using the slider or number input. Your scores are weighted according to the rubric. Once submitted, you cannot edit your review."
+            side="right"
+          />
+        </div>
         <CardDescription>
           Score this application based on the criteria below
         </CardDescription>
@@ -212,14 +220,22 @@ const ReviewScoringForm = ({
               return (
                 <div key={criterion.name} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <Label htmlFor={criterion.name} className="capitalize">
-                      {criterion.name.replace('_', ' ')}
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={criterion.name} className="capitalize">
+                        {criterion.name.replace('_', ' ')}
+                        {criterion.description && (
+                          <span className="text-muted-foreground text-sm font-normal ml-2">
+                            ({criterion.description})
+                          </span>
+                        )}
+                      </Label>
                       {criterion.description && (
-                        <span className="text-muted-foreground text-sm font-normal ml-2">
-                          ({criterion.description})
-                        </span>
+                        <HelpTooltip 
+                          content={criterion.description}
+                          side="top"
+                        />
                       )}
-                    </Label>
+                    </div>
                     <span className="text-sm font-medium">
                       {currentValue} / {maxScore}
                     </span>

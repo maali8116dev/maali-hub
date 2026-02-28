@@ -8,60 +8,26 @@ import { useAdminApplications } from "@/hooks/useAdminApplications";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
-
-// Helper function to get status badge
-const getStatusBadge = (status: string, reviewProgress?: { completed: number; total: number }) => {
-  switch (status) {
-    case "pending":
-      return (
-        <Badge className="bg-warning/10 text-warning border-warning/20">
-          <Clock className="h-3 w-3 mr-1" />
-          Pending
-        </Badge>
-      );
-    case "under_review":
-      return (
-        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400">
-          <Users className="h-3 w-3 mr-1" />
-          Under Review
-          {reviewProgress && (
-            <span className="ml-1 text-xs">
-              ({reviewProgress.completed}/{reviewProgress.total})
-            </span>
-          )}
-        </Badge>
-      );
-    case "approved":
-      return (
-        <Badge className="bg-success/10 text-success border-success/20">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Approved
-        </Badge>
-      );
-    case "rejected":
-      return (
-        <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-          <XCircle className="h-3 w-3 mr-1" />
-          Rejected
-        </Badge>
-      );
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
-};
+import { getApplicationStatusBadge } from "@/lib/statusBadges";
+import { formatDate } from "@/lib/dateUtils";
+import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 
 const AdminApplications = () => {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const { data: applications = [], isLoading, error, refetch, isFetching } = useAdminApplications();
 
-  // Filter applications by status (DataTable handles search internally)
-  const filteredApplications = useMemo(() => {
-    if (statusFilter === "all") return applications;
-    return applications.filter((app) => app.status === statusFilter);
-  }, [applications, statusFilter]);
+  const {
+    filteredApplications,
+    statusCounts,
+    statusFilter,
+    setStatusFilter,
+  } = useApplicationFilters({
+    applications,
+    defaultFilter: "all",
+    statusValues: ["pending", "under_review", "approved", "rejected"],
+  });
 
   // Define columns for the applications table
   const applicationColumns: ColumnDef<any>[] = useMemo(() => [
@@ -105,7 +71,7 @@ const AdminApplications = () => {
       cell: ({ row }) => {
         return (
           <span className="text-sm text-muted-foreground">
-            {new Date(row.original.submittedAt).toLocaleDateString()}
+            {formatDate(row.original.submittedAt)}
           </span>
         );
       },

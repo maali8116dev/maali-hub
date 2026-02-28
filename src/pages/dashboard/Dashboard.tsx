@@ -14,6 +14,11 @@ import { ProfileSetupWizard } from "@/components/ProfileSetupWizard";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { InAppTip } from "@/components/onboarding/InAppTip";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { formatDate } from "@/lib/dateUtils";
+import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -84,17 +89,7 @@ const Dashboard = () => {
   }, [profile]);
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      pending: "bg-warning/10 text-warning border-warning/20",
-      approved: "bg-success/10 text-success border-success/20",
-      rejected: "bg-destructive/10 text-destructive border-destructive/20",
-      draft: "bg-muted text-muted-foreground border-muted",
-    };
-    return styles[status as keyof typeof styles] || styles.pending;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return getApplicationStatusBadgeClassName(status);
   };
 
   const isLoadingStats = isLoadingApplications || isLoadingDashboardStats;
@@ -157,11 +152,36 @@ const Dashboard = () => {
       )}
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+          <HelpTooltip 
+            content="Your dashboard shows an overview of your applications, profile status, and quick actions. Use the stats cards to track your progress."
+            side="right"
+          />
+        </div>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
           Welcome back! Here's an overview of your activity.
         </p>
       </div>
+
+      {/* Onboarding Checklist */}
+      {!dismissedPrompt && (
+        <OnboardingChecklist compact={false} />
+      )}
+
+      {/* Profile completion tip */}
+      {isIncomplete && profileCompletion < 50 && !dismissedPrompt && (
+        <InAppTip
+          id="profile-completion-tip"
+          type="warning"
+          title="Complete your profile"
+          description={`Your profile is ${profileCompletion}% complete. A complete profile increases your chances of approval.`}
+          action={{
+            label: "Complete Profile",
+            onClick: () => setShowWizard(true),
+          }}
+        />
+      )}
 
       {/* Stats Cards */}
       {isLoadingStats ? (
@@ -170,7 +190,13 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+                <HelpTooltip 
+                  content="Total number of applications you've submitted, including drafts, pending, approved, and rejected applications."
+                  side="top"
+                />
+              </div>
               <FileText className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -183,7 +209,13 @@ const Dashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+                <HelpTooltip 
+                  content="Applications currently being reviewed by our team. You'll be notified when a decision is made."
+                  side="top"
+                />
+              </div>
               <Clock className="h-4 w-4 text-warning hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -332,6 +364,18 @@ const Dashboard = () => {
                 onClick: () => navigate("/projects"),
                 variant: "outline",
               }}
+              secondaryAction={{
+                label: "View Guide",
+                onClick: () => navigate("/guide"),
+                variant: "outline",
+              }}
+              helpLink="/help"
+              tips={[
+                "Complete your profile before applying",
+                "Read project requirements carefully",
+                "Prepare all required documents in advance",
+                "Submit applications before deadlines",
+              ]}
             />
           )}
         </CardContent>

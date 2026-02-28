@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Plus, X } from 'lucide-react';
 
 interface RubricFormProps {
@@ -37,6 +38,8 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
       id: `criterion-${Date.now()}-${idx}`,
     }));
   });
+  
+  const [versionNotes, setVersionNotes] = useState('');
 
   const addCriterion = () => {
     setCriteria([...criteria, { 
@@ -82,20 +85,27 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
         description: c.description?.trim() || '',
       }));
 
-      const { error } = await supabase
-        .from('system_rubric')
-        .upsert({
-          id: '00000000-0000-0000-0000-000000000001',
-          rubric: { criteria: normalizedCriteria },
-        }, {
-          onConflict: 'id',
-        });
+      // Create new rubric version using RPC function
+      const { data: versionId, error } = await supabase.rpc(
+        'create_rubric_version',
+        {
+          p_rubric: { criteria: normalizedCriteria },
+          p_notes: versionNotes.trim() || null,
+        }
+      );
       
       if (error) throw error;
+      
+      return versionId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-rubric'] });
-      toast({ title: 'Rubric Saved', description: 'System rubric saved successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['rubric-versions'] });
+      setVersionNotes('');
+      toast({ 
+        title: 'Rubric Version Created', 
+        description: 'A new rubric version has been created. All new reviews will use this version.' 
+      });
       onSuccess?.();
     },
     onError: (error: Error) => {
@@ -195,8 +205,22 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
         ))}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="version-notes">Version Notes (optional)</Label>
+        <Textarea
+          id="version-notes"
+          value={versionNotes}
+          onChange={(e) => setVersionNotes(e.target.value)}
+          placeholder="Describe what changed in this version (e.g., 'Added sustainability criterion', 'Updated weights')"
+          rows={3}
+        />
+        <p className="text-xs text-muted-foreground">
+          Creating a new version will deactivate all previous versions. Historical reviews will continue using their original rubric versions.
+        </p>
+      </div>
+
       <Button type="submit" className="w-full" disabled={criteria.length === 0 || saveRubric.isPending}>
-        {saveRubric.isPending ? 'Saving...' : 'Save System Rubric'}
+        {saveRubric.isPending ? 'Creating Version...' : 'Create New Rubric Version'}
       </Button>
     </form>
   );
