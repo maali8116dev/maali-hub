@@ -64,7 +64,7 @@ const formatFileSize = (bytes: number | null): string => {
 
 const Resources = () => {
   const navigate = useNavigate();
-  const { data: resources = [], isLoading } = useAdminResources();
+  const { data: resources = [], isLoading, refetch, isFetching } = useAdminResources();
   const deleteResource = useDeleteResource();
   const togglePublished = useToggleResourcePublished();
   
@@ -290,6 +290,8 @@ const Resources = () => {
                 enableSorting={true}
                 enablePagination={true}
                 exportFileName="resources"
+                onRefresh={() => refetch()}
+                isRefreshing={isFetching}
               />
             )}
           </CardContent>

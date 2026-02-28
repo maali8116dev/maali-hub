@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export interface ReviewerCategory {
   id: string;
@@ -132,12 +134,36 @@ export const useAssignReviewers = () => {
 
 // Get assignments for an application
 export const useApplicationAssignments = (applicationId: string) => {
+  const { user } = useAuth();
+  const { data: userRole } = useUserRole();
+
   return useQuery({
-    queryKey: ['application-assignments', applicationId],
+    queryKey: ['application-assignments', applicationId, user?.id, userRole],
     queryFn: async () => {
       if (!applicationId) return [];
 
-      // Server-side join (assignments + reviewer profile) to avoid extra round trips
+      // If user is a reviewer, query directly with RLS (reviewers can only see their own assignments)
+      if (userRole === 'reviewer' && user?.id) {
+        const { data, error } = await supabase
+          .from('application_assignments')
+          .select('*')
+          .eq('application_id', applicationId)
+          .eq('reviewer_id', user.id)
+          .maybeSingle();
+        
+        if (error) throw error;
+        if (!data) return [];
+        
+        return [{
+          id: data.id,
+          application_id: data.application_id,
+          reviewer_id: data.reviewer_id,
+          assigned_at: data.assigned_at,
+          status: (data.status as ApplicationAssignment['status']) || 'pending',
+        }] as ApplicationAssignment[];
+      }
+
+      // For admins, use the existing admin-only RPC to get all assignments with reviewer info
       const { data, error } = await supabase.rpc(
         'get_application_assignments_with_reviewers' as any,
         { p_application_id: applicationId }
@@ -161,7 +187,7 @@ export const useApplicationAssignments = (applicationId: string) => {
           : undefined,
       })) as ApplicationAssignment[];
     },
-    enabled: !!applicationId,
+    enabled: !!applicationId && !!user,
   });
 };
 

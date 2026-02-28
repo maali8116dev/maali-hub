@@ -3,20 +3,32 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, CheckCircle, XCircle, Clock, X } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, X, Users } from "lucide-react";
 import { useAdminApplications } from "@/hooks/useAdminApplications";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 // Helper function to get status badge
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, reviewProgress?: { completed: number; total: number }) => {
   switch (status) {
     case "pending":
       return (
         <Badge className="bg-warning/10 text-warning border-warning/20">
           <Clock className="h-3 w-3 mr-1" />
           Pending
+        </Badge>
+      );
+    case "under_review":
+      return (
+        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400">
+          <Users className="h-3 w-3 mr-1" />
+          Under Review
+          {reviewProgress && (
+            <span className="ml-1 text-xs">
+              ({reviewProgress.completed}/{reviewProgress.total})
+            </span>
+          )}
         </Badge>
       );
     case "approved":
@@ -43,7 +55,7 @@ const AdminApplications = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  const { data: applications = [], isLoading, error } = useAdminApplications();
+  const { data: applications = [], isLoading, error, refetch, isFetching } = useAdminApplications();
 
   // Filter applications by status (DataTable handles search internally)
   const filteredApplications = useMemo(() => {
@@ -82,7 +94,7 @@ const AdminApplications = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status);
+        return getStatusBadge(row.original.status, row.original.reviewProgress);
       },
     },
     {
@@ -105,14 +117,26 @@ const AdminApplications = () => {
     },
     {
       accessorKey: 'reviewers',
-      header: 'Reviewers',
+      header: 'Review Progress',
       cell: ({ row }) => {
         const app = row.original;
         const reviewerCount = app.reviewerDecisions?.length || 0;
+        const progress = app.reviewProgress;
+        
+        if (progress) {
+          return (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {progress.completed}/{progress.total} completed
+              </Badge>
+            </div>
+          );
+        }
+        
         return (
           <div className="flex items-center gap-2">
             {reviewerCount > 0 ? (
-              <Badge variant="outline">
+              <Badge variant="outline" className="text-xs">
                 {reviewerCount} review{reviewerCount !== 1 ? 's' : ''}
               </Badge>
             ) : (
@@ -249,6 +273,7 @@ const AdminApplications = () => {
             {[
               { value: "all", label: "All" },
               { value: "pending", label: "Pending" },
+              { value: "under_review", label: "Under Review" },
               { value: "approved", label: "Approved" },
               { value: "rejected", label: "Rejected" },
             ].map((filter) => (
@@ -286,6 +311,8 @@ const AdminApplications = () => {
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching}
             />
           )}
         </CardContent>

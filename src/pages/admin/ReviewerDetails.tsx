@@ -29,7 +29,7 @@ export const ReviewerDetails = () => {
   }, [reviewerId]);
 
   // Fetch all reviewer details in a single RPC call
-  const { data: reviewerDetails, isLoading: isLoadingDetails, error: detailsError } = useQuery({
+  const { data: reviewerDetails, isLoading: isLoadingDetails, error: detailsError, refetch: refetchDetails, isFetching: isFetchingDetails } = useQuery({
     queryKey: ['reviewer-full-details', reviewerId],
     queryFn: async () => {
       if (!reviewerId) return null;
@@ -467,6 +467,8 @@ export const ReviewerDetails = () => {
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
+              onRefresh={() => refetchDetails()}
+              isRefreshing={isFetchingDetails}
             />
           )}
         </CardContent>

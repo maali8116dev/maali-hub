@@ -12,7 +12,7 @@ import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 const Applications = () => {
   const navigate = useNavigate();
-  const { data: applications = [], isLoading, error } = useApplications();
+  const { data: applications = [], isLoading, error, refetch, isRefetching } = useApplications();
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -225,6 +225,8 @@ const Applications = () => {
               enablePagination={true}
               enableExport={true}
               exportFileName={`my-applications-${statusFilter}`}
+              onRefresh={() => { refetch(); }}
+              isRefreshing={isRefetching}
             />
           </CardContent>
         </Card>

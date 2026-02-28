@@ -10,7 +10,7 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X, Download } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X, Download, RotateCw } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -42,6 +42,8 @@ interface DataTableProps<TData, TValue> {
   enableExport?: boolean
   exportFileName?: string
   className?: string
+  onRefresh?: () => void | Promise<void>
+  isRefreshing?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -55,6 +57,8 @@ export function DataTable<TData, TValue>({
   enableExport = true,
   exportFileName,
   className,
+  onRefresh,
+  isRefreshing = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -291,7 +295,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Search Input and Export Button */}
+      {/* Search Input, Refresh, and Export Button */}
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -320,6 +324,19 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
         </div>
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onRefresh()}
+            disabled={isRefreshing}
+            className="h-9 w-9"
+            title="Refresh data"
+          >
+            <RotateCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="sr-only">Refresh</span>
+          </Button>
+        )}
         {enableExport && (
           <Button
             variant="outline"

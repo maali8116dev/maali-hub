@@ -26,7 +26,7 @@ const AdminProjects = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
-  const { data: projects = [], isLoading, error } = useAdminProjects();
+  const { data: projects = [], isLoading, error, refetch, isFetching } = useAdminProjects();
   const deleteProject = useDeleteProject();
 
   const getStatusBadge = (status: string) => {
@@ -251,6 +251,8 @@ const AdminProjects = () => {
               enableSorting={true}
               enablePagination={true}
               exportFileName="projects"
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching}
             />
           )}
         </CardContent>

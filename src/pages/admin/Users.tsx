@@ -22,7 +22,7 @@ import {
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const { data: users = [], isLoading, error } = useUsers();
+  const { data: users = [], isLoading, error, refetch, isFetching } = useUsers();
   const suspendUser = useSuspendUser();
   const activateUser = useActivateUser();
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
@@ -253,6 +253,8 @@ const AdminUsers = () => {
               enableSorting={true}
               enablePagination={true}
               exportFileName="users"
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching}
             />
           )}
         </CardContent>

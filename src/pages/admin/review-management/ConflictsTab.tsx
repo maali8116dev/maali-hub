@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
 
 export const ConflictsTab = () => {
-  const { data: conflicts = [] } = useQuery({
+  const { data: conflicts = [], refetch, isFetching } = useQuery({
     queryKey: ['all-conflicts'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -116,6 +116,8 @@ export const ConflictsTab = () => {
           pageSize={10}
           enableSorting={true}
           enablePagination={true}
+          onRefresh={() => refetch()}
+          isRefreshing={isFetching}
         />
       </CardContent>
     </Card>

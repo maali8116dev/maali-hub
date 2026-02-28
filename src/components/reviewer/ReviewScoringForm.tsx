@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewScoringFormProps {
@@ -19,6 +20,8 @@ interface ReviewScoringFormProps {
   onSuccess?: () => void;
 }
 
+type Recommendation = 'approve' | 'reject' | 'request_info';
+
 const ReviewScoringForm = ({
   applicationId,
   assignmentId,
@@ -26,7 +29,58 @@ const ReviewScoringForm = ({
   onSuccess,
 }: ReviewScoringFormProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { mutate: submitReview, isPending } = useSubmitReview();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Persisted reviewer-specific check so disabled state survives page reloads
+  const { data: existingReview, isLoading: existingReviewLoading } = useQuery({
+    queryKey: ['review-score', applicationId, reviewerId],
+    queryFn: async () => {
+      if (!applicationId || !reviewerId) {
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from('review_scores')
+        .select('*')
+        .eq('application_id', applicationId)
+        .eq('reviewer_id', reviewerId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!applicationId && !!reviewerId,
+    staleTime: 30 * 1000,
+  });
+
+  const hasSubmittedReview = !!existingReview || isSubmitted;
+
+  const normalizeScores = (value: unknown): Record<string, number> => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return {};
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, entryValue]) => typeof entryValue === 'number') as Array<[string, number]>;
+
+    return Object.fromEntries(entries);
+  };
+
+  const normalizeRecommendation = (value: unknown): Recommendation => {
+    if (value === 'approve' || value === 'reject' || value === 'request_info') {
+      return value;
+    }
+    return 'approve';
+  };
+
+  // Sync local state with existing review
+  useEffect(() => {
+    if (existingReview && !isSubmitted) {
+      setIsSubmitted(true);
+    }
+  }, [existingReview, isSubmitted]);
 
   // Get system rubric (applies to all applications)
   const { data: rubric } = useSystemRubric();
@@ -76,20 +130,36 @@ const ReviewScoringForm = ({
     { name: 'team', weight: 0.25, max_score: 10, description: 'Team capability and experience' },
   ];
 
-  // Initialize default scores
+  // Initialize scores - use existing review data if available, otherwise use defaults
   useEffect(() => {
-    const defaultScores: Record<string, number> = {};
-    criteria.forEach((criterion: any) => {
-      defaultScores[criterion.name] = 5; // Default to middle score
-    });
-    form.reset({
-      scores: defaultScores,
-      comments: '',
-      recommendation: 'approve',
-    });
-  }, [criteria, form]);
+    if (existingReview) {
+      // Populate form with existing review data
+      form.reset({
+        scores: normalizeScores(existingReview.scores),
+        comments: existingReview.comments || '',
+        recommendation: normalizeRecommendation(existingReview.recommendation),
+      });
+    } else {
+      // Initialize with default scores
+      const defaultScores: Record<string, number> = {};
+      criteria.forEach((criterion: any) => {
+        defaultScores[criterion.name] = 5; // Default to middle score
+      });
+      form.reset({
+        scores: defaultScores,
+        comments: '',
+        recommendation: 'approve',
+      });
+    }
+  }, [criteria, form, existingReview]);
 
   const onSubmit = (data: any) => {
+    // Prevent multiple submissions
+    if (existingReviewLoading || hasSubmittedReview || isPending) {
+      return;
+    }
+
+    setIsSubmitted(true); // Optimistically set as submitted
     submitReview(
       {
         applicationId,
@@ -100,7 +170,10 @@ const ReviewScoringForm = ({
         recommendation: data.recommendation,
       },
       {
-        onSuccess: () => {
+        onSuccess: async (savedReview) => {
+          queryClient.setQueryData(['review-score', applicationId, reviewerId], savedReview);
+          await queryClient.invalidateQueries({ queryKey: ['review-score', applicationId, reviewerId] });
+          
           toast({
             title: 'Review Submitted',
             description: 'Your review has been submitted successfully.',
@@ -108,6 +181,8 @@ const ReviewScoringForm = ({
           onSuccess?.();
         },
         onError: (error: any) => {
+          // Reset submitted state on error
+          setIsSubmitted(false);
           toast({
             title: 'Submission Failed',
             description: error.message || 'Failed to submit review. Please try again.',
@@ -130,34 +205,77 @@ const ReviewScoringForm = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Scoring Criteria */}
           <div className="space-y-6">
-            {criteria.map((criterion: any) => (
-              <div key={criterion.name} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor={criterion.name} className="capitalize">
-                    {criterion.name.replace('_', ' ')}
-                    {criterion.description && (
-                      <span className="text-muted-foreground text-sm font-normal ml-2">
-                        ({criterion.description})
-                      </span>
-                    )}
-                  </Label>
-                  <span className="text-sm font-medium">
-                    {form.watch(`scores.${criterion.name}`) || 0} / {criterion.max_score}
-                  </span>
+            {criteria.map((criterion: any) => {
+              const currentValue = form.watch(`scores.${criterion.name}`) || 0;
+              const maxScore = criterion.max_score || 10;
+              
+              return (
+                <div key={criterion.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor={criterion.name} className="capitalize">
+                      {criterion.name.replace('_', ' ')}
+                      {criterion.description && (
+                        <span className="text-muted-foreground text-sm font-normal ml-2">
+                          ({criterion.description})
+                        </span>
+                      )}
+                    </Label>
+                    <span className="text-sm font-medium">
+                      {currentValue} / {maxScore}
+                    </span>
+                  </div>
+                  
+                  {/* Slider and Input Container */}
+                  <div className="flex gap-4 items-center">
+                    <Slider
+                      id={`${criterion.name}-slider`}
+                      min={0}
+                      max={maxScore}
+                      step={0.5}
+                      value={[currentValue]}
+                      onValueChange={([value]) => {
+                        form.setValue(`scores.${criterion.name}`, value, { shouldValidate: true });
+                      }}
+                      className="flex-1"
+                      disabled={hasSubmittedReview}
+                    />
+                    <div className="flex items-center gap-2 min-w-[120px]">
+                      <Input
+                        id={`${criterion.name}-input`}
+                        type="number"
+                        min={0}
+                        max={maxScore}
+                        step={0.5}
+                        value={currentValue}
+                        onChange={(e) => {
+                          if (!hasSubmittedReview) {
+                            const value = parseFloat(e.target.value);
+                            if (!isNaN(value)) {
+                              const clampedValue = Math.max(0, Math.min(maxScore, value));
+                              form.setValue(`scores.${criterion.name}`, clampedValue, { shouldValidate: true });
+                            }
+                          }
+                        }}
+                        onBlur={(e) => {
+                          if (!hasSubmittedReview) {
+                            const value = parseFloat(e.target.value);
+                            if (isNaN(value) || value < 0) {
+                              form.setValue(`scores.${criterion.name}`, 0, { shouldValidate: true });
+                            } else if (value > maxScore) {
+                              form.setValue(`scores.${criterion.name}`, maxScore, { shouldValidate: true });
+                            }
+                          }
+                        }}
+                        className="w-20 text-center"
+                        placeholder="0"
+                        disabled={hasSubmittedReview}
+                      />
+                 
+                    </div>
+                  </div>
                 </div>
-                <Slider
-                  id={criterion.name}
-                  min={0}
-                  max={criterion.max_score || 10}
-                  step={0.5}
-                  value={[form.watch(`scores.${criterion.name}`) || 0]}
-                  onValueChange={([value]) => {
-                    form.setValue(`scores.${criterion.name}`, value);
-                  }}
-                  className="w-full"
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Comments */}
@@ -168,6 +286,7 @@ const ReviewScoringForm = ({
               {...form.register('comments')}
               placeholder="Add any additional comments about this application..."
               rows={4}
+              disabled={hasSubmittedReview}
             />
           </div>
 
@@ -177,7 +296,8 @@ const ReviewScoringForm = ({
             <select
               id="recommendation"
               {...form.register('recommendation')}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={hasSubmittedReview}
             >
               <option value="approve">Approve</option>
               <option value="reject">Reject</option>
@@ -190,11 +310,12 @@ const ReviewScoringForm = ({
               type="button"
               variant="outline"
               onClick={() => form.reset()}
+              disabled={existingReviewLoading || hasSubmittedReview || isPending}
             >
               Reset
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'Submitting...' : 'Submit Review'}
+            <Button type="submit" disabled={existingReviewLoading || hasSubmittedReview || isPending}>
+              {isPending ? 'Submitting...' : hasSubmittedReview ? 'Review Submitted' : 'Submit Review'}
             </Button>
           </div>
         </form>

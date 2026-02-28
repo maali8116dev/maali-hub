@@ -18,7 +18,7 @@ export type AdminApplication = {
   projectTitle: string;
   projectId: number;
   submittedAt: string;
-  status: "pending" | "approved" | "rejected" | "draft";
+  status: "pending" | "approved" | "rejected" | "draft" | "under_review";
   contactEmail: string;
   contactPhone?: string;
   reviewedBy?: string | null;
@@ -26,6 +26,10 @@ export type AdminApplication = {
   reviewNotes?: string | null;
   reviewedByName?: string;
   reviewerDecisions?: ReviewerDecision[];
+  reviewProgress?: {
+    completed: number;
+    total: number;
+  };
 };
 
 // Status mapping
@@ -72,6 +76,15 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
         reviewerDecisions = [];
       }
 
+      const completedReviews = reviewerDecisions.length;
+      const hasReviews = completedReviews > 0;
+      const baseStatus = statusMap[app.status || "pending"] || "pending";
+      
+      // Determine if application is under review (has some reviews but not final decision)
+      const finalStatus = hasReviews && baseStatus === "pending" 
+        ? "under_review" 
+        : baseStatus;
+
       return {
         id: app.id,
         applicantName: app.applicant_name || "Unknown Applicant",
@@ -79,7 +92,7 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
         projectTitle: app.project_title || "Unknown Project",
         projectId: app.project_id,
         submittedAt: app.submitted_at,
-        status: statusMap[app.status || "pending"] || "pending",
+        status: finalStatus,
         contactEmail: app.contact_email || "N/A",
         contactPhone: app.contact_phone || undefined,
         reviewedBy: app.reviewed_by || undefined,
@@ -96,6 +109,10 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
               submittedAt: decision.submittedAt,
             }))
           : [],
+        reviewProgress: hasReviews ? {
+          completed: completedReviews,
+          total: completedReviews + 1, // Estimate: assume at least one more reviewer pending
+        } : undefined,
       };
     });
   } catch (err) {

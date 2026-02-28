@@ -535,6 +535,8 @@ const AdminFinancial = () => {
             enablePagination={true}
             enableExport={true}
             exportFileName="transactions"
+            onRefresh={() => refetchTransactions()}
+            isRefreshing={isFetchingTransactions}
           />
         </CardContent>
       </Card>

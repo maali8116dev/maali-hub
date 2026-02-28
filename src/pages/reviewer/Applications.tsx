@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, AlertCircle, Users } from "lucide-react";
 import { useReviewerApplications } from "@/hooks/useReviewerApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColumnDef } from "@tanstack/react-table";
@@ -13,15 +13,27 @@ const ReviewerApplications = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("pending"); // Default to pending
 
-  const { data: applications = [], isLoading, error } = useReviewerApplications();
+  const { data: applications = [], isLoading, error, refetch, isRefetching } = useReviewerApplications();
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, reviewProgress?: { completed: number; total: number }) => {
     switch (status) {
       case "pending":
         return (
           <Badge className="bg-warning/10 text-warning border-warning/20">
             <Clock className="h-3 w-3 mr-1" />
             Pending
+          </Badge>
+        );
+      case "under_review":
+        return (
+          <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400">
+            <Users className="h-3 w-3 mr-1" />
+            Under Review
+            {reviewProgress && (
+              <span className="ml-1 text-xs">
+                ({reviewProgress.completed}/{reviewProgress.total})
+              </span>
+            )}
           </Badge>
         );
       case "approved":
@@ -123,7 +135,7 @@ const ReviewerApplications = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status);
+        return getStatusBadge(row.original.status, row.original.reviewProgress);
       },
       sortingFn: (rowA, rowB) => {
         return rowA.original.status.localeCompare(rowB.original.status);
@@ -233,6 +245,7 @@ const ReviewerApplications = () => {
             {[
               { value: "all", label: "All" },
               { value: "pending", label: "Pending" },
+              { value: "under_review", label: "Under Review" },
               { value: "approved", label: "Approved" },
               { value: "rejected", label: "Rejected" },
             ].map((filter) => (
@@ -275,6 +288,8 @@ const ReviewerApplications = () => {
               ? "All Applications" 
               : statusFilter === "pending"
               ? "Pending Applications"
+              : statusFilter === "under_review"
+              ? "Under Review Applications"
               : statusFilter === "approved"
               ? "Approved Applications"
               : "Rejected Applications"} ({processedApplications.length})
@@ -290,6 +305,8 @@ const ReviewerApplications = () => {
             enablePagination={true}
             enableExport={true}
             exportFileName={`applications-${statusFilter}`}
+            onRefresh={() => { refetch(); }}
+            isRefreshing={isRefetching}
           />
         </CardContent>
       </Card>

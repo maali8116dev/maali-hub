@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import type { AdminApplication, ReviewerDecision } from "./useAdminApplications";
 
 // Status mapping
-const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> = {
+const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft" | "under_review"> = {
   pending: "pending",
-  under_review: "pending",
+  under_review: "under_review",
   approved: "approved",
   rejected: "rejected",
   draft: "draft",
@@ -21,41 +22,70 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
     p_reviewer_id: reviewerId,
   });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error fetching reviewer applications:", {
+      error,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+      reviewerId,
+    });
+    throw error;
+  }
 
   if (!data || data.length === 0) {
     return [];
   }
 
-  return data.map((app: any) => {
-    const reviewerDecisions = Array.isArray(app.reviewer_decisions)
-      ? app.reviewer_decisions
-      : [];
+  return data
+    .filter((app: any) => {
+      // Defense in depth: Only return applications that have an assignment_id
+      // The RPC should already filter this via INNER JOIN, but this adds extra safety
+      return app.assignment_id != null;
+    })
+    .map((app: any) => {
+      const reviewerDecisions = Array.isArray(app.reviewer_decisions)
+        ? app.reviewer_decisions
+        : [];
 
-    return {
-      id: app.id,
-      applicantName: app.applicant_name || "Unknown Applicant",
-      applicantEmail: app.applicant_email || "No email",
-      projectTitle: app.project_title || "Unknown Project",
-      projectId: app.project_id,
-      submittedAt: app.submitted_at,
-      status: statusMap[app.status || "pending"] || "pending",
-      contactEmail: app.contact_email || "N/A",
-      contactPhone: app.contact_phone || undefined,
-      reviewedBy: app.reviewed_by || undefined,
-      reviewedAt: app.reviewed_at || undefined,
-      reviewNotes: app.review_notes || undefined,
-      reviewedByName: app.reviewed_by_name || undefined,
-      reviewerDecisions: reviewerDecisions.map((decision: any) => ({
-        reviewerId: decision.reviewerId,
-        reviewerName: decision.reviewerName,
-        recommendation: decision.recommendation,
-        overallScore: decision.overallScore,
-        comments: decision.comments,
-        submittedAt: decision.submittedAt,
-      })),
-    };
-  });
+      const completedReviews = reviewerDecisions.length;
+      const hasReviews = completedReviews > 0;
+      const baseStatus = statusMap[app.status || "pending"] || "pending";
+      
+      // Determine if application is under review (has some reviews but not final decision)
+      const finalStatus = hasReviews && baseStatus === "pending" 
+        ? "under_review" 
+        : baseStatus;
+
+      return {
+        id: app.id,
+        applicantName: app.applicant_name || "Unknown Applicant",
+        applicantEmail: app.applicant_email || "No email",
+        projectTitle: app.project_title || "Unknown Project",
+        projectId: app.project_id,
+        submittedAt: app.submitted_at,
+        status: finalStatus,
+        contactEmail: app.contact_email || "N/A",
+        contactPhone: app.contact_phone || undefined,
+        reviewedBy: app.reviewed_by || undefined,
+        reviewedAt: app.reviewed_at || undefined,
+        reviewNotes: app.review_notes || undefined,
+        reviewedByName: app.reviewed_by_name || undefined,
+        reviewerDecisions: reviewerDecisions.map((decision: any) => ({
+          reviewerId: decision.reviewerId,
+          reviewerName: decision.reviewerName,
+          recommendation: decision.recommendation,
+          overallScore: decision.overallScore,
+          comments: decision.comments,
+          submittedAt: decision.submittedAt,
+        })),
+        reviewProgress: hasReviews ? {
+          completed: completedReviews,
+          total: completedReviews + 1, // Estimate: assume at least one more reviewer pending
+        } : undefined,
+      };
+    });
 }
 
 /**
@@ -64,6 +94,7 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
  */
 export function useReviewerApplications() {
   const { user } = useAuth();
+  const { data: userRole } = useUserRole();
 
   return useQuery({
     queryKey: ["reviewer-applications", user?.id],
@@ -73,7 +104,7 @@ export function useReviewerApplications() {
       }
       return fetchReviewerApplications(user.id);
     },
-    enabled: !!user?.id, // Only enable if user is authenticated
+    enabled: !!user?.id && userRole === "reviewer", // Only enable if user is authenticated and is a reviewer
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1,
   });

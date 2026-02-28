@@ -3,16 +3,14 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
-import { createNotification } from "@/hooks/useNotifications";
-import { useActivityLogger } from "@/hooks/useActivityLogger";
+import { useApplicationAssignments, useApplicationReviewScores } from "@/hooks/useReviewerAssignment";
+import ReviewScoringForm from "@/components/reviewer/ReviewScoringForm";
 import {
   ApplicationHeader,
   ApplicationDetailsSkeleton,
@@ -40,10 +38,7 @@ const ReviewApplication = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { data: profile } = useProfile();
-  const { logActivity } = useActivityLogger();
   const queryClient = useQueryClient();
-  const [reviewNotes, setReviewNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Determine the back route based on user role or location state
@@ -60,6 +55,14 @@ const ReviewApplication = () => {
   // Check if user is a reviewer (only reviewers can perform review actions)
   const isReviewer = profile?.role === "reviewer";
   const isAdmin = profile?.role === "admin";
+
+  // Check if reviewer has an assignment for this application
+  const { data: assignments = [], isLoading: assignmentsLoading } = useApplicationAssignments(id || "");
+  const reviewerAssignment = assignments.find(a => a.reviewer_id === user?.id);
+
+  // Check if reviewer has already submitted a review
+  const { data: reviewScores = [], isLoading: reviewScoresLoading } = useApplicationReviewScores(id || "");
+  const existingReview = reviewScores.find(rs => rs.reviewer_id === user?.id);
 
   // Fetch application data
   const { data: application, isLoading, error } = useQuery({
@@ -152,225 +155,20 @@ const ReviewApplication = () => {
     enabled: !!id && !!application,
   });
 
-  const handleApprove = async () => {
-    if (!isReviewer) {
-      toast({
-        title: "Access Denied",
-        description: "Only reviewers can approve applications. Please use a reviewer account.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!id || !application) return;
-
-    setIsSubmitting(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const now = new Date().toISOString();
-      const { error: updateError } = await supabase
-        .from("applications")
-        .update({
-          status: "approved",
-          reviewed_by: user.id,
-          reviewed_at: now,
-          review_notes: reviewNotes.trim() || null,
-          updated_at: now,
-        })
-        .eq("id", id);
-
-      if (updateError) throw updateError;
-
-      await logActivity({
-        actionType: "approve",
-        entityType: "application",
-        entityId: id,
-        description: `Approved application for "${application.projectTitle}"`,
-        metadata: {
-          application_id: id,
-          project_id: application.project_id,
-          project_title: application.projectTitle,
-          reviewer_id: user.id,
-          review_notes: reviewNotes.trim() || null,
-        },
-      });
-
-      await createNotification(
-        application.user_id,
-        "Application Approved!",
-        `Congratulations! Your application for "${application.projectTitle}" has been approved.`,
-        "application",
-        `/dashboard/applications/${id}`,
-        {
-          application_id: id,
-          project_id: application.project_id,
-          status: "approved",
-        }
-      );
-
-      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
-      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
-
-      toast({
-        title: "Application Approved",
-        description: "The application has been approved successfully.",
-      });
-
-      navigate(getBackRoute());
-    } catch (error) {
-      console.error("Error approving application:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to approve application. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!isReviewer) {
-      toast({
-        title: "Access Denied",
-        description: "Only reviewers can reject applications. Please use a reviewer account.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!reviewNotes.trim()) {
-      toast({
-        title: "Review Notes Required",
-        description: "Please provide review notes before rejecting an application.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!id || !application) return;
-
-    setIsSubmitting(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      const now = new Date().toISOString();
-      const { error: updateError } = await supabase
-        .from("applications")
-        .update({
-          status: "rejected",
-          reviewed_by: user.id,
-          reviewed_at: now,
-          review_notes: reviewNotes.trim() || null,
-          updated_at: now,
-        })
-        .eq("id", id);
-
-      if (updateError) throw updateError;
-
-      await logActivity({
-        actionType: "reject",
-        entityType: "application",
-        entityId: id,
-        description: `Rejected application for "${application.projectTitle}"`,
-        metadata: {
-          application_id: id,
-          project_id: application.project_id,
-          project_title: application.projectTitle,
-          reviewer_id: user.id,
-          review_notes: reviewNotes.trim() || null,
-        },
-      });
-
-      await createNotification(
-        application.user_id,
-        "Application Status Updated",
-        `Your application for "${application.projectTitle}" has been reviewed. Please check your application details for more information.`,
-        "application",
-        `/dashboard/applications/${id}`,
-        {
-          application_id: id,
-          project_id: application.project_id,
-          status: "rejected",
-        }
-      );
-
-      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
-      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
-
-      toast({
-        title: "Application Rejected",
-        description: "The application has been rejected.",
-      });
-
-      navigate(getBackRoute());
-    } catch (error) {
-      console.error("Error rejecting application:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reject application. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRequestMoreInfo = async () => {
-    if (!isReviewer) {
-      toast({
-        title: "Access Denied",
-        description: "Only reviewers can request additional information. Please use a reviewer account.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!reviewNotes.trim()) {
-      toast({
-        title: "Notes Required",
-        description: "Please provide notes about what information is needed.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!id || !application) return;
-
-    setIsSubmitting(true);
-    try {
-      const { error: updateError } = await supabase
-        .from("applications")
-        .update({
-          status: "under_review",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", id);
-
-      if (updateError) throw updateError;
-
-      queryClient.invalidateQueries({ queryKey: ["review-application", id] });
-      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
-
-      toast({
-        title: "Information Requested",
-        description: "The applicant has been notified to provide additional information.",
-      });
-
-      navigate(getBackRoute());
-    } catch (error) {
-      console.error("Error requesting more info:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send request. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleReviewSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["review-application", id] });
+    queryClient.invalidateQueries({ queryKey: ["review-scores", id] });
+    queryClient.invalidateQueries({ queryKey: ["application-assignments", id] });
+    queryClient.invalidateQueries({ queryKey: ["reviewer-applications"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
+    
+    toast({
+      title: "Review Submitted",
+      description: "Your review has been submitted successfully. The decision engine will process all reviews.",
+    });
+    
+    // Optionally navigate back, or stay on page to see updated status
+    // navigate(getBackRoute());
   };
 
   const handleDownload = async (doc: { id: string; filePath: string; fileName: string }) => {
@@ -441,58 +239,97 @@ const ReviewApplication = () => {
         {/* Review Panel */}
         <div className="space-y-6">
           {isReviewer ? (
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Review Actions</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Submit your review decision for this application
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="reviewNotes">Review Notes</Label>
-                  <Textarea
-                    id="reviewNotes"
-                    placeholder="Add your review notes, feedback, or questions here..."
-                    value={reviewNotes}
-                    onChange={(e) => setReviewNotes(e.target.value)}
-                    rows={6}
-                    className="mt-2"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Notes are required when rejecting an application
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Button
-                    onClick={handleApprove}
-                    disabled={isSubmitting || application.status === "approved"}
-                    className="w-full min-h-[48px] bg-success hover:bg-success/90"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve
-                  </Button>
-                  <Button
-                    onClick={handleReject}
-                    disabled={isSubmitting || application.status === "rejected"}
-                    variant="destructive"
-                    className="w-full min-h-[48px]"
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Reject
-                  </Button>
-                  <Button
-                    onClick={handleRequestMoreInfo}
-                    disabled={isSubmitting}
-                    variant="outline"
-                    className="w-full min-h-[48px]"
-                  >
-                    Request Info
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <>
+              {!reviewerAssignment ? (
+                <Card className="border-warning/50 bg-warning/5">
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+                      Not Assigned
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      You are not assigned to review this application
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                    <p className="text-sm text-muted-foreground">
+                      Only assigned reviewers can submit reviews for applications. 
+                      If you believe you should be assigned, please contact an administrator.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : existingReview ? (
+                <Card className="border-success/50 bg-success/5">
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+                      Review Submitted
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      You have already submitted your review for this application
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Overall Score:</span>
+                        <span className="font-medium">{existingReview.overall_score?.toFixed(2) || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Recommendation:</span>
+                        <span className="font-medium capitalize">{existingReview.recommendation?.replace('_', ' ')}</span>
+                      </div>
+                      {existingReview.scores && Object.keys(existingReview.scores).length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-sm font-medium">Criterion Scores:</p>
+                          <div className="space-y-1">
+                            {Object.entries(existingReview.scores).map(([criterion, score]) => (
+                              <div key={criterion} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground capitalize">{criterion.replace('_', ' ')}:</span>
+                                <span className="font-medium">{score}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {existingReview.comments && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium mb-1">Your Comments:</p>
+                          <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                            {existingReview.comments}
+                          </p>
+                        </div>
+                      )}
+                      {existingReview.submitted_at && (
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
+                          <span>Submitted:</span>
+                          <span>{new Date(existingReview.submitted_at).toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-4 bg-muted p-3 rounded-md">
+                      Your review has been submitted. The decision engine will process all reviews once all assigned reviewers have submitted their reviews.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      You can update your review by submitting again - it will replace your previous submission.
+                    </p>
+                    <ReviewScoringForm
+                      applicationId={id!}
+                      assignmentId={reviewerAssignment.id}
+                      reviewerId={user!.id}
+                      onSuccess={handleReviewSuccess}
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <ReviewScoringForm
+                  applicationId={id!}
+                  assignmentId={reviewerAssignment.id}
+                  reviewerId={user!.id}
+                  onSuccess={handleReviewSuccess}
+                />
+              )}
+            </>
           ) : isAdmin ? (
             <Card className="border-warning/50 bg-warning/5">
               <CardHeader className="p-4 sm:p-6">
