@@ -183,5 +183,112 @@
       "languageUpdated": "Langue mise à jour",
       "themeUpdated": "Thème mis à jour"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Restez informé de vos candidatures et de l'activité de votre compte",
+    "markAllAsRead": "Tout marquer comme lu",
+    "marking": "Marquage...",
+    "stats": {
+      "total": "Total",
+      "unread": "Non lu",
+      "read": "Lu"
+    },
+    "sections": {
+      "unread": "Non lu",
+      "earlier": "Plus tôt"
+    },
+    "actions": {
+      "viewDetails": "Voir les détails →"
+    },
+    "emptyState": {
+      "title": "Aucune notification",
+      "description": "Vous êtes à jour ! Les nouvelles notifications apparaîtront ici."
+    }
+  },
+  "documents": {
+    "title": "Mes documents",
+    "subtitle": "Gérez votre bibliothèque de documents et les documents de candidature",
+    "uploadToLibrary": "Télécharger dans la bibliothèque",
+    "uploading": "Téléchargement...",
+    "applyForFunding": "Postuler pour un financement",
+    "searchPlaceholder": "Rechercher des documents...",
+    "tabs": {
+      "library": "Bibliothèque",
+      "applications": "Candidatures"
+    },
+    "library": {
+      "title": "Bibliothèque de documents",
+      "description": "Documents réutilisables qui peuvent être sélectionnés lors de la candidature à des opportunités"
+    },
+    "applicationDocuments": {
+      "title": "Documents de candidature",
+      "description": "Documents liés à des candidatures spécifiques"
+    },
+    "emptyState": {
+      "noLibraryDocuments": "Aucun document dans la bibliothèque",
+      "noLibraryDocumentsDesc": "Téléchargez des documents dans votre bibliothèque pour les réutiliser dans plusieurs candidatures. Cliquez sur 'Télécharger dans la bibliothèque' ci-dessus pour commencer.",
+      "noLibraryDocumentsSearch": "Essayez d'ajuster votre recherche pour trouver plus de documents.",
+      "noApplicationDocuments": "Aucun document de candidature",
+      "noApplicationDocumentsDesc": "Les documents téléchargés avec vos candidatures apparaîtront ici. Commencez à postuler pour des opportunités pour télécharger des documents.",
+      "noApplicationDocumentsSearch": "Essayez d'ajuster votre recherche pour trouver plus de documents.",
+      "uploadToLibrary": "Télécharger dans la bibliothèque",
+      "browseOpportunities": "Parcourir les opportunités"
+    },
+    "deleteDialog": {
+      "title": "Supprimer le document",
+      "description": "Êtes-vous sûr de vouloir supprimer \"{{fileName}}\" ? Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "badges": {
+      "application": "Candidature",
+      "library": "Bibliothèque"
+    }
+  },
+  "resources": {
+    "hero": {
+      "title": "Bibliothèque de ressources",
+      "description": "Accédez à des guides, modèles, tutoriels et outils pour vous aider à réussir vos candidatures de financement",
+      "searchPlaceholder": "Rechercher des ressources...",
+      "availableCount": "{{count}} ressources disponibles"
+    },
+    "tabs": {
+      "all": "Tout",
+      "documents": "Documents",
+      "videos": "Vidéos",
+      "spreadsheets": "Tableurs",
+      "presentations": "Présentations",
+      "links": "Liens"
+    },
+    "emptyState": {
+      "noResources": "Aucune ressource disponible",
+      "noResourcesDesc": "Les ressources apparaîtront ici une fois qu'elles seront ajoutées par les administrateurs",
+      "noResults": "Aucun résultat trouvé",
+      "noResultsDesc": "Aucune ressource ne correspond à \"{{query}}\". Essayez un autre terme de recherche.",
+      "clearSearch": "Effacer la recherche",
+      "checkBackLater": "Revenez plus tard pour de nouvelles ressources"
+    },
+    "sections": {
+      "browseResources": "Parcourir les ressources",
+      "searchResults": "Résultats de recherche pour \"{{query}}\""
+    },
+    "card": {
+      "featured": "En vedette",
+      "view": "Voir",
+      "open": "Ouvrir",
+      "download": "Télécharger",
+      "typeLabels": {
+        "pdfDocument": "Document PDF",
+        "video": "Vidéo",
+        "webinar": "Webinaire",
+        "spreadsheet": "Tableur",
+        "presentation": "Présentation",
+        "document": "Document",
+        "externalLink": "Lien externe",
+        "directory": "Répertoire",
+        "event": "Événement"
+      }
+    }
   }
 }

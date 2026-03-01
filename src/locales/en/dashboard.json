@@ -20,6 +20,275 @@
     "profile": "Profile",
     "billing": "Billing",
     "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! Here's an overview of your activity.",
+    "helpTooltip": "Your dashboard shows an overview of your applications, profile status, and quick actions. Use the stats cards to track your progress.",
+    "stats": {
+      "totalApplications": "Total Applications",
+      "totalApplicationsDesc": "Total number of applications you've submitted, including drafts, pending, approved, and rejected applications.",
+      "allTimeApplications": "All time applications",
+      "pending": "Pending",
+      "pendingDesc": "Applications currently being reviewed by our team. You'll be notified when a decision is made.",
+      "underReview": "Under review",
+      "approved": "Approved",
+      "successfullyFunded": "Successfully funded",
+      "rejected": "Rejected",
+      "notSelected": "Not selected"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "startNewApplication": "Start New Application",
+      "browseOpportunities": "Browse Opportunities",
+      "viewAllApplications": "View All Applications"
+    },
+    "profileCompletion": {
+      "title": "Profile Completion",
+      "status": "Profile Status",
+      "complete": "Complete",
+      "completeProfile": "Complete your profile →",
+      "viewProfile": "View your profile →"
+    },
+    "recentApplications": {
+      "title": "Recent Applications",
+      "viewAll": "View All",
+      "submitted": "Submitted"
+    },
+    "emptyState": {
+      "noApplications": "No applications yet",
+      "noApplicationsDesc": "Start applying to funding opportunities to see your applications here.",
+      "browseOpportunities": "Browse Opportunities",
+      "viewGuide": "View Guide",
+      "tips": {
+        "completeProfile": "Complete your profile before applying",
+        "readRequirements": "Read project requirements carefully",
+        "prepareDocuments": "Prepare all required documents in advance",
+        "submitBeforeDeadline": "Submit applications before deadlines"
+      }
+    },
+    "profileTip": {
+      "title": "Complete your profile",
+      "description": "Your profile is {{percentage}}% complete. A complete profile increases your chances of approval.",
+      "action": "Complete Profile"
+    }
+  },
+  "applications": {
+    "title": "My Applications",
+    "subtitle": "Track and manage your funding applications",
+    "helpTooltip": "Track the status of all your funding applications. You can filter by status, search, and view detailed information about each application.",
+    "firstTimeTip": {
+      "title": "Ready to apply for funding?",
+      "description": "Browse available opportunities and submit your first application. Make sure your profile is complete to increase your chances of approval.",
+      "action": "Browse Opportunities"
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "draft": "Draft"
+    },
+    "columns": {
+      "project": "Project",
+      "sector": "Sector",
+      "country": "Country",
+      "status": "Status",
+      "submitted": "Submitted",
+      "actions": "Actions"
+    },
+    "statusDescriptions": {
+      "pending": "Your application is being reviewed by our team",
+      "approved": "Congratulations! Your application has been approved",
+      "rejected": "Your application was not selected this time",
+      "draft": "This application is saved but not yet submitted",
+      "under_review": "Your application is currently under review",
+      "default": "Application status"
+    },
+    "actions": {
+      "continueApplication": "Continue Application",
+      "applicationClosed": "Application Closed",
+      "viewDetails": "View Details"
+    },
+    "table": {
+      "allApplications": "All Applications",
+      "pendingApplications": "Pending Applications",
+      "approvedApplications": "Approved Applications",
+      "rejectedApplications": "Rejected Applications",
+      "draftApplications": "Draft Applications",
+      "searchPlaceholder": "Search by project title, sector, or country..."
+    },
+    "emptyState": {
+      "errorTitle": "Error loading applications",
+      "errorDesc": "There was an error loading your applications. Please try again later.",
+      "noApplications": "No applications yet",
+      "noApplicationsDesc": "Start by browsing available opportunities and submitting your first application.",
+      "noFilteredApplications": "No",
+      "noFilteredApplicationsDesc": "Try adjusting your filter criteria to find more applications.",
+      "browseOpportunities": "Browse Opportunities",
+      "clearFilter": "Clear Filter",
+      "viewGuide": "View Guide",
+      "tips": {
+        "completeProfile": "Complete your profile to increase approval chances",
+        "readRequirements": "Read project requirements carefully before applying",
+        "saveDrafts": "You can save applications as drafts and submit later",
+        "checkDeadlines": "Check application deadlines to avoid missing opportunities"
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose what notifications you want to receive",
+      "emailNotifications": "Email Notifications",
+      "emailNotificationsDesc": "Receive email updates about your applications",
+      "applicationUpdates": "Application Updates",
+      "applicationUpdatesDesc": "Get notified when your application status changes",
+      "newsletter": "Newsletter",
+      "newsletterDesc": "Receive our monthly newsletter with funding opportunities"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Customize your experience",
+      "language": "Language",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Manage your account security settings",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "enterCurrentPassword": "Enter current password",
+      "enterNewPassword": "Enter new password",
+      "confirmNewPassword": "Confirm new password",
+      "updatePassword": "Update Password"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Irreversible and destructive actions",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDesc": "Permanently delete your account and all associated data"
+    },
+    "save": {
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "saved": "Settings saved",
+      "savedDesc": "Your preferences have been updated.",
+      "languageUpdated": "Language updated",
+      "themeUpdated": "Theme updated"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Stay updated on your applications and account activity",
+    "markAllAsRead": "Mark all as read",
+    "marking": "Marking...",
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "sections": {
+      "unread": "Unread",
+      "earlier": "Earlier"
+    },
+    "actions": {
+      "viewDetails": "View details →"
+    },
+    "emptyState": {
+      "title": "No notifications",
+      "description": "You're all caught up! New notifications will appear here."
+    }
+  },
+  "documents": {
+    "title": "My Documents",
+    "subtitle": "Manage your document library and application documents",
+    "uploadToLibrary": "Upload to Library",
+    "uploading": "Uploading...",
+    "applyForFunding": "Apply for Funding",
+    "searchPlaceholder": "Search documents...",
+    "tabs": {
+      "library": "Library",
+      "applications": "Applications"
+    },
+    "library": {
+      "title": "Document Library",
+      "description": "Reusable documents that can be selected when applying for opportunities"
+    },
+    "applicationDocuments": {
+      "title": "Application Documents",
+      "description": "Documents linked to specific applications"
+    },
+    "emptyState": {
+      "noLibraryDocuments": "No library documents",
+      "noLibraryDocumentsDesc": "Upload documents to your library to reuse them across multiple applications. Click 'Upload to Library' above to get started.",
+      "noLibraryDocumentsSearch": "Try adjusting your search to find more documents.",
+      "noApplicationDocuments": "No application documents",
+      "noApplicationDocumentsDesc": "Documents uploaded with your applications will appear here. Start applying for opportunities to upload documents.",
+      "noApplicationDocumentsSearch": "Try adjusting your search to find more documents.",
+      "uploadToLibrary": "Upload to Library",
+      "browseOpportunities": "Browse Opportunities"
+    },
+    "deleteDialog": {
+      "title": "Delete Document",
+      "description": "Are you sure you want to delete \"{{fileName}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "badges": {
+      "application": "Application",
+      "library": "Library"
+    }
+  },
+  "resources": {
+    "hero": {
+      "title": "Resource Library",
+      "description": "Access guides, templates, tutorials, and tools to help you succeed in your funding applications",
+      "searchPlaceholder": "Search resources...",
+      "availableCount": "{{count}} resources available"
+    },
+    "tabs": {
+      "all": "All",
+      "documents": "Documents",
+      "videos": "Videos",
+      "spreadsheets": "Spreadsheets",
+      "presentations": "Presentations",
+      "links": "Links"
+    },
+    "emptyState": {
+      "noResources": "No resources available",
+      "noResourcesDesc": "Resources will appear here once they are added by administrators",
+      "noResults": "No results found",
+      "noResultsDesc": "No resources match \"{{query}}\". Try a different search term.",
+      "clearSearch": "Clear search",
+      "checkBackLater": "Check back later for new resources"
+    },
+    "sections": {
+      "browseResources": "Browse Resources",
+      "searchResults": "Search results for \"{{query}}\""
+    },
+    "card": {
+      "featured": "Featured",
+      "view": "View",
+      "open": "Open",
+      "download": "Download",
+      "typeLabels": {
+        "pdfDocument": "PDF Document",
+        "video": "Video",
+        "webinar": "Webinar",
+        "spreadsheet": "Spreadsheet",
+        "presentation": "Presentation",
+        "document": "Document",
+        "externalLink": "External Link",
+        "directory": "Directory",
+        "event": "Event"
+      }
+    }
   }
 }
-

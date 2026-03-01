@@ -13,9 +13,11 @@ import {
   useIncrementDownload,
   type Resource 
 } from "@/hooks/useResources";
+import { useTranslation } from "react-i18next";
 
 const Resources = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation(['dashboard']);
 
   const { data: resources, isLoading } = useResources();
   const incrementDownload = useIncrementDownload();
@@ -133,16 +135,16 @@ const Resources = () => {
         ) : !resources?.length ? (
           <EmptyState
             icon={FileText}
-            title="No resources available"
-            description="Resources will appear here once they are added by administrators"
+            title={t('dashboard:resources.emptyState.noResources')}
+            description={t('dashboard:resources.emptyState.noResourcesDesc')}
           />
         ) : filteredResources.length === 0 ? (
           <EmptyState
             icon={FileText}
-            title="No results found"
-            description={`No resources match "${searchQuery}". Try a different search term.`}
+            title={t('dashboard:resources.emptyState.noResults')}
+            description={t('dashboard:resources.emptyState.noResultsDesc', { query: searchQuery })}
             action={{
-              label: "Clear search",
+              label: t('dashboard:resources.emptyState.clearSearch'),
               onClick: () => setSearchQuery(""),
               variant: "outline"
             }}
@@ -156,7 +158,7 @@ const Resources = () => {
             
             <section>
               <h2 className="text-xl font-semibold text-foreground mb-6">
-                {searchQuery ? `Search results for "${searchQuery}"` : "Browse Resources"}
+                {searchQuery ? t('dashboard:resources.sections.searchResults', { query: searchQuery }) : t('dashboard:resources.sections.browseResources')}
               </h2>
               
               <ResourceTabs 

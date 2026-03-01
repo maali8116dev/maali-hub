@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead, useDeleteNotification, useDeleteAllNotifications, Notification } from "@/hooks/useNotifications";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 const Notifications = () => {
+  const { t } = useTranslation(['dashboard']);
   // Fetch real notifications
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsRead = useMarkNotificationAsRead();
@@ -60,9 +62,9 @@ const Notifications = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Notifications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('dashboard:notifications.title')}</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Stay updated on your applications and account activity
+            {t('dashboard:notifications.subtitle')}
           </p>
         </div>
         <div className="space-y-4">
@@ -84,9 +86,9 @@ const Notifications = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Notifications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('dashboard:notifications.title')}</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Stay updated on your applications and account activity
+            {t('dashboard:notifications.subtitle')}
           </p>
         </div>
         {unreadCount > 0 && (
@@ -97,7 +99,7 @@ const Notifications = () => {
             disabled={markAllAsRead.isPending}
           >
             <CheckCheck className="h-4 w-4 mr-2" />
-            {markAllAsRead.isPending ? "Marking..." : "Mark all as read"}
+            {markAllAsRead.isPending ? t('dashboard:notifications.marking') : t('dashboard:notifications.markAllAsRead')}
           </Button>
         )}
       </div>
@@ -106,7 +108,7 @@ const Notifications = () => {
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:notifications.stats.total')}</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-xl sm:text-2xl font-bold">{notifications.length}</div>
@@ -114,7 +116,7 @@ const Notifications = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Unread</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:notifications.stats.unread')}</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-xl sm:text-2xl font-bold text-warning">{unreadCount}</div>
@@ -122,7 +124,7 @@ const Notifications = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Read</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:notifications.stats.read')}</CardTitle>
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-xl sm:text-2xl font-bold text-muted-foreground">
@@ -135,7 +137,7 @@ const Notifications = () => {
       {/* Unread Notifications */}
       {unreadNotifications.length > 0 && (
         <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Unread</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">{t('dashboard:notifications.sections.unread')}</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
@@ -193,7 +195,7 @@ const Notifications = () => {
                         {notification.link && (
                           <Link to={notification.link}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs min-h-[44px] flex items-center">
-                              View details →
+                              {t('dashboard:notifications.actions.viewDetails')}
                             </Button>
                           </Link>
                         )}
@@ -211,7 +213,7 @@ const Notifications = () => {
       {/* Read Notifications */}
       {readNotifications.length > 0 && (
         <div className="space-y-3 sm:space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Earlier</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">{t('dashboard:notifications.sections.earlier')}</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
@@ -259,7 +261,7 @@ const Notifications = () => {
                         {notification.link && (
                           <Link to={notification.link}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs min-h-[44px] flex items-center">
-                              View details →
+                              {t('dashboard:notifications.actions.viewDetails')}
                             </Button>
                           </Link>
                         )}
@@ -278,9 +280,9 @@ const Notifications = () => {
         <Card>
           <CardContent className="py-12 text-center">
             <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">No notifications</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('dashboard:notifications.emptyState.title')}</h3>
             <p className="text-muted-foreground text-sm sm:text-base">
-              You're all caught up! New notifications will appear here.
+              {t('dashboard:notifications.emptyState.description')}
             </p>
           </CardContent>
         </Card>

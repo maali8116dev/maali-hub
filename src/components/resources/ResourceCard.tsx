@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Resource } from "@/hooks/useResources";
+import { useTranslation } from "react-i18next";
 
 interface ResourceCardProps {
   resource: Resource;
@@ -42,17 +43,17 @@ const formatFileSize = (bytes: number | null): string => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const getTypeLabel = (fileType: string): string => {
+const getTypeLabel = (fileType: string, t: any): string => {
   const labels: Record<string, string> = {
-    pdf: "PDF Document",
-    video: "Video",
-    webinar: "Webinar",
-    excel: "Spreadsheet",
-    powerpoint: "Presentation",
-    word: "Document",
-    link: "External Link",
-    directory: "Directory",
-    event: "Event"
+    pdf: t('dashboard:resources.card.typeLabels.pdfDocument'),
+    video: t('dashboard:resources.card.typeLabels.video'),
+    webinar: t('dashboard:resources.card.typeLabels.webinar'),
+    excel: t('dashboard:resources.card.typeLabels.spreadsheet'),
+    powerpoint: t('dashboard:resources.card.typeLabels.presentation'),
+    word: t('dashboard:resources.card.typeLabels.document'),
+    link: t('dashboard:resources.card.typeLabels.externalLink'),
+    directory: t('dashboard:resources.card.typeLabels.directory'),
+    event: t('dashboard:resources.card.typeLabels.event')
   };
   return labels[fileType] || fileType;
 };
@@ -62,6 +63,7 @@ const isExternalType = (fileType: string): boolean => {
 };
 
 export function ResourceCard({ resource, onDownload, variant = "default" }: ResourceCardProps) {
+  const { t } = useTranslation(['dashboard']);
   const isFeatured = variant === "featured";
   
   return (
@@ -94,7 +96,7 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
               </h3>
               {resource.is_featured && variant === "default" && (
                 <Badge variant="secondary" className="flex-shrink-0 text-xs w-fit">
-                  Featured
+                  {t('dashboard:resources.card.featured')}
                 </Badge>
               )}
             </div>
@@ -108,7 +110,7 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1">
               <Badge variant="outline" className="text-xs font-normal">
-                {getTypeLabel(resource.file_type)}
+                {getTypeLabel(resource.file_type, t)}
               </Badge>
               
               {resource.duration && (
@@ -138,7 +140,7 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
             {resource.title === "Find a Mentor" ? (
               <Button size="sm" variant="outline" asChild className="w-full sm:w-auto min-h-[44px] sm:min-h-0">
                 <Link to="/mentors">
-                  View
+                  {t('dashboard:resources.card.view')}
                   <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -152,12 +154,12 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
               >
                 {isExternalType(resource.file_type) ? (
                   <>
-                    Open
+                    {t('dashboard:resources.card.open')}
                     <ExternalLink className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
                   </>
                 ) : (
                   <>
-                    Download
+                    {t('dashboard:resources.card.download')}
                     <Download className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover/btn:translate-y-0.5" />
                   </>
                 )}

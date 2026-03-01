@@ -32,10 +32,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Documents = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation(['dashboard']);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<UploadedDocument | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -135,9 +137,9 @@ const Documents = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">My Documents</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('dashboard:documents.title')}</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Manage your document library and application documents
+            {t('dashboard:documents.subtitle')}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -148,7 +150,7 @@ const Documents = () => {
             disabled={isUploading}
           >
             <Upload className="h-4 w-4 mr-2" />
-            {isUploading ? "Uploading..." : "Upload to Library"}
+            {isUploading ? t('dashboard:documents.uploading') : t('dashboard:documents.uploadToLibrary')}
           </Button>
           <input
             ref={fileInputRef}
@@ -160,7 +162,7 @@ const Documents = () => {
           />
           <Button onClick={() => navigate("/projects")} className="w-full sm:w-auto min-h-[44px]">
             <FileCheck className="h-4 w-4 mr-2" />
-            Apply for Funding
+            {t('dashboard:documents.applyForFunding')}
           </Button>
         </div>
       </div>
@@ -171,7 +173,7 @@ const Documents = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search documents..."
+              placeholder={t('dashboard:documents.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-11 sm:h-10"
@@ -185,11 +187,11 @@ const Documents = () => {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="library" className="flex items-center gap-2">
             <Library className="h-4 w-4" />
-            Library ({libraryDocuments.length})
+            {t('dashboard:documents.tabs.library')} ({libraryDocuments.length})
           </TabsTrigger>
           <TabsTrigger value="applications" className="flex items-center gap-2">
             <FileCheck className="h-4 w-4" />
-            Applications ({applicationDocuments.length})
+            {t('dashboard:documents.tabs.applications')} ({applicationDocuments.length})
           </TabsTrigger>
         </TabsList>
 
@@ -207,10 +209,10 @@ const Documents = () => {
             <Card>
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-base sm:text-lg">
-                  Document Library ({filteredLibraryDocuments.length})
+                  {t('dashboard:documents.library.title')} ({filteredLibraryDocuments.length})
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Reusable documents that can be selected when applying for opportunities
+                  {t('dashboard:documents.library.description')}
                 </p>
               </CardHeader>
               <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -234,16 +236,16 @@ const Documents = () => {
               <CardContent className="pt-6">
                 <EmptyState
                   icon={Library}
-                  title="No library documents"
+                  title={t('dashboard:documents.emptyState.noLibraryDocuments')}
                   description={
                     searchQuery
-                      ? "Try adjusting your search to find more documents."
-                      : "Upload documents to your library to reuse them across multiple applications. Click 'Upload to Library' above to get started."
+                      ? t('dashboard:documents.emptyState.noLibraryDocumentsSearch')
+                      : t('dashboard:documents.emptyState.noLibraryDocumentsDesc')
                   }
                   action={
                     !searchQuery
                       ? {
-                          label: "Upload to Library",
+                          label: t('dashboard:documents.emptyState.uploadToLibrary'),
                           onClick: () => fileInputRef.current?.click(),
                           variant: "hero",
                         }
@@ -269,10 +271,10 @@ const Documents = () => {
             <Card>
               <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-base sm:text-lg">
-                  Application Documents ({filteredApplicationDocuments.length})
+                  {t('dashboard:documents.applicationDocuments.title')} ({filteredApplicationDocuments.length})
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Documents linked to specific applications
+                  {t('dashboard:documents.applicationDocuments.description')}
                 </p>
               </CardHeader>
               <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -297,16 +299,16 @@ const Documents = () => {
               <CardContent className="pt-6">
                 <EmptyState
                   icon={FileCheck}
-                  title="No application documents"
+                  title={t('dashboard:documents.emptyState.noApplicationDocuments')}
                   description={
                     searchQuery
-                      ? "Try adjusting your search to find more documents."
-                      : "Documents uploaded with your applications will appear here. Start applying for opportunities to upload documents."
+                      ? t('dashboard:documents.emptyState.noApplicationDocumentsSearch')
+                      : t('dashboard:documents.emptyState.noApplicationDocumentsDesc')
                   }
                   action={
                     !searchQuery
                       ? {
-                          label: "Browse Opportunities",
+                          label: t('dashboard:documents.emptyState.browseOpportunities'),
                           onClick: () => navigate("/projects"),
                           variant: "hero",
                         }
@@ -323,18 +325,18 @@ const Documents = () => {
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogTitle>{t('dashboard:documents.deleteDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteConfirm?.fileName}"? This action cannot be undone.
+              {t('dashboard:documents.deleteDialog.description', { fileName: deleteConfirm?.fileName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('dashboard:documents.deleteDialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('dashboard:documents.deleteDialog.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -379,7 +381,7 @@ const DocumentItem = ({
               <>
                 <span>•</span>
                 <Badge variant="outline" className="text-xs">
-                  Application
+                  {t('dashboard:documents.badges.application')}
                 </Badge>
               </>
             )}
@@ -387,7 +389,7 @@ const DocumentItem = ({
               <>
                 <span>•</span>
                 <Badge variant="secondary" className="text-xs">
-                  Library
+                  {t('dashboard:documents.badges.library')}
                 </Badge>
               </>
             )}

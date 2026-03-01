@@ -1,6 +1,7 @@
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface ResourcesHeroProps {
   searchQuery: string;
@@ -9,6 +10,7 @@ interface ResourcesHeroProps {
 }
 
 export function ResourcesHero({ searchQuery, onSearchChange, totalCount }: ResourcesHeroProps) {
+  const { t } = useTranslation(['dashboard']);
   return (
     <section className="relative py-12 md:py-16 mb-8">
       {/* Background decoration */}
@@ -18,10 +20,10 @@ export function ResourcesHero({ searchQuery, onSearchChange, totalCount }: Resou
       
       <div className="text-center max-w-3xl mx-auto px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
-          Resource Library
+          {t('dashboard:resources.hero.title')}
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Access guides, templates, tutorials, and tools to help you succeed in your funding applications
+          {t('dashboard:resources.hero.description')}
         </p>
         
         {/* Search bar */}
@@ -30,7 +32,7 @@ export function ResourcesHero({ searchQuery, onSearchChange, totalCount }: Resou
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search resources..."
+              placeholder={t('dashboard:resources.hero.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-12 pr-12 h-14 text-base rounded-xl border-border/50 bg-background/80 backdrop-blur-sm shadow-sm focus-visible:ring-primary/30"
@@ -48,7 +50,7 @@ export function ResourcesHero({ searchQuery, onSearchChange, totalCount }: Resou
           </div>
           
           <p className="mt-3 text-sm text-muted-foreground">
-            {totalCount} resources available
+            {t('dashboard:resources.hero.availableCount', { count: totalCount })}
           </p>
         </div>
       </div>

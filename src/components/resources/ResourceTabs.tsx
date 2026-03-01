@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Resource } from "@/hooks/useResources";
 import { ResourceCard } from "./ResourceCard";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface ResourceTabsProps {
   resources: Resource[];
@@ -13,21 +14,22 @@ interface ResourceTabsProps {
 
 interface TabConfig {
   id: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   types: string[];
 }
 
-const tabs: TabConfig[] = [
-  { id: "all", label: "All", icon: LayoutGrid, types: [] },
-  { id: "documents", label: "Documents", icon: FileText, types: ["pdf", "word"] },
-  { id: "videos", label: "Videos", icon: Video, types: ["video", "webinar"] },
-  { id: "spreadsheets", label: "Spreadsheets", icon: Table2, types: ["excel"] },
-  { id: "presentations", label: "Presentations", icon: Presentation, types: ["powerpoint"] },
-  { id: "links", label: "Links", icon: LinkIcon, types: ["link", "directory", "event"] },
-];
-
 export function ResourceTabs({ resources, onDownload }: ResourceTabsProps) {
+  const { t } = useTranslation(['dashboard']);
+  
+  const tabs: TabConfig[] = [
+    { id: "all", labelKey: "dashboard:resources.tabs.all", icon: LayoutGrid, types: [] },
+    { id: "documents", labelKey: "dashboard:resources.tabs.documents", icon: FileText, types: ["pdf", "word"] },
+    { id: "videos", labelKey: "dashboard:resources.tabs.videos", icon: Video, types: ["video", "webinar"] },
+    { id: "spreadsheets", labelKey: "dashboard:resources.tabs.spreadsheets", icon: Table2, types: ["excel"] },
+    { id: "presentations", labelKey: "dashboard:resources.tabs.presentations", icon: Presentation, types: ["powerpoint"] },
+    { id: "links", labelKey: "dashboard:resources.tabs.links", icon: LinkIcon, types: ["link", "directory", "event"] },
+  ];
   const getResourcesForTab = (tab: TabConfig): Resource[] => {
     if (tab.id === "all") return resources;
     return resources.filter(r => tab.types.includes(r.file_type));
@@ -60,7 +62,7 @@ export function ResourceTabs({ resources, onDownload }: ResourceTabsProps) {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="hidden sm:inline">{t(tab.labelKey)}</span>
                 <Badge 
                   variant="secondary" 
                   className={cn(
@@ -88,8 +90,8 @@ export function ResourceTabs({ resources, onDownload }: ResourceTabsProps) {
             {tabResources.length === 0 ? (
               <EmptyState
                 icon={tab.icon}
-                title={`No ${tab.label.toLowerCase()} available`}
-                description="Check back later for new resources"
+                title={t('dashboard:resources.emptyState.noResults')}
+                description={t('dashboard:resources.emptyState.checkBackLater')}
               />
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
