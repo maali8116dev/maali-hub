@@ -31,6 +31,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -65,6 +66,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const getPageTitle = () => {
     if (location.pathname === "/admin") return "Admin Dashboard";
     if (location.pathname === "/admin/projects") return "Manage Projects";
+    if (location.pathname.startsWith("/admin/projects/") && location.pathname.endsWith("/applications")) {
+      return "Project Applications";
+    }
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname === "/admin/financial") return "Financial Management";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
@@ -164,6 +168,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 lg:hidden">
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1 justify-end">
+            <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <Shield className="h-4 w-4 text-primary" />
@@ -182,6 +187,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             <h2 className="text-lg font-semibold">{getPageTitle()}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <Shield className="h-4 w-4 text-primary" />

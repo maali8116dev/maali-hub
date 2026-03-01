@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import NotificationsDropdown from "./NotificationsDropdown";
 import EmailVerificationBanner from "./EmailVerificationBanner";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   Sidebar,
   SidebarContent,
@@ -173,6 +174,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 lg:hidden">
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1 justify-end">
+            <ThemeToggle />
             <NotificationsDropdown
               notifications={notifications}
               unreadCount={unreadCount}
@@ -197,6 +199,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <h2 className="text-lg font-semibold">{getPageTitle()}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <NotificationsDropdown
               notifications={notifications}
               unreadCount={unreadCount}

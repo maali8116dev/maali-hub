@@ -39,7 +39,6 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
     }));
   });
   
-  const [versionNotes, setVersionNotes] = useState('');
 
   const addCriterion = () => {
     setCriteria([...criteria, { 
@@ -85,26 +84,24 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
         description: c.description?.trim() || '',
       }));
 
-      // Create new rubric version using RPC function
-      const { data: versionId, error } = await supabase.rpc(
-        'create_rubric_version',
-        {
-          p_rubric: { criteria: normalizedCriteria },
-          p_notes: versionNotes.trim() || null,
-        }
-      );
+      // Update system rubric directly (versioning removed for simplicity)
+      const { error } = await supabase
+        .from('system_rubric')
+        .update({
+          rubric: { criteria: normalizedCriteria },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', '00000000-0000-0000-0000-000000000001');
       
       if (error) throw error;
       
-      return versionId;
+      return '00000000-0000-0000-0000-000000000001';
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-rubric'] });
-      queryClient.invalidateQueries({ queryKey: ['rubric-versions'] });
-      setVersionNotes('');
       toast({ 
-        title: 'Rubric Version Created', 
-        description: 'A new rubric version has been created. All new reviews will use this version.' 
+        title: 'Rubric Updated', 
+        description: 'The rubric has been updated successfully. All new reviews will use this rubric.' 
       });
       onSuccess?.();
     },
@@ -205,22 +202,8 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
         ))}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="version-notes">Version Notes (optional)</Label>
-        <Textarea
-          id="version-notes"
-          value={versionNotes}
-          onChange={(e) => setVersionNotes(e.target.value)}
-          placeholder="Describe what changed in this version (e.g., 'Added sustainability criterion', 'Updated weights')"
-          rows={3}
-        />
-        <p className="text-xs text-muted-foreground">
-          Creating a new version will deactivate all previous versions. Historical reviews will continue using their original rubric versions.
-        </p>
-      </div>
-
       <Button type="submit" className="w-full" disabled={criteria.length === 0 || saveRubric.isPending}>
-        {saveRubric.isPending ? 'Creating Version...' : 'Create New Rubric Version'}
+        {saveRubric.isPending ? 'Saving...' : 'Save Rubric'}
       </Button>
     </form>
   );

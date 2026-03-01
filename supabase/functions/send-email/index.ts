@@ -86,6 +86,8 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           margin: 0;
           padding: 0;
           color: #212121;
+          -webkit-text-size-adjust: 100%;
+          -ms-text-size-adjust: 100%;
         }
         .container {
           max-width: 600px;
@@ -104,6 +106,8 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
         .header img {
           max-width: 75px;
           height: auto;
+          display: block;
+          margin: 0 auto;
         }
         .content {
           padding: 25px 35px;
@@ -113,6 +117,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           font-size: 20px;
           font-weight: bold;
           margin: 0 0 15px 0;
+          line-height: 1.4;
         }
         .content p {
           color: #333;
@@ -135,6 +140,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           font-size: 36px;
           font-weight: bold;
           margin: 10px 0;
+          word-break: break-all;
         }
         .verification-expiry {
           color: #333;
@@ -144,13 +150,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
         .button {
           display: inline-block;
           background: ${primaryGradient};
-          color: #ffffff;
+          color: #ffffff !important;
           padding: 12px 24px;
           text-decoration: none;
           border-radius: 4px;
           font-size: 14px;
           font-weight: 500;
           margin: 20px 0;
+          text-align: center;
         }
         .button:hover {
           opacity: 0.9;
@@ -208,6 +215,132 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           margin: 6px 0 14px 0;
           padding-left: 20px;
         }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+        /* Mobile Responsive Styles */
+        @media only screen and (max-width: 600px) {
+          .container {
+            padding: 10px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .email-section {
+            width: 100% !important;
+          }
+          .header {
+            padding: 15px 10px !important;
+          }
+          .header img {
+            max-width: 60px !important;
+          }
+          .content {
+            padding: 20px 15px !important;
+          }
+          .content h1 {
+            font-size: 18px !important;
+            margin: 0 0 12px 0 !important;
+          }
+          .content p {
+            font-size: 14px !important;
+            line-height: 22px !important;
+            margin: 5px 0 12px 0 !important;
+          }
+          .verification-code {
+            font-size: 28px !important;
+          }
+          .button {
+            display: block !important;
+            width: 100% !important;
+            padding: 14px 20px !important;
+            margin: 15px 0 !important;
+            box-sizing: border-box;
+          }
+          .footer {
+            padding: 20px 15px !important;
+          }
+          .footer p {
+            font-size: 13px !important;
+          }
+          .footer-links {
+            font-size: 11px !important;
+            padding: 0 15px !important;
+            margin: 20px 0 !important;
+          }
+          .footer-links a {
+            font-size: 13px !important;
+          }
+          ul {
+            font-size: 14px !important;
+            padding-left: 18px !important;
+          }
+        }
+        /* Additional mobile optimizations for small screens */
+        @media only screen and (max-width: 480px) {
+          .container {
+            padding: 5px !important;
+          }
+          .header {
+            padding: 12px 8px !important;
+          }
+          .header img {
+            max-width: 50px !important;
+          }
+          .content {
+            padding: 15px 12px !important;
+          }
+          .content h1 {
+            font-size: 16px !important;
+          }
+          .verification-code {
+            font-size: 24px !important;
+          }
+          .button {
+            padding: 12px 16px !important;
+            font-size: 13px !important;
+          }
+        }
+        /* Mobile styles for summary sections - values stack under labels */
+        @media only screen and (max-width: 600px) {
+          .summary-section {
+            padding: 12px 15px !important;
+            margin: 15px 0 !important;
+          }
+          .summary-table {
+            font-size: 13px !important;
+            width: 100% !important;
+          }
+          .summary-row {
+            display: block !important;
+            width: 100% !important;
+          }
+          .summary-label {
+            display: block !important;
+            width: 100% !important;
+            padding: 8px 0 4px 0 !important;
+            text-align: left !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            color: #6b7280 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+          }
+          .summary-value {
+            display: block !important;
+            width: 100% !important;
+            padding: 0 0 12px 0 !important;
+            text-align: left !important;
+            font-size: 14px !important;
+            color: #111827 !important;
+            font-weight: 500 !important;
+            border-bottom: 1px solid #e5e7eb !important;
+          }
+          .summary-row:last-child .summary-value {
+            border-bottom: none !important;
+            padding-bottom: 0 !important;
+          }
+        }
       </style>
     </head>
     <body>
@@ -250,20 +383,38 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
     if (visibleRows.length === 0) return "";
 
     return `
-      <div style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
-        ${sectionTitle ? `<p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#374151;">${sectionTitle}</p>` : ""}
+      <div class="summary-section" style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
+        ${sectionTitle ? `<p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#374151;">${sectionTitle}</p>` : ""}
+        <!--[if mso]>
         <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#111827;">
           ${visibleRows
             .map(
               (row) => `
                 <tr>
-                  <td style="padding:4px 0;color:#6b7280;">${row.label}</td>
-                  <td style="padding:4px 0;text-align:right;${row.monospace ? "font-family:monospace;" : ""}">${row.value}</td>
+                  <td style="padding:8px 0;color:#6b7280;width:40%;">${row.label}</td>
+                  <td style="padding:8px 0;text-align:right;${row.monospace ? "font-family:monospace;" : ""}word-break:break-word;">${row.value}</td>
                 </tr>
               `
             )
             .join("")}
         </table>
+        <![endif]-->
+        <!--[if !mso]><!-- -->
+        <table width="100%" cellpadding="0" cellspacing="0" class="summary-table" style="font-size:14px;color:#111827;width:100%;border-collapse:collapse;">
+          ${visibleRows
+            .map(
+              (row, index) => `
+                <tr class="summary-row">
+                  <td colspan="2" class="summary-label" style="padding:${index === 0 ? '0' : '12px'} 0 4px 0;color:#6b7280;word-break:break-word;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;width:100%;">${row.label}</td>
+                </tr>
+                <tr class="summary-row">
+                  <td colspan="2" class="summary-value" style="padding:0 0 12px 0;${row.monospace ? "font-family:monospace;" : ""}word-break:break-word;font-size:14px;color:#111827;font-weight:500;border-bottom:1px solid #e5e7eb;width:100%;">${row.value}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </table>
+        <!--<![endif]-->
       </div>
     `;
   };

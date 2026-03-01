@@ -3,7 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, ClipboardCheck, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminProjects, useDeleteProject } from "@/hooks/useAdminProjects";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Briefcase } from "lucide-react";
 import { getProjectStatusBadge } from "@/lib/statusBadges";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminProjects = () => {
   const navigate = useNavigate();
@@ -29,6 +31,28 @@ const AdminProjects = () => {
 
   const { data: projects = [], isLoading, error, refetch, isFetching } = useAdminProjects();
   const deleteProject = useDeleteProject();
+
+  // Fetch approved applications count per project to check if winners are selected
+  const { data: projectsWithWinners = [] } = useQuery({
+    queryKey: ["projects-winners-selected"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("applications")
+        .select("project_id")
+        .eq("status", "approved")
+        .eq("is_draft", false);
+
+      if (error) throw error;
+
+      // Get unique project IDs that have approved applications
+      const projectIdsWithWinners = new Set(
+        (data || []).map((app) => app.project_id)
+      );
+
+      return Array.from(projectIdsWithWinners) as number[];
+    },
+    staleTime: 1 * 60 * 1000, // Cache for 1 minute
+  });
 
 
   const handleDelete = (id: number) => {
@@ -53,7 +77,19 @@ const AdminProjects = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getProjectStatusBadge(row.original.status);
+        const project = row.original;
+        const hasWinners = projectsWithWinners.includes(project.id);
+        return (
+          <div className="flex items-center gap-2">
+            {getProjectStatusBadge(project.status)}
+            {hasWinners && (
+              <Badge className="bg-success/10 text-success border-success/20">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Winners Selected
+              </Badge>
+            )}
+          </div>
+        );
       },
     },
     {
@@ -143,6 +179,14 @@ const AdminProjects = () => {
               title="View project"
             >
               <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/admin/projects/${project.id}/applications`)}
+              title="View ranked applications"
+            >
+              <ClipboardCheck className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"

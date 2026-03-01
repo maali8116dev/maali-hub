@@ -60,7 +60,7 @@ const AdminApplications = () => {
         <SortableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => {
-        return getStatusBadge(row.original.status, row.original.reviewProgress);
+        return getApplicationStatusBadge(row.original.status, row.original.reviewProgress);
       },
     },
     {

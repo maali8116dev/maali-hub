@@ -17,6 +17,7 @@ import {
 import { useTransactions, useFinancialStats, Transaction } from "@/hooks/useFinancialData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { getPaymentStatusBadge } from "@/lib/statusBadges";
 import {
   Select,
   SelectContent,
@@ -32,7 +33,13 @@ const AdminFinancial = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
 
-  const { data: transactions = [], isLoading: transactionsLoading, error: transactionsError } = useTransactions();
+  const { 
+    data: transactions = [], 
+    isLoading: transactionsLoading, 
+    error: transactionsError,
+    refetch: refetchTransactions,
+    isFetching: isFetchingTransactions
+  } = useTransactions();
   const { data: stats, isLoading: statsLoading, error: statsError } = useFinancialStats();
 
 
@@ -499,7 +506,9 @@ const AdminFinancial = () => {
             enablePagination={true}
             enableExport={true}
             exportFileName="transactions"
-            onRefresh={() => refetchTransactions()}
+            onRefresh={() => {
+              refetchTransactions();
+            }}
             isRefreshing={isFetchingTransactions}
           />
         </CardContent>

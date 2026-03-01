@@ -20,7 +20,6 @@ export const useSubmitReview = () => {
       scores,
       comments,
       recommendation,
-      rubricVersionId,
     }: {
       applicationId: string;
       reviewerId: string;
@@ -28,23 +27,7 @@ export const useSubmitReview = () => {
       scores: Record<string, number>;
       comments?: string;
       recommendation: 'approve' | 'reject' | 'request_info';
-      rubricVersionId?: string;
     }) => {
-      // Get active rubric version if not provided
-      let activeRubricVersionId = rubricVersionId;
-      if (!activeRubricVersionId) {
-        const { data: activeVersion, error: versionError } = await supabase
-          .from('rubric_versions' as any)
-          .select('id')
-          .eq('is_active', true)
-          .order('version', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (versionError) throw versionError;
-        activeRubricVersionId = (activeVersion as any)?.id || null;
-      }
-      
       const { data, error } = await supabase
         .from('review_scores')
         .upsert({
@@ -54,7 +37,6 @@ export const useSubmitReview = () => {
           scores,
           comments: comments || null,
           recommendation,
-          rubric_version_id: activeRubricVersionId,
           submitted_at: new Date().toISOString(),
         }, {
           onConflict: 'application_id,reviewer_id',

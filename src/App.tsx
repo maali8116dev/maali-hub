@@ -7,10 +7,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
+import { MaintenanceMode } from "@/components/MaintenanceMode";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
+import { getMaintenanceConfig } from "@/lib/maintenanceMode";
 import Index from "./pages/Index";
 import Projects from "./pages/projects/Projects";
 import About from "./pages/About";
@@ -51,6 +53,7 @@ import AdminProjectForm from "./pages/admin/ProjectForm";
 import ReviewManagement from "./pages/admin/ReviewManagement";
 import { ReviewerDetails } from "./pages/admin/ReviewerDetails";
 import AdminProjectDetails from "./pages/admin/ProjectDetails";
+import ProjectApplications from "./pages/admin/ProjectApplications";
 import AdminActivityLogs from "./pages/admin/ActivityLogs";
 import AdminCategories from "./pages/admin/Categories";
 import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
@@ -95,17 +98,33 @@ const TrackingInitializer = () => {
   return null;
 };
 
-const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <TooltipProvider>
-          <TrackingInitializer />
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <CookieConsent />
-            <Routes>
+const App = () => {
+  const maintenanceConfig = getMaintenanceConfig();
+
+  // Show maintenance mode if enabled
+  if (maintenanceConfig.enabled) {
+    return (
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <MaintenanceMode
+          message={maintenanceConfig.message}
+          estimatedTime={maintenanceConfig.estimatedTime}
+          contactEmail={maintenanceConfig.contactEmail}
+        />
+      </ThemeProvider>
+    );
+  }
+
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
+          <TooltipProvider>
+            <TrackingInitializer />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <CookieConsent />
+              <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/about" element={<About />} />
@@ -334,6 +353,18 @@ const App = () => (
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <ApplicationDetails />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/projects/:id/applications"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <ProjectApplications />
                 </AdminLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
@@ -626,6 +657,7 @@ const App = () => (
     </ErrorBoundary>
     </QueryClientProvider>
   </ThemeProvider>
-);
+  );
+};
 
 export default App;

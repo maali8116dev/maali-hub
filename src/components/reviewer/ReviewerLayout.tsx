@@ -29,6 +29,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface ReviewerLayoutProps {
   children: React.ReactNode;
@@ -151,6 +152,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 lg:hidden">
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1 justify-end">
+            <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <ClipboardCheck className="h-4 w-4 text-primary" />
@@ -169,6 +171,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
             <h2 className="text-lg font-semibold">{getPageTitle()}</h2>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <ClipboardCheck className="h-4 w-4 text-primary" />

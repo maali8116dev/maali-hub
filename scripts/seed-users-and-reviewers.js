@@ -1120,6 +1120,7 @@ async function main() {
     let reviewScoresCreated = 0;
     
     if (allAssignments.length > 0) {
+
       // Sample score sets for different scenarios (varied quality)
       const scoreSets = [
         { innovation: 9, feasibility: 8, impact: 9, team: 8, recommendation: 'approve', comment: 'Excellent proposal with strong potential and a capable team.' },
@@ -1143,7 +1144,7 @@ async function main() {
           .select('id')
           .eq('application_id', assignment.application_id)
           .eq('reviewer_id', assignment.reviewer_id)
-          .single();
+          .maybeSingle();
 
         if (existing) {
           continue;
@@ -1175,7 +1176,7 @@ async function main() {
             )
           `)
           .eq('id', assignment.application_id)
-          .single();
+          .maybeSingle();
 
         if (!application) {
           continue;

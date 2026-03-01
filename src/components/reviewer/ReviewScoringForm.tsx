@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -124,12 +124,16 @@ const ReviewScoringForm = ({
     },
   });
 
-  const criteria = rubric?.rubric?.criteria || [
-    { name: 'innovation', weight: 0.25, max_score: 10, description: 'Innovation and creativity' },
-    { name: 'feasibility', weight: 0.25, max_score: 10, description: 'Feasibility and implementation plan' },
-    { name: 'impact', weight: 0.25, max_score: 10, description: 'Potential impact and benefits' },
-    { name: 'team', weight: 0.25, max_score: 10, description: 'Team capability and experience' },
-  ];
+  const criteria = useMemo(
+    () =>
+      rubric?.rubric?.criteria || [
+        { name: 'innovation', weight: 0.25, max_score: 10, description: 'Innovation and creativity' },
+        { name: 'feasibility', weight: 0.25, max_score: 10, description: 'Feasibility and implementation plan' },
+        { name: 'impact', weight: 0.25, max_score: 10, description: 'Potential impact and benefits' },
+        { name: 'team', weight: 0.25, max_score: 10, description: 'Team capability and experience' },
+      ],
+    [rubric?.rubric?.criteria]
+  );
 
   // Initialize scores - use existing review data if available, otherwise use defaults
   useEffect(() => {
@@ -169,7 +173,6 @@ const ReviewScoringForm = ({
         scores: data.scores,
         comments: data.comments,
         recommendation: data.recommendation,
-        rubricVersionId: rubric?.id, // Pass the active rubric version ID
       },
       {
         onSuccess: async (savedReview) => {

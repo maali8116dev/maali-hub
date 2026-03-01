@@ -31,6 +31,7 @@ const Navigation = () => {
     { href: '/projects', label: t('navigation:projects') },
     { href: '/about', label: t('navigation:about') },
     { href: '/resources', label: t('navigation:resources') },
+    { href: '/blog', label: t('navigation:blog', 'Blog') },
     { href: '/contact', label: t('navigation:contact') }
   ];
 
