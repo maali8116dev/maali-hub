@@ -1,0 +1,187 @@
+{
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "applications": "Mes candidatures",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "billing": "Facturation",
+    "settings": "Paramètres"
+  },
+  "header": {
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter"
+  },
+  "pages": {
+    "dashboard": "Tableau de bord",
+    "applications": "Mes candidatures",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "billing": "Facturation",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bon retour ! Voici un aperçu de votre activité.",
+    "helpTooltip": "Votre tableau de bord affiche un aperçu de vos candidatures, l'état de votre profil et les actions rapides. Utilisez les cartes de statistiques pour suivre vos progrès.",
+    "stats": {
+      "totalApplications": "Total des candidatures",
+      "totalApplicationsDesc": "Nombre total de candidatures que vous avez soumises, y compris les brouillons, en attente, approuvées et rejetées.",
+      "allTimeApplications": "Candidatures de tous les temps",
+      "pending": "En attente",
+      "pendingDesc": "Candidatures actuellement examinées par notre équipe. Vous serez notifié lorsqu'une décision sera prise.",
+      "underReview": "En cours d'examen",
+      "approved": "Approuvé",
+      "successfullyFunded": "Financé avec succès",
+      "rejected": "Rejeté",
+      "notSelected": "Non sélectionné"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "startNewApplication": "Démarrer une nouvelle candidature",
+      "browseOpportunities": "Parcourir les opportunités",
+      "viewAllApplications": "Voir toutes les candidatures"
+    },
+    "profileCompletion": {
+      "title": "Complétion du profil",
+      "status": "État du profil",
+      "complete": "Complet",
+      "completeProfile": "Complétez votre profil →",
+      "viewProfile": "Voir votre profil →"
+    },
+    "recentApplications": {
+      "title": "Candidatures récentes",
+      "viewAll": "Voir tout",
+      "submitted": "Soumis"
+    },
+    "emptyState": {
+      "noApplications": "Aucune candidature pour le moment",
+      "noApplicationsDesc": "Commencez à postuler pour des opportunités de financement pour voir vos candidatures ici.",
+      "browseOpportunities": "Parcourir les opportunités",
+      "viewGuide": "Voir le guide",
+      "tips": {
+        "completeProfile": "Complétez votre profil avant de postuler",
+        "readRequirements": "Lisez attentivement les exigences du projet",
+        "prepareDocuments": "Préparez tous les documents requis à l'avance",
+        "submitBeforeDeadline": "Soumettez les candidatures avant les dates limites"
+      }
+    },
+    "profileTip": {
+      "title": "Complétez votre profil",
+      "description": "Votre profil est {{percentage}}% complet. Un profil complet augmente vos chances d'approbation.",
+      "action": "Compléter le profil"
+    }
+  },
+  "applications": {
+    "title": "Mes candidatures",
+    "subtitle": "Suivez et gérez vos candidatures de financement",
+    "helpTooltip": "Suivez le statut de toutes vos candidatures de financement. Vous pouvez filtrer par statut, rechercher et voir des informations détaillées sur chaque candidature.",
+    "firstTimeTip": {
+      "title": "Prêt à postuler pour un financement ?",
+      "description": "Parcourez les opportunités disponibles et soumettez votre première candidature. Assurez-vous que votre profil est complet pour augmenter vos chances d'approbation.",
+      "action": "Parcourir les opportunités"
+    },
+    "filters": {
+      "all": "Tout",
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "draft": "Brouillon"
+    },
+    "columns": {
+      "project": "Projet",
+      "sector": "Secteur",
+      "country": "Pays",
+      "status": "Statut",
+      "submitted": "Soumis",
+      "actions": "Actions"
+    },
+    "statusDescriptions": {
+      "pending": "Votre candidature est en cours d'examen par notre équipe",
+      "approved": "Félicitations ! Votre candidature a été approuvée",
+      "rejected": "Votre candidature n'a pas été sélectionnée cette fois",
+      "draft": "Cette candidature est enregistrée mais pas encore soumise",
+      "under_review": "Votre candidature est actuellement en cours d'examen",
+      "default": "Statut de la candidature"
+    },
+    "actions": {
+      "continueApplication": "Continuer la candidature",
+      "applicationClosed": "Candidature fermée",
+      "viewDetails": "Voir les détails"
+    },
+    "table": {
+      "allApplications": "Toutes les candidatures",
+      "pendingApplications": "Candidatures en attente",
+      "approvedApplications": "Candidatures approuvées",
+      "rejectedApplications": "Candidatures rejetées",
+      "draftApplications": "Candidatures en brouillon",
+      "searchPlaceholder": "Rechercher par titre de projet, secteur ou pays..."
+    },
+    "emptyState": {
+      "errorTitle": "Erreur lors du chargement des candidatures",
+      "errorDesc": "Une erreur s'est produite lors du chargement de vos candidatures. Veuillez réessayer plus tard.",
+      "noApplications": "Aucune candidature pour le moment",
+      "noApplicationsDesc": "Commencez par parcourir les opportunités disponibles et soumettre votre première candidature.",
+      "noFilteredApplications": "Aucune candidature",
+      "noFilteredApplicationsDesc": "Essayez d'ajuster vos critères de filtre pour trouver plus de candidatures.",
+      "browseOpportunities": "Parcourir les opportunités",
+      "clearFilter": "Effacer le filtre",
+      "viewGuide": "Voir le guide",
+      "tips": {
+        "completeProfile": "Complétez votre profil pour augmenter les chances d'approbation",
+        "readRequirements": "Lisez attentivement les exigences du projet avant de postuler",
+        "saveDrafts": "Vous pouvez enregistrer les candidatures en brouillon et les soumettre plus tard",
+        "checkDeadlines": "Vérifiez les dates limites des candidatures pour éviter de manquer des opportunités"
+      }
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez les paramètres et préférences de votre compte",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choisissez les notifications que vous souhaitez recevoir",
+      "emailNotifications": "Notifications par e-mail",
+      "emailNotificationsDesc": "Recevez des mises à jour par e-mail concernant vos candidatures",
+      "applicationUpdates": "Mises à jour des candidatures",
+      "applicationUpdatesDesc": "Soyez notifié lorsque le statut de votre candidature change",
+      "newsletter": "Newsletter",
+      "newsletterDesc": "Recevez notre newsletter mensuelle avec des opportunités de financement"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "description": "Personnalisez votre expérience",
+      "language": "Langue",
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "security": {
+      "title": "Sécurité",
+      "description": "Gérez les paramètres de sécurité de votre compte",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "enterCurrentPassword": "Entrez le mot de passe actuel",
+      "enterNewPassword": "Entrez le nouveau mot de passe",
+      "confirmNewPassword": "Confirmez le nouveau mot de passe",
+      "updatePassword": "Mettre à jour le mot de passe"
+    },
+    "dangerZone": {
+      "title": "Zone de danger",
+      "description": "Actions irréversibles et destructives",
+      "deleteAccount": "Supprimer le compte",
+      "deleteAccountDesc": "Supprimer définitivement votre compte et toutes les données associées"
+    },
+    "save": {
+      "saving": "Enregistrement...",
+      "saveChanges": "Enregistrer les modifications",
+      "saved": "Paramètres enregistrés",
+      "savedDesc": "Vos préférences ont été mises à jour.",
+      "languageUpdated": "Langue mise à jour",
+      "themeUpdated": "Thème mis à jour"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "applications": "My Applications",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "header": {
+    "signOut": "Sign Out",
+    "signIn": "Sign In"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "applications": "My Applications",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings"
+  }
+}
+

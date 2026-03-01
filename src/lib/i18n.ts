@@ -7,16 +7,19 @@ import enCommon from '../locales/en/common.json';
 import enNavigation from '../locales/en/navigation.json';
 import enLanding from '../locales/en/landing.json';
 import enFooter from '../locales/en/footer.json';
+import enDashboard from '../locales/en/dashboard.json';
 
 import frCommon from '../locales/fr/common.json';
 import frNavigation from '../locales/fr/navigation.json';
 import frLanding from '../locales/fr/landing.json';
 import frFooter from '../locales/fr/footer.json';
+import frDashboard from '../locales/fr/dashboard.json';
 
 import ptCommon from '../locales/pt/common.json';
 import ptNavigation from '../locales/pt/navigation.json';
 import ptLanding from '../locales/pt/landing.json';
 import ptFooter from '../locales/pt/footer.json';
+import ptDashboard from '../locales/pt/dashboard.json';
 
 i18n
   .use(LanguageDetector)
@@ -28,18 +31,21 @@ i18n
         navigation: enNavigation,
         landing: enLanding,
         footer: enFooter,
+        dashboard: enDashboard,
       },
       fr: {
         common: frCommon,
         navigation: frNavigation,
         landing: frLanding,
         footer: frFooter,
+        dashboard: frDashboard,
       },
       pt: {
         common: ptCommon,
         navigation: ptNavigation,
         landing: ptLanding,
         footer: ptFooter,
+        dashboard: ptDashboard,
       },
     },
     fallbackLng: 'en',

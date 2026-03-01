@@ -22,7 +22,7 @@ import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'dashboard']);
   const { data: applications, isLoading: isLoadingApplications } = useApplications();
   const { data: dashboardStats, isLoading: isLoadingDashboardStats } = useUserDashboardStats();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
@@ -153,14 +153,14 @@ const Dashboard = () => {
 
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t('dashboard:dashboard.title')}</h1>
           <HelpTooltip 
-            content="Your dashboard shows an overview of your applications, profile status, and quick actions. Use the stats cards to track your progress."
+            content={t('dashboard:dashboard.helpTooltip')}
             side="right"
           />
         </div>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Welcome back! Here's an overview of your activity.
+          {t('dashboard:dashboard.welcome')}
         </p>
       </div>
 
@@ -174,10 +174,10 @@ const Dashboard = () => {
         <InAppTip
           id="profile-completion-tip"
           type="warning"
-          title="Complete your profile"
-          description={`Your profile is ${profileCompletion}% complete. A complete profile increases your chances of approval.`}
+          title={t('dashboard:dashboard.profileTip.title')}
+          description={t('dashboard:dashboard.profileTip.description', { percentage: profileCompletion })}
           action={{
-            label: "Complete Profile",
+            label: t('dashboard:dashboard.profileTip.action'),
             onClick: () => setShowWizard(true),
           }}
         />
@@ -191,9 +191,9 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
               <div className="flex items-center gap-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:dashboard.stats.totalApplications')}</CardTitle>
                 <HelpTooltip 
-                  content="Total number of applications you've submitted, including drafts, pending, approved, and rejected applications."
+                  content={t('dashboard:dashboard.stats.totalApplicationsDesc')}
                   side="top"
                 />
               </div>
@@ -202,7 +202,7 @@ const Dashboard = () => {
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.totalApplications}</div>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                All time applications
+                {t('dashboard:dashboard.stats.allTimeApplications')}
               </p>
             </CardContent>
           </Card>
@@ -210,9 +210,9 @@ const Dashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
               <div className="flex items-center gap-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:dashboard.stats.pending')}</CardTitle>
                 <HelpTooltip 
-                  content="Applications currently being reviewed by our team. You'll be notified when a decision is made."
+                  content={t('dashboard:dashboard.stats.pendingDesc')}
                   side="top"
                 />
               </div>
@@ -221,33 +221,33 @@ const Dashboard = () => {
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.pending}</div>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                Under review
+                {t('dashboard:dashboard.stats.underReview')}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Approved</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:dashboard.stats.approved')}</CardTitle>
               <CheckCircle className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.approved}</div>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                Successfully funded
+                {t('dashboard:dashboard.stats.successfullyFunded')}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Rejected</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard:dashboard.stats.rejected')}</CardTitle>
               <XCircle className="h-4 w-4 text-destructive hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.rejected}</div>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                Not selected
+                {t('dashboard:dashboard.stats.notSelected')}
               </p>
             </CardContent>
           </Card>
@@ -258,27 +258,27 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
-            <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.quickActions.title')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2 space-y-2">
             <Link to="/projects">
               <Button variant="hero" className="w-full justify-start min-h-[44px]">
                 <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Start New Application</span>
+                <span className="truncate">{t('dashboard:dashboard.quickActions.startNewApplication')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
             <Link to="/projects">
               <Button variant="outline" className="w-full justify-start min-h-[44px]">
                 <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">Browse Opportunities</span>
+                <span className="truncate">{t('dashboard:dashboard.quickActions.browseOpportunities')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
             <Link to="/dashboard/applications">
               <Button variant="outline" className="w-full justify-start min-h-[44px]">
                 <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">View All Applications</span>
+                <span className="truncate">{t('dashboard:dashboard.quickActions.viewAllApplications')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
@@ -287,14 +287,14 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
-            <CardTitle className="text-base sm:text-lg">Profile Completion</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.profileCompletion.title')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Profile Status</span>
+                <span className="text-muted-foreground">{t('dashboard:dashboard.profileCompletion.status')}</span>
                 <span className="font-medium">
-                  {isLoadingProfile ? "..." : `${profileCompletion}% Complete`}
+                  {isLoadingProfile ? "..." : `${profileCompletion}% ${t('dashboard:dashboard.profileCompletion.complete')}`}
                 </span>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
@@ -305,7 +305,7 @@ const Dashboard = () => {
               </div>
               <Link to="/dashboard/profile">
                 <Button variant="link" className="p-0 h-auto min-h-[44px] flex items-center">
-                  {profileCompletion < 100 ? "Complete your profile →" : "View your profile →"}
+                  {profileCompletion < 100 ? t('dashboard:dashboard.profileCompletion.completeProfile') : t('dashboard:dashboard.profileCompletion.viewProfile')}
                 </Button>
               </Link>
             </div>
@@ -316,10 +316,10 @@ const Dashboard = () => {
       {/* Recent Applications */}
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Recent Applications</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.recentApplications.title')}</CardTitle>
           <Link to="/dashboard/applications">
             <Button variant="ghost" size="sm" className="min-h-[44px] w-full sm:w-auto">
-              View All
+              {t('dashboard:dashboard.recentApplications.viewAll')}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
@@ -339,7 +339,7 @@ const Dashboard = () => {
                     <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="truncate">{app.sector}</span>
                       <span className="hidden sm:inline">•</span>
-                      <span>Submitted {formatDate(app.submittedAt)}</span>
+                      <span>{t('dashboard:dashboard.recentApplications.submitted')} {formatDate(app.submittedAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -357,24 +357,24 @@ const Dashboard = () => {
           ) : (
             <EmptyState
               icon={FileText}
-              title="No applications yet"
-              description="Start applying to funding opportunities to see your applications here."
+              title={t('dashboard:dashboard.emptyState.noApplications')}
+              description={t('dashboard:dashboard.emptyState.noApplicationsDesc')}
               action={{
-                label: "Browse Opportunities",
+                label: t('dashboard:dashboard.emptyState.browseOpportunities'),
                 onClick: () => navigate("/projects"),
                 variant: "outline",
               }}
               secondaryAction={{
-                label: "View Guide",
+                label: t('dashboard:dashboard.emptyState.viewGuide'),
                 onClick: () => navigate("/guide"),
                 variant: "outline",
               }}
               helpLink="/help"
               tips={[
-                "Complete your profile before applying",
-                "Read project requirements carefully",
-                "Prepare all required documents in advance",
-                "Submit applications before deadlines",
+                t('dashboard:dashboard.emptyState.tips.completeProfile'),
+                t('dashboard:dashboard.emptyState.tips.readRequirements'),
+                t('dashboard:dashboard.emptyState.tips.prepareDocuments'),
+                t('dashboard:dashboard.emptyState.tips.submitBeforeDeadline'),
               ]}
             />
           )}

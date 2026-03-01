@@ -14,9 +14,11 @@ import { InAppTip } from "@/components/onboarding/InAppTip";
 import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
 import { formatDate } from "@/lib/dateUtils";
 import { useApplicationFilters } from "@/hooks/useApplicationFilters";
+import { useTranslation } from "react-i18next";
 
 const Applications = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(['dashboard']);
   const { data: applications = [], isLoading, error, refetch, isRefetching } = useApplications();
 
   const {
@@ -35,7 +37,7 @@ const Applications = () => {
     {
       accessorKey: 'projectTitle',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Project" />
+        <SortableColumnHeader column={column} title={t('dashboard:applications.columns.project')} />
       ),
       cell: ({ row }) => {
         return <span className="font-medium">{row.original.projectTitle}</span>;
@@ -44,7 +46,7 @@ const Applications = () => {
     {
       accessorKey: 'sector',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Sector" />
+        <SortableColumnHeader column={column} title={t('dashboard:applications.columns.sector')} />
       ),
       cell: ({ row }) => {
         return (
@@ -58,7 +60,7 @@ const Applications = () => {
     {
       accessorKey: 'country',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Country" />
+        <SortableColumnHeader column={column} title={t('dashboard:applications.columns.country')} />
       ),
       cell: ({ row }) => {
         return (
@@ -72,16 +74,16 @@ const Applications = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Status" />
+        <SortableColumnHeader column={column} title={t('dashboard:applications.columns.status')} />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
         const statusDescriptions: Record<string, string> = {
-          pending: "Your application is being reviewed by our team",
-          approved: "Congratulations! Your application has been approved",
-          rejected: "Your application was not selected this time",
-          draft: "This application is saved but not yet submitted",
-          under_review: "Your application is currently under review",
+          pending: t('dashboard:applications.statusDescriptions.pending'),
+          approved: t('dashboard:applications.statusDescriptions.approved'),
+          rejected: t('dashboard:applications.statusDescriptions.rejected'),
+          draft: t('dashboard:applications.statusDescriptions.draft'),
+          under_review: t('dashboard:applications.statusDescriptions.under_review'),
         };
         
         return (
@@ -90,7 +92,7 @@ const Applications = () => {
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </Badge>
             <HelpTooltip 
-              content={statusDescriptions[status] || "Application status"}
+              content={statusDescriptions[status] || t('dashboard:applications.statusDescriptions.default')}
               side="top"
             />
           </div>
@@ -103,7 +105,7 @@ const Applications = () => {
     {
       accessorKey: 'submittedAt',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Submitted" />
+        <SortableColumnHeader column={column} title={t('dashboard:applications.columns.submitted')} />
       ),
       cell: ({ row }) => {
         return (
@@ -123,7 +125,7 @@ const Applications = () => {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t('dashboard:applications.columns.actions'),
       cell: ({ row }) => {
         const app = row.original;
         if (app.status === "draft") {
@@ -131,12 +133,12 @@ const Applications = () => {
             app.isProjectOpen ? (
               <Link to={`/projects/${app.projectId}/apply`}>
                 <Button variant="outline" size="sm">
-                  Continue Application
+                  {t('dashboard:applications.actions.continueApplication')}
                 </Button>
               </Link>
             ) : (
               <Button variant="outline" size="sm" disabled>
-                Application Closed
+                {t('dashboard:applications.actions.applicationClosed')}
               </Button>
             )
           );
@@ -145,7 +147,7 @@ const Applications = () => {
           <Link to={`/dashboard/applications/${app.id}`}>
             <Button variant="outline" size="sm">
               <Eye className="h-4 w-4 mr-2" />
-              View Details
+              {t('dashboard:applications.actions.viewDetails')}
             </Button>
           </Link>
         );
@@ -159,14 +161,14 @@ const Applications = () => {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold">My Applications</h1>
+          <h1 className="text-3xl font-bold">{t('dashboard:applications.title')}</h1>
           <HelpTooltip 
-            content="Track the status of all your funding applications. You can filter by status, search, and view detailed information about each application."
+            content={t('dashboard:applications.helpTooltip')}
             side="right"
           />
         </div>
         <p className="text-muted-foreground mt-2">
-          Track and manage your funding applications ({filteredApplications.length})
+          {t('dashboard:applications.subtitle')} ({filteredApplications.length})
         </p>
       </div>
 
@@ -175,10 +177,10 @@ const Applications = () => {
         <InAppTip
           id="first-application-tip"
           type="tip"
-          title="Ready to apply for funding?"
-          description="Browse available opportunities and submit your first application. Make sure your profile is complete to increase your chances of approval."
+          title={t('dashboard:applications.firstTimeTip.title')}
+          description={t('dashboard:applications.firstTimeTip.description')}
           action={{
-            label: "Browse Opportunities",
+            label: t('dashboard:applications.firstTimeTip.action'),
             onClick: () => navigate("/projects"),
           }}
         />
@@ -189,11 +191,11 @@ const Applications = () => {
         <CardContent className="pt-6">
           <div className="flex gap-2 flex-wrap overflow-x-auto pb-2 -mb-2 scrollbar-hide">
             {[
-              { value: "all", label: "All" },
-              { value: "pending", label: "Pending" },
-              { value: "approved", label: "Approved" },
-              { value: "rejected", label: "Rejected" },
-              { value: "draft", label: "Draft" },
+              { value: "all", label: t('dashboard:applications.filters.all') },
+              { value: "pending", label: t('dashboard:applications.filters.pending') },
+              { value: "approved", label: t('dashboard:applications.filters.approved') },
+              { value: "rejected", label: t('dashboard:applications.filters.rejected') },
+              { value: "draft", label: t('dashboard:applications.filters.draft') },
             ].map((filter) => (
               <Button
                 key={filter.value}
@@ -219,8 +221,8 @@ const Applications = () => {
           <CardContent className="pt-6">
             <EmptyState
               icon={FileText}
-              title="Error loading applications"
-              description="There was an error loading your applications. Please try again later."
+              title={t('dashboard:applications.emptyState.errorTitle')}
+              description={t('dashboard:applications.emptyState.errorDesc')}
             />
           </CardContent>
         </Card>
@@ -229,21 +231,21 @@ const Applications = () => {
           <CardHeader>
             <CardTitle>
               {statusFilter === "all" 
-                ? "All Applications" 
+                ? t('dashboard:applications.table.allApplications')
                 : statusFilter === "pending"
-                ? "Pending Applications"
+                ? t('dashboard:applications.table.pendingApplications')
                 : statusFilter === "approved"
-                ? "Approved Applications"
+                ? t('dashboard:applications.table.approvedApplications')
                 : statusFilter === "rejected"
-                ? "Rejected Applications"
-                : "Draft Applications"} ({filteredApplications.length})
+                ? t('dashboard:applications.table.rejectedApplications')
+                : t('dashboard:applications.table.draftApplications')} ({filteredApplications.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <DataTable
               columns={applicationColumns}
               data={filteredApplications}
-              searchPlaceholder="Search by project title, sector, or country..."
+              searchPlaceholder={t('dashboard:applications.table.searchPlaceholder')}
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
@@ -261,23 +263,23 @@ const Applications = () => {
               icon={FileText}
               title={
                 statusFilter !== "all"
-                  ? `No ${statusFilter} applications`
-                  : "No applications yet"
+                  ? `${t('dashboard:applications.emptyState.noFilteredApplications')} ${t(`dashboard:applications.filters.${statusFilter}`)}`
+                  : t('dashboard:applications.emptyState.noApplications')
               }
               description={
                 statusFilter !== "all"
-                  ? "Try adjusting your filter criteria to find more applications."
-                  : "Start by browsing available opportunities and submitting your first application."
+                  ? t('dashboard:applications.emptyState.noFilteredApplicationsDesc')
+                  : t('dashboard:applications.emptyState.noApplicationsDesc')
               }
               action={
                 statusFilter === "all"
                   ? {
-                      label: "Browse Opportunities",
+                      label: t('dashboard:applications.emptyState.browseOpportunities'),
                       onClick: () => navigate("/projects"),
                       variant: "hero",
                     }
                   : {
-                      label: "Clear Filter",
+                      label: t('dashboard:applications.emptyState.clearFilter'),
                       onClick: () => setStatusFilter("all"),
                       variant: "outline",
                     }
@@ -285,7 +287,7 @@ const Applications = () => {
               secondaryAction={
                 statusFilter === "all"
                   ? {
-                      label: "View Guide",
+                      label: t('dashboard:applications.emptyState.viewGuide'),
                       onClick: () => navigate("/guide"),
                       variant: "outline",
                     }
@@ -295,10 +297,10 @@ const Applications = () => {
               tips={
                 statusFilter === "all"
                   ? [
-                      "Complete your profile to increase approval chances",
-                      "Read project requirements carefully before applying",
-                      "You can save applications as drafts and submit later",
-                      "Check application deadlines to avoid missing opportunities",
+                      t('dashboard:applications.emptyState.tips.completeProfile'),
+                      t('dashboard:applications.emptyState.tips.readRequirements'),
+                      t('dashboard:applications.emptyState.tips.saveDrafts'),
+                      t('dashboard:applications.emptyState.tips.checkDeadlines'),
                     ]
                   : undefined
               }

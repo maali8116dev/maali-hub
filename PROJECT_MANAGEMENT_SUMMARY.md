@@ -565,3 +565,129 @@
 8. API response times
 9. Activity log entries (system health indicator)
 10. Admin actions tracked (compliance/audit trail)
+
+---
+
+## 🚀 **DEPLOYMENT & EDGE FUNCTIONS STATUS**
+
+### ✅ **Edge Functions Deployed**
+
+All critical Edge Functions have been created and deployed:
+
+#### 1. **`auth-email-hook`** ✅
+- **Purpose**: Intercepts Supabase authentication emails and sends custom branded emails via Resend
+- **Features**: Password reset, email verification, magic link sign-in, email change confirmations, XSS protection
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/auth-email-hook/index.ts`
+
+#### 2. **`send-email`** ✅
+- **Purpose**: Sends application-related emails (submitted, approved, rejected, etc.)
+- **Features**: Application submitted/approved/rejected notifications, status updates, welcome emails, XSS protection
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/send-email/index.ts`
+
+#### 3. **`create-payment-intent`** ✅
+- **Purpose**: Creates Stripe payment intents for application fees
+- **Features**: Server-side payment amount validation, payment metadata protection, project fee verification, CORS support
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/create-payment-intent/index.ts`
+
+#### 4. **`stripe-webhook`** ✅
+- **Purpose**: Handles Stripe webhook events (payment confirmations, failures, etc.)
+- **Features**: Payment intent succeeded/failed handling, generic error handling
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/stripe-webhook/index.ts`
+
+#### 5. **`rate-limited-auth`** ✅
+- **Purpose**: Rate limiting for authentication operations (sign-in, sign-up, password reset)
+- **Features**: Rate limiting via database triggers, IP-based tracking, configurable limits per operation type, CORS support
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/rate-limited-auth/index.ts`
+
+#### 6. **`manage-user`** ✅
+- **Purpose**: Admin user management operations (create, update, delete users)
+- **Features**: Admin-only access, user creation with roles, user updates, user deletion, CORS support
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/manage-user/index.ts`
+
+#### 7. **`generate-invoice`** ✅
+- **Purpose**: Generate PDF invoices/receipts for payments
+- **Features**: PDF generation, receipt formatting matching email structure
+- **Status**: ✅ Created and deployed
+- **Location**: `supabase/functions/generate-invoice/index.ts`
+
+### 📋 **Shared Utilities**
+
+#### **`_shared/cors.ts`** ✅
+- **Purpose**: Shared CORS configuration and HTML escaping utilities
+- **Features**: Dynamic origin-based CORS headers, HTML escaping for XSS prevention
+- **Status**: ✅ Created
+- **Location**: `supabase/functions/_shared/cors.ts`
+
+### 🔐 **Required Secrets**
+
+| Secret | Status | Purpose |
+|--------|--------|---------|
+| `RESEND_API_KEY` | ✅ Configured | Resend API key for sending emails |
+| `STRIPE_SECRET_KEY` | ✅ Configured | Stripe secret key for payment processing |
+| `STRIPE_WEBHOOK_SECRET` | ✅ Configured | Stripe webhook secret for webhook verification |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ Configured | Service role key for admin operations |
+| `SITE_URL` | ✅ Configured | Site URL for email links and CORS |
+| `FROM_EMAIL` | ⚠️ Optional | Custom from address (e.g., `Maali <noreply@yourdomain.com>`) |
+
+> **Note:** Without `FROM_EMAIL`, emails will be sent from `onboarding@resend.dev` which only works for testing.
+
+### 🔗 **Auth Hook Configuration**
+
+To enable the auth email hook:
+
+1. Go to Supabase Dashboard → Auth → Email Templates
+2. Scroll to **Auth Hooks** section
+3. Enable **Send Email Hook**
+4. Enter hook URL: `https://[your-project-ref].supabase.co/functions/v1/auth-email-hook`
+5. Click **Save**
+
+### 📝 **Email Types Supported**
+
+#### Auth Hook (`auth-email-hook`)
+- `password_reset` - Password reset requests
+- `signup` - Email verification
+- `magiclink` - Magic link sign-in
+- `email_change` - Email change confirmations
+
+#### Application Emails (`send-email`)
+- `application_submitted` - Submission confirmation
+- `application_approved` - Approval notification
+- `application_rejected` - Rejection notification
+- `application_under_review` - Review status update
+- `status_update` - Generic status updates
+- `welcome` - Welcome email for new users
+- `payment_receipt` - Payment receipt with PDF attachment
+
+### 🐛 **Troubleshooting**
+
+Check function logs via CLI:
+```bash
+npx supabase functions logs auth-email-hook --project-ref [your-project-ref]
+npx supabase functions logs send-email --project-ref [your-project-ref]
+```
+
+### ✅ **Deployment Checklist**
+
+For each edge function:
+- [x] Function code is in `supabase/functions/[function-name]/index.ts`
+- [x] Required secrets are set in Supabase dashboard
+- [x] Function is deployed: `supabase functions deploy [function-name]`
+- [x] CORS is configured (using shared utility)
+- [x] Error handling is implemented
+- [x] Authentication/authorization checks are in place
+
+### 🎯 **Summary**
+
+**Total Edge Functions**: 7 ✅
+- All critical functions are created
+- All functions have security hardening
+- All functions use shared CORS utility
+- No missing critical edge functions
+
+**Status**: ✅ **Ready for Production** (all required functions exist)

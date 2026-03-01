@@ -17,6 +17,8 @@ import {
 import NotificationsDropdown from "./NotificationsDropdown";
 import EmailVerificationBanner from "./EmailVerificationBanner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useTranslation } from "react-i18next";
 import {
   Sidebar,
   SidebarContent,
@@ -42,6 +44,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { t } = useTranslation(['dashboard', 'common']);
   
   // Get display name: profile name > email
   // User must be authenticated to access dashboard (enforced by ProtectedRoute)
@@ -50,13 +53,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     : user?.email || "User";
 
   const menuItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/applications", label: "My Applications", icon: FileText },
-    { href: "/dashboard/documents", label: "Documents", icon: FolderOpen },
-    { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-    { href: "/dashboard/profile", label: "Profile", icon: User },
-    { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-    { href: "/dashboard/settings", label: "Settings", icon: Settings },
+    { href: "/dashboard", label: t('dashboard:menu.dashboard'), icon: LayoutDashboard },
+    { href: "/dashboard/applications", label: t('dashboard:menu.applications'), icon: FileText },
+    { href: "/dashboard/documents", label: t('dashboard:menu.documents'), icon: FolderOpen },
+    { href: "/dashboard/notifications", label: t('dashboard:menu.notifications'), icon: Bell },
+    { href: "/dashboard/profile", label: t('dashboard:menu.profile'), icon: User },
+    { href: "/dashboard/billing", label: t('dashboard:menu.billing'), icon: CreditCard },
+    { href: "/dashboard/settings", label: t('dashboard:menu.settings'), icon: Settings },
   ];
 
   // Fetch real notifications
@@ -79,14 +82,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const getPageTitle = () => {
-    if (location.pathname === "/dashboard") return "Dashboard";
-    if (location.pathname === "/dashboard/applications") return "My Applications";
-    if (location.pathname === "/dashboard/documents") return "Documents";
-    if (location.pathname === "/dashboard/notifications") return "Notifications";
-    if (location.pathname === "/dashboard/profile") return "Profile";
-    if (location.pathname === "/dashboard/billing") return "Billing";
-    if (location.pathname === "/dashboard/settings") return "Settings";
-    return "Dashboard";
+    if (location.pathname === "/dashboard") return t('dashboard:pages.dashboard');
+    if (location.pathname === "/dashboard/applications") return t('dashboard:pages.applications');
+    if (location.pathname === "/dashboard/documents") return t('dashboard:pages.documents');
+    if (location.pathname === "/dashboard/notifications") return t('dashboard:pages.notifications');
+    if (location.pathname === "/dashboard/profile") return t('dashboard:pages.profile');
+    if (location.pathname === "/dashboard/billing") return t('dashboard:pages.billing');
+    if (location.pathname === "/dashboard/settings") return t('dashboard:pages.settings');
+    return t('dashboard:pages.dashboard');
   };
 
   return (
@@ -154,12 +157,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {user ? (
                 <SidebarMenuButton onClick={handleSignOut}>
                   <LogOut />
-                  <span>Sign Out</span>
+                  <span>{t('dashboard:header.signOut')}</span>
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton onClick={() => navigate("/auth")}>
                   <User />
-                  <span>Sign In</span>
+                  <span>{t('dashboard:header.signIn')}</span>
                 </SidebarMenuButton>
               )}
             </SidebarMenuItem>
@@ -175,6 +178,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1 justify-end">
             <ThemeToggle />
+            <LanguageSwitcher />
             <NotificationsDropdown
               notifications={notifications}
               unreadCount={unreadCount}
@@ -200,6 +204,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
+            <LanguageSwitcher />
             <NotificationsDropdown
               notifications={notifications}
               unreadCount={unreadCount}

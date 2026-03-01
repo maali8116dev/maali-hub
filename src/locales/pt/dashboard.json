@@ -1,0 +1,25 @@
+{
+  "menu": {
+    "dashboard": "Painel",
+    "applications": "Minhas candidaturas",
+    "documents": "Documentos",
+    "notifications": "Notificações",
+    "profile": "Perfil",
+    "billing": "Faturamento",
+    "settings": "Configurações"
+  },
+  "header": {
+    "signOut": "Sair",
+    "signIn": "Entrar"
+  },
+  "pages": {
+    "dashboard": "Painel",
+    "applications": "Minhas candidaturas",
+    "documents": "Documentos",
+    "notifications": "Notificações",
+    "profile": "Perfil",
+    "billing": "Faturamento",
+    "settings": "Configurações"
+  }
+}
+
