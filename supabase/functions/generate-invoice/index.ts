@@ -28,19 +28,24 @@ function buildPdf(lines: { label: string; value: string }[], title: string, subt
   contentLines.push("/F1 12 Tf");
   contentLines.push("0 -25 Td");
   contentLines.push(`(${escPdf(subtitle)}) Tj`);
-  contentLines.push("0 -15 Td");
-  contentLines.push("/F1 10 Tf");
   contentLines.push("0 -20 Td");
+  contentLines.push("/F1 10 Tf");
 
   for (const line of lines) {
-    contentLines.push(`(${escPdf(line.label + ": " + line.value)}) Tj`);
-    contentLines.push("0 -16 Td");
+    if (line.label && line.value) {
+      // Label: Value format (for receipt details)
+      contentLines.push(`(${escPdf(line.label + ": " + line.value)}) Tj`);
+      contentLines.push("0 -16 Td");
+    } else if (line.value) {
+      // Just value (for paragraphs/greeting)
+      contentLines.push(`(${escPdf(line.value)}) Tj`);
+      contentLines.push("0 -16 Td");
+    } else {
+      // Empty line
+      contentLines.push("0 -12 Td");
+    }
   }
 
-  // Footer
-  contentLines.push("0 -30 Td");
-  contentLines.push("/F1 8 Tf");
-  contentLines.push(`(© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.) Tj`);
   contentLines.push("ET");
 
   const stream = contentLines.join("\n");
@@ -188,29 +193,44 @@ serve(async (req: Request) => {
     const statusLabel = tx.status === "completed" ? "Paid" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
     const billingEmail = tx.billing_email || user.email || "N/A";
 
-    // Build PDF
-    const lines = [
-      { label: "Invoice Number", value: invoiceNumber },
-      { label: "Billed To", value: userName },
-      { label: "Email", value: billingEmail },
-      { label: "Payment Date", value: paymentDate },
-      { label: "Status", value: statusLabel },
-      { label: "", value: "" },
-      { label: "Description", value: tx.description || "Application Fee" },
-      { label: "Project", value: projectTitle },
-      { label: "Amount", value: `${currency} ${amount}` },
-      { label: "", value: "" },
-      { label: "Total", value: `${currency} ${amount}` },
-    ];
-
-    if (tx.provider_transaction_id) {
-      lines.push({ label: "Transaction ID", value: tx.provider_transaction_id });
+    // Build PDF to match email receipt structure
+    const lines: { label: string; value: string }[] = [];
+    
+    // Add greeting
+    lines.push({ label: "", value: `Dear ${userName},` });
+    lines.push({ label: "", value: "" });
+    lines.push({ label: "", value: "Thank you for your payment. Here is your receipt:" });
+    lines.push({ label: "", value: "" });
+    
+    // Receipt details (matching email structure)
+    if (projectTitle && projectTitle !== "N/A") {
+      lines.push({ label: "Project", value: projectTitle });
     }
+    
     if (tx.application_id) {
       lines.push({ label: "Application ID", value: tx.application_id });
     }
+    
+    lines.push({ label: "Amount", value: `${currency} ${amount}` });
+    lines.push({ label: "Date", value: paymentDate });
+    lines.push({ label: "Status", value: statusLabel });
+    
+    if (invoiceNumber) {
+      lines.push({ label: "Invoice #", value: invoiceNumber });
+    }
+    
+    if (tx.provider_transaction_id) {
+      lines.push({ label: "Transaction ID", value: tx.provider_transaction_id });
+    }
+    
+    lines.push({ label: "", value: "" });
+    lines.push({ label: "", value: "Your application fee has been confirmed and your application is now under review." });
+    lines.push({ label: "", value: "" });
+    lines.push({ label: "", value: "Please keep this receipt for your records." });
+    lines.push({ label: "", value: "" });
+    lines.push({ label: "", value: `© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.` });
 
-    const pdfBytes = buildPdf(lines, "INVOICE", `MAALI  -  ${invoiceNumber}`);
+    const pdfBytes = buildPdf(lines, "Payment Receipt", `MAALI OPPORTUNITY HUB`);
 
     return new Response(pdfBytes, {
       status: 200,

@@ -23,6 +23,8 @@ import {
   useProjectApplicationsRanked,
 } from "@/hooks/useProjectApplicationsRanked";
 import { sendApplicationApprovedEmail, sendEmail } from "@/lib/email";
+import { logActivityDirect } from "@/hooks/useActivityLogger";
+import { useAuth } from "@/hooks/useAuth";
 
 const scoreBadgeClass = (score: number | null) => {
   if (score === null || Number.isNaN(score)) {
@@ -46,6 +48,7 @@ const ProjectApplications = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const initialProjectId = id ? Number(id) : undefined;
   const [projectId, setProjectId] = useState<number | undefined>(initialProjectId);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -201,6 +204,40 @@ const ProjectApplications = () => {
 
       // Wait for all emails (but don't fail if some fail)
       await Promise.allSettled(emailPromises);
+
+      // Get admin profile information for activity log
+      const { data: adminProfile } = user
+        ? await supabase
+            .from('profiles')
+            .select('first_name, last_name, role')
+            .eq('user_id', user.id)
+            .single()
+        : { data: null };
+
+      const adminName = adminProfile
+        ? `${adminProfile.first_name || ''} ${adminProfile.last_name || ''}`.trim() || 'Unknown Admin'
+        : 'Unknown Admin';
+
+      // Log activity for winner selection
+      await logActivityDirect({
+        userId: user?.id,
+        actionType: 'select_winners',
+        entityType: 'project',
+        entityId: projectId?.toString(),
+        description: `Selected ${selectedIds.size} winner${selectedIds.size > 1 ? 's' : ''} for project "${projectTitle}"`,
+        metadata: {
+          admin_id: user?.id || null,
+          admin_name: adminName,
+          admin_role: adminProfile?.role || 'admin',
+          project_id: projectId,
+          project_title: projectTitle,
+          winners_count: selectedIds.size,
+          approved_application_ids: approvedIds,
+          approved_applicant_names: approvedApplications.map(app => app.applicant_name),
+          total_applications: rankedApplications.length,
+          selection_method: 'ranked_by_score',
+        },
+      });
 
       toast({
         title: "Winners Approved",

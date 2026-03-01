@@ -7,6 +7,7 @@ import type {
   ReviewScore,
   RpcReviewScoreWithReviewerRow,
 } from '@/types/reviewer';
+import { logActivityDirect } from './useActivityLogger';
 
 // Submit review score
 export const useSubmitReview = () => {
@@ -28,6 +29,20 @@ export const useSubmitReview = () => {
       comments?: string;
       recommendation: 'approve' | 'reject' | 'request_info';
     }) => {
+      // Get reviewer profile information for activity log
+      const { data: reviewerProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, role')
+        .eq('user_id', reviewerId)
+        .single();
+
+      // Get application and project information for activity log
+      const { data: application } = await supabase
+        .from('applications')
+        .select('project_id, projects:project_id(title)')
+        .eq('id', applicationId)
+        .single();
+
       const { data, error } = await supabase
         .from('review_scores')
         .upsert({
@@ -51,6 +66,38 @@ export const useSubmitReview = () => {
         .from('application_assignments')
         .update({ status: 'completed' })
         .eq('id', assignmentId);
+      
+      // Calculate overall score from saved data or scores
+      const overallScore = (data as any).overall_score || 
+        (Object.values(scores).length > 0
+          ? Object.values(scores).reduce((sum: number, score: any) => sum + score, 0) / Object.values(scores).length
+          : 0);
+      
+      // Log activity with reviewer details
+      const reviewerName = reviewerProfile
+        ? `${reviewerProfile.first_name || ''} ${reviewerProfile.last_name || ''}`.trim() || 'Unknown Reviewer'
+        : 'Unknown Reviewer';
+
+      await logActivityDirect({
+        userId: reviewerId,
+        actionType: 'review',
+        entityType: 'application',
+        entityId: applicationId,
+        description: `Review submitted for application ${applicationId} by ${reviewerName}`,
+        metadata: {
+          reviewer_id: reviewerId,
+          reviewer_name: reviewerName,
+          reviewer_role: reviewerProfile?.role || 'reviewer',
+          application_id: applicationId,
+          project_id: application?.project_id || null,
+          project_title: (application?.projects as any)?.title || null,
+          overall_score: typeof overallScore === 'number' ? overallScore.toFixed(2) : String(overallScore || '0.00'),
+          recommendation,
+          scores,
+          has_comments: !!comments,
+          comments_length: comments?.length || 0,
+        },
+      });
       
       return data as ReviewScore;
     },

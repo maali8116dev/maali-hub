@@ -124,15 +124,16 @@ export default function ActivityLogs() {
     }
 
     return ((data as any[]) || []).map((log): ActivityLog => ({
-      id: log.id,
-      userId: log.user_id,
-      actionType: log.action_type,
-      entityType: log.entity_type,
-      entityId: log.entity_id,
-      description: log.description,
-      metadata: log.metadata as Record<string, unknown> | null,
-      createdAt: log.created_at,
-    }));
+        id: log.id,
+        userId: log.user_id,
+        userName: log.user_name || null,
+        actionType: log.action_type,
+        entityType: log.entity_type,
+        entityId: log.entity_id,
+        description: log.description,
+        metadata: log.metadata as Record<string, unknown> | null,
+        createdAt: log.created_at,
+      }));
   };
 
   const exportToCSV = async () => {
@@ -152,9 +153,10 @@ export default function ActivityLogs() {
       }
 
       // Create CSV content
-      const headers = ["Date", "Action", "Entity Type", "Entity ID", "Description"];
+      const headers = ["Date", "User", "Action", "Entity Type", "Entity ID", "Description"];
       const rows = logsToExport.map(log => [
         format(new Date(log.createdAt), "yyyy-MM-dd HH:mm:ss"),
+        log.userName || (log.userId ? `User ${log.userId.substring(0, 8)}...` : 'System'),
         log.actionType,
         log.entityType.replace('_', ' '),
         log.entityId || "N/A",
@@ -238,6 +240,7 @@ export default function ActivityLogs() {
             <thead>
               <tr>
                 <th>Date & Time</th>
+                <th>User</th>
                 <th>Action</th>
                 <th>Entity</th>
                 <th>Description</th>
@@ -247,6 +250,7 @@ export default function ActivityLogs() {
               ${logsToExport.map(log => `
                 <tr>
                   <td>${format(new Date(log.createdAt), "MMM d, yyyy HH:mm")}</td>
+                  <td>${log.userName || (log.userId ? `User ${log.userId.substring(0, 8)}...` : 'System')}</td>
                   <td><span class="badge ${log.actionType}">${log.actionType}</span></td>
                   <td>${log.entityType.replace('_', ' ')}</td>
                   <td>${log.description}</td>
@@ -455,6 +459,7 @@ export default function ActivityLogs() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>User</TableHead>
                     <TableHead>Action</TableHead>
                     <TableHead>Entity</TableHead>
                     <TableHead className="hidden md:table-cell">Description</TableHead>
@@ -464,6 +469,17 @@ export default function ActivityLogs() {
                 <TableBody>
                   {filteredLogs.map((log) => (
                     <TableRow key={log.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">
+                            {log.userName || 
+                             (log.metadata?.reviewer_name as string) ||
+                             (log.metadata?.admin_name as string) ||
+                             (log.userId ? `User ${log.userId.substring(0, 8)}...` : 'System')}
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant="secondary"

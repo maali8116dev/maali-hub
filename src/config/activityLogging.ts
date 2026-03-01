@@ -22,6 +22,9 @@ export const ACTIVITY_LOG_CONFIG = {
     'submit',
     'approve',
     'reject',
+    'review',
+    'select_winners',
+    'assign_reviewers',
     // 'logout' - optional, uncomment if you want logout logs
   ] as readonly ActionType[],
 

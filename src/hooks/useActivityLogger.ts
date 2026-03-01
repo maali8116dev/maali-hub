@@ -15,7 +15,9 @@ export type ActionType =
   | 'reject'
   | 'error'
   | 'warning'
-  | 'assign_reviewers';
+  | 'assign_reviewers'
+  | 'review'
+  | 'select_winners';
 
 export type EntityType = 
   | 'project' 

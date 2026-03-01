@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface ActivityLog {
   id: string;
   userId: string | null;
+  userName: string | null;
   actionType: string;
   entityType: string;
   entityId: string | null;
@@ -102,6 +103,7 @@ export function useActivityLogs(options: UseActivityLogsOptions = {}) {
       const logs = ((data as any[]) || []).map((log): ActivityLog => ({
         id: log.id,
         userId: log.user_id,
+        userName: log.user_name || null,
         actionType: log.action_type,
         entityType: log.entity_type,
         entityId: log.entity_id,
