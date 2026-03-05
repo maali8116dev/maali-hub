@@ -467,7 +467,7 @@ export const ReviewerDetails = () => {
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
-              onRefresh={() => refetchDetails()}
+              onRefresh={() => { refetchDetails(); }}
               isRefreshing={isFetchingDetails}
             />
           )}

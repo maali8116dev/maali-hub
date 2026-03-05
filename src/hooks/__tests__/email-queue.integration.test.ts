@@ -94,7 +94,7 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
       }
 
       // 1) Call the claim_email_batch function with a batch size larger than ready rows.
-      const { data: claimed, error: claimError } = await supabaseAdmin.rpc('claim_email_batch', {
+      const { data: claimed, error: claimError } = await (supabaseAdmin as any).rpc('claim_email_batch', {
         p_limit: 10,
       });
 
@@ -103,13 +103,13 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
 
       // We seeded 2 rows that are ready (past next_attempt_at) and 1 that is future-dated.
       // Only the 2 ready ones should be claimed.
-      expect(claimed!.length).toBe(2);
+      expect((claimed as any[])!.length).toBe(2);
 
-      const claimedIds = new Set(claimed!.map((row: any) => row.id as string));
+      const claimedIds = new Set((claimed as any[])!.map((row: any) => row.id as string));
       expect(createdIds.filter((id) => claimedIds.has(id)).length).toBe(2);
 
       // 2) Verify in DB that claimed rows are now status='processing'
-      const { data: processingRows, error: checkError } = await supabaseAdmin
+      const { data: processingRows, error: checkError } = await (supabaseAdmin as any)
         .from('email_queue')
         .select('id, status, next_attempt_at')
         .in('id', createdIds);

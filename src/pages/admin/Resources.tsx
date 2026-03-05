@@ -290,7 +290,7 @@ const Resources = () => {
                 enableSorting={true}
                 enablePagination={true}
                 exportFileName="resources"
-                onRefresh={() => refetch()}
+                onRefresh={() => { refetch(); }}
                 isRefreshing={isFetching}
               />
             )}

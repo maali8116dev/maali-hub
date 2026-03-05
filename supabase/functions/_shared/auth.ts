@@ -122,7 +122,7 @@ export async function authenticateRequest(
     };
   }
 
-  return { user: user as AuthUser, token, error: null };
+  return { user: user as unknown as AuthUser, token, error: null };
 }
 
 /* ------------------------------------------------------------------ */

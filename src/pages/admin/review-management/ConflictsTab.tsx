@@ -116,7 +116,7 @@ export const ConflictsTab = () => {
           pageSize={10}
           enableSorting={true}
           enablePagination={true}
-          onRefresh={() => refetch()}
+          onRefresh={() => { refetch(); }}
           isRefreshing={isFetching}
         />
       </CardContent>
