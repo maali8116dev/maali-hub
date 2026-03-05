@@ -18,7 +18,7 @@ export type AdminApplication = {
   projectTitle: string;
   projectId: number;
   submittedAt: string;
-  status: "pending" | "approved" | "rejected" | "draft" | "under_review";
+  status: "pending" | "approved" | "rejected" | "draft" | "under_review" | "pending_payment";
   contactEmail: string;
   contactPhone?: string;
   reviewedBy?: string | null;
