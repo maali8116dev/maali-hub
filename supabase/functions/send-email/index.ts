@@ -810,20 +810,29 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_ANON_KEY")!,
-        { global: { headers: { Authorization: authHeader } } }
-      );
-
       const token = authHeader.replace("Bearer ", "");
-      const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-      
-      if (claimsError || !claimsData?.claims) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+      // Allow trusted internal function-to-function calls using service role key.
+      const isTrustedInternal = serviceRoleKey && token === serviceRoleKey;
+
+      if (!isTrustedInternal) {
+        // Validate as a normal user JWT
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!,
+          { global: { headers: { Authorization: authHeader } } }
         );
+
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+
+        if (userError || !userData?.user) {
+          console.error("[send-email] User auth failed:", userError?.message);
+          return new Response(
+            JSON.stringify({ error: "Unauthorized" }),
+            { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+          );
+        }
       }
     }
 
@@ -928,13 +937,40 @@ const handler = async (req: Request): Promise<Response> => {
     // Add PDF attachment if available
     if (attachmentUrl && type === "payment_receipt") {
       try {
-        // Extract file path from URL
+        console.log(`[send-email] Attempting to attach PDF from URL: ${attachmentUrl}`);
+        
+        // Extract file path from URL - handle multiple URL formats
         const urlObj = new URL(attachmentUrl);
-        const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/receipts\/(.+)/);
-        if (pathMatch) {
-          const filePath = pathMatch[1];
+        let filePath: string | null = null;
+        
+        // Pattern 1: /storage/v1/object/public/receipts/userId/file.pdf
+        const publicMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/receipts\/(.+)/);
+        if (publicMatch) {
+          filePath = publicMatch[1];
+          console.log(`[send-email] Extracted path from public URL: ${filePath}`);
+        } else {
+          // Pattern 2: /storage/v1/object/sign/receipts/userId/file.pdf (signed URLs)
+          const signedMatch = urlObj.pathname.match(/\/storage\/v1\/object\/sign\/receipts\/(.+)/);
+          if (signedMatch) {
+            filePath = signedMatch[1].split('?')[0]; // Remove query params
+            console.log(`[send-email] Extracted path from signed URL: ${filePath}`);
+          } else {
+            // Pattern 3: Direct path extraction (fallback)
+            const pathParts = urlObj.pathname.split('/receipts/');
+            if (pathParts.length > 1) {
+              filePath = pathParts[1].split('?')[0]; // Remove query params
+              console.log(`[send-email] Extracted path using fallback method: ${filePath}`);
+            }
+          }
+        }
+        
+        if (!filePath) {
+          console.error(`[send-email] Could not extract file path from URL: ${attachmentUrl}`);
+          console.error(`[send-email] URL pathname: ${urlObj.pathname}`);
+        } else {
+          console.log(`[send-email] Downloading PDF from storage, path: ${filePath}`);
           
-          // Download PDF from storage
+          // Download PDF from storage using service role (works for private buckets)
           const { data: pdfData, error: downloadError } = await supabaseAdmin.storage
             .from("receipts")
             .download(filePath);
@@ -954,15 +990,17 @@ const handler = async (req: Request): Promise<Response> => {
               },
             ];
             
-            console.log(`PDF attachment added to email: ${fileName}`);
+            console.log(`[send-email] PDF attachment added successfully: ${fileName} (${pdfArrayBuffer.byteLength} bytes)`);
           } else {
-            console.warn(`Failed to download PDF from storage: ${downloadError?.message || 'Unknown error'}`);
+            console.error(`[send-email] Failed to download PDF from storage`);
+            console.error(`[send-email] Path: ${filePath}`);
+            console.error(`[send-email] Error:`, downloadError);
+            // Log the error but continue without attachment
           }
-        } else {
-          console.warn(`Could not extract file path from URL: ${attachmentUrl}`);
         }
       } catch (attachErr) {
-        console.error("Error attaching PDF to email:", attachErr);
+        console.error("[send-email] Error attaching PDF to email:", attachErr);
+        console.error("[send-email] Error details:", attachErr instanceof Error ? attachErr.stack : String(attachErr));
         // Continue without attachment - don't fail the email
       }
     }

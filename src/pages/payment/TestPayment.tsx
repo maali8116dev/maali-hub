@@ -14,7 +14,7 @@ export default function TestPayment() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const projectId = Number(searchParams.get("projectId") || searchParams.get("project_id")) ||10;
+  const projectId = Number(searchParams.get("projectId") || searchParams.get("project_id")) ||12;
   type SubmitPayload = {
     success?: boolean;
     error?: string;

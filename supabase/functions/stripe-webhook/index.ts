@@ -782,9 +782,8 @@ async function assignReviewersToApplication(applicationId: string) {
 }
 
 /**
- * Enqueue a payment receipt email into the email_queue table.
- * The process-email-queue worker will pick it up and route it through
- * the send-email function, so all template logic stays in one place.
+ * Send payment receipt email directly via send-email function.
+ * Falls back to queueing if direct send fails.
  */
 async function enqueuePaymentReceiptEmail(
   applicationId: string,
@@ -852,35 +851,73 @@ async function enqueuePaymentReceiptEmail(
       day: "numeric",
     });
 
-    // Insert into email_queue — the worker calls send-email with this payload
-    const { error: queueError } = await supabaseAdmin
-      .from("email_queue")
-      .insert({
-        type: "payment_receipt",
-        to_email: recipientEmail,
-        payload: {
-          recipientName,
-          projectTitle,
-          applicationId,
-          amount,
-          currency: currency.toUpperCase(),
-          paymentDate,
-          transactionId,
-          actionUrl: `${siteUrl}/dashboard/applications/${applicationId}`,
-          invoicePdfUrl: invoicePdfUrl || null,
-        },
-        idempotency_key: `payment_receipt:${applicationId}:${transactionId}`,
-      });
+    const payload = {
+      recipientName,
+      projectTitle,
+      applicationId,
+      amount,
+      currency: currency.toUpperCase(),
+      paymentDate,
+      transactionId,
+      actionUrl: `${siteUrl}/dashboard/applications/${applicationId}`,
+      invoicePdfUrl: invoicePdfUrl || null,
+    };
+
+    // 1) Try direct send first (simpler and immediate)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (supabaseUrl) {
+      try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+        if (internalSecret) {
+          headers["X-Internal-Secret"] = internalSecret;
+        }
+        if (serviceRoleKey) {
+          headers["Authorization"] = `Bearer ${serviceRoleKey}`;
+        }
+
+        const response = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            to: recipientEmail,
+            type: "payment_receipt",
+            data: payload,
+            allowPublic: true,
+          }),
+        });
+
+        if (response.ok) {
+          console.log(`Payment receipt email sent directly to ${recipientEmail} (application ${applicationId})`);
+          return;
+        }
+
+        const errBody = await response.text();
+        console.error(`Direct send-email failed (${response.status}): ${errBody}`);
+      } catch (sendErr) {
+        console.error("Direct send-email call failed:", sendErr);
+      }
+    }
+
+    // 2) Fallback: enqueue for worker retries/backoff
+    const { error: queueError } = await supabaseAdmin.from("email_queue").insert({
+      type: "payment_receipt",
+      to_email: recipientEmail,
+      payload,
+      idempotency_key: `payment_receipt:${applicationId}:${transactionId}`,
+    });
 
     if (queueError) {
-      // idempotency_key conflict means we already queued this email — that's fine
       if (queueError.code === "23505") {
         console.log(`Payment receipt email already queued for application ${applicationId}`);
       } else {
         console.error("Error enqueuing payment receipt email:", queueError);
       }
     } else {
-      console.log(`Payment receipt email enqueued for ${recipientEmail} (application ${applicationId})`);
+      console.log(`Payment receipt email queued as fallback for ${recipientEmail} (application ${applicationId})`);
     }
   } catch (err) {
     console.error("Error enqueuing payment receipt email:", err);

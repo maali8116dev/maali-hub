@@ -101,12 +101,7 @@ const NotFound = () => {
                   >
                     Contact
                   </a>
-                  <a
-                    href="/help"
-                    className="text-primary hover:underline transition-colors"
-                  >
-                    Help
-                  </a>
+                 
                 </div>
               </div>
             </CardContent>
