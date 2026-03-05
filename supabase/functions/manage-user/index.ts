@@ -119,8 +119,8 @@ serve(async (req)=>{
       }
     });
 
-    // Check if user is admin (prefer app_metadata role, fallback to profiles role)
-    const appRole = user.app_metadata?.role || user.user_metadata?.role;
+    // Check if user is admin (only trust app_metadata, never user_metadata which is user-controlled)
+    const appRole = user.app_metadata?.role || null;
     let profileRole: string | null = null;
     let profileErrorMessage: string | null = null;
 
