@@ -17,7 +17,7 @@ export function useFeaturedPartners() {
   return useQuery({
     queryKey: ["partners", "featured"],
     queryFn: async (): Promise<Partner[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("partners")
         .select("id, name, logo_url, website_url, display_order")
         .eq("status", "active")

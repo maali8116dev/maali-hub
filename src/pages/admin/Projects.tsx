@@ -280,7 +280,7 @@ const AdminProjects = () => {
               enableSorting={true}
               enablePagination={true}
               exportFileName="projects"
-              onRefresh={() => refetch()}
+              onRefresh={() => { refetch(); }}
               isRefreshing={isFetching}
             />
           )}

@@ -253,7 +253,7 @@ const AdminUsers = () => {
               enableSorting={true}
               enablePagination={true}
               exportFileName="users"
-              onRefresh={() => refetch()}
+              onRefresh={() => { refetch(); }}
               isRefreshing={isFetching}
             />
           )}

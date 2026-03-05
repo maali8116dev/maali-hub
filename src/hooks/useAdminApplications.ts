@@ -18,7 +18,7 @@ export type AdminApplication = {
   projectTitle: string;
   projectId: number;
   submittedAt: string;
-  status: "pending" | "approved" | "rejected" | "draft" | "under_review";
+  status: "pending" | "approved" | "rejected" | "draft" | "under_review" | "pending_payment";
   contactEmail: string;
   contactPhone?: string;
   reviewedBy?: string | null;
@@ -61,7 +61,7 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
       return [];
     }
 
-    return data.map((app: any) => {
+    return (data as any[]).map((app: any) => {
       // Handle reviewer_decisions - it might be JSONB (already parsed) or a string
       let reviewerDecisions: any[] = [];
       try {

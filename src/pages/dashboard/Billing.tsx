@@ -472,7 +472,7 @@ const Billing = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoicePdfUrl)}
+onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoice_pdf_url)}
                       className="w-full min-h-[44px] gap-2 text-primary hover:text-primary"
                     >
                       <Download className="h-4 w-4" />
@@ -516,7 +516,7 @@ const Billing = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoicePdfUrl)}
+                            onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoice_pdf_url)}
                             className="min-h-[44px] gap-2 text-primary hover:text-primary"
                           >
                             <Download className="h-4 w-4" />
