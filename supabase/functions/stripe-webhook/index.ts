@@ -194,30 +194,61 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
   }
 
-  // Update transaction status — keep the original provider_transaction_id (session.id)
-  // First, check if transaction exists and get its current status
-  const { data: existingTx } = await supabaseAdmin
+  // Update transaction status — try multiple lookup strategies for robustness
+  let existingTx: { id: string; status: string } | null = null;
+
+  // Strategy 1: Lookup by checkout session ID + application ID (most specific)
+  const { data: txBySessionAndApp } = await supabaseAdmin
     .from("transactions")
     .select("id, status")
     .eq("provider_transaction_id", checkoutSessionId)
     .eq("application_id", applicationId)
     .maybeSingle();
 
+  if (txBySessionAndApp) {
+    existingTx = txBySessionAndApp;
+    console.log(`Found transaction by session+app: ${existingTx.id}`);
+  } else {
+    // Strategy 2: Lookup by checkout session ID only (in case application_id wasn't set)
+    const { data: txBySession } = await supabaseAdmin
+      .from("transactions")
+      .select("id, status")
+      .eq("provider_transaction_id", checkoutSessionId)
+      .maybeSingle();
+
+    if (txBySession) {
+      existingTx = txBySession;
+      console.log(`Found transaction by session only: ${existingTx.id}`);
+    } else {
+      // Strategy 3: Lookup by payment intent ID (fallback)
+      const { data: txByPaymentIntent } = await supabaseAdmin
+        .from("transactions")
+        .select("id, status")
+        .eq("provider_payment_intent_id", paymentIntentId)
+        .maybeSingle();
+
+      if (txByPaymentIntent) {
+        existingTx = txByPaymentIntent;
+        console.log(`Found transaction by payment intent: ${existingTx.id}`);
+      }
+    }
+  }
+
   if (existingTx) {
     // Only update if not already completed (idempotency)
     if (existingTx.status !== "completed") {
-      const { error: txError, data: updatedTx } = await supabaseAdmin
+      const { error: txError } = await supabaseAdmin
         .from("transactions")
         .update({
           status: "completed",
           provider_payment_intent_id: paymentIntentId,
+          provider_transaction_id: checkoutSessionId, // Ensure both IDs are set
           completed_at: new Date().toISOString(),
           receipt_url: receiptUrl,
           invoice_pdf_url: invoicePdfUrl,
+          ...(applicationId && !txBySessionAndApp ? { application_id: applicationId } : {}), // Set app_id if missing
         })
-        .eq("id", existingTx.id)
-        .select()
-        .single();
+        .eq("id", existingTx.id);
 
       if (txError) {
         console.error("Error updating transaction after checkout:", txError);
@@ -228,10 +259,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       console.log(`Transaction ${existingTx.id} already completed, skipping update`);
     }
   } else {
-    console.warn(`No transaction found for checkout session ${checkoutSessionId} and application ${applicationId}`);
+    console.error(`No transaction found for checkout session ${checkoutSessionId}, payment intent ${paymentIntentId}, application ${applicationId}`);
+    console.error("This may indicate the transaction was never created or the webhook is being called incorrectly.");
   }
 
   if (!appError) {
+    // Save payment method to database
+    if (userId) {
+      await savePaymentMethod(userId, paymentIntentId, session.customer_email || null);
+    }
+
     // Queue payment receipt email after PDF generation/transaction update.
     await enqueuePaymentReceiptEmail(applicationId, userId, session.amount_total, "usd", paymentIntentId, invoicePdfUrl);
     
@@ -318,13 +355,36 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     }
   }
 
-  // Update transaction status
-  // First, check if transaction exists
-  const { data: existingTx } = await supabaseAdmin
+  // Update transaction status — try multiple lookup strategies for robustness
+  let existingTx: { id: string; status: string; provider_transaction_id: string | null } | null = null;
+
+  // Strategy 1: Lookup by payment intent ID (most common for this handler)
+  const { data: txByPaymentIntent } = await supabaseAdmin
     .from("transactions")
     .select("id, status, provider_transaction_id")
     .eq("provider_payment_intent_id", paymentIntentId)
     .maybeSingle();
+
+  if (txByPaymentIntent) {
+    existingTx = txByPaymentIntent;
+    console.log(`Found transaction by payment intent: ${existingTx.id}`);
+  } else if (applicationId) {
+    // Strategy 2: Lookup by application ID + payment intent metadata
+    // This handles cases where payment_intent_id wasn't set initially
+    const { data: txByApp } = await supabaseAdmin
+      .from("transactions")
+      .select("id, status, provider_transaction_id")
+      .eq("application_id", applicationId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (txByApp) {
+      existingTx = txByApp;
+      console.log(`Found transaction by application: ${existingTx.id}`);
+    }
+  }
 
   if (existingTx) {
     // Only update if not already completed (idempotency)
@@ -333,6 +393,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         .from("transactions")
         .update({
           status: "completed",
+          provider_payment_intent_id: paymentIntentId,
           provider_transaction_id: existingTx.provider_transaction_id || paymentIntent.id,
           completed_at: new Date().toISOString(),
           receipt_url: receiptUrl,
@@ -349,7 +410,8 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       console.log(`Transaction ${existingTx.id} already completed, skipping update`);
     }
   } else {
-    console.warn(`No transaction found for payment intent ${paymentIntentId}`);
+    console.error(`No transaction found for payment intent ${paymentIntentId}, application ${applicationId || "unknown"}`);
+    console.error("This may indicate the transaction was never created or the webhook is being called incorrectly.");
   }
 
   // Update application if applicationId exists
@@ -367,6 +429,11 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       console.error("Error updating application:", applicationError);
     } else {
       console.log(`Application ${applicationId} marked as paid and status set to pending`);
+
+      // Save payment method to database
+      if (userId) {
+        await savePaymentMethod(userId, paymentIntentId, paymentIntent.receipt_email || null);
+      }
 
       // Queue payment receipt email (with PDF URL if available)
       await enqueuePaymentReceiptEmail(applicationId, userId, paymentIntent.amount, paymentIntent.currency, paymentIntentId, invoicePdfUrl);
@@ -430,6 +497,109 @@ async function handlePaymentCanceled(paymentIntent: Stripe.PaymentIntent) {
   }
 
   console.log(`Payment canceled: ${paymentIntentId}`);
+}
+
+/**
+ * Save or update payment method in database after successful payment
+ */
+async function savePaymentMethod(
+  userId: string,
+  paymentIntentId: string,
+  billingEmail?: string | null
+): Promise<void> {
+  try {
+    // Fetch payment method details from Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    if (!paymentIntent.payment_method || typeof paymentIntent.payment_method !== "string") {
+      console.log(`No payment method found for payment intent ${paymentIntentId}`);
+      return;
+    }
+
+    const paymentMethod = await stripe.paymentMethods.retrieve(paymentIntent.payment_method as string);
+    
+    if (!paymentMethod.card) {
+      console.log(`Payment method ${paymentMethod.id} is not a card`);
+      return;
+    }
+
+    const card = paymentMethod.card;
+    const providerId = paymentMethod.id;
+    const last4 = card.last4 || "";
+    const brand = card.brand || "unknown";
+    const expiryMonth = card.exp_month || null;
+    const expiryYear = card.exp_year || null;
+
+    // Check if payment method already exists for this user
+    const { data: existingMethod } = await supabaseAdmin
+      .from("payment_methods")
+      .select("id, is_default")
+      .eq("user_id", userId)
+      .eq("provider_id", providerId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (existingMethod) {
+      // Update existing payment method (reactivate if deleted, update expiry if changed)
+      const { error: updateError } = await supabaseAdmin
+        .from("payment_methods")
+        .update({
+          is_active: true,
+          expiry_month: expiryMonth,
+          expiry_year: expiryYear,
+          updated_at: new Date().toISOString(),
+          deleted_at: null, // Reactivate if previously deleted
+        })
+        .eq("id", existingMethod.id);
+
+      if (updateError) {
+        console.error("Error updating payment method:", updateError);
+      } else {
+        console.log(`Updated payment method ${existingMethod.id} for user ${userId}`);
+      }
+    } else {
+      // Check if user has any default payment method
+      const { data: existingDefaults } = await supabaseAdmin
+        .from("payment_methods")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("is_default", true)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+      const isDefault = !existingDefaults; // Set as default if user has no other default
+
+      // Insert new payment method
+      const { error: insertError } = await supabaseAdmin
+        .from("payment_methods")
+        .insert({
+          user_id: userId,
+          provider: "stripe",
+          provider_id: providerId,
+          type: "card",
+          brand: brand,
+          last4: last4,
+          expiry_month: expiryMonth,
+          expiry_year: expiryYear,
+          billing_email: billingEmail,
+          is_active: true,
+          is_default: isDefault,
+          metadata: {
+            payment_intent_id: paymentIntentId,
+            fingerprint: card.fingerprint || null,
+          },
+        });
+
+      if (insertError) {
+        console.error("Error inserting payment method:", insertError);
+      } else {
+        console.log(`Saved payment method ${providerId} for user ${userId} (default: ${isDefault})`);
+      }
+    }
+  } catch (error) {
+    console.error("Error saving payment method:", error);
+    // Don't throw - payment method saving shouldn't fail the webhook
+  }
 }
 
 /**
