@@ -28,7 +28,7 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
     const past = new Date(now.getTime() - 5 * 60 * 1000).toISOString(); // 5 minutes ago
     const future = new Date(now.getTime() + 60 * 60 * 1000).toISOString(); // 1 hour ahead
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await (supabaseAdmin as any)
       .from('email_queue')
       .insert([
         {
@@ -77,7 +77,7 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
     if (!supabaseAdmin || createdIds.length === 0) return;
 
     try {
-      await supabaseAdmin.from('email_queue').delete().in('id', createdIds);
+      await (supabaseAdmin as any).from('email_queue').delete().in('id', createdIds);
     } catch {
       // Swallow cleanup errors in tests
     }
