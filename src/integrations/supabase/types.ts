@@ -58,6 +58,7 @@ export type Database = {
           application_id: string
           assigned_at: string
           id: string
+          review_deadline: string | null
           reviewer_id: string
           status: string | null
         }
@@ -65,6 +66,7 @@ export type Database = {
           application_id: string
           assigned_at?: string
           id?: string
+          review_deadline?: string | null
           reviewer_id: string
           status?: string | null
         }
@@ -72,6 +74,7 @@ export type Database = {
           application_id?: string
           assigned_at?: string
           id?: string
+          review_deadline?: string | null
           reviewer_id?: string
           status?: string | null
         }
@@ -495,6 +498,54 @@ export type Database = {
         }
         Relationships: []
       }
+      email_queue: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          sent_at: string | null
+          status: string
+          to_email: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          sent_at?: string | null
+          status?: string
+          to_email: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          max_attempts?: number
+          next_attempt_at?: string
+          payload?: Json
+          sent_at?: string | null
+          status?: string
+          to_email?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           answer: string
@@ -618,6 +669,51 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          featured: boolean | null
+          id: number
+          logo_url: string | null
+          name: string
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          featured?: boolean | null
+          id?: number
+          logo_url?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          featured?: boolean | null
+          id?: number
+          logo_url?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -924,6 +1020,7 @@ export type Database = {
           overall_score: number | null
           recommendation: string | null
           reviewer_id: string
+          rubric_version_id: string | null
           scores: Json
           submitted_at: string | null
           updated_at: string
@@ -937,6 +1034,7 @@ export type Database = {
           overall_score?: number | null
           recommendation?: string | null
           reviewer_id: string
+          rubric_version_id?: string | null
           scores?: Json
           submitted_at?: string | null
           updated_at?: string
@@ -950,6 +1048,7 @@ export type Database = {
           overall_score?: number | null
           recommendation?: string | null
           reviewer_id?: string
+          rubric_version_id?: string | null
           scores?: Json
           submitted_at?: string | null
           updated_at?: string
@@ -967,6 +1066,13 @@ export type Database = {
             columns: ["assignment_id"]
             isOneToOne: false
             referencedRelation: "application_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_scores_rubric_version_id_fkey"
+            columns: ["rubric_version_id"]
+            isOneToOne: false
+            referencedRelation: "rubric_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -1032,6 +1138,93 @@ export type Database = {
           },
         ]
       }
+      rubric_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          rubric: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          rubric: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          rubric?: Json
+          version?: number
+        }
+        Relationships: []
+      }
+      success_stories: {
+        Row: {
+          category: string
+          company: string
+          created_at: string
+          created_by: string | null
+          description: string
+          display_order: number | null
+          featured: boolean | null
+          funding_amount: string
+          funding_date: string
+          id: number
+          image_url: string | null
+          impact_metrics: string | null
+          location: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          company: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          display_order?: number | null
+          featured?: boolean | null
+          funding_amount: string
+          funding_date: string
+          id?: number
+          image_url?: string | null
+          impact_metrics?: string | null
+          location: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          company?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          display_order?: number | null
+          featured?: boolean | null
+          funding_amount?: string
+          funding_date?: string
+          id?: number
+          image_url?: string | null
+          impact_metrics?: string | null
+          location?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_rubric: {
         Row: {
           created_at: string
@@ -1066,6 +1259,7 @@ export type Database = {
           failure_reason: string | null
           id: string
           invoice_number: string | null
+          invoice_pdf_url: string | null
           invoice_url: string | null
           metadata: Json | null
           payment_method_id: string | null
@@ -1092,6 +1286,7 @@ export type Database = {
           failure_reason?: string | null
           id?: string
           invoice_number?: string | null
+          invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
           payment_method_id?: string | null
@@ -1118,6 +1313,7 @@ export type Database = {
           failure_reason?: string | null
           id?: string
           invoice_number?: string | null
+          invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
           payment_method_id?: string | null
@@ -1168,31 +1364,16 @@ export type Database = {
           id: string | null
           metadata: Json | null
           user_id: string | null
-        }
-        Insert: {
-          action_type?: string | null
-          created_at?: string | null
-          description?: string | null
-          entity_id?: string | null
-          entity_type?: string | null
-          id?: string | null
-          metadata?: Json | null
-          user_id?: string | null
-        }
-        Update: {
-          action_type?: string | null
-          created_at?: string | null
-          description?: string | null
-          entity_id?: string | null
-          entity_type?: string | null
-          id?: string | null
-          metadata?: Json | null
-          user_id?: string | null
+          user_name: string | null
         }
         Relationships: []
       }
     }
     Functions: {
+      admin_set_application_reviewers: {
+        Args: { p_application_id: string; p_reviewer_ids: string[] }
+        Returns: undefined
+      }
       assign_reviewer_category: {
         Args: { p_category_name: string; p_reviewer_id: string }
         Returns: {
@@ -1213,6 +1394,10 @@ export type Database = {
       calculate_review_score:
         | { Args: { p_scores: Json }; Returns: number }
         | { Args: { p_category: string; p_scores: Json }; Returns: number }
+        | {
+            Args: { p_rubric_version_id?: string; p_scores: Json }
+            Returns: number
+          }
       check_and_increment_rate_limit: {
         Args: {
           p_ip_address: unknown
@@ -1222,6 +1407,13 @@ export type Database = {
           p_window_minutes: number
         }
         Returns: Json
+      }
+      cleanup_old_pending_payment_applications: {
+        Args: { p_days_old?: number }
+        Returns: {
+          deleted_count: number
+          deleted_ids: string[]
+        }[]
       }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       create_notification: {
@@ -1235,11 +1427,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_rubric_version: {
+        Args: { p_notes?: string; p_rubric: Json }
+        Returns: string
+      }
       generate_category_slug: {
         Args: { category_name: string }
         Returns: string
       }
       generate_invoice_number: { Args: never; Returns: string }
+      get_active_rubric_version: { Args: never; Returns: string }
       get_admin_applications: {
         Args: never
         Returns: {
@@ -1250,6 +1447,7 @@ export type Database = {
           id: string
           project_id: number
           project_title: string
+          review_deadline: string
           review_notes: string
           reviewed_at: string
           reviewed_by: string
@@ -1344,6 +1542,24 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_application_submission_preview: {
+        Args: { p_project_id: number; p_user_id: string }
+        Returns: {
+          can_submit: boolean
+          existing_application: Json
+          project: Json
+          validation_error: string
+        }[]
+      }
+      get_eligible_reviewers_for_application: {
+        Args: { p_application_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          reviewer_id: string
+          workload: number
+        }[]
+      }
       get_financial_stats: {
         Args: never
         Returns: {
@@ -1358,6 +1574,22 @@ export type Database = {
           this_month_revenue: number
           total_revenue: number
           total_transactions: number
+        }[]
+      }
+      get_project_applications_ranked: {
+        Args: { p_project_id: number }
+        Returns: {
+          applicant_email: string
+          applicant_name: string
+          application_id: string
+          average_score: number
+          rank_position: number
+          recommendations: Json
+          reviewer_scores: Json
+          score_variance: number
+          status: string
+          submitted_at: string
+          total_reviews: number
         }[]
       }
       get_projects_with_filters: {
@@ -1396,6 +1628,7 @@ export type Database = {
           location: string
           project_id: number
           project_title: string
+          review_deadline: string
           review_notes: string
           reviewed_at: string
           reviewed_by: string
@@ -1439,6 +1672,10 @@ export type Database = {
         Args: { p_reviewer_id: string }
         Returns: number
       }
+      get_rubric_by_version_id: {
+        Args: { p_version_id: string }
+        Returns: Json
+      }
       get_user_applications_with_projects: {
         Args: { p_user_id: string }
         Returns: {
@@ -1466,6 +1703,20 @@ export type Database = {
       mark_notification_read: {
         Args: { p_notification_id: string }
         Returns: boolean
+      }
+      validate_application_submission: {
+        Args: { p_project_id: number; p_user_id: string }
+        Returns: {
+          can_submit: boolean
+          error_message: string
+          existing_application_id: string
+          has_existing_application: boolean
+          is_project_open: boolean
+          project_deadline: string
+          project_fee: number
+          project_status: string
+          project_title: string
+        }[]
       }
     }
     Enums: {
