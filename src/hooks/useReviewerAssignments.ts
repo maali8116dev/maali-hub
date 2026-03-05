@@ -141,6 +141,7 @@ export const useReviewerWorkload = (reviewerId?: string) => {
 };
 
 // Get reviewer categories
+// Reviewer categories are relatively static and don't change frequently
 export const useReviewerCategories = (reviewerId?: string) => {
   return useQuery({
     queryKey: ['reviewer-categories', reviewerId],
@@ -172,6 +173,11 @@ export const useReviewerCategories = (reviewerId?: string) => {
       return unique.sort((a, b) => a.category.localeCompare(b.category));
     },
     enabled: !!reviewerId,
+    staleTime: Infinity, // Never consider stale - reviewer categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };
 

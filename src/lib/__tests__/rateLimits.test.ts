@@ -33,7 +33,6 @@ describe("rateLimits", () => {
         "sign_in",
         "sign_up",
         "password_reset",
-        "magic_link",
         "application_submission",
         "draft_save",
         "document_upload",

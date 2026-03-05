@@ -5,6 +5,44 @@ import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+const supabaseAdmin = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PUBLIC_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const PUBLIC_RATE_LIMIT_MAX_PER_IP = 20;
+const PUBLIC_RATE_LIMIT_MAX_PER_EMAIL = 6;
+const publicRateLimitStore = new Map<string, number[]>();
+
+function parseClientIP(req: Request): string {
+  const xForwardedFor = req.headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    return xForwardedFor.split(",")[0].trim();
+  }
+  return req.headers.get("x-real-ip") || "unknown";
+}
+
+function consumeRateLimit(key: string, maxRequests: number, windowMs: number): { allowed: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  const cutoff = now - windowMs;
+  const attempts = (publicRateLimitStore.get(key) || []).filter((ts) => ts > cutoff);
+
+  if (attempts.length >= maxRequests) {
+    const retryAfterMs = attempts[0] + windowMs - now;
+    return {
+      allowed: false,
+      retryAfterSec: Math.max(1, Math.ceil(retryAfterMs / 1000)),
+    };
+  }
+
+  attempts.push(now);
+  publicRateLimitStore.set(key, attempts);
+  return { allowed: true, retryAfterSec: 0 };
+}
+
 type EmailType = 
   | "application_submitted"
   | "application_approved"
@@ -43,10 +81,11 @@ interface SendEmailRequest {
     paymentDate?: string;
     invoiceNumber?: string;
     transactionId?: string;
+    invoicePdfUrl?: string | null;
   };
 }
 
-const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
+const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { subject: string; html: string; attachmentUrl?: string | null } => {
   // M1 FIX: HTML-escape all user-provided data to prevent HTML injection in emails
   const recipientName = escapeHtml(data.recipientName || data.firstName || "Applicant");
   const projectTitle = data.projectTitle ? escapeHtml(data.projectTitle) : undefined;
@@ -443,6 +482,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "application_approved":
@@ -467,6 +507,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "application_rejected":
@@ -492,6 +533,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "application_under_review":
@@ -516,6 +558,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "status_update":
@@ -538,6 +581,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "welcome":
@@ -560,6 +604,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "email_verification":
@@ -574,6 +619,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "password_reset":
@@ -589,6 +635,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "contact_confirmation":
@@ -606,6 +653,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
 
     case "payment_receipt": {
@@ -615,6 +663,8 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
       const invoiceNum = data.invoiceNumber ? escapeHtml(data.invoiceNumber) : undefined;
       const transactionIdVal = data.transactionId ? escapeHtml(data.transactionId) : undefined;
 
+      const invoicePdfUrl = data.invoicePdfUrl || null;
+
       return {
         subject: `Payment Receipt - ${projectTitle || "Maali"}`,
         html: emailTemplate(
@@ -622,6 +672,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
           `
             <p>Dear ${recipientName},</p>
             <p>Thank you for your payment. Here is your receipt:</p>
+            ${invoicePdfUrl ? `<p>A PDF copy of your receipt is attached to this email.</p>` : ''}
             <div style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
               <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#111827;">
                 ${projectTitle ? `
@@ -670,6 +721,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: invoicePdfUrl,
       };
     }
 
@@ -703,6 +755,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>Maali Contact System</p>
           `
         ),
+        attachmentUrl: null,
       };
     }
 
@@ -718,6 +771,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]) => {
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
+        attachmentUrl: null,
       };
   }
 };
@@ -730,6 +784,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { to, type, data, allowPublic }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
+    const emailData = data || {};
     
     // Determine request context
     const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
@@ -772,36 +827,147 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    if (!to || !type) {
+    if (!type) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: to, type" }),
+        JSON.stringify({ error: "Missing required field: type" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
-    // Validate and sanitize email address
-    const sanitizedEmail = typeof to === 'string' ? to.trim() : '';
-    
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(sanitizedEmail)) {
+    const senderEmail = typeof emailData.email === "string" ? emailData.email.trim() : "";
+    if (isContactEmail && !senderEmail) {
       return new Response(
-        JSON.stringify({ error: "Invalid email address format" }),
+        JSON.stringify({ error: "Missing required contact sender email" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
-    const { subject, html } = getEmailContent(type, data || {});
+    if (isContactEmail && !EMAIL_REGEX.test(senderEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid sender email format" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    let recipientEmail = typeof to === "string" ? to.trim() : "";
+    if (type === "contact_submission") {
+      recipientEmail = (Deno.env.get("CONTACT_NOTIFICATION_EMAIL") || Deno.env.get("SUPPORT_EMAIL") || "").trim();
+      if (!recipientEmail) {
+        return new Response(
+          JSON.stringify({ error: "Server misconfiguration: support recipient is not set" }),
+          { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
+    } else if (type === "contact_confirmation") {
+      recipientEmail = senderEmail;
+    }
+
+    if (!recipientEmail || !EMAIL_REGEX.test(recipientEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid recipient email address format" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    if (isPublicAllowed && isContactEmail) {
+      const clientIP = parseClientIP(req);
+
+      const ipLimit = consumeRateLimit(
+        `contact:ip:${clientIP}`,
+        PUBLIC_RATE_LIMIT_MAX_PER_IP,
+        PUBLIC_RATE_LIMIT_WINDOW_MS,
+      );
+      if (!ipLimit.allowed) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          {
+            status: 429,
+            headers: {
+              ...getCorsHeaders(req),
+              "Content-Type": "application/json",
+              "Retry-After": String(ipLimit.retryAfterSec),
+            },
+          }
+        );
+      }
+
+      const emailLimit = consumeRateLimit(
+        `contact:email:${senderEmail.toLowerCase()}`,
+        PUBLIC_RATE_LIMIT_MAX_PER_EMAIL,
+        PUBLIC_RATE_LIMIT_WINDOW_MS,
+      );
+      if (!emailLimit.allowed) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          {
+            status: 429,
+            headers: {
+              ...getCorsHeaders(req),
+              "Content-Type": "application/json",
+              "Retry-After": String(emailLimit.retryAfterSec),
+            },
+          }
+        );
+      }
+    }
+
+    const emailContent = getEmailContent(type, emailData);
+    const { subject, html, attachmentUrl } = emailContent;
 
     // Get configured from email or fall back to default
     const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";
 
-    const emailResponse = await resend.emails.send({
+    // Prepare email payload
+    const emailPayload: any = {
       from: fromEmail,
-      to: [sanitizedEmail], // Use sanitized email
+      to: [recipientEmail],
       subject,
       html,
-    });
+    };
+
+    // Add PDF attachment if available
+    if (attachmentUrl && type === "payment_receipt") {
+      try {
+        // Extract file path from URL
+        const urlObj = new URL(attachmentUrl);
+        const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/receipts\/(.+)/);
+        if (pathMatch) {
+          const filePath = pathMatch[1];
+          
+          // Download PDF from storage
+          const { data: pdfData, error: downloadError } = await supabaseAdmin.storage
+            .from("receipts")
+            .download(filePath);
+
+          if (!downloadError && pdfData) {
+            const pdfArrayBuffer = await pdfData.arrayBuffer();
+            const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfArrayBuffer)));
+            
+            // Extract filename from path
+            const fileName = filePath.split('/').pop() || `receipt-${emailData.transactionId || 'receipt'}.pdf`;
+            
+            emailPayload.attachments = [
+              {
+                filename: fileName,
+                content: pdfBase64,
+                content_type: "application/pdf",
+              },
+            ];
+            
+            console.log(`PDF attachment added to email: ${fileName}`);
+          } else {
+            console.warn(`Failed to download PDF from storage: ${downloadError?.message || 'Unknown error'}`);
+          }
+        } else {
+          console.warn(`Could not extract file path from URL: ${attachmentUrl}`);
+        }
+      } catch (attachErr) {
+        console.error("Error attaching PDF to email:", attachErr);
+        // Continue without attachment - don't fail the email
+      }
+    }
+
+    const emailResponse = await resend.emails.send(emailPayload);
 
     console.log("Email sent successfully:", emailResponse);
 

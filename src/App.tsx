@@ -48,6 +48,10 @@ import AdminFAQForm from "./pages/admin/FAQForm";
 import AdminMentors from "./pages/admin/Mentors";
 import AdminMentorForm from "./pages/admin/MentorForm";
 import AdminResources from "./pages/admin/Resources";
+import AdminPartners from "./pages/admin/Partners";
+import AdminPartnerForm from "./pages/admin/PartnerForm";
+import AdminSuccessStories from "./pages/admin/SuccessStories";
+import AdminSuccessStoryForm from "./pages/admin/SuccessStoryForm";
 import AdminResourceForm from "./pages/admin/ResourceForm";
 import AdminProjectForm from "./pages/admin/ProjectForm";
 import ReviewManagement from "./pages/admin/ReviewManagement";
@@ -78,6 +82,7 @@ import DataProtection from "./pages/DataProtection";
 import ErrorTest from "./tests/ErrorTest";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
+import TestPayment from "./pages/payment/TestPayment";
 import OAuthCallback from "./pages/OAuthCallback";
 
 const queryClient = new QueryClient();
@@ -137,6 +142,7 @@ const App = () => {
           <Route path="/projects/:id/apply" element={<ApplicationForm />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
+          <Route path="/payment/test" element={<TestPayment />} />
           
           {/* Footer Link Pages */}
           <Route path="/apply" element={<Apply />} />
@@ -475,6 +481,78 @@ const App = () => {
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <AdminBlogForm />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/partners"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminPartners />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/partners/new"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminPartnerForm />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/partners/:id/edit"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminPartnerForm />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/success-stories"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminSuccessStories />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/success-stories/new"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminSuccessStoryForm />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/success-stories/:id/edit"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminSuccessStoryForm />
                 </AdminLayout>
               </ProtectedRoute>
               </RoleBasedRoute>

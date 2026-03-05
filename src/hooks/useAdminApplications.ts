@@ -30,12 +30,15 @@ export type AdminApplication = {
     completed: number;
     total: number;
   };
+  reviewDeadline?: string | null;
 };
 
 // Status mapping
-const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> = {
+// Admins can see pending_payment status for monitoring incomplete applications
+const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft" | "under_review"> = {
   pending: "pending",
-  under_review: "pending",
+  pending_payment: "pending", // Map to pending for display consistency
+  under_review: "under_review",
   approved: "approved",
   rejected: "rejected",
   draft: "draft",
@@ -78,10 +81,17 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
 
       const completedReviews = reviewerDecisions.length;
       const hasReviews = completedReviews > 0;
-      const baseStatus = statusMap[app.status || "pending"] || "pending";
+      
+      // Preserve pending_payment status for admin visibility
+      // Don't map it to pending - admins need to see incomplete applications
+      const rawStatus = app.status || "pending";
+      const baseStatus = rawStatus === "pending_payment" 
+        ? "pending_payment" 
+        : (statusMap[rawStatus] || "pending");
       
       // Determine if application is under review (has some reviews but not final decision)
-      const finalStatus = hasReviews && baseStatus === "pending" 
+      // But don't change pending_payment to under_review
+      const finalStatus = (hasReviews && baseStatus === "pending" && rawStatus !== "pending_payment")
         ? "under_review" 
         : baseStatus;
 

@@ -16,6 +16,8 @@
   "trustIndicators": {
     "title": "Trusted by leading",
     "titleHighlight": "Organizations",
+    "worldwide": "Worldwide",
+    "logoLabel": "Logo {{index}}",
     "subtitle": "Our focus on honesty, integrity and competence makes us the preferred choice for our partners and clients."
   },
   "howItWorks": {
@@ -105,6 +107,12 @@
     "titleHighlight": "Opportunities",
     "subtitle": "Discover funding opportunities across various sectors. From agriculture to technology, find the perfect match for your entrepreneurial vision.",
     "viewAll": "View All Projects"
+  },
+  "successStories": {
+    "title": "Success",
+    "titleHighlight": "Stories",
+    "subtitle": "Discover how African entrepreneurs are transforming their communities and building successful businesses with funding from our platform.",
+    "viewAll": "View All Success Stories"
   },
   "featureShowcase": {
     "title": "Built for",

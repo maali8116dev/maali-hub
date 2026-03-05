@@ -24,5 +24,11 @@ verify_jwt = false
 [functions.generate-invoice]
 verify_jwt = false
 
+[functions.submit-application]
+verify_jwt = false
+
+[functions.update-application-status]
+verify_jwt = false
+
 [functions.process-email-queue]
 verify_jwt = false

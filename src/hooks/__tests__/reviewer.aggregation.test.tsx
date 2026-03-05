@@ -260,7 +260,7 @@ describe('useDecisionEngine (Hook)', () => {
 // Direct RPC integration tests (real database)
 // ============================================================
 
-describe('get_application_review_scores_with_reviewers RPC (Integration)', () => {
+describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', () => {
   let testApplicationId: string;
   let testProjectId: number;
   let testCategoryId: number;

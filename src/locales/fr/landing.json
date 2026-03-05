@@ -16,6 +16,8 @@
   "trustIndicators": {
     "title": "Approuvé par les principales",
     "titleHighlight": "Organisations",
+    "worldwide": "Dans le monde entier",
+    "logoLabel": "Logo {{index}}",
     "subtitle": "Notre engagement envers l'honnêteté, l'intégrité et la compétence fait de nous le choix préféré de nos partenaires et clients."
   },
   "howItWorks": {
@@ -105,6 +107,12 @@
     "titleHighlight": "en Vedette",
     "subtitle": "Découvrez les opportunités de financement dans divers secteurs. De l'agriculture à la technologie, trouvez la correspondance parfaite pour votre vision entrepreneuriale.",
     "viewAll": "Voir tous les projets"
+  },
+  "successStories": {
+    "title": "Histoires de",
+    "titleHighlight": "Succès",
+    "subtitle": "Découvrez comment les entrepreneurs africains transforment leurs communautés et construisent des entreprises prospères grâce au financement de notre plateforme.",
+    "viewAll": "Voir toutes les histoires de succès"
   },
   "featureShowcase": {
     "title": "Conçu pour les",

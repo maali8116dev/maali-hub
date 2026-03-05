@@ -21,6 +21,7 @@ export interface CategoryFormData {
 
 /**
  * Hook to fetch all active categories (for public use)
+ * Categories are static content that rarely changes
  */
 export function useCategories() {
   return useQuery({
@@ -35,12 +36,17 @@ export function useCategories() {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
 /**
  * Hook to fetch all categories including inactive ones (admin only)
+ * Categories are static content that rarely changes
  */
 export function useAllCategories() {
   return useQuery({
@@ -54,12 +60,17 @@ export function useAllCategories() {
       if (error) throw error;
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
 /**
  * Hook to fetch a single category by ID
+ * Categories are static content that rarely changes
  */
 export function useCategory(categoryId: number | null) {
   return useQuery({
@@ -80,11 +91,17 @@ export function useCategory(categoryId: number | null) {
       return data;
     },
     enabled: !!categoryId,
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
 /**
  * Hook to fetch a single category by slug
+ * Categories are static content that rarely changes
  */
 export function useCategoryBySlug(slug: string | null) {
   return useQuery({
@@ -106,6 +123,11 @@ export function useCategoryBySlug(slug: string | null) {
       return data;
     },
     enabled: !!slug,
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 

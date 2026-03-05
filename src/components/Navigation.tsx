@@ -31,7 +31,7 @@ const Navigation = () => {
     { href: '/projects', label: t('navigation:projects') },
     { href: '/about', label: t('navigation:about') },
     { href: '/resources', label: t('navigation:resources') },
-    { href: '/blog', label: t('navigation:blog', 'Blog') },
+    { href: '/blog', label: t('navigation:blog') },
     { href: '/contact', label: t('navigation:contact') }
   ];
 
@@ -150,7 +150,7 @@ const Navigation = () => {
             
             {/* Language selector for mobile */}
             <div className="px-4 py-3 border-t border-border mt-2">
-              <p className="text-sm text-muted-foreground mb-2">Language</p>
+              <p className="text-sm text-muted-foreground mb-2">{t('navigation:language')}</p>
               <div className="flex gap-2 flex-wrap">
                 {languages.map((lang) => (
                   <button

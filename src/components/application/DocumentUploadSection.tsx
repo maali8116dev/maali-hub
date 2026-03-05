@@ -235,6 +235,17 @@ const DocumentUploadSection = ({
     }
   };
 
+  // Define required documents (marked with asterisk)
+  const requiredDocuments = applicantType === "Individual"
+    ? new Set([
+        "Government-issued ID (if requested)",
+        "Project proposal or concept note",
+      ])
+    : new Set([
+        "Registration certificate or legal incorporation document",
+        "Project proposal or concept note",
+      ]);
+
   const recommendedDocuments = applicantType === "Individual"
     ? [
         "Government-issued ID (if requested)",
@@ -262,11 +273,16 @@ const DocumentUploadSection = ({
           </p>
           <ul className="space-y-1 text-sm">
             {recommendedDocuments.map((item) => (
-              <li key={item} className="text-foreground">- {item}</li>
+              <li key={item} className="text-foreground">
+                - {item}
+                {requiredDocuments.has(item) && (
+                  <span className="text-destructive ml-1">*</span>
+                )}
+              </li>
             ))}
           </ul>
           <p className="text-xs text-muted-foreground italic">
-            You can upload all files in this one dropzone. Documents are optional but strongly encouraged.
+            You can upload all files in this one dropzone. Documents marked with <span className="text-destructive">*</span> are required.
           </p>
         </CardContent>
       </Card>

@@ -123,6 +123,7 @@ export function useProjects(filters?: {
 /**
  * Hook to fetch project categories from the centralized categories table
  * Returns category names for backward compatibility
+ * Categories are static content that rarely changes
  */
 export function useProjectCategories() {
   return useQuery({
@@ -140,7 +141,11 @@ export function useProjectCategories() {
       const uniqueNames = Array.from(new Set((data || []).map((c) => c.name)));
       return uniqueNames;
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
@@ -161,6 +166,7 @@ async function fetchLocationsDirect(): Promise<string[]> {
 
 /**
  * Hook to fetch project locations/regions
+ * Locations are relatively static content that doesn't change frequently
  */
 export function useProjectLocations() {
   return useQuery({
@@ -168,7 +174,11 @@ export function useProjectLocations() {
     queryFn: async () => {
       return fetchLocationsDirect();
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: Infinity, // Never consider stale - locations rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
@@ -194,6 +204,7 @@ async function fetchFeaturedProjectsDirect(): Promise<Project[]> {
 
 /**
  * Hook to fetch featured projects for homepage
+ * Projects show dynamic data (applicant counts, deadlines) but don't need constant refetching
  */
 export function useFeaturedProjects() {
   return useQuery({
@@ -201,6 +212,10 @@ export function useFeaturedProjects() {
     queryFn: async () => {
       return fetchFeaturedProjectsDirect();
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000, // 10 minutes - reasonable for landing page
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    retry: 1,
   });
 }

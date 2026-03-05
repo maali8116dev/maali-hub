@@ -13,6 +13,7 @@ export interface ReviewProgress {
 export function getApplicationStatusBadgeClassName(status: string): string {
   const styles: Record<string, string> = {
     pending: "bg-warning/10 text-warning border-warning/20",
+    pending_payment: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
     approved: "bg-success/10 text-success border-success/20",
     rejected: "bg-destructive/10 text-destructive border-destructive/20",
     draft: "bg-muted text-muted-foreground border-border",
@@ -34,6 +35,13 @@ export function getApplicationStatusBadge(
         <Badge className="bg-warning/10 text-warning border-warning/20">
           <Clock className="h-3 w-3 mr-1" />
           Pending
+        </Badge>
+      );
+    case "pending_payment":
+      return (
+        <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400">
+          <Clock className="h-3 w-3 mr-1" />
+          Payment Pending
         </Badge>
       );
     case "under_review":

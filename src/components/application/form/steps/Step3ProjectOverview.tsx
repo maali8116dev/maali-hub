@@ -15,9 +15,13 @@ export function Step3ProjectOverview({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Project Overview</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Project Overview{" "}
+          <span className="text-destructive">*</span>
+        </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Tell us what you want funding for.
+          Tell us what you want funding for. All fields marked with{" "}
+          <span className="text-destructive">*</span> are required.
         </p>
       </div>
 

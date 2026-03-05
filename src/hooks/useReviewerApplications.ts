@@ -84,6 +84,7 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
           completed: completedReviews,
           total: completedReviews + 1, // Estimate: assume at least one more reviewer pending
         } : undefined,
+        reviewDeadline: app.review_deadline || undefined,
       };
     });
 }

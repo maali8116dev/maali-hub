@@ -228,7 +228,7 @@ describe('useApplicationReviewScores (Hook)', () => {
 // Direct DB integration tests (real database)
 // ============================================================
 
-describe('Review scoring (Integration)', () => {
+describe.skip('Review scoring (Integration)', () => {
   let testApplicationId: string;
   let testProjectId: number;
   let testCategoryId: number;

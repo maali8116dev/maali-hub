@@ -30,11 +30,11 @@ export interface RateLimitedAuthResult<T = unknown> {
 /**
  * Call the rate-limited-auth Edge Function.
  *
- * @param operation  One of: sign_in, sign_up, password_reset, magic_link
+ * @param operation  One of: sign_in, sign_up, password_reset
  * @param payload    The rest of the fields (email, password, options, …)
  */
 export async function rateLimitedAuth<T = unknown>(
-  operation: "sign_in" | "sign_up" | "password_reset" | "magic_link",
+  operation: "sign_in" | "sign_up" | "password_reset",
   payload: {
     email: string;
     password?: string;

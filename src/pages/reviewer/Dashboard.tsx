@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useReviewerApplications } from "@/hooks/useReviewerApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/dateUtils";
 
 const ReviewerDashboard = () => {
   const navigate = useNavigate();
@@ -28,11 +30,53 @@ const ReviewerDashboard = () => {
     };
   }, [applications]);
 
-  // Get recent applications (pending ones, sorted by date)
+  // Get recent applications (pending ones, sorted by deadline urgency)
   const recentApplications = useMemo(() => {
     return applications
-      .filter((app) => app.status === "pending")
-      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .filter((app) => app.status === "pending" || app.status === "under_review")
+      .map((app) => {
+        // Calculate deadline status
+        let deadlineStatus: 'overdue' | 'approaching' | 'on-time' | null = null;
+        let daysUntilDeadline: number | null = null;
+        
+        if (app.reviewDeadline) {
+          const deadlineDate = new Date(app.reviewDeadline);
+          const today = new Date();
+          const diffMs = deadlineDate.getTime() - today.getTime();
+          daysUntilDeadline = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilDeadline < 0) {
+            deadlineStatus = 'overdue';
+          } else if (daysUntilDeadline <= 2) {
+            deadlineStatus = 'approaching';
+          } else {
+            deadlineStatus = 'on-time';
+          }
+        }
+        
+        return {
+          ...app,
+          deadlineStatus,
+          daysUntilDeadline,
+        };
+      })
+      .sort((a, b) => {
+        // Sort by deadline urgency: overdue first, then approaching, then by deadline date
+        if (a.deadlineStatus === 'overdue' && b.deadlineStatus !== 'overdue') return -1;
+        if (b.deadlineStatus === 'overdue' && a.deadlineStatus !== 'overdue') return 1;
+        if (a.deadlineStatus === 'approaching' && b.deadlineStatus === 'on-time') return -1;
+        if (b.deadlineStatus === 'approaching' && a.deadlineStatus === 'on-time') return 1;
+        
+        // If same urgency, sort by deadline date
+        if (a.reviewDeadline && b.reviewDeadline) {
+          return new Date(a.reviewDeadline).getTime() - new Date(b.reviewDeadline).getTime();
+        }
+        if (a.reviewDeadline) return -1;
+        if (b.reviewDeadline) return 1;
+        
+        // Fallback to submission date
+        return new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+      })
       .slice(0, 5);
   }, [applications]);
 
@@ -207,29 +251,55 @@ const ReviewerDashboard = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {recentApplications.map((app) => (
-                  <div
-                    key={app.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors gap-2"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs sm:text-sm truncate">{app.applicantName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{app.projectTitle}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(app.submittedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(`/reviewer/applications/${app.id}`)}
-                      className="min-h-[44px] min-w-[44px] w-full sm:w-auto"
+                {recentApplications.map((app: any) => {
+                  const isOverdue = app.deadlineStatus === 'overdue';
+                  const isApproaching = app.deadlineStatus === 'approaching';
+                  
+                  return (
+                    <div
+                      key={app.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors gap-2 ${isOverdue ? 'border-destructive/50 bg-destructive/5' : isApproaching ? 'border-warning/50 bg-warning/5' : ''}`}
                     >
-                      <Eye className="h-4 w-4 sm:mr-0" />
-                      <span className="sm:hidden ml-2">View</span>
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-xs sm:text-sm truncate">{app.applicantName}</p>
+                          {isOverdue && (
+                            <Badge variant="destructive" className="text-xs">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Overdue
+                            </Badge>
+                          )}
+                          {isApproaching && !isOverdue && (
+                            <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{app.projectTitle}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Submitted: {new Date(app.submittedAt).toLocaleDateString()}
+                          </p>
+                          {app.reviewDeadline && (
+                            <p className={`text-xs ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
+                              Deadline: {formatDate(new Date(app.reviewDeadline))}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/reviewer/applications/${app.id}`)}
+                        className="min-h-[44px] min-w-[44px] w-full sm:w-auto"
+                      >
+                        <Eye className="h-4 w-4 sm:mr-0" />
+                        <span className="sm:hidden ml-2">View</span>
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>

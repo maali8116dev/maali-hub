@@ -15,6 +15,8 @@ import {
   DollarSign,
   ClipboardCheck,
   Tag,
+  Handshake,
+  Star,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +53,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/categories", label: "Categories", icon: Tag },
     { href: "/admin/resources", label: "Resources", icon: FolderOpen },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
+    { href: "/admin/partners", label: "Partners", icon: Handshake },
+    { href: "/admin/success-stories", label: "Success Stories", icon: Star },
     { href: "/admin/faq", label: "FAQs", icon: HelpCircle },
     { href: "/admin/mentors", label: "Mentors", icon: Users },
     { href: "/admin/users", label: "Users", icon: Users },
@@ -72,6 +76,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname === "/admin/financial") return "Financial Management";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
+    if (location.pathname.startsWith("/admin/partners")) return "Manage Partners";
+    if (location.pathname.startsWith("/admin/success-stories")) return "Manage Success Stories";
     if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
     if (location.pathname.startsWith("/admin/mentors")) return "Manage Mentors";
     if (location.pathname === "/admin/users") return "Manage Users";
@@ -112,6 +118,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href || 
                     (item.href === "/admin/blog" && location.pathname.startsWith("/admin/blog")) ||
+                    (item.href === "/admin/partners" && location.pathname.startsWith("/admin/partners")) ||
+                    (item.href === "/admin/success-stories" && location.pathname.startsWith("/admin/success-stories")) ||
                     (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
                     (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors")) ||
                     (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources")) ||

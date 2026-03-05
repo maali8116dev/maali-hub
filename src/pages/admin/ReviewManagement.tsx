@@ -11,6 +11,7 @@ import {
   ConflictsTab,
   SettingsTab,
 } from './review-management';
+import { useCategories } from '@/hooks/useCategories';
 
 const ReviewManagement = () => {
 
@@ -39,20 +40,9 @@ const ReviewManagement = () => {
     },
   });
 
-  // Get project categories from categories table
-  const { data: categories = [] } = useQuery({
-    queryKey: ['project-categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('name')
-        .eq('is_active', true)
-        .order('name', { ascending: true });
-      
-      if (error) throw error;
-      return (data || []).map(c => c.name);
-    },
-  });
+  // Get project categories from categories table (cached and optimized)
+  const { data: categoriesData = [] } = useCategories();
+  const categories = categoriesData.map(c => c.name);
 
   return (
     <div className="space-y-6">

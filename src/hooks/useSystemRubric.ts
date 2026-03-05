@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { SystemRubric } from '@/types/reviewer';
 
 // Get system rubric (simplified - no versioning)
+// Rubrics are static configuration that rarely changes
 export const useSystemRubric = () => {
   return useQuery({
     queryKey: ['system-rubric'],
@@ -28,6 +29,11 @@ export const useSystemRubric = () => {
         updated_at: data.updated_at,
       } as SystemRubric;
     },
+    staleTime: Infinity, // Never consider stale - rubrics rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };
 

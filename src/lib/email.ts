@@ -259,6 +259,7 @@ export async function sendContactConfirmationEmail(
     to,
     type: "contact_confirmation",
     data: {
+      email: to,
       firstName,
       message,
       submissionId,

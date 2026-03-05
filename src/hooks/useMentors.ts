@@ -24,24 +24,25 @@ export interface Mentor {
 export type NewMentor = Omit<Mentor, 'id' | 'created_at' | 'updated_at'>;
 
 // Fetch published mentors for public page
+// Mentors are static content that rarely changes
 export function useMentors() {
   return useQuery({
     queryKey: ['mentors', 'published'],
     queryFn: async () => {
-      console.log('Fetching mentors...');
       const { data, error } = await (supabase
         .from('mentors')
         .select('*')
         .eq('is_published', true)
         .order('display_order', { ascending: true }) as any);
 
-      console.log('Mentors response:', { data, error });
-      if (error) {
-        console.error('Mentors fetch error:', error);
-        throw error;
-      }
+      if (error) throw error;
       return data as Mentor[];
     },
+    staleTime: Infinity, // Never consider stale - mentors rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 
@@ -62,6 +63,7 @@ export function useAdminMentors() {
 }
 
 // Fetch single mentor
+// Mentors are static content that rarely changes
 export function useMentor(id: number | undefined) {
   return useQuery({
     queryKey: ['mentors', id],
@@ -77,6 +79,11 @@ export function useMentor(id: number | undefined) {
       return data as Mentor;
     },
     enabled: !!id,
+    staleTime: Infinity, // Never consider stale - mentors rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 }
 

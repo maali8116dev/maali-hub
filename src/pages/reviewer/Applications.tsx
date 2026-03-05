@@ -29,18 +29,39 @@ const ReviewerApplications = () => {
     statusValues: ["pending", "under_review", "approved", "rejected"],
   });
 
-  // Filter and process applications with days pending calculation
+  // Filter and process applications with days pending and deadline calculations
   const processedApplications = useMemo(() => {
-    // Add days pending calculation for all applications (useful for sorting)
+    // Add days pending and deadline status calculations
     return baseFilteredApplications.map((app) => {
       const submittedDate = new Date(app.submittedAt);
       const today = new Date();
       const daysPending = Math.floor(
         (today.getTime() - submittedDate.getTime()) / (1000 * 60 * 60 * 24)
       );
+      
+      // Calculate deadline status
+      let deadlineStatus: 'overdue' | 'approaching' | 'on-time' | null = null;
+      let daysUntilDeadline: number | null = null;
+      
+      if (app.reviewDeadline) {
+        const deadlineDate = new Date(app.reviewDeadline);
+        const diffMs = deadlineDate.getTime() - today.getTime();
+        daysUntilDeadline = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilDeadline < 0) {
+          deadlineStatus = 'overdue';
+        } else if (daysUntilDeadline <= 2) {
+          deadlineStatus = 'approaching';
+        } else {
+          deadlineStatus = 'on-time';
+        }
+      }
+      
       return {
         ...app,
         daysPending,
+        deadlineStatus,
+        daysUntilDeadline,
       };
     });
   }, [baseFilteredApplications]);
@@ -70,6 +91,47 @@ const ReviewerApplications = () => {
         ),
         cell: ({ row }) => {
           return <span className="text-sm">{row.original.projectTitle}</span>;
+        },
+      },
+      {
+        accessorKey: 'reviewDeadline',
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Review Deadline" />
+        ),
+        cell: ({ row }) => {
+          const app = row.original;
+          if (!app.reviewDeadline) {
+            return <span className="text-sm text-muted-foreground">No deadline</span>;
+          }
+          
+          const deadlineDate = new Date(app.reviewDeadline);
+          const isOverdue = app.deadlineStatus === 'overdue';
+          const isApproaching = app.daysUntilDeadline !== null && app.daysUntilDeadline <= 2 && !isOverdue;
+          
+          return (
+            <div className="flex items-center gap-2">
+              <span className={`text-sm ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : ''}`}>
+                {formatDate(deadlineDate)}
+              </span>
+              {isOverdue && (
+                <Badge variant="destructive" className="text-xs">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Overdue
+                </Badge>
+              )}
+              {isApproaching && !isOverdue && (
+                <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
+                </Badge>
+              )}
+            </div>
+          );
+        },
+        sortingFn: (rowA, rowB) => {
+          const deadlineA = rowA.original.reviewDeadline ? new Date(rowA.original.reviewDeadline).getTime() : 0;
+          const deadlineB = rowB.original.reviewDeadline ? new Date(rowB.original.reviewDeadline).getTime() : 0;
+          return deadlineA - deadlineB;
         },
       },
     ];

@@ -190,13 +190,40 @@ const Billing = () => {
     }
   };
 
-  const handleDownloadInvoice = async (transactionId: string, receiptUrl: string | null) => {
-    // If Stripe receipt URL exists, open it directly
-    if (receiptUrl) {
-      window.open(receiptUrl, "_blank");
-      return;
+  const triggerPdfDownload = (blob: Blob, filename: string) => {
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    // Delay revoke slightly so browsers have time to start the download reliably.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
+
+  const handleDownloadInvoice = async (
+    transactionId: string,
+    _receiptUrl: string | null,
+    invoicePdfUrl: string | null,
+    forceRegenerate: boolean = false
+  ) => {
+    // Priority 1: Use stored PDF receipt if available (unless forcing regeneration)
+    if (invoicePdfUrl && !forceRegenerate) {
+      try {
+        const response = await fetch(invoicePdfUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          triggerPdfDownload(blob, `receipt-${transactionId.substring(0, 8)}.pdf`);
+          toast({ title: "Success", description: "Invoice downloaded." });
+          return;
+        }
+      } catch (err) {
+        console.warn("[Invoice] Failed to download stored PDF, falling back:", err);
+      }
     }
 
+    // Priority 2: Generate PDF on-demand (skip Stripe receipt URL - it's a web page, not a PDF)
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -218,6 +245,7 @@ const Billing = () => {
       });
 
       console.log("[Invoice] Response status:", res.status, res.statusText);
+      console.log("[Invoice] Response content-type:", res.headers.get("content-type"));
 
       if (!res.ok) {
         const errorBody = await res.text();
@@ -226,14 +254,17 @@ const Billing = () => {
       }
 
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `invoice-${transactionId.substring(0, 8)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      console.log("[Invoice] PDF blob size:", blob.size, "bytes");
+      console.log("[Invoice] PDF blob type:", blob.type);
+      
+      // Verify it's actually a PDF
+      if (!blob.type.includes("pdf") && blob.size < 1000) {
+        console.error("[Invoice] Warning: Response may not be a valid PDF");
+        const text = await blob.text();
+        console.error("[Invoice] Response content:", text.substring(0, 200));
+      }
+      triggerPdfDownload(blob, `invoice-${transactionId.substring(0, 8)}.pdf`);
+      toast({ title: "Success", description: "Invoice downloaded." });
     } catch (err) {
       console.error("[Invoice] Download failed:", err);
       toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
@@ -441,7 +472,7 @@ const Billing = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
+                      onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoicePdfUrl)}
                       className="w-full min-h-[44px] gap-2 text-primary hover:text-primary"
                     >
                       <Download className="h-4 w-4" />
@@ -485,7 +516,7 @@ const Billing = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadInvoice(item.id, item.receipt_url)}
+                            onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoicePdfUrl)}
                             className="min-h-[44px] gap-2 text-primary hover:text-primary"
                           >
                             <Download className="h-4 w-4" />

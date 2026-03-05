@@ -26,7 +26,7 @@ const AdminApplications = () => {
   } = useApplicationFilters({
     applications,
     defaultFilter: "all",
-    statusValues: ["pending", "under_review", "approved", "rejected"],
+    statusValues: ["pending", "pending_payment", "under_review", "approved", "rejected"],
   });
 
   // Define columns for the applications table
@@ -239,6 +239,7 @@ const AdminApplications = () => {
             {[
               { value: "all", label: "All" },
               { value: "pending", label: "Pending" },
+              { value: "pending_payment", label: "Payment Pending" },
               { value: "under_review", label: "Under Review" },
               { value: "approved", label: "Approved" },
               { value: "rejected", label: "Rejected" },

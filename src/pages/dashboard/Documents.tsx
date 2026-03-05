@@ -365,6 +365,8 @@ const DocumentItem = ({
   getFileTypeLabel,
   showApplicationBadge = false,
 }: DocumentItemProps) => {
+  const { t } = useTranslation(['dashboard']);
+  
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-accent/50 transition-colors gap-3">
       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">

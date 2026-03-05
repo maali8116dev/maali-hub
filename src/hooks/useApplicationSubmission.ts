@@ -1,26 +1,89 @@
 /**
  * Hook for handling application submission logic
  */
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useActivityLogger } from '@/hooks/useActivityLogger';
-import { useDocumentUpload } from '@/hooks/useDocumentUpload';
-import { useApplicationFormStore } from '@/stores/applicationForm';
-import { isProjectOpen } from '@/lib/projectAvailability';
-import { isRateLimitError } from '@/lib/rateLimits';
-import { createNotification } from '@/hooks/useNotifications';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
+import { useApplicationFormStore } from "@/stores/applicationForm";
+import { isProjectOpen } from "@/lib/projectAvailability";
+import { isRateLimitError } from "@/lib/rateLimits";
+
+type UploadedDocForCleanup = {
+  id: string;
+  filePath: string;
+  fileName: string;
+};
+
+type SubmitApplicationResponse = {
+  success?: boolean;
+  error?: string;
+  errorCode?: string;
+  existingApplicationId?: string | null;
+  applicationId?: string;
+  requiresPayment?: boolean;
+  checkoutUrl?: string;
+  resumedExistingApplication?: boolean;
+};
+
+/**
+ * Maps error codes and raw messages to user-friendly descriptions.
+ * Raw errors are logged to the console for debugging.
+ */
+function getUserFriendlyError(errorCode?: string, _rawMessage?: string): string {
+  switch (errorCode) {
+    case "ALREADY_APPLIED":
+      return "You've already submitted an application for this opportunity.";
+    case "PROJECT_CLOSED":
+      return "This opportunity is no longer accepting applications.";
+    case "CHECKOUT_ERROR":
+      return "We couldn't set up the payment. Please try again or contact support.";
+    case "UNAUTHORIZED":
+      return "Your session has expired. Please sign in again to continue.";
+    case "MISSING_PROJECT_ID":
+      return "Something went wrong. Please refresh the page and try again.";
+    case "VALIDATION_ERROR":
+      return "We couldn't validate your application. Please try again shortly.";
+    case "INVALID_BODY":
+      return "Something went wrong with your form data. Please refresh and try again.";
+    case "INTERNAL_ERROR":
+      return "Something went wrong on our end. Please try again or contact support if the issue persists.";
+    default:
+      return "Something went wrong submitting your application. Please try again.";
+  }
+}
 
 export function useApplicationSubmission() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { logActivity } = useActivityLogger();
-  const { uploadDocuments, linkLibraryDocumentToApplication } = useDocumentUpload();
-  const { formData, selectedFiles, selectedLibraryDocIds, reset, setDraftId } = useApplicationFormStore();
+  const { uploadDocuments } = useDocumentUpload();
+  const { formData, selectedFiles, selectedLibraryDocIds, reset, setDraftId } =
+    useApplicationFormStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const parseEdgeErrorBody = (edgeError: unknown): SubmitApplicationResponse | null => {
+    const rawBody = (
+      edgeError as { context?: { body?: unknown } } | undefined
+    )?.context?.body;
+
+    if (!rawBody) return null;
+
+    try {
+      if (typeof rawBody === "string") {
+        return JSON.parse(rawBody) as SubmitApplicationResponse;
+      }
+      if (typeof rawBody === "object") {
+        return rawBody as SubmitApplicationResponse;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  };
 
   const validateProjectIsOpen = async (projectId: number): Promise<boolean> => {
     const { data: project, error } = await supabase
@@ -34,7 +97,8 @@ export function useApplicationSubmission() {
     if (!project || !isProjectOpen(project.status, project.deadline)) {
       toast({
         title: "Applications Closed",
-        description: "This project is closed. You can no longer submit or edit applications.",
+        description:
+          "This project is closed. You can no longer submit or edit applications.",
         variant: "destructive",
       });
       navigate(projectId ? `/projects/${projectId}` : "/projects");
@@ -63,6 +127,75 @@ export function useApplicationSubmission() {
     return data;
   };
 
+  async function cleanupOrphanUploads(uploads: UploadedDocForCleanup[]) {
+    if (!uploads.length || !user) return;
+
+    // IMPORTANT: We only delete docs that are still NOT linked to an application
+    // and owned by the current user. This prevents deleting docs that the Edge Function
+    // may have already linked, and ensures we only delete the user's own documents.
+    await Promise.allSettled(
+      uploads.map(async (doc) => {
+        try {
+          // 1) Ensure the record is still "orphaned" (application_id is null)
+          //    and owned by this user
+          const { data: existing, error: fetchErr } = await supabase
+            .from("application_documents")
+            .select("id, file_path, application_id, user_id")
+            .eq("id", doc.id)
+            .eq("user_id", user.id) // Security: Only fetch user's own documents
+            .maybeSingle();
+
+          if (fetchErr) {
+            console.error("Cleanup fetch failed:", fetchErr);
+            return;
+          }
+
+          // If it was linked already or doesn't exist, DO NOTHING.
+          if (!existing) return;
+          if (existing.application_id) return;
+
+          // 2) Delete the DB record (only if still unlinked and owned by user)
+          const { error: delErr } = await supabase
+            .from("application_documents")
+            .delete()
+            .eq("id", doc.id)
+            .eq("user_id", user.id) // Security: Only delete user's own documents
+            .is("application_id", null);
+
+          if (delErr) {
+            console.error(`Failed deleting doc row ${doc.id}:`, delErr);
+            return;
+          }
+
+          // 3) Remove from storage only if no other rows reference same file_path
+          const filePath = existing.file_path ?? doc.filePath;
+
+          const { count, error: countErr } = await supabase
+            .from("application_documents")
+            .select("id", { count: "exact", head: true })
+            .eq("file_path", filePath);
+
+          if (countErr) {
+            console.error(`Cleanup count failed for ${filePath}:`, countErr);
+            return;
+          }
+
+          if (!count || count === 0) {
+            const { error: storageErr } = await supabase.storage
+              .from("application-docs")
+              .remove([filePath]);
+
+            if (storageErr) {
+              console.error(`Storage remove failed for ${filePath}:`, storageErr);
+            }
+          }
+        } catch (e) {
+          console.error(`Cleanup error for doc ${doc.id}:`, e);
+        }
+      })
+    );
+  }
+
   const submitApplication = async (draftId?: string | null) => {
     if (!user || !formData.projectId) {
       throw new Error("User and project ID are required");
@@ -70,40 +203,47 @@ export function useApplicationSubmission() {
 
     setIsSubmitting(true);
 
+    // Track uploaded documents for cleanup on failure
+    let uploadedDocuments: UploadedDocForCleanup[] = [];
+
     try {
-      // Validate project is still open
-      const isOpen = await validateProjectIsOpen(formData.projectId);
-      if (!isOpen) {
-        setIsSubmitting(false);
-        return;
+      // Upload new files (as library documents, will be linked after application creation)
+      let uploadedDocumentIds: string[] = [];
+      if (selectedFiles.length > 0) {
+        try {
+          toast({
+            title: "Uploading Documents",
+            description: `Uploading ${selectedFiles.length} document${
+              selectedFiles.length > 1 ? "s" : ""
+            }...`,
+          });
+
+          const uploadedDocs = await uploadDocuments(
+            selectedFiles,
+            undefined,
+            formData.projectId,
+            true
+          );
+
+          uploadedDocumentIds = uploadedDocs.map((doc) => doc.id);
+
+          uploadedDocuments = uploadedDocs.map((doc) => ({
+            id: doc.id,
+            filePath: doc.filePath,
+            fileName: doc.fileName,
+          }));
+        } catch (uploadError) {
+          console.error("Error uploading documents:", uploadError);
+          // ✅ Don't mark as destructive if you're still submitting
+          toast({
+            title: "Some uploads failed",
+            description:
+              "Some documents failed to upload. Your application will still be submitted, but without those files.",
+          });
+        }
       }
 
-      // Check for existing application
-      const existingApplication = await checkExistingApplication(formData.projectId);
-      if (existingApplication) {
-        toast({
-          title: "Already Applied",
-          description: "You already submitted an application for this opportunity. You can't submit another one.",
-          variant: "destructive",
-        });
-        navigate(`/dashboard/applications/${existingApplication.id}`);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Get project info for fee
-      const { data: projectInfo } = await supabase
-        .from("projects")
-        .select("id, title, application_fee")
-        .eq("id", formData.projectId)
-        .single();
-
-      const feeValue = projectInfo?.application_fee ? Number(projectInfo.application_fee) : 0;
-      const hasFee = feeValue > 0;
-      const initialStatus = hasFee ? "pending_payment" : "pending";
-
-      // Prepare application data
-      const applicationData: any = {
+      const applicationData = {
         applicant_type: formData.applicantType,
         full_legal_name: formData.fullLegalName,
         organization_name: formData.organizationName || null,
@@ -124,256 +264,99 @@ export function useApplicationSubmission() {
         conflict_of_interest_declared: formData.conflictOfInterestDeclared,
         reporting_requirements_agreed: formData.reportingRequirementsAgreed,
         data_processing_consented: formData.dataProcessingConsented,
-        declaration_date: new Date().toISOString(),
-        status: initialStatus,
-        is_draft: false,
-        application_fee_paid: false,
-        stripe_payment_intent_id: null,
+        ...(formData.applicantType !== "Individual" && {
+          year_established: formData.yearEstablished || null,
+          core_mission_purpose: formData.coreMissionPurpose || null,
+          primary_sectors: formData.primarySectors || null,
+          primary_sector_other: formData.primarySectorOther || null,
+          team_size: formData.numberOfTeamMembers || null,
+          key_team_members_roles: formData.keyTeamMembersRoles || null,
+          previous_grants_funding_received:
+            formData.previousGrantsFundingReceived || false,
+          previous_grants_funding_details:
+            formData.previousGrantsFundingDetails || null,
+        }),
       };
 
-      // Add organizational background if not Individual
-      if (formData.applicantType !== "Individual") {
-        applicationData.year_established = formData.yearEstablished || null;
-        applicationData.core_mission_purpose = formData.coreMissionPurpose || null;
-        applicationData.primary_sectors = formData.primarySectors
-          ? JSON.stringify(formData.primarySectors)
-          : null;
-        applicationData.primary_sector_other = formData.primarySectorOther || null;
-        applicationData.team_size = formData.numberOfTeamMembers || null;
-        applicationData.key_team_members_roles = formData.keyTeamMembersRoles || null;
-        applicationData.previous_grants_funding_received = formData.previousGrantsFundingReceived || false;
-        applicationData.previous_grants_funding_details = formData.previousGrantsFundingDetails || null;
+      const allDocumentIds = [...selectedLibraryDocIds, ...uploadedDocumentIds];
+
+      // Get session token for authentication (edge function will validate)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Your session has expired. Please sign in again to continue.");
       }
 
-      // Create or update application
-      let application;
-      if (draftId) {
-        const { data, error } = await supabase
-          .from("applications")
-          .update({
-            ...applicationData,
-            project_id: formData.projectId,
-          })
-          .eq("id", draftId)
-          .select()
-          .single();
-
-        if (error) throw error;
-        application = data;
-      } else {
-        const { data, error } = await supabase
-          .from("applications")
-          .insert({
-            user_id: user.id,
-            project_id: formData.projectId,
-            ...applicationData,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        application = data;
-      }
-
-      // Link library documents
-      if (selectedLibraryDocIds.length > 0 && application) {
-        try {
-          toast({
-            title: "Linking Documents",
-            description: `Linking ${selectedLibraryDocIds.length} document${selectedLibraryDocIds.length > 1 ? "s" : ""} from library...`,
-          });
-
-          await Promise.all(
-            selectedLibraryDocIds.map((docId) =>
-              linkLibraryDocumentToApplication(docId, application.id)
-            )
-          );
-        } catch (linkError) {
-          console.error("Error linking documents:", linkError);
-          // Don't fail submission if document linking fails
-        }
-      }
-
-      // Upload new files
-      if (selectedFiles.length > 0 && application) {
-        try {
-          toast({
-            title: "Uploading Documents",
-            description: `Uploading ${selectedFiles.length} document${selectedFiles.length > 1 ? "s" : ""}...`,
-          });
-
-          await uploadDocuments(selectedFiles, application.id, formData.projectId);
-        } catch (uploadError) {
-          console.error("Error uploading documents:", uploadError);
-          // Don't fail submission if upload fails
-        }
-      }
-
-      // Get project title for notification
-      const { data: project } = await supabase
-        .from("projects")
-        .select("title")
-        .eq("id", formData.projectId)
-        .single();
-
-      const projectTitle = project?.title || formData.projectTitle || "the project";
-
-      // Log activity
-      await logActivity({
-        actionType: "submit",
-        entityType: "application",
-        entityId: application.id,
-        description: `Submitted application for project ID: ${formData.projectId}`,
-        metadata: {
-          projectId: formData.projectId,
-          applicantType: formData.applicantType,
-          projectTitle: formData.projectTitle,
-        },
-      });
-
-      // Create notification for the applicant
-      await createNotification(
-        user.id,
-        "Application Submitted",
-        `Your application for "${projectTitle}" has been successfully submitted and is now under review.`,
-        "application",
-        `/dashboard/applications/${application.id}`,
+      const { data, error: edgeError } = await supabase.functions.invoke(
+        "submit-application",
         {
-          application_id: application.id,
-          project_id: formData.projectId,
-          status: "pending",
+          body: {
+            draftId,
+            projectId: formData.projectId,
+            applicationData,
+            libraryDocumentIds: allDocumentIds,
+            token: session.access_token,
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
         }
       );
 
-      // Assign reviewers using workload-balanced assignment system
-      try {
-        const NUM_REVIEWERS = 2; // Default number of reviewers per application
+      const edgeErrorBody = edgeError ? parseEdgeErrorBody(edgeError) : null;
+      const payload: SubmitApplicationResponse | null =
+        data && typeof data === "object"
+          ? (data as SubmitApplicationResponse)
+          : edgeErrorBody;
 
-        const { data: assignments, error: assignError } = await supabase.rpc(
-          "assign_reviewers_to_application",
-          {
-            p_application_id: application.id,
-            p_num_reviewers: NUM_REVIEWERS,
-          }
-        );
+      if (!payload?.success) {
+        // Edge Function returned an error - application wasn't created, so cleanup uploads
+        await cleanupOrphanUploads(uploadedDocuments);
 
-        if (assignError) {
-          console.warn("Failed to assign reviewers automatically:", assignError);
-          await logActivity({
-            actionType: "error",
-            entityType: "application",
-            entityId: application.id,
-            description: `Failed to automatically assign reviewers: ${assignError.message}`,
-            metadata: {
-              application_id: application.id,
-              project_id: formData.projectId,
-              error: assignError.message,
-            },
-          });
-        } else if (assignments && assignments.length > 0) {
-          await logActivity({
-            actionType: "assign_reviewers",
-            entityType: "application",
-            entityId: application.id,
-            description: `Assigned ${assignments.length} reviewer(s) to application`,
-            metadata: {
-              application_id: application.id,
-              project_id: formData.projectId,
-              reviewer_count: assignments.length,
-              reviewer_ids: assignments.map((a: any) => a.reviewer_id),
-            },
-          });
-
-          // Notify each assigned reviewer
-          await Promise.allSettled(
-            assignments.map(async (assignment: any) => {
-              try {
-                await createNotification(
-                  assignment.reviewer_id,
-                  "New Application Assigned",
-                  `A new application for "${projectTitle}" has been assigned to you for review.`,
-                  "review_assigned",
-                  `/reviewer/applications/${application.id}`,
-                  {
-                    application_id: application.id,
-                    project_id: formData.projectId,
-                    assignment_id: assignment.assignment_id,
-                  }
-                );
-              } catch (notifError) {
-                console.error(`Failed to notify reviewer ${assignment.reviewer_id}:`, notifError);
-              }
-            })
-          );
-        } else {
-          await logActivity({
-            actionType: "warning",
-            entityType: "application",
-            entityId: application.id,
-            description: "No reviewers automatically assigned - manual assignment may be required",
-            metadata: {
-              application_id: application.id,
-              project_id: formData.projectId,
-            },
-          });
-        }
-      } catch (assignErr) {
-        console.error("Unexpected error during reviewer assignment:", assignErr);
-        await logActivity({
-          actionType: "error",
-          entityType: "application",
-          entityId: application.id,
-          description: `Unexpected error during reviewer assignment: ${
-            assignErr instanceof Error ? assignErr.message : "Unknown error"
-          }`,
-          metadata: {
-            application_id: application.id,
-            project_id: formData.projectId,
-          },
-        });
-      }
-
-      // Handle payment if required
-      if (hasFee) {
-        toast({
-          title: "Redirecting to Payment",
-          description: "You will be redirected to complete the application fee payment.",
-        });
-
-        try {
-          const baseUrl = window.location.origin;
-          const response = await supabase.functions.invoke("create-checkout-session", {
-            body: {
-              applicationId: application.id,
-              projectId: formData.projectId,
-              successUrl: `${baseUrl}/payment/success?application_id=${application.id}`,
-              cancelUrl: `${baseUrl}/payment/cancel?application_id=${application.id}`,
-            },
-          });
-
-          if (response.error) {
-            throw new Error(response.error.message || "Failed to create checkout session");
-          }
-
-          const { url } = response.data;
-          if (url) {
-            reset();
-            setDraftId(null);
-            window.location.href = url;
-            return;
-          }
-        } catch (checkoutError) {
-          console.error("Checkout session error:", checkoutError);
+        if (payload?.errorCode === "ALREADY_APPLIED") {
           toast({
-            title: "Payment Setup Failed",
-            description: "Your application was saved. You can complete payment from your dashboard.",
+            title: "Already Applied",
+            description:
+              "You've already submitted an application for this opportunity. Check your dashboard to view its status.",
             variant: "destructive",
           });
-          reset();
-          setDraftId(null);
-          navigate(`/dashboard/applications/${application.id}`);
+          navigate(
+            payload.existingApplicationId
+              ? `/dashboard/applications/${payload.existingApplicationId}`
+              : "/dashboard/applications"
+          );
           return;
         }
+
+        if (payload?.errorCode === "PROJECT_CLOSED") {
+          toast({
+            title: "Applications Closed",
+            description:
+              "This opportunity is no longer accepting applications.",
+            variant: "destructive",
+          });
+          navigate(`/projects/${formData.projectId}`);
+          return;
+        }
+
+        // Log the raw error for debugging, show friendly message to user
+        const rawError = payload?.error || edgeError?.message || "Unknown error";
+        console.error("Submission failed:", rawError);
+        throw new Error(getUserFriendlyError(payload?.errorCode, rawError));
+      }
+
+      // Payment redirect
+      if (payload.requiresPayment && payload.checkoutUrl) {
+        toast({
+          title: "Application Saved - Payment Required",
+          description:
+            payload.resumedExistingApplication
+              ? "Your existing application is awaiting payment. Redirecting you to Stripe."
+              : "Your application has been saved. You will be redirected to complete the payment.",
+        });
+        reset();
+        setDraftId(null);
+        window.location.href = payload.checkoutUrl;
+        return;
       }
 
       toast({
@@ -387,48 +370,33 @@ export function useApplicationSubmission() {
     } catch (error) {
       console.error("Submission error:", error);
 
-      const err: any = error;
-      const errorMessage =
-        typeof err?.message === "string"
-          ? err.message
-          : error instanceof Error
-            ? error.message
+      // ✅ Cleanup: delete only orphan uploads (still unlinked)
+      await cleanupOrphanUploads(uploadedDocuments);
+
+      const rawMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+            ? error
             : "";
 
-      if (isRateLimitError(errorMessage)) {
+      if (isRateLimitError(rawMessage)) {
         toast({
           title: "Too Many Submissions",
-          description: "You've submitted too many applications recently. Please wait an hour and try again.",
+          description:
+            "You've submitted too many applications recently. Please wait an hour and try again.",
           variant: "destructive",
         });
         return;
       }
 
-      if (err?.code === "23505" || errorMessage.includes("idx_applications_unique_user_project")) {
-        toast({
-          title: "Already Applied",
-          description: "You already submitted an application for this opportunity. You can view it from your dashboard.",
-          variant: "destructive",
-        });
-        navigate("/dashboard/applications");
-        return;
-      }
-
-      if (
-        errorMessage.toLowerCase().includes("row-level security") ||
-        errorMessage.toLowerCase().includes("permission denied")
-      ) {
-        toast({
-          title: "Applications Closed",
-          description: "This project is no longer accepting applications or edits.",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // Show the user-friendly message (the throw above already calls getUserFriendlyError)
+      // For unexpected errors, show a generic message
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your application. Please try again.",
+        description:
+          rawMessage ||
+          "Something went wrong submitting your application. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -443,4 +411,3 @@ export function useApplicationSubmission() {
     checkExistingApplication,
   };
 }
-

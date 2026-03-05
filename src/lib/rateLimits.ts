@@ -15,7 +15,6 @@ export type RateLimitOperationType =
   | "sign_in"
   | "sign_up"
   | "password_reset"
-  | "magic_link"
   | "application_submission"
   | "draft_save"
   | "document_upload"
@@ -37,7 +36,6 @@ const FALLBACK_LIMITS: Record<RateLimitOperationType, RateLimitConfig> = {
   sign_in:                   { max: 5,  window: 15 },
   sign_up:                   { max: 3,  window: 60 },
   password_reset:            { max: 3,  window: 60 },
-  magic_link:                { max: 3,  window: 60 },
   application_submission:    { max: 3,  window: 60 },
   draft_save:                { max: 20, window: 60 },
   document_upload:           { max: 10, window: 60 },

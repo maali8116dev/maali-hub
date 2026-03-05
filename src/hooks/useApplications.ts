@@ -22,8 +22,11 @@ export type ApplicationWithProject = {
 };
 
 // Status mapping
+// Note: pending_payment applications are filtered out at the database level
+// Users should only see applications that are actually submitted
 const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> = {
   pending: "pending",
+  pending_payment: "pending", // Map to pending for display, but these are filtered out in RPC
   under_review: "pending",
   approved: "approved",
   rejected: "rejected",

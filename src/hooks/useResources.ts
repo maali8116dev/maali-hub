@@ -58,6 +58,7 @@ const FILE_TYPES = [
 export { RESOURCE_CATEGORIES, FILE_TYPES };
 
 // Fetch published resources (public)
+// Resources are static content that rarely changes (download_count updated via mutation)
 export const useResources = (filters?: { category?: string; fileType?: string }) => {
   return useQuery({
     queryKey: ["resources", "published", filters],
@@ -81,6 +82,11 @@ export const useResources = (filters?: { category?: string; fileType?: string })
       if (error) throw error;
       return data as Resource[];
     },
+    staleTime: Infinity, // Never consider stale - resources rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };
 
@@ -121,6 +127,7 @@ export const useResource = (id: string | undefined) => {
 };
 
 // Fetch unique categories from resources
+// Categories are static content that rarely changes
 export const useResourceCategories = () => {
   return useQuery({
     queryKey: ["resources", "categories"],
@@ -135,6 +142,11 @@ export const useResourceCategories = () => {
       const uniqueCategories = [...new Set(data.map(r => r.category))].sort();
       return uniqueCategories;
     },
+    staleTime: Infinity, // Never consider stale - categories rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };
 

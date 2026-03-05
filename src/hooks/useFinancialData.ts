@@ -19,6 +19,7 @@ export type Transaction = {
   description: string;
   invoiceNumber: string | null;
   invoiceUrl: string | null;
+  invoicePdfUrl: string | null;
   receiptUrl: string | null;
   billingEmail: string | null;
   failureReason: string | null;
@@ -145,6 +146,7 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
         description: tx.description,
         invoiceNumber: tx.invoice_number,
         invoiceUrl: tx.invoice_url,
+        invoicePdfUrl: tx.invoice_pdf_url,
         receiptUrl: tx.receipt_url,
         billingEmail: tx.billing_email,
         failureReason: tx.failure_reason,

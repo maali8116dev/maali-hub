@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
+import { generateReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -8,122 +10,32 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-// Minimal PDF builder (no external dependencies)
-function buildPdf(lines: { label: string; value: string }[], title: string, subtitle: string): Uint8Array {
-  const objects: string[] = [];
-  let objectId = 0;
-
-  const addObject = (content: string) => {
-    objectId++;
-    objects.push(content);
-    return objectId;
-  };
-
-  // Build page content stream
-  const contentLines: string[] = [];
-  contentLines.push("BT");
-  contentLines.push("/F1 20 Tf");
-  contentLines.push("50 770 Td");
-  contentLines.push(`(${escPdf(title)}) Tj`);
-  contentLines.push("/F1 12 Tf");
-  contentLines.push("0 -25 Td");
-  contentLines.push(`(${escPdf(subtitle)}) Tj`);
-  contentLines.push("0 -20 Td");
-  contentLines.push("/F1 10 Tf");
-
-  for (const line of lines) {
-    if (line.label && line.value) {
-      // Label: Value format (for receipt details)
-      contentLines.push(`(${escPdf(line.label + ": " + line.value)}) Tj`);
-      contentLines.push("0 -16 Td");
-    } else if (line.value) {
-      // Just value (for paragraphs/greeting)
-      contentLines.push(`(${escPdf(line.value)}) Tj`);
-      contentLines.push("0 -16 Td");
-    } else {
-      // Empty line
-      contentLines.push("0 -12 Td");
-    }
-  }
-
-  contentLines.push("ET");
-
-  const stream = contentLines.join("\n");
-
-  // PDF objects
-  const catalogId = addObject("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj");
-  const pagesId = addObject("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj");
-  const pageId = addObject(
-    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 4 0 R >> >> >>\nendobj"
-  );
-  const fontId = addObject(
-    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj"
-  );
-  const streamId = addObject(
-    `5 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj`
-  );
-
-  // Build PDF file
-  let pdf = "%PDF-1.4\n";
-  const offsets: number[] = [];
-
-  for (let i = 0; i < objects.length; i++) {
-    offsets.push(pdf.length);
-    pdf += objects[i] + "\n";
-  }
-
-  const xrefOffset = pdf.length;
-  pdf += "xref\n";
-  pdf += `0 ${objects.length + 1}\n`;
-  pdf += "0000000000 65535 f \n";
-  for (const offset of offsets) {
-    pdf += offset.toString().padStart(10, "0") + " 00000 n \n";
-  }
-
-  pdf += "trailer\n";
-  pdf += `<< /Size ${objects.length + 1} /Root 1 0 R >>\n`;
-  pdf += "startxref\n";
-  pdf += `${xrefOffset}\n`;
-  pdf += "%%EOF";
-
-  return new TextEncoder().encode(pdf);
-}
-
-function escPdf(str: string): string {
-  return str.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-}
-
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: getCorsHeaders(req) });
   }
 
   try {
+    const acceptLanguage = req.headers.get("accept-language");
+    const locale = acceptLanguage?.toLowerCase().startsWith("fr") ? "fr" : "en";
+
+    // Extract body token (POST) or query token (GET) as fallback
+    let bodyToken: string | null = null;
+    if (req.method === "POST") {
+      try {
+        const body = await req.clone().json();
+        bodyToken = body?.token || null;
+      } catch { /* no body */ }
+    } else {
+      bodyToken = new URL(req.url).searchParams.get("token");
+    }
+
     // Authenticate
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-      });
+    const auth = await authenticateRequest(req, { bodyToken });
+    if (!auth.user) {
+      return jsonResponse(req, 401, { error: auth.error || "Unauthorized" });
     }
-
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseUser.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
-      });
-    }
+    const user = auth.user;
 
     // Get transaction ID
     const url = new URL(req.url);
@@ -181,56 +93,78 @@ serve(async (req: Request) => {
       projectTitle = project?.title || "N/A";
     }
 
+    // Fetch payment method details from Stripe if payment intent ID exists
+    let paymentMethodLast4: string | null = null;
+    if (tx.provider_payment_intent_id) {
+      try {
+        const stripe = (await import("https://esm.sh/stripe@14.21.0")).default;
+        const stripeClient = new stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+          apiVersion: "2023-10-16",
+          httpClient: stripe.createFetchHttpClient(),
+        });
+        
+        const paymentIntent = await stripeClient.paymentIntents.retrieve(tx.provider_payment_intent_id);
+        if (paymentIntent.payment_method && typeof paymentIntent.payment_method === "string") {
+          const paymentMethod = await stripeClient.paymentMethods.retrieve(paymentIntent.payment_method as string);
+          if (paymentMethod.card?.last4) {
+            paymentMethodLast4 = paymentMethod.card.last4;
+          }
+        }
+      } catch (pmError) {
+        console.warn("[Invoice] Could not fetch payment method details:", pmError);
+      }
+    }
+
     // Format values
     const amount = parseFloat(tx.amount).toFixed(2);
     const currency = (tx.currency || "USD").toUpperCase();
     const invoiceNumber = tx.invoice_number || `TXN-${tx.id.substring(0, 8).toUpperCase()}`;
-    const paymentDate = new Date(tx.completed_at || tx.created_at).toLocaleDateString("en-US", {
+    const paymentDate = new Date(tx.completed_at || tx.created_at).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-    const statusLabel = tx.status === "completed" ? "Paid" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
-    const billingEmail = tx.billing_email || user.email || "N/A";
+    const statusLabel = tx.status === "completed"
+      ? (locale === "fr" ? "Paye" : "Paid")
+      : tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
 
-    // Build PDF to match email receipt structure
-    const lines: { label: string; value: string }[] = [];
-    
-    // Add greeting
-    lines.push({ label: "", value: `Dear ${userName},` });
-    lines.push({ label: "", value: "" });
-    lines.push({ label: "", value: "Thank you for your payment. Here is your receipt:" });
-    lines.push({ label: "", value: "" });
-    
-    // Receipt details (matching email structure)
-    if (projectTitle && projectTitle !== "N/A") {
-      lines.push({ label: "Project", value: projectTitle });
-    }
-    
-    if (tx.application_id) {
-      lines.push({ label: "Application ID", value: tx.application_id });
-    }
-    
-    lines.push({ label: "Amount", value: `${currency} ${amount}` });
-    lines.push({ label: "Date", value: paymentDate });
-    lines.push({ label: "Status", value: statusLabel });
-    
-    if (invoiceNumber) {
-      lines.push({ label: "Invoice #", value: invoiceNumber });
-    }
-    
-    if (tx.provider_transaction_id) {
-      lines.push({ label: "Transaction ID", value: tx.provider_transaction_id });
-    }
-    
-    lines.push({ label: "", value: "" });
-    lines.push({ label: "", value: "Your application fee has been confirmed and your application is now under review." });
-    lines.push({ label: "", value: "" });
-    lines.push({ label: "", value: "Please keep this receipt for your records." });
-    lines.push({ label: "", value: "" });
-    lines.push({ label: "", value: `© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.` });
+    // Build receipt data using shared format
+    const receiptData: ReceiptData = {
+      userName,
+      projectTitle: projectTitle !== "N/A" ? projectTitle : null,
+      applicationId: tx.application_id || null,
+      amount,
+      currency,
+      paymentDate,
+      statusLabel,
+      invoiceNumber,
+      transactionId: tx.provider_transaction_id || null,
+      billingEmail: tx.billing_email || null,
+      paymentMethodLast4,
+      locale,
+    };
 
-    const pdfBytes = buildPdf(lines, "Payment Receipt", `MAALI OPPORTUNITY HUB`);
+    // Generate PDF using shared function
+    console.log("[Invoice] Generating PDF receipt...");
+    console.log("[Invoice] Receipt data:", JSON.stringify(receiptData, null, 2));
+    
+    let pdfBytes: Uint8Array;
+    try {
+      pdfBytes = await generateReceiptPdf(receiptData);
+      console.log("[Invoice] PDF generated successfully, bytes length:", pdfBytes.length);
+      
+      // Verify PDF header
+      const header = new TextDecoder().decode(pdfBytes.slice(0, 8));
+      console.log("[Invoice] PDF header:", header);
+      
+      if (!header.startsWith("%PDF")) {
+        throw new Error(`Invalid PDF format. Header: ${header}`);
+      }
+    } catch (pdfError) {
+      console.error("[Invoice] PDF generation failed:", pdfError);
+      console.error("[Invoice] PDF error details:", pdfError instanceof Error ? pdfError.stack : String(pdfError));
+      throw pdfError;
+    }
 
     return new Response(pdfBytes, {
       status: 200,

@@ -37,6 +37,7 @@ export function useProjectDetails(projectId: string | undefined): UseProjectDeta
   const { user } = useAuth();
 
   // Fetch project data
+  // Projects can change (applicant counts, deadlines) but don't need constant refetching
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
@@ -59,6 +60,11 @@ export function useProjectDetails(projectId: string | undefined): UseProjectDeta
       } as ProjectWithCategory;
     },
     enabled: !!projectId,
+    staleTime: 5 * 60 * 1000, // 5 minutes - projects can change but not constantly
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
+    retry: 1,
   });
 
   // Check if user has a draft for this project

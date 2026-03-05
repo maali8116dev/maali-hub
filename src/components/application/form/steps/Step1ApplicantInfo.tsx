@@ -22,9 +22,13 @@ export function Step1ApplicantInfo({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Applicant Information</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Applicant Information{" "}
+          <span className="text-destructive">*</span>
+        </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Tell us about yourself or your organization.
+          Tell us about yourself or your organization. All fields marked with{" "}
+          <span className="text-destructive">*</span> are required.
         </p>
       </div>
 

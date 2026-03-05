@@ -14,6 +14,7 @@ export interface ApplicationAssignment {
   application_id: string;
   reviewer_id: string;
   assigned_at: string;
+  review_deadline?: string | null;
   status: 'pending' | 'in_progress' | 'completed' | 'declined';
   reviewer?: {
     user_id: string;

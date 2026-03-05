@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2023-10-16",
@@ -42,30 +43,15 @@ serve(async (req: Request) => {
   }
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
-      );
-    }
-
-    const body: CreateCheckoutRequest = await req.json();
+    // Parse body FIRST to get token fallback
+    const body: CreateCheckoutRequest & { token?: string } = await req.json();
     const { applicationId, projectId, successUrl, cancelUrl } = body;
+
+    const auth = await authenticateRequest(req, { bodyToken: body.token });
+    if (!auth.user) {
+      return jsonResponse(req, 401, { error: auth.error || "Unauthorized" });
+    }
+    const user = auth.user;
 
     if (!applicationId || !projectId) {
       return new Response(
@@ -183,7 +169,7 @@ serve(async (req: Request) => {
     });
 
     // Create transaction record
-    await supabase
+    await supabaseAdmin
       .from("transactions")
       .insert({
         user_id: user.id,

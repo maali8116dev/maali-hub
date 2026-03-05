@@ -381,8 +381,11 @@ const CustomFormField = <TFieldValues extends FieldValues = FieldValues>(
       render={({ field }) => (
         <FormItem className={cn("flex-1", className)}>
           {!isCheckbox && label && (
-            <FormLabel className={required ? "after:content-['*'] after:ml-0.5 after:text-destructive" : ""}>
+            <FormLabel>
               {label}
+              {required && (
+                <span className="text-destructive ml-0.5">*</span>
+              )}
             </FormLabel>
           )}
           <FieldRenderer field={field} props={props} />

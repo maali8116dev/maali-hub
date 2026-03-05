@@ -19,7 +19,7 @@ const Footer = () => {
       { label: "Blog", href: "/blog" }
     ],
     support: [
-      { label: "Help Center", href: "/help" },
+      // { label: "Help Center", href: "/help" },
       { label: "Contact Us", href: "/contact" },
       { label: "FAQ", href: "/faq" },
       { label: "Application Guide", href: "/guide" }
@@ -84,7 +84,7 @@ const Footer = () => {
               </div>
 
               {/* Payment Methods */}
-              <div className="space-y-3">
+              {/* <div className="space-y-3">
                 <h4 className="font-semibold text-sm">We Accept</h4>
                 <div className="flex flex-wrap gap-3 items-center">
                   <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
@@ -103,7 +103,7 @@ const Footer = () => {
                 <p className="text-xs text-muted-foreground">
                   Secure payments powered by Stripe
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {/* Footer Links */}

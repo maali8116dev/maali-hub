@@ -33,14 +33,19 @@ export function OnboardingChecklist({
 }: OnboardingChecklistProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
-  const { data: applications = [] } = useApplications();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { data: applications = [], isLoading: isLoadingApplications } = useApplications();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const dismissedState = localStorage.getItem('onboardingChecklistDismissed');
     setDismissed(dismissedState === 'true');
   }, []);
+
+  // Don't render until data is loaded to prevent flash/flicker
+  if (isLoadingProfile || isLoadingApplications || !user) {
+    return null;
+  }
 
   const handleDismiss = () => {
     setDismissed(true);

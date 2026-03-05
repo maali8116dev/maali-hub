@@ -102,55 +102,11 @@ const Auth = () => {
     },
   });
 
-  // Check if user is already logged in or arriving from password reset/magic link
+  // Check if user is already logged in or arriving from password reset
   useEffect(() => {
     const checkAuth = async () => {
-      // Check for password reset (hash) or magic link (token_hash in query) flow
+      // Check for password reset (hash) flow
       const searchParams = new URLSearchParams(window.location.search);
-      const urlType = searchParams.get("type");
-      const tokenHash = searchParams.get("token_hash");
-
-      // Magic link flow using verifyOtp + token_hash
-      if (urlType === "magiclink" && tokenHash) {
-        try {
-          setIsLoading(true);
-
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: "email",
-          } as any);
-
-          if (error) {
-            console.error("Magic link verification error:", error);
-            toast({
-              title: "Magic link error",
-              description: error.message || "The magic link is invalid or has expired. Please request a new one.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Welcome!",
-              description: "You've been signed in successfully.",
-            });
-
-            const returnTo = searchParams.get("returnTo");
-            const redirectPath = returnTo || getReturnUrl();
-            navigate(redirectPath);
-          }
-        } catch (err) {
-          console.error("Magic link verification exception:", err);
-          toast({
-            title: "Magic link error",
-            description: err instanceof Error ? err.message : "An unexpected error occurred. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          // Clean URL (remove token + type) and stop further processing
-          window.history.replaceState(null, "", window.location.pathname);
-          setIsLoading(false);
-        }
-        return;
-      }
 
       // Password reset flow (recovery) uses access_token in hash
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -187,7 +143,7 @@ const Auth = () => {
     };
     checkAuth();
 
-    // Listen for auth state changes (handles the recovery and magic link flow)
+    // Listen for auth state changes (handles the recovery flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         // Password recovery token was processed, session should be available
@@ -443,83 +399,6 @@ const Auth = () => {
     }
   };
 
-  const handleMagicLinkSignIn = async () => {
-    const email = signInForm.getValues("email");
-    
-    if (!email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate email format (basic validation, not using emailSchema to avoid blocking legitimate emails)
-    try {
-      signInSchema.parse({ email, password: "dummy" }); // Just validate email format
-    } catch (error) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Use a simple redirect URL (must be whitelisted in Supabase dashboard)
-      const redirectUrl = `${window.location.origin}/auth`;
-
-      // Check rate limit via Edge Function first
-      const rlResult = await rateLimitedAuth("magic_link", {
-        email,
-        options: { emailRedirectTo: redirectUrl },
-      });
-
-      if (rlResult.error) {
-        if (rlResult.error.isRateLimited) {
-          toast({
-            title: "Too many attempts",
-            description: rlResult.error.message,
-            variant: "destructive",
-          });
-        } else {
-          console.error("Magic link error:", rlResult.error);
-
-          let errorMessage = rlResult.error.message;
-          if (rlResult.error.message.includes("redirect")) {
-            errorMessage = "Redirect URL not configured. Please contact support.";
-          } else if (rlResult.error.message.includes("email")) {
-            errorMessage = "Unable to send email. Please check your email address and try again.";
-          }
-
-          toast({
-            title: "Failed to send magic link",
-            description: errorMessage,
-            variant: "destructive",
-          });
-        }
-        return;
-      }
-
-      // Success - magic link sent
-      toast({
-        title: "Check your email",
-        description: "We've sent you a magic link. Click the link in the email to sign in.",
-      });
-    } catch (error) {
-      console.error("Magic link exception:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleForgotPassword = async () => {
     const email = signInForm.getValues("email");
@@ -816,15 +695,7 @@ const Auth = () => {
                     iconPosition="left"
                     required
                   />
-                  <div className="flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={handleMagicLinkSignIn}
-                      disabled={isLoading}
-                      className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Sign in with magic link
-                    </button>
+                  <div className="flex items-center justify-end">
                     <button
                       type="button"
                       onClick={handleForgotPassword}

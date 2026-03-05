@@ -24,6 +24,7 @@ export interface FAQFormData {
 }
 
 // Fetch all published FAQs for public page
+// FAQs are static content that rarely changes
 export const useFAQs = () => {
   return useQuery({
     queryKey: ["faqs", "published"],
@@ -38,6 +39,11 @@ export const useFAQs = () => {
       if (error) throw error;
       return data as FAQ[];
     },
+    staleTime: Infinity, // Never consider stale - FAQs rarely change
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 };
 

@@ -18,6 +18,32 @@ vi.mock('@/hooks/useUserDashboardStats');
 vi.mock('@/components/ProfileSetupWizard', () => ({
   ProfileSetupWizard: () => <div>Profile Setup Wizard</div>,
 }));
+vi.mock('@/components/onboarding/OnboardingChecklist', () => ({
+  OnboardingChecklist: () => null,
+}));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'dashboard:dashboard.title': 'Dashboard',
+        'dashboard:dashboard.welcome': 'Welcome to your dashboard',
+        'dashboard:dashboard.stats.totalApplications': 'Total Applications',
+        'dashboard:dashboard.stats.pending': 'Pending',
+        'dashboard:dashboard.stats.approved': 'Approved',
+        'dashboard:dashboard.stats.rejected': 'Rejected',
+        'dashboard:dashboard.emptyState.noApplications': 'No applications yet',
+        'dashboard:dashboard.emptyState.noApplicationsDesc': 'Start applying to funding opportunities to see your applications here.',
+        'dashboard:dashboard.profileCompletion.complete': 'Complete',
+        'dashboard:dashboard.profileCompletion.title': 'Profile Completion',
+        'dashboard:dashboard.profileCompletion.status': 'Progress',
+        'dashboard:dashboard.recentApplications.title': 'Recent Applications',
+        'dashboard:dashboard.recentApplications.viewAll': 'View All',
+        'dashboard:dashboard.recentApplications.submitted': 'Submitted',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
 
 describe('Dashboard - Data Viewing', () => {
   const mockApplications = [

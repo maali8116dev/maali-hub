@@ -49,7 +49,8 @@ export function Step7Compliance({
                 htmlFor="informationAccurate"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Confirmation that information is accurate
+                Confirmation that information is accurate{" "}
+                <span className="text-destructive">*</span>
               </label>
               <p className="text-sm text-muted-foreground mt-1">
                 I confirm that all information provided in this application is
@@ -82,7 +83,8 @@ export function Step7Compliance({
                 htmlFor="conflictOfInterest"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Conflict of interest declaration
+                Conflict of interest declaration{" "}
+                <span className="text-destructive">*</span>
               </label>
               <p className="text-sm text-muted-foreground mt-1">
                 I declare that I have disclosed any potential conflicts of
@@ -115,7 +117,8 @@ export function Step7Compliance({
                 htmlFor="reportingRequirements"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Agreement to reporting requirements
+                Agreement to reporting requirements{" "}
+                <span className="text-destructive">*</span>
               </label>
               <p className="text-sm text-muted-foreground mt-1">
                 I agree to provide regular progress reports, financial
@@ -149,7 +152,8 @@ export function Step7Compliance({
                 htmlFor="dataProcessing"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Consent to data processing
+                Consent to data processing{" "}
+                <span className="text-destructive">*</span>
               </label>
               <p className="text-sm text-muted-foreground mt-1">
                 I consent to the processing of my personal data and application

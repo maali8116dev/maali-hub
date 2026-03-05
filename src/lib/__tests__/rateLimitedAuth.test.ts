@@ -145,17 +145,17 @@ describe("rateLimitedAuth", () => {
     it("sends operation and payload in the request body", async () => {
       mockFetchResponse(200, { data: {} });
 
-      await rateLimitedAuth("magic_link", {
+      await rateLimitedAuth("password_reset", {
         email: "user@gmail.com",
-        options: { emailRedirectTo: "http://localhost/dashboard" },
+        options: { redirectTo: "http://localhost/auth" },
       });
 
       const body = JSON.parse(
         (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
       );
-      expect(body.operation).toBe("magic_link");
+      expect(body.operation).toBe("password_reset");
       expect(body.email).toBe("user@gmail.com");
-      expect(body.options.emailRedirectTo).toBe("http://localhost/dashboard");
+      expect(body.options.redirectTo).toBe("http://localhost/auth");
     });
   });
 

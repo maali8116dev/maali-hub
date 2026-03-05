@@ -11,6 +11,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAllCategories } from "@/hooks/useCategories";
 
 const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required").min(10, "Title must be at least 10 characters"),
@@ -93,7 +94,8 @@ const BlogForm = () => {
     navigate("/admin/blog");
   };
 
-  const categories = ["Applications", "Funding", "Business", "Success Stories", "Finance", "Networking"];
+  const { data: categoriesData = [] } = useAllCategories();
+  const categories = categoriesData.map((cat) => cat.name);
 
   return (
     <div className="space-y-6">
@@ -267,11 +269,15 @@ const BlogForm = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
+                      {categories.length === 0 ? (
+                        <SelectItem value="" disabled>No categories available</SelectItem>
+                      ) : (
+                        categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   {errors.category && (
