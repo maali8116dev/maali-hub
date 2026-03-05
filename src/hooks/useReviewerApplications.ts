@@ -80,10 +80,13 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
           comments: decision.comments,
           submittedAt: decision.submittedAt,
         })),
-        reviewProgress: hasReviews ? {
+        reviewProgress: (app.total_assignments && app.total_assignments > 0) ? {
           completed: completedReviews,
-          total: completedReviews + 1, // Estimate: assume at least one more reviewer pending
-        } : undefined,
+          total: app.total_assignments, // Use actual assignment count from RPC if available
+        } : (hasReviews ? {
+          completed: completedReviews,
+          total: Math.max(completedReviews + 1, 2), // Better estimate: at least 2 reviewers expected
+        } : undefined),
         reviewDeadline: app.review_deadline || undefined,
       };
     });

@@ -39,7 +39,12 @@ export function useProjectApplicationsRanked(projectId?: number) {
         { p_project_id: projectId }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching ranked applications:", error);
+        throw error;
+      }
+      
+      console.log("Ranked applications data:", data);
       return (data || []) as RankedApplication[];
     },
     enabled: !!projectId,

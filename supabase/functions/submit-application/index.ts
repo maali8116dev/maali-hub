@@ -364,13 +364,70 @@ async function runSideEffects(params: {
   // 3. Reviewer assignment (only for free applications)
   if (!hasFee) {
     try {
-      const NUM_REVIEWERS = 2;
-      const { data: assignments, error: assignError } = await supabaseAdmin.rpc(
+      const notifyAdminsMissingReviewer = async (availableCount: number) => {
+        try {
+          const { data: admins, error: adminsError } = await supabaseAdmin
+            .from("profiles")
+            .select("user_id")
+            .eq("role", "admin");
+
+          if (adminsError) {
+            console.error("Failed to fetch admins for missing reviewer notification:", adminsError);
+            return;
+          }
+
+          const adminIds = (admins || []).map((a: any) => a.user_id).filter(Boolean);
+          if (adminIds.length === 0) return;
+
+          await Promise.allSettled(
+            adminIds.map((adminId: string) =>
+              supabaseAdmin.rpc("create_notification", {
+                p_user_id: adminId,
+                p_title: "Reviewer capacity needed",
+                p_message: `Only ${availableCount} reviewer is available for "${projectTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
+                p_type: "review_assignment",
+                p_link: `/admin/applications/${applicationId}`,
+                p_metadata: {
+                  application_id: applicationId,
+                  project_id: projectId,
+                  project_title: projectTitle,
+                  required_reviewers: 2,
+                  assigned_reviewers: availableCount,
+                },
+              })
+            )
+          );
+        } catch (e) {
+          console.error("Failed to notify admins about missing reviewer:", e);
+        }
+      };
+
+      const PREFERRED_REVIEWERS = 2;
+      let { data: assignments, error: assignError } = await supabaseAdmin.rpc(
         "assign_reviewers_to_application",
-        { p_application_id: applicationId, p_num_reviewers: NUM_REVIEWERS },
+        { p_application_id: applicationId, p_num_reviewers: PREFERRED_REVIEWERS },
       );
 
       if (assignError) {
+        const msg = assignError.message || "";
+        const notEnough = msg.toLowerCase().includes("not enough available reviewers");
+
+        if (notEnough) {
+          const retry = await supabaseAdmin.rpc("assign_reviewers_to_application", {
+            p_application_id: applicationId,
+            p_num_reviewers: 1,
+          });
+          assignments = retry.data;
+          assignError = retry.error;
+
+          if (!assignError && assignments?.length === 1) {
+            console.warn(
+              `Only 1 reviewer assigned to application ${applicationId} due to limited capacity. Admin action required.`,
+            );
+            await notifyAdminsMissingReviewer(1);
+          }
+        }
+
         console.warn("Reviewer assignment failed:", assignError);
         await supabaseAdmin.from("activity_logs").insert({
           user_id: userId,

@@ -119,9 +119,9 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
               submittedAt: decision.submittedAt,
             }))
           : [],
-        reviewProgress: hasReviews ? {
+        reviewProgress: (app.total_assignments && app.total_assignments > 0) ? {
           completed: completedReviews,
-          total: completedReviews + 1, // Estimate: assume at least one more reviewer pending
+          total: app.total_assignments, // Use actual assignment count from RPC
         } : undefined,
       };
     });

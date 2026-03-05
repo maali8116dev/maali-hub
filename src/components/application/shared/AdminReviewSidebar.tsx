@@ -1,6 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import {
   CheckCircle,
   XCircle,
@@ -17,6 +29,7 @@ interface AdminReviewSidebarProps {
   assignmentsLoading: boolean;
   scoresLoading: boolean;
   aggregationLoading: boolean;
+  applicationId?: string;
 }
 
 const AdminReviewSidebar = ({
@@ -26,7 +39,70 @@ const AdminReviewSidebar = ({
   assignmentsLoading,
   scoresLoading,
   aggregationLoading,
+  applicationId,
 }: AdminReviewSidebarProps) => {
+  const { toast } = useToast();
+  const [isManageOpen, setIsManageOpen] = useState(false);
+  const [selectedReviewer1, setSelectedReviewer1] = useState<string>("");
+  const [selectedReviewer2, setSelectedReviewer2] = useState<string>("");
+
+  const { data: eligibleReviewers = [], isLoading: eligibleLoading, refetch: refetchEligible } = useQuery({
+    queryKey: ["eligible-reviewers-for-application", applicationId],
+    queryFn: async () => {
+      if (!applicationId) return [];
+      const { data, error } = await supabase.rpc("get_eligible_reviewers_for_application" as any, {
+        p_application_id: applicationId,
+      });
+      if (error) throw error;
+      return (data || []) as Array<{
+        reviewer_id: string;
+        first_name: string;
+        last_name: string;
+        workload: number;
+      }>;
+    },
+    enabled: !!applicationId && isManageOpen,
+  });
+
+  const setReviewersMutation = useMutation({
+    mutationFn: async () => {
+      if (!applicationId) throw new Error("Missing application id");
+      if (!selectedReviewer1 || !selectedReviewer2) {
+        throw new Error("Select 2 reviewers");
+      }
+      if (selectedReviewer1 === selectedReviewer2) {
+        throw new Error("Reviewers must be different");
+      }
+      const { error } = await supabase.rpc("admin_set_application_reviewers" as any, {
+        p_application_id: applicationId,
+        p_reviewer_ids: [selectedReviewer1, selectedReviewer2],
+      });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast({
+        title: "Reviewers updated",
+        description: "Assignments were updated successfully.",
+      });
+      setIsManageOpen(false);
+    },
+    onError: (e: unknown) => {
+      toast({
+        title: "Update failed",
+        description: e instanceof Error ? e.message : "Could not update reviewers.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const openManage = async () => {
+    setIsManageOpen(true);
+    // prefill selections from existing assignments (if any)
+    setSelectedReviewer1(assignments[0]?.reviewer_id || "");
+    setSelectedReviewer2(assignments[1]?.reviewer_id || "");
+    await refetchEligible();
+  };
+
   return (
     <>
       {/* Review Summary */}
@@ -149,9 +225,21 @@ const AdminReviewSidebar = ({
       ) : assignments.length > 0 ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+              {applicationId && (
+                <Button variant="outline" size="sm" onClick={openManage}>
+                  {assignments.length < 2 ? "Assign reviewer" : "Reassign"}
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+            {assignments.length < 2 && (
+              <div className="text-xs text-warning">
+                This application needs 2 reviewers. Only {assignments.length} assigned so far.
+              </div>
+            )}
             {assignments.map((assignment) => {
               const reviewerName = assignment.reviewer
                 ? `${assignment.reviewer.first_name} ${assignment.reviewer.last_name}`.trim() || "Unknown Reviewer"
@@ -230,7 +318,14 @@ const AdminReviewSidebar = ({
       ) : (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+              {applicationId && (
+                <Button variant="outline" size="sm" onClick={openManage}>
+                  Assign reviewers
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="text-sm text-muted-foreground">
@@ -239,6 +334,73 @@ const AdminReviewSidebar = ({
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Assign reviewers</DialogTitle>
+            <DialogDescription>
+              Select exactly 2 eligible reviewers for this application.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Reviewer 1</label>
+              <select
+                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                value={selectedReviewer1}
+                onChange={(e) => setSelectedReviewer1(e.target.value)}
+                disabled={eligibleLoading || setReviewersMutation.isPending}
+              >
+                <option value="" disabled>
+                  Select reviewer
+                </option>
+                {eligibleReviewers.map((r) => (
+                  <option key={r.reviewer_id} value={r.reviewer_id}>
+                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Reviewer 2</label>
+              <select
+                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                value={selectedReviewer2}
+                onChange={(e) => setSelectedReviewer2(e.target.value)}
+                disabled={eligibleLoading || setReviewersMutation.isPending}
+              >
+                <option value="" disabled>
+                  Select reviewer
+                </option>
+                {eligibleReviewers.map((r) => (
+                  <option key={r.reviewer_id} value={r.reviewer_id}>
+                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsManageOpen(false)}
+                disabled={setReviewersMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setReviewersMutation.mutate()}
+                disabled={setReviewersMutation.isPending}
+              >
+                {setReviewersMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -157,18 +157,8 @@ const ProjectApplications = () => {
       const approvedIds = Array.from(selectedIds);
       await updateApplicationStatus(approvedIds, "approved");
 
-      // Update project status to "closed" when winners are selected
-      if (projectId) {
-        const { error: projectError } = await supabase
-          .from("projects")
-          .update({ status: "closed", updated_at: new Date().toISOString() })
-          .eq("id", projectId);
-
-        if (projectError) {
-          console.error("Error updating project status:", projectError);
-          // Don't fail the approval process if project update fails
-        }
-      }
+      // Note: Projects are NOT automatically closed when winners are selected.
+      // Projects should only be closed by their deadline or manually by admins.
 
       // Send approval emails to all approved applicants
       const approvedApplications = rankedApplications.filter((app) =>

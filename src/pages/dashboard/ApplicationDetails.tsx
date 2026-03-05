@@ -262,6 +262,7 @@ const ApplicationDetails = () => {
               assignmentsLoading={assignmentsLoading}
               scoresLoading={scoresLoading}
               aggregationLoading={aggregationLoading}
+              applicationId={application.id}
             />
           )}
 

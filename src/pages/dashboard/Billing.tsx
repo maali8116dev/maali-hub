@@ -33,6 +33,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +54,7 @@ const Billing = () => {
   const queryClient = useQueryClient();
   const [isDeletingPaymentMethod, setIsDeletingPaymentMethod] = useState<string | null>(null);
   const [showAddCardDialog, setShowAddCardDialog] = useState(false);
+  const [paymentMethodToDelete, setPaymentMethodToDelete] = useState<{ id: string; isDefault: boolean; isOnlyOne: boolean } | null>(null);
 
   // Fetch payment methods from DB
   const { data: paymentMethods = [], isLoading: loadingPaymentMethods } = useQuery({
@@ -143,20 +154,74 @@ const Billing = () => {
     },
   });
 
-  // Delete (soft) payment method
+  // Delete (soft) payment method with proper handling
   const handleDeletePaymentMethod = async (id: string) => {
+    if (!user || !paymentMethodToDelete) return;
+
     setIsDeletingPaymentMethod(id);
-    const { error } = await supabase
-      .from("payment_methods")
-      .update({ deleted_at: new Date().toISOString(), is_active: false })
-      .eq("id", id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
-      toast({ title: "Payment method removed", description: "Your payment method has been removed." });
+    
+    try {
+      // If it's the default, find another active payment method to set as default
+      if (paymentMethodToDelete.isDefault) {
+        const { data: otherMethods } = await supabase
+          .from("payment_methods")
+          .select("id")
+          .eq("user_id", user.id)
+          .neq("id", id)
+          .is("deleted_at", null)
+          .eq("is_active", true)
+          .limit(1);
+
+        if (otherMethods && otherMethods.length > 0) {
+          // Set the first available method as default
+          await supabase
+            .from("payment_methods")
+            .update({ is_default: true })
+            .eq("id", otherMethods[0].id);
+        }
+      }
+
+      // Soft delete the payment method
+      const { error } = await supabase
+        .from("payment_methods")
+        .update({ 
+          deleted_at: new Date().toISOString(), 
+          is_active: false,
+          is_default: false, // Unset default if it was default
+        })
+        .eq("id", id);
+
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
+        const message = paymentMethodToDelete.isOnlyOne
+          ? "Your payment method has been removed. You'll need to add a new payment method for future transactions."
+          : paymentMethodToDelete.isDefault
+          ? "Your payment method has been removed. Another payment method has been set as default."
+          : "Your payment method has been removed.";
+        toast({ title: "Payment method removed", description: message });
+      }
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: error instanceof Error ? error.message : "Failed to delete payment method", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsDeletingPaymentMethod(null);
+      setPaymentMethodToDelete(null);
     }
-    setIsDeletingPaymentMethod(null);
+  };
+
+  // Prepare deletion with confirmation
+  const confirmDeletePaymentMethod = (method: { id: string; is_default: boolean }) => {
+    const isOnlyOne = paymentMethods.filter(m => m.id !== method.id && !m.deleted_at && m.is_active).length === 0;
+    setPaymentMethodToDelete({ 
+      id: method.id, 
+      isDefault: method.is_default, 
+      isOnlyOne 
+    });
   };
 
   // Set default payment method
@@ -408,7 +473,7 @@ const Billing = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeletePaymentMethod(method.id)}
+                      onClick={() => confirmDeletePaymentMethod(method)}
                       disabled={isDeletingPaymentMethod === method.id}
                       className="min-h-[44px] min-w-[44px]"
                     >
@@ -646,6 +711,53 @@ const Billing = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Payment Method Confirmation Dialog */}
+      <AlertDialog open={!!paymentMethodToDelete} onOpenChange={(open) => !open && setPaymentMethodToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {paymentMethodToDelete?.isOnlyOne 
+                ? "Delete Your Only Payment Method?" 
+                : "Delete Payment Method?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {paymentMethodToDelete?.isOnlyOne ? (
+                <>
+                  This is your only payment method. If you delete it, you'll need to add a new payment method 
+                  before making any future payments. Are you sure you want to continue?
+                </>
+              ) : paymentMethodToDelete?.isDefault ? (
+                <>
+                  This is your default payment method. It will be removed and another payment method will be 
+                  set as default. Are you sure you want to continue?
+                </>
+              ) : (
+                "Are you sure you want to remove this payment method? This action cannot be undone."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingPaymentMethod !== null}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => paymentMethodToDelete && handleDeletePaymentMethod(paymentMethodToDelete.id)}
+              disabled={isDeletingPaymentMethod !== null}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingPaymentMethod ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
