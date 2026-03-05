@@ -549,7 +549,7 @@ const ProjectApplications = () => {
             enablePagination={true}
             enableExport={true}
             exportFileName="ranked-applications"
-            onRefresh={() => refetch()}
+            onRefresh={() => { refetch(); }}
             isRefreshing={isFetching || isLoading}
           />
         </CardContent>

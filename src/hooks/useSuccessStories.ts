@@ -21,7 +21,7 @@ export type SuccessStory = {
  * Direct Supabase query for featured success stories
  */
 async function fetchFeaturedSuccessStoriesDirect(): Promise<SuccessStory[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("success_stories")
     .select("*")
     .eq("status", "published")
@@ -58,7 +58,7 @@ export function useFeaturedSuccessStories() {
  * Direct Supabase query for all success stories
  */
 async function fetchAllSuccessStoriesDirect(): Promise<SuccessStory[]> {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("success_stories")
     .select("*")
     .eq("status", "published")
