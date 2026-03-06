@@ -467,8 +467,7 @@ async function runSideEffects(params: {
                   project_id: projectId,
                   assignment_id: a.assignment_id,
                 },
-              })
-          ),
+              }),
           ),
         );
       }
