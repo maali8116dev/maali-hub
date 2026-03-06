@@ -66,9 +66,15 @@ const Billing = () => {
         .eq("user_id", user!.id)
         .is("deleted_at", null)
         .eq("is_active", true)
+        .order("is_default", { ascending: false }) // Default/primary first
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+      // Sort by method_type: primary first, then secondary
+      return (data || []).sort((a, b) => {
+        if (a.method_type === "primary" && b.method_type !== "primary") return -1;
+        if (a.method_type !== "primary" && b.method_type === "primary") return 1;
+        return 0;
+      });
     },
     enabled: !!user,
   });
@@ -161,7 +167,7 @@ const Billing = () => {
     setIsDeletingPaymentMethod(id);
     
     try {
-      // If it's the default, find another active payment method to set as default
+      // If it's the default/primary, find another active payment method to set as default
       if (paymentMethodToDelete.isDefault) {
         const { data: otherMethods } = await supabase
           .from("payment_methods")
@@ -173,7 +179,7 @@ const Billing = () => {
           .limit(1);
 
         if (otherMethods && otherMethods.length > 0) {
-          // Set the first available method as default
+          // Set the first available method as default (trigger handles method_type automatically)
           await supabase
             .from("payment_methods")
             .update({ is_default: true })
@@ -181,13 +187,13 @@ const Billing = () => {
         }
       }
 
-      // Soft delete the payment method
+      // Soft delete the payment method (trigger handles method_type automatically)
       const { error } = await supabase
         .from("payment_methods")
         .update({ 
           deleted_at: new Date().toISOString(), 
           is_active: false,
-          is_default: false, // Unset default if it was default
+          is_default: false,
         })
         .eq("id", id);
 
@@ -224,24 +230,12 @@ const Billing = () => {
     });
   };
 
-  // Set default payment method
+  // Set default payment method (trigger automatically handles primary/secondary)
   const handleSetDefault = async (id: string) => {
     if (!user) return;
 
-    // Unset previous defaults for this user first
-    const { error: unsetError } = await supabase
-      .from("payment_methods")
-      .update({ is_default: false })
-      .eq("user_id", user.id)
-      .eq("is_default", true)
-      .is("deleted_at", null);
-
-    if (unsetError) {
-      toast({ title: "Error", description: unsetError.message, variant: "destructive" });
-      return;
-    }
-
-    // Set the selected method as default
+    // Just set the new default — the trigger automatically unsets the old default
+    // and handles primary/secondary classification
     const { error } = await supabase
       .from("payment_methods")
       .update({ is_default: true })
@@ -448,8 +442,10 @@ const Billing = () => {
                         <p className="font-medium text-sm sm:text-base">
                           {method.brand || method.type} •••• {method.last4}
                         </p>
-                        {method.is_default && (
-                          <Badge variant="secondary" className="text-xs">Default</Badge>
+                        {method.method_type === "primary" ? (
+                          <Badge variant="default" className="text-xs">Primary</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs">Secondary</Badge>
                         )}
                       </div>
                       {method.expiry_month && method.expiry_year && (

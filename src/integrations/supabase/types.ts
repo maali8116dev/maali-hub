@@ -731,6 +731,7 @@ export type Database = {
           is_default: boolean | null
           last4: string
           metadata: Json | null
+          method_type: string | null
           provider: string | null
           provider_id: string | null
           type: string
@@ -750,6 +751,7 @@ export type Database = {
           is_default?: boolean | null
           last4: string
           metadata?: Json | null
+          method_type?: string | null
           provider?: string | null
           provider_id?: string | null
           type: string
@@ -769,6 +771,7 @@ export type Database = {
           is_default?: boolean | null
           last4?: string
           metadata?: Json | null
+          method_type?: string | null
           provider?: string | null
           provider_id?: string | null
           type?: string

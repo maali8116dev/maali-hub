@@ -270,7 +270,7 @@ const BlogForm = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {categories.length === 0 ? (
-                        <SelectItem value="" disabled>No categories available</SelectItem>
+                        <SelectItem value="no-categories" disabled>No categories available</SelectItem>
                       ) : (
                         categories.map((cat) => (
                           <SelectItem key={cat} value={cat}>

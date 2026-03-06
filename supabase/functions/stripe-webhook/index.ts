@@ -541,12 +541,15 @@ async function savePaymentMethod(
 
     if (existingMethod) {
       // Update existing payment method (reactivate if deleted, update expiry if changed)
+      // If it was default, ensure it's primary; otherwise keep as secondary
+      const shouldBePrimary = existingMethod.is_default;
       const { error: updateError } = await supabaseAdmin
         .from("payment_methods")
         .update({
           is_active: true,
           expiry_month: expiryMonth,
           expiry_year: expiryYear,
+          method_type: shouldBePrimary ? "primary" : "secondary",
           updated_at: new Date().toISOString(),
           deleted_at: null, // Reactivate if previously deleted
         })
@@ -568,6 +571,7 @@ async function savePaymentMethod(
         .maybeSingle();
 
       const isDefault = !existingDefaults; // Set as default if user has no other default
+      const methodType = isDefault ? "primary" : "secondary";
 
       // Insert new payment method
       const { error: insertError } = await supabaseAdmin
@@ -584,6 +588,7 @@ async function savePaymentMethod(
           billing_email: billingEmail,
           is_active: true,
           is_default: isDefault,
+          method_type: methodType,
           metadata: {
             payment_intent_id: paymentIntentId,
             fingerprint: card.fingerprint || null,

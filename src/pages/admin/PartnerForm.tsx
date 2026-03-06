@@ -15,7 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { useAllCategories } from "@/hooks/useCategories";
 
 const partnerSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
@@ -161,8 +160,8 @@ const PartnerForm = () => {
   };
 
   const logoUrl = watch("logo_url");
-  const { data: categoriesData = [] } = useAllCategories();
-  const categories = categoriesData.map((cat) => cat.name);
+  // Partner categories are fixed and defined in the database CHECK constraint
+  const partnerCategories = ['Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic'];
 
   if (isFetching) {
     return (
@@ -297,15 +296,11 @@ const PartnerForm = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.length === 0 ? (
-                        <SelectItem value="" disabled>No categories available</SelectItem>
-                      ) : (
-                        categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))
-                      )}
+                      {partnerCategories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

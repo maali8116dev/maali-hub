@@ -189,12 +189,12 @@ const AdminPartners = () => {
                   key={partner.id}
                   className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
                     {partner.logo_url ? (
                       <img
                         src={partner.logo_url}
                         alt={partner.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                           (e.target as HTMLImageElement).parentElement!.innerHTML = "🏢";

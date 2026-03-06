@@ -218,11 +218,11 @@ const About = () => {
                           <CardHeader>
                             <div className="flex items-start justify-between mb-2">
                               {partner.logo_url ? (
-                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center">
                                   <img
                                     src={partner.logo_url}
                                     alt={partner.name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).style.display = "none";
                                       (e.target as HTMLImageElement).parentElement!.innerHTML = "🏢";
@@ -230,7 +230,7 @@ const About = () => {
                                   />
                                 </div>
                               ) : (
-                                <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center text-2xl">
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
                                   🏢
                                 </div>
                               )}

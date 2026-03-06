@@ -50,7 +50,7 @@ const TrustIndicators = () => {
         {isLoading ? (
           <div className="flex gap-4 justify-center">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="w-32 h-32 rounded-md" />
+              <Skeleton key={i} className="w-32 h-32 rounded-full" />
             ))}
           </div>
         ) : partners.length > 0 ? (
@@ -62,21 +62,23 @@ const TrustIndicators = () => {
                     href={partner.website_url || "#"}
                     target={partner.website_url ? "_blank" : undefined}
                     rel={partner.website_url ? "noopener noreferrer" : undefined}
-                    className="flex rounded-md aspect-square bg-muted items-center justify-center p-6 hover:bg-muted/80 transition-colors group"
+                    className="flex rounded-full aspect-square bg-muted items-center justify-center p-2 hover:bg-muted/80 transition-colors group overflow-hidden"
                   >
                     {partner.logo_url ? (
-                      <img
-                        src={partner.logo_url}
-                        alt={partner.name}
-                        className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                          const fallback = (e.target as HTMLImageElement).parentElement;
-                          if (fallback) {
-                            fallback.innerHTML = `<span class="text-sm text-muted-foreground text-center">${partner.name}</span>`;
-                          }
-                        }}
-                      />
+                      <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                        <img
+                          src={partner.logo_url}
+                          alt={partner.name}
+                          className="w-full h-full object-contain  opacity-70 group-hover:opacity-100 transition-opacity"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                            const fallback = (e.target as HTMLImageElement).parentElement?.parentElement;
+                            if (fallback) {
+                              fallback.innerHTML = `<span class="text-sm text-muted-foreground text-center">${partner.name}</span>`;
+                            }
+                          }}
+                        />
+                      </div>
                     ) : (
                       <span className="text-sm text-muted-foreground text-center">{partner.name}</span>
                     )}
