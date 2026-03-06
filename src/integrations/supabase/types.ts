@@ -731,6 +731,7 @@ export type Database = {
           is_default: boolean | null
           last4: string
           metadata: Json | null
+          method_type: string | null
           provider: string | null
           provider_id: string | null
           type: string
@@ -750,6 +751,7 @@ export type Database = {
           is_default?: boolean | null
           last4: string
           metadata?: Json | null
+          method_type?: string | null
           provider?: string | null
           provider_id?: string | null
           type: string
@@ -769,6 +771,7 @@ export type Database = {
           is_default?: boolean | null
           last4?: string
           metadata?: Json | null
+          method_type?: string | null
           provider?: string | null
           provider_id?: string | null
           type?: string
@@ -1455,6 +1458,7 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
+          total_assignments: number
         }[]
       }
       get_admin_stats: {
@@ -1620,15 +1624,11 @@ export type Database = {
           assigned_at: string
           assignment_id: string
           assignment_status: string
-          company_name: string
           contact_email: string
           contact_phone: string
-          funding_amount: string
           id: string
-          location: string
           project_id: number
           project_title: string
-          review_deadline: string
           review_notes: string
           reviewed_at: string
           reviewed_by: string
@@ -1636,6 +1636,7 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
+          total_assignments: number
         }[]
       }
       get_reviewer_assignments_with_application: {
