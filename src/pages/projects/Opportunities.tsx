@@ -202,12 +202,12 @@ const Opportunities = () => {
             <span className="text-sm font-medium text-muted-foreground">Browse by tag</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {allCloudTags.map((tagName) => {
-              const isFromDb = dbTagNames.includes(tagName);
-              const isActive = selectedTag === tagName;
+            {cloudTags.map((tag) => {
+              const isFromDb = tag.count > 0;
+              const isActive = selectedTag === tag.name;
               return (
                 <Badge
-                  key={tagName}
+                  key={tag.name}
                   variant={isActive ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer transition-all text-xs px-3 py-1.5 hover:scale-105",
@@ -217,9 +217,12 @@ const Opportunities = () => {
                         ? "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary"
                         : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  onClick={() => handleTagClick(tagName)}
+                  onClick={() => handleTagClick(tag.name)}
                 >
-                  {tagName}
+                  {tag.name}
+                  {isFromDb && tag.count > 0 && (
+                    <span className="ml-1 text-[10px] opacity-70">({tag.count})</span>
+                  )}
                   {isActive && <X className="h-3 w-3 ml-1.5" />}
                 </Badge>
               );
