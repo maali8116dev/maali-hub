@@ -130,7 +130,7 @@ const Applications = () => {
         const app = row.original;
         if (app.status === "draft") {
           return (
-            app.isProjectOpen ? (
+            app.isOpportunityOpen ? (
               <Link to={`/opportunities/${app.opportunityId}/apply`}>
                 <Button variant="outline" size="sm">
                   {t('dashboard:applications.actions.continueApplication')}

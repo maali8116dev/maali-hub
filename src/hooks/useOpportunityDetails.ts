@@ -99,15 +99,15 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
     queryKey: ["user-opportunity-application", user?.id, opportunityId],
     queryFn: async () => {
       if (!user || !opportunityId) return null;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("applications")
         .select("id, status, is_draft")
         .eq("user_id", user.id)
-        .eq("opportunity_id", parseInt(opportunityId))
+        .eq("project_id", parseInt(opportunityId))
         .eq("is_draft", false)
         .order("created_at", { ascending: false })
         .limit(1)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (error) {
         console.error("Error checking existing application:", error);

@@ -341,7 +341,7 @@ describe('useApplications - Integration Tests', () => {
       // Find the application with under_review status (should map to pending)
       const underReviewApp = ourApplications.find(app => 
         app.status === 'pending' && 
-        (app.projectTitle.includes('Project 2') || app.contactEmail.includes('int-applicant'))
+        (app.opportunityTitle.includes('Project 2') || app.contactEmail.includes('int-applicant'))
       );
 
       // If we found it, verify it was mapped correctly

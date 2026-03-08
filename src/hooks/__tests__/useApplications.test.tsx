@@ -141,7 +141,7 @@ describe('useApplications', () => {
 
     // Should still return application with "Unknown Project" as title
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].projectTitle).toBe('Unknown Project');
+    expect(result.current.data?.[0].opportunityTitle).toBe('Unknown Opportunity');
     expect(result.current.data?.[0].sector).toBe('Unknown');
   });
 
