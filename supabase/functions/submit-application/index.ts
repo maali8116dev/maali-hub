@@ -436,7 +436,7 @@ async function runSideEffects(params: {
           entity_id: applicationId,
           description: `Failed to assign reviewers: ${assignError?.message ?? 'Unknown error'}`,
           metadata: { application_id: applicationId, opportunity_id: opportunityId },
-        }).then(() => {}).catch(() => {});
+        });
       } else if (assignments?.length) {
         await supabaseAdmin.from("activity_logs").insert({
           user_id: userId,
