@@ -267,7 +267,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     if (!supabaseAdmin) return;
 
     // Insert an under_review application
-    const { data: urApp } = await supabaseAdmin.from('applications').insert({
+    const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0], project_id: testProjectId,
       contact_email: 'ur@test.com', status: 'under_review', is_draft: false,
     }).select('id').single();
