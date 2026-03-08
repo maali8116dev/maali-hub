@@ -44,6 +44,7 @@ const PartnerForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(isEditing);
   const [oldLogoUrl, setOldLogoUrl] = useState<string | null>(null);
+  const [partnerUsers, setPartnerUsers] = useState<PartnerUser[]>([]);
 
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "partner-logos",
