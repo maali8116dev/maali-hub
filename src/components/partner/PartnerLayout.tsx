@@ -31,7 +31,7 @@ interface PartnerLayoutProps {
 
 const menuItems = [
   { href: "/partner", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/partner/projects", label: "My Projects", icon: FolderKanban },
+  { href: "/partner/opportunities", label: "My Opportunities", icon: FolderKanban },
   { href: "/partner/settings", label: "Settings", icon: Settings },
 ];
 
