@@ -98,6 +98,7 @@ export type Database = {
           file_type: string | null
           id: string
           is_library_document: boolean | null
+          opportunity_id: number | null
           project_id: number | null
           user_id: string | null
         }
@@ -110,6 +111,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
+          opportunity_id?: number | null
           project_id?: number | null
           user_id?: string | null
         }
@@ -122,6 +124,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
+          opportunity_id?: number | null
           project_id?: number | null
           user_id?: string | null
         }
@@ -131,6 +134,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_documents_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
           {
@@ -166,6 +176,7 @@ export type Database = {
           key_team_members_roles: string | null
           linkedin_url: string | null
           location: string | null
+          opportunity_id: number
           organization_name: string | null
           other_social_links: string | null
           previous_grants_funding_details: string | null
@@ -215,6 +226,7 @@ export type Database = {
           key_team_members_roles?: string | null
           linkedin_url?: string | null
           location?: string | null
+          opportunity_id: number
           organization_name?: string | null
           other_social_links?: string | null
           previous_grants_funding_details?: string | null
@@ -264,6 +276,7 @@ export type Database = {
           key_team_members_roles?: string | null
           linkedin_url?: string | null
           location?: string | null
+          opportunity_id?: number
           organization_name?: string | null
           other_social_links?: string | null
           previous_grants_funding_details?: string | null
@@ -291,6 +304,13 @@ export type Database = {
           year_established?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "applications_project_id_fkey"
             columns: ["project_id"]
@@ -1872,6 +1892,10 @@ export type Database = {
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
+      is_opportunity_open: {
+        Args: { p_opportunity_id: number }
+        Returns: boolean
+      }
       is_project_open: { Args: { p_project_id: number }; Returns: boolean }
       mark_all_notifications_read: {
         Args: { p_user_id: string }
