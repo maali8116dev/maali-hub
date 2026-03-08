@@ -1752,12 +1752,7 @@ export type Database = {
           p_status?: string
           p_tags?: string[]
         }
-        Returns: {
-          opportunities: Json
-          page: number
-          total_count: number
-          total_pages: number
-        }[]
+        Returns: Json
       }
       get_project_applications_ranked: {
         Args: { p_project_id: number }
