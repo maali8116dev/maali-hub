@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Save, Plus, X, Tag } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { usePartnerOpportunity, useCreatePartnerOpportunity, useUpdatePartnerOpportunity, PartnerOpportunityFormData } from "@/hooks/usePartnerOpportunities";
+import {
+  usePartnerOpportunity,
+  useCreatePartnerOpportunity,
+  useUpdatePartnerOpportunity,
+  usePartnerOpportunityTags,
+  PartnerOpportunityFormData,
+} from "@/hooks/usePartnerOpportunities";
 import { useCategories } from "@/hooks/useCategories";
+import { useOpportunityTags } from "@/hooks/useOpportunities";
+import { cn } from "@/lib/utils";
 
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -22,12 +31,20 @@ const schema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
-  maxApplicants: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().positive().optional()),
+  maxApplicants: z.preprocess(
+    (v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v),
+    z.number().int().positive().optional()
+  ),
   currency: z.string().optional(),
   country: z.string().optional(),
   organizationName: z.string().optional(),
-  categoryId: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().optional()),
-  opportunityType: z.enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"]).default("grant"),
+  categoryId: z.preprocess(
+    (v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v),
+    z.number().int().optional()
+  ),
+  opportunityType: z
+    .enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"])
+    .default("grant"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -40,18 +57,31 @@ const PartnerOpportunityForm = () => {
 
   const { data: opportunity, isLoading } = usePartnerOpportunity(opportunityId);
   const { data: categories = [] } = useCategories();
+  const { data: allTags = [] } = useOpportunityTags();
+  const { data: existingTagNames = [] } = usePartnerOpportunityTags(opportunityId);
   const createOpp = useCreatePartnerOpportunity();
   const updateOpp = useUpdatePartnerOpportunity();
 
+  // Tag state
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", description: "", status: "open", deadline: "", fundingAmount: "", location: "", requirements: "", eligibilityCriteria: "", currency: "USD", country: "", organizationName: "", opportunityType: "grant" },
+    defaultValues: {
+      title: "", description: "", status: "open", deadline: "", fundingAmount: "",
+      location: "", requirements: "", eligibilityCriteria: "", currency: "USD",
+      country: "", organizationName: "", opportunityType: "grant",
+    },
   });
 
   const status = watch("status");
   const categoryId = watch("categoryId");
   const opportunityType = watch("opportunityType");
 
+  // Populate form when editing
   useEffect(() => {
     if (opportunity && isEditing) {
       reset({
@@ -73,6 +103,42 @@ const PartnerOpportunityForm = () => {
     }
   }, [opportunity, isEditing, reset]);
 
+  // Populate tags when editing
+  useEffect(() => {
+    if (existingTagNames.length > 0) {
+      setSelectedTags(existingTagNames);
+    }
+  }, [existingTagNames]);
+
+  // Tag input suggestions (filter existing tags, exclude already selected)
+  const tagSuggestions = tagInput.trim().length > 0
+    ? allTags
+        .filter((t) => t.name.toLowerCase().includes(tagInput.toLowerCase()) && !selectedTags.includes(t.name))
+        .slice(0, 6)
+    : [];
+
+  const addTag = (name: string) => {
+    const trimmed = name.trim();
+    if (trimmed && !selectedTags.includes(trimmed)) {
+      setSelectedTags((prev) => [...prev, trimmed]);
+    }
+    setTagInput("");
+    setShowSuggestions(false);
+  };
+
+  const removeTag = (name: string) => {
+    setSelectedTags((prev) => prev.filter((t) => t !== name));
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && selectedTags.length > 0) {
+      removeTag(selectedTags[selectedTags.length - 1]);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
     const formData: PartnerOpportunityFormData = {
       title: data.title,
@@ -89,6 +155,7 @@ const PartnerOpportunityForm = () => {
       organizationName: data.organizationName,
       categoryId: data.categoryId,
       opportunityType: data.opportunityType,
+      tags: selectedTags,
     };
 
     if (isEditing && opportunityId) {
@@ -212,6 +279,88 @@ const PartnerOpportunityForm = () => {
             <div>
               <Label htmlFor="eligibilityCriteria">Eligibility Criteria</Label>
               <Textarea id="eligibilityCriteria" {...register("eligibilityCriteria")} rows={3} />
+            </div>
+
+            {/* Tags */}
+            <div>
+              <Label className="flex items-center gap-1.5 mb-2">
+                <Tag className="h-3.5 w-3.5" />
+                Tags
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Select existing tags or type a new one and press Enter to create it.
+              </p>
+
+              {/* Selected tags */}
+              {selectedTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {selectedTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
+                        aria-label={`Remove ${tag}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Input with dropdown */}
+              <div className="relative">
+                <div className="flex gap-2">
+                  <Input
+                    ref={tagInputRef}
+                    value={tagInput}
+                    onChange={(e) => { setTagInput(e.target.value); setShowSuggestions(true); }}
+                    onKeyDown={handleTagKeyDown}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    placeholder="Type a tag name..."
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { if (tagInput.trim()) addTag(tagInput); }}
+                    disabled={!tagInput.trim()}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
+
+                {/* Suggestions dropdown */}
+                {showSuggestions && (tagSuggestions.length > 0 || (tagInput.trim() && !allTags.some((t) => t.name.toLowerCase() === tagInput.toLowerCase()))) && (
+                  <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-md overflow-hidden">
+                    {tagSuggestions.map((tag) => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onMouseDown={() => addTag(tag.name)}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                      >
+                        {tag.name}
+                      </button>
+                    ))}
+                    {tagInput.trim() && !allTags.some((t) => t.name.toLowerCase() === tagInput.toLowerCase()) && (
+                      <button
+                        type="button"
+                        onMouseDown={() => addTag(tagInput)}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors border-t border-border flex items-center gap-2"
+                      >
+                        <Plus className="h-3.5 w-3.5 text-primary" />
+                        <span>Create "<strong>{tagInput.trim()}</strong>"</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

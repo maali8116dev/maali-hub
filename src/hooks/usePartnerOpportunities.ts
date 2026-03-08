@@ -42,6 +42,7 @@ export type PartnerOpportunityFormData = {
   organizationName?: string;
   country?: string;
   categoryId?: number;
+  tags?: string[]; // Tag names (existing or new)
 };
 
 function transformOpportunity(data: any): PartnerOpportunity {
@@ -108,6 +109,33 @@ export function usePartnerOpportunity(id?: number) {
   });
 }
 
+/** Upsert tags by name and link them to an opportunity */
+async function syncTags(opportunityId: number, tagNames: string[]) {
+  if (!tagNames.length) return;
+
+  // For each tag name, upsert into opportunity_tags
+  const resolvedTagIds: number[] = [];
+  for (const name of tagNames) {
+    const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const { data: upserted, error } = await (supabase
+      .from("opportunity_tags" as any)
+      .upsert({ name, slug }, { onConflict: "slug" })
+      .select("id")
+      .single() as any);
+    if (error) throw error;
+    resolvedTagIds.push(upserted.id);
+  }
+
+  // Delete old mappings then insert new ones
+  await (supabase.from("opportunity_tag_map" as any).delete().eq("opportunity_id", opportunityId) as any);
+  if (resolvedTagIds.length) {
+    const { error } = await (supabase.from("opportunity_tag_map" as any).insert(
+      resolvedTagIds.map((tag_id) => ({ opportunity_id: opportunityId, tag_id }))
+    ) as any);
+    if (error) throw error;
+  }
+}
+
 export function useCreatePartnerOpportunity() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -140,10 +168,13 @@ export function useCreatePartnerOpportunity() {
         .single();
 
       if (error) throw error;
+      if (formData.tags?.length) await syncTags(data.id, formData.tags);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-tags"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-tags-popular"] });
       toast({ title: "Opportunity created successfully" });
     },
     onError: (error: any) => {
@@ -185,15 +216,36 @@ export function useUpdatePartnerOpportunity() {
         .single();
 
       if (error) throw error;
+      if (formData.tags !== undefined) await syncTags(id, formData.tags);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["partner-opportunity"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-tags"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-tags-popular"] });
       toast({ title: "Opportunity updated successfully" });
     },
     onError: (error: any) => {
       toast({ title: "Error updating opportunity", description: error.message, variant: "destructive" });
     },
+  });
+}
+
+/** Fetch existing tags for an opportunity */
+export function usePartnerOpportunityTags(opportunityId?: number) {
+  return useQuery({
+    queryKey: ["partner-opportunity-tags", opportunityId],
+    queryFn: async () => {
+      const { data, error } = await (supabase
+        .from("opportunity_tag_map" as any)
+        .select("opportunity_tags(id, name, slug)")
+        .eq("opportunity_id", opportunityId!) as any);
+      if (error) throw error;
+      return ((data || []) as any[])
+        .map((row: any) => row.opportunity_tags?.name as string)
+        .filter(Boolean);
+    },
+    enabled: !!opportunityId,
   });
 }
