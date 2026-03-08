@@ -7,8 +7,6 @@ export interface UserDashboardStats {
   pendingApplications: number;
   approvedApplications: number;
   rejectedApplications: number;
-  draftApplications: number;
-  totalProjectsApplied: number;
 }
 
 /**
@@ -26,8 +24,6 @@ export function useUserDashboardStats() {
           pendingApplications: 0,
           approvedApplications: 0,
           rejectedApplications: 0,
-          draftApplications: 0,
-          totalProjectsApplied: 0,
         };
       }
 
@@ -40,26 +36,22 @@ export function useUserDashboardStats() {
         throw error;
       }
 
-      if (!data || data.length === 0) {
+      if (!data || (data as any[]).length === 0) {
         return {
           totalApplications: 0,
           pendingApplications: 0,
           approvedApplications: 0,
           rejectedApplications: 0,
-          draftApplications: 0,
-          totalProjectsApplied: 0,
         };
       }
 
-      const stats = data[0];
+      const stats = (data as any[])[0];
 
       return {
         totalApplications: Number(stats?.total_applications || 0),
         pendingApplications: Number(stats?.pending_applications || 0),
         approvedApplications: Number(stats?.approved_applications || 0),
         rejectedApplications: Number(stats?.rejected_applications || 0),
-        draftApplications: Number(stats?.draft_applications || 0),
-        totalProjectsApplied: Number(stats?.total_projects_applied || 0),
       };
     },
     enabled: !!user?.id,
