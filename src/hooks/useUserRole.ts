@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export type UserRole = "admin" | "reviewer" | "applicant";
+export type UserRole = "admin" | "reviewer" | "applicant" | "partner";
 
 /**
  * Lightweight hook to fetch only the user's role.

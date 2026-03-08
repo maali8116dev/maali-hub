@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface RoleBasedRouteProps {
   children: ReactNode;
-  allowedRoles?: ("admin" | "reviewer" | "applicant")[];
+  allowedRoles?: ("admin" | "reviewer" | "applicant" | "partner")[];
   redirectTo?: string;
 }
 
@@ -17,6 +17,7 @@ const getDashboardForRole = (role: string): string => {
   switch (role) {
     case "admin": return "/admin";
     case "reviewer": return "/reviewer";
+    case "partner": return "/partner";
     default: return "/dashboard";
   }
 };
@@ -72,6 +73,18 @@ const RoleBasedRoute = ({
         return pathname === "/dashboard"
           ? "/admin"
           : pathname.replace("/dashboard", "/admin");
+      }
+      if (role === "partner") {
+        return pathname === "/dashboard"
+          ? "/partner"
+          : pathname.replace("/dashboard", "/partner");
+      }
+    }
+
+    // Partner routes — only partners and admins allowed
+    if (pathname.startsWith("/partner")) {
+      if (role !== "partner" && role !== "admin") {
+        return getDashboardForRole(role);
       }
     }
 
