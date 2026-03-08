@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Trophy } from "lucide-react";
 import { usePartnerApplications, downloadApplicationsCSV } from "@/hooks/usePartnerApplications";
 import { usePartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
