@@ -54,7 +54,9 @@ type EmailType =
   | "password_reset"
   | "contact_submission"
   | "contact_confirmation"
-  | "payment_receipt";
+  | "payment_receipt"
+  | "kyc_verified"
+  | "kyc_rejected";
 
 interface SendEmailRequest {
   to: string;
@@ -82,6 +84,8 @@ interface SendEmailRequest {
     invoiceNumber?: string;
     transactionId?: string;
     invoicePdfUrl?: string | null;
+    // KYC fields
+    rejectionReason?: string;
   };
 }
 
@@ -753,6 +757,48 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
             ${submissionId ? `<p>Submission ID: <strong>${submissionId}</strong></p>` : ''}
             <p>Please respond to this inquiry within 24 hours.</p>
             <p>Best regards,<br>Maali Contact System</p>
+          `
+        ),
+        attachmentUrl: null,
+      };
+    }
+
+    case "kyc_verified":
+      return {
+        subject: "Identity Verification Approved - Maali",
+        html: emailTemplate(
+          "Identity Verification Approved",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>We are pleased to inform you that your identity verification (KYC) has been <span class="status-badge status-approved">Verified</span>.</p>
+            <p>Your account is now fully verified and you can access all features of the platform.</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Go to Dashboard</a></div>` : ''}
+            <p>Thank you for completing the verification process.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+        attachmentUrl: null,
+      };
+
+    case "kyc_rejected": {
+      const rejectionReason = data.rejectionReason ? escapeHtml(data.rejectionReason) : undefined;
+      return {
+        subject: "Identity Verification Update - Maali",
+        html: emailTemplate(
+          "Identity Verification Not Approved",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>Unfortunately, your identity verification (KYC) has been <span class="status-badge status-rejected">Rejected</span>.</p>
+            ${rejectionReason ? `
+              <div style="background-color:#fef2f2;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #fecaca;">
+                <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#991b1b;">Reason for rejection:</p>
+                <p style="margin:0;font-size:14px;color:#7f1d1d;">${rejectionReason}</p>
+              </div>
+            ` : ''}
+            <p>You can update your documents and resubmit your verification at any time.</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Resubmit Verification</a></div>` : ''}
+            <p>If you believe this was an error, please contact our support team.</p>
+            <p>Best regards,<br>The Maali Team</p>
           `
         ),
         attachmentUrl: null,
