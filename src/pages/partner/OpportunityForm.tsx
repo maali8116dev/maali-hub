@@ -22,12 +22,12 @@ const schema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
-  applicationFee: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().min(0).optional()),
   maxApplicants: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().positive().optional()),
   currency: z.string().optional(),
   country: z.string().optional(),
   organizationName: z.string().optional(),
   categoryId: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().optional()),
+  opportunityType: z.enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"]).default("grant"),
 });
 
 type FormValues = z.infer<typeof schema>;
