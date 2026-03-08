@@ -82,12 +82,12 @@ const PartnerOpportunityForm = () => {
       location: data.location,
       requirements: data.requirements,
       eligibilityCriteria: data.eligibilityCriteria,
-      applicationFee: data.applicationFee,
       maxApplicants: data.maxApplicants,
       currency: data.currency,
       country: data.country,
       organizationName: data.organizationName,
       categoryId: data.categoryId,
+      opportunityType: data.opportunityType,
     };
 
     if (isEditing && opportunityId) {
