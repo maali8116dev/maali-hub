@@ -140,7 +140,7 @@ const Opportunities = () => {
       setSelectedTag(null);
     } else {
       setSelectedTag(tagName);
-      setSelectedCategory(null); // clear category when tag is selected
+      setSelectedSector(null); // clear sector when tag is selected
       setCurrentPage(1);
     }
   };
