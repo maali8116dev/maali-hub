@@ -78,7 +78,7 @@ describe('useApplications', () => {
 
     expect(result.current.data).toBeDefined();
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].projectTitle).toBe('AgriTech Innovation Fund');
+    expect(result.current.data?.[0].opportunityTitle).toBe('AgriTech Innovation Fund');
     expect(result.current.data?.[0].contactEmail).toBe('john@tech.com');
     expect(result.current.data?.[0].status).toBe('pending');
   });
