@@ -222,9 +222,9 @@ export function useOpportunityTags() {
  * Direct Supabase query for locations (regions)
  */
 async function fetchLocationsDirect(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
-    .select("location");
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
+    .select("location") as any);
 
   if (error) throw error;
 
