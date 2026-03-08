@@ -35,8 +35,8 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
         throw new Error(`Invalid opportunity ID: ${opportunityId}`);
       }
 
-      const { data, error } = await supabase
-        .from("opportunities")
+      const { data, error } = await (supabase
+        .from("opportunities" as any)
         .select(`
           *,
           tags:opportunity_tag_map(
@@ -44,7 +44,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
           )
         `)
         .eq("id", opportunityIdNum)
-        .single();
+        .single() as any);
 
       if (error) {
         console.error("Error fetching opportunity:", {
