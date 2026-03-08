@@ -68,6 +68,7 @@ const PartnerForm = () => {
       display_order: 0,
       featured: false,
       status: "active",
+      user_id: "",
     },
   });
 
