@@ -197,10 +197,10 @@ export function useOpportunityTags() {
   return useQuery({
     queryKey: ["opportunity-tags"],
     queryFn: async (): Promise<OpportunityTag[]> => {
-      const { data, error } = await supabase
-        .from("opportunity_tags")
+      const { data, error } = await (supabase
+        .from("opportunity_tags" as any)
         .select("id, name, slug")
-        .order("name", { ascending: true });
+        .order("name", { ascending: true }) as any);
 
       if (error) throw error;
 
@@ -222,9 +222,9 @@ export function useOpportunityTags() {
  * Direct Supabase query for locations (regions)
  */
 async function fetchLocationsDirect(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
-    .select("location");
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
+    .select("location") as any);
 
   if (error) throw error;
 
@@ -254,10 +254,10 @@ export function useOpportunityLocations() {
  * Direct Supabase query for countries
  */
 async function fetchCountriesDirect(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
     .select("country")
-    .not("country", "is", null);
+    .not("country", "is", null) as any);
 
   if (error) throw error;
 
@@ -287,8 +287,8 @@ export function useOpportunityCountries() {
  * Direct Supabase query for featured opportunities
  */
 async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
     .select(`
       *,
       tags:opportunity_tag_map(
@@ -298,7 +298,7 @@ async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
     .eq("featured", true)
     .neq("status", "closed")
     .order("created_at", { ascending: false })
-    .limit(6);
+    .limit(6) as any);
 
   if (error) throw error;
 

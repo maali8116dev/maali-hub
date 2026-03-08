@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { useAuth } from '@/hooks/useAuth';
-import { useProjects } from '@/hooks/useProjects';
+import { useOpportunities } from '@/hooks/useOpportunities';
 import { supabase } from '@/integrations/supabase/client';
 import { useDocumentUpload } from '@/hooks/useDocumentUpload';
 import { useApplicationFormStore } from '@/stores/applicationForm';
@@ -205,10 +205,10 @@ export const setupMocks = () => {
   // Mock useAuth
   (useAuth as any).mockReturnValue({ user: mockUser });
 
-  // Mock useProjects with correct paginated structure
-  (useProjects as any).mockReturnValue({
+  // Mock useOpportunities with correct paginated structure
+  (useOpportunities as any).mockReturnValue({
     data: {
-      projects: [mockProject],
+      opportunities: [mockProject],
       total: 1,
       page: 1,
       itemsPerPage: 9,

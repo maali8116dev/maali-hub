@@ -299,7 +299,7 @@ const ApplicationDetails = () => {
               </Button>
               {application.status === "draft" && (
                 isProjectOpen(application.project?.status, application.project?.deadline) ? (
-                  <Link to={`/opportunities/${application.opportunity_id}/apply`} className="w-full block">
+                  <Link to={`/opportunities/${application.project_id}/apply`} className="w-full block">
                     <Button className="w-full min-h-[44px]">
                       Continue Application
                     </Button>

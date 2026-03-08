@@ -314,9 +314,9 @@ describe('useApplications - Integration Tests', () => {
       if (ourApplications.length > 0) {
         // All applications should have project titles (not "Unknown Project")
         ourApplications.forEach((app) => {
-          expect(app.projectTitle).not.toBe('Unknown Project');
-          expect(app.projectTitle).toBeDefined();
-          expect(app.projectId).toBeDefined();
+          expect(app.opportunityTitle).not.toBe('Unknown Opportunity');
+          expect(app.opportunityTitle).toBeDefined();
+          expect(app.opportunityId).toBeDefined();
           expect(app.sector).toBeDefined();
         });
       }
@@ -341,7 +341,7 @@ describe('useApplications - Integration Tests', () => {
       // Find the application with under_review status (should map to pending)
       const underReviewApp = ourApplications.find(app => 
         app.status === 'pending' && 
-        (app.projectTitle.includes('Project 2') || app.contactEmail.includes('int-applicant'))
+        (app.opportunityTitle.includes('Project 2') || app.contactEmail.includes('int-applicant'))
       );
 
       // If we found it, verify it was mapped correctly

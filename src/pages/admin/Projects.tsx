@@ -38,7 +38,7 @@ const AdminProjects = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("applications")
-        .select("opportunity_id")
+        .select("project_id")
         .eq("status", "approved")
         .eq("is_draft", false);
 
@@ -46,7 +46,7 @@ const AdminProjects = () => {
 
       // Get unique opportunity IDs that have approved applications
       const opportunityIdsWithWinners = new Set(
-        (data || []).map((app) => app.opportunity_id)
+        (data || []).map((app: any) => app.project_id)
       );
 
       return Array.from(opportunityIdsWithWinners) as number[];

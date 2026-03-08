@@ -6,7 +6,7 @@ import { FileText, Calendar, MapPin, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ApplicationListSkeleton } from "@/components/ui/skeletons";
-import { useApplications, type ApplicationWithProject } from "@/hooks/useApplications";
+import { useApplications, type ApplicationWithOpportunity } from "@/hooks/useApplications";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
@@ -35,12 +35,12 @@ const Applications = () => {
   // Define columns for the applications table
   const applicationColumns: ColumnDef<ApplicationWithOpportunity>[] = useMemo(() => [
     {
-      accessorKey: 'projectTitle',
+      accessorKey: 'opportunityTitle',
       header: ({ column }) => (
         <SortableColumnHeader column={column} title={t('dashboard:applications.columns.project')} />
       ),
       cell: ({ row }) => {
-        return <span className="font-medium">{row.original.projectTitle}</span>;
+        return <span className="font-medium">{row.original.opportunityTitle}</span>;
       },
     },
     {
@@ -130,7 +130,7 @@ const Applications = () => {
         const app = row.original;
         if (app.status === "draft") {
           return (
-            app.isProjectOpen ? (
+            app.isOpportunityOpen ? (
               <Link to={`/opportunities/${app.opportunityId}/apply`}>
                 <Button variant="outline" size="sm">
                   {t('dashboard:applications.actions.continueApplication')}

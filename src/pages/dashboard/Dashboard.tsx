@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
-import { useApplications, ApplicationWithProject } from "@/hooks/useApplications";
+import { useApplications, type ApplicationWithOpportunity } from "@/hooks/useApplications";
 import { useUserDashboardStats } from "@/hooks/useUserDashboardStats";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
@@ -329,13 +329,13 @@ const Dashboard = () => {
             <ApplicationListSkeleton count={3} />
           ) : recentApplications.length > 0 ? (
             <div className="space-y-3 sm:space-y-4">
-              {recentApplications.map((app: ApplicationWithProject) => (
+              {recentApplications.map((app: ApplicationWithOpportunity) => (
                 <div
                   key={app.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors gap-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{app.projectTitle}</h3>
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{app.opportunityTitle}</h3>
                     <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="truncate">{app.sector}</span>
                       <span className="hidden sm:inline">•</span>

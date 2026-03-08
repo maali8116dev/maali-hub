@@ -35,8 +35,8 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
         throw new Error(`Invalid opportunity ID: ${opportunityId}`);
       }
 
-      const { data, error } = await supabase
-        .from("opportunities")
+      const { data, error } = await (supabase
+        .from("opportunities" as any)
         .select(`
           *,
           tags:opportunity_tag_map(
@@ -44,7 +44,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
           )
         `)
         .eq("id", opportunityIdNum)
-        .single();
+        .single() as any);
 
       if (error) {
         console.error("Error fetching opportunity:", {
@@ -66,16 +66,16 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       
       if (!data) {
         // Log available opportunities for debugging
-        const { data: allOpportunities } = await supabase
-          .from("opportunities")
+        const { data: allOpportunities } = await (supabase
+          .from("opportunities" as any)
           .select("id, title")
-          .limit(10);
-        console.warn("Opportunity not found. Available opportunity IDs:", allOpportunities?.map(o => o.id) || []);
+          .limit(10) as any);
+        console.warn("Opportunity not found. Available opportunity IDs:", (allOpportunities as any[])?.map((o: any) => o.id) || []);
         throw new Error(`Opportunity with ID ${opportunityIdNum} not found`);
       }
       
       // Transform the nested structure
-      const tags = (data.tags || []).map((t: any) => t.tag).filter(Boolean);
+      const tags = ((data as any).tags || []).map((t: any) => t.tag).filter(Boolean);
       
       // Transform snake_case to camelCase and add tags
       return {
@@ -99,15 +99,15 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
     queryKey: ["user-opportunity-application", user?.id, opportunityId],
     queryFn: async () => {
       if (!user || !opportunityId) return null;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("applications")
         .select("id, status, is_draft")
         .eq("user_id", user.id)
-        .eq("opportunity_id", parseInt(opportunityId))
+        .eq("project_id", parseInt(opportunityId))
         .eq("is_draft", false)
         .order("created_at", { ascending: false })
         .limit(1)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (error) {
         console.error("Error checking existing application:", error);

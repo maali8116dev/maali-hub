@@ -21,7 +21,7 @@ const testTXT = () => loadTestFile('text-document.txt', 'text/plain');
 
 // Mock dependencies
 vi.mock('@/hooks/useAuth');
-vi.mock('@/hooks/useProjects');
+vi.mock('@/hooks/useOpportunities');
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
