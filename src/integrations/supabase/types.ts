@@ -1828,6 +1828,22 @@ export type Database = {
         }
         Returns: Json
       }
+      get_partner_opportunity_applications_ranked: {
+        Args: { p_opportunity_id: number }
+        Returns: {
+          applicant_email: string
+          applicant_name: string
+          application_id: string
+          average_score: number
+          organization_name: string
+          project_title: string
+          rank_position: number
+          score_variance: number
+          status: string
+          submitted_at: string
+          total_reviews: number
+        }[]
+      }
       get_project_applications_ranked: {
         Args: { p_project_id: number }
         Returns: {

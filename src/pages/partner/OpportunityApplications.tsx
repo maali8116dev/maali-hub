@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Trophy } from "lucide-react";
 import { usePartnerApplications, downloadApplicationsCSV } from "@/hooks/usePartnerApplications";
 import { usePartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -29,16 +29,25 @@ const PartnerOpportunityApplications = () => {
           <h1 className="text-2xl font-bold">Applications</h1>
           <p className="text-muted-foreground">{opportunity?.title || "Loading..."}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => navigate(`/partner/opportunities/${id}/qualified`)}
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            Qualified Applicants
+          </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => downloadApplicationsCSV(applications, `applications-opportunity-${id}.csv`)}
             disabled={applications.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/partner/opportunities")}>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/partner/opportunities")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
