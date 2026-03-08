@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardStatsSkeleton, ApplicationListSkeleton } from "@/components/ui/skeletons";
-import { useApplications, ApplicationWithProject } from "@/hooks/useApplications";
+import { useApplications, type ApplicationWithOpportunity } from "@/hooks/useApplications";
 import { useUserDashboardStats } from "@/hooks/useUserDashboardStats";
 import { useProfile } from "@/hooks/useProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
