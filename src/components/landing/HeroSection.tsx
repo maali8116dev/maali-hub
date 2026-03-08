@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
-import heroImage from "@/assets/hero-agriculture.jpg";
+const heroImage = "/images/hero-agriculture.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
