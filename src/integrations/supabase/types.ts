@@ -863,6 +863,7 @@ export type Database = {
           name: string
           status: string
           updated_at: string
+          user_id: string | null
           website_url: string | null
         }
         Insert: {
@@ -877,6 +878,7 @@ export type Database = {
           name: string
           status?: string
           updated_at?: string
+          user_id?: string | null
           website_url?: string | null
         }
         Update: {
@@ -891,6 +893,7 @@ export type Database = {
           name?: string
           status?: string
           updated_at?: string
+          user_id?: string | null
           website_url?: string | null
         }
         Relationships: []

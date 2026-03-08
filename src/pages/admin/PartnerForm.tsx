@@ -25,9 +25,16 @@ const partnerSchema = z.object({
   display_order: z.number().int().min(0),
   featured: z.boolean(),
   status: z.enum(["active", "inactive"]),
+  user_id: z.string().optional().or(z.literal("")),
 });
 
 type PartnerFormValues = z.infer<typeof partnerSchema>;
+
+type PartnerUser = {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+};
 
 const PartnerForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +44,7 @@ const PartnerForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(isEditing);
   const [oldLogoUrl, setOldLogoUrl] = useState<string | null>(null);
+  const [partnerUsers, setPartnerUsers] = useState<PartnerUser[]>([]);
 
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "partner-logos",
@@ -60,14 +68,25 @@ const PartnerForm = () => {
       display_order: 0,
       featured: false,
       status: "active",
+      user_id: "",
     },
   });
 
   useEffect(() => {
+    fetchPartnerUsers();
     if (isEditing && id) {
       fetchPartner();
     }
   }, [id, isEditing]);
+
+  const fetchPartnerUsers = async () => {
+    // Get all users with partner role
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name")
+      .eq("role", "partner");
+    if (data) setPartnerUsers(data);
+  };
 
   const fetchPartner = async () => {
     try {
@@ -87,9 +106,10 @@ const PartnerForm = () => {
         setOldLogoUrl(data.logo_url);
         setValue("website_url", data.website_url || "");
         setValue("category", data.category);
-        setValue("display_order", data.display_order);
-        setValue("featured", data.featured);
+        setValue("display_order", data.display_order ?? 0);
+        setValue("featured", data.featured ?? false);
         setValue("status", data.status as PartnerFormValues["status"]);
+        setValue("user_id", (data as any).user_id || "");
       }
     } catch (error: any) {
       toast({
@@ -120,6 +140,7 @@ const PartnerForm = () => {
         display_order: data.display_order,
         featured: data.featured,
         status: data.status,
+        user_id: data.user_id || null,
       };
 
       if (isEditing && id) {
@@ -349,6 +370,35 @@ const PartnerForm = () => {
                     onCheckedChange={(checked) => setValue("featured", checked)}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Linked User Account */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Linked User Account</CardTitle>
+                <CardDescription>Link this partner org to a user with the partner role</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={watch("user_id") || ""}
+                  onValueChange={(value) => setValue("user_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a partner user..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No linked user</SelectItem>
+                    {partnerUsers.map((u) => (
+                      <SelectItem key={u.user_id} value={u.user_id}>
+                        {u.first_name || ""} {u.last_name || ""} ({u.user_id.slice(0, 8)}...)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Only users with the "partner" role are shown. Assign the partner role first via Users management.
+                </p>
               </CardContent>
             </Card>
 

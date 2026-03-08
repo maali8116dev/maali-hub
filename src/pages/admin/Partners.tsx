@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ExternalLink, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -28,8 +28,15 @@ type Partner = {
   display_order: number;
   featured: boolean;
   status: string;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type PartnerProfile = {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
 };
 
 const AdminPartners = () => {
@@ -39,6 +46,7 @@ const AdminPartners = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState<number | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [partnerProfiles, setPartnerProfiles] = useState<Record<string, PartnerProfile>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +63,22 @@ const AdminPartners = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setPartners(data || []);
+      const partnerList = (data || []) as Partner[];
+      setPartners(partnerList);
+
+      // Fetch profiles for linked users
+      const userIds = partnerList.map(p => p.user_id).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", userIds);
+        if (profiles) {
+          const map: Record<string, PartnerProfile> = {};
+          profiles.forEach(p => { map[p.user_id] = p; });
+          setPartnerProfiles(map);
+        }
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -218,6 +241,17 @@ const AdminPartners = () => {
                     )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span>Order: {partner.display_order}</span>
+                      {partner.user_id && partnerProfiles[partner.user_id] ? (
+                        <span className="flex items-center gap-1 text-primary">
+                          <User className="h-3 w-3" />
+                          {partnerProfiles[partner.user_id].first_name || ""} {partnerProfiles[partner.user_id].last_name || ""} (Linked)
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-muted-foreground/60">
+                          <User className="h-3 w-3" />
+                          No user linked
+                        </span>
+                      )}
                       {partner.website_url && (
                         <a
                           href={partner.website_url}
