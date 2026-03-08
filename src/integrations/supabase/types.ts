@@ -672,6 +672,164 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          application_fee: number | null
+          category_id: number | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          current_applicants: number | null
+          deadline: string
+          description: string
+          eligibility_criteria: string | null
+          end_date: string | null
+          experience_level:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured: boolean
+          funding_amount: string
+          funding_type: Database["public"]["Enums"]["funding_type"] | null
+          id: number
+          image_url: string | null
+          location: string
+          max_applicants: number | null
+          opportunity_type: Database["public"]["Enums"]["opportunity_type"]
+          organization_name: string | null
+          program_format: Database["public"]["Enums"]["program_format"] | null
+          requirements: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_fee?: number | null
+          category_id?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_applicants?: number | null
+          deadline: string
+          description: string
+          eligibility_criteria?: string | null
+          end_date?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured?: boolean
+          funding_amount: string
+          funding_type?: Database["public"]["Enums"]["funding_type"] | null
+          id?: number
+          image_url?: string | null
+          location: string
+          max_applicants?: number | null
+          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
+          organization_name?: string | null
+          program_format?: Database["public"]["Enums"]["program_format"] | null
+          requirements?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_fee?: number | null
+          category_id?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          current_applicants?: number | null
+          deadline?: string
+          description?: string
+          eligibility_criteria?: string | null
+          end_date?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured?: boolean
+          funding_amount?: string
+          funding_type?: Database["public"]["Enums"]["funding_type"] | null
+          id?: number
+          image_url?: string | null
+          location?: string
+          max_applicants?: number | null
+          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
+          organization_name?: string | null
+          program_format?: Database["public"]["Enums"]["program_format"] | null
+          requirements?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_tag_map: {
+        Row: {
+          id: number
+          opportunity_id: number
+          tag_id: number
+        }
+        Insert: {
+          id?: number
+          opportunity_id: number
+          tag_id: number
+        }
+        Update: {
+          id?: number
+          opportunity_id?: number
+          tag_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_tag_map_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_tag_map_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_tags: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           category: string
@@ -1580,6 +1738,27 @@ export type Database = {
           total_transactions: number
         }[]
       }
+      get_opportunities_with_filters: {
+        Args: {
+          p_country?: string
+          p_experience_level?: string
+          p_funding_type?: string
+          p_location?: string
+          p_opportunity_type?: string
+          p_page?: number
+          p_page_size?: number
+          p_program_format?: string
+          p_search?: string
+          p_status?: string
+          p_tags?: string[]
+        }
+        Returns: {
+          opportunities: Json
+          page: number
+          total_count: number
+          total_pages: number
+        }[]
+      }
       get_project_applications_ranked: {
         Args: { p_project_id: number }
         Returns: {
@@ -1677,6 +1856,10 @@ export type Database = {
         Args: { p_version_id: string }
         Returns: Json
       }
+      get_user_applications_with_opportunities: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_user_applications_with_projects: {
         Args: { p_user_id: string }
         Returns: {
@@ -1688,11 +1871,9 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           approved_applications: number
-          draft_applications: number
           pending_applications: number
           rejected_applications: number
           total_applications: number
-          total_projects_applied: number
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
@@ -1721,6 +1902,34 @@ export type Database = {
       }
     }
     Enums: {
+      experience_level:
+        | "student"
+        | "undergraduate"
+        | "graduate"
+        | "early_career"
+        | "mid_career"
+        | "startup_founder"
+        | "researcher"
+        | "professional"
+      funding_type:
+        | "fully_funded"
+        | "partially_funded"
+        | "stipend"
+        | "no_funding"
+        | "equity"
+        | "paid"
+        | "unpaid"
+      opportunity_type:
+        | "grant"
+        | "fellowship"
+        | "scholarship"
+        | "internship"
+        | "training"
+        | "competition"
+        | "accelerator"
+        | "incubator"
+        | "job"
+      program_format: "online" | "in_person" | "hybrid"
       user_role: "admin" | "reviewer" | "applicant"
     }
     CompositeTypes: {
@@ -1849,6 +2058,37 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      experience_level: [
+        "student",
+        "undergraduate",
+        "graduate",
+        "early_career",
+        "mid_career",
+        "startup_founder",
+        "researcher",
+        "professional",
+      ],
+      funding_type: [
+        "fully_funded",
+        "partially_funded",
+        "stipend",
+        "no_funding",
+        "equity",
+        "paid",
+        "unpaid",
+      ],
+      opportunity_type: [
+        "grant",
+        "fellowship",
+        "scholarship",
+        "internship",
+        "training",
+        "competition",
+        "accelerator",
+        "incubator",
+        "job",
+      ],
+      program_format: ["online", "in_person", "hybrid"],
       user_role: ["admin", "reviewer", "applicant"],
     },
   },
