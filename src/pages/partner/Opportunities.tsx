@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePartnerOpportunities } from "@/hooks/usePartnerOpportunities";
+import { InAppTip } from "@/components/onboarding/InAppTip";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
@@ -34,15 +35,24 @@ const PartnerOpportunities = () => {
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading opportunities...</div>
       ) : opportunities.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground mb-4">You haven't created any opportunities yet.</p>
-            <Button onClick={() => navigate("/partner/opportunities/new")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Opportunity
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <InAppTip
+            id="partner-empty-opportunities"
+            title="Create your first opportunity"
+            description="Opportunities are how you attract and collect applications from qualified candidates. Create one to get started!"
+            type="tip"
+            dismissible={false}
+          />
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <p className="text-muted-foreground mb-4">You haven't created any opportunities yet.</p>
+              <Button onClick={() => navigate("/partner/opportunities/new")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Your First Opportunity
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       ) : (
         <div className="grid gap-4">
           {opportunities.map((opp) => (
