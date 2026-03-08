@@ -247,6 +247,51 @@ describe('Email Sending - Real Integration Tests', () => {
     console.log('   Check your inbox for the status update notification!');
   }, { timeout: 30000 });
 
+  it('should send a KYC verified email', async () => {
+    if (!testUser) {
+      console.warn('Skipping test: No authenticated test user');
+      return;
+    }
+
+    const result = await sendEmailDirect({
+      to: TEST_EMAIL_RECIPIENT,
+      type: 'kyc_verified',
+      data: {
+        recipientName: 'Test User',
+        actionUrl: 'https://example.com/dashboard',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.error).toBeUndefined();
+
+    console.log(`✅ KYC verified email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log('   Check your inbox for the KYC verification approval!');
+  }, { timeout: 30000 });
+
+  it('should send a KYC rejected email with reason', async () => {
+    if (!testUser) {
+      console.warn('Skipping test: No authenticated test user');
+      return;
+    }
+
+    const result = await sendEmailDirect({
+      to: TEST_EMAIL_RECIPIENT,
+      type: 'kyc_rejected',
+      data: {
+        recipientName: 'Test User',
+        rejectionReason: 'The submitted ID document was blurry and unreadable. Please resubmit a clear photo.',
+        actionUrl: 'https://example.com/dashboard/profile',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.error).toBeUndefined();
+
+    console.log(`✅ KYC rejected email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log('   Check your inbox for the KYC rejection notification!');
+  }, { timeout: 30000 });
+
   it('should handle email sending errors gracefully', async () => {
     if (!testUser) {
       console.warn('Skipping test: No authenticated test user');
