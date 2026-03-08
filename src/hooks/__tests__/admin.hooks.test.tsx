@@ -230,7 +230,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
         user_id: ud.user.id, first_name: `Applicant${i}`, last_name: 'Test', role: 'applicant',
       }, { onConflict: 'user_id' });
 
-      const { data: appData } = await supabaseAdmin.from('applications').insert({
+      const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
         user_id: ud.user.id, project_id: testProjectId, contact_email: email,
         organization_name: `Company ${i}`, status: i === 0 ? 'pending' : 'approved',
         is_draft: false,
