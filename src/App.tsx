@@ -99,9 +99,9 @@ const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"
 // Lazy-loaded partner pages
 const PartnerLayout = lazy(() => import("@/components/partner/PartnerLayout"));
 const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
-const PartnerProjects = lazy(() => import("./pages/partner/Projects"));
-const PartnerProjectForm = lazy(() => import("./pages/partner/ProjectForm"));
-const PartnerProjectApplications = lazy(() => import("./pages/partner/ProjectApplications"));
+const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"));
+const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
+const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
 
 // Test page
