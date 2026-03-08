@@ -901,6 +901,41 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_users: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string
+          partner_id: number
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          partner_id: number
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          partner_id?: number
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_users_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           category: string
