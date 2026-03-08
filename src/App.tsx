@@ -709,48 +709,48 @@ const App = () => {
             }
           />
           <Route
-            path="/partner/projects"
+            path="/partner/opportunities"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjects />
+                  <PartnerOpportunities />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/new"
+            path="/partner/opportunities/new"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectForm />
+                  <PartnerOpportunityForm />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/:id/edit"
+            path="/partner/opportunities/:id/edit"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectForm />
+                  <PartnerOpportunityForm />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/:id/applications"
+            path="/partner/opportunities/:id/applications"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectApplications />
+                  <PartnerOpportunityApplications />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
