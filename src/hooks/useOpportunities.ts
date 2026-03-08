@@ -142,7 +142,9 @@ async function fetchOpportunitiesDirect(filters?: {
 
   if (error) throw error;
 
-  if (!rpcData || rpcData.length === 0) {
+  // RPC now returns a single JSON object (not an array)
+  const result = rpcData as any;
+  if (!result || !result.opportunities) {
     return {
       opportunities: [],
       total: 0,
@@ -152,7 +154,6 @@ async function fetchOpportunitiesDirect(filters?: {
     };
   }
 
-  const result = rpcData[0];
   const opportunities = (result.opportunities || []) as any[];
 
   return {
