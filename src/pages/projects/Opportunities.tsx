@@ -25,7 +25,7 @@ import {
 import { Search, X, Tag } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
-import { useOpportunities, useOpportunityTags, useOpportunityLocations } from "@/hooks/useOpportunities";
+import { useOpportunities, useOpportunityTags, useOpportunityLocations, usePopularTags } from "@/hooks/useOpportunities";
 import { useActivePartners } from "@/hooks/usePartners";
 import ProjectCard from "@/components/landing/ProjectCard";
 import { cn } from "@/lib/utils";
