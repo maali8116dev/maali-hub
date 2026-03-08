@@ -34,11 +34,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-// Dummy tags to supplement DB tags and fill the cloud
-const DUMMY_TAGS = [
-  "Women-led", "Youth", "Rural", "Urban", "Cross-border",
-  "Social Impact", "Sustainability", "Innovation", "Digital",
-  "Capacity Building", "Research", "Community", "Pan-African",
+// Fallback tags shown when DB has fewer than the limit
+const FALLBACK_TAGS = [
+  "Women-led", "Youth", "Rural", "Social Impact",
+  "Sustainability", "Innovation", "Digital", "Community",
 ];
 
 const Opportunities = () => {
