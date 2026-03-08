@@ -5,7 +5,7 @@ import { setupMocks, mockProject, populateFormStore, defaultApplicationPayload, 
 
 // Mock dependencies
 vi.mock('@/hooks/useAuth');
-vi.mock('@/hooks/useProjects');
+vi.mock('@/hooks/useOpportunities');
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(),
