@@ -50,6 +50,7 @@ const PartnerOpportunityForm = () => {
 
   const status = watch("status");
   const categoryId = watch("categoryId");
+  const opportunityType = watch("opportunityType");
 
   useEffect(() => {
     if (opportunity && isEditing) {
