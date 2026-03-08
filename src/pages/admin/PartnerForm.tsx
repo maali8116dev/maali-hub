@@ -25,9 +25,16 @@ const partnerSchema = z.object({
   display_order: z.number().int().min(0),
   featured: z.boolean(),
   status: z.enum(["active", "inactive"]),
+  user_id: z.string().optional().or(z.literal("")),
 });
 
 type PartnerFormValues = z.infer<typeof partnerSchema>;
+
+type PartnerUser = {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+};
 
 const PartnerForm = () => {
   const { id } = useParams<{ id: string }>();
