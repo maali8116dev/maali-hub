@@ -224,23 +224,23 @@ const Opportunities = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-4 items-end">
-                {/* Category Filter */}
+                {/* Sector Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="category-filter" className="mb-2 block">Category</Label>
+                  <Label htmlFor="sector-filter" className="mb-2 block">Sector</Label>
                   <Select
-                    value={selectedCategory || "all"}
+                    value={selectedSector || "all"}
                     onValueChange={(value) => {
-                      setSelectedCategory(value === "all" ? null : value);
+                      setSelectedSector(value === "all" ? null : value);
                       setSelectedTag(null);
                     }}
                   >
-                    <SelectTrigger id="category-filter" className="w-full">
-                      <SelectValue placeholder="Select category" />
+                    <SelectTrigger id="sector-filter" className="w-full">
+                      <SelectValue placeholder="Select sector" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      <SelectItem value="all">All Sectors</SelectItem>
+                      {sectors.map((sector) => (
+                        <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
