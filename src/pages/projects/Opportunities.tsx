@@ -127,7 +127,7 @@ const Opportunities = () => {
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setSelectedCategory(null);
+    setSelectedSector(null);
     setSelectedStatus(null);
     setSelectedLocation(null);
     setSelectedPartner(null);
