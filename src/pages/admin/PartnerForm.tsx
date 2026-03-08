@@ -400,6 +400,7 @@ const PartnerForm = () => {
                   Only users with the "partner" role are shown. Assign the partner role first via Users management.
                 </p>
               </CardContent>
+            </Card>
 
             {/* Actions */}
             <Card>
