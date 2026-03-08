@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface RoleBasedRouteProps {
   children: ReactNode;
-  allowedRoles?: ("admin" | "reviewer" | "applicant")[];
+  allowedRoles?: ("admin" | "reviewer" | "applicant" | "partner")[];
   redirectTo?: string;
 }
 
