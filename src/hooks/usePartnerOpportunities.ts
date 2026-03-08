@@ -36,7 +36,6 @@ export type PartnerOpportunityFormData = {
   imageUrl?: string;
   requirements?: string;
   eligibilityCriteria?: string;
-  applicationFee?: number;
   maxApplicants?: number;
   currency?: string;
   opportunityType?: string;
