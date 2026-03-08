@@ -287,7 +287,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     if (!supabaseAdmin) return;
 
     // Insert a draft
-    const { data: draftApp } = await supabaseAdmin.from('applications').insert({
+    const { data: draftApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0], project_id: testProjectId,
       contact_email: 'draft@test.com', status: 'pending', is_draft: true,
     }).select('id').single();

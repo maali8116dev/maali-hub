@@ -287,7 +287,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
     await supabaseAdmin.from('profiles').upsert({ user_id: testApplicantId, first_name: 'T', last_name: 'A', role: 'applicant' }, { onConflict: 'user_id' });
 
     // Application
-    const { data: app } = await supabaseAdmin.from('applications').insert({
+    const { data: app } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testApplicantId, project_id: testProjectId, contact_email: aEmail,
       company_name: 'Test', status: 'pending', is_draft: false,
     }).select('id').single();

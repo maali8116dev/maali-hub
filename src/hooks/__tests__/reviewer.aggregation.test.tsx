@@ -381,7 +381,7 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
     if (!supabaseAdmin) return;
 
     // Create a new application with no reviews (use admin client to bypass RLS)
-    const { data: app2, error: insertError } = await supabaseAdmin.from('applications').insert({
+    const { data: app2, error: insertError } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testApplicantId, project_id: testProjectId,
       contact_email: 'noreview@test.com', status: 'pending', is_draft: false,
     }).select('id').single();

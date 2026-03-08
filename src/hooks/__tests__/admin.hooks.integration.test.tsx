@@ -218,7 +218,7 @@ describe('useAdminApplications — real user flow', () => {
   it('drafts never appear in the admin list', async () => {
     if (!supabaseAdmin) return;
 
-    const { data: draft } = await supabaseAdmin.from('applications').insert({
+    const { data: draft } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
       project_id: testProjectId,
       contact_email: 'draft@test.com',
