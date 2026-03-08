@@ -194,7 +194,7 @@ describe('useAdminApplications — real user flow', () => {
     if (!supabaseAdmin) return;
 
     // Insert an under_review application
-    const { data: urApp } = await supabaseAdmin.from('applications').insert({
+    const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
       project_id: testProjectId,
       contact_email: 'underreview@test.com',
