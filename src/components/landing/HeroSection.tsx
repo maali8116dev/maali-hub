@@ -31,12 +31,13 @@ const HeroSection = () => {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image with Parallax Effect */}
       <div className="absolute inset-0 z-0 bg-transparent">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-parallax"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            transform: 'scale(1.1)', // Slightly larger to prevent gaps during animation
-          }}
+        <img 
+          src={heroImage}
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover animate-parallax"
+          style={{ transform: 'scale(1.1)' }}
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,79 +13,98 @@ import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
+
+// Critical path - eagerly loaded
 import Index from "./pages/Index";
-import Opportunities from "./pages/projects/Opportunities";
-import About from "./pages/About";
-import Resources from "./pages/Resources";
-import Contact from "./pages/Contact";
-import Auth from "./pages/Auth";
-import ProjectDetails from "./pages/projects/ProjectDetails";
-import ApplicationForm from "./pages/projects/ApplicationForm";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleBasedRoute from "@/components/RoleBasedRoute";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import AdminLayout from "@/components/admin/AdminLayout";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Applications from "./pages/dashboard/Applications";
-import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
-import Documents from "./pages/dashboard/Documents";
-import Notifications from "./pages/dashboard/Notifications";
-import Profile from "./pages/dashboard/Profile";
-import Settings from "./pages/dashboard/Settings";
-import Billing from "./pages/dashboard/Billing";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminProjects from "./pages/admin/Projects";
-import AdminApplications from "./pages/admin/Applications";
-import AdminUsers from "./pages/admin/Users";
-import AdminUserDetails from "./pages/admin/UserDetails";
-import AdminSettings from "./pages/admin/Settings";
-import AdminFinancial from "./pages/admin/Financial";
-import AdminBlog from "./pages/admin/Blog";
-import AdminBlogForm from "./pages/admin/BlogForm";
-import AdminFAQ from "./pages/admin/FAQ";
-import AdminFAQForm from "./pages/admin/FAQForm";
-import AdminMentors from "./pages/admin/Mentors";
-import AdminMentorForm from "./pages/admin/MentorForm";
-import AdminResources from "./pages/admin/Resources";
-import AdminPartners from "./pages/admin/Partners";
-import AdminPartnerForm from "./pages/admin/PartnerForm";
-import AdminSuccessStories from "./pages/admin/SuccessStories";
-import AdminSuccessStoryForm from "./pages/admin/SuccessStoryForm";
-import AdminResourceForm from "./pages/admin/ResourceForm";
-import AdminProjectForm from "./pages/admin/ProjectForm";
-import ReviewManagement from "./pages/admin/ReviewManagement";
-import { ReviewerDetails } from "./pages/admin/ReviewerDetails";
-import AdminProjectDetails from "./pages/admin/ProjectDetails";
-import ProjectApplications from "./pages/admin/ProjectApplications";
-import AdminActivityLogs from "./pages/admin/ActivityLogs";
-import AdminCategories from "./pages/admin/Categories";
-import ReviewerLayout from "@/components/reviewer/ReviewerLayout";
-import ReviewerDashboard from "./pages/reviewer/Dashboard";
-import ReviewerApplications from "./pages/reviewer/Applications";
-import ReviewApplication from "./pages/reviewer/ReviewApplication";
-import ReviewerSettings from "./pages/reviewer/Settings";
-import ReviewerNotifications from "./pages/reviewer/Notifications";
-import Apply from "./pages/Apply";
-import Partners from "./pages/Partners";
-import SuccessStories from "./pages/SuccessStories";
-import Blog from "./pages/Blog";
-import BlogDetail from "./pages/BlogDetail";
-import Help from "./pages/Help";
-import FAQ from "./pages/FAQ";
-import Mentors from "./pages/Mentors";
-import Guide from "./pages/Guide";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Cookies from "./pages/Cookies";
-import DataProtection from "./pages/DataProtection";
-import ErrorTest from "./tests/ErrorTest";
-import PaymentSuccess from "./pages/payment/PaymentSuccess";
-import PaymentCancel from "./pages/payment/PaymentCancel";
-import TestPayment from "./pages/payment/TestPayment";
-import OAuthCallback from "./pages/OAuthCallback";
+
+// Lazy-loaded public pages
+const Opportunities = lazy(() => import("./pages/projects/Opportunities"));
+const About = lazy(() => import("./pages/About"));
+const Resources = lazy(() => import("./pages/Resources"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ProjectDetails = lazy(() => import("./pages/projects/ProjectDetails"));
+const ApplicationForm = lazy(() => import("./pages/projects/ApplicationForm"));
+const Apply = lazy(() => import("./pages/Apply"));
+const Partners = lazy(() => import("./pages/Partners"));
+const SuccessStories = lazy(() => import("./pages/SuccessStories"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogDetail = lazy(() => import("./pages/BlogDetail"));
+const Help = lazy(() => import("./pages/Help"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Mentors = lazy(() => import("./pages/Mentors"));
+const Guide = lazy(() => import("./pages/Guide"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Cookies = lazy(() => import("./pages/Cookies"));
+const DataProtection = lazy(() => import("./pages/DataProtection"));
+const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
+
+// Lazy-loaded payment pages
+const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
+const TestPayment = lazy(() => import("./pages/payment/TestPayment"));
+
+// Lazy-loaded dashboard pages
+const DashboardLayout = lazy(() => import("@/components/dashboard/DashboardLayout"));
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const Applications = lazy(() => import("./pages/dashboard/Applications"));
+const ApplicationDetails = lazy(() => import("./pages/dashboard/ApplicationDetails"));
+const Documents = lazy(() => import("./pages/dashboard/Documents"));
+const Notifications = lazy(() => import("./pages/dashboard/Notifications"));
+const Profile = lazy(() => import("./pages/dashboard/Profile"));
+const Settings = lazy(() => import("./pages/dashboard/Settings"));
+const Billing = lazy(() => import("./pages/dashboard/Billing"));
+
+// Lazy-loaded admin pages
+const AdminLayout = lazy(() => import("@/components/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AdminProjects = lazy(() => import("./pages/admin/Projects"));
+const AdminApplications = lazy(() => import("./pages/admin/Applications"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminUserDetails = lazy(() => import("./pages/admin/UserDetails"));
+const AdminSettings = lazy(() => import("./pages/admin/Settings"));
+const AdminFinancial = lazy(() => import("./pages/admin/Financial"));
+const AdminBlog = lazy(() => import("./pages/admin/Blog"));
+const AdminBlogForm = lazy(() => import("./pages/admin/BlogForm"));
+const AdminFAQ = lazy(() => import("./pages/admin/FAQ"));
+const AdminFAQForm = lazy(() => import("./pages/admin/FAQForm"));
+const AdminMentors = lazy(() => import("./pages/admin/Mentors"));
+const AdminMentorForm = lazy(() => import("./pages/admin/MentorForm"));
+const AdminResources = lazy(() => import("./pages/admin/Resources"));
+const AdminPartners = lazy(() => import("./pages/admin/Partners"));
+const AdminPartnerForm = lazy(() => import("./pages/admin/PartnerForm"));
+const AdminSuccessStories = lazy(() => import("./pages/admin/SuccessStories"));
+const AdminSuccessStoryForm = lazy(() => import("./pages/admin/SuccessStoryForm"));
+const AdminResourceForm = lazy(() => import("./pages/admin/ResourceForm"));
+const AdminProjectForm = lazy(() => import("./pages/admin/ProjectForm"));
+const ReviewManagement = lazy(() => import("./pages/admin/ReviewManagement"));
+const ReviewerDetails = lazy(() => import("./pages/admin/ReviewerDetails").then(m => ({ default: m.ReviewerDetails })));
+const AdminProjectDetails = lazy(() => import("./pages/admin/ProjectDetails"));
+const ProjectApplications = lazy(() => import("./pages/admin/ProjectApplications"));
+const AdminActivityLogs = lazy(() => import("./pages/admin/ActivityLogs"));
+const AdminCategories = lazy(() => import("./pages/admin/Categories"));
+
+// Lazy-loaded reviewer pages
+const ReviewerLayout = lazy(() => import("@/components/reviewer/ReviewerLayout"));
+const ReviewerDashboard = lazy(() => import("./pages/reviewer/Dashboard"));
+const ReviewerApplications = lazy(() => import("./pages/reviewer/Applications"));
+const ReviewApplication = lazy(() => import("./pages/reviewer/ReviewApplication"));
+const ReviewerSettings = lazy(() => import("./pages/reviewer/Settings"));
+const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"));
+
+// Test page
+const ErrorTest = lazy(() => import("./tests/ErrorTest"));
 
 const queryClient = new QueryClient();
+
+// Minimal loading fallback - invisible to avoid layout shift
+const PageFallback = () => (
+  <div className="min-h-screen bg-background" />
+);
 
 // Component to initialize tracking after consent
 const TrackingInitializer = () => {
@@ -130,6 +149,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <CookieConsent />
+              <Suspense fallback={<PageFallback />}>
               <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/opportunities" element={<Opportunities />} />
@@ -732,6 +752,7 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+              </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </ErrorBoundary>
