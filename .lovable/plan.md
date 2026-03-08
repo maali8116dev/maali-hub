@@ -1,147 +1,72 @@
 
-# Plan: Fix MultiStepApplicationForm Integration Test
 
-## Problem Analysis
+## Plan: Add "Partner" Role with Dedicated Portal
 
-After reviewing the test file and the component implementation, I've identified several issues causing test failures:
+### Overview
+Add a new `partner` role to the system. Partners can log in, create/manage their own projects (opportunities), view metrics about their projects, and download applications for their projects.
 
-### Issue 1: Mock `useProjects` Return Structure Mismatch
-The test mocks `useProjects` to return:
-```typescript
-{
-  data: [mockProject],
-  isLoading: false,
-  isError: false,
-}
+### 1. Database Migration
+
+**Add `partner` to the `user_role` enum:**
+```sql
+ALTER TYPE public.user_role ADD VALUE IF NOT EXISTS 'partner';
 ```
 
-However, the actual `useProjects` hook returns a paginated structure with TanStack Query:
-```typescript
-{
-  data: { projects: [...], total: number, page: number, ... },
-  isLoading: boolean,
-  isError: boolean,
-  ...
-}
-```
+**Update RLS policies on `projects` table** to allow partners to manage their own projects:
+- INSERT: `get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid()`
+- UPDATE: same pattern
+- SELECT: partners can see their own projects (already public for SELECT)
+- No DELETE for partners (admin only)
 
-### Issue 2: Missing Mock for `createNotification` Function
-The component imports and uses `createNotification` from `@/hooks/useNotifications`, but this is not mocked in the test file. This will cause runtime errors during submission tests.
+**Update RLS on `applications` table** so partners can view applications for their own projects:
+- New SELECT policy: partner role + application's `project_id` matches a project where `created_by = auth.uid()`
 
-### Issue 3: Zustand Store State Persistence Between Tests
-The `useApplicationFormStore` uses `persist` middleware which stores state in localStorage. Between tests, this state isn't being cleared, causing tests to start with unexpected initial state (wrong step number, pre-filled data, etc.).
+**Update RLS on `application_documents` table** similarly for document download access.
 
-### Issue 4: Missing `supabase.auth.getUser` Mock Return Value
-The mock for `supabase.auth.getUser` returns `vi.fn()` but doesn't specify a return value. The component calls `await supabase.auth.getUser()` and expects `{ data: { user } }`.
+### 2. Update `get_user_role` function
+No change needed -- it already returns `role::text` from profiles.
 
-### Issue 5: Incomplete Mock Chain for Supabase Queries
-The mock query chain doesn't properly handle all the chained methods used in the component, especially:
-- `.select().single()` chain (returns different from `.select()` alone)
-- The `.rpc()` method for reviewer assignment
+### 3. Frontend: Role System Updates
 
-### Issue 6: Test Relies on `getByRole('combobox', { name: /Applicant Type/i })`
-Some tests use this selector which may fail because Radix Select doesn't expose an accessible name on the trigger in the same way. The first test correctly gets all comboboxes and uses index, but later tests try to use the name selector inconsistently.
+**Files to update:**
+- `src/hooks/useUserRole.ts` -- add `"partner"` to `UserRole` type
+- `src/components/RoleBasedRoute.tsx` -- add `"partner"` to `allowedRoles` type, add `/partner` to `getDashboardForRole`, add redirect logic for `/partner` routes
 
----
+### 4. Frontend: Partner Layout & Pages
 
-## Solution
+**New files to create:**
 
-### Changes to `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
+- `src/components/partner/PartnerLayout.tsx` -- sidebar layout (modeled after ReviewerLayout) with menu items: Dashboard, Projects, Settings
+- `src/pages/partner/Dashboard.tsx` -- overview with stats (total projects, total applications, pending/approved counts)
+- `src/pages/partner/Projects.tsx` -- list of partner's own projects
+- `src/pages/partner/ProjectForm.tsx` -- create/edit project form (reuse schema from admin ProjectForm, scoped to partner's `created_by`)
+- `src/pages/partner/ProjectDetails.tsx` -- view project details + application metrics
+- `src/pages/partner/ProjectApplications.tsx` -- list applications for a project with download capability
+- `src/pages/partner/Settings.tsx` -- basic settings page
 
-1. **Add mock for `createNotification`** in the mock section:
-   ```typescript
-   vi.mock('@/hooks/useNotifications', () => ({
-     createNotification: vi.fn().mockResolvedValue(undefined),
-   }));
-   ```
+### 5. Frontend: Partner Hooks
 
-2. **Fix `useProjects` mock return structure** to match the actual hook:
-   ```typescript
-   (useProjects as any).mockReturnValue({
-     data: {
-       projects: [mockProject],
-       total: 1,
-       page: 1,
-       itemsPerPage: 9,
-       totalPages: 1,
-     },
-     isLoading: false,
-     isError: false,
-   });
-   ```
+- `src/hooks/usePartnerProjects.ts` -- fetch projects where `created_by = user.id`, plus create/update mutations
+- `src/hooks/usePartnerStats.ts` -- aggregate stats for partner's projects
+- `src/hooks/usePartnerApplications.ts` -- fetch applications for partner's projects with CSV download utility
 
-3. **Add proper `supabase.auth.getUser` mock** that returns the expected structure:
-   ```typescript
-   (supabase.auth.getUser as any).mockResolvedValue({
-     data: { user: mockUser },
-     error: null,
-   });
-   ```
+### 6. App.tsx Route Registration
 
-4. **Reset the Zustand store before each test** by adding to `beforeEach`:
-   ```typescript
-   import { useApplicationFormStore } from '@/stores/applicationForm';
+Add lazy imports and routes under `/partner/*` path, wrapped with `<RoleBasedRoute allowedRoles={["partner", "admin"]}>`.
 
-   beforeEach(() => {
-     // Clear localStorage to reset Zustand persisted state
-     localStorage.clear();
-     // Reset the store state
-     useApplicationFormStore.getState().reset();
-     // ... rest of beforeEach
-   });
-   ```
+### 7. Admin: Assign Partner Role
 
-5. **Add `rpc` method to Supabase mock**:
-   ```typescript
-   (supabase as any).rpc = vi.fn().mockResolvedValue({ data: [], error: null });
-   ```
+Update the `manage-user` edge function and admin user management UI to support assigning the `partner` role.
 
-6. **Fix inconsistent combobox selectors** - use consistent approach:
-   ```typescript
-   // Instead of: screen.getByRole('combobox', { name: /Applicant Type/i })
-   // Use: screen.getAllByRole('combobox')[0]
-   ```
+### Technical Details
 
-7. **Enhance the mock query to handle chained methods properly**:
-   ```typescript
-   const createMockQuery = () => {
-     const mockQuery = {
-       select: vi.fn().mockReturnThis(),
-       eq: vi.fn().mockReturnThis(),
-       neq: vi.fn().mockReturnThis(),
-       insert: vi.fn().mockReturnThis(),
-       update: vi.fn().mockReturnThis(),
-       delete: vi.fn().mockReturnThis(),
-       in: vi.fn().mockReturnThis(),
-       order: vi.fn().mockReturnThis(),
-       single: vi.fn().mockResolvedValue({ data: null, error: null }),
-     };
-     return mockQuery;
-   };
-   ```
+- The `projects` table already has a `created_by` column, which will be used to scope partner access
+- RLS policies use `get_user_role()` (SECURITY DEFINER, bypasses RLS) -- same pattern for partner policies
+- The `applications` table references `project_id`, enabling the join for partner access
+- CSV download for applications will be a client-side utility that fetches data and generates a downloadable file
 
----
+### Estimated Scope
+- 1 database migration (enum + RLS policies)
+- ~8 new frontend files (layout + pages + hooks)
+- ~5 existing files updated (role types, routing, edge function)
 
-## Technical Details
-
-### Files to Modify
-- `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
-
-### Key Changes Summary
-
-| Area | Current Issue | Fix |
-|------|---------------|-----|
-| useProjects mock | Returns `{ data: [project] }` | Return `{ data: { projects: [project], ... } }` |
-| createNotification | Not mocked | Add mock returning Promise |
-| Zustand store | State persists between tests | Reset store and clear localStorage in beforeEach |
-| supabase.auth.getUser | No return value | Mock to return `{ data: { user }, error: null }` |
-| supabase.rpc | Not mocked | Add rpc mock |
-| Combobox selectors | Inconsistent naming | Use getAllByRole consistently |
-
-### Testing Strategy
-After fixing, all tests should:
-1. Render the form correctly on Step 1
-2. Allow navigation through steps when filling required fields
-3. Handle document upload mocking correctly
-4. Skip payment for free projects
-5. Complete the full flow without errors
