@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { KycReviewCard } from "@/components/admin/KycReviewCard";
 import {
   AlertDialog,
   AlertDialogAction,
