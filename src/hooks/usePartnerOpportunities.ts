@@ -42,6 +42,7 @@ export type PartnerOpportunityFormData = {
   organizationName?: string;
   country?: string;
   categoryId?: number;
+  tags?: string[]; // Tag names (existing or new)
 };
 
 function transformOpportunity(data: any): PartnerOpportunity {
