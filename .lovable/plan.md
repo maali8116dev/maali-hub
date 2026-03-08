@@ -1,147 +1,67 @@
 
-# Plan: Fix MultiStepApplicationForm Integration Test
 
-## Problem Analysis
+# KYC/ID Verification on Profile -- Plan
 
-After reviewing the test file and the component implementation, I've identified several issues causing test failures:
+## Concept
 
-### Issue 1: Mock `useProjects` Return Structure Mismatch
-The test mocks `useProjects` to return:
-```typescript
-{
-  data: [mockProject],
-  isLoading: false,
-  isError: false,
-}
-```
+Move KYC from the application form to the user profile so it's done once and reused across all applications. Add a selfie upload for visual comparison against the ID document photo.
 
-However, the actual `useProjects` hook returns a paginated structure with TanStack Query:
-```typescript
-{
-  data: { projects: [...], total: number, page: number, ... },
-  isLoading: boolean,
-  isError: boolean,
-  ...
-}
-```
+## Database Changes
 
-### Issue 2: Missing Mock for `createNotification` Function
-The component imports and uses `createNotification` from `@/hooks/useNotifications`, but this is not mocked in the test file. This will cause runtime errors during submission tests.
+**New table: `kyc_verifications`**
+- `id` (uuid, PK), `user_id` (uuid, unique, references profiles), `id_type` (enum: passport, national_id, drivers_license, business_registration), `id_number` (text), `full_name_on_id` (text)
+- `id_document_url` (text -- storage path), `selfie_url` (text -- storage path)
+- `status` (enum: pending, verified, rejected, expired), `rejection_reason` (text)
+- `verified_by` (uuid), `verified_at` (timestamptz), `admin_notes` (text)
+- `created_at`, `updated_at`
+- RLS: users can insert/select/update their own (only when status is pending/rejected); admins can select/update all
 
-### Issue 3: Zustand Store State Persistence Between Tests
-The `useApplicationFormStore` uses `persist` middleware which stores state in localStorage. Between tests, this state isn't being cleared, causing tests to start with unexpected initial state (wrong step number, pre-filled data, etc.).
+**New storage bucket: `kyc-documents`** (private, not public)
+- RLS: users can upload/read files in their own folder (`user_id/`); admins can read all
 
-### Issue 4: Missing `supabase.auth.getUser` Mock Return Value
-The mock for `supabase.auth.getUser` returns `vi.fn()` but doesn't specify a return value. The component calls `await supabase.auth.getUser()` and expects `{ data: { user } }`.
+## Application Form Changes
 
-### Issue 5: Incomplete Mock Chain for Supabase Queries
-The mock query chain doesn't properly handle all the chained methods used in the component, especially:
-- `.select().single()` chain (returns different from `.select()` alone)
-- The `.rpc()` method for reviewer assignment
+- **Remove** `registrationIdNumber` field from Step 1 (`Step1ApplicantInfo.tsx`)
+- **Remove** `registrationIdNumber` from `step1Schema` in `schemas.ts`
+- Instead, show a read-only KYC status badge in Step 1 (or Step 7 Compliance) with a link to complete KYC on the profile page if not yet done
+- Optionally block submission if KYC status is not `verified` or `pending`
 
-### Issue 6: Test Relies on `getByRole('combobox', { name: /Applicant Type/i })`
-Some tests use this selector which may fail because Radix Select doesn't expose an accessible name on the trigger in the same way. The first test correctly gets all comboboxes and uses index, but later tests try to use the name selector inconsistently.
+## Profile Page Changes (`src/pages/dashboard/Profile.tsx`)
 
----
+Add a new **"Identity Verification"** card below the Personal Information card:
+- Shows current KYC status (not started, pending, verified, rejected)
+- If not started or rejected: shows a form with:
+  - **ID Type** dropdown (Passport, National ID, Driver's License, Business Registration)
+  - **ID Number** field with basic regex validation per type
+  - **Full Name as on ID** (pre-filled from profile name)
+  - **ID Document Upload** (image only: JPG/PNG, max 5MB) with preview
+  - **Selfie Upload** (image only: JPG/PNG, max 5MB) with instructions ("Take a clear photo of your face, similar to your ID photo")
+- If pending: shows submitted info (read-only) with "Pending Review" badge
+- If verified: shows green verified badge with verification date
 
-## Solution
+## Admin Verification UI
 
-### Changes to `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
+Add a **KYC Verification card** to admin user details (`src/pages/admin/UserDetails.tsx`):
+- Side-by-side display: ID document image vs selfie image
+- ID type, masked ID number, name on ID vs profile name
+- Verify / Reject buttons with notes field
+- On action, updates `kyc_verifications` status
 
-1. **Add mock for `createNotification`** in the mock section:
-   ```typescript
-   vi.mock('@/hooks/useNotifications', () => ({
-     createNotification: vi.fn().mockResolvedValue(undefined),
-   }));
-   ```
+## New Files
+- `src/hooks/useKycVerification.ts` -- CRUD hook for kyc_verifications + file upload to kyc-documents bucket
+- `src/components/profile/KycVerificationSection.tsx` -- the profile KYC form/status component
+- `src/components/admin/KycReviewCard.tsx` -- admin review card with side-by-side comparison
+- Migration SQL for table, bucket, and RLS policies
 
-2. **Fix `useProjects` mock return structure** to match the actual hook:
-   ```typescript
-   (useProjects as any).mockReturnValue({
-     data: {
-       projects: [mockProject],
-       total: 1,
-       page: 1,
-       itemsPerPage: 9,
-       totalPages: 1,
-     },
-     isLoading: false,
-     isError: false,
-   });
-   ```
+## Files to Edit
+- `src/pages/dashboard/Profile.tsx` -- add KycVerificationSection
+- `src/components/application/form/steps/Step1ApplicantInfo.tsx` -- remove registrationIdNumber, add KYC status indicator
+- `src/components/application/form/schemas.ts` -- remove registrationIdNumber from step1Schema
+- `src/pages/admin/UserDetails.tsx` -- add KycReviewCard
+- `src/integrations/supabase/types.ts` -- auto-updated after migration
 
-3. **Add proper `supabase.auth.getUser` mock** that returns the expected structure:
-   ```typescript
-   (supabase.auth.getUser as any).mockResolvedValue({
-     data: { user: mockUser },
-     error: null,
-   });
-   ```
+## Validation Logic
+- ID number format regex per type (passport: 6-9 alphanum, national ID: 5-20, etc.)
+- Name mismatch flag: compare `full_name_on_id` vs profile `first_name + last_name` (warning to admin, not blocking)
+- File restrictions: images only (JPG/PNG), max 5MB each
 
-4. **Reset the Zustand store before each test** by adding to `beforeEach`:
-   ```typescript
-   import { useApplicationFormStore } from '@/stores/applicationForm';
-
-   beforeEach(() => {
-     // Clear localStorage to reset Zustand persisted state
-     localStorage.clear();
-     // Reset the store state
-     useApplicationFormStore.getState().reset();
-     // ... rest of beforeEach
-   });
-   ```
-
-5. **Add `rpc` method to Supabase mock**:
-   ```typescript
-   (supabase as any).rpc = vi.fn().mockResolvedValue({ data: [], error: null });
-   ```
-
-6. **Fix inconsistent combobox selectors** - use consistent approach:
-   ```typescript
-   // Instead of: screen.getByRole('combobox', { name: /Applicant Type/i })
-   // Use: screen.getAllByRole('combobox')[0]
-   ```
-
-7. **Enhance the mock query to handle chained methods properly**:
-   ```typescript
-   const createMockQuery = () => {
-     const mockQuery = {
-       select: vi.fn().mockReturnThis(),
-       eq: vi.fn().mockReturnThis(),
-       neq: vi.fn().mockReturnThis(),
-       insert: vi.fn().mockReturnThis(),
-       update: vi.fn().mockReturnThis(),
-       delete: vi.fn().mockReturnThis(),
-       in: vi.fn().mockReturnThis(),
-       order: vi.fn().mockReturnThis(),
-       single: vi.fn().mockResolvedValue({ data: null, error: null }),
-     };
-     return mockQuery;
-   };
-   ```
-
----
-
-## Technical Details
-
-### Files to Modify
-- `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
-
-### Key Changes Summary
-
-| Area | Current Issue | Fix |
-|------|---------------|-----|
-| useProjects mock | Returns `{ data: [project] }` | Return `{ data: { projects: [project], ... } }` |
-| createNotification | Not mocked | Add mock returning Promise |
-| Zustand store | State persists between tests | Reset store and clear localStorage in beforeEach |
-| supabase.auth.getUser | No return value | Mock to return `{ data: { user }, error: null }` |
-| supabase.rpc | Not mocked | Add rpc mock |
-| Combobox selectors | Inconsistent naming | Use getAllByRole consistently |
-
-### Testing Strategy
-After fixing, all tests should:
-1. Render the form correctly on Step 1
-2. Allow navigation through steps when filling required fields
-3. Handle document upload mocking correctly
-4. Skip payment for free projects
-5. Complete the full flow without errors
