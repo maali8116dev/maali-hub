@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Search, Edit, Trash2, ExternalLink, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -28,8 +28,15 @@ type Partner = {
   display_order: number;
   featured: boolean;
   status: string;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type PartnerProfile = {
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
 };
 
 const AdminPartners = () => {
