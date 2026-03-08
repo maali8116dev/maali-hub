@@ -16,15 +16,15 @@ export const useUserDrafts = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("applications")
-        .select("id, project_id, opportunity_id, organization_name, updated_at")
+        .select("id, project_id, organization_name, updated_at")
         .eq("user_id", user.id)
         .eq("is_draft", true)
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false }) as any);
 
       if (error) throw error;
-      return data as Draft[];
+      return (data || []) as Draft[];
     },
   });
 };
