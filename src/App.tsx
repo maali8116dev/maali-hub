@@ -99,9 +99,9 @@ const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"
 // Lazy-loaded partner pages
 const PartnerLayout = lazy(() => import("@/components/partner/PartnerLayout"));
 const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
-const PartnerProjects = lazy(() => import("./pages/partner/Projects"));
-const PartnerProjectForm = lazy(() => import("./pages/partner/ProjectForm"));
-const PartnerProjectApplications = lazy(() => import("./pages/partner/ProjectApplications"));
+const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"));
+const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
+const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
 
 // Test page
@@ -709,48 +709,48 @@ const App = () => {
             }
           />
           <Route
-            path="/partner/projects"
+            path="/partner/opportunities"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjects />
+                  <PartnerOpportunities />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/new"
+            path="/partner/opportunities/new"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectForm />
+                  <PartnerOpportunityForm />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/:id/edit"
+            path="/partner/opportunities/:id/edit"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectForm />
+                  <PartnerOpportunityForm />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
             }
           />
           <Route
-            path="/partner/projects/:id/applications"
+            path="/partner/opportunities/:id/applications"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
-                  <PartnerProjectApplications />
+                  <PartnerOpportunityApplications />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>

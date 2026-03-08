@@ -8,25 +8,25 @@ export function usePartnerStats() {
   return useQuery({
     queryKey: ["partner-stats", user?.id],
     queryFn: async () => {
-      // Get partner's projects
-      const { data: projects, error: projError } = await supabase
-        .from("projects")
+      // Get partner's opportunities
+      const { data: opportunities, error: oppError } = await supabase
+        .from("opportunities")
         .select("id, status")
         .eq("created_by", user!.id);
 
-      if (projError) throw projError;
+      if (oppError) throw oppError;
 
-      const projectIds = (projects || []).map((p) => p.id);
+      const opportunityIds = (opportunities || []).map((o) => o.id);
 
-      if (projectIds.length === 0) {
-        return { totalProjects: 0, activeProjects: 0, totalApplications: 0, pendingApplications: 0, approvedApplications: 0 };
+      if (opportunityIds.length === 0) {
+        return { totalOpportunities: 0, activeOpportunities: 0, totalApplications: 0, pendingApplications: 0, approvedApplications: 0 };
       }
 
-      // Get applications for those projects
+      // Get applications for those opportunities
       const { data: apps, error: appError } = await supabase
         .from("applications")
-        .select("id, status, project_id")
-        .in("project_id", projectIds)
+        .select("id, status, opportunity_id")
+        .in("opportunity_id", opportunityIds)
         .eq("is_draft", false);
 
       if (appError) throw appError;
@@ -34,8 +34,8 @@ export function usePartnerStats() {
       const applications = apps || [];
 
       return {
-        totalProjects: projects?.length || 0,
-        activeProjects: projects?.filter((p) => p.status === "open" || p.status === "closing-soon").length || 0,
+        totalOpportunities: opportunities?.length || 0,
+        activeOpportunities: opportunities?.filter((o) => o.status === "open" || o.status === "closing-soon").length || 0,
         totalApplications: applications.length,
         pendingApplications: applications.filter((a) => a.status === "pending").length,
         approvedApplications: applications.filter((a) => a.status === "approved").length,

@@ -3,11 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
-export type PartnerProject = {
+export type PartnerOpportunity = {
   id: number;
   title: string;
   description: string;
-  category: string | null;
   status: string;
   deadline: string;
   fundingAmount: string;
@@ -19,13 +18,17 @@ export type PartnerProject = {
   maxApplicants: number | null;
   currentApplicants: number;
   featured: boolean;
+  currency: string;
+  opportunityType: string;
+  organizationName: string | null;
+  country: string | null;
+  categoryId: number | null;
   createdAt: string;
 };
 
-export type PartnerProjectFormData = {
+export type PartnerOpportunityFormData = {
   title: string;
   description: string;
-  category: string;
   status: string;
   deadline: string;
   fundingAmount: string;
@@ -35,14 +38,18 @@ export type PartnerProjectFormData = {
   eligibilityCriteria?: string;
   applicationFee?: number;
   maxApplicants?: number;
+  currency?: string;
+  opportunityType?: string;
+  organizationName?: string;
+  country?: string;
+  categoryId?: number;
 };
 
-function transformProject(data: any): PartnerProject {
+function transformOpportunity(data: any): PartnerOpportunity {
   return {
     id: data.id,
     title: data.title,
     description: data.description,
-    category: data.category,
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount,
@@ -54,63 +61,67 @@ function transformProject(data: any): PartnerProject {
     maxApplicants: data.max_applicants,
     currentApplicants: data.current_applicants || 0,
     featured: data.featured,
+    currency: data.currency,
+    opportunityType: data.opportunity_type,
+    organizationName: data.organization_name,
+    country: data.country,
+    categoryId: data.category_id,
     createdAt: data.created_at,
   };
 }
 
-export function usePartnerProjects() {
+export function usePartnerOpportunities() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["partner-projects", user?.id],
+    queryKey: ["partner-opportunities", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities")
         .select("*")
         .eq("created_by", user!.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data || []).map(transformProject);
+      return (data || []).map(transformOpportunity);
     },
     enabled: !!user,
   });
 }
 
-export function usePartnerProject(id?: number) {
+export function usePartnerOpportunity(id?: number) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["partner-project", id],
+    queryKey: ["partner-opportunity", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities")
         .select("*")
         .eq("id", id!)
         .eq("created_by", user!.id)
         .single();
 
       if (error) throw error;
-      return transformProject(data);
+      return transformOpportunity(data);
     },
     enabled: !!user && !!id,
   });
 }
 
-export function useCreatePartnerProject() {
+export function useCreatePartnerOpportunity() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (formData: PartnerProjectFormData) => {
+    mutationFn: async (formData: PartnerOpportunityFormData) => {
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities")
         .insert({
           title: formData.title,
           description: formData.description,
-          category: formData.category,
-          status: formData.status,
+          status: formData.status || "open",
           deadline: formData.deadline,
           funding_amount: formData.fundingAmount,
           location: formData.location,
@@ -119,6 +130,11 @@ export function useCreatePartnerProject() {
           eligibility_criteria: formData.eligibilityCriteria || null,
           application_fee: formData.applicationFee || 0,
           max_applicants: formData.maxApplicants || null,
+          currency: formData.currency || "USD",
+          opportunity_type: (formData.opportunityType as any) || "grant",
+          organization_name: formData.organizationName || null,
+          country: formData.country || null,
+          category_id: formData.categoryId || null,
           created_by: user!.id,
         })
         .select()
@@ -128,28 +144,27 @@ export function useCreatePartnerProject() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["partner-projects"] });
-      toast({ title: "Project created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
+      toast({ title: "Opportunity created successfully" });
     },
     onError: (error: any) => {
-      toast({ title: "Error creating project", description: error.message, variant: "destructive" });
+      toast({ title: "Error creating opportunity", description: error.message, variant: "destructive" });
     },
   });
 }
 
-export function useUpdatePartnerProject() {
+export function useUpdatePartnerOpportunity() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, data: formData }: { id: number; data: PartnerProjectFormData }) => {
+    mutationFn: async ({ id, data: formData }: { id: number; data: PartnerOpportunityFormData }) => {
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities")
         .update({
           title: formData.title,
           description: formData.description,
-          category: formData.category,
           status: formData.status,
           deadline: formData.deadline,
           funding_amount: formData.fundingAmount,
@@ -159,6 +174,11 @@ export function useUpdatePartnerProject() {
           eligibility_criteria: formData.eligibilityCriteria || null,
           application_fee: formData.applicationFee || 0,
           max_applicants: formData.maxApplicants || null,
+          currency: formData.currency || "USD",
+          opportunity_type: (formData.opportunityType as any) || "grant",
+          organization_name: formData.organizationName || null,
+          country: formData.country || null,
+          category_id: formData.categoryId || null,
         })
         .eq("id", id)
         .eq("created_by", user!.id)
@@ -169,12 +189,12 @@ export function useUpdatePartnerProject() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["partner-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["partner-project"] });
-      toast({ title: "Project updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["partner-opportunity"] });
+      toast({ title: "Opportunity updated successfully" });
     },
     onError: (error: any) => {
-      toast({ title: "Error updating project", description: error.message, variant: "destructive" });
+      toast({ title: "Error updating opportunity", description: error.message, variant: "destructive" });
     },
   });
 }

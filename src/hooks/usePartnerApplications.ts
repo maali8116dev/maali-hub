@@ -10,23 +10,23 @@ export type PartnerApplication = {
   contactEmail: string | null;
   projectTitle: string | null;
   createdAt: string;
-  projectId: number;
+  opportunityId: number;
 };
 
-export function usePartnerApplications(projectId?: number) {
+export function usePartnerApplications(opportunityId?: number) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["partner-applications", user?.id, projectId],
+    queryKey: ["partner-applications", user?.id, opportunityId],
     queryFn: async () => {
       let query = supabase
         .from("applications")
-        .select("id, status, full_legal_name, organization_name, contact_email, project_title, created_at, project_id")
+        .select("id, status, full_legal_name, organization_name, contact_email, project_title, created_at, opportunity_id")
         .eq("is_draft", false)
         .order("created_at", { ascending: false });
 
-      if (projectId) {
-        query = query.eq("project_id", projectId);
+      if (opportunityId) {
+        query = query.eq("opportunity_id", opportunityId);
       }
 
       const { data, error } = await query;
@@ -40,7 +40,7 @@ export function usePartnerApplications(projectId?: number) {
         contactEmail: a.contact_email,
         projectTitle: a.project_title,
         createdAt: a.created_at,
-        projectId: a.project_id,
+        opportunityId: a.opportunity_id,
       }));
     },
     enabled: !!user,

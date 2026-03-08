@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download } from "lucide-react";
 import { usePartnerApplications, downloadApplicationsCSV } from "@/hooks/usePartnerApplications";
-import { usePartnerProject } from "@/hooks/usePartnerProjects";
+import { usePartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 
@@ -15,30 +15,30 @@ const statusColors: Record<string, string> = {
   "under-review": "bg-blue-500/10 text-blue-600",
 };
 
-const PartnerProjectApplications = () => {
+const PartnerOpportunityApplications = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const projectId = id ? parseInt(id) : undefined;
-  const { data: project } = usePartnerProject(projectId);
-  const { data: applications = [], isLoading } = usePartnerApplications(projectId);
+  const opportunityId = id ? parseInt(id) : undefined;
+  const { data: opportunity } = usePartnerOpportunity(opportunityId);
+  const { data: applications = [], isLoading } = usePartnerApplications(opportunityId);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Applications</h1>
-          <p className="text-muted-foreground">{project?.title || "Loading..."}</p>
+          <p className="text-muted-foreground">{opportunity?.title || "Loading..."}</p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => downloadApplicationsCSV(applications, `applications-project-${id}.csv`)}
+            onClick={() => downloadApplicationsCSV(applications, `applications-opportunity-${id}.csv`)}
             disabled={applications.length === 0}
           >
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/partner/projects")}>
+          <Button variant="ghost" onClick={() => navigate("/partner/opportunities")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
@@ -50,7 +50,7 @@ const PartnerProjectApplications = () => {
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground">Loading applications...</div>
           ) : applications.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No applications yet for this project.</div>
+            <div className="text-center py-12 text-muted-foreground">No applications yet for this opportunity.</div>
           ) : (
             <Table>
               <TableHeader>
@@ -85,4 +85,4 @@ const PartnerProjectApplications = () => {
   );
 };
 
-export default PartnerProjectApplications;
+export default PartnerOpportunityApplications;
