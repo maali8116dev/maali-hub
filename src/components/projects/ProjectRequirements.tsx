@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Target, CheckCircle2 } from "lucide-react";
 import { ListItemsRenderer } from "@/components/projects/ListItemsRenderer";
-import type { ProjectWithCategory } from "@/hooks/useProjectDetails";
+import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 
 interface ProjectRequirementsProps {
-  project: ProjectWithCategory;
+  project: OpportunityWithTags;
 }
 
 /**
@@ -35,7 +35,7 @@ export function ProjectRequirements({ project }: ProjectRequirementsProps) {
       )}
 
       {/* Eligibility Criteria */}
-      {project.eligibility_criteria && (
+      {project.eligibilityCriteria && (
         <Card className="border-l-4 border-l-success">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -47,7 +47,7 @@ export function ProjectRequirements({ project }: ProjectRequirementsProps) {
           </CardHeader>
           <CardContent>
             <ListItemsRenderer
-              items={project.eligibility_criteria}
+              items={project.eligibilityCriteria}
               variant="success"
               icon={CheckCircle2}
             />

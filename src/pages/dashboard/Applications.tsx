@@ -33,7 +33,7 @@ const Applications = () => {
   });
 
   // Define columns for the applications table
-  const applicationColumns: ColumnDef<ApplicationWithProject>[] = useMemo(() => [
+  const applicationColumns: ColumnDef<ApplicationWithOpportunity>[] = useMemo(() => [
     {
       accessorKey: 'projectTitle',
       header: ({ column }) => (
@@ -131,7 +131,7 @@ const Applications = () => {
         if (app.status === "draft") {
           return (
             app.isProjectOpen ? (
-              <Link to={`/projects/${app.projectId}/apply`}>
+              <Link to={`/opportunities/${app.opportunityId}/apply`}>
                 <Button variant="outline" size="sm">
                   {t('dashboard:applications.actions.continueApplication')}
                 </Button>
@@ -181,7 +181,7 @@ const Applications = () => {
           description={t('dashboard:applications.firstTimeTip.description')}
           action={{
             label: t('dashboard:applications.firstTimeTip.action'),
-            onClick: () => navigate("/projects"),
+            onClick: () => navigate("/opportunities"),
           }}
         />
       )}
@@ -275,7 +275,7 @@ const Applications = () => {
                 statusFilter === "all"
                   ? {
                       label: t('dashboard:applications.emptyState.browseOpportunities'),
-                      onClick: () => navigate("/projects"),
+                      onClick: () => navigate("/opportunities"),
                       variant: "hero",
                     }
                   : {

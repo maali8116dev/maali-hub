@@ -3,13 +3,13 @@ import ProjectCard from "./ProjectCard";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useFeaturedProjects } from "@/hooks/useProjects";
+import { useFeaturedOpportunities } from "@/hooks/useOpportunities";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
 
 const FeaturedProjects = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('landing');
-  const { data: featuredProjects, isLoading } = useFeaturedProjects();
+  const { data: featuredOpportunities, isLoading } = useFeaturedOpportunities();
 
   // Fallback mock data when no featured projects exist
   const fallbackProjects = [
@@ -48,7 +48,7 @@ const FeaturedProjects = () => {
     },
   ];
 
-  const hasRealProjects = featuredProjects && featuredProjects.length > 0;
+  const hasRealProjects = featuredOpportunities && featuredOpportunities.length > 0;
 
   return (
     <section className="py-20 md:py-24 bg-background">
@@ -66,18 +66,18 @@ const FeaturedProjects = () => {
           <ProjectCardSkeletonGrid count={3} />
         ) : hasRealProjects ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredProjects.slice(0, 3).map((project) => (
+            {featuredOpportunities.slice(0, 3).map((opportunity) => (
               <ProjectCard
-                key={project.id}
-                id={project.id}
-                title={project.title}
-                description={project.description}
-                category={project.category}
-                location={project.location}
-                fundingAmount={project.fundingAmount}
-                deadline={project.deadline}
-                currentApplicants={project.currentApplicants}
-                status={project.status}
+                key={opportunity.id}
+                id={opportunity.id}
+                title={opportunity.title}
+                description={opportunity.description}
+                category={opportunity.tags?.[0]?.name || "Uncategorized"}
+                location={opportunity.location}
+                fundingAmount={opportunity.fundingAmount}
+                deadline={opportunity.deadline}
+                currentApplicants={opportunity.currentApplicants}
+                status={opportunity.status}
               />
             ))}
           </div>
@@ -94,7 +94,7 @@ const FeaturedProjects = () => {
             variant="outline" 
             size="lg" 
             className="group"
-            onClick={() => navigate("/projects")}
+            onClick={() => navigate("/opportunities")}
           >
             {t('featuredProjects.viewAll')}
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

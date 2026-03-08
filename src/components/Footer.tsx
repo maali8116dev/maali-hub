@@ -7,7 +7,7 @@ const Footer = () => {
 
   const footerLinks = {
     platform: [
-      { label: "Browse Projects", href: "/projects" },
+      { label: "Browse Opportunities", href: "/opportunities" },
       { label: "Submit Application", href: "/apply" },
       { label: "Track Status", href: "/dashboard" },
       { label: "Resources", href: "/resources" }

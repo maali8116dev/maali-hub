@@ -14,7 +14,7 @@ import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
 import Index from "./pages/Index";
-import Projects from "./pages/projects/Projects";
+import Opportunities from "./pages/projects/Opportunities";
 import About from "./pages/About";
 import Resources from "./pages/Resources";
 import Contact from "./pages/Contact";
@@ -132,14 +132,14 @@ const App = () => {
               <CookieConsent />
               <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/projects" element={<Projects />} />
+          <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/about" element={<About />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
-          <Route path="/projects/:id" element={<ProjectDetails />} />
-          <Route path="/projects/:id/apply" element={<ApplicationForm />} />
+          <Route path="/opportunities/:id" element={<ProjectDetails />} />
+          <Route path="/opportunities/:id/apply" element={<ApplicationForm />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/payment/test" element={<TestPayment />} />

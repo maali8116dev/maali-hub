@@ -101,7 +101,7 @@ export function useApplicationSubmission() {
           "This project is closed. You can no longer submit or edit applications.",
         variant: "destructive",
       });
-      navigate(projectId ? `/projects/${projectId}` : "/projects");
+      navigate(projectId ? `/opportunities/${projectId}` : "/opportunities");
       return false;
     }
 
@@ -334,7 +334,7 @@ export function useApplicationSubmission() {
               "This opportunity is no longer accepting applications.",
             variant: "destructive",
           });
-          navigate(`/projects/${formData.projectId}`);
+          navigate(`/opportunities/${formData.projectId}`);
           return;
         }
 

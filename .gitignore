@@ -38,3 +38,6 @@ reset_live_db.md
 supabase/migrations_backup/**
 supabase/migrations/**/*.sql
 
+# Scripts (utility scripts, not part of the codebase)
+scripts/split_migrations.py
+

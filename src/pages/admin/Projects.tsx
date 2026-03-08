@@ -29,27 +29,27 @@ const AdminProjects = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
-  const { data: projects = [], isLoading, error, refetch, isFetching } = useAdminProjects();
+  const { data: opportunities = [], isLoading, error, refetch, isFetching } = useAdminProjects();
   const deleteProject = useDeleteProject();
 
-  // Fetch approved applications count per project to check if winners are selected
-  const { data: projectsWithWinners = [] } = useQuery({
-    queryKey: ["projects-winners-selected"],
+  // Fetch approved applications count per opportunity to check if winners are selected
+  const { data: opportunitiesWithWinners = [] } = useQuery({
+    queryKey: ["opportunities-winners-selected"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("applications")
-        .select("project_id")
+        .select("opportunity_id")
         .eq("status", "approved")
         .eq("is_draft", false);
 
       if (error) throw error;
 
-      // Get unique project IDs that have approved applications
-      const projectIdsWithWinners = new Set(
-        (data || []).map((app) => app.project_id)
+      // Get unique opportunity IDs that have approved applications
+      const opportunityIdsWithWinners = new Set(
+        (data || []).map((app) => app.opportunity_id)
       );
 
-      return Array.from(projectIdsWithWinners) as number[];
+      return Array.from(opportunityIdsWithWinners) as number[];
     },
     staleTime: 1 * 60 * 1000, // Cache for 1 minute
   });
@@ -78,7 +78,7 @@ const AdminProjects = () => {
       ),
       cell: ({ row }) => {
         const project = row.original;
-        const hasWinners = projectsWithWinners.includes(project.id);
+        const hasWinners = opportunitiesWithWinners.includes(project.id);
         return (
           <div className="flex items-center gap-2">
             {getProjectStatusBadge(project.status)}
@@ -231,7 +231,7 @@ const AdminProjects = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Manage Projects</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Manage Opportunities</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Create, edit, and manage funding opportunities
           </p>
@@ -241,14 +241,14 @@ const AdminProjects = () => {
           className="w-full sm:w-auto min-h-[44px]"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create Project
+          Create Opportunity
         </Button>
       </div>
 
-      {/* Projects Table */}
+      {/* Opportunities Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Projects ({projects.length})</CardTitle>
+          <CardTitle>All Opportunities ({opportunities.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -259,27 +259,27 @@ const AdminProjects = () => {
             </div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">
-              <p>Error loading projects: {error instanceof Error ? error.message : "Unknown error"}</p>
+              <p>Error loading opportunities: {error instanceof Error ? error.message : "Unknown error"}</p>
             </div>
-          ) : projects.length === 0 ? (
+          ) : opportunities.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium mb-2">No projects found</p>
+              <p className="font-medium mb-2">No opportunities found</p>
               <p className="text-sm mb-4">Start by creating your first funding opportunity.</p>
               <Button onClick={() => navigate("/admin/projects/new")}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Project
+                Create Opportunity
               </Button>
             </div>
           ) : (
             <DataTable
               columns={projectColumns}
-              data={projects}
+              data={opportunities}
               searchPlaceholder="Search by title, category, or location..."
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
-              exportFileName="projects"
+              exportFileName="opportunities"
               onRefresh={() => { refetch(); }}
               isRefreshing={isFetching}
             />
@@ -293,7 +293,7 @@ const AdminProjects = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the project and all associated applications.
+              This action cannot be undone. This will permanently delete the opportunity and all associated applications.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

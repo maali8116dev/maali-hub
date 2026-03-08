@@ -123,7 +123,7 @@ const ProjectCard = (props: ProjectCardProps) => {
             {getStatusText(displayStatus)}
           </Badge>
         </div>
-        <Link to={`/projects/${id}`} className="block">
+        <Link to={`/opportunities/${id}`} className="block">
           <h3 className="text-lg font-semibold group-hover:text-primary transition-colors cursor-pointer hover:underline">
             {title}
           </h3>
@@ -170,7 +170,7 @@ const ProjectCard = (props: ProjectCardProps) => {
             className="flex-1"
             asChild
           >
-            <Link to={`/projects/${id}`}>
+            <Link to={`/opportunities/${id}`}>
               View Details
               <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
@@ -196,9 +196,9 @@ const ProjectCard = (props: ProjectCardProps) => {
                   description: "Please log in or create an account to apply for this opportunity.",
                   variant: "default",
                 });
-                navigate("/auth", { state: { from: { pathname: `/projects/${id}/apply` } } });
+                navigate("/auth", { state: { from: { pathname: `/opportunities/${id}/apply` } } });
               } else {
-                navigate(`/projects/${id}/apply`);
+                navigate(`/opportunities/${id}/apply`);
               }
             }}
           >

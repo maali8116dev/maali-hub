@@ -21,6 +21,7 @@ export type ActionType =
 
 export type EntityType = 
   | 'project' 
+  | 'opportunity'
   | 'application' 
   | 'user' 
   | 'blog_post' 

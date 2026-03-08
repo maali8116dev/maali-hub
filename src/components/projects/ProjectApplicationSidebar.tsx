@@ -5,11 +5,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LogIn, CheckCircle2, Edit } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { isProjectOpen } from "@/lib/projectAvailability";
-import type { ProjectWithCategory } from "@/hooks/useProjectDetails";
+import { isOpportunityOpen } from "@/lib/opportunityAvailability";
+import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 
 interface ProjectApplicationSidebarProps {
-  project: ProjectWithCategory;
+  project: OpportunityWithTags;
   draft: { updated_at: string } | null | undefined;
   existingApplication: { id: string; status: string } | null | undefined;
   hasSubmittedApplication: boolean;
@@ -30,7 +30,7 @@ export function ProjectApplicationSidebar({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const isDisabled = !isProjectOpen(project.status, project.deadline);
+  const isDisabled = !isOpportunityOpen(project.status, project.deadline);
   const projectId = project.id.toString();
 
   const handleNavigateToApplication = (newApplication = false) => {
@@ -45,12 +45,12 @@ export function ProjectApplicationSidebar({
       navigate("/auth", {
         state: {
           from: {
-            pathname: `/projects/${projectId}/apply${newApplication ? "?new=true" : ""}`,
+            pathname: `/opportunities/${projectId}/apply${newApplication ? "?new=true" : ""}`,
           },
         },
       });
     } else {
-      navigate(`/projects/${projectId}/apply${newApplication ? "?new=true" : ""}`);
+      navigate(`/opportunities/${projectId}/apply${newApplication ? "?new=true" : ""}`);
     }
   };
 
@@ -172,9 +172,9 @@ export function ProjectApplicationSidebar({
           </>
         )}
 
-        {project.application_fee && Number(project.application_fee) > 0 && (
+        {project.applicationFee && Number(project.applicationFee) > 0 && (
           <p className="text-xs text-muted-foreground mt-3 text-center">
-            Application fee: ${Number(project.application_fee).toFixed(2)}{" "}
+            Application fee: ${Number(project.applicationFee).toFixed(2)}{" "}
             (processed at submission)
           </p>
         )}

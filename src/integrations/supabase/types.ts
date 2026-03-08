@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.1"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -98,7 +118,7 @@ export type Database = {
           file_type: string | null
           id: string
           is_library_document: boolean | null
-          project_id: number | null
+          opportunity_id: number
           user_id: string | null
         }
         Insert: {
@@ -110,7 +130,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
-          project_id?: number | null
+          opportunity_id: number
           user_id?: string | null
         }
         Update: {
@@ -122,7 +142,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
-          project_id?: number | null
+          opportunity_id?: number
           user_id?: string | null
         }
         Relationships: [
@@ -134,10 +154,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "application_documents_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "application_documents_opportunity_id_fkey"
+            columns: ["opportunity_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
         ]
@@ -166,6 +186,7 @@ export type Database = {
           key_team_members_roles: string | null
           linkedin_url: string | null
           location: string | null
+          opportunity_id: number
           organization_name: string | null
           other_social_links: string | null
           previous_grants_funding_details: string | null
@@ -173,7 +194,6 @@ export type Database = {
           primary_sector_other: string | null
           primary_sectors: Json | null
           problem_statement: string | null
-          project_id: number
           project_summary: string | null
           project_title: string | null
           proposed_solution: string | null
@@ -215,6 +235,7 @@ export type Database = {
           key_team_members_roles?: string | null
           linkedin_url?: string | null
           location?: string | null
+          opportunity_id: number
           organization_name?: string | null
           other_social_links?: string | null
           previous_grants_funding_details?: string | null
@@ -222,7 +243,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_id: number
           project_summary?: string | null
           project_title?: string | null
           proposed_solution?: string | null
@@ -264,6 +284,7 @@ export type Database = {
           key_team_members_roles?: string | null
           linkedin_url?: string | null
           location?: string | null
+          opportunity_id?: number
           organization_name?: string | null
           other_social_links?: string | null
           previous_grants_funding_details?: string | null
@@ -271,7 +292,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_id?: number
           project_summary?: string | null
           project_title?: string | null
           proposed_solution?: string | null
@@ -292,10 +312,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "applications_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
         ]
@@ -672,6 +692,164 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          application_fee: number | null
+          category_id: number | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          current_applicants: number | null
+          deadline: string
+          description: string
+          eligibility_criteria: string | null
+          end_date: string | null
+          experience_level:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured: boolean
+          funding_amount: string
+          funding_type: Database["public"]["Enums"]["funding_type"] | null
+          id: number
+          image_url: string | null
+          location: string
+          max_applicants: number | null
+          opportunity_type: Database["public"]["Enums"]["opportunity_type"]
+          organization_name: string | null
+          program_format: Database["public"]["Enums"]["program_format"] | null
+          requirements: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_fee?: number | null
+          category_id?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          current_applicants?: number | null
+          deadline: string
+          description: string
+          eligibility_criteria?: string | null
+          end_date?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured?: boolean
+          funding_amount: string
+          funding_type?: Database["public"]["Enums"]["funding_type"] | null
+          id?: number
+          image_url?: string | null
+          location: string
+          max_applicants?: number | null
+          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
+          organization_name?: string | null
+          program_format?: Database["public"]["Enums"]["program_format"] | null
+          requirements?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_fee?: number | null
+          category_id?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          current_applicants?: number | null
+          deadline?: string
+          description?: string
+          eligibility_criteria?: string | null
+          end_date?: string | null
+          experience_level?:
+            | Database["public"]["Enums"]["experience_level"]
+            | null
+          featured?: boolean
+          funding_amount?: string
+          funding_type?: Database["public"]["Enums"]["funding_type"] | null
+          id?: number
+          image_url?: string | null
+          location?: string
+          max_applicants?: number | null
+          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
+          organization_name?: string | null
+          program_format?: Database["public"]["Enums"]["program_format"] | null
+          requirements?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_tag_map: {
+        Row: {
+          opportunity_id: number
+          tag_id: number
+        }
+        Insert: {
+          opportunity_id: number
+          tag_id: number
+        }
+        Update: {
+          opportunity_id?: number
+          tag_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_tag_map_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_tag_map_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_tags: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           category: string
@@ -824,80 +1002,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      projects: {
-        Row: {
-          application_fee: number | null
-          category: string | null
-          category_id: number | null
-          created_at: string
-          created_by: string | null
-          current_applicants: number | null
-          deadline: string
-          description: string
-          eligibility_criteria: string | null
-          featured: boolean
-          funding_amount: string
-          id: number
-          image_url: string | null
-          location: string
-          max_applicants: number | null
-          requirements: string | null
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          application_fee?: number | null
-          category?: string | null
-          category_id?: number | null
-          created_at?: string
-          created_by?: string | null
-          current_applicants?: number | null
-          deadline: string
-          description: string
-          eligibility_criteria?: string | null
-          featured?: boolean
-          funding_amount: string
-          id?: number
-          image_url?: string | null
-          location: string
-          max_applicants?: number | null
-          requirements?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          application_fee?: number | null
-          category?: string | null
-          category_id?: number | null
-          created_at?: string
-          created_by?: string | null
-          current_applicants?: number | null
-          deadline?: string
-          description?: string
-          eligibility_criteria?: string | null
-          featured?: boolean
-          funding_amount?: string
-          id?: number
-          image_url?: string | null
-          location?: string
-          max_applicants?: number | null
-          requirements?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       rate_limit_config: {
         Row: {
@@ -1265,8 +1369,8 @@ export type Database = {
           invoice_pdf_url: string | null
           invoice_url: string | null
           metadata: Json | null
+          opportunity_id: number
           payment_method_id: string | null
-          project_id: number | null
           provider: string | null
           provider_payment_intent_id: string | null
           provider_transaction_id: string | null
@@ -1292,8 +1396,8 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
+          opportunity_id: number
           payment_method_id?: string | null
-          project_id?: number | null
           provider?: string | null
           provider_payment_intent_id?: string | null
           provider_transaction_id?: string | null
@@ -1319,8 +1423,8 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
+          opportunity_id?: number
           payment_method_id?: string | null
-          project_id?: number | null
           provider?: string | null
           provider_payment_intent_id?: string | null
           provider_transaction_id?: string | null
@@ -1344,13 +1448,6 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1411,6 +1508,30 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_email_batch: {
+        Args: { p_limit: number }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          sent_at: string | null
+          status: string
+          to_email: string
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "email_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       cleanup_old_pending_payment_applications: {
         Args: { p_days_old?: number }
         Returns: {
@@ -1448,8 +1569,8 @@ export type Database = {
           contact_email: string
           contact_phone: string
           id: string
-          project_id: number
-          project_title: string
+          opportunity_id: number
+          opportunity_title: string
           review_deadline: string
           review_notes: string
           reviewed_at: string
@@ -1458,18 +1579,7 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
-        }[]
-      }
-      get_admin_stats: {
-        Args: never
-        Returns: {
-          active_projects: number
-          approved_applications: number
-          pending_applications: number
-          rejected_applications: number
-          total_applications: number
-          total_projects: number
-          total_users: number
+          total_assignments: number
         }[]
       }
       get_all_reviewers_with_details: {
@@ -1523,7 +1633,7 @@ export type Database = {
         Returns: {
           application: Json
           documents: Json
-          project: Json
+          opportunity: Json
         }[]
       }
       get_application_review_scores_with_reviewers: {
@@ -1546,11 +1656,11 @@ export type Database = {
         }[]
       }
       get_application_submission_preview: {
-        Args: { p_project_id: number; p_user_id: string }
+        Args: { p_opportunity_id: number; p_user_id: string }
         Returns: {
           can_submit: boolean
           existing_application: Json
-          project: Json
+          opportunity: Json
           validation_error: string
         }[]
       }
@@ -1579,8 +1689,8 @@ export type Database = {
           total_transactions: number
         }[]
       }
-      get_project_applications_ranked: {
-        Args: { p_project_id: number }
+      get_opportunity_applications_ranked: {
+        Args: { p_opportunity_id: number }
         Returns: {
           applicant_email: string
           applicant_name: string
@@ -1595,20 +1705,12 @@ export type Database = {
           total_reviews: number
         }[]
       }
-      get_projects_with_filters: {
-        Args: {
-          p_category?: string
-          p_location?: string
-          p_page?: number
-          p_page_size?: number
-          p_search?: string
-          p_status?: string
-        }
+      get_opportunity_details_with_user_status: {
+        Args: { p_opportunity_id: number; p_user_id?: string }
         Returns: {
-          page: number
-          projects: Json
-          total_count: number
-          total_pages: number
+          draft_application: Json
+          existing_application: Json
+          opportunity: Json
         }[]
       }
       get_rate_limit_config: {
@@ -1629,7 +1731,7 @@ export type Database = {
           funding_amount: string
           id: string
           location: string
-          project_id: number
+          opportunity_id: number
           project_title: string
           review_deadline: string
           review_notes: string
@@ -1639,23 +1741,6 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
-        }[]
-      }
-      get_reviewer_assignments_with_application: {
-        Args: { p_reviewer_id: string }
-        Returns: {
-          application_id: string
-          application_status: string
-          assigned_at: string
-          assignment_id: string
-          category_id: number
-          category_name: string
-          created_at: string
-          is_draft: boolean
-          project_id: number
-          project_title: string
-          reviewer_id: string
-          status: string
         }[]
       }
       get_reviewer_full_details: {
@@ -1679,6 +1764,13 @@ export type Database = {
         Args: { p_version_id: string }
         Returns: Json
       }
+      get_user_applications_with_opportunities: {
+        Args: { p_user_id: string }
+        Returns: {
+          application: Json
+          opportunity: Json
+        }[]
+      }
       get_user_applications_with_projects: {
         Args: { p_user_id: string }
         Returns: {
@@ -1694,11 +1786,14 @@ export type Database = {
           pending_applications: number
           rejected_applications: number
           total_applications: number
-          total_projects_applied: number
+          total_opportunities_applied: number
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
-      is_project_open: { Args: { p_project_id: number }; Returns: boolean }
+      is_opportunity_open: {
+        Args: { p_opportunity_id: number }
+        Returns: boolean
+      }
       mark_all_notifications_read: {
         Args: { p_user_id: string }
         Returns: number
@@ -1708,21 +1803,48 @@ export type Database = {
         Returns: boolean
       }
       validate_application_submission: {
-        Args: { p_project_id: number; p_user_id: string }
+        Args: { p_opportunity_id: number; p_user_id: string }
         Returns: {
+          application_fee: number
           can_submit: boolean
-          error_message: string
+          deadline: string
           existing_application_id: string
           has_existing_application: boolean
-          is_project_open: boolean
-          project_deadline: string
-          project_fee: number
-          project_status: string
-          project_title: string
+          opportunity_status: string
+          opportunity_title: string
+          reason: string
         }[]
       }
     }
     Enums: {
+      experience_level:
+        | "student"
+        | "undergraduate"
+        | "graduate"
+        | "early_career"
+        | "mid_career"
+        | "startup_founder"
+        | "researcher"
+        | "professional"
+      funding_type:
+        | "fully_funded"
+        | "partially_funded"
+        | "stipend"
+        | "no_funding"
+        | "equity"
+        | "paid"
+        | "unpaid"
+      opportunity_type:
+        | "grant"
+        | "fellowship"
+        | "scholarship"
+        | "internship"
+        | "training"
+        | "competition"
+        | "accelerator"
+        | "incubator"
+        | "job"
+      program_format: "online" | "in_person" | "hybrid"
       user_role: "admin" | "reviewer" | "applicant"
     }
     CompositeTypes: {
@@ -1849,9 +1971,44 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
+      experience_level: [
+        "student",
+        "undergraduate",
+        "graduate",
+        "early_career",
+        "mid_career",
+        "startup_founder",
+        "researcher",
+        "professional",
+      ],
+      funding_type: [
+        "fully_funded",
+        "partially_funded",
+        "stipend",
+        "no_funding",
+        "equity",
+        "paid",
+        "unpaid",
+      ],
+      opportunity_type: [
+        "grant",
+        "fellowship",
+        "scholarship",
+        "internship",
+        "training",
+        "competition",
+        "accelerator",
+        "incubator",
+        "job",
+      ],
+      program_format: ["online", "in_person", "hybrid"],
       user_role: ["admin", "reviewer", "applicant"],
     },
   },
 } as const
+

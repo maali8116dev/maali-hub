@@ -165,7 +165,7 @@ const Guide = () => {
                       </ul>
                     </div>
                     <div>
-                      <Link to={step.number === 1 ? "/auth" : step.number === 2 ? "/dashboard/profile" : step.number === 3 ? "/projects" : step.number === 5 ? "/apply" : "/dashboard"}>
+                      <Link to={step.number === 1 ? "/auth" : step.number === 2 ? "/dashboard/profile" : step.number === 3 ? "/opportunities" : step.number === 5 ? "/apply" : "/dashboard"}>
                         <Button variant="outline" size="sm">
                           {step.action}
                           <ArrowRight className="ml-2 h-4 w-4" />

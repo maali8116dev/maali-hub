@@ -71,7 +71,7 @@ const ApplicationFormContent = () => {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => navigate(id ? `/projects/${id}` : "/projects")}
+          onClick={() => navigate(id ? `/opportunities/${id}` : "/opportunities")}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -103,7 +103,7 @@ const ApplicationFormContent = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(`/projects/${projectState.id}`)}
+                  onClick={() => navigate(`/opportunities/${projectState.id}`)}
                 >
                   Back to Project
                 </Button>

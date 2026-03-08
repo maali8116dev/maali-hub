@@ -15,7 +15,7 @@ const HeroSection = () => {
   const handleApplyClick = () => {
     if (user) {
       // User is logged in, redirect to projects or application form
-      navigate("/projects");
+      navigate("/opportunities");
     } else {
       // User not logged in, show toast and redirect to auth page
       toast({
@@ -85,7 +85,7 @@ const HeroSection = () => {
                 variant="outline" 
                 size="lg" 
                 className="group  text-primary  hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
-                onClick={() => navigate("/projects")}
+                onClick={() => navigate("/opportunities")}
               >
                 {t('hero.browseProjects')}
               </Button>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
-import { useProjectDetails } from "@/hooks/useProjectDetails";
+import { useOpportunityDetails } from "@/hooks/useOpportunityDetails";
 import { ProjectInfo } from "@/components/projects/ProjectInfo";
 import { ProjectRequirements } from "@/components/projects/ProjectRequirements";
 import { ProjectApplicationSidebar } from "@/components/projects/ProjectApplicationSidebar";
@@ -19,14 +19,14 @@ const ProjectDetails = () => {
   const navigate = useNavigate();
 
   const {
-    project,
+    opportunity,
     isLoading,
     error,
     draft,
     existingApplication,
     hasSubmittedApplication,
     hasApprovedApplication,
-  } = useProjectDetails(id);
+  } = useOpportunityDetails(id);
 
   if (isLoading) {
     return (
@@ -63,19 +63,34 @@ const ProjectDetails = () => {
     );
   }
 
-  if (error || !project) {
+  if (error || !opportunity) {
+    // Log error details for debugging
+    if (error) {
+      console.error("Opportunity fetch error:", {
+        error,
+        id,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+    }
+    
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
+            <h1 className="text-2xl font-bold mb-4">Opportunity Not Found</h1>
             <p className="text-muted-foreground mb-4">
-              {error instanceof Error ? error.message : "The project you're looking for doesn't exist."}
+              {error instanceof Error ? error.message : "The opportunity you're looking for doesn't exist."}
             </p>
-            <Button onClick={() => navigate("/projects")}>
+            {error && (
+              <p className="text-sm text-muted-foreground mb-4">
+                ID: {id} | Check the browser console for more details.
+              </p>
+            )}
+            <Button onClick={() => navigate("/opportunities")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Projects
+              Back to Opportunities
             </Button>
           </div>
         </main>
@@ -84,14 +99,14 @@ const ProjectDetails = () => {
     );
   }
 
-  const projectUrl = `${getSiteUrl()}/projects/${project.id}`;
-  const projectImage = project.image_url ? getImageUrl(project.image_url) : undefined;
-  const projectDescription = truncateDescription(project.description || project.title);
+  const projectUrl = `${getSiteUrl()}/opportunities/${opportunity.id}`;
+  const projectImage = opportunity.imageUrl ? getImageUrl(opportunity.imageUrl) : undefined;
+  const projectDescription = truncateDescription(opportunity.description || opportunity.title);
 
   return (
     <>
       <SEO
-        title={project.title}
+        title={opportunity.title}
         description={projectDescription}
         // Keywords are optional - modern search engines ignore meta keywords
         // The description and structured data provide better SEO value
@@ -100,19 +115,19 @@ const ProjectDetails = () => {
         type="website"
         canonical={projectUrl}
       />
-      {project && (
+      {opportunity && (
         <StructuredData
           type="Project"
           data={{
-            name: project.title,
-            description: project.description || project.title,
+            name: opportunity.title,
+            description: opportunity.description || opportunity.title,
             image: projectImage,
             url: projectUrl,
-            fundingAmount: project.funding_amount,
-            location: project.location ? { name: project.location } : undefined,
-            startDate: project.created_at,
-            endDate: project.deadline,
-            category: project.category,
+            fundingAmount: opportunity.fundingAmount,
+            location: opportunity.location ? { name: opportunity.location } : undefined,
+            startDate: opportunity.createdAt,
+            endDate: opportunity.deadline,
+            category: opportunity.tags?.[0]?.name || "Uncategorized",
           }}
           id="project-schema"
         />
@@ -123,24 +138,24 @@ const ProjectDetails = () => {
         {/* Back Button */}
         <Button 
           variant="ghost" 
-          onClick={() => navigate("/projects")}
+          onClick={() => navigate("/opportunities")}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
+          Back to Opportunities
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Project Details */}
           <div className="lg:col-span-2 space-y-6">
-            <ProjectInfo project={project} />
-            <ProjectRequirements project={project} />
+            <ProjectInfo project={opportunity} />
+            <ProjectRequirements project={opportunity} />
           </div>
 
           {/* Application Sidebar */}
           <div>
             <ProjectApplicationSidebar
-              project={project}
+              project={opportunity}
               draft={draft}
               existingApplication={existingApplication}
               hasSubmittedApplication={hasSubmittedApplication}

@@ -24,7 +24,7 @@ import {
 import { Search, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
-import { useProjects, useProjectCategories, useProjectLocations } from "@/hooks/useProjects";
+import { useOpportunities, useOpportunityTags, useOpportunityLocations } from "@/hooks/useOpportunities";
 import ProjectCard from "@/components/landing/ProjectCard";
 import { cn } from "@/lib/utils";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
@@ -32,19 +32,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-const Projects = () => {
+const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // Show projects per page
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Show opportunities per page
   const { user } = useAuth();
 
-  // Fetch projects with filters
-  const { data, isLoading, error } = useProjects({
-    category: selectedCategory,
-    // Status filtering is done client-side using getProjectDisplayStatus
+  // Fetch opportunities with filters
+  const { data, isLoading, error } = useOpportunities({
+    // Map category to tags for now (backward compatibility)
+    tags: selectedCategory ? [selectedCategory.toLowerCase().replace(/\s+/g, '-')] : null,
     status: undefined,
     location: selectedLocation,
     search: searchQuery.trim() || undefined,
@@ -52,19 +52,22 @@ const Projects = () => {
     itemsPerPage,
   });
 
-  // Fetch categories and locations for dropdowns
-  const { data: categories = [] } = useProjectCategories();
-  const { data: locations = [] } = useProjectLocations();
+  // Fetch tags and locations for dropdowns
+  const { data: tags = [] } = useOpportunityTags();
+  const { data: locations = [] } = useOpportunityLocations();
+  console.log(data?.opportunities);
+  // Map tags to categories for backward compatibility with UI
+  const categories = tags.map(tag => tag.name);
 
   // Fetch submitted (non-draft) applications for the current user.
-  // Used to disable "Apply" on projects they already applied to.
+  // Used to disable "Apply" on opportunities they already applied to.
   const { data: submittedApplications = [] } = useQuery({
     queryKey: ["user-submitted-applications", user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("applications")
-        .select("project_id")
+        .select("opportunity_id")
         .eq("user_id", user.id)
         .eq("is_draft", false);
 
@@ -72,26 +75,26 @@ const Projects = () => {
         console.error("Error fetching submitted applications:", error);
         return [];
       }
-      return (data || []).map(app => app.project_id);
+      return (data || []).map(app => app.opportunity_id);
     },
     enabled: !!user,
   });
 
   // Create a Set for O(1) lookup
-  const submittedProjectIds = new Set(submittedApplications);
+  const submittedOpportunityIds = new Set(submittedApplications);
 
-  const projects = data?.projects || [];
+  const opportunities = data?.opportunities || [];
   const totalPages = data?.totalPages || 0;
   const total = data?.total || 0;
 
   // Apply display-based status filtering (Open / Closed, with New & Closing Soon as visual variants of Open)
-  const filteredProjects = projects.filter((project) => {
+  const filteredOpportunities = opportunities.filter((opportunity) => {
     if (!selectedStatus) return true;
 
     const displayStatus = getProjectDisplayStatus(
-      project.status,
-      project.deadline,
-      project.createdAt,
+      opportunity.status,
+      opportunity.deadline,
+      opportunity.createdAt,
     );
 
     switch (selectedStatus) {
@@ -138,7 +141,7 @@ const Projects = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search projects by title, description, location, or category..."
+              placeholder="Search opportunities by title, description, location, or tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-10 h-12 text-base"
@@ -252,7 +255,7 @@ const Projects = () => {
           </Card>
         </div>
 
-        {/* Projects Grid */}
+        {/* Opportunities Grid */}
         {isLoading ? (
           <ProjectCardSkeletonGrid count={6} />
         ) : error ? (
@@ -260,28 +263,28 @@ const Projects = () => {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <p className="text-destructive mb-4">
-                  {error instanceof Error ? error.message : "Failed to load projects"}
+                  {error instanceof Error ? error.message : "Failed to load opportunities"}
                 </p>
                 <Button onClick={() => window.location.reload()}>Retry</Button>
               </div>
             </CardContent>
           </Card>
-        ) : filteredProjects.length > 0 ? (
+        ) : filteredOpportunities.length > 0 ? (
           <>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {filteredProjects.map((project) => (
+              {filteredOpportunities.map((opportunity) => (
                 <ProjectCard
-                  key={project.id}
-                  id={project.id}
-                  title={project.title}
-                  description={project.description}
-                  category={project.category}
-                  location={project.location}
-                  fundingAmount={project.fundingAmount}
-                  deadline={project.deadline}
-                  currentApplicants={project.currentApplicants}
-                  status={project.status}
-                  hasSubmittedApplication={submittedProjectIds.has(project.id)}
+                  key={opportunity.id}
+                  id={opportunity.id}
+                  title={opportunity.title}
+                  description={opportunity.description}
+                  category={opportunity.tags?.[0]?.name || opportunity.opportunityType}
+                  location={opportunity.location}
+                  fundingAmount={opportunity.fundingAmount}
+                  deadline={opportunity.deadline}
+                  currentApplicants={opportunity.currentApplicants}
+                  status={opportunity.status}
+                  hasSubmittedApplication={submittedOpportunityIds.has(opportunity.id)}
                 />
               ))}
             </div>
@@ -383,7 +386,7 @@ const Projects = () => {
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
                     <div className="text-muted-foreground order-2 sm:order-1">
                       Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, total)} of{" "}
-                      {total} project{total !== 1 ? "s" : ""}
+                      {total} opportunit{total !== 1 ? "ies" : "y"}
                     </div>
 
                     {/* Results per page dropdown */}
@@ -416,11 +419,11 @@ const Projects = () => {
             <CardContent className="pt-6">
               <EmptyState
                 icon={Search}
-                title="No projects found"
+                title="No opportunities found"
                 description={
                   searchQuery || selectedCategory || selectedStatus || selectedLocation
-                    ? "Try adjusting your search terms or filters to find more projects."
-                    : "There are no projects available at the moment. Check back later for new opportunities."
+                    ? "Try adjusting your search terms or filters to find more opportunities."
+                    : "There are no opportunities available at the moment. Check back later for new opportunities."
                 }
                 action={
                   searchQuery || selectedCategory || selectedStatus || selectedLocation
@@ -441,5 +444,5 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default Opportunities;
 

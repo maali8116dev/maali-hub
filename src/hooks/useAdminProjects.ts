@@ -128,7 +128,7 @@ export function useAdminProjects() {
     queryKey: ["admin-projects"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .select(`
           *,
           categories:category_id(name)
@@ -150,10 +150,10 @@ export function useProject(id: number | undefined) {
   return useQuery({
     queryKey: ["project", id],
     queryFn: async () => {
-      if (!id) throw new Error("Project ID is required");
+      if (!id) throw new Error("Opportunity ID is required");
       
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .select(`
           *,
           categories:category_id(name)
@@ -223,7 +223,7 @@ export function useCreateProject() {
       };
 
       const { data: result, error } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .insert(insertData)
         .select(`
           *,
@@ -236,27 +236,27 @@ export function useCreateProject() {
     },
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
-      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-opportunities"] });
       
       // Log activity
       logActivity({
         actionType: "create",
-        entityType: "project",
+        entityType: "opportunity",
         entityId: String(project.id),
-        description: `Created project: ${project.title}`,
+        description: `Created opportunity: ${project.title}`,
         metadata: { title: project.title, category: project.category },
       });
       
       toast({
-        title: "Project created",
-        description: "The project has been created successfully.",
+        title: "Opportunity created",
+        description: "The opportunity has been created successfully.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating project",
-        description: error.message || "Failed to create project. Please try again.",
+        title: "Error creating opportunity",
+        description: error.message || "Failed to create opportunity. Please try again.",
         variant: "destructive",
       });
     },
@@ -276,7 +276,7 @@ export function useUpdateProject() {
       const updateData = await toSnakeCase(data as ProjectFormData);
       
       const { data: result, error } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .update(updateData)
         .eq("id", id)
         .select(`
@@ -290,28 +290,28 @@ export function useUpdateProject() {
     },
     onSuccess: (project, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
-      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["project", variables.id] });
       
       // Log activity
       logActivity({
         actionType: "update",
-        entityType: "project",
+        entityType: "opportunity",
         entityId: String(project.id),
-        description: `Updated project: ${project.title}`,
+        description: `Updated opportunity: ${project.title}`,
         metadata: { title: project.title },
       });
       
       toast({
-        title: "Project updated",
-        description: "The project has been updated successfully.",
+        title: "Opportunity updated",
+        description: "The opportunity has been updated successfully.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating project",
-        description: error.message || "Failed to update project. Please try again.",
+        title: "Error updating opportunity",
+        description: error.message || "Failed to update opportunity. Please try again.",
         variant: "destructive",
       });
     },
@@ -328,44 +328,44 @@ export function useDeleteProject() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      // Fetch project title before deleting for logging
+      // Fetch opportunity title before deleting for logging
       const { data: project } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .select("title")
         .eq("id", id)
         .single();
       
       const { error } = await supabase
-        .from("projects")
+        .from("opportunities" as any)
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-      return { id, title: project?.title || "Unknown" };
+      return { id, title: (project as any)?.title || "Unknown" };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
-      queryClient.invalidateQueries({ queryKey: ["featured-projects"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-opportunities"] });
       
       // Log activity
       logActivity({
         actionType: "delete",
-        entityType: "project",
+        entityType: "opportunity",
         entityId: String(data.id),
-        description: `Deleted project: ${data.title}`,
+        description: `Deleted opportunity: ${data.title}`,
         metadata: { title: data.title },
       });
       
       toast({
-        title: "Project deleted",
-        description: "The project has been deleted successfully.",
+        title: "Opportunity deleted",
+        description: "The opportunity has been deleted successfully.",
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error deleting project",
-        description: error.message || "Failed to delete project. Please try again.",
+        title: "Error deleting opportunity",
+        description: error.message || "Failed to delete opportunity. Please try again.",
         variant: "destructive",
       });
     },

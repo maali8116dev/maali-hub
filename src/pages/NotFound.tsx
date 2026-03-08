@@ -61,7 +61,7 @@ const NotFound = () => {
                   Go Back
                 </Button>
                 <Button
-                  onClick={() => navigate("/projects")}
+                  onClick={() => navigate("/opportunities")}
                   variant="outline"
                   size="lg"
                   className="min-h-[44px]"
@@ -78,7 +78,7 @@ const NotFound = () => {
                 </p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
                   <a
-                    href="/projects"
+                    href="/opportunities"
                     className="text-primary hover:underline transition-colors"
                   >
                     Projects

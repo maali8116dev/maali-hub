@@ -43,7 +43,7 @@ const Apply = () => {
             Take the first step towards growing your business today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/projects">
+            <Link to="/opportunities">
               <Button size="lg" variant="hero" className="w-full sm:w-auto">
                 Browse Opportunities
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -95,7 +95,7 @@ const Apply = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link to="/projects">
+              <Link to="/opportunities">
                 <Button variant="hero" className="w-full">
                   View All Projects
                   <ArrowRight className="ml-2 h-4 w-4" />

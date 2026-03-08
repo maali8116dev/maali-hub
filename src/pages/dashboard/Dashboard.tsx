@@ -261,14 +261,14 @@ const Dashboard = () => {
             <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.quickActions.title')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2 space-y-2">
-            <Link to="/projects">
+            <Link to="/opportunities">
               <Button variant="hero" className="w-full justify-start min-h-[44px]">
                 <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard:dashboard.quickActions.startNewApplication')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
-            <Link to="/projects">
+            <Link to="/opportunities">
               <Button variant="outline" className="w-full justify-start min-h-[44px]">
                 <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard:dashboard.quickActions.browseOpportunities')}</span>
@@ -361,7 +361,7 @@ const Dashboard = () => {
               description={t('dashboard:dashboard.emptyState.noApplicationsDesc')}
               action={{
                 label: t('dashboard:dashboard.emptyState.browseOpportunities'),
-                onClick: () => navigate("/projects"),
+                onClick: () => navigate("/opportunities"),
                 variant: "outline",
               }}
               secondaryAction={{

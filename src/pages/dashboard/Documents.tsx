@@ -160,7 +160,7 @@ const Documents = () => {
             accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp"
             onChange={handleFileSelect}
           />
-          <Button onClick={() => navigate("/projects")} className="w-full sm:w-auto min-h-[44px]">
+          <Button onClick={() => navigate("/opportunities")} className="w-full sm:w-auto min-h-[44px]">
             <FileCheck className="h-4 w-4 mr-2" />
             {t('dashboard:documents.applyForFunding')}
           </Button>
@@ -309,7 +309,7 @@ const Documents = () => {
                     !searchQuery
                       ? {
                           label: t('dashboard:documents.emptyState.browseOpportunities'),
-                          onClick: () => navigate("/projects"),
+                          onClick: () => navigate("/opportunities"),
                           variant: "hero",
                         }
                       : undefined

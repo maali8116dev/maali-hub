@@ -28,7 +28,7 @@ const Navigation = () => {
 
   const navigationItems = [
     { href: '/', label: t('navigation:home') },
-    { href: '/projects', label: t('navigation:projects') },
+    { href: '/opportunities', label: t('navigation:opportunities') },
     { href: '/about', label: t('navigation:about') },
     { href: '/resources', label: t('navigation:resources') },
     { href: '/blog', label: t('navigation:blog') },

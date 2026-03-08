@@ -21,7 +21,7 @@ const ProjectDetailsCard = ({ application, showProjectLink = false }: ProjectDet
       {showProjectLink && application.project && (
         <div className="mb-4 pb-4 border-b">
           <InfoField icon={Building2} label="Project" value={application.project.title} breakWords />
-          <Link to={`/projects/${application.project_id}`} className="mt-3 block">
+          <Link to={`/opportunities/${application.opportunity_id}`} className="mt-3 block">
             <Button variant="outline" className="w-full min-h-[44px]">
               View Project Details
             </Button>

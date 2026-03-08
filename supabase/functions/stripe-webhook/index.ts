@@ -628,15 +628,15 @@ async function generateAndStoreReceiptPdf(
       ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "N/A"
       : "N/A";
 
-    // Get project title
-    let projectTitle: string | null = "N/A";
-    if (transaction.project_id) {
-      const { data: project } = await supabaseAdmin
-        .from("projects")
+    // Get opportunity title
+    let opportunityTitle: string | null = "N/A";
+    if (transaction.opportunity_id) {
+      const { data: opportunity } = await supabaseAdmin
+        .from("opportunities")
         .select("title")
-        .eq("id", transaction.project_id)
+        .eq("id", transaction.opportunity_id)
         .maybeSingle();
-      projectTitle = project?.title || "N/A";
+      opportunityTitle = opportunity?.title || "N/A";
     }
 
     // Fetch payment method details from Stripe if payment intent ID exists
@@ -669,7 +669,7 @@ async function generateAndStoreReceiptPdf(
     // Generate PDF
     const receiptData: ReceiptData = {
       userName,
-      projectTitle,
+      projectTitle: opportunityTitle, // Keep field name for PDF template compatibility
       applicationId: transaction.application_id || null,
       amount,
       currency,
@@ -719,18 +719,18 @@ async function assignReviewersToApplication(applicationId: string) {
     // Get project title for notifications
     const { data: appData } = await supabaseAdmin
       .from("applications")
-      .select("project_id")
+      .select("opportunity_id")
       .eq("id", applicationId)
       .maybeSingle();
 
-    let projectTitle = "the project";
-    if (appData?.project_id) {
-      const { data: project } = await supabaseAdmin
-        .from("projects")
+    let opportunityTitle = "the opportunity";
+    if (appData?.opportunity_id) {
+      const { data: opportunity } = await supabaseAdmin
+        .from("opportunities")
         .select("title")
-        .eq("id", appData.project_id)
+        .eq("id", appData.opportunity_id)
         .maybeSingle();
-      if (project?.title) projectTitle = project.title;
+      if (opportunity?.title) opportunityTitle = opportunity.title;
     }
 
     const notifyAdminsMissingReviewer = async (availableCount: number) => {
@@ -753,13 +753,13 @@ async function assignReviewersToApplication(applicationId: string) {
             supabaseAdmin.rpc("create_notification", {
               p_user_id: adminId,
               p_title: "Reviewer capacity needed",
-              p_message: `Only ${availableCount} reviewer is available for "${projectTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
+              p_message: `Only ${availableCount} reviewer is available for "${opportunityTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
               p_type: "review_assignment",
               p_link: `/admin/applications/${applicationId}`,
               p_metadata: {
                 application_id: applicationId,
-                project_id: appData?.project_id,
-                project_title: projectTitle,
+                opportunity_id: appData?.opportunity_id,
+                opportunity_title: opportunityTitle,
                 required_reviewers: 2,
                 assigned_reviewers: availableCount,
               },
@@ -825,12 +825,12 @@ async function assignReviewersToApplication(applicationId: string) {
             await supabaseAdmin.rpc("create_notification", {
               p_user_id: assignment.reviewer_id,
               p_title: "New Application Assigned",
-              p_message: `A new application for "${projectTitle}" has been assigned to you for review.`,
+              p_message: `A new application for "${opportunityTitle}" has been assigned to you for review.`,
               p_type: "review_assigned",
               p_link: `/reviewer/applications/${applicationId}`,
               p_metadata: {
                 application_id: applicationId,
-                project_id: appData?.project_id,
+                opportunity_id: appData?.opportunity_id,
                 assignment_id: assignment.assignment_id,
               },
             });
@@ -864,7 +864,7 @@ async function enqueuePaymentReceiptEmail(
     // Look up recipient email and name
     const { data: appData } = await supabaseAdmin
       .from("applications")
-      .select("contact_email, user_id, project_id, full_legal_name")
+      .select("contact_email, user_id, opportunity_id, full_legal_name")
       .eq("id", applicationId)
       .maybeSingle();
 
@@ -899,15 +899,15 @@ async function enqueuePaymentReceiptEmail(
       return;
     }
 
-    // Look up project title
-    let projectTitle = "Project";
-    if (appData.project_id) {
-      const { data: project } = await supabaseAdmin
-        .from("projects")
+    // Look up opportunity title
+    let opportunityTitle = "Opportunity";
+    if (appData.opportunity_id) {
+      const { data: opportunity } = await supabaseAdmin
+        .from("opportunities")
         .select("title")
-        .eq("id", appData.project_id)
+        .eq("id", appData.opportunity_id)
         .maybeSingle();
-      if (project?.title) projectTitle = project.title;
+      if (opportunity?.title) opportunityTitle = opportunity.title;
     }
 
     const amount = amountInCents ? (amountInCents / 100).toFixed(2) : "0.00";
@@ -920,7 +920,7 @@ async function enqueuePaymentReceiptEmail(
 
     const payload = {
       recipientName,
-      projectTitle,
+      projectTitle: opportunityTitle, // Keep field name for email template compatibility
       applicationId,
       amount,
       currency: currency.toUpperCase(),

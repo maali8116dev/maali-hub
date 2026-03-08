@@ -26,7 +26,7 @@ const supabaseAdmin = createClient(
 interface SubmitApplicationRequest {
   token?: string;
   draftId?: string | null;
-  projectId: number;
+  opportunityId: number;
   applicationData: {
     applicant_type: string;
     full_legal_name: string;
@@ -66,9 +66,9 @@ interface CheckoutCreationParams {
   userId: string;
   userEmail: string | null;
   applicationId: string;
-  projectId: number;
+  opportunityId: number;
   feeValue: number;
-  projectTitle: string;
+  opportunityTitle: string;
 }
 
 interface ApplicationDocumentRef {
@@ -141,11 +141,11 @@ async function cleanupOrphanDocumentsForUser(
 
 async function linkDocumentsToApplication(params: {
   userId: string;
-  projectId: number;
+  opportunityId: number;
   applicationId: string;
   documentIds: string[];
 }) {
-  const { userId, projectId, applicationId, documentIds } = params;
+  const { userId, opportunityId, applicationId, documentIds } = params;
   if (!documentIds.length) return { linked: 0, failedIds: [] as string[] };
 
   const { data: docs, error: fetchErr } = await supabaseAdmin
@@ -172,7 +172,7 @@ async function linkDocumentsToApplication(params: {
     .from("application_documents")
     .update({
       application_id: applicationId,
-      project_id: projectId,
+      opportunity_id: opportunityId,
       is_library_document: false,
     })
     .in("id", validUnlinkedIds)
@@ -198,9 +198,9 @@ async function createCheckoutSessionForApplication(
     userId,
     userEmail,
     applicationId,
-    projectId,
+    opportunityId,
     feeValue,
-    projectTitle,
+    opportunityTitle,
   } = params;
 
   const baseUrl = getTrustedBaseUrl(req);
@@ -214,8 +214,8 @@ async function createCheckoutSessionForApplication(
           currency: "usd",
           unit_amount: Math.round(feeValue * 100),
           product_data: {
-            name: `Application Fee - ${projectTitle}`,
-            description: `Application fee for ${projectTitle}`,
+            name: `Application Fee - ${opportunityTitle}`,
+            description: `Application fee for ${opportunityTitle}`,
           },
         },
         quantity: 1,
@@ -224,7 +224,7 @@ async function createCheckoutSessionForApplication(
     metadata: {
       userId,
       applicationId,
-      projectId: projectId.toString(),
+      opportunity_id: opportunityId.toString(),
     },
     success_url: `${baseUrl}/payment/success?application_id=${encodeURIComponent(applicationId)}`,
     cancel_url: `${baseUrl}/payment/cancel?application_id=${encodeURIComponent(applicationId)}`,
@@ -241,10 +241,10 @@ async function createCheckoutSessionForApplication(
       provider: "stripe",
       provider_payment_intent_id: (session.payment_intent as string) || null,
       provider_transaction_id: session.id,
-      description: `Application fee for ${projectTitle}`,
+      description: `Application fee for ${opportunityTitle}`,
       billing_email: userEmail,
       application_id: applicationId,
-      project_id: projectId,
+      opportunity_id: opportunityId,
       metadata: { checkout_session_id: session.id },
     })
     .then(({ error }) => {
@@ -309,8 +309,8 @@ function buildApplicationRow(
 async function runSideEffects(params: {
   userId: string;
   applicationId: string;
-  projectId: number;
-  projectTitle: string;
+  opportunityId: number;
+  opportunityTitle: string;
   applicantType: string;
   hasFee: boolean;
   initialStatus: string;
@@ -318,8 +318,8 @@ async function runSideEffects(params: {
   const {
     userId,
     applicationId,
-    projectId,
-    projectTitle,
+    opportunityId,
+    opportunityTitle,
     applicantType,
     hasFee,
     initialStatus,
@@ -332,8 +332,8 @@ async function runSideEffects(params: {
       action_type: "submit",
       entity_type: "application",
       entity_id: applicationId,
-      description: `Submitted application for project ID: ${projectId}`,
-      metadata: { projectId, applicantType, projectTitle },
+      description: `Submitted application for opportunity ID: ${opportunityId}`,
+      metadata: { opportunityId, applicantType, opportunityTitle },
     });
   } catch (e) {
     console.error("Activity log error:", e);
@@ -341,8 +341,8 @@ async function runSideEffects(params: {
 
   // 2. Notification
   const notificationMessage = hasFee
-    ? `Your application for "${projectTitle}" has been successfully submitted. Please complete payment to proceed with review.`
-    : `Your application for "${projectTitle}" has been successfully submitted and is now under review.`;
+    ? `Your application for "${opportunityTitle}" has been successfully submitted. Please complete payment to proceed with review.`
+    : `Your application for "${opportunityTitle}" has been successfully submitted and is now under review.`;
 
   try {
     await supabaseAdmin.rpc("create_notification", {
@@ -353,7 +353,7 @@ async function runSideEffects(params: {
       p_link: `/dashboard/applications/${applicationId}`,
       p_metadata: {
         application_id: applicationId,
-        project_id: projectId,
+        opportunity_id: opportunityId,
         status: initialStatus,
       },
     });
@@ -384,13 +384,13 @@ async function runSideEffects(params: {
               supabaseAdmin.rpc("create_notification", {
                 p_user_id: adminId,
                 p_title: "Reviewer capacity needed",
-                p_message: `Only ${availableCount} reviewer is available for "${projectTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
+                p_message: `Only ${availableCount} reviewer is available for "${opportunityTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
                 p_type: "review_assignment",
                 p_link: `/admin/applications/${applicationId}`,
                 p_metadata: {
                   application_id: applicationId,
-                  project_id: projectId,
-                  project_title: projectTitle,
+                  opportunity_id: opportunityId,
+                  opportunity_title: opportunityTitle,
                   required_reviewers: 2,
                   assigned_reviewers: availableCount,
                 },
@@ -435,7 +435,7 @@ async function runSideEffects(params: {
           entity_type: "application",
           entity_id: applicationId,
           description: `Failed to assign reviewers: ${assignError.message}`,
-          metadata: { application_id: applicationId, project_id: projectId },
+          metadata: { application_id: applicationId, opportunity_id: opportunityId },
         }).then(() => {}).catch(() => {});
       } else if (assignments?.length) {
         await supabaseAdmin.from("activity_logs").insert({
@@ -446,7 +446,7 @@ async function runSideEffects(params: {
           description: `Assigned ${assignments.length} reviewer(s)`,
           metadata: {
             application_id: applicationId,
-            project_id: projectId,
+            opportunity_id: opportunityId,
             reviewer_count: assignments.length,
             reviewer_ids: (assignments as ReviewerAssignment[]).map((a) => a.reviewer_id),
           },
@@ -459,12 +459,12 @@ async function runSideEffects(params: {
               .rpc("create_notification", {
                 p_user_id: a.reviewer_id,
                 p_title: "New Application Assigned",
-                p_message: `A new application for "${projectTitle}" has been assigned to you for review.`,
+                p_message: `A new application for "${opportunityTitle}" has been assigned to you for review.`,
                 p_type: "review_assigned",
                 p_link: `/reviewer/applications/${applicationId}`,
                 p_metadata: {
                   application_id: applicationId,
-                  project_id: projectId,
+                  opportunity_id: opportunityId,
                   assignment_id: a.assignment_id,
                 },
               })
@@ -520,17 +520,17 @@ serve(async (req: Request): Promise<Response> => {
 
     const {
       draftId,
-      projectId,
+      opportunityId,
       applicationData,
       libraryDocumentIds: bodyDocIds = [],
     } = body;
     libraryDocumentIds = bodyDocIds;
 
-    if (!projectId) {
+    if (!opportunityId) {
       return jsonResponse(req, 400, {
         success: false,
-        error: "Project ID is required",
-        errorCode: "MISSING_PROJECT_ID",
+        error: "Opportunity ID is required",
+        errorCode: "MISSING_OPPORTUNITY_ID",
       });
     }
 
@@ -538,7 +538,7 @@ serve(async (req: Request): Promise<Response> => {
     const { data: validation, error: validationError } =
       await supabaseAdmin.rpc("validate_application_submission", {
         p_user_id: user.id,
-        p_project_id: projectId,
+        p_opportunity_id: opportunityId,
       });
 
     if (validationError) {
@@ -560,28 +560,28 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const feeValue = v.project_fee != null ? Number(v.project_fee) : 0;
+    const feeValue = v.application_fee != null ? Number(v.application_fee) : 0;
     const hasFee = feeValue > 0;
-    const projectTitle =
-      v.project_title || applicationData.project_title || "the project";
+    const opportunityTitle =
+      v.opportunity_title || applicationData.project_title || "the opportunity";
     const initialStatus = hasFee ? "pending_payment" : "pending";
 
     if (!v.can_submit) {
       console.log("[submit-application] decision=validation_blocked", {
         userId: user.id,
-        projectId,
+        opportunityId,
         hasExistingApplication: !!v.has_existing_application,
         existingApplicationId: v.existing_application_id ?? null,
-        errorCode: v.has_existing_application ? "ALREADY_APPLIED" : "PROJECT_CLOSED",
+        errorCode: v.has_existing_application ? "ALREADY_APPLIED" : "OPPORTUNITY_CLOSED",
       });
 
       if (v.has_existing_application) {
         const { data: existingApp, error: existingAppError } = await supabaseAdmin
           .from("applications")
-          .select("id, user_id, project_id, status, application_fee_paid, contact_email")
+          .select("id, user_id, opportunity_id, status, application_fee_paid, contact_email")
           .eq("id", v.existing_application_id)
           .eq("user_id", user.id)
-          .eq("project_id", projectId)
+          .eq("opportunity_id", opportunityId)
           .maybeSingle();
 
         if (existingAppError) {
@@ -616,14 +616,14 @@ serve(async (req: Request): Promise<Response> => {
               userId: user.id,
               userEmail: checkoutUserEmail,
               applicationId: existingApp.id,
-              projectId,
+              opportunityId,
               feeValue,
-              projectTitle,
+              opportunityTitle,
             });
 
             console.log("[submit-application] decision=resume_checkout", {
               userId: user.id,
-              projectId,
+              opportunityId,
               applicationId: existingApp.id,
               checkoutSessionId: session.id,
             });
@@ -656,7 +656,7 @@ serve(async (req: Request): Promise<Response> => {
         error: v.error_message || "Cannot submit application",
         errorCode: v.has_existing_application
           ? "ALREADY_APPLIED"
-          : "PROJECT_CLOSED",
+          : "OPPORTUNITY_CLOSED",
         existingApplicationId: v.existing_application_id ?? null,
       });
     }
@@ -668,7 +668,7 @@ serve(async (req: Request): Promise<Response> => {
     if (draftId) {
       const { data, error } = await supabaseAdmin
         .from("applications")
-        .update({ ...appRow, project_id: projectId })
+        .update({ ...appRow, opportunity_id: opportunityId })
         .eq("id", draftId)
         .eq("user_id", user.id)
         .select()
@@ -686,7 +686,7 @@ serve(async (req: Request): Promise<Response> => {
     } else {
       const { data, error } = await supabaseAdmin
         .from("applications")
-        .insert({ user_id: user.id, project_id: projectId, ...appRow })
+        .insert({ user_id: user.id, opportunity_id: opportunityId, ...appRow })
         .select()
         .single();
 
@@ -702,7 +702,7 @@ serve(async (req: Request): Promise<Response> => {
             .from("applications")
             .select("id")
             .eq("user_id", user.id)
-            .eq("project_id", projectId)
+            .eq("opportunity_id", opportunityId)
             .eq("is_draft", false)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -724,7 +724,7 @@ serve(async (req: Request): Promise<Response> => {
       application = data;
       console.log("[submit-application] decision=new_application_created", {
         userId: user.id,
-        projectId,
+        opportunityId,
         applicationId: application?.id ?? null,
       });
     }
@@ -746,7 +746,7 @@ serve(async (req: Request): Promise<Response> => {
       try {
         docResult = await linkDocumentsToApplication({
           userId: user.id,
-          projectId,
+          opportunityId,
           applicationId,
           documentIds: libraryDocumentIds,
         });
@@ -764,8 +764,8 @@ serve(async (req: Request): Promise<Response> => {
     runSideEffects({
       userId: user.id,
       applicationId,
-      projectId,
-      projectTitle,
+      opportunityId,
+      opportunityTitle,
       applicantType: applicationData.applicant_type,
       hasFee,
       initialStatus,
@@ -789,9 +789,9 @@ serve(async (req: Request): Promise<Response> => {
           userId: user.id,
           userEmail,
           applicationId,
-          projectId,
+          opportunityId,
           feeValue,
-          projectTitle,
+          opportunityTitle,
         });
 
         return jsonResponse(req, 200, {
@@ -834,10 +834,10 @@ serve(async (req: Request): Promise<Response> => {
           provider: null, // No payment provider for free applications
           provider_payment_intent_id: null,
           provider_transaction_id: null,
-          description: `Application fee for ${projectTitle} (Free)`,
+          description: `Application fee for ${opportunityTitle} (Free)`,
           billing_email: userEmail,
           application_id: applicationId,
-          project_id: projectId,
+          opportunity_id: opportunityId,
           completed_at: new Date().toISOString(),
           metadata: { is_free_application: true },
         })

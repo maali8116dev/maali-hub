@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
-import type { ProjectWithCategory } from "@/hooks/useProjectDetails";
+import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 
 interface ProjectInfoProps {
-  project: ProjectWithCategory;
+  project: OpportunityWithTags;
 }
 
 const getStatusColor = (status: string) => {
@@ -33,7 +33,7 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
   const displayStatus = getProjectDisplayStatus(
     project.status,
     project.deadline,
-    project.created_at,
+    project.createdAt,
   );
 
   const formatProjectDate = (dateString: string) => {
@@ -52,7 +52,7 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start mb-4">
-          <Badge variant="secondary">{project.category}</Badge>
+          <Badge variant="secondary">{project.tags?.[0]?.name || "Uncategorized"}</Badge>
           <Badge className={getStatusColor(displayStatus)}>
             {displayStatus}
           </Badge>
@@ -61,10 +61,10 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
       </CardHeader>
       <CardContent>
         {/* Project Image */}
-        {project.image_url && (
+        {project.imageUrl && (
           <div className="mb-6">
             <img
-              src={project.image_url}
+              src={project.imageUrl}
               alt={project.title}
               className="w-full h-64 object-cover rounded-lg"
             />
@@ -79,7 +79,7 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
           </div>
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-muted-foreground" />
-            <span>{project.funding_amount}</span>
+            <span>{project.fundingAmount}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -87,7 +87,7 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
           </div>
           <div className="flex items-center gap-2">
             <Tag className="h-5 w-5 text-muted-foreground" />
-            <span>Category: {project.category}</span>
+            <span>Category: {project.tags?.[0]?.name || "Uncategorized"}</span>
           </div>
         </div>
       </CardContent>
