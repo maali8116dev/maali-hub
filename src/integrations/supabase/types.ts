@@ -1949,7 +1949,7 @@ export type Database = {
         | "incubator"
         | "job"
       program_format: "online" | "in_person" | "hybrid"
-      user_role: "admin" | "reviewer" | "applicant"
+      user_role: "admin" | "reviewer" | "applicant" | "partner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2108,7 +2108,7 @@ export const Constants = {
         "job",
       ],
       program_format: ["online", "in_person", "hybrid"],
-      user_role: ["admin", "reviewer", "applicant"],
+      user_role: ["admin", "reviewer", "applicant", "partner"],
     },
   },
 } as const
