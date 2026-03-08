@@ -22,12 +22,12 @@ const schema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
-  applicationFee: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().min(0).optional()),
   maxApplicants: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().positive().optional()),
   currency: z.string().optional(),
   country: z.string().optional(),
   organizationName: z.string().optional(),
   categoryId: z.preprocess((v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v), z.number().int().optional()),
+  opportunityType: z.enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"]).default("grant"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -45,11 +45,12 @@ const PartnerOpportunityForm = () => {
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", description: "", status: "open", deadline: "", fundingAmount: "", location: "", requirements: "", eligibilityCriteria: "", currency: "USD", country: "", organizationName: "" },
+    defaultValues: { title: "", description: "", status: "open", deadline: "", fundingAmount: "", location: "", requirements: "", eligibilityCriteria: "", currency: "USD", country: "", organizationName: "", opportunityType: "grant" },
   });
 
   const status = watch("status");
   const categoryId = watch("categoryId");
+  const opportunityType = watch("opportunityType");
 
   useEffect(() => {
     if (opportunity && isEditing) {
@@ -62,12 +63,12 @@ const PartnerOpportunityForm = () => {
         location: opportunity.location,
         requirements: opportunity.requirements || "",
         eligibilityCriteria: opportunity.eligibilityCriteria || "",
-        applicationFee: opportunity.applicationFee ? parseFloat(opportunity.applicationFee.toString()) : undefined,
         maxApplicants: opportunity.maxApplicants || undefined,
         currency: opportunity.currency || "USD",
         country: opportunity.country || "",
         organizationName: opportunity.organizationName || "",
         categoryId: opportunity.categoryId || undefined,
+        opportunityType: (opportunity.opportunityType as any) || "grant",
       });
     }
   }, [opportunity, isEditing, reset]);
@@ -82,12 +83,12 @@ const PartnerOpportunityForm = () => {
       location: data.location,
       requirements: data.requirements,
       eligibilityCriteria: data.eligibilityCriteria,
-      applicationFee: data.applicationFee,
       maxApplicants: data.maxApplicants,
       currency: data.currency,
       country: data.country,
       organizationName: data.organizationName,
       categoryId: data.categoryId,
+      opportunityType: data.opportunityType,
     };
 
     if (isEditing && opportunityId) {
@@ -131,7 +132,24 @@ const PartnerOpportunityForm = () => {
               <Textarea id="description" {...register("description")} rows={6} className={errors.description ? "border-destructive" : ""} />
               {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <Label>Opportunity Type *</Label>
+                <Select value={opportunityType} onValueChange={(v) => setValue("opportunityType", v as any, { shouldValidate: true })}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grant">Grant</SelectItem>
+                    <SelectItem value="fellowship">Fellowship</SelectItem>
+                    <SelectItem value="scholarship">Scholarship</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="competition">Competition</SelectItem>
+                    <SelectItem value="accelerator">Accelerator</SelectItem>
+                    <SelectItem value="incubator">Incubator</SelectItem>
+                    <SelectItem value="job">Job</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label>Category</Label>
                 <Select value={categoryId?.toString() || ""} onValueChange={(v) => setValue("categoryId", parseInt(v), { shouldValidate: true })}>
@@ -166,7 +184,7 @@ const PartnerOpportunityForm = () => {
                 {errors.location && <p className="text-sm text-destructive mt-1">{errors.location.message}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="fundingAmount">Funding Amount *</Label>
                 <Input id="fundingAmount" {...register("fundingAmount")} className={errors.fundingAmount ? "border-destructive" : ""} />
@@ -175,11 +193,6 @@ const PartnerOpportunityForm = () => {
               <div>
                 <Label htmlFor="currency">Currency</Label>
                 <Input id="currency" {...register("currency")} placeholder="USD" />
-              </div>
-              <div>
-                <Label htmlFor="applicationFee">Application Fee</Label>
-                <Input id="applicationFee" type="number" step="0.01" min="0" {...register("applicationFee", { valueAsNumber: true })} />
-                <p className="text-xs text-muted-foreground mt-1">Leave empty for free</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

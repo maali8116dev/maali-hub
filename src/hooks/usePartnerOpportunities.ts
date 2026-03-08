@@ -36,7 +36,6 @@ export type PartnerOpportunityFormData = {
   imageUrl?: string;
   requirements?: string;
   eligibilityCriteria?: string;
-  applicationFee?: number;
   maxApplicants?: number;
   currency?: string;
   opportunityType?: string;
@@ -128,7 +127,7 @@ export function useCreatePartnerOpportunity() {
           image_url: formData.imageUrl || null,
           requirements: formData.requirements || null,
           eligibility_criteria: formData.eligibilityCriteria || null,
-          application_fee: formData.applicationFee || 0,
+          application_fee: 0,
           max_applicants: formData.maxApplicants || null,
           currency: formData.currency || "USD",
           opportunity_type: (formData.opportunityType as any) || "grant",
@@ -172,7 +171,7 @@ export function useUpdatePartnerOpportunity() {
           image_url: formData.imageUrl || null,
           requirements: formData.requirements || null,
           eligibility_criteria: formData.eligibilityCriteria || null,
-          application_fee: formData.applicationFee || 0,
+          application_fee: 0,
           max_applicants: formData.maxApplicants || null,
           currency: formData.currency || "USD",
           opportunity_type: (formData.opportunityType as any) || "grant",
