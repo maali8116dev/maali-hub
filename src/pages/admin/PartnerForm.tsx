@@ -106,9 +106,10 @@ const PartnerForm = () => {
         setOldLogoUrl(data.logo_url);
         setValue("website_url", data.website_url || "");
         setValue("category", data.category);
-        setValue("display_order", data.display_order);
-        setValue("featured", data.featured);
+        setValue("display_order", data.display_order ?? 0);
+        setValue("featured", data.featured ?? false);
         setValue("status", data.status as PartnerFormValues["status"]);
+        setValue("user_id", (data as any).user_id || "");
       }
     } catch (error: any) {
       toast({
