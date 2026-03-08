@@ -17,6 +17,7 @@ const getDashboardForRole = (role: string): string => {
   switch (role) {
     case "admin": return "/admin";
     case "reviewer": return "/reviewer";
+    case "partner": return "/partner";
     default: return "/dashboard";
   }
 };
