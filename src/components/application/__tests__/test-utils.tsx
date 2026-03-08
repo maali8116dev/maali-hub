@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { useAuth } from '@/hooks/useAuth';
-import { useProjects } from '@/hooks/useProjects';
+import { useOpportunities } from '@/hooks/useOpportunities';
 import { supabase } from '@/integrations/supabase/client';
 import { useDocumentUpload } from '@/hooks/useDocumentUpload';
 import { useApplicationFormStore } from '@/stores/applicationForm';
