@@ -54,7 +54,9 @@ type EmailType =
   | "password_reset"
   | "contact_submission"
   | "contact_confirmation"
-  | "payment_receipt";
+  | "payment_receipt"
+  | "kyc_verified"
+  | "kyc_rejected";
 
 interface SendEmailRequest {
   to: string;
