@@ -434,7 +434,7 @@ async function runSideEffects(params: {
           action_type: "error",
           entity_type: "application",
           entity_id: applicationId,
-          description: `Failed to assign reviewers: ${assignError.message}`,
+          description: `Failed to assign reviewers: ${assignError?.message ?? 'Unknown error'}`,
           metadata: { application_id: applicationId, opportunity_id: opportunityId },
         }).then(() => {}).catch(() => {});
       } else if (assignments?.length) {
@@ -450,7 +450,7 @@ async function runSideEffects(params: {
             reviewer_count: assignments.length,
             reviewer_ids: (assignments as ReviewerAssignment[]).map((a) => a.reviewer_id),
           },
-        }).then(() => {}).catch(() => {});
+        });
 
         // Notify each reviewer
         await Promise.allSettled(
@@ -467,11 +467,7 @@ async function runSideEffects(params: {
                   opportunity_id: opportunityId,
                   assignment_id: a.assignment_id,
                 },
-              })
-              .then(() => {})
-              .catch((err: unknown) =>
-                console.error(`Notify reviewer ${a.reviewer_id} failed:`, err),
-              ),
+              }),
           ),
         );
       }

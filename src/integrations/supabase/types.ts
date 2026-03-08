@@ -1582,6 +1582,18 @@ export type Database = {
           total_assignments: number
         }[]
       }
+      get_admin_stats: {
+        Args: never
+        Returns: {
+          active_opportunities: number
+          approved_applications: number
+          pending_applications: number
+          rejected_applications: number
+          total_applications: number
+          total_opportunities: number
+          total_users: number
+        }[]
+      }
       get_all_reviewers_with_details: {
         Args: never
         Returns: {
@@ -1725,15 +1737,12 @@ export type Database = {
           assigned_at: string
           assignment_id: string
           assignment_status: string
-          company_name: string
           contact_email: string
           contact_phone: string
-          funding_amount: string
           id: string
           location: string
           opportunity_id: number
           project_title: string
-          review_deadline: string
           review_notes: string
           reviewed_at: string
           reviewed_by: string
@@ -1741,6 +1750,7 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
+          total_assignments: number
         }[]
       }
       get_reviewer_full_details: {
