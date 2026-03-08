@@ -54,8 +54,8 @@ const Opportunities = () => {
 
   // Fetch opportunities with filters
   const { data, isLoading, error } = useOpportunities({
-    tags: selectedCategory
-      ? [selectedCategory.toLowerCase().replace(/\s+/g, "-")]
+    tags: selectedSector
+      ? [selectedSector.toLowerCase().replace(/\s+/g, "-")]
       : selectedTag
         ? [selectedTag.toLowerCase().replace(/\s+/g, "-")]
         : null,
