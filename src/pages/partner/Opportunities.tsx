@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePartnerOpportunities } from "@/hooks/usePartnerOpportunities";
+import { InAppTip } from "@/components/onboarding/InAppTip";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
