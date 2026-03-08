@@ -25,7 +25,7 @@ import {
 import { Search, X, Tag } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
-import { useOpportunities, useOpportunityTags, useOpportunityLocations } from "@/hooks/useOpportunities";
+import { useOpportunities, useOpportunityTags, useOpportunityLocations, usePopularTags } from "@/hooks/useOpportunities";
 import { useActivePartners } from "@/hooks/usePartners";
 import ProjectCard from "@/components/landing/ProjectCard";
 import { cn } from "@/lib/utils";
@@ -34,11 +34,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-// Dummy tags to supplement DB tags and fill the cloud
-const DUMMY_TAGS = [
-  "Women-led", "Youth", "Rural", "Urban", "Cross-border",
-  "Social Impact", "Sustainability", "Innovation", "Digital",
-  "Capacity Building", "Research", "Community", "Pan-African",
+// Fallback tags shown when DB has fewer than the limit
+const FALLBACK_TAGS = [
+  "Women-led", "Youth", "Rural", "Social Impact",
+  "Sustainability", "Innovation", "Digital", "Community",
 ];
 
 const Opportunities = () => {
@@ -68,14 +67,23 @@ const Opportunities = () => {
 
   // Fetch tags, locations, and partners for dropdowns
   const { data: tags = [] } = useOpportunityTags();
+  const { data: popularTags = [] } = usePopularTags(15);
   const { data: locations = [] } = useOpportunityLocations();
   const { data: partners = [] } = useActivePartners();
 
   const sectors = tags.map((tag) => tag.name);
 
-  // Build tag cloud: merge DB tags + dummy tags, deduplicate
-  const dbTagNames = tags.map((t) => t.name);
-  const allCloudTags = Array.from(new Set([...dbTagNames, ...DUMMY_TAGS])).sort();
+  // Build tag cloud: use popular tags, fill with fallbacks if needed
+  const popularTagNames = popularTags.map((t) => t.name);
+  const cloudTags = popularTags.length >= 5
+    ? popularTags
+    : [
+        ...popularTags,
+        ...FALLBACK_TAGS
+          .filter((name) => !popularTagNames.includes(name))
+          .slice(0, 15 - popularTags.length)
+          .map((name) => ({ id: 0, name, slug: name.toLowerCase().replace(/\s+/g, "-"), count: 0 })),
+      ];
 
   // Fetch submitted applications for current user
   const { data: submittedApplications = [] } = useQuery({
@@ -194,12 +202,12 @@ const Opportunities = () => {
             <span className="text-sm font-medium text-muted-foreground">Browse by tag</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {allCloudTags.map((tagName) => {
-              const isFromDb = dbTagNames.includes(tagName);
-              const isActive = selectedTag === tagName;
+            {cloudTags.map((tag) => {
+              const isFromDb = tag.count > 0;
+              const isActive = selectedTag === tag.name;
               return (
                 <Badge
-                  key={tagName}
+                  key={tag.name}
                   variant={isActive ? "default" : "outline"}
                   className={cn(
                     "cursor-pointer transition-all text-xs px-3 py-1.5 hover:scale-105",
@@ -209,9 +217,12 @@ const Opportunities = () => {
                         ? "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary"
                         : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
-                  onClick={() => handleTagClick(tagName)}
+                  onClick={() => handleTagClick(tag.name)}
                 >
-                  {tagName}
+                  {tag.name}
+                  {isFromDb && tag.count > 0 && (
+                    <span className="ml-1 text-[10px] opacity-70">({tag.count})</span>
+                  )}
                   {isActive && <X className="h-3 w-3 ml-1.5" />}
                 </Badge>
               );

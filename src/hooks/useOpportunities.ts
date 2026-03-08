@@ -211,11 +211,55 @@ export function useOpportunityTags() {
         slug: tag.slug,
       }));
     },
-    staleTime: Infinity, // Never consider stale - tags rarely change
-    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
+  });
+}
+
+export type OpportunityTagWithCount = OpportunityTag & { count: number };
+
+/**
+ * Hook to fetch top N most-used opportunity tags by usage count
+ */
+export function usePopularTags(limit = 15) {
+  return useQuery({
+    queryKey: ["opportunity-tags-popular", limit],
+    queryFn: async (): Promise<OpportunityTagWithCount[]> => {
+      // Fetch all tag mappings with tag info
+      const { data: tagMaps, error: mapError } = await (supabase
+        .from("opportunity_tag_map" as any)
+        .select("tag_id, opportunity_tags(id, name, slug)") as any);
+
+      if (mapError) throw mapError;
+
+      // Count usage per tag
+      const countMap = new Map<number, { tag: OpportunityTag; count: number }>();
+      for (const row of tagMaps || []) {
+        const tag = (row as any).opportunity_tags;
+        if (!tag) continue;
+        const existing = countMap.get(tag.id);
+        if (existing) {
+          existing.count++;
+        } else {
+          countMap.set(tag.id, {
+            tag: { id: tag.id, name: tag.name, slug: tag.slug },
+            count: 1,
+          });
+        }
+      }
+
+      // Sort by count desc, take top N
+      return Array.from(countMap.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit)
+        .map(({ tag, count }) => ({ ...tag, count }));
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }
 
