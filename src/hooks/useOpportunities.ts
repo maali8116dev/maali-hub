@@ -254,10 +254,10 @@ export function useOpportunityLocations() {
  * Direct Supabase query for countries
  */
 async function fetchCountriesDirect(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
     .select("country")
-    .not("country", "is", null);
+    .not("country", "is", null) as any);
 
   if (error) throw error;
 
