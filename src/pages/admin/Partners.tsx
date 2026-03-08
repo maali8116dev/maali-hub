@@ -46,6 +46,7 @@ const AdminPartners = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState<number | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [partnerProfiles, setPartnerProfiles] = useState<Record<string, PartnerProfile>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
