@@ -329,7 +329,7 @@ const Dashboard = () => {
             <ApplicationListSkeleton count={3} />
           ) : recentApplications.length > 0 ? (
             <div className="space-y-3 sm:space-y-4">
-              {recentApplications.map((app: ApplicationWithProject) => (
+              {recentApplications.map((app: ApplicationWithOpportunity) => (
                 <div
                   key={app.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors gap-3"
