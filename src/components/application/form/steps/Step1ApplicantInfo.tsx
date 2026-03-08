@@ -71,13 +71,6 @@ export function Step1ApplicantInfo({
           )}
         <CustomFormField
           control={control}
-          name="registrationIdNumber"
-          fieldType={FormFieldType.INPUT}
-          label="Official ID / Registration Number"
-          placeholder="Enter government ID or registration number"
-        />
-        <CustomFormField
-          control={control}
           name="countryOfResidence"
           fieldType={FormFieldType.SELECT}
           label="Country of Residence / Registration"
