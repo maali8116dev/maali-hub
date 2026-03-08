@@ -43,7 +43,7 @@ const DUMMY_TAGS = [
 
 const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
@@ -54,8 +54,8 @@ const Opportunities = () => {
 
   // Fetch opportunities with filters
   const { data, isLoading, error } = useOpportunities({
-    tags: selectedCategory
-      ? [selectedCategory.toLowerCase().replace(/\s+/g, "-")]
+    tags: selectedSector
+      ? [selectedSector.toLowerCase().replace(/\s+/g, "-")]
       : selectedTag
         ? [selectedTag.toLowerCase().replace(/\s+/g, "-")]
         : null,
@@ -71,7 +71,7 @@ const Opportunities = () => {
   const { data: locations = [] } = useOpportunityLocations();
   const { data: partners = [] } = useActivePartners();
 
-  const categories = tags.map((tag) => tag.name);
+  const sectors = tags.map((tag) => tag.name);
 
   // Build tag cloud: merge DB tags + dummy tags, deduplicate
   const dbTagNames = tags.map((t) => t.name);
@@ -123,11 +123,11 @@ const Opportunities = () => {
     return true;
   });
 
-  const hasActiveFilters = !!(selectedCategory || selectedStatus || selectedLocation || selectedPartner || selectedTag);
+  const hasActiveFilters = !!(selectedSector || selectedStatus || selectedLocation || selectedPartner || selectedTag);
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setSelectedCategory(null);
+    setSelectedSector(null);
     setSelectedStatus(null);
     setSelectedLocation(null);
     setSelectedPartner(null);
@@ -140,7 +140,7 @@ const Opportunities = () => {
       setSelectedTag(null);
     } else {
       setSelectedTag(tagName);
-      setSelectedCategory(null); // clear category when tag is selected
+      setSelectedSector(null); // clear sector when tag is selected
       setCurrentPage(1);
     }
   };
@@ -224,23 +224,23 @@ const Opportunities = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-4 items-end">
-                {/* Category Filter */}
+                {/* Sector Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="category-filter" className="mb-2 block">Category</Label>
+                  <Label htmlFor="sector-filter" className="mb-2 block">Sector</Label>
                   <Select
-                    value={selectedCategory || "all"}
+                    value={selectedSector || "all"}
                     onValueChange={(value) => {
-                      setSelectedCategory(value === "all" ? null : value);
+                      setSelectedSector(value === "all" ? null : value);
                       setSelectedTag(null);
                     }}
                   >
-                    <SelectTrigger id="category-filter" className="w-full">
-                      <SelectValue placeholder="Select category" />
+                    <SelectTrigger id="sector-filter" className="w-full">
+                      <SelectValue placeholder="Select sector" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      <SelectItem value="all">All Sectors</SelectItem>
+                      {sectors.map((sector) => (
+                        <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
