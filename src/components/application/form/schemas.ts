@@ -44,7 +44,7 @@ export const step1Schema = z.object({
     .string()
     .min(1, "Full legal name is required"),
   organizationName: z.string().optional(),
-  registrationIdNumber: z.string().optional(),
+  
   countryOfResidence: z.string().min(2, "Country of residence is required"),
   cityRegion: z.string().min(1, "City/region is required"),
   emailAddress: emailSchema,

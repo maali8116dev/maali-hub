@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { User, Mail, Building, Phone, MapPin, Loader2 } from "lucide-react";
+import { KycVerificationSection } from "@/components/profile/KycVerificationSection";
 
 const Profile = () => {
   const { user } = useAuth();

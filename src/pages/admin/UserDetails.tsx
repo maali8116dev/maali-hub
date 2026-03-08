@@ -228,6 +228,9 @@ const AdminUserDetails = () => {
         </Card>
       </div>
 
+      {/* KYC Verification Card */}
+      <KycReviewCard userId={user.userId} profileName={user.name} />
+
       {/* Role Management Card */}
       <Card>
         <CardHeader>
