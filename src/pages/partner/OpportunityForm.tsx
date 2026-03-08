@@ -132,7 +132,24 @@ const PartnerOpportunityForm = () => {
               <Textarea id="description" {...register("description")} rows={6} className={errors.description ? "border-destructive" : ""} />
               {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <Label>Opportunity Type *</Label>
+                <Select value={opportunityType} onValueChange={(v) => setValue("opportunityType", v as any, { shouldValidate: true })}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grant">Grant</SelectItem>
+                    <SelectItem value="fellowship">Fellowship</SelectItem>
+                    <SelectItem value="scholarship">Scholarship</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="competition">Competition</SelectItem>
+                    <SelectItem value="accelerator">Accelerator</SelectItem>
+                    <SelectItem value="incubator">Incubator</SelectItem>
+                    <SelectItem value="job">Job</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label>Category</Label>
                 <Select value={categoryId?.toString() || ""} onValueChange={(v) => setValue("categoryId", parseInt(v), { shouldValidate: true })}>
@@ -167,7 +184,7 @@ const PartnerOpportunityForm = () => {
                 {errors.location && <p className="text-sm text-destructive mt-1">{errors.location.message}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="fundingAmount">Funding Amount *</Label>
                 <Input id="fundingAmount" {...register("fundingAmount")} className={errors.fundingAmount ? "border-destructive" : ""} />
@@ -176,11 +193,6 @@ const PartnerOpportunityForm = () => {
               <div>
                 <Label htmlFor="currency">Currency</Label>
                 <Input id="currency" {...register("currency")} placeholder="USD" />
-              </div>
-              <div>
-                <Label htmlFor="applicationFee">Application Fee</Label>
-                <Input id="applicationFee" type="number" step="0.01" min="0" {...register("applicationFee", { valueAsNumber: true })} />
-                <p className="text-xs text-muted-foreground mt-1">Leave empty for free</p>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
