@@ -140,6 +140,7 @@ const PartnerForm = () => {
         display_order: data.display_order,
         featured: data.featured,
         status: data.status,
+        user_id: data.user_id || null,
       };
 
       if (isEditing && id) {
