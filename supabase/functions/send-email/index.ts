@@ -84,6 +84,8 @@ interface SendEmailRequest {
     invoiceNumber?: string;
     transactionId?: string;
     invoicePdfUrl?: string | null;
+    // KYC fields
+    rejectionReason?: string;
   };
 }
 
