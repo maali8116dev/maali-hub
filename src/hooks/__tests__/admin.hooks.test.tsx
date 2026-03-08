@@ -230,7 +230,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
         user_id: ud.user.id, first_name: `Applicant${i}`, last_name: 'Test', role: 'applicant',
       }, { onConflict: 'user_id' });
 
-      const { data: appData } = await supabaseAdmin.from('applications').insert({
+      const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
         user_id: ud.user.id, project_id: testProjectId, contact_email: email,
         organization_name: `Company ${i}`, status: i === 0 ? 'pending' : 'approved',
         is_draft: false,
@@ -267,7 +267,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     if (!supabaseAdmin) return;
 
     // Insert an under_review application
-    const { data: urApp } = await supabaseAdmin.from('applications').insert({
+    const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0], project_id: testProjectId,
       contact_email: 'ur@test.com', status: 'under_review', is_draft: false,
     }).select('id').single();
@@ -287,7 +287,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     if (!supabaseAdmin) return;
 
     // Insert a draft
-    const { data: draftApp } = await supabaseAdmin.from('applications').insert({
+    const { data: draftApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0], project_id: testProjectId,
       contact_email: 'draft@test.com', status: 'pending', is_draft: true,
     }).select('id').single();

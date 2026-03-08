@@ -133,7 +133,7 @@ beforeAll(async () => {
       { onConflict: 'user_id' },
     );
 
-    const { data: appData } = await supabaseAdmin.from('applications').insert({
+    const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: ud.user.id,
       project_id: testProjectId,
       contact_email: email,
@@ -194,7 +194,7 @@ describe('useAdminApplications — real user flow', () => {
     if (!supabaseAdmin) return;
 
     // Insert an under_review application
-    const { data: urApp } = await supabaseAdmin.from('applications').insert({
+    const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
       project_id: testProjectId,
       contact_email: 'underreview@test.com',
@@ -218,7 +218,7 @@ describe('useAdminApplications — real user flow', () => {
   it('drafts never appear in the admin list', async () => {
     if (!supabaseAdmin) return;
 
-    const { data: draft } = await supabaseAdmin.from('applications').insert({
+    const { data: draft } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
       project_id: testProjectId,
       contact_email: 'draft@test.com',

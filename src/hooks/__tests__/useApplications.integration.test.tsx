@@ -209,8 +209,8 @@ describe('useApplications - Integration Tests', () => {
     ];
 
     for (const application of testApplications) {
-      const { data: newApp, error: appError } = await supabaseAdmin
-        .from('applications')
+      const { data: newApp, error: appError } = await (supabaseAdmin
+        .from('applications') as any)
         .insert(application)
         .select('id')
         .single();

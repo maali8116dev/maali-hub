@@ -89,7 +89,7 @@ describe('useSubmitReview — real user flow', () => {
       { onConflict: 'user_id' },
     );
 
-    const { data: app } = await supabaseAdmin.from('applications').insert({
+    const { data: app } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testApplicantId, project_id: testProjectId,
       contact_email: aEmail, company_name: 'Test', status: 'pending', is_draft: false,
     }).select('id').single();

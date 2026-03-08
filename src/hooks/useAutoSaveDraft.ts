@@ -140,7 +140,7 @@ export const useAutoSaveDraft = ({
           // Create new draft
           result = await supabase
             .from("applications")
-            .insert(draftData)
+            .insert(draftData as any)
             .select()
             .single();
         }

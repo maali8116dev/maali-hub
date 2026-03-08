@@ -147,8 +147,8 @@ describe('Application Review Workflow - Integration Tests', () => {
     );
 
     // 4. Create test application
-    const { data: applicationData, error: applicationError } = await supabaseAdmin
-      .from('applications')
+    const { data: applicationData, error: applicationError } = await (supabaseAdmin
+      .from('applications') as any)
       .insert({
         user_id: testApplicantId,
         project_id: testProjectId,
@@ -515,8 +515,8 @@ describe('Application Review Workflow - Integration Tests', () => {
 
     it('should handle workflow with conflicting recommendations', async () => {
       // Create a new application for this test
-      const { data: newAppData } = await supabaseAdmin!
-        .from('applications')
+      const { data: newAppData } = await (supabaseAdmin!
+        .from('applications') as any)
         .insert({
           user_id: testApplicantId,
           project_id: testProjectId,
