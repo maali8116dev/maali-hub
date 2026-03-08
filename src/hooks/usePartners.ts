@@ -11,7 +11,6 @@ export type Partner = {
 
 /**
  * Hook to fetch featured partners for landing page
- * Partners are relatively static content that rarely changes
  */
 export function useFeaturedPartners() {
   return useQuery({
@@ -28,8 +27,32 @@ export function useFeaturedPartners() {
       if (error) throw error;
       return (data || []) as Partner[];
     },
-    staleTime: Infinity, // Partners rarely change
-    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}
+
+/**
+ * Hook to fetch all active partners (for filter dropdowns)
+ */
+export function useActivePartners() {
+  return useQuery({
+    queryKey: ["partners", "active"],
+    queryFn: async (): Promise<Pick<Partner, "id" | "name">[]> => {
+      const { data, error } = await (supabase as any)
+        .from("partners")
+        .select("id, name")
+        .eq("status", "active")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as Pick<Partner, "id" | "name">[];
+    },
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
