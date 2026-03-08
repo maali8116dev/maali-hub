@@ -197,10 +197,10 @@ export function useOpportunityTags() {
   return useQuery({
     queryKey: ["opportunity-tags"],
     queryFn: async (): Promise<OpportunityTag[]> => {
-      const { data, error } = await supabase
-        .from("opportunity_tags")
+      const { data, error } = await (supabase
+        .from("opportunity_tags" as any)
         .select("id, name, slug")
-        .order("name", { ascending: true });
+        .order("name", { ascending: true }) as any);
 
       if (error) throw error;
 
