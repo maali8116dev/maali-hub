@@ -1,147 +1,57 @@
 
-# Plan: Fix MultiStepApplicationForm Integration Test
 
-## Problem Analysis
+## Partner Onboarding UX Recommendations
 
-After reviewing the test file and the component implementation, I've identified several issues causing test failures:
+### Current State
+- Admin creates a partner org in `/admin/partners`, links it to a user account with the `partner` role
+- Partner logs in and lands on a bare dashboard with stats (all zeros initially) and a "New Opportunity" button
+- Settings page is minimal (just email + role display)
+- No guided onboarding exists for partners
 
-### Issue 1: Mock `useProjects` Return Structure Mismatch
-The test mocks `useProjects` to return:
-```typescript
-{
-  data: [mockProject],
-  isLoading: false,
-  isError: false,
-}
-```
+### Proposed Flow: Two-Phase Onboarding
 
-However, the actual `useProjects` hook returns a paginated structure with TanStack Query:
-```typescript
-{
-  data: { projects: [...], total: number, page: number, ... },
-  isLoading: boolean,
-  isError: boolean,
-  ...
-}
-```
+**Phase 1: Admin-Side Setup**
+The admin creates the partner org entry and links a user account (already built). When the admin saves, the linked user gets an email invite or notification. No changes needed here beyond what exists.
 
-### Issue 2: Missing Mock for `createNotification` Function
-The component imports and uses `createNotification` from `@/hooks/useNotifications`, but this is not mocked in the test file. This will cause runtime errors during submission tests.
+**Phase 2: Partner First-Login Experience**
 
-### Issue 3: Zustand Store State Persistence Between Tests
-The `useApplicationFormStore` uses `persist` middleware which stores state in localStorage. Between tests, this state isn't being cleared, causing tests to start with unexpected initial state (wrong step number, pre-filled data, etc.).
+When a partner user logs in for the first time (detected by checking if their linked partner org has incomplete profile data or if they haven't dismissed onboarding), show a guided setup:
 
-### Issue 4: Missing `supabase.auth.getUser` Mock Return Value
-The mock for `supabase.auth.getUser` returns `vi.fn()` but doesn't specify a return value. The component calls `await supabase.auth.getUser()` and expects `{ data: { user } }`.
+1. **Partner Welcome Dialog (modal wizard, 3 steps)** -- reuse the pattern from `ProfileSetupWizard.tsx`:
+   - **Step 1 - Organization Profile**: Pre-filled org name from admin, partner completes description, logo upload, website URL
+   - **Step 2 - Contact Details**: Business phone, primary contact name, country/region
+   - **Step 3 - First Opportunity**: Optional quick-start to create their first opportunity (title, deadline, funding amount) -- or skip
 
-### Issue 5: Incomplete Mock Chain for Supabase Queries
-The mock query chain doesn't properly handle all the chained methods used in the component, especially:
-- `.select().single()` chain (returns different from `.select()` alone)
-- The `.rpc()` method for reviewer assignment
+2. **Dashboard Onboarding Checklist** -- reuse the `OnboardingChecklist` pattern adapted for partners:
+   - Complete organization profile
+   - Upload organization logo
+   - Create your first opportunity
+   - Review your first application
+   - Dismissible, persisted in localStorage
 
-### Issue 6: Test Relies on `getByRole('combobox', { name: /Applicant Type/i })`
-Some tests use this selector which may fail because Radix Select doesn't expose an accessible name on the trigger in the same way. The first test correctly gets all comboboxes and uses index, but later tests try to use the name selector inconsistently.
+3. **Contextual In-App Tips** -- reuse `InAppTip` component:
+   - On empty opportunities list: "Create your first opportunity to start receiving applications"
+   - On dashboard with zero stats: tip explaining what each metric means
+   - On first application received: tip about CSV export
 
----
+### Technical Implementation
 
-## Solution
+**New files:**
+- `src/components/partner/PartnerSetupWizard.tsx` -- modal wizard (3 steps), modeled after `ProfileSetupWizard.tsx`
+- `src/components/partner/PartnerOnboardingChecklist.tsx` -- checklist component using same pattern as `OnboardingChecklist`
 
-### Changes to `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
+**Files to edit:**
+- `src/pages/partner/Dashboard.tsx` -- add `PartnerOnboardingChecklist` and `PartnerSetupWizard` (show wizard on first login)
+- `src/pages/partner/Opportunities.tsx` -- add empty-state tip
+- `src/hooks/usePartnerStats.ts` -- optionally expose a `isNewPartner` flag based on zero opportunities
 
-1. **Add mock for `createNotification`** in the mock section:
-   ```typescript
-   vi.mock('@/hooks/useNotifications', () => ({
-     createNotification: vi.fn().mockResolvedValue(undefined),
-   }));
-   ```
+**Detection logic:** Check if the partner's linked org entry (from `partners` table where `user_id = auth.uid()`) has a complete profile (logo, description). If incomplete, trigger the wizard. The checklist uses localStorage for dismiss state, same as the existing applicant checklist.
 
-2. **Fix `useProjects` mock return structure** to match the actual hook:
-   ```typescript
-   (useProjects as any).mockReturnValue({
-     data: {
-       projects: [mockProject],
-       total: 1,
-       page: 1,
-       itemsPerPage: 9,
-       totalPages: 1,
-     },
-     isLoading: false,
-     isError: false,
-   });
-   ```
+**No database changes required** -- the `partners` table already has all needed columns (logo_url, description, website_url). The wizard just updates the partner's own row.
 
-3. **Add proper `supabase.auth.getUser` mock** that returns the expected structure:
-   ```typescript
-   (supabase.auth.getUser as any).mockResolvedValue({
-     data: { user: mockUser },
-     error: null,
-   });
-   ```
+### Summary
+- Wizard on first login to complete org profile (3 steps)
+- Persistent checklist on dashboard tracking setup progress
+- Contextual tips on empty states
+- All built on existing component patterns (`ProfileSetupWizard`, `OnboardingChecklist`, `InAppTip`)
 
-4. **Reset the Zustand store before each test** by adding to `beforeEach`:
-   ```typescript
-   import { useApplicationFormStore } from '@/stores/applicationForm';
-
-   beforeEach(() => {
-     // Clear localStorage to reset Zustand persisted state
-     localStorage.clear();
-     // Reset the store state
-     useApplicationFormStore.getState().reset();
-     // ... rest of beforeEach
-   });
-   ```
-
-5. **Add `rpc` method to Supabase mock**:
-   ```typescript
-   (supabase as any).rpc = vi.fn().mockResolvedValue({ data: [], error: null });
-   ```
-
-6. **Fix inconsistent combobox selectors** - use consistent approach:
-   ```typescript
-   // Instead of: screen.getByRole('combobox', { name: /Applicant Type/i })
-   // Use: screen.getAllByRole('combobox')[0]
-   ```
-
-7. **Enhance the mock query to handle chained methods properly**:
-   ```typescript
-   const createMockQuery = () => {
-     const mockQuery = {
-       select: vi.fn().mockReturnThis(),
-       eq: vi.fn().mockReturnThis(),
-       neq: vi.fn().mockReturnThis(),
-       insert: vi.fn().mockReturnThis(),
-       update: vi.fn().mockReturnThis(),
-       delete: vi.fn().mockReturnThis(),
-       in: vi.fn().mockReturnThis(),
-       order: vi.fn().mockReturnThis(),
-       single: vi.fn().mockResolvedValue({ data: null, error: null }),
-     };
-     return mockQuery;
-   };
-   ```
-
----
-
-## Technical Details
-
-### Files to Modify
-- `src/components/application/__tests__/MultiStepApplicationForm.integration.test.tsx`
-
-### Key Changes Summary
-
-| Area | Current Issue | Fix |
-|------|---------------|-----|
-| useProjects mock | Returns `{ data: [project] }` | Return `{ data: { projects: [project], ... } }` |
-| createNotification | Not mocked | Add mock returning Promise |
-| Zustand store | State persists between tests | Reset store and clear localStorage in beforeEach |
-| supabase.auth.getUser | No return value | Mock to return `{ data: { user }, error: null }` |
-| supabase.rpc | Not mocked | Add rpc mock |
-| Combobox selectors | Inconsistent naming | Use getAllByRole consistently |
-
-### Testing Strategy
-After fixing, all tests should:
-1. Render the form correctly on Step 1
-2. Allow navigation through steps when filling required fields
-3. Handle document upload mocking correctly
-4. Skip payment for free projects
-5. Complete the full flow without errors
