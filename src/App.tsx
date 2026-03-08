@@ -96,6 +96,14 @@ const ReviewApplication = lazy(() => import("./pages/reviewer/ReviewApplication"
 const ReviewerSettings = lazy(() => import("./pages/reviewer/Settings"));
 const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"));
 
+// Lazy-loaded partner pages
+const PartnerLayout = lazy(() => import("@/components/partner/PartnerLayout"));
+const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
+const PartnerProjects = lazy(() => import("./pages/partner/Projects"));
+const PartnerProjectForm = lazy(() => import("./pages/partner/ProjectForm"));
+const PartnerProjectApplications = lazy(() => import("./pages/partner/ProjectApplications"));
+const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
+
 // Test page
 const ErrorTest = lazy(() => import("./tests/ErrorTest"));
 
