@@ -695,6 +695,80 @@ const App = () => {
             }
           />
 
+          {/* Partner Routes - Protected, requires authentication and partner role */}
+          <Route
+            path="/partner"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerDashboard />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/projects"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerProjects />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/projects/new"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerProjectForm />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/projects/:id/edit"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerProjectForm />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/projects/:id/applications"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerProjectApplications />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/settings"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerSettings />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+
           {/* Reviewer Routes - Protected, requires authentication and reviewer role */}
           <Route
             path="/reviewer"

@@ -74,6 +74,18 @@ const RoleBasedRoute = ({
           ? "/admin"
           : pathname.replace("/dashboard", "/admin");
       }
+      if (role === "partner") {
+        return pathname === "/dashboard"
+          ? "/partner"
+          : pathname.replace("/dashboard", "/partner");
+      }
+    }
+
+    // Partner routes — only partners and admins allowed
+    if (pathname.startsWith("/partner")) {
+      if (role !== "partner" && role !== "admin") {
+        return getDashboardForRole(role);
+      }
     }
 
     // Reviewer routes — only reviewers and admins allowed
