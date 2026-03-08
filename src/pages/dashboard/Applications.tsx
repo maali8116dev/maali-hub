@@ -6,7 +6,7 @@ import { FileText, Calendar, MapPin, Eye } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ApplicationListSkeleton } from "@/components/ui/skeletons";
-import { useApplications, type ApplicationWithProject } from "@/hooks/useApplications";
+import { useApplications, type ApplicationWithOpportunity } from "@/hooks/useApplications";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
