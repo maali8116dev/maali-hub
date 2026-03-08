@@ -71,7 +71,7 @@ const Opportunities = () => {
   const { data: locations = [] } = useOpportunityLocations();
   const { data: partners = [] } = useActivePartners();
 
-  const categories = tags.map((tag) => tag.name);
+  const sectors = tags.map((tag) => tag.name);
 
   // Build tag cloud: merge DB tags + dummy tags, deduplicate
   const dbTagNames = tags.map((t) => t.name);
