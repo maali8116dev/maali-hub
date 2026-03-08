@@ -123,7 +123,7 @@ const Opportunities = () => {
     return true;
   });
 
-  const hasActiveFilters = !!(selectedCategory || selectedStatus || selectedLocation || selectedPartner || selectedTag);
+  const hasActiveFilters = !!(selectedSector || selectedStatus || selectedLocation || selectedPartner || selectedTag);
 
   const handleClearFilters = () => {
     setSearchQuery("");
