@@ -73,10 +73,20 @@ const PartnerForm = () => {
   });
 
   useEffect(() => {
+    fetchPartnerUsers();
     if (isEditing && id) {
       fetchPartner();
     }
   }, [id, isEditing]);
+
+  const fetchPartnerUsers = async () => {
+    // Get all users with partner role
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name")
+      .eq("role", "partner");
+    if (data) setPartnerUsers(data);
+  };
 
   const fetchPartner = async () => {
     try {
