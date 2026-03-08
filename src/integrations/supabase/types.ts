@@ -1688,11 +1688,9 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           approved_applications: number
-          draft_applications: number
           pending_applications: number
           rejected_applications: number
           total_applications: number
-          total_projects_applied: number
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
