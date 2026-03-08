@@ -35,12 +35,12 @@ const Applications = () => {
   // Define columns for the applications table
   const applicationColumns: ColumnDef<ApplicationWithOpportunity>[] = useMemo(() => [
     {
-      accessorKey: 'projectTitle',
+      accessorKey: 'opportunityTitle',
       header: ({ column }) => (
         <SortableColumnHeader column={column} title={t('dashboard:applications.columns.project')} />
       ),
       cell: ({ row }) => {
-        return <span className="font-medium">{row.original.projectTitle}</span>;
+        return <span className="font-medium">{row.original.opportunityTitle}</span>;
       },
     },
     {

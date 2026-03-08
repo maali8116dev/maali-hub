@@ -62,13 +62,13 @@ export const useOpportunityDraft = (opportunityId: number | undefined) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("applications")
         .select("id, organization_name, updated_at")
         .eq("user_id", user.id)
-        .eq("opportunity_id", opportunityId)
+        .eq("project_id", opportunityId)
         .eq("is_draft", true)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (error) throw error;
       return data;

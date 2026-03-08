@@ -205,10 +205,10 @@ export const setupMocks = () => {
   // Mock useAuth
   (useAuth as any).mockReturnValue({ user: mockUser });
 
-  // Mock useProjects with correct paginated structure
-  (useProjects as any).mockReturnValue({
+  // Mock useOpportunities with correct paginated structure
+  (useOpportunities as any).mockReturnValue({
     data: {
-      projects: [mockProject],
+      opportunities: [mockProject],
       total: 1,
       page: 1,
       itemsPerPage: 9,

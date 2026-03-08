@@ -75,7 +75,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       }
       
       // Transform the nested structure
-      const tags = (data.tags || []).map((t: any) => t.tag).filter(Boolean);
+      const tags = ((data as any).tags || []).map((t: any) => t.tag).filter(Boolean);
       
       // Transform snake_case to camelCase and add tags
       return {

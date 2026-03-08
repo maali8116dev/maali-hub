@@ -335,7 +335,7 @@ const Dashboard = () => {
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors gap-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{app.projectTitle}</h3>
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{app.opportunityTitle}</h3>
                     <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="truncate">{app.sector}</span>
                       <span className="hidden sm:inline">•</span>

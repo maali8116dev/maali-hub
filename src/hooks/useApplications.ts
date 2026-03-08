@@ -38,18 +38,18 @@ const statusMap: Record<string, "pending" | "approved" | "rejected" | "draft"> =
  */
 async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithOpportunity[]> {
   const { data: rpcData, error: rpcError } = await supabase.rpc(
-    "get_user_applications_with_opportunities",
+    "get_user_applications_with_opportunities" as any,
     { p_user_id: userId }
   );
 
   if (rpcError) throw rpcError;
 
-  if (!rpcData || rpcData.length === 0) {
+  if (!rpcData || (rpcData as any[]).length === 0) {
     return [];
   }
 
   // Map RPC response to ApplicationWithOpportunity type
-  return rpcData.map((row: { application: any; opportunity: any }) => {
+  return (rpcData as any[]).map((row: { application: any; opportunity: any }) => {
     const app = row.application;
     const opportunity = row.opportunity;
 

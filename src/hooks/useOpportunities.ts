@@ -287,8 +287,8 @@ export function useOpportunityCountries() {
  * Direct Supabase query for featured opportunities
  */
 async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
-  const { data, error } = await supabase
-    .from("opportunities")
+  const { data, error } = await (supabase
+    .from("opportunities" as any)
     .select(`
       *,
       tags:opportunity_tag_map(
@@ -298,7 +298,7 @@ async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
     .eq("featured", true)
     .neq("status", "closed")
     .order("created_at", { ascending: false })
-    .limit(6);
+    .limit(6) as any);
 
   if (error) throw error;
 

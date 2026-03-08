@@ -67,7 +67,7 @@ const Opportunities = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("applications")
-        .select("opportunity_id")
+        .select("project_id")
         .eq("user_id", user.id)
         .eq("is_draft", false);
 
@@ -75,7 +75,7 @@ const Opportunities = () => {
         console.error("Error fetching submitted applications:", error);
         return [];
       }
-      return (data || []).map(app => app.opportunity_id);
+      return (data || []).map((app: any) => app.project_id);
     },
     enabled: !!user,
   });
