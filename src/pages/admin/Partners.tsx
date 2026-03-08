@@ -241,6 +241,17 @@ const AdminPartners = () => {
                     )}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span>Order: {partner.display_order}</span>
+                      {partner.user_id && partnerProfiles[partner.user_id] ? (
+                        <span className="flex items-center gap-1 text-primary">
+                          <User className="h-3 w-3" />
+                          {partnerProfiles[partner.user_id].first_name || ""} {partnerProfiles[partner.user_id].last_name || ""} (Linked)
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-muted-foreground/60">
+                          <User className="h-3 w-3" />
+                          No user linked
+                        </span>
+                      )}
                       {partner.website_url && (
                         <a
                           href={partner.website_url}
