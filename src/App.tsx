@@ -758,6 +758,18 @@ const App = () => {
             }
           />
           <Route
+            path="/partner/opportunities/:id/qualified"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerQualifiedApplicants />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
             path="/partner/settings"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
