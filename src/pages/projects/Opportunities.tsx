@@ -67,14 +67,23 @@ const Opportunities = () => {
 
   // Fetch tags, locations, and partners for dropdowns
   const { data: tags = [] } = useOpportunityTags();
+  const { data: popularTags = [] } = usePopularTags(15);
   const { data: locations = [] } = useOpportunityLocations();
   const { data: partners = [] } = useActivePartners();
 
   const sectors = tags.map((tag) => tag.name);
 
-  // Build tag cloud: merge DB tags + dummy tags, deduplicate
-  const dbTagNames = tags.map((t) => t.name);
-  const allCloudTags = Array.from(new Set([...dbTagNames, ...DUMMY_TAGS])).sort();
+  // Build tag cloud: use popular tags, fill with fallbacks if needed
+  const popularTagNames = popularTags.map((t) => t.name);
+  const cloudTags = popularTags.length >= 5
+    ? popularTags
+    : [
+        ...popularTags,
+        ...FALLBACK_TAGS
+          .filter((name) => !popularTagNames.includes(name))
+          .slice(0, 15 - popularTags.length)
+          .map((name) => ({ id: 0, name, slug: name.toLowerCase().replace(/\s+/g, "-"), count: 0 })),
+      ];
 
   // Fetch submitted applications for current user
   const { data: submittedApplications = [] } = useQuery({
