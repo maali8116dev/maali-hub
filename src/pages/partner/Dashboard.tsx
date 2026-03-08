@@ -9,8 +9,8 @@ const PartnerDashboard = () => {
   const { data: stats, isLoading } = usePartnerStats();
 
   const statCards = [
-    { title: "Total Projects", value: stats?.totalProjects ?? 0, icon: FolderKanban, color: "text-primary" },
-    { title: "Active Projects", value: stats?.activeProjects ?? 0, icon: Clock, color: "text-amber-500" },
+    { title: "Total Opportunities", value: stats?.totalOpportunities ?? 0, icon: FolderKanban, color: "text-primary" },
+    { title: "Active Opportunities", value: stats?.activeOpportunities ?? 0, icon: Clock, color: "text-amber-500" },
     { title: "Total Applications", value: stats?.totalApplications ?? 0, icon: FileText, color: "text-blue-500" },
     { title: "Approved", value: stats?.approvedApplications ?? 0, icon: CheckCircle, color: "text-emerald-500" },
   ];
@@ -20,11 +20,11 @@ const PartnerDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Partner Dashboard</h1>
-          <p className="text-muted-foreground">Manage your projects and track applications</p>
+          <p className="text-muted-foreground">Manage your opportunities and track applications</p>
         </div>
-        <Button onClick={() => navigate("/partner/projects/new")}>
+        <Button onClick={() => navigate("/partner/opportunities/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          New Project
+          New Opportunity
         </Button>
       </div>
 
