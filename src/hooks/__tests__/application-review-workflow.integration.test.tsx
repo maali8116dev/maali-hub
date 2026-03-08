@@ -147,8 +147,8 @@ describe('Application Review Workflow - Integration Tests', () => {
     );
 
     // 4. Create test application
-    const { data: applicationData, error: applicationError } = await supabaseAdmin
-      .from('applications')
+    const { data: applicationData, error: applicationError } = await (supabaseAdmin
+      .from('applications') as any)
       .insert({
         user_id: testApplicantId,
         project_id: testProjectId,
