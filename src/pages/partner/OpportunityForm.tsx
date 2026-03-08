@@ -45,7 +45,7 @@ const PartnerOpportunityForm = () => {
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch, reset } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: "", description: "", status: "open", deadline: "", fundingAmount: "", location: "", requirements: "", eligibilityCriteria: "", currency: "USD", country: "", organizationName: "" },
+    defaultValues: { title: "", description: "", status: "open", deadline: "", fundingAmount: "", location: "", requirements: "", eligibilityCriteria: "", currency: "USD", country: "", organizationName: "", opportunityType: "grant" },
   });
 
   const status = watch("status");
