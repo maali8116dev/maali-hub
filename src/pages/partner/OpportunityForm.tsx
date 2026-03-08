@@ -62,12 +62,12 @@ const PartnerOpportunityForm = () => {
         location: opportunity.location,
         requirements: opportunity.requirements || "",
         eligibilityCriteria: opportunity.eligibilityCriteria || "",
-        applicationFee: opportunity.applicationFee ? parseFloat(opportunity.applicationFee.toString()) : undefined,
         maxApplicants: opportunity.maxApplicants || undefined,
         currency: opportunity.currency || "USD",
         country: opportunity.country || "",
         organizationName: opportunity.organizationName || "",
         categoryId: opportunity.categoryId || undefined,
+        opportunityType: (opportunity.opportunityType as any) || "grant",
       });
     }
   }, [opportunity, isEditing, reset]);
