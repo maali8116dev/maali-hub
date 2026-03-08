@@ -66,11 +66,11 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       
       if (!data) {
         // Log available opportunities for debugging
-        const { data: allOpportunities } = await supabase
-          .from("opportunities")
+        const { data: allOpportunities } = await (supabase
+          .from("opportunities" as any)
           .select("id, title")
-          .limit(10);
-        console.warn("Opportunity not found. Available opportunity IDs:", allOpportunities?.map(o => o.id) || []);
+          .limit(10) as any);
+        console.warn("Opportunity not found. Available opportunity IDs:", (allOpportunities as any[])?.map((o: any) => o.id) || []);
         throw new Error(`Opportunity with ID ${opportunityIdNum} not found`);
       }
       
