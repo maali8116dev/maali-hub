@@ -326,6 +326,9 @@ const Profile = () => {
         </CardContent>
       </Card>
 
+      {/* Identity Verification */}
+      <KycVerificationSection />
+
       {/* Profile Completion */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
