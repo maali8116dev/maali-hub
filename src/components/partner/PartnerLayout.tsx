@@ -47,7 +47,7 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
 
   const getPageTitle = () => {
     if (location.pathname === "/partner") return "Partner Dashboard";
-    if (location.pathname.startsWith("/partner/projects")) return "My Projects";
+    if (location.pathname.startsWith("/partner/opportunities")) return "My Opportunities";
     if (location.pathname === "/partner/settings") return "Settings";
     return "Partner Portal";
   };
