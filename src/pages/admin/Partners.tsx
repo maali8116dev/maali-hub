@@ -63,7 +63,22 @@ const AdminPartners = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setPartners(data || []);
+      const partnerList = (data || []) as Partner[];
+      setPartners(partnerList);
+
+      // Fetch profiles for linked users
+      const userIds = partnerList.map(p => p.user_id).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", userIds);
+        if (profiles) {
+          const map: Record<string, PartnerProfile> = {};
+          profiles.forEach(p => { map[p.user_id] = p; });
+          setPartnerProfiles(map);
+        }
+      }
     } catch (error: any) {
       toast({
         title: "Error",
