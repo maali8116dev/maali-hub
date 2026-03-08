@@ -602,6 +602,57 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_verifications: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          full_name_on_id: string
+          id: string
+          id_document_url: string | null
+          id_number: string
+          id_type: Database["public"]["Enums"]["kyc_id_type"]
+          rejection_reason: string | null
+          selfie_url: string | null
+          status: Database["public"]["Enums"]["kyc_status"]
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          full_name_on_id: string
+          id?: string
+          id_document_url?: string | null
+          id_number: string
+          id_type: Database["public"]["Enums"]["kyc_id_type"]
+          rejection_reason?: string | null
+          selfie_url?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          full_name_on_id?: string
+          id?: string
+          id_document_url?: string | null
+          id_number?: string
+          id_type?: Database["public"]["Enums"]["kyc_id_type"]
+          rejection_reason?: string | null
+          selfie_url?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       mentors: {
         Row: {
           avatar_url: string | null
@@ -1941,6 +1992,12 @@ export type Database = {
         | "equity"
         | "paid"
         | "unpaid"
+      kyc_id_type:
+        | "passport"
+        | "national_id"
+        | "drivers_license"
+        | "business_registration"
+      kyc_status: "pending" | "verified" | "rejected" | "expired"
       opportunity_type:
         | "grant"
         | "fellowship"
@@ -2099,6 +2156,13 @@ export const Constants = {
         "paid",
         "unpaid",
       ],
+      kyc_id_type: [
+        "passport",
+        "national_id",
+        "drivers_license",
+        "business_registration",
+      ],
+      kyc_status: ["pending", "verified", "rejected", "expired"],
       opportunity_type: [
         "grant",
         "fellowship",
