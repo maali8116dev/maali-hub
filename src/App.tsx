@@ -103,6 +103,7 @@ const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"))
 const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
 const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
+const PartnerQualifiedApplicants = lazy(() => import("./pages/partner/QualifiedApplicants"));
 
 // Test page
 const ErrorTest = lazy(() => import("./tests/ErrorTest"));
