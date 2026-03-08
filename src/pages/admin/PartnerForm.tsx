@@ -373,6 +373,34 @@ const PartnerForm = () => {
               </CardContent>
             </Card>
 
+            {/* Linked User Account */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Linked User Account</CardTitle>
+                <CardDescription>Link this partner org to a user with the partner role</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={watch("user_id") || ""}
+                  onValueChange={(value) => setValue("user_id", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a partner user..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No linked user</SelectItem>
+                    {partnerUsers.map((u) => (
+                      <SelectItem key={u.user_id} value={u.user_id}>
+                        {u.first_name || ""} {u.last_name || ""} ({u.user_id.slice(0, 8)}...)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Only users with the "partner" role are shown. Assign the partner role first via Users management.
+                </p>
+              </CardContent>
+
             {/* Actions */}
             <Card>
               <CardContent className="pt-6">
