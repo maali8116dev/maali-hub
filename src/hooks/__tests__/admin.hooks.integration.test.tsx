@@ -133,7 +133,7 @@ beforeAll(async () => {
       { onConflict: 'user_id' },
     );
 
-    const { data: appData } = await supabaseAdmin.from('applications').insert({
+    const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: ud.user.id,
       project_id: testProjectId,
       contact_email: email,

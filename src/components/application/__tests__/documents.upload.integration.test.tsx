@@ -247,8 +247,8 @@ describe('Document Upload - Real Integration Tests', () => {
       return null;
     }
 
-    const { data: application, error } = await supabase
-      .from('applications')
+    const { data: application, error } = await (supabase
+      .from('applications') as any)
       .insert({
         user_id: testUser.id,
         project_id: projectId,
