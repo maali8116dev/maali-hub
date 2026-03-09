@@ -11,17 +11,87 @@ import { ColumnDef } from "@tanstack/react-table";
 import { TableSkeleton } from "@/components/ui/skeletons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-const statusColors: Record<string, string> = {
-  open: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
-  "closing-soon": "bg-amber-500/10 text-amber-600 border-amber-200",
-  closed: "bg-red-500/10 text-red-600 border-red-200",
-  new: "bg-blue-500/10 text-blue-600 border-blue-200",
-  archived: "bg-muted text-muted-foreground",
-};
+const columns: ColumnDef<PartnerOpportunity>[] = [
+  {
+    accessorKey: "title",
+    header: "Title",
+    cell: ({ row }) => (
+      <div className="space-y-1">
+        <span className="font-medium">{row.getValue("title")}</span>
+        <p className="text-sm text-muted-foreground line-clamp-1">
+          {row.original.description}
+        </p>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge variant="outline" className={statusColors[status] || ""}>
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+  },
+  {
+    accessorKey: "fundingAmount",
+    header: "Funding",
+    cell: ({ row }) => row.getValue("fundingAmount") || "—",
+  },
+  {
+    accessorKey: "deadline",
+    header: "Deadline",
+    cell: ({ row }) => format(new Date(row.getValue("deadline")), "MMM d, yyyy"),
+  },
+  {
+    accessorKey: "currentApplicants",
+    header: "Applications",
+    cell: ({ row }) => {
+      const current = row.getValue("currentApplicants") as number;
+      const max = row.original.maxApplicants;
+      return max ? `${current}/${max}` : current.toString();
+    },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const navigate = useNavigate();
+      const opportunity = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/applications`)}>
+              <FileText className="h-4 w-4 mr-2" />
+              Applications ({opportunity.currentApplicants})
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/edit`)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
 
 const PartnerOpportunities = () => {
   const navigate = useNavigate();
-  const { data: opportunities = [], isLoading } = usePartnerOpportunities();
+  const { data: opportunities = [], isLoading, refetch } = usePartnerOpportunities();
 
   return (
     <div className="space-y-6">
@@ -36,9 +106,7 @@ const PartnerOpportunities = () => {
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading opportunities...</div>
-      ) : opportunities.length === 0 ? (
+      {opportunities.length === 0 && !isLoading ? (
         <div className="space-y-4">
           <InAppTip
             id="partner-empty-opportunities"
@@ -58,40 +126,22 @@ const PartnerOpportunities = () => {
           </Card>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {opportunities.map((opp) => (
-            <Card key={opp.id}>
-              <CardHeader className="flex flex-row items-start justify-between pb-2">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{opp.title}</CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{opp.location}</span>
-                    <span>•</span>
-                    <span>{opp.fundingAmount}</span>
-                    <span>•</span>
-                    <span>Deadline: {format(new Date(opp.deadline), "MMM d, yyyy")}</span>
-                  </div>
-                </div>
-                <Badge variant="outline" className={statusColors[opp.status] || ""}>
-                  {opp.status}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{opp.description}</p>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/partner/opportunities/${opp.id}/applications`)}>
-                    <FileText className="h-4 w-4 mr-1" />
-                    Applications ({opp.currentApplicants})
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/partner/opportunities/${opp.id}/edit`)}>
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <TableSkeleton rows={5} columns={7} />
+            ) : (
+              <DataTable
+                columns={columns}
+                data={opportunities}
+                searchKey="title"
+                searchPlaceholder="Search opportunities..."
+                onRefresh={async () => { await refetch(); }}
+                isRefreshing={isLoading}
+              />
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
