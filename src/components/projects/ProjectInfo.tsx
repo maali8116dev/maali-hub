@@ -185,9 +185,9 @@ const formatProjectDate = (dateString: string) => {
             </h4>
             <div className="bg-muted/30 rounded-lg p-4">
               <div 
-                className="prose prose-sm max-w-none"
+                className="prose prose-sm max-w-none [&>*:last-child]:mb-0"
                 dangerouslySetInnerHTML={{ 
-                  __html: project.requirements.replace(/\n/g, '<br>').replace(/•\s*/g, '• ') 
+                  __html: project.requirements 
                 }}
               />
             </div>
