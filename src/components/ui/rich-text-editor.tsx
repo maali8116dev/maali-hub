@@ -85,7 +85,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn("rich-text-editor", className)}>
+    <div className={cn("rich-text-editor", error && "error", className)}>
       <ReactQuill
         ref={quillRef}
         theme="snow"
@@ -97,7 +97,6 @@ export function RichTextEditor({
         readOnly={disabled}
         className={cn(
           "bg-background",
-          error && "border-destructive",
           disabled && "opacity-50 cursor-not-allowed"
         )}
       />
