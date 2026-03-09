@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import "./rich-text-editor.css";
-
-// Lazy load ReactQuill to avoid SSR issues
-let ReactQuill: any = null;
-if (typeof window !== 'undefined') {
-  ReactQuill = require('react-quill').default;
-}
 
 interface RichTextEditorProps {
   value?: string;
@@ -70,8 +66,7 @@ export function RichTextEditor({
     onChange(html);
   };
 
-  // Don't render on server side to avoid SSR issues
-  if (!isClient || !ReactQuill) {
+  if (!isClient) {
     return (
       <div className={cn(
         "min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
