@@ -3,10 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Trophy } from "lucide-react";
-import { usePartnerApplications, downloadApplicationsCSV } from "@/hooks/usePartnerApplications";
+import { usePartnerApplications, downloadApplicationsCSV, PartnerApplication } from "@/hooks/usePartnerApplications";
 import { usePartnerOpportunity } from "@/hooks/usePartnerOpportunities";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 const statusColors: Record<string, string> = {
   pending: "bg-amber-500/10 text-amber-600",
@@ -14,6 +16,43 @@ const statusColors: Record<string, string> = {
   rejected: "bg-red-500/10 text-red-600",
   "under-review": "bg-blue-500/10 text-blue-600",
 };
+
+const columns: ColumnDef<PartnerApplication>[] = [
+  {
+    accessorKey: "fullLegalName",
+    header: "Applicant",
+    cell: ({ row }) => (
+      <span className="font-medium">{row.getValue("fullLegalName") || "—"}</span>
+    ),
+  },
+  {
+    accessorKey: "organizationName",
+    header: "Organization",
+    cell: ({ row }) => row.getValue("organizationName") || "—",
+  },
+  {
+    accessorKey: "contactEmail",
+    header: "Email",
+    cell: ({ row }) => row.getValue("contactEmail") || "—",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge variant="outline" className={statusColors[status || ""] || ""}>
+          {status || "pending"}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Submitted",
+    cell: ({ row }) => format(new Date(row.getValue("createdAt")), "MMM d, yyyy"),
+  },
+];
 
 const PartnerOpportunityApplications = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,36 +96,14 @@ const PartnerOpportunityApplications = () => {
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">Loading applications...</div>
-          ) : applications.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No applications yet for this opportunity.</div>
+            <TableSkeleton rows={5} columns={5} />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Applicant</TableHead>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Submitted</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {applications.map((app) => (
-                  <TableRow key={app.id}>
-                    <TableCell className="font-medium">{app.fullLegalName || "—"}</TableCell>
-                    <TableCell>{app.organizationName || "—"}</TableCell>
-                    <TableCell>{app.contactEmail || "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={statusColors[app.status || ""] || ""}>
-                        {app.status || "pending"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{format(new Date(app.createdAt), "MMM d, yyyy")}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={columns}
+              data={applications}
+              searchKey="fullLegalName"
+              searchPlaceholder="Search applicants..."
+            />
           )}
         </CardContent>
       </Card>
