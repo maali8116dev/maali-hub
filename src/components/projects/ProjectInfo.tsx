@@ -90,7 +90,10 @@ const formatProjectDate = (dateString: string) => {
             />
           </div>
         )}
-        <p className="text-muted-foreground mb-6">{project.description}</p>
+        <div 
+          className="text-muted-foreground mb-6"
+          dangerouslySetInnerHTML={{ __html: project.description }}
+        />
 
         {/* Basic Information Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
