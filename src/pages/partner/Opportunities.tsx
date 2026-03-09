@@ -83,7 +83,7 @@ const columns: ColumnDef<PartnerOpportunity>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/qualified`)}>
-              <Trophy className="h-4 w-4 mr-2 text-emerald-500" />
+              <Trophy className="h-4 w-4 mr-2 text-primary" />
               Qualified Applicants
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/applications`)}>
