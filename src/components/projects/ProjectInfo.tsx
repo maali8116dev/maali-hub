@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, DollarSign, Calendar, Tag } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase, CreditCard } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
+import InfoField from "@/components/application/shared/InfoField";
 
 interface ProjectInfoProps {
   project: OpportunityWithTags;
