@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, Edit, FileText, MoreHorizontal, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePartnerOpportunities, PartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { InAppTip } from "@/components/onboarding/InAppTip";
