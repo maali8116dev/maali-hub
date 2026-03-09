@@ -100,9 +100,6 @@ export function RichTextEditor({
           error && "border-destructive",
           disabled && "opacity-50 cursor-not-allowed"
         )}
-        style={{
-          '--ql-editor-min-height': '150px'
-        } as React.CSSProperties}
       />
     </div>
   );
