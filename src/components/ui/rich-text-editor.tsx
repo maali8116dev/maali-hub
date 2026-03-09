@@ -66,8 +66,7 @@ export function RichTextEditor({
     onChange(html);
   };
 
-  // Don't render on server side to avoid SSR issues
-  if (!isClient || !ReactQuill) {
+  if (!isClient) {
     return (
       <div className={cn(
         "min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
