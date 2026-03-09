@@ -17,6 +17,9 @@ import {
   Tag,
   Handshake,
   Star,
+  Building2,
+  UserCheck,
+  Home,
 } from "lucide-react";
 import {
   Sidebar,
