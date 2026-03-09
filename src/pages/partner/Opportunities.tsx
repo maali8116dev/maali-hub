@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, Edit, FileText, MoreHorizontal, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePartnerOpportunities, PartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { InAppTip } from "@/components/onboarding/InAppTip";
@@ -82,9 +82,13 @@ const columns: ColumnDef<PartnerOpportunity>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/qualified`)}>
+              <Trophy className="h-4 w-4 mr-2 text-primary" />
+              Qualified Applicants
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/applications`)}>
               <FileText className="h-4 w-4 mr-2" />
-              Applications ({opportunity.currentApplicants})
+              All Applications ({opportunity.currentApplicants})
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/partner/opportunities/${opportunity.id}/edit`)}>
               <Edit className="h-4 w-4 mr-2" />
