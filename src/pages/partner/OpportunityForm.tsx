@@ -196,7 +196,12 @@ const PartnerOpportunityForm = () => {
             </div>
             <div>
               <Label htmlFor="description">Description *</Label>
-              <Textarea id="description" {...register("description")} rows={6} className={errors.description ? "border-destructive" : ""} />
+              <RichTextEditor
+                value={watch("description")}
+                onChange={(value) => setValue("description", value, { shouldValidate: true })}
+                placeholder="Provide a comprehensive description of your opportunity. Use formatting to make it clear and engaging..."
+                error={!!errors.description}
+              />
               {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
