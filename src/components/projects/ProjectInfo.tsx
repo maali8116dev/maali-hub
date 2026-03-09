@@ -37,17 +37,36 @@ export function ProjectInfo({ project }: ProjectInfoProps) {
     project.createdAt,
   );
 
-  const formatProjectDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
+const formatOpportunityType = (type: string) => {
+  return type.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+};
+
+const formatCurrency = (amount: string, currency: string) => {
+  const currencySymbols: Record<string, string> = {
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'CAD': 'C$',
+    'AUD': 'A$'
   };
+  
+  const symbol = currencySymbols[currency] || currency;
+  return `${symbol}${amount}`;
+};
+
+const formatProjectDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+};
 
   return (
     <Card>
