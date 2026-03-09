@@ -17,6 +17,9 @@ import {
   Tag,
   Handshake,
   Star,
+  Building2,
+  UserCheck,
+  Home,
 } from "lucide-react";
 import {
   Sidebar,
@@ -146,10 +149,32 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         <SidebarFooter>
           <SidebarMenu>
+            {/* Testing Dashboards - Admin access to all dashboards */}
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate("/dashboard")}>
-                <LayoutDashboard />
+              <SidebarMenuButton 
+                onClick={() => navigate("/dashboard")}
+                tooltip="User Dashboard"
+              >
+                <Home />
                 <span>User Dashboard</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={() => navigate("/partner")}
+                tooltip="Partner Dashboard"
+              >
+                <Building2 />
+                <span>Partner Dashboard</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={() => navigate("/reviewer")}
+                tooltip="Reviewer Dashboard"
+              >
+                <UserCheck />
+                <span>Reviewer Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
