@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import "./rich-text-editor.css";
-
-// Lazy load ReactQuill to avoid SSR issues
-let ReactQuill: any = null;
-if (typeof window !== 'undefined') {
-  ReactQuill = require('react-quill').default;
-}
 
 interface RichTextEditorProps {
   value?: string;
