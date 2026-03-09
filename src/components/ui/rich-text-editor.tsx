@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import "./rich-text-editor.css";
 
 // Lazy load ReactQuill to avoid SSR issues
 let ReactQuill: any = null;
