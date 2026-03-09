@@ -1,11 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, FileText } from "lucide-react";
+import { Plus, Edit, FileText, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { usePartnerOpportunities } from "@/hooks/usePartnerOpportunities";
+import { usePartnerOpportunities, PartnerOpportunity } from "@/hooks/usePartnerOpportunities";
 import { InAppTip } from "@/components/onboarding/InAppTip";
 import { format } from "date-fns";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { TableSkeleton } from "@/components/ui/skeletons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const statusColors: Record<string, string> = {
   open: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
