@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Star } from "lucide-react";
@@ -224,12 +225,11 @@ const ProjectForm = () => {
 
                 <div>
                   <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    {...register("description")}
-                    placeholder="Provide a detailed description of the funding opportunity..."
-                    rows={8}
-                    className={errors.description ? "border-destructive" : ""}
+                  <RichTextEditor
+                    value={watch("description")}
+                    onChange={(value) => setValue("description", value, { shouldValidate: true })}
+                    placeholder="Provide a comprehensive description of the funding opportunity. Use formatting to make it clear and engaging..."
+                    error={!!errors.description}
                   />
                   {errors.description && (
                     <p className="text-sm text-destructive mt-1">{errors.description.message}</p>

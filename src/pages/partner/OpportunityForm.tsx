@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Save, Plus, X, Tag } from "lucide-react";
@@ -196,7 +197,12 @@ const PartnerOpportunityForm = () => {
             </div>
             <div>
               <Label htmlFor="description">Description *</Label>
-              <Textarea id="description" {...register("description")} rows={6} className={errors.description ? "border-destructive" : ""} />
+              <RichTextEditor
+                value={watch("description")}
+                onChange={(value) => setValue("description", value, { shouldValidate: true })}
+                placeholder="Provide a comprehensive description of your opportunity. Use formatting to make it clear and engaging..."
+                error={!!errors.description}
+              />
               {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -90,7 +90,10 @@ const formatProjectDate = (dateString: string) => {
             />
           </div>
         )}
-        <p className="text-muted-foreground mb-6">{project.description}</p>
+        <div 
+          className="text-muted-foreground mb-6"
+          dangerouslySetInnerHTML={{ __html: project.description }}
+        />
 
         {/* Basic Information Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -182,9 +185,9 @@ const formatProjectDate = (dateString: string) => {
             </h4>
             <div className="bg-muted/30 rounded-lg p-4">
               <div 
-                className="prose prose-sm max-w-none"
+                className="prose prose-sm max-w-none [&>*:last-child]:mb-0"
                 dangerouslySetInnerHTML={{ 
-                  __html: project.requirements.replace(/\n/g, '<br>').replace(/•\s*/g, '• ') 
+                  __html: project.requirements 
                 }}
               />
             </div>
@@ -200,9 +203,9 @@ const formatProjectDate = (dateString: string) => {
             </h4>
             <div className="bg-muted/30 rounded-lg p-4">
               <div 
-                className="prose prose-sm max-w-none"
+                className="prose prose-sm max-w-none [&>*:last-child]:mb-0"
                 dangerouslySetInnerHTML={{ 
-                  __html: project.eligibilityCriteria.replace(/\n/g, '<br>').replace(/•\s*/g, '• ') 
+                  __html: project.eligibilityCriteria 
                 }}
               />
             </div>
