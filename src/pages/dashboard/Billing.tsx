@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -234,7 +234,7 @@ const Billing = () => {
   const handleSetDefault = async (id: string) => {
     if (!user) return;
 
-    // Just set the new default — the trigger automatically unsets the old default
+    // Just set the new default -the trigger automatically unsets the old default
     // and handles primary/secondary classification
     const { error } = await supabase
       .from("payment_methods")
@@ -440,7 +440,7 @@ const Billing = () => {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-sm sm:text-base">
-                          {method.brand || method.type} •••• {method.last4}
+                          {method.brand || method.type} -¢-¢-¢-¢ {method.last4}
                         </p>
                         {method.method_type === "primary" ? (
                           <Badge variant="default" className="text-xs">Primary</Badge>
@@ -567,7 +567,7 @@ onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoice_pdf
                         </TableCell>
                         <TableCell>{item.description}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">
-                          {item.invoice_number || "—"}
+                          {item.invoice_number || "-}
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(item.amount, item.currency)}
@@ -759,3 +759,11 @@ onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoice_pdf
 };
 
 export default Billing;
+
+
+
+
+
+
+
+

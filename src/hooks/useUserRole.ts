@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -45,4 +45,12 @@ export function useUserRole() {
     },
   });
 }
+
+
+
+
+
+
+
+
 

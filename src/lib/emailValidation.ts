@@ -1,4 +1,4 @@
-import * as z from "zod";
+﻿import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
 // List of blocked domains (test emails, common typos, etc.)
@@ -209,4 +209,12 @@ export const emailSchema = z.string()
       message: validation.message || "Invalid email address",
     };
   });
+
+
+
+
+
+
+
+
 

@@ -26,7 +26,7 @@ LANGUAGE "plpgsql" SECURITY DEFINER
 SET "search_path" TO 'public'
 AS $$
 DECLARE
-  v_category_id INTEGER;
+  v_sector_id INTEGER;
   v_opportunity_deadline DATE;
   v_review_deadline TIMESTAMPTZ;
   v_available_reviewers UUID[];
@@ -35,15 +35,15 @@ DECLARE
   v_assignment_id UUID;
   i INTEGER;
 BEGIN
-  -- Get category and opportunity deadline
-  SELECT p.category_id, p.deadline
-  INTO v_category_id, v_opportunity_deadline
+  -- Get Sector and opportunity deadline
+  SELECT p.sector_id, p.deadline
+  INTO v_sector_id, v_opportunity_deadline
   FROM public.applications a
   JOIN public.opportunities p ON a.opportunity_id = p.id
   WHERE a.id = p_application_id;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no category assigned';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no Sector assigned';
   END IF;
 
   -- Calculate review deadline: opportunity deadline + 7 days
@@ -66,8 +66,8 @@ BEGIN
 
   SELECT ARRAY_AGG(rc.reviewer_id ORDER BY public.get_reviewer_workload(rc.reviewer_id), random())
   INTO v_available_reviewers
-  FROM public.reviewer_categories rc
-  WHERE rc.category_id = v_category_id
+  FROM public.reviewer_sectors rc
+  WHERE rc.sector_id = v_sector_id
     AND rc.reviewer_id NOT IN (
       SELECT rcf.reviewer_id
       FROM public.reviewer_conflicts rcf
@@ -87,7 +87,7 @@ BEGIN
 
   IF v_available_reviewers IS NULL OR array_length(v_available_reviewers, 1) < p_num_reviewers THEN
     RAISE EXCEPTION
-      'Not enough available reviewers for category. Need % reviewers, found %',
+      'Not enough available reviewers for Sector. Need % reviewers, found %',
       p_num_reviewers,
       COALESCE(array_length(v_available_reviewers, 1), 0);
   END IF;
@@ -307,3 +307,4 @@ GRANT EXECUTE ON FUNCTION public.get_reviewer_applications(UUID) TO service_role
 
 
 -- ============================================
+

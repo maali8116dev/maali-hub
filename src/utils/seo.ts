@@ -1,4 +1,4 @@
-export const getSiteUrl = (): string => {
+﻿export const getSiteUrl = (): string => {
   return import.meta.env.VITE_SITE_URL || 
          (typeof window !== 'undefined' ? window.location.origin : 'https://maali.platform');
 };
@@ -19,4 +19,12 @@ export const truncateDescription = (text: string, maxLength: number = 160): stri
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength - 3).trim() + '...';
 };
+
+
+
+
+
+
+
+
 

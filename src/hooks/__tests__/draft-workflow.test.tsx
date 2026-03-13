@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
 import { ApplicationFormData } from '@/stores/applicationForm';
 
@@ -20,7 +20,7 @@ vi.mock('@/hooks/use-toast', () => ({
 
 /**
  * Unit test for draft workflow (mocked)
- * Tests: Create Draft → Auto-save → Load Draft → Submit Application
+ * Tests: Create Draft â†’ Auto-save â†’ Load Draft â†’ Submit Application
  * 
  * This test focuses on business logic without UI rendering.
  * For real database integration tests, see the integration test suite.
@@ -56,7 +56,7 @@ describe('Draft Workflow', () => {
   });
 
   describe('Complete Draft Workflow', () => {
-    it('should complete full draft workflow: create → save → load → submit', async () => {
+    it('should complete full draft workflow: create â†’ save â†’ load â†’ submit', async () => {
       const mockDraftId = 'draft-123';
       
       // Step 1: Create draft (first save)
@@ -383,4 +383,12 @@ describe('Draft Workflow', () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

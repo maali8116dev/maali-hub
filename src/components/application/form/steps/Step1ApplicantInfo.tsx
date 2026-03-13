@@ -1,4 +1,4 @@
-import { Control, useWatch } from "react-hook-form";
+﻿import { Control, useWatch } from "react-hook-form";
 import { Building2, Mail, Phone, MapPin } from "lucide-react";
 import CustomFormField, {
   FormFieldType,
@@ -112,3 +112,11 @@ export function Step1ApplicantInfo({
     </div>
   );
 }
+
+
+
+
+
+
+
+

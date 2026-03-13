@@ -1,5 +1,5 @@
-/**
- * Integration tests — useSubmitReview hook hits the REAL database.
+﻿/**
+ * Integration tests -” useSubmitReview hook hits the REAL database.
  *
  * Simulates: Reviewer opens a review form, scores the application,
  * writes comments, picks a recommendation, and submits.
@@ -50,30 +50,30 @@ const createWrapper = () => {
   );
 };
 
-describe('useSubmitReview — real user flow', () => {
+describe('useSubmitReview -” real user flow', () => {
   let reviewerEmail: string;
   let testReviewerId: string;
   let testApplicationId: string;
   let testAssignmentId: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testApplicantId: string;
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping.');
       return;
     }
 
-    // Category
+    // sector
     let { data: catData } = await supabaseAdmin
-      .from('categories').select('id').eq('name', 'Technology').single();
-    testCategoryId = catData?.id || 1;
+      .from('sectors').select('id').eq('name', 'Technology').single();
+    testsectorId = catData?.id || 1;
 
     // Project
     const { data: pj } = await supabaseAdmin.from('projects').insert({
       title: `IntTest Score ${Date.now()}`, description: 'Test', status: 'open',
-      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
     }).select('id').single();
     testProjectId = pj!.id;
@@ -105,8 +105,8 @@ describe('useSubmitReview — real user flow', () => {
       { user_id: testReviewerId, first_name: 'Test', last_name: 'Reviewer', role: 'reviewer' },
       { onConflict: 'user_id' },
     );
-    await supabaseAdmin.from('reviewer_categories').insert({
-      reviewer_id: testReviewerId, category_id: testCategoryId,
+    await supabaseAdmin.from('reviewer_sectors').insert({
+      reviewer_id: testReviewerId, sector_id: testsectorId,
     });
 
     // Assignment (status = in_progress, like it would be in the real flow)
@@ -130,7 +130,7 @@ describe('useSubmitReview — real user flow', () => {
     }
     if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
     if (testReviewerId) {
-      await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', testReviewerId);
+      await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', testReviewerId);
     }
     for (const uid of [testReviewerId, testApplicantId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
@@ -150,7 +150,7 @@ describe('useSubmitReview — real user flow', () => {
       .eq('id', testAssignmentId);
   });
 
-  it('reviewer submits a review → scores saved, assignment marked completed', async () => {
+  it('reviewer submits a review â†’ scores saved, assignment marked completed', async () => {
     if (!supabaseAdmin) return;
 
     const { result } = renderHook(() => useSubmitReview(), {
@@ -190,7 +190,7 @@ describe('useSubmitReview — real user flow', () => {
     expect(assignment!.status).toBe('completed');
   }, 20000);
 
-  it('reviewer updates their review → upsert overwrites previous scores', async () => {
+  it('reviewer updates their review â†’ upsert overwrites previous scores', async () => {
     if (!supabaseAdmin) return;
 
     // First submission
@@ -216,7 +216,7 @@ describe('useSubmitReview — real user flow', () => {
       reviewerId: testReviewerId,
       assignmentId: testAssignmentId,
       scores: { innovation: 9, feasibility: 9, impact: 9 },
-      comments: 'Revised — much better after second look',
+      comments: 'Revised -” much better after second look',
       recommendation: 'approve',
     });
     await waitFor(() => expect(r2.current.isSuccess).toBe(true), { timeout: 15000 });
@@ -228,10 +228,10 @@ describe('useSubmitReview — real user flow', () => {
       .eq('reviewer_id', testReviewerId);
     expect(rows!.length).toBe(1);
     expect(rows![0].recommendation).toBe('approve');
-    expect(rows![0].comments).toBe('Revised — much better after second look');
+    expect(rows![0].comments).toBe('Revised -” much better after second look');
   }, 30000);
 
-  it('reviewer submits "reject" recommendation → saved correctly', async () => {
+  it('reviewer submits "reject" recommendation â†’ saved correctly', async () => {
     if (!supabaseAdmin) return;
 
     const { result } = renderHook(() => useSubmitReview(), {
@@ -260,4 +260,12 @@ describe('useSubmitReview — real user flow', () => {
     expect(row!.recommendation).toBe('reject');
   }, 20000);
 });
+
+
+
+
+
+
+
+
 

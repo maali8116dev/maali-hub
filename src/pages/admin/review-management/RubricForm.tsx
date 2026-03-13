@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -208,4 +208,12 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
     </form>
   );
 };
+
+
+
+
+
+
+
+
 

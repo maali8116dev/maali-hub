@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Check if an opportunity is open for applications
  */
 export function isOpportunityOpen(
@@ -15,4 +15,12 @@ export function isOpportunityOpen(
   
   return deadlineDate >= today;
 }
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type PartnerRankedApplication = {
@@ -77,3 +77,11 @@ export function downloadQualifiedApplicantsCSV(
   link.click();
   URL.revokeObjectURL(url);
 }
+
+
+
+
+
+
+
+

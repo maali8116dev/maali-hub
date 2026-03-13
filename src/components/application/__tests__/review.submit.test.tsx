@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { setupMocks, mockProject, populateFormStore, defaultApplicationPayload, ApplicationPayload } from './test-utils';
@@ -160,3 +160,11 @@ describe('Step 6: Payment', () => {
     expect(mockProject.application_fee).toBe(0);
   });
 });
+
+
+
+
+
+
+
+

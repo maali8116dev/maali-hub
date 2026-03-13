@@ -21,7 +21,7 @@ const partnerSchema = z.object({
   description: z.string().optional(),
   logo_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   website_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "Sector is required"),
   display_order: z.number().int().min(0),
   featured: z.boolean(),
   status: z.enum(["active", "inactive"]),
@@ -64,7 +64,7 @@ const PartnerForm = () => {
       description: "",
       logo_url: "",
       website_url: "",
-      category: "Funding",
+      sector: "Funding",
       display_order: 0,
       featured: false,
       status: "active",
@@ -105,7 +105,7 @@ const PartnerForm = () => {
         setValue("logo_url", data.logo_url || "");
         setOldLogoUrl(data.logo_url);
         setValue("website_url", data.website_url || "");
-        setValue("category", data.category);
+        setValue("sector", data.sector);
         setValue("display_order", data.display_order ?? 0);
         setValue("featured", data.featured ?? false);
         setValue("status", data.status as PartnerFormValues["status"]);
@@ -136,7 +136,7 @@ const PartnerForm = () => {
         description: data.description || null,
         logo_url: data.logo_url || null,
         website_url: data.website_url || null,
-        category: data.category,
+        sector: data.sector,
         display_order: data.display_order,
         featured: data.featured,
         status: data.status,
@@ -181,8 +181,8 @@ const PartnerForm = () => {
   };
 
   const logoUrl = watch("logo_url");
-  // Partner categories are fixed and defined in the database CHECK constraint
-  const partnerCategories = ['Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic'];
+  // Partner sectors are fixed and defined in the database CHECK constraint
+  const partnersectors = ['Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic'];
 
   if (isFetching) {
     return (
@@ -308,16 +308,16 @@ const PartnerForm = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="sector">Sector *</Label>
                   <Select
-                    value={watch("category")}
-                    onValueChange={(value) => setValue("category", value as PartnerFormValues["category"])}
+                    value={watch("sector")}
+                    onValueChange={(value) => setValue("sector", value as PartnerFormValues["sector"])}
                   >
-                    <SelectTrigger id="category">
+                    <SelectTrigger id="sector">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {partnerCategories.map((cat) => (
+                      {partnersectors.map((cat) => (
                         <SelectItem key={cat} value={cat}>
                           {cat}
                         </SelectItem>
@@ -433,4 +433,12 @@ const PartnerForm = () => {
 };
 
 export default PartnerForm;
+
+
+
+
+
+
+
+
 

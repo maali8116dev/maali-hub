@@ -6,16 +6,14 @@ import {
   AlertTriangle,
   Settings,
 } from 'lucide-react';
-import {
-  ReviewerCategoriesTab,
-  ConflictsTab,
-  SettingsTab,
-} from './review-management';
-import { useCategories } from '@/hooks/useCategories';
+import { ReviewersectorsTab } from './review-management/ReviewerCategoriesTab';
+import { ConflictsTab } from './review-management/ConflictsTab';
+import { SettingsTab } from './review-management/SettingsTab';
+import { useSectors } from '@/hooks/useSectors';
 
 const ReviewManagement = () => {
 
-  // Get all reviewers with details (categories, workload, stats) in a single RPC call
+  // Get all reviewers with details (sectors, workload, stats) in a single RPC call
   const { data: reviewers = [] } = useQuery({
     queryKey: ['all-reviewers-with-details'],
     queryFn: async () => {
@@ -33,23 +31,23 @@ const ReviewManagement = () => {
         last_name: r.last_name,
         email: r.email,
         workload: r.workload,
-        categories: r.categories || [],
+        sectors: r.sectors || [],
         total_reviews: r.total_reviews,
         average_score: r.average_score,
       }));
     },
   });
 
-  // Get project categories from categories table (cached and optimized)
-  const { data: categoriesData = [] } = useCategories();
-  const categories = categoriesData.map(c => c.name);
+  // Get project sectors from sectors table (cached and optimized)
+  const { data: sectorsData = [] } = useSectors();
+  const sectors = sectorsData.map(c => c.name);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Review Management</h1>
         <p className="text-muted-foreground mt-2">
-          Manage reviewer assignments, categories, rubrics, and conflicts
+          Manage reviewer assignments, sectors, rubrics, and conflicts
         </p>
       </div>
 
@@ -69,9 +67,9 @@ const ReviewManagement = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Reviewer Categories Tab */}
+        {/* Reviewer sectors Tab */}
         <TabsContent value="reviewers" className="space-y-4">
-          <ReviewerCategoriesTab reviewers={reviewers} categories={categories} />
+          <ReviewersectorsTab reviewers={reviewers} sectors={sectors} />
         </TabsContent>
 
         {/* Conflicts Tab */}
@@ -81,7 +79,7 @@ const ReviewManagement = () => {
 
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
-          <SettingsTab categories={categories} />
+          <SettingsTab sectors={sectors} />
         </TabsContent>
       </Tabs>
     </div>
@@ -89,3 +87,11 @@ const ReviewManagement = () => {
 };
 
 export default ReviewManagement;
+
+
+
+
+
+
+
+

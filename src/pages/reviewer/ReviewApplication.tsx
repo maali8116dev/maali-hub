@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -354,9 +354,9 @@ const ReviewApplication = () => {
                   </p>
                 </div>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>• Admins manage users, projects, and system settings</p>
-                  <p>• Reviewers evaluate and make decisions on applications</p>
-                  <p>• This separation ensures clear accountability and audit trails</p>
+                  <p>-¢ Admins manage users, projects, and system settings</p>
+                  <p>-¢ Reviewers evaluate and make decisions on applications</p>
+                  <p>-¢ This separation ensures clear accountability and audit trails</p>
                 </div>
               </CardContent>
             </Card>
@@ -389,3 +389,11 @@ const ReviewApplication = () => {
 };
 
 export default ReviewApplication;
+
+
+
+
+
+
+
+

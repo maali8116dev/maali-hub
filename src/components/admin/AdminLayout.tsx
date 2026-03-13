@@ -20,6 +20,7 @@ import {
   Building2,
   UserCheck,
   Home,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -49,11 +50,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const menuItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/projects", label: "Projects", icon: Briefcase },
+    { href: "/admin/opportunities", label: "Opportunities", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
+    { href: "/admin/notifications", label: "Notifications", icon: Bell },
+    { href: "/admin/kyc", label: "KYC Requests", icon: Shield },
     { href: "/admin/review-management", label: "Review Management", icon: ClipboardCheck },
     { href: "/admin/financial", label: "Financial", icon: DollarSign },
-    { href: "/admin/categories", label: "Categories", icon: Tag },
+    { href: "/admin/sectors", label: "Sectors", icon: Tag },
     { href: "/admin/resources", label: "Resources", icon: FolderOpen },
     { href: "/admin/blog", label: "Blog", icon: BookOpen },
     { href: "/admin/partners", label: "Partners", icon: Handshake },
@@ -72,19 +75,21 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const getPageTitle = () => {
     if (location.pathname === "/admin") return "Admin Dashboard";
-    if (location.pathname === "/admin/projects") return "Manage Projects";
-    if (location.pathname.startsWith("/admin/projects/") && location.pathname.endsWith("/applications")) {
-      return "Project Applications";
+    if (location.pathname === "/admin/opportunities") return "Manage Opportunities";
+    if (location.pathname.startsWith("/admin/opportunities/") && location.pathname.endsWith("/applications")) {
+      return "Opportunity Applications";
     }
     if (location.pathname === "/admin/applications") return "Review Applications";
     if (location.pathname === "/admin/financial") return "Financial Management";
+    if (location.pathname === "/admin/kyc") return "KYC Requests";
+    if (location.pathname === "/admin/notifications") return "Notifications";
     if (location.pathname.startsWith("/admin/blog")) return "Manage Blog";
     if (location.pathname.startsWith("/admin/partners")) return "Manage Partners";
     if (location.pathname.startsWith("/admin/success-stories")) return "Manage Success Stories";
     if (location.pathname.startsWith("/admin/faq")) return "Manage FAQs";
     if (location.pathname.startsWith("/admin/mentors")) return "Manage Mentors";
     if (location.pathname === "/admin/users") return "Manage Users";
-    if (location.pathname === "/admin/categories") return "Manage Categories";
+    if (location.pathname === "/admin/sectors") return "Manage sectors";
     if (location.pathname === "/admin/activity-logs") return "Activity Logs";
     if (location.pathname === "/admin/settings") return "Admin Settings";
     return "Admin Dashboard";
@@ -126,7 +131,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
                     (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors")) ||
                     (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources")) ||
-                    (item.href === "/admin/categories" && location.pathname.startsWith("/admin/categories"));
+                    (item.href === "/admin/sectors" && location.pathname.startsWith("/admin/sectors"));
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
@@ -241,4 +246,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 };
 
 export default AdminLayout;
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { captureError } from "@/lib/sentry";
 import { AlertTriangle, Bug, Zap } from "lucide-react";
@@ -107,3 +107,11 @@ export const ErrorTest = () => {
 };
 
 export default ErrorTest;
+
+
+
+
+
+
+
+

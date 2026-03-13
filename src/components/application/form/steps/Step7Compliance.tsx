@@ -1,4 +1,4 @@
-import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+﻿import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ApplicationFormValues } from "../schemas";
 import type { ApplicationFormData } from "@/stores/applicationForm";
@@ -183,4 +183,12 @@ export function Step7Compliance({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

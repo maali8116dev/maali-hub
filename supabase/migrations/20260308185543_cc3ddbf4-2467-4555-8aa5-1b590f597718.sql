@@ -70,3 +70,4 @@ CREATE TRIGGER prevent_role_self_update_trigger
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.prevent_role_self_update();
+

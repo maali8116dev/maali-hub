@@ -62,19 +62,19 @@ DROP TYPE IF EXISTS "public"."experience_level" CASCADE;
 CREATE TYPE "public"."user_role" AS ENUM (
     'admin',
     'reviewer',
-    'applicant'
-);
+    'applicant',
+    'partner');
 
 CREATE TYPE "public"."opportunity_type" AS ENUM (
-    'grant',
-    'fellowship',
-    'scholarship',
-    'internship',
-    'training',
-    'competition',
     'accelerator',
-    'incubator',
-    'job'
+    'competition',
+    'fellowship',
+    'grant',
+    'hackathon',
+    'internship',
+    'job',
+    'scholarship',
+    'training'
 );
 
 CREATE TYPE "public"."program_format" AS ENUM (
@@ -112,12 +112,12 @@ ALTER TYPE "public"."funding_type" OWNER TO "postgres";
 ALTER TYPE "public"."experience_level" OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") RETURNS TABLE("id" "uuid", "reviewer_id" "uuid", "category_id" integer, "category_name" "text", "created_at" timestamp with time zone)
+CREATE OR REPLACE FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") RETURNS TABLE("id" "uuid", "reviewer_id" "uuid", "sector_id" integer, "sector_name" "text", "created_at" timestamp with time zone)
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
 DECLARE
-  v_category_id INTEGER;
+  v_sector_id INTEGER;
   v_assignment_id UUID;
 BEGIN
   IF NOT EXISTS (
@@ -139,46 +139,46 @@ BEGIN
   END IF;
 
   SELECT c.id
-  INTO v_category_id
-  FROM public.categories c
-  WHERE c.name = p_category_name
+  INTO v_sector_id
+  FROM public.sectors c
+  WHERE c.name = p_sector_name
     AND c.is_active = true;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Category "%" not found or is inactive', p_category_name;
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Sector "%" not found or is inactive', p_sector_name;
   END IF;
 
-  INSERT INTO public.reviewer_categories (reviewer_id, category_id)
-  VALUES (p_reviewer_id, v_category_id)
-  ON CONFLICT ON CONSTRAINT reviewer_categories_reviewer_id_category_id_key DO NOTHING
-  RETURNING public.reviewer_categories.id INTO v_assignment_id;
+  INSERT INTO public.reviewer_sectors (reviewer_id, sector_id)
+  VALUES (p_reviewer_id, v_sector_id)
+  ON CONFLICT ON CONSTRAINT reviewer_sectors_reviewer_id_sector_id_key DO NOTHING
+  RETURNING public.reviewer_sectors.id INTO v_assignment_id;
 
   IF v_assignment_id IS NULL THEN
     SELECT rc.id
     INTO v_assignment_id
-    FROM public.reviewer_categories rc
+    FROM public.reviewer_sectors rc
     WHERE rc.reviewer_id = p_reviewer_id
-      AND rc.category_id = v_category_id;
+      AND rc.sector_id = v_sector_id;
   END IF;
 
   RETURN QUERY
   SELECT
     rc.id AS id,
     rc.reviewer_id,
-    rc.category_id,
-    c.name AS category_name,
+    rc.sector_id,
+    c.name AS sector_name,
     rc.created_at
-  FROM public.reviewer_categories rc
-  JOIN public.categories c ON rc.category_id = c.id
+  FROM public.reviewer_sectors rc
+  JOIN public.sectors c ON rc.sector_id = c.id
   WHERE rc.id = v_assignment_id;
 END;
 $$;
 
 
-ALTER FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") IS 'Atomically assigns a reviewer to a category. Validates category exists and is active, prevents duplicates, and returns the created assignment.';
+COMMENT ON FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") IS 'Atomically assigns a reviewer to a Sector. Validates Sector exists and is active, prevents duplicates, and returns the created assignment.';
 
 
 
@@ -227,7 +227,7 @@ COMMENT ON FUNCTION "public"."auto_generate_invoice_number"() IS 'Trigger functi
 
 
 
-CREATE OR REPLACE FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_category" "text") RETURNS numeric
+CREATE OR REPLACE FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") RETURNS numeric
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -239,11 +239,11 @@ DECLARE
   v_score_value DECIMAL(5,2);
   v_weight DECIMAL(5,2);
 BEGIN
-  -- Get rubric for category
+  -- Get rubric for Sector
   SELECT cr.rubric INTO v_rubric
-  FROM public.category_rubrics cr
-  JOIN public.categories c ON cr.category_id = c.id
-  WHERE c.name = p_category;
+  FROM public.sector_rubrics cr
+  JOIN public.sectors c ON cr.sector_id = c.id
+  WHERE c.name = p_Sector;
   
   -- If no rubric, return simple average
   IF v_rubric IS NULL OR v_rubric->'criteria' IS NULL THEN
@@ -275,7 +275,7 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_category" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."check_and_increment_rate_limit"("p_user_id" "uuid", "p_ip_address" "inet", "p_operation_type" "text", "p_max_requests" integer, "p_window_minutes" integer) RETURNS "jsonb"
@@ -339,7 +339,7 @@ BEGIN
     SELECT count INTO v_new_count FROM upsert;
   END IF;
 
-  -- Increment was accepted → allowed
+  -- Increment was accepted Ã¢- ’ allowed
   IF v_new_count IS NOT NULL THEN
     RETURN jsonb_build_object(
       'allowed',       true,
@@ -350,7 +350,7 @@ BEGIN
     );
   END IF;
 
-  -- Increment was rejected (count >= max) → denied
+  -- Increment was rejected (count >= max) Ã¢- ’ denied
   -- Look up the actual count for the response payload
   IF p_user_id IS NOT NULL THEN
     SELECT COALESCE(rl.count, p_max_requests)
@@ -382,7 +382,7 @@ $$;
 ALTER FUNCTION "public"."check_and_increment_rate_limit"("p_user_id" "uuid", "p_ip_address" "inet", "p_operation_type" "text", "p_max_requests" integer, "p_window_minutes" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."check_and_increment_rate_limit"("p_user_id" "uuid", "p_ip_address" "inet", "p_operation_type" "text", "p_max_requests" integer, "p_window_minutes" integer) IS 'Atomically checks and increments a rate limit counter. Returns JSONB with allowed status. Not callable from client — only SECURITY DEFINER functions and service_role.';
+COMMENT ON FUNCTION "public"."check_and_increment_rate_limit"("p_user_id" "uuid", "p_ip_address" "inet", "p_operation_type" "text", "p_max_requests" integer, "p_window_minutes" integer) IS 'Atomically checks and increments a rate limit counter. Returns JSONB with allowed status. Not callable from client Ã¢â‚¬” only SECURITY DEFINER functions and service_role.';
 
 
 
@@ -516,7 +516,7 @@ $$;
 ALTER FUNCTION "public"."enforce_application_submission_rate_limit"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."enforce_application_submission_rate_limit"() IS 'Trigger function that enforces rate limits on application submissions (INSERT and draft→submit UPDATE).';
+COMMENT ON FUNCTION "public"."enforce_application_submission_rate_limit"() IS 'Trigger function that enforces rate limits on application submissions (INSERT and draftÃ¢- ’submit UPDATE).';
 
 
 
@@ -562,16 +562,16 @@ $$;
 ALTER FUNCTION "public"."ensure_single_default_payment_method"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."generate_category_slug"("category_name" "text") RETURNS "text"
+CREATE OR REPLACE FUNCTION "public"."generate_sector_slug"("sector_name" "text") RETURNS "text"
     LANGUAGE "plpgsql"
     AS $$
 BEGIN
-  RETURN lower(regexp_replace(category_name, '[^a-zA-Z0-9]+', '-', 'g'));
+  RETURN lower(regexp_replace(sector_name, '[^a-zA-Z0-9]+', '-', 'g'));
 END;
 $$;
 
 
-ALTER FUNCTION "public"."generate_category_slug"("category_name" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."generate_sector_slug"("sector_name" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."generate_invoice_number"() RETURNS "text"
@@ -613,7 +613,7 @@ COMMENT ON FUNCTION "public"."generate_invoice_number"() IS 'Generates a sequent
 -- Function get_admin_stats removed - will be updated to use opportunities in opportunities migration
 
 
-CREATE OR REPLACE FUNCTION "public"."get_all_reviewers_with_details"() RETURNS TABLE("reviewer_id" "uuid", "first_name" "text", "last_name" "text", "email" "text", "workload" integer, "categories" "jsonb", "total_reviews" integer, "average_score" numeric)
+CREATE OR REPLACE FUNCTION "public"."get_all_reviewers_with_details"() RETURNS TABLE("reviewer_id" "uuid", "first_name" "text", "last_name" "text", "email" "text", "workload" integer, "sectors" "jsonb", "total_reviews" integer, "average_score" numeric)
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'auth'
     AS $$
@@ -648,16 +648,16 @@ BEGIN
       SELECT jsonb_agg(
         jsonb_build_object(
           'id', rc.id,
-          'category_id', rc.category_id,
-          'category_name', COALESCE(c.name, 'Unknown'),
+          'sector_id', rc.sector_id,
+          'sector_name', COALESCE(c.name, 'Unknown'),
           'created_at', rc.created_at
         )
         ORDER BY c.name
       )
-      FROM public.reviewer_categories rc
-      LEFT JOIN public.categories c ON c.id = rc.category_id
+      FROM public.reviewer_sectors rc
+      LEFT JOIN public.sectors c ON c.id = rc.sector_id
       WHERE rc.reviewer_id = p.user_id
-    ), '[]'::jsonb) AS categories,
+    ), '[]'::jsonb) AS sectors,
     COALESCE((
       SELECT COUNT(*)::INTEGER
       FROM public.review_scores rs
@@ -1063,7 +1063,7 @@ ALTER FUNCTION "public"."get_rate_limit_config"("p_operation_type" "text", OUT "
 -- Function get_reviewer_assignments_with_application removed - will be replaced with opportunities support in opportunities migration
 
 
-CREATE OR REPLACE FUNCTION "public"."get_reviewer_full_details"("p_reviewer_id" "uuid") RETURNS TABLE("reviewer" "jsonb", "workload" integer, "total_reviews" integer, "total_assignments" integer, "average_score" numeric, "completed_reviews" "jsonb", "pending_assignments" "jsonb", "categories" "jsonb")
+CREATE OR REPLACE FUNCTION "public"."get_reviewer_full_details"("p_reviewer_id" "uuid") RETURNS TABLE("reviewer" "jsonb", "workload" integer, "total_reviews" integer, "total_assignments" integer, "average_score" numeric, "completed_reviews" "jsonb", "pending_assignments" "jsonb", "sectors" "jsonb")
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -1144,16 +1144,16 @@ BEGIN
       SELECT jsonb_agg(
         jsonb_build_object(
           'id', rc.id,
-          'category_id', rc.category_id,
-          'category_name', COALESCE(c.name, 'Unknown'),
+          'sector_id', rc.sector_id,
+          'sector_name', COALESCE(c.name, 'Unknown'),
           'created_at', rc.created_at
         )
         ORDER BY c.name
       )
-      FROM public.reviewer_categories rc
-      LEFT JOIN public.categories c ON c.id = rc.category_id
+      FROM public.reviewer_sectors rc
+      LEFT JOIN public.sectors c ON c.id = rc.sector_id
       WHERE rc.reviewer_id = p_reviewer_id
-    ), '[]'::jsonb) AS categories;
+    ), '[]'::jsonb) AS sectors;
 END;
 $$;
 
@@ -1197,19 +1197,19 @@ BEGIN
     RAISE EXCEPTION 'Access denied. You can only fetch your own applications.';
   END IF;
 
-  -- 3. Return all applications for the user with joined project and category data
+  -- 3. Return all applications for the user with joined project and Sector data
   RETURN QUERY
   SELECT
     to_jsonb(a.*) AS application,
     CASE
       WHEN p.id IS NULL THEN NULL
       ELSE to_jsonb(p.*) || jsonb_build_object(
-             'category', COALESCE(c.name, 'Uncategorized')
+             'Sector', COALESCE(c.name, 'Uncategorized')
            )
     END AS project
   FROM public.applications a
   LEFT JOIN public.opportunities p ON p.id = a.opportunity_id
-  LEFT JOIN public.categories c ON c.id = p.category_id
+  LEFT JOIN public.sectors c ON c.id = p.sector_id
   WHERE a.user_id = p_user_id
   ORDER BY a.created_at DESC;
 END;
@@ -1567,28 +1567,28 @@ CREATE OR REPLACE FUNCTION "public"."update_review_score_overall"() RETURNS "tri
     SET "search_path" TO 'public'
     AS $$
 DECLARE
-  v_category_id INTEGER;
-  v_category_name TEXT;
+  v_sector_id INTEGER;
+  v_sector_name TEXT;
 BEGIN
-  -- Get category_id from opportunity
-  SELECT p.category_id
-  INTO v_category_id
+  -- Get sector_id from opportunity
+  SELECT p.sector_id
+  INTO v_sector_id
   FROM public.applications a
       JOIN public.opportunities p ON a.opportunity_id = p.id
   WHERE a.id = NEW.application_id;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no category assigned';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no Sector assigned';
   END IF;
   
-  -- Get category name from categories table
+  -- Get Sector name from sectors table
   SELECT name
-  INTO v_category_name
-  FROM public.categories
-  WHERE id = v_category_id;
+  INTO v_sector_name
+  FROM public.sectors
+  WHERE id = v_sector_id;
 
   -- Calculate and update overall score
-  NEW.overall_score := public.calculate_review_score(NEW.scores, v_category_name);
+  NEW.overall_score := public.calculate_review_score(NEW.scores, v_sector_name);
   NEW.updated_at := now();
 
   RETURN NEW;
@@ -1798,7 +1798,7 @@ CREATE TABLE IF NOT EXISTS "public"."blog_posts" (
     "excerpt" "text" NOT NULL,
     "content" "text" NOT NULL,
     "author" "text" NOT NULL,
-    "category" "text" NOT NULL,
+    "Sector" "text" NOT NULL,
     "read_time" "text" NOT NULL,
     "image_url" "text" NOT NULL,
     "featured" boolean DEFAULT false,
@@ -1832,7 +1832,7 @@ ALTER SEQUENCE "public"."blog_posts_id_seq" OWNED BY "public"."blog_posts"."id";
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."categories" (
+CREATE TABLE IF NOT EXISTS "public"."sectors" (
     "id" integer NOT NULL PRIMARY KEY,
     "name" "text" NOT NULL,
     "slug" "text" NOT NULL,
@@ -1843,22 +1843,22 @@ CREATE TABLE IF NOT EXISTS "public"."categories" (
 );
 
 
-ALTER TABLE "public"."categories" OWNER TO "postgres";
+ALTER TABLE "public"."sectors" OWNER TO "postgres";
 
 
-COMMENT ON TABLE "public"."categories" IS 'Centralized categories table - single source of truth for all category values';
-
-
-
-COMMENT ON COLUMN "public"."categories"."slug" IS 'URL-friendly version of category name';
+COMMENT ON TABLE "public"."sectors" IS 'Centralized sectors table - single source of truth for all Sector values';
 
 
 
-COMMENT ON COLUMN "public"."categories"."is_active" IS 'Allow disabling categories without deleting';
+COMMENT ON COLUMN "public"."sectors"."slug" IS 'URL-friendly version of Sector name';
 
 
 
-CREATE SEQUENCE IF NOT EXISTS "public"."categories_id_seq"
+COMMENT ON COLUMN "public"."sectors"."is_active" IS 'Allow disabling sectors without deleting';
+
+
+
+CREATE SEQUENCE IF NOT EXISTS "public"."sectors_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -1867,26 +1867,26 @@ CREATE SEQUENCE IF NOT EXISTS "public"."categories_id_seq"
     CACHE 1;
 
 
-ALTER SEQUENCE "public"."categories_id_seq" OWNER TO "postgres";
+ALTER SEQUENCE "public"."sectors_id_seq" OWNER TO "postgres";
 
 
-ALTER SEQUENCE "public"."categories_id_seq" OWNED BY "public"."categories"."id";
+ALTER SEQUENCE "public"."sectors_id_seq" OWNED BY "public"."sectors"."id";
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."category_rubrics" (
+CREATE TABLE IF NOT EXISTS "public"."sector_rubrics" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "rubric" "jsonb" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "category_id" integer
+    "sector_id" integer
 );
 
 
-ALTER TABLE "public"."category_rubrics" OWNER TO "postgres";
+ALTER TABLE "public"."sector_rubrics" OWNER TO "postgres";
 
 
-COMMENT ON TABLE "public"."category_rubrics" IS 'Defines scoring criteria and weights for each category';
+COMMENT ON TABLE "public"."sector_rubrics" IS 'Defines scoring criteria and weights for each Sector';
 
 
 
@@ -1920,7 +1920,7 @@ CREATE TABLE IF NOT EXISTS "public"."faqs" (
     "id" integer NOT NULL,
     "question" "text" NOT NULL,
     "answer" "text" NOT NULL,
-    "category" "text" NOT NULL,
+    "Sector" "text" NOT NULL,
     "display_order" integer DEFAULT 0,
     "is_published" boolean DEFAULT true,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -2047,23 +2047,23 @@ ALTER TABLE "public"."payment_methods" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own payment methods"
 ON "public"."payment_methods"
 FOR SELECT
-USING (auth.uid() = user_id);
+USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can insert their own payment methods"
 ON "public"."payment_methods"
 FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own payment methods"
 ON "public"."payment_methods"
 FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING ((select auth.uid()) = user_id)
+WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own payment methods"
 ON "public"."payment_methods"
 FOR DELETE
-USING (auth.uid() = user_id);
+USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Service role can manage payment methods"
 ON "public"."payment_methods"
@@ -2195,10 +2195,16 @@ ON public.opportunity_tags FOR ALL
 USING (
   EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE user_id = auth.uid()
+    WHERE user_id = (select auth.uid())
     AND role = 'admin'
   )
 );
+
+CREATE POLICY "Partners can create tags"
+ON public.opportunity_tags
+FOR INSERT
+TO authenticated
+WITH CHECK (get_user_role((select auth.uid())) = 'partner');
 
 -- Create Opportunities Table
 CREATE TABLE IF NOT EXISTS public.opportunities (
@@ -2206,7 +2212,7 @@ CREATE TABLE IF NOT EXISTS public.opportunities (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   status TEXT DEFAULT 'open'::text NOT NULL,
-  opportunity_type public.opportunity_type NOT NULL DEFAULT 'grant',
+  opportunity_type public.opportunity_type,
   program_format public.program_format,
   funding_type public.funding_type,
   experience_level public.experience_level,
@@ -2215,16 +2221,15 @@ CREATE TABLE IF NOT EXISTS public.opportunities (
   deadline DATE NOT NULL,
   start_date DATE,
   end_date DATE,
-  funding_amount TEXT NOT NULL,
+  funding_amount TEXT,
   currency TEXT DEFAULT 'USD',
   application_fee NUMERIC(10,2) DEFAULT 0,
-  organization_name TEXT,
   eligibility_criteria TEXT,
   requirements TEXT,
   image_url TEXT,
   max_applicants INTEGER,
   current_applicants INTEGER DEFAULT 0,
-  category_id INTEGER REFERENCES public.categories(id),
+  sector_id INTEGER REFERENCES public.sectors(id),
   created_by UUID REFERENCES auth.users(id),
   featured BOOLEAN DEFAULT false NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
@@ -2276,19 +2281,19 @@ USING (true);
 CREATE POLICY "Admins can create opportunities"
 ON public.opportunities FOR INSERT
 WITH CHECK (
-  public.get_user_role(auth.uid()) = 'admin'
+  public.get_user_role((select auth.uid())) = 'admin'
 );
 
 CREATE POLICY "Admins can update opportunities"
 ON public.opportunities FOR UPDATE
 USING (
-  public.get_user_role(auth.uid()) = 'admin'
+  public.get_user_role((select auth.uid())) = 'admin'
 );
 
 CREATE POLICY "Admins can delete opportunities"
 ON public.opportunities FOR DELETE
 USING (
-  public.get_user_role(auth.uid()) = 'admin'
+  public.get_user_role((select auth.uid())) = 'admin'
 );
 
 -- RLS Policies for opportunity_tag_map
@@ -2301,8 +2306,34 @@ ON public.opportunity_tag_map FOR ALL
 USING (
   EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE user_id = auth.uid()
+    WHERE user_id = (select auth.uid())
     AND role = 'admin'
+  )
+);
+
+CREATE POLICY "Partners can manage tag maps for own opportunities"
+ON public.opportunity_tag_map
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  (get_user_role((select auth.uid())) = 'partner')
+  AND EXISTS (
+    SELECT 1 FROM public.opportunities
+    WHERE opportunities.id = opportunity_tag_map.opportunity_id
+      AND opportunities.created_by = (select auth.uid())
+  )
+);
+
+CREATE POLICY "Partners can delete tag maps for own opportunities"
+ON public.opportunity_tag_map
+FOR DELETE
+TO authenticated
+USING (
+  (get_user_role((select auth.uid())) = 'partner')
+  AND EXISTS (
+    SELECT 1 FROM public.opportunities
+    WHERE opportunities.id = opportunity_tag_map.opportunity_id
+      AND opportunities.created_by = (select auth.uid())
   )
 );
 
@@ -2317,7 +2348,7 @@ CREATE INDEX IF NOT EXISTS idx_opportunities_status ON public.opportunities(stat
 CREATE INDEX IF NOT EXISTS idx_opportunities_type_status_deadline ON public.opportunities(opportunity_type, status, deadline);
 CREATE INDEX IF NOT EXISTS idx_opportunities_created_at ON public.opportunities(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_opportunities_featured ON public.opportunities(featured);
-CREATE INDEX IF NOT EXISTS idx_opportunities_category_id ON public.opportunities(category_id);
+CREATE INDEX IF NOT EXISTS idx_opportunities_sector_id ON public.opportunities(sector_id);
 
 -- Add update_updated_at trigger for opportunities
 CREATE OR REPLACE TRIGGER update_opportunities_updated_at
@@ -2325,8 +2356,8 @@ BEFORE UPDATE ON public.opportunities
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
-COMMENT ON TABLE public.opportunities IS 'Comprehensive opportunities table. Supports multiple opportunity types, program formats, funding models, experience levels. Uses BOTH categories (single category_id for reviewer assignment and rubrics) AND tags (multiple via opportunity_tag_map for flexible categorization).';
-COMMENT ON COLUMN public.opportunities.category_id IS 'Primary category for reviewer assignment and review rubrics. Each opportunity has one category for the review system.';
+COMMENT ON TABLE public.opportunities IS 'Comprehensive opportunities table. Supports multiple opportunity types, program formats, funding models, experience levels. Uses BOTH sectors (single sector_id for reviewer assignment and rubrics) AND tags (multiple via opportunity_tag_map for flexible categorization).';
+COMMENT ON COLUMN public.opportunities.sector_id IS 'Primary Sector for reviewer assignment and review rubrics. Each opportunity has one Sector for the review system.';
 COMMENT ON TABLE public.opportunity_tags IS 'Tags for flexible categorization of opportunities by domain/topic (AI, climate, fintech, etc.). Multiple tags per opportunity via opportunity_tag_map.';
 COMMENT ON TABLE public.opportunity_tag_map IS 'Many-to-many relationship between opportunities and tags. Allows multiple tags per opportunity for flexible filtering and display.';
 
@@ -2372,7 +2403,7 @@ CREATE TABLE IF NOT EXISTS "public"."resources" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "title" "text" NOT NULL,
     "description" "text",
-    "category" "text" NOT NULL,
+    "Sector" "text" NOT NULL,
     "file_type" "text" NOT NULL,
     "file_url" "text",
     "file_size" bigint,
@@ -2413,18 +2444,18 @@ COMMENT ON TABLE "public"."review_scores" IS 'Stores individual reviewer scores 
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."reviewer_categories" (
+CREATE TABLE IF NOT EXISTS "public"."reviewer_sectors" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "reviewer_id" "uuid" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "category_id" integer
+    "sector_id" integer
 );
 
 
-ALTER TABLE "public"."reviewer_categories" OWNER TO "postgres";
+ALTER TABLE "public"."reviewer_sectors" OWNER TO "postgres";
 
 
-COMMENT ON TABLE "public"."reviewer_categories" IS 'Maps reviewers to categories they can review';
+COMMENT ON TABLE "public"."reviewer_sectors" IS 'Maps reviewers to sectors they can review';
 
 
 
@@ -2482,7 +2513,7 @@ ALTER TABLE ONLY "public"."blog_posts" ALTER COLUMN "id" SET DEFAULT "nextval"('
 
 
 
-ALTER TABLE ONLY "public"."categories" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."categories_id_seq"'::"regclass");
+ALTER TABLE ONLY "public"."sectors" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."sectors_id_seq"'::"regclass");
 
 
 
@@ -2533,8 +2564,8 @@ ALTER TABLE ONLY "public"."blog_posts"
 
 
 
-ALTER TABLE ONLY "public"."categories"
-    ADD CONSTRAINT "categories_name_key" UNIQUE ("name");
+ALTER TABLE ONLY "public"."sectors"
+    ADD CONSTRAINT "sectors_name_key" UNIQUE ("name");
 
 
 
@@ -2543,27 +2574,27 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint 
-    WHERE conname = 'categories_pkey'
+    WHERE conname = 'sectors_pkey'
   ) THEN
-    ALTER TABLE ONLY "public"."categories"
-      ADD CONSTRAINT "categories_pkey" PRIMARY KEY ("id");
+    ALTER TABLE ONLY "public"."sectors"
+      ADD CONSTRAINT "sectors_pkey" PRIMARY KEY ("id");
   END IF;
 END $$;
 
 
 
-ALTER TABLE ONLY "public"."categories"
-    ADD CONSTRAINT "categories_slug_key" UNIQUE ("slug");
+ALTER TABLE ONLY "public"."sectors"
+    ADD CONSTRAINT "sectors_slug_key" UNIQUE ("slug");
 
 
 
-ALTER TABLE ONLY "public"."category_rubrics"
-    ADD CONSTRAINT "category_rubrics_category_id_key" UNIQUE ("category_id");
+ALTER TABLE ONLY "public"."sector_rubrics"
+    ADD CONSTRAINT "sector_rubrics_sector_id_key" UNIQUE ("sector_id");
 
 
 
-ALTER TABLE ONLY "public"."category_rubrics"
-    ADD CONSTRAINT "category_rubrics_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."sector_rubrics"
+    ADD CONSTRAINT "sector_rubrics_pkey" PRIMARY KEY ("id");
 
 
 
@@ -2633,13 +2664,13 @@ ALTER TABLE ONLY "public"."review_scores"
 
 
 
-ALTER TABLE ONLY "public"."reviewer_categories"
-    ADD CONSTRAINT "reviewer_categories_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."reviewer_sectors"
+    ADD CONSTRAINT "reviewer_sectors_pkey" PRIMARY KEY ("id");
 
 
 
-ALTER TABLE ONLY "public"."reviewer_categories"
-    ADD CONSTRAINT "reviewer_categories_reviewer_id_category_id_key" UNIQUE ("reviewer_id", "category_id");
+ALTER TABLE ONLY "public"."reviewer_sectors"
+    ADD CONSTRAINT "reviewer_sectors_reviewer_id_sector_id_key" UNIQUE ("reviewer_id", "sector_id");
 
 
 
@@ -2731,7 +2762,7 @@ CREATE INDEX "idx_billing_addresses_user_id" ON "public"."billing_addresses" USI
 
 
 
-CREATE INDEX "idx_blog_posts_category" ON "public"."blog_posts" USING "btree" ("category");
+CREATE INDEX "idx_blog_posts_Sector" ON "public"."blog_posts" USING "btree" ("Sector");
 
 
 
@@ -2747,15 +2778,15 @@ CREATE INDEX "idx_blog_posts_status" ON "public"."blog_posts" USING "btree" ("st
 
 
 
-CREATE INDEX "idx_categories_active" ON "public"."categories" USING "btree" ("is_active");
+CREATE INDEX "idx_sectors_active" ON "public"."sectors" USING "btree" ("is_active");
 
 
 
-CREATE INDEX "idx_categories_slug" ON "public"."categories" USING "btree" ("slug");
+CREATE INDEX "idx_sectors_slug" ON "public"."sectors" USING "btree" ("slug");
 
 
 
-CREATE INDEX "idx_category_rubrics_category_id" ON "public"."category_rubrics" USING "btree" ("category_id");
+CREATE INDEX "idx_sector_rubrics_sector_id" ON "public"."sector_rubrics" USING "btree" ("sector_id");
 
 
 
@@ -2819,8 +2850,8 @@ CREATE INDEX "idx_profiles_role" ON "public"."profiles" USING "btree" ("role");
 
 
 
--- Index for category_id (used for reviewer assignment and rubrics)
--- Note: Opportunities use BOTH categories (single, for review system) and tags (multiple, for flexible categorization)
+-- Index for sector_id (used for reviewer assignment and rubrics)
+-- Note: Opportunities use BOTH sectors (single, for review system) and tags (multiple, for flexible categorization)
 -- Note: Other opportunity indexes (deadline, featured, status) are already created earlier with IF NOT EXISTS
 
 
@@ -2837,11 +2868,11 @@ CREATE INDEX "idx_review_scores_reviewer" ON "public"."review_scores" USING "btr
 
 
 
-CREATE INDEX "idx_reviewer_categories_category_id" ON "public"."reviewer_categories" USING "btree" ("category_id");
+CREATE INDEX "idx_reviewer_sectors_sector_id" ON "public"."reviewer_sectors" USING "btree" ("sector_id");
 
 
 
-CREATE INDEX "idx_reviewer_categories_reviewer" ON "public"."reviewer_categories" USING "btree" ("reviewer_id");
+CREATE INDEX "idx_reviewer_sectors_reviewer" ON "public"."reviewer_sectors" USING "btree" ("reviewer_id");
 
 
 
@@ -3009,8 +3040,8 @@ ALTER TABLE ONLY "public"."blog_posts"
 
 
 
-ALTER TABLE ONLY "public"."category_rubrics"
-    ADD CONSTRAINT "category_rubrics_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
+ALTER TABLE ONLY "public"."sector_rubrics"
+    ADD CONSTRAINT "sector_rubrics_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "public"."sectors"("id");
 
 
 
@@ -3073,13 +3104,13 @@ ALTER TABLE ONLY "public"."review_scores"
 
 
 
-ALTER TABLE ONLY "public"."reviewer_categories"
-    ADD CONSTRAINT "reviewer_categories_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id");
+ALTER TABLE ONLY "public"."reviewer_sectors"
+    ADD CONSTRAINT "reviewer_sectors_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "public"."sectors"("id");
 
 
 
-ALTER TABLE ONLY "public"."reviewer_categories"
-    ADD CONSTRAINT "reviewer_categories_reviewer_id_fkey" FOREIGN KEY ("reviewer_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+ALTER TABLE ONLY "public"."reviewer_sectors"
+    ADD CONSTRAINT "reviewer_sectors_reviewer_id_fkey" FOREIGN KEY ("reviewer_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -3112,7 +3143,7 @@ ALTER TABLE ONLY "public"."transactions"
 
 
 
-CREATE POLICY "Active categories are viewable by everyone" ON "public"."categories" FOR SELECT USING (("is_active" = true));
+CREATE POLICY "Active sectors are viewable by everyone" ON "public"."sectors" FOR SELECT USING (("is_active" = true));
 
 
 
@@ -3164,7 +3195,7 @@ CREATE POLICY "Admins can delete resources" ON "public"."resources" FOR DELETE U
 
 
 
-CREATE POLICY "Admins can manage categories" ON "public"."categories" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
+CREATE POLICY "Admins can manage sectors" ON "public"."sectors" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
 
 
 
@@ -3172,11 +3203,11 @@ CREATE POLICY "Admins can manage conflicts" ON "public"."reviewer_conflicts" USI
 
 
 
-CREATE POLICY "Admins can manage reviewer categories" ON "public"."reviewer_categories" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
+CREATE POLICY "Admins can manage reviewer sectors" ON "public"."reviewer_sectors" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
 
 
 
-CREATE POLICY "Admins can manage rubrics" ON "public"."category_rubrics" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
+CREATE POLICY "Admins can manage rubrics" ON "public"."sector_rubrics" USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
 
 
 
@@ -3236,7 +3267,7 @@ CREATE POLICY "Admins can view all assignments" ON "public"."application_assignm
 
 
 
-CREATE POLICY "Admins can view all categories" ON "public"."categories" FOR SELECT USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
+CREATE POLICY "Admins can view all sectors" ON "public"."sectors" FOR SELECT USING (("public"."get_user_role"("auth"."uid"()) = 'admin'::"text"));
 
 
 
@@ -3284,7 +3315,7 @@ CREATE POLICY "Authenticated users can create activity logs" ON "public"."activi
 
 
 
-CREATE POLICY "Everyone can view rubrics" ON "public"."category_rubrics" FOR SELECT USING (true);
+CREATE POLICY "Everyone can view rubrics" ON "public"."sector_rubrics" FOR SELECT USING (true);
 
 
 
@@ -3332,7 +3363,7 @@ CREATE POLICY "Reviewers can view their own assignments" ON "public"."applicatio
 
 
 
-CREATE POLICY "Reviewers can view their own categories" ON "public"."reviewer_categories" FOR SELECT USING (("auth"."uid"() = "reviewer_id"));
+CREATE POLICY "Reviewers can view their own sectors" ON "public"."reviewer_sectors" FOR SELECT USING (("auth"."uid"() = "reviewer_id"));
 
 
 
@@ -3468,10 +3499,10 @@ ALTER TABLE "public"."billing_addresses" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."blog_posts" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."categories" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."sectors" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."category_rubrics" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."sector_rubrics" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."contact_submissions" ENABLE ROW LEVEL SECURITY;
@@ -3519,7 +3550,7 @@ ALTER TABLE "public"."resources" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."review_scores" ENABLE ROW LEVEL SECURITY;
 
 
-ALTER TABLE "public"."reviewer_categories" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."reviewer_sectors" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."reviewer_conflicts" ENABLE ROW LEVEL SECURITY;
@@ -3550,10 +3581,10 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-REVOKE ALL ON FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."assign_reviewer_category"("p_reviewer_id" "uuid", "p_category_name" "text") TO "service_role";
+REVOKE ALL ON FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."assign_reviewer_sector"("p_reviewer_id" "uuid", "p_sector_name" "text") TO "service_role";
 
 
 
@@ -3565,9 +3596,9 @@ GRANT ALL ON FUNCTION "public"."auto_generate_invoice_number"() TO "service_role
 
 
 
-GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_category" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_category" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_category" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") TO "service_role";
 
 
 
@@ -3606,9 +3637,9 @@ GRANT ALL ON FUNCTION "public"."ensure_single_default_payment_method"() TO "serv
 
 
 
-GRANT ALL ON FUNCTION "public"."generate_category_slug"("category_name" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."generate_category_slug"("category_name" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."generate_category_slug"("category_name" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."generate_sector_slug"("sector_name" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."generate_sector_slug"("sector_name" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."generate_sector_slug"("sector_name" "text") TO "service_role";
 
 
 
@@ -3837,21 +3868,21 @@ GRANT ALL ON SEQUENCE "public"."blog_posts_id_seq" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."categories" TO "anon";
-GRANT ALL ON TABLE "public"."categories" TO "authenticated";
-GRANT ALL ON TABLE "public"."categories" TO "service_role";
+GRANT ALL ON TABLE "public"."sectors" TO "anon";
+GRANT ALL ON TABLE "public"."sectors" TO "authenticated";
+GRANT ALL ON TABLE "public"."sectors" TO "service_role";
 
 
 
-GRANT ALL ON SEQUENCE "public"."categories_id_seq" TO "anon";
-GRANT ALL ON SEQUENCE "public"."categories_id_seq" TO "authenticated";
-GRANT ALL ON SEQUENCE "public"."categories_id_seq" TO "service_role";
+GRANT ALL ON SEQUENCE "public"."sectors_id_seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."sectors_id_seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."sectors_id_seq" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."category_rubrics" TO "anon";
-GRANT ALL ON TABLE "public"."category_rubrics" TO "authenticated";
-GRANT ALL ON TABLE "public"."category_rubrics" TO "service_role";
+GRANT ALL ON TABLE "public"."sector_rubrics" TO "anon";
+GRANT ALL ON TABLE "public"."sector_rubrics" TO "authenticated";
+GRANT ALL ON TABLE "public"."sector_rubrics" TO "service_role";
 
 
 
@@ -3951,9 +3982,9 @@ GRANT ALL ON TABLE "public"."review_scores" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."reviewer_categories" TO "anon";
-GRANT ALL ON TABLE "public"."reviewer_categories" TO "authenticated";
-GRANT ALL ON TABLE "public"."reviewer_categories" TO "service_role";
+GRANT ALL ON TABLE "public"."reviewer_sectors" TO "anon";
+GRANT ALL ON TABLE "public"."reviewer_sectors" TO "authenticated";
+GRANT ALL ON TABLE "public"."reviewer_sectors" TO "service_role";
 
 
 
@@ -3991,15 +4022,15 @@ BEGIN
   END IF;
 END $$;
 
--- Foreign key for opportunities category (if not already added in table definition)
+-- Foreign key for opportunities Sector (if not already added in table definition)
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint 
-    WHERE conname = 'opportunities_category_id_fkey'
+    WHERE conname = 'opportunities_sector_id_fkey'
   ) THEN
     ALTER TABLE ONLY "public"."opportunities"
-      ADD CONSTRAINT "opportunities_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE SET NULL;
+      ADD CONSTRAINT "opportunities_sector_id_fkey" FOREIGN KEY ("sector_id") REFERENCES "public"."sectors"("id") ON DELETE SET NULL;
   END IF;
 END $$;
 
@@ -4028,5 +4059,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
+
 
 

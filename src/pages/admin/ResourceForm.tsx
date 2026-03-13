@@ -31,7 +31,7 @@ import {
   useCreateResource,
   useUpdateResource,
   uploadResourceFile,
-  RESOURCE_CATEGORIES,
+  RESOURCE_sectors,
   FILE_TYPES,
   type ResourceFormData,
 } from "@/hooks/useResources";
@@ -40,7 +40,7 @@ import { toast } from "sonner";
 const resourceSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "Sector is required"),
   file_type: z.string().min(1, "File type is required"),
   file_url: z.string().optional(),
   file_size: z.number().optional(),
@@ -66,7 +66,7 @@ const ResourceForm = () => {
     defaultValues: {
       title: "",
       description: "",
-      category: "",
+      sector: "",
       file_type: "pdf",
       file_url: "",
       file_size: undefined,
@@ -84,7 +84,7 @@ const ResourceForm = () => {
       form.reset({
         title: resource.title,
         description: resource.description || "",
-        category: resource.category,
+        sector: resource.sector,
         file_type: resource.file_type,
         file_url: resource.file_url || "",
         file_size: resource.file_size || undefined,
@@ -195,20 +195,20 @@ const ResourceForm = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="category"
+                    name="sector"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category</FormLabel>
+                        <FormLabel>sector</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
+                              <SelectValue placeholder="Select Sector" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {RESOURCE_CATEGORIES.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
+                            {RESOURCE_sectors.map((sector) => (
+                              <SelectItem key={sector} value={sector}>
+                                {sector}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -401,3 +401,11 @@ const ResourceForm = () => {
 };
 
 export default ResourceForm;
+
+
+
+
+
+
+
+

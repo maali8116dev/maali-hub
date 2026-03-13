@@ -298,3 +298,4 @@ COMMENT ON FUNCTION public.create_rubric_version(JSONB, TEXT) IS 'Creates a new 
 
 
 -- ============================================
+

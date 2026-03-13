@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase, CreditCard } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
@@ -46,8 +46,8 @@ const formatOpportunityType = (type: string) => {
 const formatCurrency = (amount: string, currency: string) => {
   const currencySymbols: Record<string, string> = {
     'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
+    'EUR': 'â‚¬',
+    'GBP': 'Â£',
     'CAD': 'C$',
     'AUD': 'A$'
   };
@@ -114,7 +114,7 @@ const formatProjectDate = (dateString: string) => {
           />
           <InfoField 
             icon={Tag} 
-            label="Category" 
+            label="sector" 
             value={project.tags?.[0]?.name || "Uncategorized"}
           />
         </div>
@@ -215,4 +215,12 @@ const formatProjectDate = (dateString: string) => {
     </Card>
   );
 }
+
+
+
+
+
+
+
+
 

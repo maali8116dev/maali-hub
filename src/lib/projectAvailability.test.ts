@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 import { getProjectApplicationStateLabel, isProjectOpen } from "@/lib/projectAvailability";
 
 function formatDate(date: Date): string {
@@ -38,4 +38,12 @@ describe("projectAvailability", () => {
     expect(getProjectApplicationStateLabel("open", formatDate(past))).toBe("Closed for applications");
   });
 });
+
+
+
+
+
+
+
+
 

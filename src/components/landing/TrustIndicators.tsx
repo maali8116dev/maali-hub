@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   Carousel,
   CarouselApi,
@@ -99,4 +99,12 @@ const TrustIndicators = () => {
 };
 
 export default TrustIndicators;
+
+
+
+
+
+
+
+
 

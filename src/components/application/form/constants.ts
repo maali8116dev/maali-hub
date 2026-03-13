@@ -1,4 +1,4 @@
-export const stepTitles = [
+﻿export const stepTitles = [
   "Applicant Information",
   "Organization Details (Optional)",
   "Project Overview",
@@ -9,7 +9,7 @@ export const stepTitles = [
   "Submit",
 ];
 
-export const PRIMARY_SECTORS = [
+export const PRIMARY_sectorS = [
   { value: "Health", label: "Health" },
   { value: "Education", label: "Education" },
   { value: "Technology", label: "Technology" },
@@ -29,4 +29,12 @@ export const APPLICANT_TYPES = [
     label: "Research / Academic",
   },
 ] as const;
+
+
+
+
+
+
+
+
 

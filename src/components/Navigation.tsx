@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,8 +16,8 @@ const Navigation = () => {
 
   const languages = [
     { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    // { code: 'pt', name: 'Português' }
+    { code: 'fr', name: 'FranÃ§ais' },
+    // { code: 'pt', name: 'PortuguÃªs' }
   ];
 
   const currentLang = i18n.language || 'en';
@@ -198,3 +198,11 @@ const Navigation = () => {
 };
 
 export default Navigation;
+
+
+
+
+
+
+
+

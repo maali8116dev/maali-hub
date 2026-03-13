@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,7 +28,7 @@ const step1Schema = z.object({
 // Step 2: Business Details Schema
 const step2Schema = z.object({
   businessName: z.string().optional(),
-  businessSector: z.string().min(1, "Business sector is required"),
+  businesssector: z.string().min(1, "Business sector is required"),
   bio: z.string().optional(),
 });
 
@@ -42,7 +42,7 @@ interface ProfileSetupWizardProps {
   onComplete?: () => void;
 }
 
-const BUSINESS_SECTORS = [
+const BUSINESS_sectorS = [
   "Technology",
   "Agriculture",
   "FinTech",
@@ -58,11 +58,11 @@ const BUSINESS_SECTORS = [
 const AFRICAN_COUNTRIES = [
   "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
   "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros",
-  "Congo", "Côte d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea",
+  "Congo", "CÃ´te d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea",
   "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea",
   "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
   "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique",
-  "Namibia", "Niger", "Nigeria", "Rwanda", "São Tomé and Príncipe",
+  "Namibia", "Niger", "Nigeria", "Rwanda", "SÃ£o TomÃ© and PrÃ­ncipe",
   "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa",
   "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda",
   "Zambia", "Zimbabwe"
@@ -100,7 +100,7 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
     resolver: zodResolver(step2Schema),
     defaultValues: {
       businessName: profile?.businessName || "",
-      businessSector: profile?.businessSector || "",
+      businesssector: profile?.businesssector || "",
       bio: profile?.bio || "",
     },
   });
@@ -115,7 +115,7 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
       });
       step2Form.reset({
         businessName: profile.businessName || "",
-        businessSector: profile.businessSector || "",
+        businesssector: profile.businesssector || "",
         bio: profile.bio || "",
       });
       setAvatarUrl(profile.avatarUrl || "");
@@ -174,7 +174,7 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
         lastName: step1Data.lastName,
         country: step1Data.country,
         businessName: step2Data.businessName || undefined,
-        businessSector: step2Data.businessSector,
+        businesssector: step2Data.businesssector,
         bio: step2Data.bio || undefined,
         avatarUrl: avatarUrl || undefined,
       });
@@ -347,18 +347,18 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
               <form className="space-y-4">
                 <FormField
                   control={step2Form.control}
-                  name="businessSector"
+                  name="businesssector"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('profileWizard.businessSector')}</FormLabel>
+                      <FormLabel>{t('profileWizard.businesssector')}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t('profileWizard.businessSectorPlaceholder')} />
+                            <SelectValue placeholder={t('profileWizard.businesssectorPlaceholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {BUSINESS_SECTORS.map((sector) => (
+                          {BUSINESS_sectorS.map((sector) => (
                             <SelectItem key={sector} value={sector}>
                               {sector}
                             </SelectItem>
@@ -448,4 +448,12 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
     </Dialog>
   );
 };
+
+
+
+
+
+
+
+
 

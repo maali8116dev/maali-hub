@@ -2,7 +2,7 @@ import { CheckCircle2, LucideIcon } from "lucide-react";
 
 interface ListItemsRendererProps {
   /**
-   * The text content to render as a list (newline-separated items)
+   * The text content to render as a list (comma or newline separated items)
    */
   items: string;
   
@@ -51,7 +51,7 @@ const variantStyles = {
 };
 
 /**
- * Renders a list of items from a newline-separated string.
+ * Renders a list of items from a comma or newline-separated string.
  * Supports both bulleted and numbered lists with appropriate icons.
  */
 export function ListItemsRenderer({
@@ -64,10 +64,10 @@ export function ListItemsRenderer({
   const styles = variantStyles[variant];
 
   const parsedItems = items
-    .split("\n")
+    .split(/[\n,]+/)
     .filter((line) => line.trim())
     .map((item) => {
-      const cleanedItem = item.replace(/^[-•]\s*/, "").trim();
+      const cleanedItem = item.replace(/^[--¢]\s*/, "").trim();
       const isNumbered = /^\d+[\.\)]\s/.test(cleanedItem);
       const displayText = cleanedItem.replace(/^\d+[\.\)]\s/, "");
       const number = cleanedItem.match(/^\d+/)?.[0];
@@ -110,4 +110,12 @@ export function ListItemsRenderer({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

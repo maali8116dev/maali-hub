@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hooks for managing system rubrics
  * Note: Rubric versioning has been removed for simplicity. 
  * If needed later, see migration: 20260229000000_add_rubric_versioning.sql
@@ -52,4 +52,12 @@ export const useRubricVersions = () => {
     },
   });
 };
+
+
+
+
+
+
+
+
 

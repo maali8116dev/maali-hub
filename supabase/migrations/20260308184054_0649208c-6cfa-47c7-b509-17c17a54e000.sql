@@ -70,3 +70,4 @@ BEGIN
   ORDER BY rank_position;
 END;
 $$;
+

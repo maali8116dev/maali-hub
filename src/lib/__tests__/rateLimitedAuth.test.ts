@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock the supabase client (used by rateLimitedSignIn/SignUp)
 const mockSignInWithPassword = vi.fn();
@@ -22,7 +22,7 @@ import {
   rateLimitedSignUp,
 } from "../rateLimitedAuth";
 
-// ─── Helpers ─────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const EDGE_FUNCTION_URL = /\/functions\/v1\/rate-limited-auth$/;
 
 function mockFetchResponse(status: number, body: Record<string, unknown>) {
@@ -33,7 +33,7 @@ function mockFetchResponse(status: number, body: Record<string, unknown>) {
   });
 }
 
-/** Queue a sequence of responses — each call to fetch pops the next one. */
+/** Queue a sequence of responses -” each call to fetch pops the next one. */
 function mockFetchSequence(
   responses: Array<{ status: number; body: Record<string, unknown> }>
 ) {
@@ -52,7 +52,7 @@ function mockFetchNetworkError() {
   global.fetch = vi.fn().mockRejectedValue(new Error("Failed to fetch"));
 }
 
-// ─── Tests ───────────────────────────────────────────────────────
+// â”€â”€â”€ Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 describe("rateLimitedAuth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,7 +62,7 @@ describe("rateLimitedAuth", () => {
     vi.restoreAllMocks();
   });
 
-  // ─── rateLimitedAuth (raw Edge Function call) ──────────────────
+  // â”€â”€â”€ rateLimitedAuth (raw Edge Function call) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitedAuth()", () => {
     it("returns data on successful 200 response", async () => {
       mockFetchResponse(200, { data: { user: { id: "u1" } } });
@@ -159,7 +159,7 @@ describe("rateLimitedAuth", () => {
     });
   });
 
-  // ─── Simulated rate-limit exhaustion (N+1 calls) ────────────────
+  // â”€â”€â”€ Simulated rate-limit exhaustion (N+1 calls) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rate limit exhaustion (sequential calls)", () => {
     it("allows the first N calls and denies the N+1th (sign_in, max=3)", async () => {
       // Simulate a server that allows 3 requests then returns 429 on the 4th.
@@ -259,7 +259,7 @@ describe("rateLimitedAuth", () => {
       expect(ok.error).toBeNull();
       expect(mockSignInWithPassword).toHaveBeenCalledTimes(1);
 
-      // Second call is denied — local auth must NOT be called again
+      // Second call is denied -” local auth must NOT be called again
       const denied = await rateLimitedSignIn("user@gmail.com", "pass123");
       expect(denied.error!.isRateLimited).toBe(true);
       expect(mockSignInWithPassword).toHaveBeenCalledTimes(1); // still 1, not 2
@@ -286,7 +286,7 @@ describe("rateLimitedAuth", () => {
     });
   });
 
-  // ─── rateLimitedSignIn (convenience wrapper) ───────────────────
+  // â”€â”€â”€ rateLimitedSignIn (convenience wrapper) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitedSignIn()", () => {
     it("establishes local session after successful rate limit check", async () => {
       mockFetchResponse(200, { data: { user: { id: "u1" } } });
@@ -332,7 +332,7 @@ describe("rateLimitedAuth", () => {
     });
   });
 
-  // ─── rateLimitedSignUp (convenience wrapper) ───────────────────
+  // â”€â”€â”€ rateLimitedSignUp (convenience wrapper) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitedSignUp()", () => {
     it("establishes local session after successful rate limit check", async () => {
       mockFetchResponse(200, { data: { user: { id: "new-user" } } });
@@ -366,4 +366,12 @@ describe("rateLimitedAuth", () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

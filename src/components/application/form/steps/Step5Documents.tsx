@@ -1,4 +1,4 @@
-import DocumentUploadSection from "@/components/application/DocumentUploadSection";
+﻿import DocumentUploadSection from "@/components/application/DocumentUploadSection";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step5DocumentsProps {
@@ -32,4 +32,12 @@ export function Step5Documents({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

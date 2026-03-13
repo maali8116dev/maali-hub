@@ -59,3 +59,4 @@ COMMENT ON INDEX idx_rubric_versions_created_by IS 'Index for foreign key to imp
 COMMENT ON INDEX idx_success_stories_created_by IS 'Index for foreign key to improve join performance with auth.users table';
 COMMENT ON INDEX idx_transactions_payment_method_id IS 'Index for foreign key to improve join performance with payment_methods table';
 
+

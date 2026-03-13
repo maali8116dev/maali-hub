@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+﻿import { useEffect, useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ApplicationFormData } from "@/stores/applicationForm";
@@ -76,10 +76,10 @@ export const useAutoSaveDraft = ({
         contact_phone: formData.phoneNumber || null,
         year_established: formData.yearEstablished || null,
         core_mission_purpose: formData.coreMissionPurpose || null,
-        primary_sectors: formData.primarySectors?.length
-          ? JSON.stringify(formData.primarySectors)
+        primary_sectors: formData.primarysectors?.length
+          ? JSON.stringify(formData.primarysectors)
           : null,
-        primary_sector_other: formData.primarySectorOther || null,
+        primary_sector_other: formData.primarysectorOther || null,
         team_size: formData.numberOfTeamMembers || null,
         key_team_members_roles: formData.keyTeamMembersRoles || null,
         previous_grants_funding_received: formData.previousGrantsFundingReceived || false,
@@ -195,15 +195,15 @@ export const useAutoSaveDraft = ({
         .maybeSingle();
 
       if (existingDraft) {
-        let parsedPrimarySectors: string[] | undefined = undefined;
+        let parsedPrimarysectors: string[] | undefined = undefined;
         if (Array.isArray(existingDraft.primary_sectors)) {
-          parsedPrimarySectors = existingDraft.primary_sectors as string[];
+          parsedPrimarysectors = existingDraft.primary_sectors as string[];
         } else if (typeof existingDraft.primary_sectors === "string") {
           try {
             const parsed = JSON.parse(existingDraft.primary_sectors);
-            parsedPrimarySectors = Array.isArray(parsed) ? parsed : undefined;
+            parsedPrimarysectors = Array.isArray(parsed) ? parsed : undefined;
           } catch {
-            parsedPrimarySectors = undefined;
+            parsedPrimarysectors = undefined;
           }
         }
 
@@ -219,8 +219,8 @@ export const useAutoSaveDraft = ({
           phoneNumber: existingDraft.contact_phone || undefined,
           yearEstablished: existingDraft.year_established || undefined,
           coreMissionPurpose: existingDraft.core_mission_purpose || undefined,
-          primarySectors: parsedPrimarySectors,
-          primarySectorOther: existingDraft.primary_sector_other || undefined,
+          primarysectors: parsedPrimarysectors,
+          primarysectorOther: existingDraft.primary_sector_other || undefined,
           numberOfTeamMembers: existingDraft.team_size || undefined,
           keyTeamMembersRoles: existingDraft.key_team_members_roles || undefined,
           previousGrantsFundingReceived:
@@ -282,3 +282,11 @@ export const useAutoSaveDraft = ({
     deleteDraft,
   };
 };
+
+
+
+
+
+
+
+

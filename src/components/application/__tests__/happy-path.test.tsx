@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { setupMocks, mockDocuments, populateFormStore, defaultApplicationPayload } from './test-utils';
@@ -110,3 +110,11 @@ describe('Complete Application Flow', () => {
     }
   });
 });
+
+
+
+
+
+
+
+

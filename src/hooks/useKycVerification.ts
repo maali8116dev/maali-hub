@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { getSignedUrl as getStorageSignedUrl, uploadFileToBucket } from "@/lib/storageUploads";
 
 export type KycIdType = "passport" | "national_id" | "drivers_license" | "business_registration";
 export type KycStatus = "pending" | "verified" | "rejected" | "expired";
@@ -191,28 +192,23 @@ export const useKycFileUpload = () => {
     if (!user?.id) return null;
 
     const allowedTypes = ["image/jpeg", "image/png"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("Only JPG and PNG images are allowed");
-      return null;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File must be less than 5MB");
-      return null;
-    }
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/${type}-${Date.now()}.${fileExt}`;
 
     setIsUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const fileName = `${user.id}/${type}-${Date.now()}.${ext}`;
-
-      const { data, error } = await supabase.storage
-        .from("kyc-documents")
-        .upload(fileName, file, { cacheControl: "3600", upsert: true });
-
-      if (error) throw error;
+      const { path } = await uploadFileToBucket(file, {
+        bucket: "kyc-documents",
+        filePath,
+        allowedTypes,
+        maxSizeMB: 5,
+        cacheControl: "3600",
+        upsert: true,
+        isPublic: false,
+      });
 
       // For private buckets, we store the path and use signed URLs
-      return data.path;
+      return path;
     } catch (error: any) {
       toast.error(`Upload failed: ${error.message}`);
       return null;
@@ -222,12 +218,20 @@ export const useKycFileUpload = () => {
   };
 
   const getSignedUrl = async (path: string): Promise<string | null> => {
-    const { data, error } = await supabase.storage
-      .from("kyc-documents")
-      .createSignedUrl(path, 3600); // 1 hour
-    if (error) return null;
-    return data.signedUrl;
+    try {
+      return await getStorageSignedUrl("kyc-documents", path, 3600);
+    } catch {
+      return null;
+    }
   };
 
   return { upload, getSignedUrl, isUploading };
 };
+
+
+
+
+
+
+
+

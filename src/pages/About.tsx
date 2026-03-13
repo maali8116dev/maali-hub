@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ type Partner = {
   description: string | null;
   logo_url: string | null;
   website_url: string | null;
-  category: string;
+  sector: string;
   featured: boolean;
 };
 
@@ -44,12 +44,12 @@ const About = () => {
     }
   };
 
-  // Group partners by category
+  // Group partners by sector
   const partnersByCategory = partners.reduce((acc, partner) => {
-    if (!acc[partner.category]) {
-      acc[partner.category] = [];
+    if (!acc[partner.sector]) {
+      acc[partner.sector] = [];
     }
-    acc[partner.category].push(partner);
+    acc[partner.sector].push(partner);
     return acc;
   }, {} as Record<string, Partner[]>);
 
@@ -107,7 +107,7 @@ const About = () => {
             About Maali
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
-            Maali is more than a platform – it's a movement to unlock the potential of African entrepreneurs 
+            Maali is more than a platform -it's a movement to unlock the potential of African entrepreneurs 
             through accessible funding, mentorship, and community support.
           </p>
         </div>
@@ -204,13 +204,13 @@ const About = () => {
             </div>
           ) : (
             <div className="space-y-12">
-              {Object.entries(partnersByCategory).map(([category, categoryPartners]) => {
-                const Icon = categoryIcons[category] || Users;
+              {Object.entries(partnersByCategory).map(([sector, categoryPartners]) => {
+                const Icon = categoryIcons[sector] || Users;
                 return (
-                  <div key={category}>
+                  <div key={sector}>
                     <div className="flex items-center gap-3 mb-6">
                       <Icon className="h-6 w-6 text-primary" />
-                      <h3 className="text-2xl font-bold">{category} Partners</h3>
+                      <h3 className="text-2xl font-bold">{sector} Partners</h3>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {categoryPartners.map((partner) => (
@@ -225,13 +225,13 @@ const About = () => {
                                     className="w-full h-full object-contain"
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).style.display = "none";
-                                      (e.target as HTMLImageElement).parentElement!.innerHTML = "🏢";
+                                      (e.target as HTMLImageElement).parentElement!.innerHTML = "ðŸ¢";
                                     }}
                                   />
                                 </div>
                               ) : (
                                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
-                                  🏢
+                                  ðŸ¢
                                 </div>
                               )}
                               {partner.featured && (
@@ -240,7 +240,7 @@ const About = () => {
                             </div>
                             <CardTitle className="text-xl">{partner.name}</CardTitle>
                             <CardDescription className="text-primary font-medium">
-                              {partner.category}
+                              {partner.sector}
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -291,3 +291,10 @@ const About = () => {
 };
 
 export default About;
+
+
+
+
+
+
+

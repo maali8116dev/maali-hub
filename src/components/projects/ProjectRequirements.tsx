@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Target, CheckCircle2 } from "lucide-react";
 import { ListItemsRenderer } from "@/components/projects/ListItemsRenderer";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
@@ -57,4 +57,12 @@ export function ProjectRequirements({ project }: ProjectRequirementsProps) {
     </>
   );
 }
+
+
+
+
+
+
+
+
 

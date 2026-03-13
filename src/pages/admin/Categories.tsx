@@ -8,14 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Save, X, Tag } from "lucide-react";
 import {
-  useAllCategories,
-  useCreateCategory,
-  useUpdateCategory,
-  useDeleteCategory,
-  useToggleCategoryStatus,
-  Category,
-  CategoryFormData,
-} from "@/hooks/useCategories";
+  useAllSectors,
+  useCreateSector,
+  useUpdateSector,
+  useDeleteSector,
+  useToggleSectorStatus,
+  Sector,
+} from "@/hooks/useSectors";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -40,28 +39,28 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const categorySchema = z.object({
+const sectorSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
   slug: z.string().optional(),
   description: z.string().optional(),
   is_active: z.boolean().optional(),
 });
 
-type CategoryFormValues = z.infer<typeof categorySchema>;
+type SectorFormValues = z.infer<typeof sectorSchema>;
 
-const Categories = () => {
-  const { data: categories = [], isLoading } = useAllCategories();
-  const createCategory = useCreateCategory();
-  const updateCategory = useUpdateCategory();
-  const deleteCategory = useDeleteCategory();
-  const toggleStatus = useToggleCategoryStatus();
+const Sectors = () => {
+  const { data: sectors = [], isLoading } = useAllSectors();
+  const createSector = useCreateSector();
+  const updateSector = useUpdateSector();
+  const deleteSector = useDeleteSector();
+  const toggleStatus = useToggleSectorStatus();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Sector | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Sector | null>(null);
 
-  const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
+  const form = useForm<SectorFormValues>({
+    resolver: zodResolver(sectorSchema),
     defaultValues: {
       name: "",
       slug: "",
@@ -70,9 +69,9 @@ const Categories = () => {
     },
   });
 
-  const handleCreate = async (data: CategoryFormValues) => {
+  const handleCreate = async (data: SectorFormValues) => {
     try {
-      await createCategory.mutateAsync({
+      await createSector.mutateAsync({
         name: data.name,
         slug: data.slug,
         description: data.description,
@@ -85,21 +84,21 @@ const Categories = () => {
     }
   };
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
+  const handleEdit = (sector: Sector) => {
+    setEditingCategory(sector);
     form.reset({
-      name: category.name,
-      slug: category.slug,
-      description: category.description || "",
-      is_active: category.is_active,
+      name: sector.name,
+      slug: sector.slug,
+      description: sector.description || "",
+      is_active: sector.is_active,
     });
   };
 
-  const handleUpdate = async (data: CategoryFormValues) => {
+  const handleUpdate = async (data: SectorFormValues) => {
     if (!editingCategory) return;
 
     try {
-      await updateCategory.mutateAsync({
+      await updateSector.mutateAsync({
         id: editingCategory.id,
         data,
       });
@@ -114,17 +113,17 @@ const Categories = () => {
     if (!deletingCategory) return;
 
     try {
-      await deleteCategory.mutateAsync(deletingCategory.id);
+      await deleteSector.mutateAsync(deletingCategory.id);
       setDeletingCategory(null);
     } catch (error) {
       // Error handled by hook
     }
   };
 
-  const handleToggleStatus = async (category: Category) => {
+  const handleToggleStatus = async (sector: Sector) => {
     await toggleStatus.mutateAsync({
-      id: category.id,
-      isActive: !category.is_active,
+      id: sector.id,
+      isActive: !sector.is_active,
     });
   };
 
@@ -132,8 +131,8 @@ const Categories = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="text-muted-foreground mt-2">Manage project categories</p>
+          <h1 className="text-3xl font-bold">sectors</h1>
+          <p className="text-muted-foreground mt-2">Manage project sectors</p>
         </div>
         <div className="grid gap-4">
           {[1, 2, 3].map((i) => (
@@ -148,23 +147,23 @@ const Categories = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
+          <h1 className="text-3xl font-bold">sectors</h1>
           <p className="text-muted-foreground mt-2">
-            Manage project categories and their display settings
+            Manage project sectors and their display settings
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Category
+              Add Sector
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Category</DialogTitle>
+              <DialogTitle>Create Sector</DialogTitle>
               <DialogDescription>
-                Add a new category for projects. The slug will be auto-generated if not provided.
+                Add a new sector for projects. The slug will be auto-generated if not provided.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
@@ -194,7 +193,7 @@ const Categories = () => {
                 <Textarea
                   id="description"
                   {...form.register("description")}
-                  placeholder="Brief description of this category"
+                  placeholder="Brief description of this sector"
                   rows={3}
                 />
               </div>
@@ -217,8 +216,8 @@ const Categories = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createCategory.isPending}>
-                  {createCategory.isPending ? "Creating..." : "Create"}
+                <Button type="submit" disabled={createSector.isPending}>
+                  {createSector.isPending ? "Creating..." : "Create"}
                 </Button>
               </div>
             </form>
@@ -226,59 +225,59 @@ const Categories = () => {
         </Dialog>
       </div>
 
-      {categories.length === 0 ? (
+      {sectors.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title="No Categories"
-          description="Get started by creating your first category"
+          title="No sectors"
+          description="Get started by creating your first sector"
         />
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>All Categories</CardTitle>
+            <CardTitle>All sectors</CardTitle>
             <CardDescription>
-              {categories.length} category{categories.length !== 1 ? "ies" : ""} total
+              {sectors.length} sector{sectors.length !== 1 ? "ies" : ""} total
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {categories.map((category) => (
+              {sectors.map((sector) => (
                 <div
-                  key={category.id}
+                  key={sector.id}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold">{category.name}</h3>
-                      {!category.is_active && (
+                      <h3 className="font-semibold">{sector.name}</h3>
+                      {!sector.is_active && (
                         <Badge variant="secondary">Inactive</Badge>
                       )}
                     </div>
-                    {category.description && (
+                    {sector.description && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        {category.description}
+                        {sector.description}
                       </p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>Slug: {category.slug}</span>
+                      <span>Slug: {sector.slug}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={category.is_active}
-                      onCheckedChange={() => handleToggleStatus(category)}
+                      checked={sector.is_active}
+                      onCheckedChange={() => handleToggleStatus(sector)}
                     />
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleEdit(category)}
+                      onClick={() => handleEdit(sector)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setDeletingCategory(category)}
+                      onClick={() => setDeletingCategory(sector)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -295,9 +294,9 @@ const Categories = () => {
         <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
+              <DialogTitle>Edit Sector</DialogTitle>
               <DialogDescription>
-                Update category details. Changes will affect all projects using this category.
+                Update sector details. Changes will affect all projects using this sector.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-4">
@@ -327,7 +326,7 @@ const Categories = () => {
                 <Textarea
                   id="edit-description"
                   {...form.register("description")}
-                  placeholder="Brief description of this category"
+                  placeholder="Brief description of this sector"
                   rows={3}
                 />
               </div>
@@ -350,8 +349,8 @@ const Categories = () => {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={updateCategory.isPending}>
-                  {updateCategory.isPending ? "Saving..." : "Save Changes"}
+                <Button type="submit" disabled={updateSector.isPending}>
+                  {updateSector.isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </form>
@@ -366,10 +365,10 @@ const Categories = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogTitle>Delete Sector</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{deletingCategory?.name}"? This action cannot be
-              undone. Make sure no projects are using this category before deleting.
+              undone. Make sure no projects are using this sector before deleting.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -387,5 +386,13 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+export default Sectors;
+
+
+
+
+
+
+
+
 

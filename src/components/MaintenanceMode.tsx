@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wrench, Clock, Mail } from "lucide-react";
 
 interface MaintenanceModeProps {
@@ -62,4 +62,12 @@ export function MaintenanceMode({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

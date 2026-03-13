@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Check, CheckCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,21 +39,21 @@ const NotificationsDropdown = ({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "application":
-        return "📄";
+        return "ðŸ“„";
       case "system":
-        return "⚙️";
+        return "âš™ï¸";
       case "reminder":
-        return "⏰";
+        return "â°";
       case "new_application":
-        return "📋";
+        return "ðŸ“‹";
       case "review_assigned":
-        return "✅";
+        return "âœ…";
       case "deadline_reminder":
-        return "⏰";
+        return "â°";
       case "status_change":
-        return "🔄";
+        return "ðŸ”„";
       default:
-        return "🔔";
+        return "ðŸ””";
     }
   };
 
@@ -190,4 +190,12 @@ const NotificationsDropdown = ({
 };
 
 export default NotificationsDropdown;
+
+
+
+
+
+
+
+
 

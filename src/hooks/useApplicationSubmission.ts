@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hook for handling application submission logic
  */
 import { useState } from "react";
@@ -234,7 +234,7 @@ export function useApplicationSubmission() {
           }));
         } catch (uploadError) {
           console.error("Error uploading documents:", uploadError);
-          // ✅ Don't mark as destructive if you're still submitting
+          // âœ… Don't mark as destructive if you're still submitting
           toast({
             title: "Some uploads failed",
             description:
@@ -267,8 +267,8 @@ export function useApplicationSubmission() {
         ...(formData.applicantType !== "Individual" && {
           year_established: formData.yearEstablished || null,
           core_mission_purpose: formData.coreMissionPurpose || null,
-          primary_sectors: formData.primarySectors || null,
-          primary_sector_other: formData.primarySectorOther || null,
+          primary_sectors: formData.primarysectors || null,
+          primary_sector_other: formData.primarysectorOther || null,
           team_size: formData.numberOfTeamMembers || null,
           key_team_members_roles: formData.keyTeamMembersRoles || null,
           previous_grants_funding_received:
@@ -370,7 +370,7 @@ export function useApplicationSubmission() {
     } catch (error) {
       console.error("Submission error:", error);
 
-      // ✅ Cleanup: delete only orphan uploads (still unlinked)
+      // âœ… Cleanup: delete only orphan uploads (still unlinked)
       await cleanupOrphanUploads(uploadedDocuments);
 
       const rawMessage =
@@ -411,3 +411,11 @@ export function useApplicationSubmission() {
     checkExistingApplication,
   };
 }
+
+
+
+
+
+
+
+

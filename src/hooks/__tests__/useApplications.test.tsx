@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -52,7 +52,7 @@ describe('useApplications', () => {
     const mockProject = {
       id: 1,
       title: 'AgriTech Innovation Fund',
-      category: 'Agriculture',
+      sector: 'Agriculture',
       status: 'open',
       deadline: '2024-12-31',
     };
@@ -164,7 +164,7 @@ describe('useApplications', () => {
     const mockProject = {
       id: 1,
       title: 'Test Project',
-      category: 'Technology',
+      sector: 'Technology',
       status: 'open',
       deadline: '2024-12-31',
     };
@@ -227,4 +227,12 @@ describe('useApplications', () => {
     expect(result.current.error).toBeDefined();
   });
 });
+
+
+
+
+
+
+
+
 

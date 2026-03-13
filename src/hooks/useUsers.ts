@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +15,7 @@ export type UserManagement = {
   firstName?: string | null;
   lastName?: string | null;
   businessName?: string | null;
-  businessSector?: string | null;
+  businesssector?: string | null;
   country?: string | null;
   bio?: string | null;
   avatarUrl?: string | null;
@@ -88,7 +88,7 @@ export function useUsers() {
           firstName: user.first_name ?? null,
           lastName: user.last_name ?? null,
           businessName: user.business_name ?? null,
-          businessSector: user.business_sector ?? null,
+          businesssector: user.business_sector ?? null,
           country: user.country ?? null,
           bio: user.bio ?? null,
           avatarUrl: user.avatar_url ?? null,
@@ -258,4 +258,12 @@ export function useUpdateUserRole() {
     },
   });
 }
+
+
+
+
+
+
+
+
 

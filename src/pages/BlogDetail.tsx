@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+﻿import { useParams, Link } from "react-router-dom";
 import DOMPurify from "dompurify";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -54,10 +54,10 @@ const BlogDetail = () => {
     author: "Sarah Johnson",
     authorRole: "Funding Advisor",
     date: "January 15, 2024",
-    category: "Applications",
+    sector: "Applications",
     readTime: "5 min read",
     featured: true,
-    emoji: "📝",
+    emoji: "ðŸ“",
     tags: ["Funding", "Applications", "Business Tips", "Entrepreneurship"]
   };
 
@@ -77,7 +77,7 @@ const BlogDetail = () => {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-6">
             {blogPost.featured && <Badge variant="default">Featured</Badge>}
-            <Badge variant="outline">{blogPost.category}</Badge>
+            <Badge variant="outline">{blogPost.sector}</Badge>
           </div>
           
           {/* Featured Image */}
@@ -97,7 +97,7 @@ const BlogDetail = () => {
               <User className="h-4 w-4" />
               <span className="font-medium">{blogPost.author}</span>
               {blogPost.authorRole && (
-                <span className="text-xs">• {blogPost.authorRole}</span>
+                <span className="text-xs">-¢ {blogPost.authorRole}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -179,4 +179,12 @@ const BlogDetail = () => {
 };
 
 export default BlogDetail;
+
+
+
+
+
+
+
+
 

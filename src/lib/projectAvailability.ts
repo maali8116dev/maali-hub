@@ -1,4 +1,4 @@
-function parseDateFromYYYYMMDD(value: string | null | undefined): Date | null {
+﻿function parseDateFromYYYYMMDD(value: string | null | undefined): Date | null {
   if (!value) return null;
   const parts = value.split("-").map(Number);
   if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) {
@@ -95,4 +95,12 @@ export function getProjectDisplayStatus(
   // Otherwise, it's just Open
   return "Open";
 }
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ const Blog = () => {
       excerpt: "Learn the key strategies that successful entrepreneurs use to craft compelling funding applications that stand out.",
       author: "Sarah Johnson",
       date: "January 15, 2024",
-      category: "Applications",
+      sector: "Applications",
       readTime: "5 min read",
       featured: true,
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=400&fit=crop"
@@ -29,7 +29,7 @@ const Blog = () => {
       excerpt: "A comprehensive guide to grants, loans, equity, and other funding options available to African entrepreneurs.",
       author: "Michael Okafor",
       date: "January 10, 2024",
-      category: "Funding",
+      sector: "Funding",
       readTime: "8 min read",
       featured: false,
       image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop"
@@ -40,7 +40,7 @@ const Blog = () => {
       excerpt: "Explore strategies for creating businesses that not only succeed financially but also create positive social impact.",
       author: "Amina Diallo",
       date: "January 5, 2024",
-      category: "Business",
+      sector: "Business",
       readTime: "6 min read",
       featured: false,
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop"
@@ -51,7 +51,7 @@ const Blog = () => {
       excerpt: "An in-depth look at how one entrepreneur used our platform to secure funding and scale their business.",
       author: "David Kofi",
       date: "December 28, 2023",
-      category: "Success Stories",
+      sector: "Success Stories",
       readTime: "10 min read",
       featured: false,
       image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop"
@@ -62,7 +62,7 @@ const Blog = () => {
       excerpt: "Essential financial planning tips to help your startup navigate the early stages of growth and development.",
       author: "Fatima Hassan",
       date: "December 20, 2023",
-      category: "Finance",
+      sector: "Finance",
       readTime: "7 min read",
       featured: false,
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop"
@@ -73,14 +73,14 @@ const Blog = () => {
       excerpt: "Learn how to build meaningful connections and leverage your network to grow your business.",
       author: "James Mwangi",
       date: "December 15, 2023",
-      category: "Networking",
+      sector: "Networking",
       readTime: "5 min read",
       featured: false,
       image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=400&fit=crop"
     }
   ];
 
-  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
+  const sectors = Array.from(new Set(blogPosts.map(post => post.sector)));
 
   const filteredPosts = searchQuery
     ? blogPosts.filter(post =>
@@ -128,7 +128,7 @@ const Blog = () => {
               />
               <div className="absolute top-4 left-4 flex items-center gap-2">
                 <Badge variant="default">Featured</Badge>
-                <Badge variant="outline">{featuredPost.category}</Badge>
+                <Badge variant="outline">{featuredPost.sector}</Badge>
               </div>
             </div>
             <CardHeader>
@@ -159,13 +159,13 @@ const Blog = () => {
           </Card>
         )}
 
-        {/* Categories */}
+        {/* sectors */}
         {!searchQuery && (
           <div className="mb-8 flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <Badge key={category} variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">
+            {sectors.map((sector) => (
+              <Badge key={sector} variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground">
                 <Tag className="h-3 w-3 mr-1" />
-                {category}
+                {sector}
               </Badge>
             ))}
           </div>
@@ -183,7 +183,7 @@ const Blog = () => {
                 />
                 <div className="absolute top-2 right-2">
                   <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-                    {post.category}
+                    {post.sector}
                   </Badge>
                 </div>
               </div>
@@ -246,4 +246,12 @@ const Blog = () => {
 };
 
 export default Blog;
+
+
+
+
+
+
+
+
 

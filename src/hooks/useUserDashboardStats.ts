@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -59,4 +59,12 @@ export function useUserDashboardStats() {
     retry: 1,
   });
 }
+
+
+
+
+
+
+
+
 

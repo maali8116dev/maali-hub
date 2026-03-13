@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ResourcesHero } from "@/components/resources/ResourcesHero";
@@ -31,7 +31,7 @@ const Resources = () => {
     return resources.filter(resource =>
       resource.title.toLowerCase().includes(query) ||
       resource.description?.toLowerCase().includes(query) ||
-      resource.category.toLowerCase().includes(query)
+      resource.sector.toLowerCase().includes(query)
     );
   }, [resources, searchQuery]);
 
@@ -178,3 +178,11 @@ const Resources = () => {
 };
 
 export default Resources;
+
+
+
+
+
+
+
+

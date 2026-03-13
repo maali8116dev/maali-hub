@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { setupMocks, populateFormStore, defaultApplicationPayload } from './test-utils';
 
@@ -48,7 +48,7 @@ describe('Step 2: Organizational Background', () => {
       yearEstablished: 2020,
       numberOfTeamMembers: 10,
       coreMissionPurpose: 'Our mission is to create innovative solutions for social impact.',
-      primarySectors: ['Health', 'Technology'],
+      primarysectors: ['Health', 'Technology'],
       keyTeamMembersRoles: 'John Doe - CEO, Jane Smith - CTO',
     });
 
@@ -57,7 +57,7 @@ describe('Step 2: Organizational Background', () => {
     expect(formData.yearEstablished).toBe(2020);
     expect(formData.numberOfTeamMembers).toBe(10);
     expect(formData.coreMissionPurpose).toBe('Our mission is to create innovative solutions for social impact.');
-    expect(formData.primarySectors).toEqual(['Health', 'Technology']);
+    expect(formData.primarysectors).toEqual(['Health', 'Technology']);
     expect(formData.keyTeamMembersRoles).toBe('John Doe - CEO, Jane Smith - CTO');
   });
 
@@ -73,7 +73,7 @@ describe('Step 2: Organizational Background', () => {
     store.updateFormData({
       yearEstablished: undefined,
       coreMissionPurpose: '',
-      primarySectors: [],
+      primarysectors: [],
       numberOfTeamMembers: undefined,
     });
 
@@ -84,7 +84,7 @@ describe('Step 2: Organizational Background', () => {
     store.updateFormData({
       yearEstablished: 2020,
       coreMissionPurpose: 'Test mission',
-      primarySectors: ['Health'],
+      primarysectors: ['Health'],
       numberOfTeamMembers: 10,
     });
 
@@ -107,10 +107,18 @@ describe('Step 2: Organizational Background', () => {
     store.updateFormData({
       yearEstablished: undefined,
       coreMissionPurpose: undefined,
-      primarySectors: undefined,
+      primarysectors: undefined,
       numberOfTeamMembers: undefined,
     });
 
     expect(store.isStepValid(2)).toBe(true);
   });
 });
+
+
+
+
+
+
+
+

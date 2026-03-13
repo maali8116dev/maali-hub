@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Seed script for categories and projects
+ * Seed script for sectors and projects
  * Uses Supabase JS client (same method as seed-users-and-reviewers.js)
  * 
  * Usage:
@@ -108,26 +108,26 @@ async function verifySupabaseHost() {
   }
 }
 
-// Helper to get category ID by name
-async function getCategoryId(categoryName) {
+// Helper to get sector ID by name
+async function getSectorId(sectorName) {
   const { data, error } = await supabase
-    .from('categories')
+    .from('sectors')
     .select('id')
-    .eq('name', categoryName)
+    .eq('name', sectorName)
     .single();
 
   if (error || !data) {
-    throw new Error(`Category "${categoryName}" not found. Make sure categories are seeded first.`);
+    throw new Error(`Sector "${sectorName}" not found. Make sure sectors are seeded first.`);
   }
 
   return data.id;
 }
 
-// Seed categories
-async function seedCategories() {
-  console.log('📦 Seeding categories...');
+// Seed sectors
+async function seedSectors() {
+  console.log('📦 Seeding sectors...');
   
-  const categories = [
+  const sectors = [
     { name: 'Technology', slug: 'technology', description: 'Technology and innovation projects', is_active: true },
     { name: 'FinTech', slug: 'fintech', description: 'Financial technology and payment solutions', is_active: true },
     { name: 'Agriculture', slug: 'agriculture', description: 'Agricultural innovation and food security projects', is_active: true },
@@ -136,12 +136,12 @@ async function seedCategories() {
   let insertedCount = 0;
   let skippedCount = 0;
 
-  for (const category of categories) {
-    // Check if category already exists
+  for (const sector of sectors) {
+    // Check if sector already exists
     const { data: existing } = await supabase
-      .from('categories')
+      .from('sectors')
       .select('id')
-      .eq('name', category.name)
+      .eq('name', sector.name)
       .single();
 
     if (existing) {
@@ -150,11 +150,11 @@ async function seedCategories() {
     }
 
     const { error } = await supabase
-      .from('categories')
-      .insert(category);
+      .from('sectors')
+      .insert(sector);
 
     if (error) {
-      console.error(`   ❌ Failed to seed category "${category.name}":`, error.message);
+      console.error(`   ❌ Failed to seed sector "${sector.name}":`, error.message);
       throw error;
     } else {
       insertedCount++;
@@ -162,28 +162,28 @@ async function seedCategories() {
   }
 
   if (insertedCount > 0) {
-    console.log(`   ✅ ${insertedCount} categories inserted successfully`);
+    console.log(`   ✅ ${insertedCount} sectors inserted successfully`);
   }
   if (skippedCount > 0) {
-    console.log(`   ℹ️  ${skippedCount} categories already exist (skipped)`);
+    console.log(`   ℹ️  ${skippedCount} sectors already exist (skipped)`);
   }
 }
 
-// Seed projects
+// Seed opportunities (using projects seed data, into opportunities table)
 async function seedProjects() {
-  console.log('📦 Seeding projects...');
+  console.log('📦 Seeding opportunities...');
 
-  // Get category IDs
-  const technologyId = await getCategoryId('Technology');
-  const fintechId = await getCategoryId('FinTech');
-  const agricultureId = await getCategoryId('Agriculture');
+  // Get sector IDs
+  const technologyId = await getSectorId('Technology');
+  const fintechId = await getSectorId('FinTech');
+  const agricultureId = await getSectorId('Agriculture');
 
   const projects = [
     {
       title: 'African Women Tech Entrepreneurs Grant',
       description: 'Supporting women-led tech startups across Africa with funding and mentorship. This grant aims to bridge the gender gap in technology entrepreneurship by providing financial support, business mentorship, and access to networks for women building innovative tech solutions.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'closed',
       deadline: '2025-12-15',
       funding_amount: '$50,000',
@@ -199,8 +199,8 @@ async function seedProjects() {
     {
       title: 'FinTech for Financial Inclusion',
       description: 'Supporting fintech solutions that promote financial inclusion across Africa. This opportunity focuses on innovative payment systems, mobile banking, microfinance platforms, and other technologies that bring financial services to underserved communities.',
-      category: 'FinTech',
-      category_id: fintechId,
+      sector: 'FinTech',
+      sector_id: fintechId,
       status: 'open',
       deadline: '2025-10-20',
       funding_amount: '$75,000',
@@ -216,8 +216,8 @@ async function seedProjects() {
     {
       title: 'AI and Machine Learning Innovation Fund',
       description: 'Funding for African startups developing AI and ML solutions for local challenges. This includes healthcare AI, agricultural tech, education platforms, and other applications that leverage artificial intelligence to solve African problems.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2027-11-30',
       funding_amount: '$100,000',
@@ -233,8 +233,8 @@ async function seedProjects() {
     {
       title: 'E-commerce Platform Development Grant',
       description: 'Supporting the development of e-commerce platforms that connect African businesses with local and international markets. Focus on platforms that enable small and medium enterprises to sell online.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2028-01-15',
       funding_amount: '$40,000',
@@ -250,8 +250,8 @@ async function seedProjects() {
     {
       title: 'Sustainable Agriculture Innovation Fund',
       description: 'Funding innovative agricultural solutions for food security in rural communities. This includes smart farming technologies, irrigation systems, crop management apps, and sustainable farming practices.',
-      category: 'Agriculture',
-      category_id: agricultureId,
+      sector: 'Agriculture',
+      sector_id: agricultureId,
       status: 'open',
       deadline: '2027-11-30',
       funding_amount: '$25,000',
@@ -267,8 +267,8 @@ async function seedProjects() {
     {
       title: 'Smart Irrigation System for Smallholder Farmers',
       description: 'Develop affordable IoT-based irrigation solutions to help smallholder farmers optimize water usage and increase crop yields in sub-Saharan Africa.',
-      category: 'Agriculture',
-      category_id: agricultureId,
+      sector: 'Agriculture',
+      sector_id: agricultureId,
       status: 'open',
       deadline: '2027-12-20',
       funding_amount: '$60,000',
@@ -284,8 +284,8 @@ async function seedProjects() {
     {
       title: 'AgriTech Supply Chain Innovation',
       description: 'Supporting technology solutions that improve agricultural supply chains, reduce post-harvest losses, and connect farmers directly with markets.',
-      category: 'Agriculture',
-      category_id: agricultureId,
+      sector: 'Agriculture',
+      sector_id: agricultureId,
       status: 'open',
       deadline: '2027-10-10',
       funding_amount: '$35,000',
@@ -301,8 +301,8 @@ async function seedProjects() {
     {
       title: 'Mobile Money Solutions Grant',
       description: 'Funding for innovative mobile money and payment solutions that increase financial access in underserved African communities.',
-      category: 'FinTech',
-      category_id: fintechId,
+      sector: 'FinTech',
+      sector_id: fintechId,
       status: 'open',
       deadline: '2027-12-05',
       funding_amount: '$55,000',
@@ -318,8 +318,8 @@ async function seedProjects() {
     {
       title: 'Cryptocurrency and Blockchain for Development',
       description: 'Supporting blockchain and cryptocurrency solutions that address real-world development challenges in Africa, such as remittances, identity verification, and transparent governance.',
-      category: 'FinTech',
-      category_id: fintechId,
+      sector: 'FinTech',
+      sector_id: fintechId,
       status: 'open',
       deadline: '2028-02-28',
       funding_amount: '$80,000',
@@ -335,8 +335,8 @@ async function seedProjects() {
     {
       title: 'EdTech Innovation for Rural Education',
       description: 'Supporting educational technology platforms that improve access to quality education in rural and underserved African communities.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2027-11-25',
       funding_amount: '$45,000',
@@ -352,8 +352,8 @@ async function seedProjects() {
     {
       title: 'Healthcare Technology Innovation',
       description: 'Funding for health tech solutions that improve healthcare delivery, telemedicine, health records management, and access to medical services in Africa.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2027-12-10',
       funding_amount: '$65,000',
@@ -369,8 +369,8 @@ async function seedProjects() {
     {
       title: 'Green Energy Technology Fund',
       description: 'Supporting renewable energy solutions including solar, wind, and hydro technologies that provide clean energy access to African communities.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2027-10-15',
       funding_amount: '$90,000',
@@ -386,8 +386,8 @@ async function seedProjects() {
     {
       title: 'Transportation and Logistics Tech',
       description: 'Funding for technology solutions that improve transportation, logistics, and mobility in African cities and rural areas.',
-      category: 'Technology',
-      category_id: technologyId,
+      sector: 'Technology',
+      sector_id: technologyId,
       status: 'open',
       deadline: '2028-01-30',
       funding_amount: '$50,000',
@@ -402,14 +402,14 @@ async function seedProjects() {
     },
   ];
 
-  // Insert projects (check for existing ones first to avoid duplicates)
+  // Insert opportunities (check for existing ones first to avoid duplicates)
   let insertedCount = 0;
   let skippedCount = 0;
 
   for (const project of projects) {
-    // Check if project with same title already exists
+    // Check if opportunity with same title already exists
     const { data: existing } = await supabase
-      .from('projects')
+      .from('opportunities')
       .select('id')
       .eq('title', project.title)
       .single();
@@ -420,11 +420,26 @@ async function seedProjects() {
     }
 
     const { error } = await supabase
-      .from('projects')
-      .insert(project);
+      .from('opportunities')
+      .insert({
+        title: project.title,
+        description: project.description,
+        sector_id: project.sector_id,
+        status: project.status,
+        deadline: project.deadline,
+        funding_amount: project.funding_amount,
+        location: project.location,
+        image_url: project.image_url,
+        requirements: project.requirements,
+        eligibility_criteria: project.eligibility_criteria,
+        application_fee: project.application_fee,
+        max_applicants: project.max_applicants,
+        current_applicants: project.current_applicants,
+        featured: project.featured,
+      });
 
     if (error) {
-      console.error(`   ⚠️  Failed to insert project "${project.title}":`, error.message);
+      console.error(`   ⚠️  Failed to insert opportunity "${project.title}":`, error.message);
       // Continue with other projects instead of failing completely
     } else {
       insertedCount++;
@@ -432,10 +447,10 @@ async function seedProjects() {
   }
 
   if (insertedCount > 0) {
-    console.log(`   ✅ ${insertedCount} projects inserted successfully`);
+    console.log(`   ✅ ${insertedCount} opportunities inserted successfully`);
   }
   if (skippedCount > 0) {
-    console.log(`   ℹ️  ${skippedCount} projects already exist (skipped)`);
+    console.log(`   ℹ️  ${skippedCount} opportunities already exist (skipped)`);
   }
 }
 
@@ -445,8 +460,8 @@ async function main() {
     
     await verifySupabaseHost();
     
-    // Seed categories first
-    await seedCategories();
+    // Seed sectors first
+    await seedSectors();
     
     // Then seed projects
     await seedProjects();

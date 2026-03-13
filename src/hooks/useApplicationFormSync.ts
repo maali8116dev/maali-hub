@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hook to synchronize react-hook-form with Zustand store
  */
 import { useEffect, useRef } from 'react';
@@ -27,8 +27,8 @@ export function useApplicationFormSync(
       phoneNumber: formData.phoneNumber || "",
       yearEstablished: formData.yearEstablished || undefined,
       coreMissionPurpose: formData.coreMissionPurpose || "",
-      primarySectors: formData.primarySectors || [],
-      primarySectorOther: formData.primarySectorOther || "",
+      primarysectors: formData.primarysectors || [],
+      primarysectorOther: formData.primarysectorOther || "",
       numberOfTeamMembers: formData.numberOfTeamMembers || undefined,
       keyTeamMembersRoles: formData.keyTeamMembersRoles || "",
       previousGrantsFundingReceived: formData.previousGrantsFundingReceived || false,
@@ -64,8 +64,8 @@ export function useApplicationFormSync(
         phoneNumber: value.phoneNumber as string | undefined,
         yearEstablished: value.yearEstablished as number | undefined,
         coreMissionPurpose: value.coreMissionPurpose as string | undefined,
-        primarySectors: value.primarySectors as string[] | undefined,
-        primarySectorOther: value.primarySectorOther as string | undefined,
+        primarysectors: value.primarysectors as string[] | undefined,
+        primarysectorOther: value.primarysectorOther as string | undefined,
         numberOfTeamMembers: value.numberOfTeamMembers as number | undefined,
         keyTeamMembersRoles: value.keyTeamMembersRoles as string | undefined,
         previousGrantsFundingReceived: value.previousGrantsFundingReceived as boolean | undefined,
@@ -86,4 +86,12 @@ export function useApplicationFormSync(
 
   return { isResettingRef };
 }
+
+
+
+
+
+
+
+
 

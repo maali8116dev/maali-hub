@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
 import { useAssignReviewers } from '../useReviewerAssignment';
 import { useSubmitReview } from '../useReviewerAssignment';
@@ -23,7 +23,7 @@ vi.mock('@tanstack/react-query', () => ({
 
 /**
  * Unit test for complete application review workflow (mocked)
- * Tests: Application Submission → Reviewer Assignment → Review Submission → Aggregation → Decision
+ * Tests: Application Submission â†’ Reviewer Assignment â†’ Review Submission â†’ Aggregation â†’ Decision
  * 
  * This test focuses on business logic without UI rendering.
  * For real database integration tests, see the integration test suite.
@@ -58,7 +58,7 @@ describe('Application Review Workflow', () => {
     vi.clearAllMocks();
   });
 
-  describe('Complete Workflow: Submission → Assignment → Reviews → Decision', () => {
+  describe('Complete Workflow: Submission â†’ Assignment â†’ Reviews â†’ Decision', () => {
     it('should complete full review workflow with 2 reviewers', async () => {
       // Step 1: Mock reviewer assignment
       const mockAssignments = [
@@ -78,14 +78,14 @@ describe('Application Review Workflow', () => {
         },
       ];
 
-      // Mock reviewer categories query
-      const mockReviewerCategoriesQuery = {
+      // Mock reviewer sectors query
+      const mockReviewersectorsQuery = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         in: vi.fn().mockResolvedValue({
           data: [
-            { reviewer_id: mockReviewer1.id, category: mockCategory },
-            { reviewer_id: mockReviewer2.id, category: mockCategory },
+            { reviewer_id: mockReviewer1.id, sector: mockCategory },
+            { reviewer_id: mockReviewer2.id, sector: mockCategory },
           ],
           error: null,
         }),
@@ -116,8 +116,8 @@ describe('Application Review Workflow', () => {
       let callCount = 0;
       (supabase.from as any).mockImplementation((table: string) => {
         callCount++;
-        if (table === 'reviewer_categories') {
-          return mockReviewerCategoriesQuery;
+        if (table === 'reviewer_sectors') {
+          return mockReviewersectorsQuery;
         }
         if (table === 'application_assignments') {
           if (callCount === 2) {
@@ -126,7 +126,7 @@ describe('Application Review Workflow', () => {
           }
           return mockInsertQuery;
         }
-        return mockReviewerCategoriesQuery;
+        return mockReviewersectorsQuery;
       });
 
       // Step 2: Simulate reviewer assignment
@@ -366,7 +366,7 @@ describe('Application Review Workflow', () => {
       (supabase.from as any).mockReturnValue(mockErrorQuery);
 
       // Assignment should fail but not crash
-      const result = await mockErrorQuery.select().eq('category', mockCategory).in('reviewer_id', []);
+      const result = await mockErrorQuery.select().eq('sector', mockCategory).in('reviewer_id', []);
       
       expect(result.error).toBeDefined();
       expect(result.error?.message).toBe('Database error');
@@ -390,4 +390,12 @@ describe('Application Review Workflow', () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

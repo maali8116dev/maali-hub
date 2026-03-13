@@ -229,3 +229,4 @@ ALTER FUNCTION public.get_application_submission_preview(UUID, INTEGER) OWNER TO
 COMMENT ON FUNCTION public.get_application_submission_preview(UUID, INTEGER) IS 'Returns opportunity details and existing application info needed before submission. Optimizes pre-submission checks.';
 
 -- ============================================
+

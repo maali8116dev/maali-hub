@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SuccessStory = {
   id: number;
   name: string;
   company: string;
-  category: string;
+  sector: string;
   location: string;
   funding_amount: string;
   funding_date: string;
@@ -88,4 +88,12 @@ export function useSuccessStories() {
     retry: 1,
   });
 }
+
+
+
+
+
+
+
+
 

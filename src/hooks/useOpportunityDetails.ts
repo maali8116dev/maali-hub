@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOpportunityDraft } from "@/hooks/useUserDrafts";
 import { useAuth } from "@/hooks/useAuth";
@@ -131,4 +131,12 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
     hasApprovedApplication,
   };
 }
+
+
+
+
+
+
+
+
 

@@ -62,3 +62,4 @@ COMMENT ON COLUMN public.transactions.invoice_pdf_url IS 'URL to the PDF receipt
 
 
 -- ============================================
+

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Globe, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -125,7 +125,7 @@ const HeroSection = () => {
               <div className="absolute top-20 right-10 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
-                    <span className="text-success-foreground text-lg font-bold">✓</span>
+                    <span className="text-success-foreground text-lg font-bold">âœ“</span>
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Ahmed's Startup</div>
@@ -138,7 +138,7 @@ const HeroSection = () => {
               <div className="absolute bottom-10 left-5 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '1.5s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-lg font-bold">💡</span>
+                    <span className="text-primary-foreground text-lg font-bold">ðŸ’¡</span>
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Kofi's Tech Hub</div>
@@ -151,7 +151,7 @@ const HeroSection = () => {
               <div className="absolute top-0 left-20 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '2s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                    <span className="text-accent-foreground text-lg font-bold">🚀</span>
+                    <span className="text-accent-foreground text-lg font-bold">ðŸš€</span>
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Samuel's Venture</div>
@@ -169,4 +169,12 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+
+
+
+
+
+
+
+
 

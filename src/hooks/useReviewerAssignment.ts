@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Main export file for reviewer assignment hooks
  * Re-exports all hooks from focused modules for backward compatibility
  */
@@ -21,7 +21,7 @@ export {
   useApplicationAssignments,
   useReviewerAssignments,
   useReviewerWorkload,
-  useReviewerCategories,
+  useReviewersectors,
   useUpdateAssignmentStatus,
   useAddConflict,
 } from './useReviewerAssignments';
@@ -44,3 +44,11 @@ export {
   useDecisionEngine,
   calculateDecision,
 } from './useReviewAggregation';
+
+
+
+
+
+
+
+

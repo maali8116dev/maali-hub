@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type RankedReviewerScore = {
@@ -51,4 +51,12 @@ export function useProjectApplicationsRanked(projectId?: number) {
     staleTime: 30 * 1000,
   });
 }
+
+
+
+
+
+
+
+
 

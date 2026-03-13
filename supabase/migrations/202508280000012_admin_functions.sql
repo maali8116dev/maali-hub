@@ -24,7 +24,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_category_id integer;
+  v_sector_id integer;
   v_opportunity_id integer;
   v_tag_name text;
 BEGIN
@@ -46,7 +46,7 @@ BEGIN
     RAISE EXCEPTION 'Application or opportunity not found';
   END IF;
 
-  -- Get the first tag from the opportunity and find matching category
+  -- Get the first tag from the opportunity and find matching Sector
   SELECT ot.name
   INTO v_tag_name
   FROM public.opportunity_tag_map otm
@@ -54,17 +54,17 @@ BEGIN
   WHERE otm.opportunity_id = v_opportunity_id
   LIMIT 1;
 
-  -- Find category with matching name
+  -- Find Sector with matching name
   IF v_tag_name IS NOT NULL THEN
     SELECT c.id
-    INTO v_category_id
-    FROM public.categories c
+    INTO v_sector_id
+    FROM public.sectors c
     WHERE c.name = v_tag_name
     LIMIT 1;
   END IF;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Opportunity has no tags or no matching category found for reviewer assignment';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Opportunity has no tags or no matching Sector found for reviewer assignment';
   END IF;
 
   RETURN QUERY
@@ -73,9 +73,9 @@ BEGIN
     COALESCE(pr.first_name, '')::text,
     COALESCE(pr.last_name, '')::text,
     public.get_reviewer_workload(rc.reviewer_id)::integer AS workload
-  FROM public.reviewer_categories rc
+  FROM public.reviewer_sectors rc
   JOIN public.profiles pr ON pr.user_id = rc.reviewer_id
-  WHERE rc.category_id = v_category_id
+  WHERE rc.sector_id = v_sector_id
     AND pr.role = 'reviewer'
     AND rc.reviewer_id NOT IN (
       SELECT rcf.reviewer_id
@@ -87,7 +87,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.get_eligible_reviewers_for_application IS
-'Admin-only helper. Returns eligible reviewers for an application based on the opportunity tags (mapped to categories) and conflict rules, ordered by workload.';
+'Admin-only helper. Returns eligible reviewers for an application based on the opportunity tags (mapped to sectors) and conflict rules, ordered by workload.';
 
 
 CREATE OR REPLACE FUNCTION public.admin_set_application_reviewers(
@@ -100,7 +100,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_category_id integer;
+  v_sector_id integer;
   v_opportunity_id integer;
   v_tag_name text;
   v_count integer;
@@ -128,7 +128,7 @@ BEGIN
     RAISE EXCEPTION 'Application or opportunity not found';
   END IF;
 
-  -- Get the first tag from the opportunity and find matching category
+  -- Get the first tag from the opportunity and find matching Sector
   SELECT ot.name
   INTO v_tag_name
   FROM public.opportunity_tag_map otm
@@ -136,25 +136,25 @@ BEGIN
   WHERE otm.opportunity_id = v_opportunity_id
   LIMIT 1;
 
-  -- Find category with matching name
+  -- Find Sector with matching name
   IF v_tag_name IS NOT NULL THEN
     SELECT c.id
-    INTO v_category_id
-    FROM public.categories c
+    INTO v_sector_id
+    FROM public.sectors c
     WHERE c.name = v_tag_name
     LIMIT 1;
   END IF;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Opportunity has no tags or no matching category found for reviewer assignment';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Opportunity has no tags or no matching Sector found for reviewer assignment';
   END IF;
 
-  -- Validate reviewers are eligible for this category and not conflicted
+  -- Validate reviewers are eligible for this Sector and not conflicted
   SELECT COUNT(*)
   INTO v_count
   FROM unnest(p_reviewer_ids) r(reviewer_id)
   JOIN public.profiles pr ON pr.user_id = r.reviewer_id AND pr.role = 'reviewer'
-  JOIN public.reviewer_categories rc ON rc.reviewer_id = r.reviewer_id AND rc.category_id = v_category_id
+  JOIN public.reviewer_sectors rc ON rc.reviewer_id = r.reviewer_id AND rc.sector_id = v_sector_id
   WHERE r.reviewer_id NOT IN (
     SELECT rcf.reviewer_id FROM public.reviewer_conflicts rcf WHERE rcf.application_id = p_application_id
   );
@@ -457,3 +457,4 @@ COMMENT ON TRIGGER trigger_handle_review_completion ON public.review_scores IS
 'Automatically handles review completion: updates application status to "under_review" and notifies admins when opportunity is ready for winner selection.';
 
 -- ============================================
+

@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+﻿import * as Sentry from "@sentry/react";
 
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
 
@@ -114,16 +114,24 @@ export const captureError = (
 // Add breadcrumb for better error context
 export const addBreadcrumb = (
   message: string,
-  category: string,
+  sector: string,
   data?: Record<string, unknown>
 ) => {
   if (!isInitialized) return;
   Sentry.addBreadcrumb({
     message,
-    category,
+    sector,
     data,
     level: "info",
   });
 };
 
 export { Sentry };
+
+
+
+
+
+
+
+

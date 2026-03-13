@@ -24,6 +24,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -338,15 +344,29 @@ export function DataTable<TData, TValue>({
           </Button>
         )}
         {enableExport && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportToCSV}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportToCSV}>
+                CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>
+                Excel (coming soon)
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>
+                PDF (coming soon)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
       <div className="rounded-md border">
@@ -495,4 +515,12 @@ export function SortableColumnHeader<TData, TValue>({
     </Button>
   )
 }
+
+
+
+
+
+
+
+
 

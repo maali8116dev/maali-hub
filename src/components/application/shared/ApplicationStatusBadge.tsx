@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 interface ApplicationStatusBadgeProps {
@@ -40,4 +40,12 @@ const ApplicationStatusBadge = ({ status }: ApplicationStatusBadgeProps) => {
 };
 
 export default ApplicationStatusBadge;
+
+
+
+
+
+
+
+
 

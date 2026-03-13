@@ -1,5 +1,5 @@
-/**
- * Integration tests — hooks hit the REAL database.
+﻿/**
+ * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real Supabase client
  * so the hooks behave exactly as they would in the browser.
@@ -12,7 +12,7 @@ import type { Database } from '@/integrations/supabase/types';
 import React from 'react';
 import { ApplicationFormData } from '@/stores/applicationForm';
 
-// ── Hoisted container — available to vi.mock factory ──────────────────
+// â”€â”€ Hoisted container -” available to vi.mock factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const shared = vi.hoisted(() => ({
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co",
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ",
@@ -23,7 +23,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
   import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// ── Mock the module to inject our real client into hooks ──────────────
+// â”€â”€ Mock the module to inject our real client into hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 vi.mock('@/integrations/supabase/client', async () => {
   const { createClient: cc } = await import('@supabase/supabase-js');
   shared.realClient = cc<Database>(shared.SUPABASE_URL, shared.SUPABASE_ANON_KEY, {
@@ -49,7 +49,7 @@ vi.mock('@/hooks/use-toast', () => ({
 // Import hooks AFTER mocks are declared (Vitest resolves them using the mock)
 import { useAutoSaveDraft } from '../useAutoSaveDraft';
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -69,41 +69,41 @@ describe('Draft Workflow - Integration Tests', () => {
   let testUserId: string;
   let testUserEmail: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testDraftIds: string[] = [];
   const testTimestamp = Date.now();
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
       return;
     }
 
-    // 1. Get or create a test category
+    // 1. Get or create a test sector
     const { data: existingCategory } = await supabaseAdmin
-      .from('categories')
+      .from('sectors')
       .select('id')
       .eq('name', 'Technology')
       .single();
 
     if (existingCategory) {
-      testCategoryId = existingCategory.id;
+      testsectorId = existingCategory.id;
     } else {
       const { data: newCategory, error } = await supabaseAdmin
-        .from('categories')
+        .from('sectors')
         .insert({
           name: 'Technology',
           slug: 'technology',
-          description: 'Test Technology category',
+          description: 'Test Technology sector',
           is_active: true,
         })
         .select('id')
         .single();
 
       if (error || !newCategory) {
-        throw new Error(`Failed to create category: ${error?.message}`);
+        throw new Error(`Failed to create sector: ${error?.message}`);
       }
-      testCategoryId = newCategory.id;
+      testsectorId = newCategory.id;
     }
 
     // 2. Create test project
@@ -112,7 +112,7 @@ describe('Draft Workflow - Integration Tests', () => {
       .insert({
         title: `IntTest Draft Project ${testTimestamp}`,
         description: 'Integration test project for draft workflow',
-        category_id: testCategoryId,
+        sector_id: testsectorId,
         status: 'open',
         location: 'Ghana',
         funding_amount: '$50,000',
@@ -202,7 +202,7 @@ describe('Draft Workflow - Integration Tests', () => {
   }, 30000);
 
   describe('Complete Draft Workflow', () => {
-    it('should complete full draft workflow: create → save → load → submit', async () => {
+    it('should complete full draft workflow: create â†’ save â†’ load â†’ submit', async () => {
       const mockFormData: ApplicationFormData = {
         projectId: testProjectId,
         applicantType: 'Individual',
@@ -461,7 +461,7 @@ describe('Draft Workflow - Integration Tests', () => {
         .insert({
           title: `IntTest Draft Project No Draft ${testTimestamp}`,
           description: 'Integration test project for no draft test',
-          category_id: testCategoryId,
+          sector_id: testsectorId,
           status: 'open',
           location: 'Kenya',
           funding_amount: '$30,000',
@@ -513,4 +513,12 @@ describe('Draft Workflow - Integration Tests', () => {
     }, 30000);
   });
 });
+
+
+
+
+
+
+
+
 

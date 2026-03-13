@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isOpportunityOpen } from "@/lib/opportunityAvailability";
@@ -95,3 +95,11 @@ export function useApplications() {
     retry: 1,
   });
 }
+
+
+
+
+
+
+
+

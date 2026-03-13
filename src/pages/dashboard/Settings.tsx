@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,7 +136,7 @@ const Settings = () => {
                 i18n.changeLanguage(value);
                 toast({
                   title: t('dashboard:settings.save.languageUpdated'),
-                  description: `${t('dashboard:settings.preferences.language')} ${value === 'en' ? 'English' : value === 'fr' ? 'Français' : 'Português'}`,
+                  description: `${t('dashboard:settings.preferences.language')} ${value === 'en' ? 'English' : value === 'fr' ? 'FranÃ§ais' : 'PortuguÃªs'}`,
                 });
               }}
             >
@@ -145,8 +145,8 @@ const Settings = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="en">English</SelectItem>
-                <SelectItem value="fr">Français</SelectItem>
-                {/* <SelectItem value="pt">Português</SelectItem> */}
+                <SelectItem value="fr">FranÃ§ais</SelectItem>
+                {/* <SelectItem value="pt">PortuguÃªs</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
@@ -251,4 +251,12 @@ const Settings = () => {
 };
 
 export default Settings;
+
+
+
+
+
+
+
+
 

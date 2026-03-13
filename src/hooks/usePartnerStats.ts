@@ -1,18 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePartnerOrg } from "@/hooks/usePartnerOrg";
 
 export function usePartnerStats() {
   const { user } = useAuth();
+  const { data: partnerOrg } = usePartnerOrg();
 
   return useQuery({
-    queryKey: ["partner-stats", user?.id],
+    queryKey: ["partner-stats", user?.id, partnerOrg?.id],
     queryFn: async () => {
-      // Get partner's opportunities
+      if (!partnerOrg?.id) {
+        return {
+          totalOpportunities: 0,
+          activeOpportunities: 0,
+          totalApplications: 0,
+          pendingApplications: 0,
+          approvedApplications: 0,
+        };
+      }
+
+      // Get opportunities for this partner organization
       const { data: opportunities, error: oppError } = await supabase
         .from("opportunities")
         .select("id, status")
-        .eq("created_by", user!.id);
+        .eq("partner_id", partnerOrg.id);
 
       if (oppError) throw oppError;
 
@@ -44,3 +56,11 @@ export function usePartnerStats() {
     enabled: !!user,
   });
 }
+
+
+
+
+
+
+
+

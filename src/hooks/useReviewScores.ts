@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hooks for managing review scores
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -151,4 +151,12 @@ export const useApplicationReviewScores = (applicationId: string) => {
     enabled: !!applicationId,
   });
 };
+
+
+
+
+
+
+
+
 

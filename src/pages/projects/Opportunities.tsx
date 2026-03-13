@@ -42,7 +42,7 @@ const FALLBACK_TAGS = [
 
 const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const [selectedsector, setSelectedsector] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
@@ -53,8 +53,8 @@ const Opportunities = () => {
 
   // Fetch opportunities with filters
   const { data, isLoading, error } = useOpportunities({
-    tags: selectedSector
-      ? [selectedSector.toLowerCase().replace(/\s+/g, "-")]
+    tags: selectedsector
+      ? [selectedsector.toLowerCase().replace(/\s+/g, "-")]
       : selectedTag
         ? [selectedTag.toLowerCase().replace(/\s+/g, "-")]
         : null,
@@ -131,11 +131,11 @@ const Opportunities = () => {
     return true;
   });
 
-  const hasActiveFilters = !!(selectedSector || selectedStatus || selectedLocation || selectedPartner || selectedTag);
+  const hasActiveFilters = !!(selectedsector || selectedStatus || selectedLocation || selectedPartner || selectedTag);
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setSelectedSector(null);
+    setSelectedsector(null);
     setSelectedStatus(null);
     setSelectedLocation(null);
     setSelectedPartner(null);
@@ -148,7 +148,7 @@ const Opportunities = () => {
       setSelectedTag(null);
     } else {
       setSelectedTag(tagName);
-      setSelectedSector(null); // clear sector when tag is selected
+      setSelectedsector(null); // clear sector when tag is selected
       setCurrentPage(1);
     }
   };
@@ -235,13 +235,13 @@ const Opportunities = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-4 items-end">
-                {/* Sector Filter */}
+                {/* sector Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="sector-filter" className="mb-2 block">Sector</Label>
+                  <Label htmlFor="sector-filter" className="mb-2 block">sector</Label>
                   <Select
-                    value={selectedSector || "all"}
+                    value={selectedsector || "all"}
                     onValueChange={(value) => {
-                      setSelectedSector(value === "all" ? null : value);
+                      setSelectedsector(value === "all" ? null : value);
                       setSelectedTag(null);
                     }}
                   >
@@ -249,7 +249,7 @@ const Opportunities = () => {
                       <SelectValue placeholder="Select sector" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Sectors</SelectItem>
+                      <SelectItem value="all">All sectors</SelectItem>
                       {sectors.map((sector) => (
                         <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                       ))}
@@ -348,12 +348,14 @@ const Opportunities = () => {
                   id={opportunity.id}
                   title={opportunity.title}
                   description={opportunity.description}
-                  category={opportunity.tags?.[0]?.name || opportunity.opportunityType}
+                  sector={opportunity.sector || opportunity.tags?.[0]?.name || opportunity.opportunityType}
                   location={opportunity.location}
                   fundingAmount={opportunity.fundingAmount}
                   deadline={opportunity.deadline}
                   currentApplicants={opportunity.currentApplicants}
                   status={opportunity.status}
+                  organizationName={opportunity.organizationName || undefined}
+                  partnerLogoUrl={opportunity.partnerLogoUrl || undefined}
                   hasSubmittedApplication={submittedOpportunityIds.has(opportunity.id)}
                 />
               ))}
@@ -487,3 +489,11 @@ const Opportunities = () => {
 };
 
 export default Opportunities;
+
+
+
+
+
+
+
+

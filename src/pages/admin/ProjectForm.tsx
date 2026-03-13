@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from "@/hooks/useAdminProjects";
-import { useCategories } from "@/hooks/useCategories";
+import { useSectors } from "@/hooks/useSectors";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { getProjectApplicationStateLabel } from "@/lib/projectAvailability";
@@ -31,7 +31,7 @@ const optionalNumber = (schema: z.ZodNumber) =>
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required").min(5, "Title must be at least 5 characters"),
   description: z.string().min(1, "Description is required").min(50, "Description must be at least 50 characters"),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "sector is required"),
   status: z.enum(["new", "open", "closing-soon", "closed", "archived"]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be in YYYY-MM-DD format"),
   fundingAmount: z.string().min(1, "Funding amount is required"),
@@ -54,7 +54,7 @@ const ProjectForm = () => {
   const projectId = id ? parseInt(id) : undefined;
 
   const { data: project, isLoading: isLoadingProject } = useProject(projectId);
-  const { data: categories = [] } = useCategories();
+  const { data: sectors = [] } = useSectors();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
 
@@ -78,7 +78,7 @@ const ProjectForm = () => {
     defaultValues: {
       title: "",
       description: "",
-      category: "",
+      sector: "",
       status: "open",
       deadline: "",
       fundingAmount: "",
@@ -94,7 +94,7 @@ const ProjectForm = () => {
   });
 
   const status = watch("status");
-  const category = watch("category");
+  const sector = watch("sector");
   const imageUrl = watch("imageUrl");
   const deadline = watch("deadline");
   
@@ -121,7 +121,7 @@ const ProjectForm = () => {
       reset({
         title: project.title,
         description: project.description,
-        category: project.category,
+        sector: project.sector,
         status: project.status,
         deadline: deadlineDate,
         fundingAmount: project.fundingAmount,
@@ -142,7 +142,7 @@ const ProjectForm = () => {
       const formData: ProjectFormData = {
         title: data.title,
         description: data.description,
-        category: data.category,
+        sector: data.sector,
         status: data.status,
         deadline: data.deadline,
         fundingAmount: data.fundingAmount,
@@ -238,25 +238,25 @@ const ProjectForm = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="category">Category *</Label>
+                    <Label htmlFor="sector">sector *</Label>
                     <Select
-                      key={`category-${project?.id || 'new'}-${category}`}
-                      value={category || ""}
-                      onValueChange={(value) => setValue("category", value, { shouldValidate: true })}
+                      key={`sector-${project?.id || "new"}-${sector}`}
+                      value={sector || ""}
+                      onValueChange={(value) => setValue("sector", value, { shouldValidate: true })}
                     >
-                      <SelectTrigger id="category" className={errors.category ? "border-destructive" : ""}>
-                        <SelectValue placeholder="Select category" />
+                      <SelectTrigger id="sector" className={errors.sector ? "border-destructive" : ""}>
+                        <SelectValue placeholder="Select sector" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((cat) => (
+                        {sectors.map((cat) => (
                           <SelectItem key={cat.id} value={cat.name}>
                             {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.category && (
-                      <p className="text-sm text-destructive mt-1">{errors.category.message}</p>
+                    {errors.sector && (
+                      <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
                     )}
                   </div>
 
@@ -335,7 +335,7 @@ const ProjectForm = () => {
                   <Textarea
                     id="requirements"
                     {...register("requirements")}
-                    placeholder="List any specific requirements for applicants..."
+                    placeholder="Comma-separated requirements (e.g., Business plan, Pitch deck, Financials)"
                     rows={4}
                   />
                 </div>
@@ -345,7 +345,7 @@ const ProjectForm = () => {
                   <Textarea
                     id="eligibilityCriteria"
                     {...register("eligibilityCriteria")}
-                    placeholder="Describe who is eligible to apply..."
+                    placeholder="Comma-separated eligibility (e.g., Women-led startup, Registered business)"
                     rows={4}
                   />
                 </div>
@@ -512,4 +512,12 @@ const ProjectForm = () => {
 };
 
 export default ProjectForm;
+
+
+
+
+
+
+
+
 

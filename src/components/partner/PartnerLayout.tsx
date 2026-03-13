@@ -7,6 +7,7 @@ import {
   Settings,
   LogOut,
   Handshake,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,7 @@ interface PartnerLayoutProps {
 const menuItems = [
   { href: "/partner", label: "Dashboard", icon: LayoutDashboard },
   { href: "/partner/opportunities", label: "My Opportunities", icon: FolderKanban },
+  { href: "/partner/notifications", label: "Notifications", icon: Bell },
   { href: "/partner/settings", label: "Settings", icon: Settings },
 ];
 
@@ -48,6 +50,7 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
   const getPageTitle = () => {
     if (location.pathname === "/partner") return "Partner Dashboard";
     if (location.pathname.startsWith("/partner/opportunities")) return "My Opportunities";
+    if (location.pathname === "/partner/notifications") return "Notifications";
     if (location.pathname === "/partner/settings") return "Settings";
     return "Partner Portal";
   };
@@ -148,3 +151,11 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
 };
 
 export default PartnerLayout;
+
+
+
+
+
+
+
+

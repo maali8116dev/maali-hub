@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/components/ui/skeleton";
 
 interface TableRowSkeletonProps {
   columns?: number;
@@ -44,4 +44,12 @@ export function TableSkeleton({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

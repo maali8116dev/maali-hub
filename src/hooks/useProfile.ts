@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,7 +9,7 @@ export type Profile = {
   firstName: string | null;
   lastName: string | null;
   businessName: string | null;
-  businessSector: string | null;
+  businesssector: string | null;
   country: string | null;
   bio: string | null;
   avatarUrl: string | null;
@@ -26,7 +26,7 @@ function transformProfile(data: any): Profile {
     firstName: data.first_name || data.firstName,
     lastName: data.last_name || data.lastName,
     businessName: data.business_name || data.businessName,
-    businessSector: data.business_sector || data.businessSector,
+    businesssector: data.business_sector || data.businesssector,
     country: data.country,
     bio: data.bio,
     avatarUrl: data.avatar_url || data.avatarUrl,
@@ -60,7 +60,7 @@ async function updateProfileDirect(
     firstName?: string;
     lastName?: string;
     businessName?: string;
-    businessSector?: string;
+    businesssector?: string;
     country?: string;
     bio?: string;
     avatarUrl?: string;
@@ -74,7 +74,7 @@ async function updateProfileDirect(
       first_name: data.firstName,
       last_name: data.lastName,
       business_name: data.businessName,
-      business_sector: data.businessSector,
+      business_sector: data.businesssector,
       country: data.country,
       bio: data.bio,
       avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
@@ -97,7 +97,7 @@ async function updateProfileDirect(
         first_name: data.firstName,
         last_name: data.lastName,
         business_name: data.businessName,
-        business_sector: data.businessSector,
+        business_sector: data.businesssector,
         country: data.country,
         bio: data.bio,
         avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
@@ -162,7 +162,7 @@ export function useUpdateProfile() {
       firstName?: string;
       lastName?: string;
       businessName?: string;
-      businessSector?: string;
+      businesssector?: string;
       country?: string;
       bio?: string;
       avatarUrl?: string;
@@ -175,3 +175,11 @@ export function useUpdateProfile() {
     },
   });
 }
+
+
+
+
+
+
+
+

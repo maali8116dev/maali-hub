@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ApplicationListItemSkeleton() {
@@ -39,4 +39,12 @@ export function ApplicationListSkeleton({ count = 5 }: { count?: number }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

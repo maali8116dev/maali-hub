@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+﻿import { supabase } from "@/integrations/supabase/client";
 
 type EmailType = 
   | "application_submitted"
@@ -296,3 +296,11 @@ export async function sendContactSubmissionEmail(
     },
   }, true); // Allow public (no auth required)
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -393,7 +393,7 @@ const MultiStepApplicationForm = () => {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Submitting…
+                        Submitting-¦
                       </>
                     ) : !isEmailVerified ? (
                       <>
@@ -427,3 +427,10 @@ const MultiStepApplicationForm = () => {
 
 export default MultiStepApplicationForm;
                 
+
+
+
+
+
+
+

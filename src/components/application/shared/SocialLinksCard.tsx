@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Globe, Link as LinkIcon } from "lucide-react";
 
@@ -71,4 +71,12 @@ const SocialLinksCard = ({ application }: SocialLinksCardProps) => {
 };
 
 export default SocialLinksCard;
+
+
+
+
+
+
+
+
 

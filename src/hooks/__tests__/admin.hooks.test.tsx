@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -182,7 +182,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping integration tests.');
       return;
     }
 
@@ -206,12 +206,12 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     if (signInError) throw new Error(`Sign-in failed: ${signInError.message}`);
 
     // Create project
-    const { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
-    const categoryId = catData?.id || 1;
+    const { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
+    const sectorId = catData?.id || 1;
 
     const { data: projectData, error: projectError } = await supabaseAdmin.from('projects').insert({
       title: `Test Project ${Date.now()}`, description: 'Test', status: 'open',
-      category_id: categoryId, application_fee: 10000, funding_amount: '$50,000',
+      sector_id: sectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
     }).select('id').single();
     if (projectError || !projectData) throw new Error(`Project creation failed: ${projectError?.message}`);
@@ -279,7 +279,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
 
     const urRow = (data as any[]).find((a: any) => a.id === urApp?.id);
     if (urRow) {
-      expect(urRow.status).toBe('pending'); // RPC maps under_review → pending
+      expect(urRow.status).toBe('pending'); // RPC maps under_review â†’ pending
     }
   });
 
@@ -350,11 +350,11 @@ describe.skip('get_admin_stats RPC (Integration)', () => {
   it('should reject non-admin users', async () => {
     if (!supabaseAdmin) return;
 
-    // Sign out admin → unauthenticated call
+    // Sign out admin â†’ unauthenticated call
     await integrationClient.auth.signOut();
 
     const { data, error } = await (integrationClient.rpc as any)('get_admin_stats');
-    // Should fail – either error or empty
+    // Should fail -“ either error or empty
     expect(error !== null || data === null).toBe(true);
 
     // Re-sign-in for cleanup (afterAll expects a session)
@@ -374,3 +374,11 @@ describe.skip('get_admin_stats RPC (Integration)', () => {
     }
     });
   });
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -18,7 +18,7 @@ export const mockUser = {
 export const mockProject = {
   id: 1,
   title: 'Test Project',
-  category: 'Technology',
+  sector: 'Technology',
   application_fee: 0, // Free project for testing
 };
 
@@ -132,7 +132,7 @@ export const populateFormStore = (payload: ApplicationPayload) => {
     yearEstablished: payload.organizationInfo?.yearEstablished,
     numberOfTeamMembers: payload.organizationInfo?.teamSize,
     coreMissionPurpose: payload.organizationInfo?.mission,
-    primarySectors: payload.organizationInfo?.sectors,
+    primarysectors: payload.organizationInfo?.sectors,
     keyTeamMembersRoles: payload.organizationInfo?.teamRoles,
     
     // Project overview
@@ -245,4 +245,12 @@ export const setupMocks = () => {
     remove: vi.fn().mockResolvedValue({ data: null, error: null }),
   });
 };
+
+
+
+
+
+
+
+
 

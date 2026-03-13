@@ -1,5 +1,5 @@
-/**
- * Integration tests — hooks hit the REAL database.
+﻿/**
+ * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real Supabase client
  * so the hooks behave exactly as they would in the browser.
@@ -11,7 +11,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import React from 'react';
 
-// ── Hoisted container — available to vi.mock factory ──────────────────
+// â”€â”€ Hoisted container -” available to vi.mock factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const shared = vi.hoisted(() => ({
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co",
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ",
@@ -22,7 +22,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
   import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// ── Mock the module to inject our real client into hooks ──────────────
+// â”€â”€ Mock the module to inject our real client into hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 vi.mock('@/integrations/supabase/client', async () => {
   const { createClient: cc } = await import('@supabase/supabase-js');
   shared.realClient = cc<Database>(shared.SUPABASE_URL, shared.SUPABASE_ANON_KEY, {
@@ -45,7 +45,7 @@ vi.mock('@/hooks/useAuth');
 import { useProfile, useUpdateProfile } from '../useProfile';
 import { useAuth } from '../useAuth';
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -69,7 +69,7 @@ describe('useProfile - Integration Tests', () => {
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
       return;
     }
 
@@ -186,7 +186,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.lastName).toBe('Doe');
       expect(result.current.data?.userId).toBe(testUserId);
       expect(result.current.data?.businessName).toBe('Tech Solutions');
-      expect(result.current.data?.businessSector).toBe('Technology');
+      expect(result.current.data?.businesssector).toBe('Technology');
       expect(result.current.data?.country).toBe('Ghana');
       expect(result.current.data?.bio).toBe('Entrepreneur');
     });
@@ -219,7 +219,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.firstName).toBe('Jane');
       expect(result.current.data?.lastName).toBe('Smith');
       expect(result.current.data?.businessName).toBe('AgriTech');
-      expect(result.current.data?.businessSector).toBe('Agriculture');
+      expect(result.current.data?.businesssector).toBe('Agriculture');
       expect(result.current.data?.avatarUrl).toBe('https://example.com/avatar.jpg');
     });
 
@@ -300,7 +300,7 @@ describe('useProfile - Integration Tests', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         businessName: 'New Business',
-        businessSector: 'Technology',
+        businesssector: 'Technology',
         country: 'Ghana',
         bio: 'New bio',
       });
@@ -317,7 +317,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.firstName).toBe('Jane');
       expect(result.current.data?.lastName).toBe('Smith');
       expect(result.current.data?.businessName).toBe('New Business');
-      expect(result.current.data?.businessSector).toBe('Technology');
+      expect(result.current.data?.businesssector).toBe('Technology');
       expect(result.current.data?.country).toBe('Ghana');
       expect(result.current.data?.bio).toBe('New bio');
 
@@ -420,4 +420,12 @@ describe('useProfile - Integration Tests', () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

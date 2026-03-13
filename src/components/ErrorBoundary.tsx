@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+﻿import * as Sentry from "@sentry/react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -76,3 +76,11 @@ export const ErrorBoundary = ({ children }: ErrorBoundaryProps) => {
 };
 
 export default ErrorBoundary;
+
+
+
+
+
+
+
+

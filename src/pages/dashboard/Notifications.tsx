@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCheck, Check, Bell, Trash2, Loader2 } from "lucide-react";
@@ -36,13 +36,13 @@ const Notifications = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "application":
-        return "📄";
+        return "ðŸ“„";
       case "system":
-        return "⚙️";
+        return "âš™ï¸";
       case "reminder":
-        return "⏰";
+        return "â°";
       default:
-        return "🔔";
+        return "ðŸ””";
     }
   };
 
@@ -292,4 +292,12 @@ const Notifications = () => {
 };
 
 export default Notifications;
+
+
+
+
+
+
+
+
 

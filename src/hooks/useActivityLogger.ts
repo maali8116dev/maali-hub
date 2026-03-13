@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+﻿import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { trackEvent } from "@/lib/posthog";
 import { shouldLogToDatabase } from "@/config/activityLogging";
@@ -142,3 +142,11 @@ export async function logActivityDirect({
     console.error('Activity logging error:', err);
   }
 }
+
+
+
+
+
+
+
+

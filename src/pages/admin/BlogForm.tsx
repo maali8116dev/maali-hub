@@ -11,14 +11,14 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAllCategories } from "@/hooks/useCategories";
+import { useAllSectors } from "@/hooks/useSectors";
 
 const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required").min(10, "Title must be at least 10 characters"),
   excerpt: z.string().min(1, "Excerpt is required").min(50, "Excerpt must be at least 50 characters"),
   content: z.string().min(1, "Content is required").min(100, "Content must be at least 100 characters"),
   author: z.string().min(1, "Author is required"),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "Sector is required"),
   readTime: z.string().min(1, "Read time is required"),
   image: z.string().min(1, "Image URL is required").url("Please enter a valid URL"),
   featured: z.boolean(),
@@ -41,7 +41,7 @@ const BlogForm = () => {
           excerpt: "Learn the key strategies that successful entrepreneurs use to craft compelling funding applications that stand out.",
           content: "Full article content here...",
           author: "Sarah Johnson",
-          category: "Applications",
+          sector: "Applications",
           readTime: "5 min read",
           image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=600&fit=crop",
           featured: true,
@@ -64,7 +64,7 @@ const BlogForm = () => {
       excerpt: "",
       content: "",
       author: "",
-      category: "",
+      sector: "",
       readTime: "",
       image: "",
       featured: false,
@@ -94,8 +94,8 @@ const BlogForm = () => {
     navigate("/admin/blog");
   };
 
-  const { data: categoriesData = [] } = useAllCategories();
-  const categories = categoriesData.map((cat) => cat.name);
+  const { data: sectorsData = [] } = useAllSectors();
+  const sectors = sectorsData.map((cat) => cat.name);
 
   return (
     <div className="space-y-6">
@@ -260,19 +260,19 @@ const BlogForm = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="sector">Sector *</Label>
                   <Select
-                    value={watch("category")}
-                    onValueChange={(value) => setValue("category", value)}
+                    value={watch("sector")}
+                    onValueChange={(value) => setValue("sector", value)}
                   >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
+                    <SelectTrigger id="sector">
+                      <SelectValue placeholder="Select Sector" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.length === 0 ? (
-                        <SelectItem value="no-categories" disabled>No categories available</SelectItem>
+                      {sectors.length === 0 ? (
+                        <SelectItem value="no-sectors" disabled>No sectors available</SelectItem>
                       ) : (
-                        categories.map((cat) => (
+                        sectors.map((cat) => (
                           <SelectItem key={cat} value={cat}>
                             {cat}
                           </SelectItem>
@@ -280,8 +280,8 @@ const BlogForm = () => {
                       )}
                     </SelectContent>
                   </Select>
-                  {errors.category && (
-                    <p className="text-sm text-destructive mt-1">{errors.category.message}</p>
+                  {errors.sector && (
+                    <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
                   )}
                 </div>
 
@@ -339,4 +339,12 @@ const BlogForm = () => {
 };
 
 export default BlogForm;
+
+
+
+
+
+
+
+
 

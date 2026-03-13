@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Helper functions for creating dummy files in tests
  */
 
@@ -122,4 +122,12 @@ export const createOversizedFile = (
 export const createUnsupportedFile = (name: string = 'image.jpg'): File => {
   return createDummyFile(name, 'image/jpeg', 2048);
 };
+
+
+
+
+
+
+
+
 

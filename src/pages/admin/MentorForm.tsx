@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +32,7 @@ const mentorSchema = z.object({
 
 type MentorFormValues = z.infer<typeof mentorSchema>;
 
-const PREDEFINED_SECTORS = [
+const PREDEFINED_sectorS = [
   "Agriculture",
   "Technology",
   "Financial Services",
@@ -96,8 +96,8 @@ const AdminMentorForm = () => {
   });
 
   // Get existing sectors from database
-  const existingSectors = [...new Set(allMentors?.map(m => m.sector).filter(Boolean))] as string[];
-  const allSectors = [...new Set([...PREDEFINED_SECTORS, ...existingSectors])].sort();
+  const existingsectors = [...new Set(allMentors?.map(m => m.sector).filter(Boolean))] as string[];
+  const allsectors = [...new Set([...PREDEFINED_sectorS, ...existingsectors])].sort();
 
   // Get existing countries from database
   const existingCountries = [...new Set(allMentors?.map(m => m.country).filter(Boolean))] as string[];
@@ -239,7 +239,7 @@ const AdminMentorForm = () => {
                   name="sector"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sector</FormLabel>
+                      <FormLabel>sector</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -247,7 +247,7 @@ const AdminMentorForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {allSectors.map(sector => (
+                          {allsectors.map(sector => (
                             <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                           ))}
                         </SelectContent>
@@ -471,3 +471,11 @@ const AdminMentorForm = () => {
 };
 
 export default AdminMentorForm;
+
+
+
+
+
+
+
+

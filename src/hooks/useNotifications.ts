@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -181,11 +181,11 @@ export const useNotifications = () => {
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          console.log(`✅ Subscribed to notifications for user ${user.id}`);
+          console.log(`âœ… Subscribed to notifications for user ${user.id}`);
         } else if (status === "CHANNEL_ERROR") {
-          console.error("❌ Error subscribing to notifications channel");
+          console.error("âŒ Error subscribing to notifications channel");
         } else if (status === "TIMED_OUT") {
-          console.warn("⚠️ Notification subscription timed out, retrying...");
+          console.warn("âš ï¸ Notification subscription timed out, retrying...");
         }
       });
 
@@ -258,4 +258,12 @@ export const useDeleteAllNotifications = () => {
 
 // Export the createNotification function for direct use
 export { createNotification };
+
+
+
+
+
+
+
+
 

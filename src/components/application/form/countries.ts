@@ -1,4 +1,4 @@
-/** Country list with ISO 3166-1 alpha-2 codes for phone input integration. */
+﻿/** Country list with ISO 3166-1 alpha-2 codes for phone input integration. */
 export interface CountryEntry {
   /** Display name (stored in DB) */
   label: string;
@@ -50,7 +50,7 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "Congo (Brazzaville)", label: "Congo (Brazzaville)", code: "CG" },
   { value: "Congo (Kinshasa)", label: "Congo (Kinshasa)", code: "CD" },
   { value: "Costa Rica", label: "Costa Rica", code: "CR" },
-  { value: "Côte d'Ivoire", label: "Côte d'Ivoire", code: "CI" },
+  { value: "CÃ´te d'Ivoire", label: "CÃ´te d'Ivoire", code: "CI" },
   { value: "Croatia", label: "Croatia", code: "HR" },
   { value: "Cuba", label: "Cuba", code: "CU" },
   { value: "Cyprus", label: "Cyprus", code: "CY" },
@@ -158,7 +158,7 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "Saint Vincent and the Grenadines", label: "Saint Vincent and the Grenadines", code: "VC" },
   { value: "Samoa", label: "Samoa", code: "WS" },
   { value: "San Marino", label: "San Marino", code: "SM" },
-  { value: "São Tomé and Príncipe", label: "São Tomé and Príncipe", code: "ST" },
+  { value: "SÃ£o TomÃ© and PrÃ­ncipe", label: "SÃ£o TomÃ© and PrÃ­ncipe", code: "ST" },
   { value: "Saudi Arabia", label: "Saudi Arabia", code: "SA" },
   { value: "Senegal", label: "Senegal", code: "SN" },
   { value: "Serbia", label: "Serbia", code: "RS" },
@@ -212,3 +212,11 @@ export function getCountryCode(countryName: string | undefined): string | undefi
   if (!countryName) return undefined;
   return COUNTRIES.find((c) => c.value === countryName)?.code;
 }
+
+
+
+
+
+
+
+

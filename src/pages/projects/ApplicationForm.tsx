@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -128,4 +128,12 @@ const ApplicationForm = () => {
 };
 
 export default ApplicationForm;
+
+
+
+
+
+
+
+
 

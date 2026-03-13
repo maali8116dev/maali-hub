@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useReviewersPerAssignment } from '@/hooks/useReviewersPerAssignment';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { RubricsTab } from './RubricsTab';
 
 interface SettingsTabProps {
-  categories: string[];
+  sectors: string[];
 }
 
-export const SettingsTab = ({ categories }: SettingsTabProps) => {
+export const SettingsTab = ({ sectors }: SettingsTabProps) => {
   const { toast } = useToast();
   const { numReviewers, updateNumReviewers } = useReviewersPerAssignment();
   const [localNumReviewers, setLocalNumReviewers] = useState(numReviewers);
@@ -76,8 +76,16 @@ export const SettingsTab = ({ categories }: SettingsTabProps) => {
       </Card>
 
       {/* Rubrics Section */}
-      <RubricsTab categories={categories} />
+      <RubricsTab sectors={sectors} />
     </div>
   );
 };
+
+
+
+
+
+
+
+
 

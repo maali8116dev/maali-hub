@@ -1,4 +1,4 @@
-import * as z from "zod";
+﻿import * as z from "zod";
 import { emailSchema } from "@/lib/emailValidation";
 import { isValidPhoneNumber } from "libphonenumber-js";
 
@@ -68,8 +68,8 @@ export const step2Schema = z
       .refine((val) => !val || countWords(val) <= 200, {
         message: "Core mission / purpose must not exceed 200 words",
       }),
-    primarySectors: z.array(z.string()).optional(),
-    primarySectorOther: z.string().optional(),
+    primarysectors: z.array(z.string()).optional(),
+    primarysectorOther: z.string().optional(),
     numberOfTeamMembers: z.preprocess(
       (val) => (val === "" || val === undefined ? undefined : Number(val)),
       z.number().min(1, "Number of team members must be at least 1").optional()
@@ -192,4 +192,12 @@ export const applicationSchema = step1Schema
   .merge(step6Schema);
 
 export type ApplicationFormValues = z.infer<typeof applicationSchema>;
+
+
+
+
+
+
+
+
 

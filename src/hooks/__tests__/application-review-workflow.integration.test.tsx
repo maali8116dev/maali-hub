@@ -1,7 +1,7 @@
-/**
- * Integration tests — complete review workflow hits the REAL database.
+﻿/**
+ * Integration tests -” complete review workflow hits the REAL database.
  *
- * Tests: Application Submission → Reviewer Assignment → Review Submission → Aggregation → Decision
+ * Tests: Application Submission â†’ Reviewer Assignment â†’ Review Submission â†’ Aggregation â†’ Decision
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -10,7 +10,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import React from 'react';
 
-// ── Hoisted container — available to vi.mock factory ──────────────────
+// â”€â”€ Hoisted container -” available to vi.mock factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const shared = vi.hoisted(() => ({
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co",
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ",
@@ -21,7 +21,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
   import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// ── Mock the module to inject our real client into hooks ──────────────
+// â”€â”€ Mock the module to inject our real client into hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 vi.mock('@/integrations/supabase/client', async () => {
   const { createClient: cc } = await import('@supabase/supabase-js');
   shared.realClient = cc<Database>(shared.SUPABASE_URL, shared.SUPABASE_ANON_KEY, {
@@ -53,7 +53,7 @@ import {
   calculateDecision,
 } from '../useReviewerAssignment';
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -72,7 +72,7 @@ const createWrapper = () => {
 describe('Application Review Workflow - Integration Tests', () => {
   let testApplicationId: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testReviewerIds: string[] = [];
   let testAssignmentIds: string[] = [];
   let testApplicantId: string;
@@ -81,26 +81,26 @@ describe('Application Review Workflow - Integration Tests', () => {
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set, skipping integration tests');
       return;
     }
 
-    // 1. Create a dedicated test category to avoid picking unrelated reviewers
+    // 1. Create a dedicated test sector to avoid picking unrelated reviewers
     const { data: newCategory, error: categoryError } = await supabaseAdmin
-      .from('categories')
+      .from('sectors')
       .insert({
-        name: `IntTest Review Category ${testTimestamp}`,
+        name: `IntTest Review sector ${testTimestamp}`,
         slug: `inttest-review-${testTimestamp}`,
-        description: 'Integration test category for review workflow',
+        description: 'Integration test sector for review workflow',
         is_active: true,
       })
       .select('id')
       .single();
 
     if (categoryError || !newCategory) {
-      throw new Error(`Failed to create category: ${categoryError?.message}`);
+      throw new Error(`Failed to create sector: ${categoryError?.message}`);
     }
-    testCategoryId = newCategory.id;
+    testsectorId = newCategory.id;
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
@@ -108,7 +108,7 @@ describe('Application Review Workflow - Integration Tests', () => {
       .insert({
         title: `IntTest Review Workflow Project ${testTimestamp}`,
         description: 'Integration test project for review workflow',
-        category_id: testCategoryId,
+        sector_id: testsectorId,
         status: 'open',
         location: 'Ghana',
         funding_amount: '$50,000',
@@ -199,10 +199,10 @@ describe('Application Review Workflow - Integration Tests', () => {
         { onConflict: 'user_id' }
       );
 
-      // Assign reviewer to category
-      await supabaseAdmin.from('reviewer_categories').insert({
+      // Assign reviewer to sector
+      await supabaseAdmin.from('reviewer_sectors').insert({
         reviewer_id: reviewerId,
-        category_id: testCategoryId,
+        sector_id: testsectorId,
       });
     }
 
@@ -280,18 +280,18 @@ describe('Application Review Workflow - Integration Tests', () => {
         .eq('id', testProjectId);
     }
 
-    // Clean up category
-    if (testCategoryId) {
+    // Clean up sector
+    if (testsectorId) {
       await supabaseAdmin
-        .from('categories')
+        .from('sectors')
         .delete()
-        .eq('id', testCategoryId);
+        .eq('id', testsectorId);
     }
 
-    // Clean up reviewer categories
+    // Clean up reviewer sectors
     for (const reviewerId of testReviewerIds) {
       await supabaseAdmin
-        .from('reviewer_categories')
+        .from('reviewer_sectors')
         .delete()
         .eq('reviewer_id', reviewerId);
     }
@@ -310,7 +310,7 @@ describe('Application Review Workflow - Integration Tests', () => {
   }, 30000);
 
   describe('Complete Review Workflow', () => {
-    it('should complete full review workflow: assignment → reviews → aggregation → decision', async () => {
+    it('should complete full review workflow: assignment â†’ reviews â†’ aggregation â†’ decision', async () => {
       // Step 1: Assign reviewers using RPC
       const { result: assignResult } = renderHook(() => useAssignReviewers(), {
         wrapper: createWrapper(),
@@ -686,4 +686,12 @@ describe('Application Review Workflow - Integration Tests', () => {
     }, 90000);
   });
 });
+
+
+
+
+
+
+
+
 

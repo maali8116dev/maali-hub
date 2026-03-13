@@ -71,3 +71,4 @@ CREATE TRIGGER kyc_status_change_email_trigger
   AFTER UPDATE ON public.kyc_verifications
   FOR EACH ROW
   EXECUTE FUNCTION public.queue_kyc_status_email();
+

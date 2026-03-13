@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface ApplicationFormData {
@@ -18,8 +18,8 @@ export interface ApplicationFormData {
   // Step 3: Organizational Background (if applicable)
   yearEstablished?: number;
   coreMissionPurpose?: string;
-  primarySectors?: string[]; // Array of sectors: Health, Education, Technology, Agriculture, Environment, Creative, Other
-  primarySectorOther?: string;
+  primarysectors?: string[]; // Array of sectors: Health, Education, Technology, Agriculture, Environment, Creative, Other
+  primarysectorOther?: string;
   numberOfTeamMembers?: number;
   keyTeamMembersRoles?: string;
   previousGrantsFundingReceived?: boolean;
@@ -108,8 +108,8 @@ const defaultFormData: ApplicationFormData = {
   phoneNumber: undefined,
   yearEstablished: undefined,
   coreMissionPurpose: undefined,
-  primarySectors: [],
-  primarySectorOther: undefined,
+  primarysectors: [],
+  primarysectorOther: undefined,
   numberOfTeamMembers: undefined,
   keyTeamMembersRoles: undefined,
   previousGrantsFundingReceived: false,
@@ -321,4 +321,12 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
     }
   )
 );
+
+
+
+
+
+
+
+
 

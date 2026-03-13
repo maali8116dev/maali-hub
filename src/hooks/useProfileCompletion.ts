@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { useProfile } from "./useProfile";
 
 /**
@@ -23,7 +23,7 @@ export function useProfileCompletion() {
       return {
         isIncomplete: true,
         completionPercentage: 0,
-        missingFields: ['firstName', 'lastName', 'country', 'businessSector'],
+        missingFields: ['firstName', 'lastName', 'country', 'businesssector'],
       };
     }
 
@@ -32,7 +32,7 @@ export function useProfileCompletion() {
       { key: 'firstName', value: profile.firstName },
       { key: 'lastName', value: profile.lastName },
       { key: 'country', value: profile.country },
-      { key: 'businessSector', value: profile.businessSector },
+      { key: 'businesssector', value: profile.businesssector },
     ];
 
     // Optional but recommended fields
@@ -68,4 +68,12 @@ export function useProfileCompletion() {
     isLoading,
   };
 }
+
+
+
+
+
+
+
+
 

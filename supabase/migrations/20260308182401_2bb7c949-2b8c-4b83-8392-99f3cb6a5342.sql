@@ -87,3 +87,4 @@ CREATE POLICY "Users can delete own kyc docs" ON storage.objects
 CREATE POLICY "Admins can view all kyc docs" ON storage.objects
   FOR SELECT TO authenticated
   USING (bucket_id = 'kyc-documents' AND get_user_role(auth.uid()) = 'admin');
+

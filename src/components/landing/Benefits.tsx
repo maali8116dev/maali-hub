@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Zap, Target, Users, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -75,4 +75,12 @@ const Benefits = () => {
 };
 
 export default Benefits;
+
+
+
+
+
+
+
+
 

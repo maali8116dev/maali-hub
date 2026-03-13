@@ -27,7 +27,9 @@ const columns: ColumnDef<PartnerOpportunity>[] = [
       <div className="space-y-1">
         <span className="font-medium">{row.getValue("title")}</span>
         <p className="text-sm text-muted-foreground line-clamp-1">
-          {row.original.description}
+          {row.original.description
+            ? row.original.description.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+            : ""}
         </p>
       </div>
     ),
@@ -47,11 +49,6 @@ const columns: ColumnDef<PartnerOpportunity>[] = [
   {
     accessorKey: "location",
     header: "Location",
-  },
-  {
-    accessorKey: "fundingAmount",
-    header: "Funding",
-    cell: ({ row }) => row.getValue("fundingAmount") || "—",
   },
   {
     accessorKey: "deadline",
@@ -141,7 +138,7 @@ const PartnerOpportunities = () => {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <TableSkeleton rows={5} columns={7} />
+              <TableSkeleton rows={5} columns={6} />
             ) : (
               <DataTable
                 columns={columns}
@@ -160,3 +157,10 @@ const PartnerOpportunities = () => {
 };
 
 export default PartnerOpportunities;
+
+
+
+
+
+
+

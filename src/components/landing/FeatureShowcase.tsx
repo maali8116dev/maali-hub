@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { 
   FileText, 
   Shield, 
@@ -111,4 +111,12 @@ const FeatureShowcase = () => {
 };
 
 export default FeatureShowcase;
+
+
+
+
+
+
+
+
 

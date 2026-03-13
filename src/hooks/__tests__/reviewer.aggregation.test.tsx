@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -263,7 +263,7 @@ describe('useDecisionEngine (Hook)', () => {
 describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', () => {
   let testApplicationId: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testReviewerIds: string[] = [];
   let testAssignmentIds: string[] = [];
   let testApplicantId: string;
@@ -271,7 +271,7 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping integration tests.');
       return;
     }
 
@@ -287,14 +287,14 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
     }, { onConflict: 'user_id' });
     await integrationClient.auth.signInWithPassword({ email: adminEmail, password: 'TestPassword123!' });
 
-    // Category
-    let { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
-    testCategoryId = catData?.id || 1;
+    // sector
+    let { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
+    testsectorId = catData?.id || 1;
 
     // Project
     const { data: pj } = await supabaseAdmin.from('projects').insert({
       title: `Test Agg Project ${Date.now()}`, description: 'Test', status: 'open',
-      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
     }).select('id').single();
     if (!pj) throw new Error('Failed to create project');
@@ -324,7 +324,7 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
       await supabaseAdmin.from('profiles').upsert({
         user_id: ru.user.id, first_name: `Rev${i}`, last_name: 'T', role: 'reviewer',
       }, { onConflict: 'user_id' });
-      await supabaseAdmin.from('reviewer_categories').insert({ reviewer_id: ru.user.id, category_id: testCategoryId });
+      await supabaseAdmin.from('reviewer_sectors').insert({ reviewer_id: ru.user.id, sector_id: testsectorId });
 
       const { data: assignData } = await supabaseAdmin.from('application_assignments').insert({
         application_id: testApplicationId, reviewer_id: ru.user.id, status: 'completed',
@@ -351,7 +351,7 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
       await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
     }
     if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
-    for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', rid);
+    for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', rid);
     for (const uid of [...testReviewerIds, testApplicantId, adminUserId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
     }
@@ -387,7 +387,7 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
     }).select('id').single();
 
     if (insertError || !app2) {
-      console.warn('⚠️  Could not create test application:', insertError?.message);
+      console.warn('âš ï¸  Could not create test application:', insertError?.message);
       return;
     }
 
@@ -403,3 +403,11 @@ describe.skip('get_application_review_scores_with_reviewers RPC (Integration)', 
     await supabaseAdmin.from('applications').delete().eq('id', app2.id);
   });
 });
+
+
+
+
+
+
+
+

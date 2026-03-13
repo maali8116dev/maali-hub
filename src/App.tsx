@@ -86,7 +86,9 @@ const ReviewerDetails = lazy(() => import("./pages/admin/ReviewerDetails").then(
 const AdminProjectDetails = lazy(() => import("./pages/admin/ProjectDetails"));
 const ProjectApplications = lazy(() => import("./pages/admin/ProjectApplications"));
 const AdminActivityLogs = lazy(() => import("./pages/admin/ActivityLogs"));
-const AdminCategories = lazy(() => import("./pages/admin/Categories"));
+const AdminSectors = lazy(() => import("./pages/admin/Categories"));
+const AdminKyc = lazy(() => import("./pages/admin/Kyc"));
+const AdminNotifications = lazy(() => import("./pages/admin/Notifications"));
 
 // Lazy-loaded reviewer pages
 const ReviewerLayout = lazy(() => import("@/components/reviewer/ReviewerLayout"));
@@ -104,6 +106,7 @@ const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityFor
 const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
 const PartnerQualifiedApplicants = lazy(() => import("./pages/partner/QualifiedApplicants"));
+const PartnerNotifications = lazy(() => import("./pages/partner/Notifications"));
 
 // Test page
 const ErrorTest = lazy(() => import("./tests/ErrorTest"));
@@ -312,6 +315,18 @@ const App = () => {
             }
           />
           <Route
+            path="/admin/opportunities"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminProjects />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
             path="/admin/projects/new"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
@@ -420,6 +435,30 @@ const App = () => {
             }
           />
           <Route
+            path="/admin/kyc"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminKyc />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/notifications"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminNotifications />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
             path="/admin/activity-logs"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
@@ -432,12 +471,12 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/categories"
+            path="/admin/sectors"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
-                  <AdminCategories />
+                  <AdminSectors />
                 </AdminLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
@@ -781,6 +820,18 @@ const App = () => {
               </RoleBasedRoute>
             }
           />
+          <Route
+            path="/partner/notifications"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerNotifications />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
 
           {/* Reviewer Routes - Protected, requires authentication and reviewer role */}
           <Route
@@ -857,3 +908,10 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+
+

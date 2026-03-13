@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -73,7 +73,7 @@ describe('Document Upload - Real Integration Tests', () => {
     });
 
     if (authError || !authData.user) {
-      console.warn('⚠️  Could not authenticate test user. Skipping integration tests.');
+      console.warn('âš ï¸  Could not authenticate test user. Skipping integration tests.');
       console.warn('Set VITE_TEST_USER_EMAIL and VITE_TEST_USER_PASSWORD environment variables.');
       console.warn('Or create a test user in Supabase Dashboard with:');
       console.warn(`  Email: ${TEST_USER_EMAIL}`);
@@ -86,7 +86,7 @@ describe('Document Upload - Real Integration Tests', () => {
       email: authData.user.email!,
     };
 
-    console.log(`✅ Authenticated as test user: ${testUser.email}`);
+    console.log(`âœ… Authenticated as test user: ${testUser.email}`);
     console.log(`   User ID: ${testUser.id}`);
 
     // Find a project to link applications to
@@ -96,25 +96,25 @@ describe('Document Upload - Real Integration Tests', () => {
       .limit(1);
 
     if (projectError) {
-      console.warn('⚠️  Could not fetch a project for application linking:', projectError);
+      console.warn('âš ï¸  Could not fetch a project for application linking:', projectError);
     } else if (!projects || projects.length === 0) {
-      console.warn('⚠️  No projects found. Applications will not be created.');
+      console.warn('âš ï¸  No projects found. Applications will not be created.');
     } else {
       projectId = projects[0].id;
-      console.log(`✅ Using project ID for applications: ${projectId}`);
+      console.log(`âœ… Using project ID for applications: ${projectId}`);
     }
   });
 
   afterAll(async () => {
     // Sign out
     await supabase.auth.signOut();
-    console.log('✅ Signed out from test session');
+    console.log('âœ… Signed out from test session');
   });
 
   afterEach(async () => {
     const preserveUploads = import.meta.env.VITE_PRESERVE_UPLOAD_TEST_DATA === 'true';
     if (preserveUploads) {
-      console.log('ℹ️  Preserving upload test data (VITE_PRESERVE_UPLOAD_TEST_DATA=true)');
+      console.log('â„¹ï¸  Preserving upload test data (VITE_PRESERVE_UPLOAD_TEST_DATA=true)');
       return;
     }
 
@@ -130,7 +130,7 @@ describe('Document Upload - Real Integration Tests', () => {
           if (appError) {
             console.warn('Failed to cleanup applications from DB:', appError);
           } else {
-            console.log(`✅ Cleaned up ${createdApplicationIds.length} application(s) from database`);
+            console.log(`âœ… Cleaned up ${createdApplicationIds.length} application(s) from database`);
           }
         }
 
@@ -144,7 +144,7 @@ describe('Document Upload - Real Integration Tests', () => {
           if (dbError) {
             console.warn('Failed to cleanup documents from DB:', dbError);
           } else {
-            console.log(`✅ Cleaned up ${uploadedDocumentIds.length} document(s) from database`);
+            console.log(`âœ… Cleaned up ${uploadedDocumentIds.length} document(s) from database`);
           }
         }
 
@@ -157,7 +157,7 @@ describe('Document Upload - Real Integration Tests', () => {
           if (storageError) {
             console.warn('Failed to cleanup files from storage:', storageError);
           } else {
-            console.log(`✅ Cleaned up ${uploadedFilePaths.length} file(s) from storage`);
+            console.log(`âœ… Cleaned up ${uploadedFilePaths.length} file(s) from storage`);
           }
         }
       } catch (error) {
@@ -243,7 +243,7 @@ describe('Document Upload - Real Integration Tests', () => {
       throw new Error('No authenticated test user');
     }
     if (!projectId) {
-      console.warn('⚠️  No project available. Skipping application creation.');
+      console.warn('âš ï¸  No project available. Skipping application creation.');
       return null;
     }
 
@@ -276,7 +276,7 @@ describe('Document Upload - Real Integration Tests', () => {
       .single();
 
     if (error) {
-      console.warn('⚠️  Failed to create application:', error);
+      console.warn('âš ï¸  Failed to create application:', error);
       return null;
     }
 
@@ -320,7 +320,7 @@ describe('Document Upload - Real Integration Tests', () => {
     expect(dbDoc?.file_type).toBe('application/pdf');
     expect(dbDoc?.file_size).toBe(testFile.size);
 
-    console.log(`✅ Uploaded document ID: ${result.id}`);
+    console.log(`âœ… Uploaded document ID: ${result.id}`);
     console.log(`   Check Supabase Dashboard > Table Editor > application_documents`);
     console.log(`   Check Supabase Dashboard > Storage > ${BUCKET_NAME} bucket`);
   });
@@ -365,7 +365,7 @@ describe('Document Upload - Real Integration Tests', () => {
       expect(doc.user_id).toBe(testUser!.id);
     });
 
-    console.log(`✅ Uploaded ${results.length} documents`);
+    console.log(`âœ… Uploaded ${results.length} documents`);
     console.log(`   Document IDs: ${results.map(r => r.id).join(', ')}`);
   }, 20000);
 
@@ -405,7 +405,7 @@ describe('Document Upload - Real Integration Tests', () => {
     expect(dbDocs?.find(d => d.file_type === 'application/msword')).toBeDefined();
     expect(dbDocs?.find(d => d.file_type === 'text/plain')).toBeDefined();
 
-    console.log(`✅ Uploaded 3 different file types`);
+    console.log(`âœ… Uploaded 3 different file types`);
   }, 20000);
 
   it('should verify files are accessible in storage', async () => {
@@ -437,6 +437,14 @@ describe('Document Upload - Real Integration Tests', () => {
     expect(uploadedFile).toBeDefined();
     expect(uploadedFile?.metadata?.size).toBe(testFile.size);
 
-    console.log(`✅ Verified file exists in storage: ${result.filePath}`);
+    console.log(`âœ… Verified file exists in storage: ${result.filePath}`);
   });
 });
+
+
+
+
+
+
+
+

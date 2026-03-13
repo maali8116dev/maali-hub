@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -154,4 +154,12 @@ export function PaymentForm({
     </Card>
   );
 }
+
+
+
+
+
+
+
+
 

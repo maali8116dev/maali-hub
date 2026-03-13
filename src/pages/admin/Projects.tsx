@@ -93,12 +93,12 @@ const AdminProjects = () => {
       },
     },
     {
-      accessorKey: 'category',
+      accessorKey: 'sector',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Category" />
+        <SortableColumnHeader column={column} title="Sector" />
       ),
       cell: ({ row }) => {
-        return <Badge variant="outline">{row.original.category}</Badge>;
+        return <Badge variant="outline">{row.original.sector}</Badge>;
       },
     },
     {
@@ -275,7 +275,7 @@ const AdminProjects = () => {
             <DataTable
               columns={projectColumns}
               data={opportunities}
-              searchPlaceholder="Search by title, category, or location..."
+              searchPlaceholder="Search by title, sector, or location..."
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
@@ -313,4 +313,12 @@ const AdminProjects = () => {
 };
 
 export default AdminProjects;
+
+
+
+
+
+
+
+
 

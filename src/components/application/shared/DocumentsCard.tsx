@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Download } from "lucide-react";
@@ -86,4 +86,12 @@ const DocumentsCard = ({ documents, isLoading, downloadingId, onDownload }: Docu
 };
 
 export default DocumentsCard;
+
+
+
+
+
+
+
+
 

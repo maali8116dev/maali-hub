@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -189,7 +189,7 @@ describe('useProfile', () => {
     expect(result.current.data?.firstName).toBe('Jane');
     expect(result.current.data?.lastName).toBe('Smith');
     expect(result.current.data?.businessName).toBe('AgriTech');
-    expect(result.current.data?.businessSector).toBe('Agriculture');
+    expect(result.current.data?.businesssector).toBe('Agriculture');
     expect(result.current.data?.avatarUrl).toBe('https://example.com/avatar.jpg');
   });
 });
@@ -335,7 +335,7 @@ describe('useUpdateProfile', () => {
       firstName: 'Jane',
       lastName: 'Smith',
       businessName: 'New Business',
-      businessSector: 'Technology',
+      businesssector: 'Technology',
       country: 'Ghana',
       bio: 'New bio',
     });
@@ -417,7 +417,7 @@ describe('useUpdateProfile', () => {
     result.current.mutate({
       firstName: 'Bob',
       lastName: 'Johnson',
-      businessSector: 'Agriculture',
+      businesssector: 'Agriculture',
       country: 'Nigeria',
     });
 
@@ -482,7 +482,7 @@ describe('useUpdateProfile', () => {
       firstName: 'Alice',
       lastName: 'Williams',
       businessName: 'Startup Inc',
-      businessSector: 'FinTech',
+      businesssector: 'FinTech',
       country: 'Kenya',
       bio: 'Entrepreneur',
       avatarUrl: 'https://example.com/avatar.jpg',
@@ -612,4 +612,12 @@ describe('useUpdateProfile', () => {
     expect(result.current.data?.lastName).toBe('Doe Updated');
   });
 });
+
+
+
+
+
+
+
+
 

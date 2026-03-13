@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { Search, Linkedin, Twitter, Globe, Users, MapPin, Briefcase } from "luci
 const Mentors = () => {
   const { data: mentors, isLoading, error } = useMentors();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sectorFilter, setSectorFilter] = useState<string>("all");
+  const [sectorFilter, setsectorFilter] = useState<string>("all");
   const [countryFilter, setCountryFilter] = useState<string>("all");
 
   // Get unique sectors and countries for filters
@@ -27,9 +27,9 @@ const Mentors = () => {
       mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mentor.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mentor.expertise_areas?.some(e => e.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesSector = sectorFilter === "all" || mentor.sector === sectorFilter;
+    const matchessector = sectorFilter === "all" || mentor.sector === sectorFilter;
     const matchesCountry = countryFilter === "all" || mentor.country === countryFilter;
-    return matchesSearch && matchesSector && matchesCountry;
+    return matchesSearch && matchessector && matchesCountry;
   });
 
   const getInitials = (name: string) => {
@@ -77,12 +77,12 @@ const Mentors = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={sectorFilter} onValueChange={setSectorFilter}>
+            <Select value={sectorFilter} onValueChange={setsectorFilter}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Sectors" />
+                <SelectValue placeholder="All sectors" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sectors</SelectItem>
+                <SelectItem value="all">All sectors</SelectItem>
                 {sectors.map(sector => (
                   <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                 ))}
@@ -248,3 +248,11 @@ const Mentors = () => {
 };
 
 export default Mentors;
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -11,7 +11,7 @@ import {
   useSystemRubric,
   useUpdateAssignmentStatus,
   useAddConflict,
-  useReviewerCategories,
+  useReviewersectors,
 } from '../useReviewerAssignment';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -104,7 +104,7 @@ describe('useAssignReviewers (Hook)', () => {
 
   it('should handle insufficient reviewers error', async () => {
     (supabase.rpc as any).mockResolvedValue({
-      data: null, error: { message: 'Not enough available reviewers for category. Need 2 reviewers, found 1', code: 'P0001' },
+      data: null, error: { message: 'Not enough available reviewers for sector. Need 2 reviewers, found 1', code: 'P0001' },
     });
     const { result } = renderHook(() => useAssignReviewers(), { wrapper: createWrapper() });
     result.current.mutate({ applicationId: 'app-123', numReviewers: 2 });
@@ -213,27 +213,27 @@ describe('useAddConflict (Hook)', () => {
   });
 });
 
-describe('useReviewerCategories (Hook)', () => {
+describe('useReviewersectors (Hook)', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it('should fetch reviewer categories with category names', async () => {
+  it('should fetch reviewer sectors with sector names', async () => {
     const mockData = [
-      { id: 'c-1', reviewer_id: 'r-1', category_id: 1, created_at: '2024-01-01', categories: { name: 'Technology' } },
-      { id: 'c-2', reviewer_id: 'r-1', category_id: 2, created_at: '2024-01-01', categories: { name: 'Agriculture' } },
+      { id: 'c-1', reviewer_id: 'r-1', sector_id: 1, created_at: '2024-01-01', sectors: { name: 'Technology' } },
+      { id: 'c-2', reviewer_id: 'r-1', sector_id: 2, created_at: '2024-01-01', sectors: { name: 'Agriculture' } },
     ];
     const mockSelect = vi.fn().mockReturnThis();
     const mockEq = vi.fn().mockResolvedValue({ data: mockData, error: null });
     (supabase.from as any).mockReturnValue({ select: mockSelect, eq: mockEq });
 
-    const { result } = renderHook(() => useReviewerCategories('r-1'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useReviewersectors('r-1'), { wrapper: createWrapper() });
     await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
     expect(result.current.data).toHaveLength(2);
-    expect(result.current.data?.[0].category).toBe('Agriculture'); // sorted
-    expect(result.current.data?.[1].category).toBe('Technology');
+    expect(result.current.data?.[0].sector).toBe('Agriculture'); // sorted
+    expect(result.current.data?.[1].sector).toBe('Technology');
   });
 
   it('should not fetch when reviewerId is not provided', () => {
-    const { result } = renderHook(() => useReviewerCategories(undefined), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useReviewersectors(undefined), { wrapper: createWrapper() });
     expect(result.current.isFetching).toBe(false);
   });
 });
@@ -245,14 +245,14 @@ describe('useReviewerCategories (Hook)', () => {
 describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
   let testApplicationId: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testReviewerIds: string[] = [];
   let testApplicantId: string;
   let adminUserId: string;
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping integration tests.');
       return;
     }
 
@@ -268,14 +268,14 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
     }, { onConflict: 'user_id' });
     await integrationClient.auth.signInWithPassword({ email: adminEmail, password: 'TestPassword123!' });
 
-    // Category
-    let { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
-    testCategoryId = catData?.id || 1;
+    // sector
+    let { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
+    testsectorId = catData?.id || 1;
 
     // Project
     const { data: pj } = await supabaseAdmin.from('projects').insert({
       title: `Test Assign Project ${Date.now()}`, description: 'Test', status: 'open',
-      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
     }).select('id').single();
     testProjectId = pj!.id;
@@ -300,7 +300,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
       if (!ru?.user) continue;
       testReviewerIds.push(ru.user.id);
       await supabaseAdmin.from('profiles').upsert({ user_id: ru.user.id, first_name: `Rev${i}`, last_name: 'T', role: 'reviewer' }, { onConflict: 'user_id' });
-      await supabaseAdmin.from('reviewer_categories').insert({ reviewer_id: ru.user.id, category_id: testCategoryId });
+      await supabaseAdmin.from('reviewer_sectors').insert({ reviewer_id: ru.user.id, sector_id: testsectorId });
     }
   }, 30000);
 
@@ -311,7 +311,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
       await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
     }
     if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
-    for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', rid);
+    for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', rid);
     for (const uid of [...testReviewerIds, testApplicantId, adminUserId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
     }
@@ -359,7 +359,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
   it('should fail with insufficient reviewers', async () => {
     if (!supabaseAdmin) return;
 
-    // Request more reviewers than could possibly exist for the category
+    // Request more reviewers than could possibly exist for the sector
     const { error } = await integrationClient.rpc('assign_reviewers_to_application', {
       p_application_id: testApplicationId, p_num_reviewers: 999,
     });
@@ -368,3 +368,11 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
     expect(error!.message).toContain('Not enough available reviewers');
   });
 });
+
+
+
+
+
+
+
+

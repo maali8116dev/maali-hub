@@ -6,6 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ShieldCheck,
   ShieldAlert,
   Clock,
@@ -61,6 +67,10 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [idDocUrl, setIdDocUrl] = useState<string | null>(null);
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
+  const [activePreview, setActivePreview] = useState<{
+    label: string;
+    url: string;
+  } | null>(null);
 
   useEffect(() => {
     if (kyc?.id_document_url) {
@@ -105,7 +115,7 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
 
   const maskedIdNumber =
     kyc.id_number.length > 4
-      ? "•".repeat(kyc.id_number.length - 4) + kyc.id_number.slice(-4)
+      ? "*".repeat(kyc.id_number.length - 4) + kyc.id_number.slice(-4)
       : kyc.id_number;
 
   const statusConfig = STATUS_CONFIG[kyc.status] || STATUS_CONFIG.pending;
@@ -178,35 +188,81 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
 
         {/* Side-by-side images */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">ID Document</Label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">ID Document</Label>
+              {idDocUrl && (
+                <button
+                  type="button"
+                  onClick={() => setActivePreview({ label: "ID Document", url: idDocUrl })}
+                  className="text-xs text-primary hover:underline"
+                >
+                  View full
+                </button>
+              )}
+            </div>
             {idDocUrl ? (
-              <img
-                src={idDocUrl}
-                alt="ID Document"
-                className="w-full h-48 object-cover rounded-lg border border-border"
-              />
+              <div className="group relative overflow-hidden rounded-lg border border-border bg-muted/40">
+                <img
+                  src={idDocUrl}
+                  alt="ID Document"
+                  className="h-96 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              </div>
             ) : (
-              <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
+              <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
                 No document
               </div>
             )}
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Selfie</Label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">Selfie</Label>
+              {selfieUrl && (
+                <button
+                  type="button"
+                  onClick={() => setActivePreview({ label: "Selfie", url: selfieUrl })}
+                  className="text-xs text-primary hover:underline"
+                >
+                  View full
+                </button>
+              )}
+            </div>
             {selfieUrl ? (
-              <img
-                src={selfieUrl}
-                alt="Selfie"
-                className="w-full h-48 object-cover rounded-lg border border-border"
-              />
+              <div className="group relative overflow-hidden rounded-lg border border-border bg-muted/40">
+                <img
+                  src={selfieUrl}
+                  alt="Selfie"
+                  className="h-96 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              </div>
             ) : (
-              <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
+              <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
                 No selfie
               </div>
             )}
           </div>
         </div>
+
+        {/* Preview dialog */}
+        <Dialog open={!!activePreview} onOpenChange={(open) => !open && setActivePreview(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>{activePreview?.label}</DialogTitle>
+            </DialogHeader>
+            {activePreview?.url && (
+              <div className="w-full">
+                <img
+                  src={activePreview.url}
+                  alt={activePreview.label}
+                  className="w-full max-h-[70vh] object-contain rounded-md border border-border bg-muted/30"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Admin actions */}
         {kyc.status === "pending" && (
@@ -263,3 +319,11 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
     </Card>
   );
 };
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,23 +11,23 @@ import {
 
 interface AddCategoryFormProps {
   reviewers: any[];
-  categories: string[];
+  sectors: string[];
   selectedReviewerId?: string | null;
-  onSubmit: (reviewerId: string, category: string) => void;
+  onSubmit: (reviewerId: string, sector: string) => void;
   isSubmitting?: boolean;
   onDialogClose?: () => void;
 }
 
 export const AddCategoryForm = ({
   reviewers,
-  categories,
+  sectors,
   selectedReviewerId,
   onSubmit,
   isSubmitting,
   onDialogClose,
 }: AddCategoryFormProps) => {
   const [reviewerId, setReviewerId] = useState(selectedReviewerId || '');
-  const [category, setCategory] = useState('');
+  const [sector, setCategory] = useState('');
 
   // Update reviewerId when selectedReviewerId changes
   useEffect(() => {
@@ -41,8 +41,8 @@ export const AddCategoryForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (reviewerId && category && !isSubmitting) {
-      onSubmit(reviewerId, category);
+    if (reviewerId && sector && !isSubmitting) {
+      onSubmit(reviewerId, sector);
       // Form will reset when dialog closes (via key prop remount)
     }
   };
@@ -81,13 +81,13 @@ export const AddCategoryForm = ({
         </div>
       )}
       <div className="space-y-2">
-        <Label>Category</Label>
-        <Select value={category} onValueChange={setCategory}>
+        <Label>sector</Label>
+        <Select value={sector} onValueChange={setCategory}>
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Select sector" />
           </SelectTrigger>
           <SelectContent>
-            {categories.map((cat) => (
+            {sectors.map((cat) => (
               <SelectItem key={cat} value={cat}>
                 {cat}
               </SelectItem>
@@ -95,10 +95,18 @@ export const AddCategoryForm = ({
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full" disabled={!reviewerId || !category || isSubmitting}>
-        {isSubmitting ? 'Adding...' : 'Add Category'}
+      <Button type="submit" className="w-full" disabled={!reviewerId || !sector || isSubmitting}>
+        {isSubmitting ? 'Adding...' : 'Add sector'}
       </Button>
     </form>
   );
 };
+
+
+
+
+
+
+
+
 

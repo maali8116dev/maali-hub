@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -455,7 +455,7 @@ const Contact = () => {
         <div className="mt-16 text-center bg-gradient-subtle rounded-2xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Get Started?</h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Don't wait – explore funding opportunities available right now
+            Don't wait -explore funding opportunities available right now
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
@@ -473,3 +473,11 @@ const Contact = () => {
 };
 
 export default Contact;
+
+
+
+
+
+
+
+

@@ -116,7 +116,7 @@ BEGIN
     RAISE EXCEPTION 'Access denied. You can only fetch your own applications.';
   END IF;
 
-  -- 3. Return all applications for the user with joined project and category data
+  -- 3. Return all applications for the user with joined project and Sector data
   --    EXCLUDE pending_payment applications (users shouldn't see incomplete applications)
   --    Admins/reviewers can see all statuses via get_admin_applications
   RETURN QUERY
@@ -125,12 +125,12 @@ BEGIN
     CASE
       WHEN p.id IS NULL THEN NULL
       ELSE to_jsonb(p.*) || jsonb_build_object(
-             'category', COALESCE(c.name, 'Uncategorized')
+             'Sector', COALESCE(c.name, 'Uncategorized')
            )
     END AS project
   FROM public.applications a
   LEFT JOIN public.opportunities p ON p.id = a.opportunity_id
-  LEFT JOIN public.categories c ON c.id = p.category_id
+  LEFT JOIN public.sectors c ON c.id = p.sector_id
   WHERE a.user_id = p_user_id
     AND (a.status != 'pending_payment' OR a.application_fee_paid = true)
     AND a.is_draft = false
@@ -317,3 +317,4 @@ COMMENT ON FUNCTION public.get_user_dashboard_stats(UUID) IS
 
 
 -- ============================================
+

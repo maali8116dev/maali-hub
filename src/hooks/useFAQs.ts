@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
@@ -7,7 +7,7 @@ export interface FAQ {
   id: number;
   question: string;
   answer: string;
-  category: string;
+  sector: string;
   display_order: number;
   is_published: boolean;
   created_at: string;
@@ -18,7 +18,7 @@ export interface FAQ {
 export interface FAQFormData {
   question: string;
   answer: string;
-  category: string;
+  sector: string;
   display_order: number;
   is_published: boolean;
 }
@@ -33,7 +33,7 @@ export const useFAQs = () => {
         .from("faqs")
         .select("*")
         .eq("is_published", true)
-        .order("category", { ascending: true })
+        .order("sector", { ascending: true })
         .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
@@ -55,7 +55,7 @@ export const useAdminFAQs = () => {
       const { data, error } = await (supabase
         .from("faqs")
         .select("*")
-        .order("category", { ascending: true })
+        .order("sector", { ascending: true })
         .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
@@ -111,7 +111,7 @@ export const useCreateFAQ = () => {
         entityType: "document",
         entityId: String(faq.id),
         description: `Created FAQ: ${faq.question.substring(0, 50)}...`,
-        metadata: { category: faq.category },
+        metadata: { sector: faq.sector },
       });
       toast.success("FAQ created successfully");
     },
@@ -146,7 +146,7 @@ export const useUpdateFAQ = () => {
         entityType: "document",
         entityId: String(faq.id),
         description: `Updated FAQ: ${faq.question.substring(0, 50)}...`,
-        metadata: { category: faq.category },
+        metadata: { sector: faq.sector },
       });
       toast.success("FAQ updated successfully");
     },
@@ -219,3 +219,11 @@ export const useToggleFAQPublished = () => {
     },
   });
 };
+
+
+
+
+
+
+
+

@@ -53,6 +53,7 @@ export type Opportunity = {
   currency: string;
   location: string;
   country?: string | null;
+  sector?: string | null;
   imageUrl: string | null;
   requirements: string | null;
   eligibilityCriteria: string | null;
@@ -60,6 +61,8 @@ export type Opportunity = {
   maxApplicants: number | null;
   currentApplicants: number;
   organizationName?: string | null;
+  partnerLogoUrl?: string | null;
+  partnerId?: number | null;
   featured: boolean;
   tags: OpportunityTag[];
   createdBy: string | null;
@@ -85,13 +88,16 @@ export function transformOpportunity(data: any): Opportunity {
     currency: data.currency || 'USD',
     location: data.location,
     country: data.country || null,
+    sector: data.sector_name || null,
     imageUrl: data.image_url || data.imageUrl,
     requirements: data.requirements,
     eligibilityCriteria: data.eligibility_criteria || data.eligibilityCriteria,
     applicationFee: data.application_fee || data.applicationFee,
     maxApplicants: data.max_applicants || data.maxApplicants,
     currentApplicants: data.current_applicants || data.currentApplicants || 0,
-    organizationName: data.organization_name || null,
+    organizationName: data.partner_name || null,
+    partnerLogoUrl: data.partner_logo_url || null,
+    partnerId: data.partner_id || null,
     featured: data.featured ?? false,
     tags: (data.tags || []).map((tag: any) => ({
       id: tag.id,
@@ -336,6 +342,7 @@ async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
     .from("opportunities" as any)
     .select(`
       *,
+      partner:partners(name),
       tags:opportunity_tag_map(
         tag:opportunity_tags(id, name, slug)
       )
@@ -350,7 +357,7 @@ async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
   // Transform the nested structure
   return (data || []).map((item: any) => {
     const tags = (item.tags || []).map((t: any) => t.tag).filter(Boolean);
-    return transformOpportunity({ ...item, tags });
+    return transformOpportunity({ ...item, tags, partner_name: item.partner?.name || null });
   });
 }
 
@@ -370,4 +377,12 @@ export function useFeaturedOpportunities() {
     retry: 1,
   });
 }
+
+
+
+
+
+
+
+
 

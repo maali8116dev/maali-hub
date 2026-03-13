@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -232,9 +232,9 @@ export default function ActivityLogs() {
           <h1>Activity Logs Report</h1>
           <p class="subtitle">
             Generated on ${format(new Date(), "MMMM d, yyyy 'at' HH:mm")}
-            ${startDate || endDate ? ` • Date range: ${startDate ? format(startDate, "MMM d, yyyy") : "Start"} to ${endDate ? format(endDate, "MMM d, yyyy") : "End"}` : ""}
-            ${actionFilter !== "all" ? ` • Action: ${actionFilter}` : ""}
-            ${entityFilter !== "all" ? ` • Entity: ${entityFilter}` : ""}
+            ${startDate || endDate ? ` -¢ Date range: ${startDate ? format(startDate, "MMM d, yyyy") : "Start"} to ${endDate ? format(endDate, "MMM d, yyyy") : "End"}` : ""}
+            ${actionFilter !== "all" ? ` -¢ Action: ${actionFilter}` : ""}
+            ${entityFilter !== "all" ? ` -¢ Entity: ${entityFilter}` : ""}
           </p>
           <table>
             <thead>
@@ -562,3 +562,11 @@ export default function ActivityLogs() {
     </div>
   );
 }
+
+
+
+
+
+
+
+

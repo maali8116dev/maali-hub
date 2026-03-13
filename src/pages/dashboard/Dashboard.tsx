@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+﻿import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -80,7 +80,7 @@ const Dashboard = () => {
       profile.bio,
       profile.country,
       profile.businessName,
-      profile.businessSector,
+      profile.businesssector,
       profile.avatarUrl,
     ];
     
@@ -338,7 +338,7 @@ const Dashboard = () => {
                     <h3 className="font-semibold text-sm sm:text-base truncate">{app.opportunityTitle}</h3>
                     <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="truncate">{app.sector}</span>
-                      <span className="hidden sm:inline">•</span>
+                      <span className="hidden sm:inline">-¢</span>
                       <span>{t('dashboard:dashboard.recentApplications.submitted')} {formatDate(app.submittedAt)}</span>
                     </div>
                   </div>
@@ -385,3 +385,11 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+
+
+

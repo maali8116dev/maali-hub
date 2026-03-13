@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+﻿import { http, HttpResponse } from 'msw';
 
 // Mock data
 const mockProjects = [
@@ -6,7 +6,7 @@ const mockProjects = [
     id: 1,
     title: 'AgriTech Innovation Fund',
     description: 'Supporting innovative agricultural technology solutions',
-    category: 'Agriculture',
+    sector: 'Agriculture',
     status: 'open',
     deadline: '2024-12-31',
     funding_amount: '$50,000',
@@ -26,7 +26,7 @@ const mockProjects = [
     id: 2,
     title: 'Tech Startup Grant',
     description: 'Funding for technology startups',
-    category: 'Technology',
+    sector: 'Technology',
     status: 'open',
     deadline: '2024-11-30',
     funding_amount: '$75,000',
@@ -80,15 +80,15 @@ export const handlers = [
   // Mock Supabase REST API for projects
   http.get('*/rest/v1/projects', ({ request }) => {
     const url = new URL(request.url);
-    const category = url.searchParams.get('category');
+    const sector = url.searchParams.get('sector');
     const status = url.searchParams.get('status');
     const location = url.searchParams.get('location');
     const search = url.searchParams.get('or');
 
     let filteredProjects = [...mockProjects];
 
-    if (category) {
-      filteredProjects = filteredProjects.filter((p) => p.category === category);
+    if (sector) {
+      filteredProjects = filteredProjects.filter((p) => p.sector === sector);
     }
     if (status) {
       filteredProjects = filteredProjects.filter((p) => p.status === status);
@@ -151,4 +151,12 @@ export const handlers = [
     });
   }),
 ];
+
+
+
+
+
+
+
+
 

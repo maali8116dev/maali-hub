@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, Pencil, Trash2, Eye, EyeOff, Download, ExternalLink, FileText, Video, Table2, Presentation, FileSpreadsheet, Link as LinkIcon } from "lucide-react";
@@ -29,7 +29,7 @@ import {
   useAdminResources,
   useDeleteResource,
   useToggleResourcePublished,
-  RESOURCE_CATEGORIES,
+  RESOURCE_sectors,
   type Resource,
 } from "@/hooks/useResources";
 
@@ -71,10 +71,10 @@ const Resources = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<Resource | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  // Filter resources by category (DataTable handles search internally)
+  // Filter resources by sector (DataTable handles search internally)
   const filteredResources = useMemo(() => {
     if (categoryFilter === "all") return resources;
-    return resources.filter(resource => resource.category === categoryFilter);
+    return resources.filter(resource => resource.sector === categoryFilter);
   }, [resources, categoryFilter]);
 
   const handleTogglePublished = useCallback(async (resource: Resource) => {
@@ -105,12 +105,12 @@ const Resources = () => {
       },
     },
     {
-      accessorKey: 'category',
+      accessorKey: 'sector',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Category" />
+        <SortableColumnHeader column={column} title="sector" />
       ),
       cell: ({ row }) => {
-        return <span>{row.original.category}</span>;
+        return <span>{row.original.sector}</span>;
       },
     },
     {
@@ -243,19 +243,19 @@ const Resources = () => {
           </Button>
         </div>
 
-        {/* Category Filter */}
+        {/* sector Filter */}
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filter by category" />
+                  <SelectValue placeholder="Filter by sector" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {RESOURCE_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  <SelectItem value="all">All sectors</SelectItem>
+                  {RESOURCE_sectors.map((sector) => (
+                    <SelectItem key={sector} value={sector}>
+                      {sector}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -285,7 +285,7 @@ const Resources = () => {
               <DataTable
                 columns={resourceColumns}
                 data={filteredResources}
-                searchPlaceholder="Search by title, category, or type..."
+                searchPlaceholder="Search by title, sector, or type..."
                 pageSize={10}
                 enableSorting={true}
                 enablePagination={true}
@@ -319,3 +319,11 @@ const Resources = () => {
 };
 
 export default Resources;
+
+
+
+
+
+
+
+

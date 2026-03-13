@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -70,7 +70,7 @@ describe('Notifications Integration Tests', () => {
       testUserId = user.id;
       testUserEmail = user.email || '';
       authenticated = true;
-      console.log('✅ Using existing authenticated session');
+      console.log('âœ… Using existing authenticated session');
     }
     
     // Method 2: Try to sign in with seeded test user credentials
@@ -86,7 +86,7 @@ describe('Notifications Integration Tests', () => {
         testUserId = signInData.user.id;
         testUserEmail = 'applicant1@maali.test';
         authenticated = true;
-        console.log('✅ Signed in with seeded test user (applicant1@maali.test)');
+        console.log('âœ… Signed in with seeded test user (applicant1@maali.test)');
       } else {
         console.log('Sign in failed:', signInError?.message);
         // Try alternative seeded user
@@ -99,7 +99,7 @@ describe('Notifications Integration Tests', () => {
           testUserId = altSignInData.user.id;
           testUserEmail = 'applicant2@maali.test';
           authenticated = true;
-          console.log('✅ Signed in with alternative seeded test user (applicant2@maali.test)');
+          console.log('âœ… Signed in with alternative seeded test user (applicant2@maali.test)');
         }
       }
     }
@@ -109,12 +109,12 @@ describe('Notifications Integration Tests', () => {
       testUserId = import.meta.env.VITE_TEST_USER_ID;
       testUserEmail = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.com';
       authenticated = true;
-      console.log('✅ Using test user ID from environment variable');
+      console.log('âœ… Using test user ID from environment variable');
     }
 
     // Method 4: Last resort - create a new test user (should be avoided)
     if (!authenticated) {
-      console.log('⚠️  Warning: Creating new test user. Consider running seed script first.');
+      console.log('âš ï¸  Warning: Creating new test user. Consider running seed script first.');
       console.log('   Run: npm run seed:users:local (or npm run seed:users for remote)');
       const testEmail = `test-notifications-${Date.now()}@example.com`;
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -127,7 +127,7 @@ describe('Notifications Integration Tests', () => {
         testUserEmail = testEmail;
         testUserCreated = true; // Mark for cleanup
         authenticated = true;
-        console.log(`✅ Created new test user: ${testEmail} (will be cleaned up after tests)`);
+        console.log(`âœ… Created new test user: ${testEmail} (will be cleaned up after tests)`);
         console.log('Note: If email confirmation is required, you may need to confirm the email first.');
       } else {
         console.error('Sign up failed:', signUpError);
@@ -194,11 +194,11 @@ describe('Notifications Integration Tests', () => {
             if (deleteError) {
               console.error(`Error deleting test user ${testUserEmail}:`, deleteError.message);
             } else {
-              console.log(`✅ Cleaned up test user: ${testUserEmail}`);
+              console.log(`âœ… Cleaned up test user: ${testUserEmail}`);
             }
           }
         } else {
-          console.log(`⚠️  Cannot delete test user ${testUserEmail}: SERVICE_ROLE_KEY not available`);
+          console.log(`âš ï¸  Cannot delete test user ${testUserEmail}: SERVICE_ROLE_KEY not available`);
           console.log('   Set VITE_SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_ROLE_KEY to enable cleanup');
         }
       } catch (err) {
@@ -297,7 +297,7 @@ describe('Notifications Integration Tests', () => {
       expect(notification.created_at).toBeDefined();
     });
 
-    console.log(`✅ Created and verified ${testNotifications.length} notifications in database`);
+    console.log(`âœ… Created and verified ${testNotifications.length} notifications in database`);
     console.log('Notification IDs:', createdNotificationIds);
   }, { timeout: 10000 });
 
@@ -379,7 +379,7 @@ describe('Notifications Integration Tests', () => {
 
     expect(remainingNotifications!.length).toBe(initialCount - 1);
 
-    console.log(`✅ Successfully deleted notification ${notificationIdToDelete}`);
+    console.log(`âœ… Successfully deleted notification ${notificationIdToDelete}`);
     console.log(`Remaining notifications: ${remainingNotifications!.length}`);
   }, { timeout: 10000 });
 
@@ -429,7 +429,7 @@ describe('Notifications Integration Tests', () => {
       createdNotificationIds.push(notifications.id);
     }
 
-    console.log('✅ Verified notification metadata storage');
+    console.log('âœ… Verified notification metadata storage');
   }, { timeout: 10000 });
 
   it('should verify notifications can be marked as read', async () => {
@@ -481,6 +481,14 @@ describe('Notifications Integration Tests', () => {
     // Add to cleanup
     createdNotificationIds.push(notificationId);
 
-    console.log('✅ Verified notification can be marked as read');
+    console.log('âœ… Verified notification can be marked as read');
   }, { timeout: 10000 });
 });
+
+
+
+
+
+
+
+

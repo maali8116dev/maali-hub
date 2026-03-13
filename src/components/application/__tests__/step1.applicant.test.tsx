@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { setupMocks, populateFormStore, defaultApplicationPayload } from './test-utils';
 
@@ -110,3 +110,11 @@ describe('Step 1: Applicant Information', () => {
     expect(useApplicationFormStore.getState().formData.organizationName).toBeUndefined();
   });
 });
+
+
+
+
+
+
+
+

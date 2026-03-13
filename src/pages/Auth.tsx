@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -369,7 +369,7 @@ const Auth = () => {
         return;
       }
 
-      // Rate limit passed — establish local session
+      // Rate limit passed -establish local session
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -824,3 +824,10 @@ const Auth = () => {
 };
 
 export default Auth;
+
+
+
+
+
+
+

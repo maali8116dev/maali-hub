@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 
 export type ConsentStatus = "pending" | "accepted" | "rejected";
 
@@ -65,3 +65,11 @@ export const useCookieConsent = () => {
     canTrack: consentStatus === "accepted" && preferences.analytics,
   };
 };
+
+
+
+
+
+
+
+

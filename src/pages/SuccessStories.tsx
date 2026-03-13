@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,19 +46,19 @@ const SuccessStories = () => {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = "none";
-                            (e.target as HTMLImageElement).parentElement!.innerHTML = "🌟";
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = "ðŸŒŸ";
                           }}
                         />
                       </div>
                     ) : (
-                      "🌟"
+                      "ðŸŒŸ"
                     )}
                   </div>
                   <div className="flex items-center justify-between mb-2">
                     <CardTitle className="text-xl">{story.company}</CardTitle>
                     <div className="flex items-center gap-2">
                       {story.featured && <Badge variant="default">Featured</Badge>}
-                      <Badge variant="outline">{story.category}</Badge>
+                      <Badge variant="outline">{story.sector}</Badge>
                     </div>
                   </div>
                   <CardDescription className="text-base font-medium">
@@ -118,4 +118,12 @@ const SuccessStories = () => {
 };
 
 export default SuccessStories;
+
+
+
+
+
+
+
+
 

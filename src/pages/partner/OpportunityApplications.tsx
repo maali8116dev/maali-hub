@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+﻿import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,18 +22,18 @@ const columns: ColumnDef<PartnerApplication>[] = [
     accessorKey: "fullLegalName",
     header: "Applicant",
     cell: ({ row }) => (
-      <span className="font-medium">{row.getValue("fullLegalName") || "—"}</span>
+      <span className="font-medium">{row.getValue("fullLegalName") || "-}</span>
     ),
   },
   {
     accessorKey: "organizationName",
     header: "Organization",
-    cell: ({ row }) => row.getValue("organizationName") || "—",
+    cell: ({ row }) => row.getValue("organizationName") || "-,
   },
   {
     accessorKey: "contactEmail",
     header: "Email",
-    cell: ({ row }) => row.getValue("contactEmail") || "—",
+    cell: ({ row }) => row.getValue("contactEmail") || "-,
   },
   {
     accessorKey: "status",
@@ -112,3 +112,11 @@ const PartnerOpportunityApplications = () => {
 };
 
 export default PartnerOpportunityApplications;
+
+
+
+
+
+
+
+

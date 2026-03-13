@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+﻿import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -324,7 +324,7 @@ const DocumentUploadSection = ({
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{doc.fileName}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatFileSize(doc.fileSize)} • {new Date(doc.createdAt).toLocaleDateString()}
+                          {formatFileSize(doc.fileSize)} -¢ {new Date(doc.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </label>
@@ -433,7 +433,7 @@ const DocumentUploadSection = ({
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatFileSize(selectedFile.file.size)} • Ready to upload
+                          {formatFileSize(selectedFile.file.size)} -¢ Ready to upload
                         </p>
                       </div>
                     </div>
@@ -486,3 +486,11 @@ const DocumentUploadSection = ({
 };
 
 export default DocumentUploadSection;
+
+
+
+
+
+
+
+

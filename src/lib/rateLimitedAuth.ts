@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Client helper that calls the rate-limited-auth Edge Function
  * instead of hitting supabase.auth directly.
  *
@@ -31,7 +31,7 @@ export interface RateLimitedAuthResult<T = unknown> {
  * Call the rate-limited-auth Edge Function.
  *
  * @param operation  One of: sign_in, sign_up, password_reset
- * @param payload    The rest of the fields (email, password, options, …)
+ * @param payload    The rest of the fields (email, password, options, -¦)
  */
 export async function rateLimitedAuth<T = unknown>(
   operation: "sign_in" | "sign_up" | "password_reset",
@@ -75,7 +75,7 @@ export async function rateLimitedAuth<T = unknown>(
       data: null,
       error: {
         message:
-          err instanceof Error ? err.message : "Network error — please try again.",
+          err instanceof Error ? err.message : "Network error -please try again.",
         code: "NETWORK_ERROR",
         isRateLimited: false,
       },
@@ -95,7 +95,7 @@ export async function rateLimitedSignIn(email: string, password: string) {
 
   // 2. Establish local session by signing in directly.
   //    The rate limit has already been consumed server-side so this
-  //    second call is fine — it won't be double-counted because the
+  //    second call is fine -it won't be double-counted because the
   //    DB trigger only counts via the Edge Function.
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -175,4 +175,12 @@ export async function rateLimitedSignUp(
 
   return { data: signUpData as any, error: null };
 }
+
+
+
+
+
+
+
+
 

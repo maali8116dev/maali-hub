@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -80,7 +80,7 @@ describe('Email Sending - Real Integration Tests', () => {
     });
 
     if (authError || !authData.user) {
-      console.warn('⚠️  Could not authenticate test user. Skipping integration tests.');
+      console.warn('âš ï¸  Could not authenticate test user. Skipping integration tests.');
       console.warn('Set VITE_TEST_USER_EMAIL and VITE_TEST_USER_PASSWORD environment variables.');
       console.warn('Or create a test user in Supabase Dashboard with:');
       console.warn(`  Email: ${TEST_USER_EMAIL}`);
@@ -93,14 +93,14 @@ describe('Email Sending - Real Integration Tests', () => {
       email: authData.user.email!,
     };
 
-    console.log(`✅ Authenticated as test user: ${testUser.email}`);
-    console.log(`📧 Test emails will be sent to: ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Authenticated as test user: ${testUser.email}`);
+    console.log(`ðŸ“§ Test emails will be sent to: ${TEST_EMAIL_RECIPIENT}`);
   });
 
   afterAll(async () => {
     // Sign out
     await supabase.auth.signOut();
-    console.log('✅ Signed out from test session');
+    console.log('âœ… Signed out from test session');
   });
 
   it('should send a welcome email', async () => {
@@ -121,7 +121,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Welcome email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Welcome email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the welcome email!');
   }, { timeout: 30000 }); // 30 second timeout for email sending
 
@@ -145,7 +145,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Application submitted email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Application submitted email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the application confirmation email!');
   }, { timeout: 30000 });
 
@@ -169,7 +169,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Application approved email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Application approved email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the approval notification!');
   }, { timeout: 30000 });
 
@@ -194,7 +194,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Application rejected email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Application rejected email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the rejection notification!');
   }, { timeout: 30000 });
 
@@ -218,7 +218,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Application under review email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Application under review email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the review status notification!');
   }, { timeout: 30000 });
 
@@ -243,7 +243,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ Status update email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… Status update email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the status update notification!');
   }, { timeout: 30000 });
 
@@ -265,7 +265,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ KYC verified email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… KYC verified email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the KYC verification approval!');
   }, { timeout: 30000 });
 
@@ -288,7 +288,7 @@ describe('Email Sending - Real Integration Tests', () => {
     expect(result.success).toBe(true);
     expect(result.error).toBeUndefined();
 
-    console.log(`✅ KYC rejected email sent to ${TEST_EMAIL_RECIPIENT}`);
+    console.log(`âœ… KYC rejected email sent to ${TEST_EMAIL_RECIPIENT}`);
     console.log('   Check your inbox for the KYC rejection notification!');
   }, { timeout: 30000 });
 
@@ -313,16 +313,24 @@ describe('Email Sending - Real Integration Tests', () => {
     // Or the edge function might validate it first
     // Either way, we check if it succeeded or failed
     if (result.success) {
-      console.log('⚠️  Edge function accepted invalid email (validation may happen at Resend level)');
+      console.log('âš ï¸  Edge function accepted invalid email (validation may happen at Resend level)');
       // If it succeeded, that's okay - validation might happen at the email service level
       expect(result.success).toBe(true);
     } else {
       // If it failed, verify we got an error message
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
-      console.log(`✅ Error handling test completed - email rejected`);
+      console.log(`âœ… Error handling test completed - email rejected`);
       console.log(`   Error: ${result.error}`);
     }
   }, { timeout: 30000 });
 });
+
+
+
+
+
+
+
+
 

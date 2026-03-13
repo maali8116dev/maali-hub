@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   User,
   Building2,
@@ -49,4 +49,12 @@ const ApplicantInfoCard = ({ application }: ApplicantInfoCardProps) => (
 );
 
 export default ApplicantInfoCard;
+
+
+
+
+
+
+
+
 

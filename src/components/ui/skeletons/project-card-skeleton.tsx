@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectCardSkeleton() {
@@ -37,4 +37,12 @@ export function ProjectCardSkeletonGrid({ count = 6 }: { count?: number }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

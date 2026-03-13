@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -231,25 +231,25 @@ describe('useApplicationReviewScores (Hook)', () => {
 describe.skip('Review scoring (Integration)', () => {
   let testApplicationId: string;
   let testProjectId: number;
-  let testCategoryId: number;
+  let testsectorId: number;
   let testReviewerId: string;
   let testAssignmentId: string;
   let testApplicantId: string;
 
   beforeAll(async () => {
     if (!supabaseAdmin) {
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping integration tests.');
       return;
     }
 
-    // Category
-    let { data: catData } = await supabaseAdmin.from('categories').select('id').eq('name', 'Technology').single();
-    testCategoryId = catData?.id || 1;
+    // sector
+    let { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
+    testsectorId = catData?.id || 1;
 
     // Project
     const { data: pj } = await supabaseAdmin.from('projects').insert({
       title: `Test Score Project ${Date.now()}`, description: 'Test', status: 'open',
-      category_id: testCategoryId, application_fee: 10000, funding_amount: '$50,000',
+      sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
     }).select('id').single();
     if (!pj) throw new Error('Failed to create project');
@@ -276,7 +276,7 @@ describe.skip('Review scoring (Integration)', () => {
     if (!ru?.user) throw new Error('Failed to create reviewer');
     testReviewerId = ru.user.id;
     await supabaseAdmin.from('profiles').upsert({ user_id: testReviewerId, first_name: 'T', last_name: 'R', role: 'reviewer' }, { onConflict: 'user_id' });
-    await supabaseAdmin.from('reviewer_categories').insert({ reviewer_id: testReviewerId, category_id: testCategoryId });
+    await supabaseAdmin.from('reviewer_sectors').insert({ reviewer_id: testReviewerId, sector_id: testsectorId });
 
     // Assignment
     const { data: assignData } = await supabaseAdmin.from('application_assignments').insert({
@@ -297,7 +297,7 @@ describe.skip('Review scoring (Integration)', () => {
       await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
     }
     if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
-    if (testReviewerId) await supabaseAdmin.from('reviewer_categories').delete().eq('reviewer_id', testReviewerId);
+    if (testReviewerId) await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', testReviewerId);
     for (const uid of [testReviewerId, testApplicantId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
     }
@@ -349,3 +349,11 @@ describe.skip('Review scoring (Integration)', () => {
     expect(data!.scores).toEqual({ innovation: 9, feasibility: 9, impact: 9 });
   });
 });
+
+
+
+
+
+
+
+

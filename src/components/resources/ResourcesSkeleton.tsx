@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ResourcesSkeleton() {
@@ -32,3 +32,11 @@ export function ResourcesSkeleton() {
     </div>
   );
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,10 +14,10 @@ import { Plus, Edit } from 'lucide-react';
 import { RubricForm } from './RubricForm';
 
 interface RubricsTabProps {
-  categories?: string[]; // Kept for backward compatibility but not used
+  sectors?: string[]; // Kept for backward compatibility but not used
 }
 
-export const RubricsTab = ({ categories }: RubricsTabProps) => {
+export const RubricsTab = ({ sectors }: RubricsTabProps) => {
   const { data: rubric } = useQuery({
     queryKey: ['system-rubric'],
     queryFn: async () => {
@@ -83,7 +83,7 @@ export const RubricsTab = ({ categories }: RubricsTabProps) => {
                           )}
                         </div>
                         <div className="text-sm">
-                          Weight: {(criterion.weight * 100).toFixed(0)}% • Max: {criterion.max_score}
+                          Weight: {(criterion.weight * 100).toFixed(0)}% -¢ Max: {criterion.max_score}
                         </div>
                       </div>
                     ))}
@@ -114,4 +114,12 @@ export const RubricsTab = ({ categories }: RubricsTabProps) => {
     </Card>
   );
 };
+
+
+
+
+
+
+
+
 

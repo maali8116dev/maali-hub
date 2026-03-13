@@ -1,5 +1,4 @@
 /* Rich Text Editor Styles */
-@import 'react-quill/dist/quill.snow.css';
 
 .rich-text-editor .ql-toolbar {
   border-top: 1px solid hsl(var(--border));

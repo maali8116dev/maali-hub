@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Lock, Eye, FileText } from "lucide-react";
@@ -127,7 +127,7 @@ const Privacy = () => {
                   <ul className="space-y-2">
                     {section.content.map((item, itemIndex) => (
                       <li key={itemIndex} className="flex items-start gap-2 text-muted-foreground">
-                        <span className="text-primary mt-1">•</span>
+                        <span className="text-primary mt-1">-¢</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -157,4 +157,12 @@ const Privacy = () => {
 };
 
 export default Privacy;
+
+
+
+
+
+
+
+
 

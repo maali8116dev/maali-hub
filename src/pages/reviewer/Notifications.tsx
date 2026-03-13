@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
@@ -188,7 +188,7 @@ const Notifications = () => {
                         {notification.link && (
                           <Link to={notification.link}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs">
-                              View details →
+                              View details â†’
                             </Button>
                           </Link>
                         )}
@@ -255,7 +255,7 @@ const Notifications = () => {
                         {notification.link && (
                           <Link to={notification.link}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs">
-                              View details →
+                              View details â†’
                             </Button>
                           </Link>
                         )}
@@ -289,5 +289,13 @@ const Notifications = () => {
 };
 
 export default Notifications;
+
+
+
+
+
+
+
+
 
 

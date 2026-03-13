@@ -1,5 +1,5 @@
-/**
- * Integration tests — hooks hit the REAL database.
+﻿/**
+ * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real, authenticated
  * Supabase client so the hooks behave exactly as they would in the browser.
@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-// ── Hoisted container — available to vi.mock factory ──────────────────
+// â”€â”€ Hoisted container -” available to vi.mock factory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const shared = vi.hoisted(() => ({
   SUPABASE_URL: "https://alpudhhsmgtpmgpjfuqs.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ",
@@ -21,7 +21,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
   import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// ── Mock the module to inject our real client into hooks ──────────────
+// â”€â”€ Mock the module to inject our real client into hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 vi.mock('@/integrations/supabase/client', async () => {
   const { createClient: cc } = await import('@supabase/supabase-js');
   shared.realClient = cc(shared.SUPABASE_URL, shared.SUPABASE_ANON_KEY, {
@@ -40,7 +40,7 @@ const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
 // Convenience accessor
 const getRealClient = () => shared.realClient!;
 
-// Mock useAuth — hooks check `user` before enabling queries
+// Mock useAuth -” hooks check `user` before enabling queries
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/useActivityLogger');
 vi.mock('@/hooks/use-toast');
@@ -50,7 +50,7 @@ import { useAdminApplications } from '../useAdminApplications';
 import { useAdminStats } from '../useAdminStats';
 import { useAuth } from '../useAuth';
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -63,7 +63,7 @@ const createWrapper = () => {
   );
 };
 
-// ── Test data ────────────────────────────────────────────────────────
+// â”€â”€ Test data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let adminUserId: string;
 let testProjectId: number;
 let testApplicationIds: string[] = [];
@@ -71,7 +71,7 @@ let testUserIds: string[] = [];
 
 beforeAll(async () => {
   if (!supabaseAdmin) {
-    console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping integration tests.');
+    console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping integration tests.');
     return;
   }
 
@@ -100,17 +100,17 @@ beforeAll(async () => {
 
   // 3. Create a project
   const { data: catData } = await supabaseAdmin
-    .from('categories')
+    .from('sectors')
     .select('id')
     .eq('name', 'Technology')
     .single();
-  const categoryId = catData?.id || 1;
+  const sectorId = catData?.id || 1;
 
   const { data: pj, error: pe } = await supabaseAdmin.from('projects').insert({
     title: `IntTest Project ${Date.now()}`,
     description: 'Integration test project',
     status: 'open',
-    category_id: categoryId,
+    sector_id: sectorId,
     application_fee: 10000,
     funding_amount: '$50,000',
     location: 'Ghana',
@@ -159,15 +159,15 @@ afterAll(async () => {
   await getRealClient().auth.signOut();
 }, 30000);
 
-// ── useAdminApplications ─────────────────────────────────────────────
+// â”€â”€ useAdminApplications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('useAdminApplications — real user flow', () => {
+describe('useAdminApplications -” real user flow', () => {
   beforeEach(() => {
     // The hook checks useAuth().user to enable the query
     (useAuth as any).mockReturnValue({ user: { id: adminUserId } });
   });
 
-  it('admin opens the applications page → sees all non-draft applications', async () => {
+  it('admin opens the applications page â†’ sees all non-draft applications', async () => {
     if (!supabaseAdmin) return;
 
     const { result } = renderHook(() => useAdminApplications(), {
@@ -239,7 +239,7 @@ describe('useAdminApplications — real user flow', () => {
     if (draft) await supabaseAdmin.from('applications').delete().eq('id', draft.id);
   }, 20000);
 
-  it('unauthenticated user → query is disabled', () => {
+  it('unauthenticated user â†’ query is disabled', () => {
     (useAuth as any).mockReturnValue({ user: null });
 
     const { result } = renderHook(() => useAdminApplications(), {
@@ -250,10 +250,10 @@ describe('useAdminApplications — real user flow', () => {
   });
 });
 
-// ── useAdminStats ────────────────────────────────────────────────────
+// â”€â”€ useAdminStats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('useAdminStats — real user flow', () => {
-  it('admin opens dashboard → sees real statistics', async () => {
+describe('useAdminStats -” real user flow', () => {
+  it('admin opens dashboard â†’ sees real statistics', async () => {
     if (!supabaseAdmin) return;
 
     const { result } = renderHook(() => useAdminStats(), {
@@ -273,4 +273,12 @@ describe('useAdminStats — real user flow', () => {
     expect(typeof stats!.totalUsers).toBe('number');
   }, 20000);
 });
+
+
+
+
+
+
+
+
 

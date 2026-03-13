@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Maintenance mode configuration
  * 
  * To enable maintenance mode, set VITE_MAINTENANCE_MODE=true in your .env file
@@ -32,4 +32,12 @@ export function getMaintenanceConfig(): MaintenanceConfig {
 export function isMaintenanceModeEnabled(): boolean {
   return getMaintenanceConfig().enabled;
 }
+
+
+
+
+
+
+
+
 

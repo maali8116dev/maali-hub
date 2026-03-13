@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const AdminBlog = () => {
       excerpt: "Learn the key strategies that successful entrepreneurs use to craft compelling funding applications that stand out.",
       author: "Sarah Johnson",
       date: "2024-01-15",
-      category: "Applications",
+      sector: "Applications",
       readTime: "5 min read",
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=400&fit=crop",
       featured: true,
@@ -43,7 +43,7 @@ const AdminBlog = () => {
       excerpt: "A comprehensive guide to grants, loans, equity, and other funding options available to African entrepreneurs.",
       author: "Michael Okafor",
       date: "2024-01-10",
-      category: "Funding",
+      sector: "Funding",
       readTime: "8 min read",
       image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop",
       featured: false,
@@ -56,7 +56,7 @@ const AdminBlog = () => {
       excerpt: "Explore strategies for creating businesses that not only succeed financially but also create positive social impact.",
       author: "Amina Diallo",
       date: "2024-01-05",
-      category: "Business",
+      sector: "Business",
       readTime: "6 min read",
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop",
       featured: false,
@@ -69,7 +69,7 @@ const AdminBlog = () => {
       excerpt: "An in-depth look at how one entrepreneur used our platform to secure funding and scale their business.",
       author: "David Kofi",
       date: "2023-12-28",
-      category: "Success Stories",
+      sector: "Success Stories",
       readTime: "10 min read",
       image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop",
       featured: false,
@@ -81,7 +81,7 @@ const AdminBlog = () => {
   const filteredPosts = blogPosts.filter((post) =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.category.toLowerCase().includes(searchQuery.toLowerCase())
+    post.sector.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = (id: number) => {
@@ -131,7 +131,7 @@ const AdminBlog = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search posts by title, author, or category..."
+              placeholder="Search posts by title, author, or sector..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -164,7 +164,7 @@ const AdminBlog = () => {
                     <h3 className="font-semibold">{post.title}</h3>
                     {post.featured && <Badge variant="default">Featured</Badge>}
                     {getStatusBadge(post.status)}
-                    <Badge variant="outline">{post.category}</Badge>
+                    <Badge variant="outline">{post.sector}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
                     {post.excerpt}
@@ -232,4 +232,12 @@ const AdminBlog = () => {
 };
 
 export default AdminBlog;
+
+
+
+
+
+
+
+
 

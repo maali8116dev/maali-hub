@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import * as z from 'zod';
@@ -373,7 +373,7 @@ describe('Auth Validation - Business Logic', () => {
 
     it('should successfully sign in with valid credentials', async () => {
       if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('⚠️  Skipping login test: VITE_TEST_USER_EMAIL not set');
+        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
         return;
       }
 
@@ -396,7 +396,7 @@ describe('Auth Validation - Business Logic', () => {
       expect(data.user?.email).toBe(TEST_USER_EMAIL);
       expect(data.session).not.toBeNull();
 
-      console.log(`✅ Successfully signed in as ${TEST_USER_EMAIL}`);
+      console.log(`âœ… Successfully signed in as ${TEST_USER_EMAIL}`);
     }, { timeout: 10000 });
 
     it('should reject sign in with invalid email format', async () => {
@@ -432,7 +432,7 @@ describe('Auth Validation - Business Logic', () => {
 
     it('should reject sign in with wrong password', async () => {
       if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('⚠️  Skipping login test: VITE_TEST_USER_EMAIL not set');
+        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
         return;
       }
 
@@ -459,7 +459,7 @@ describe('Auth Validation - Business Logic', () => {
 
     it('should maintain session after successful login', async () => {
       if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('⚠️  Skipping login test: VITE_TEST_USER_EMAIL not set');
+        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
         return;
       }
 
@@ -482,7 +482,7 @@ describe('Auth Validation - Business Logic', () => {
 
     it('should sign out successfully', async () => {
       if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('⚠️  Skipping login test: VITE_TEST_USER_EMAIL not set');
+        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
         return;
       }
 
@@ -504,8 +504,16 @@ describe('Auth Validation - Business Logic', () => {
       const { data: afterSignOut } = await supabase.auth.getSession();
       expect(afterSignOut.session).toBeNull();
 
-      console.log('✅ Successfully signed out');
+      console.log('âœ… Successfully signed out');
     }, { timeout: 10000 });
   });
 });
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,9 +36,9 @@ const AdminFAQ = () => {
   const deleteFAQ = useDeleteFAQ();
   const togglePublished = useToggleFAQPublished();
 
-  // Get unique categories
-  const categories = faqs
-    ? [...new Set(faqs.map((faq) => faq.category))].sort()
+  // Get unique sectors
+  const sectors = faqs
+    ? [...new Set(faqs.map((faq) => faq.sector))].sort()
     : [];
 
   // Filter FAQs
@@ -46,18 +46,18 @@ const AdminFAQ = () => {
     const matchesSearch =
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.category.toLowerCase().includes(searchQuery.toLowerCase());
+      faq.sector.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
-      categoryFilter === "all" || faq.category === categoryFilter;
+      categoryFilter === "all" || faq.sector === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  // Group FAQs by category
+  // Group FAQs by sector
   const groupedFAQs = filteredFAQs?.reduce((acc, faq) => {
-    if (!acc[faq.category]) {
-      acc[faq.category] = [];
+    if (!acc[faq.sector]) {
+      acc[faq.sector] = [];
     }
-    acc[faq.category].push(faq);
+    acc[faq.sector].push(faq);
     return acc;
   }, {} as Record<string, FAQ[]>);
 
@@ -116,13 +116,13 @@ const AdminFAQ = () => {
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder="Filter by sector" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                <SelectItem value="all">All sectors</SelectItem>
+                {sectors.map((sector) => (
+                  <SelectItem key={sector} value={sector}>
+                    {sector}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -151,12 +151,12 @@ const AdminFAQ = () => {
           {groupedFAQs && Object.keys(groupedFAQs).length > 0 ? (
             Object.entries(groupedFAQs)
               .sort(([a], [b]) => a.localeCompare(b))
-              .map(([category, categoryFaqs]) => (
-                <Card key={category}>
+              .map(([sector, categoryFaqs]) => (
+                <Card key={sector}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <HelpCircle className="h-5 w-5 text-primary" />
-                      {category}
+                      {sector}
                       <Badge variant="secondary" className="ml-2">
                         {categoryFaqs.length}
                       </Badge>
@@ -274,3 +274,11 @@ const AdminFAQ = () => {
 };
 
 export default AdminFAQ;
+
+
+
+
+
+
+
+

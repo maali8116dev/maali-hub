@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+﻿import { useEffect } from 'react';
 
 export interface OrganizationSchema {
   name: string;
@@ -31,7 +31,7 @@ export interface ProjectSchema {
   };
   startDate?: string;
   endDate?: string;
-  category?: string;
+  sector?: string;
 }
 
 export interface WebSiteSchema {
@@ -106,7 +106,7 @@ export const StructuredData = ({ type, data, id = 'structured-data' }: Structure
           }),
           ...(projectData.startDate && { startDate: projectData.startDate }),
           ...(projectData.endDate && { endDate: projectData.endDate }),
-          ...(projectData.category && { category: projectData.category }),
+          ...(projectData.sector && { sector: projectData.sector }),
         };
         break;
 
@@ -136,4 +136,12 @@ export const StructuredData = ({ type, data, id = 'structured-data' }: Structure
 
   return null;
 };
+
+
+
+
+
+
+
+
 

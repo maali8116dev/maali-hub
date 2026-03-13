@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Calendar, Users, DollarSign } from "lucide-react";
@@ -43,7 +43,7 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
         )}
         {application.primary_sectors && (
           <div>
-            <Label className="text-sm text-muted-foreground">Primary Sectors</Label>
+            <Label className="text-sm text-muted-foreground">Primary sectors</Label>
             <div className="mt-2 flex flex-wrap gap-2">
               {Array.isArray(application.primary_sectors) ? (
                 application.primary_sectors.map((sector: string, idx: number) => (
@@ -70,7 +70,7 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
         )}
         {application.primary_sector_other && (
           <div>
-            <Label className="text-sm text-muted-foreground">Other Primary Sector</Label>
+            <Label className="text-sm text-muted-foreground">Other Primary sector</Label>
             <p className="mt-1 text-sm">{application.primary_sector_other}</p>
           </div>
         )}
@@ -92,4 +92,12 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
 };
 
 export default OrganizationalBackgroundCard;
+
+
+
+
+
+
+
+
 

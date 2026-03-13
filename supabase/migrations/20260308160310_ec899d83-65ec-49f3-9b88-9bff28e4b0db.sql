@@ -30,6 +30,8 @@ BEGIN
 
   SELECT count(*) INTO v_total
   FROM opportunities o
+  LEFT JOIN partners p ON p.id = o.partner_id
+  LEFT JOIN sectors s ON s.id = o.sector_id
   WHERE (p_opportunity_type IS NULL OR o.opportunity_type::text = p_opportunity_type)
     AND (p_program_format IS NULL OR o.program_format::text = p_program_format)
     AND (p_funding_type IS NULL OR o.funding_type::text = p_funding_type)
@@ -40,7 +42,7 @@ BEGIN
     AND (p_search IS NULL OR (
       o.title ILIKE '%' || p_search || '%'
       OR o.description ILIKE '%' || p_search || '%'
-      OR o.organization_name ILIKE '%' || p_search || '%'
+      OR p.name ILIKE '%' || p_search || '%'
     ))
     AND (p_tags IS NULL OR EXISTS (
       SELECT 1 FROM opportunity_tag_map otm
@@ -53,6 +55,9 @@ BEGIN
   SELECT json_agg(row_data) INTO v_opportunities
   FROM (
     SELECT to_jsonb(o.*) || jsonb_build_object(
+      'partner_name', p.name,
+      'partner_logo_url', p.logo_url,
+      'sector_name', s.name,
       'tags', COALESCE((
         SELECT json_agg(json_build_object('id', ot.id, 'name', ot.name, 'slug', ot.slug))
         FROM opportunity_tag_map otm
@@ -61,6 +66,8 @@ BEGIN
       ), '[]'::json)
     ) AS row_data
     FROM opportunities o
+    LEFT JOIN partners p ON p.id = o.partner_id
+    LEFT JOIN sectors s ON s.id = o.sector_id
     WHERE (p_opportunity_type IS NULL OR o.opportunity_type::text = p_opportunity_type)
       AND (p_program_format IS NULL OR o.program_format::text = p_program_format)
       AND (p_funding_type IS NULL OR o.funding_type::text = p_funding_type)
@@ -71,7 +78,7 @@ BEGIN
       AND (p_search IS NULL OR (
         o.title ILIKE '%' || p_search || '%'
         OR o.description ILIKE '%' || p_search || '%'
-        OR o.organization_name ILIKE '%' || p_search || '%'
+        OR p.name ILIKE '%' || p_search || '%'
       ))
       AND (p_tags IS NULL OR EXISTS (
         SELECT 1 FROM opportunity_tag_map otm
@@ -90,3 +97,4 @@ BEGIN
   );
 END;
 $$;
+

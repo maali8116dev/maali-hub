@@ -3,9 +3,10 @@
  * 
  * This script creates:
  * - 1 Admin user
- * - 5 Reviewer users (assigned to different categories)
+ * - 1 Partner user (can create opportunities)
+ * - 5 Reviewer users (assigned to different sectors)
  * - 10 Applicant users
- * - 20 Applications from applicants (distributed across categories)
+ * - 20 Applications from applicants (distributed across sectors)
  * - Reviewer assignments using the actual RPC function (to test assignment logic)
  * - Review scores for ~40% of assignments (simulating completed reviews with varied scores)
  * 
@@ -281,36 +282,36 @@ async function createUserWithProfile(userData) {
   return userId;
 }
 
-// Helper to get category ID by name
-async function getCategoryId(categoryName) {
+// Helper to get sector ID by name
+async function getSectorId(sectorName) {
   const { data, error } = await supabase
-    .from('categories')
+    .from('sectors')
     .select('id')
-    .eq('name', categoryName)
+    .eq('name', sectorName)
     .single();
 
   if (error || !data) {
-    throw new Error(`Category "${categoryName}" not found. Make sure categories are seeded first.`);
+    throw new Error(`Sector "${sectorName}" not found. Make sure sectors are seeded first.`);
   }
 
   return data.id;
 }
 
-// Helper to assign reviewer to category
-async function assignReviewerToCategory(reviewerId, categoryName) {
-  const categoryId = await getCategoryId(categoryName);
+// Helper to assign reviewer to sector
+async function assignReviewerToSector(reviewerId, sectorName) {
+  const sectorId = await getSectorId(sectorName);
   
   const { error } = await supabase
-    .from('reviewer_categories')
+    .from('reviewer_sectors')
     .upsert({
       reviewer_id: reviewerId,
-      category_id: categoryId,
+      sector_id: sectorId,
     }, {
-      onConflict: 'reviewer_id,category_id',
+      onConflict: 'reviewer_id,sector_id',
     });
 
   if (error) {
-    console.error(`   ⚠️  Failed to assign reviewer to ${categoryName}:`, error.message);
+    console.error(`   ⚠️  Failed to assign reviewer to ${sectorName}:`, error.message);
   }
 }
 
@@ -318,7 +319,7 @@ async function assignReviewerToCategory(reviewerId, categoryName) {
 async function createApplication(applicationData) {
   const {
     userId,
-    projectId,
+    opportunityId,
     companyName,
     contactEmail,
     contactPhone,
@@ -344,25 +345,25 @@ async function createApplication(applicationData) {
     }
   }
 
-  // Idempotency + unique (user_id, project_id) constraint:
-  // If an application already exists for this user/project, reuse it
+  // Idempotency + unique (user_id, opportunity_id) constraint:
+  // If an application already exists for this user/opportunity, reuse it
   const { data: existingApp, error: existingFetchError } = await supabase
     .from('applications')
     .select('id')
     .eq('user_id', userId)
-    .eq('project_id', projectId)
+    .eq('opportunity_id', opportunityId)
     .maybeSingle();
 
   if (existingFetchError) {
     console.log(
-      `   ⚠️  Warning: could not check for existing application (user_id=${userId}, project_id=${projectId}):`,
+      `   ⚠️  Warning: could not check for existing application (user_id=${userId}, opportunity_id=${opportunityId}):`,
       existingFetchError.message
     );
   }
 
   if (existingApp?.id) {
     console.log(
-      `   ℹ️  Application already exists for user/project, reusing existing id: ${existingApp.id}`
+      `   ℹ️  Application already exists for user/opportunity, reusing existing id: ${existingApp.id}`
     );
     return existingApp.id;
   }
@@ -371,7 +372,7 @@ async function createApplication(applicationData) {
     .from('applications')
     .insert({
       user_id: userId,
-      project_id: projectId,
+      opportunity_id: opportunityId,
       organization_name: companyName,
       contact_email: contactEmail,
       contact_phone: contactPhone,
@@ -385,20 +386,20 @@ async function createApplication(applicationData) {
     .single();
 
   if (error) {
-    // Handle unique (user_id, project_id) constraint defensively in case of race
+    // Handle unique (user_id, opportunity_id) constraint defensively in case of race
     if (
       error.code === '23505' ||
       error.message?.includes('idx_applications_unique_user_project')
     ) {
       console.log(
-        `   ℹ️  Duplicate application detected for user/project, attempting to reuse existing record`
+        `   ℹ️  Duplicate application detected for user/opportunity, attempting to reuse existing record`
       );
 
       const { data: existingAfterInsert, error: lookupError } = await supabase
         .from('applications')
         .select('id')
         .eq('user_id', userId)
-        .eq('project_id', projectId)
+        .eq('opportunity_id', opportunityId)
         .maybeSingle();
 
       if (!lookupError && existingAfterInsert?.id) {
@@ -439,27 +440,27 @@ async function assignReviewersToApplication(applicationId, reviewerIds) {
   }
 }
 
-// Get open projects
-async function getOpenProjects() {
+// Get open opportunities
+async function getOpenOpportunities() {
   const { data, error } = await supabase
-    .from('projects')
-    .select('id, title, category_id, category, categories(name)')
+    .from('opportunities')
+    .select('id, title, sector_id, sectors:sector_id(name)')
     .eq('status', 'open')
-    .limit(20); // Get more projects to ensure we have enough with category_id
+    .limit(20); // Get more opportunities to ensure we have enough with sector_id
 
   if (error) {
     throw error;
   }
 
-  // Filter to only projects with category_id (required for reviewer assignment)
-  const projectsWithCategory = (data || []).filter(p => p.category_id !== null);
+  // Filter to only opportunities with sector_id (required for reviewer assignment)
+  const opportunitiesWithSector = (data || []).filter(o => o.sector_id !== null);
   
-  if (projectsWithCategory.length === 0) {
-    console.log('   ⚠️  Warning: No projects found with category_id set.');
-    console.log('   💡 Tip: Run the migration that populates category_id from the category field.');
+  if (opportunitiesWithSector.length === 0) {
+    console.log('   ⚠️  Warning: No opportunities found with sector_id set.');
+    console.log('   💡 Tip: Ensure opportunities have sector_id populated.');
   }
 
-  return projectsWithCategory.length > 0 ? projectsWithCategory : (data || []);
+  return opportunitiesWithSector.length > 0 ? opportunitiesWithSector : (data || []);
 }
 
 // Helper to cleanup existing seed data (for idempotent runs)
@@ -493,6 +494,7 @@ async function cleanupSeedData() {
     // Delete seed users (this will cascade delete profiles and assignments)
     const seedEmails = [
       'admin@maali.test',
+      'partner@maali.test',
       'reviewer.tech@maali.test',
       'reviewer.agriculture@maali.test',
       'reviewer.fintech@maali.test',
@@ -528,6 +530,18 @@ async function cleanupSeedData() {
     } else {
       console.log('   ℹ️  No existing seed users found\n');
     }
+
+    // Delete seed partner org if it exists
+    const { error: partnerDeleteError } = await supabase
+      .from('partners')
+      .delete()
+      .eq('name', 'Maali Test Partner Org');
+
+    if (partnerDeleteError) {
+      console.log(`   ⚠️  Error deleting seed partner org: ${partnerDeleteError.message}\n`);
+    } else {
+      console.log('   ✅ Cleaned up existing seed partner org (if any)\n');
+    }
   } catch (error) {
     console.log(`   ⚠️  Cleanup error (continuing anyway): ${error.message}\n`);
   }
@@ -555,6 +569,73 @@ async function main() {
     });
     console.log(`   ✅ Created admin: admin@maali.test (${adminId.substring(0, 8)}...)\n`);
 
+    // Step 1.5: Create Partner user
+    console.log('📝 Step 1.5: Creating partner user...');
+    const partnerUserId = await createUserWithProfile({
+      email: 'partner@maali.test',
+      firstName: 'Patricia',
+      lastName: 'Partner',
+      role: 'partner',
+      businessName: 'Maali Test Partner Org',
+      country: 'Ghana',
+      bio: 'Seed partner account used to create and manage opportunities in test environments.',
+    });
+    console.log(`   ✅ Created partner: partner@maali.test (${partnerUserId.substring(0, 8)}...)\n`);
+
+    // Step 1.6: Create or link Partner org and connect profile.partner_id
+    console.log('📝 Step 1.6: Linking partner user to partner organization...');
+    // Create a partner org row if it doesn't exist, or fetch existing one
+    const { data: existingPartner, error: fetchPartnerError } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('name', 'Maali Test Partner Org')
+      .maybeSingle();
+
+    if (fetchPartnerError) {
+      console.log(`   ⚠️  Error checking existing partner org: ${fetchPartnerError.message}`);
+    }
+
+  let partnerOrgId = existingPartner?.id;
+
+    if (!partnerOrgId) {
+      const { data: partnerInsert, error: partnerInsertError } = await supabase
+        .from('partners')
+        .insert({
+          name: 'Maali Test Partner Org',
+          description: 'Seed partner organization used to create and manage opportunities in test environments.',
+          sector: 'Strategic',
+          status: 'active',
+          user_id: partnerUserId,
+        })
+        .select('id')
+        .single();
+
+      if (partnerInsertError) {
+        console.log(`   ⚠️  Error creating partner org: ${partnerInsertError.message}`);
+      } else {
+        partnerOrgId = partnerInsert.id;
+        console.log(`   ✅ Created partner org with id ${partnerOrgId}`);
+      }
+    } else {
+      console.log(`   ℹ️  Found existing partner org with id ${partnerOrgId}`);
+    }
+
+    // Link partner profile to partner org via profiles.partner_id
+    if (partnerOrgId) {
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({ partner_id: partnerOrgId })
+        .eq('user_id', partnerUserId);
+
+      if (profileUpdateError) {
+        console.log(`   ⚠️  Error linking partner profile to org: ${profileUpdateError.message}`);
+      } else {
+        console.log(`   ✅ Linked partner profile to org (partner_id=${partnerOrgId})\n`);
+      }
+    } else {
+      console.log('   ⚠️  Skipped linking partner profile to org because partnerOrgId could not be determined\n');
+    }
+
     // Step 2: Create Reviewers
     console.log('📝 Step 2: Creating reviewer users...');
     const reviewers = [
@@ -563,7 +644,7 @@ async function main() {
         firstName: 'Sarah',
         lastName: 'Tech',
         role: 'reviewer',
-        categories: ['Technology'],
+        sectors: ['Technology'],
         country: 'Ghana',
         bio: 'Technology expert with 10+ years in software development',
       },
@@ -572,7 +653,7 @@ async function main() {
         firstName: 'Kwame',
         lastName: 'Agri',
         role: 'reviewer',
-        categories: ['Agriculture'],
+        sectors: ['Agriculture'],
         country: 'Ghana',
         bio: 'Agricultural specialist focusing on sustainable farming',
       },
@@ -581,7 +662,7 @@ async function main() {
         firstName: 'Ama',
         lastName: 'Finance',
         role: 'reviewer',
-        categories: ['FinTech'],
+        sectors: ['FinTech'],
         country: 'Nigeria',
         bio: 'FinTech consultant with expertise in financial inclusion',
       },
@@ -590,16 +671,16 @@ async function main() {
         firstName: 'David',
         lastName: 'Multi',
         role: 'reviewer',
-        categories: ['Technology', 'Agriculture'], // Multi-category reviewer
+        sectors: ['Technology', 'Agriculture'], // Multi-sector reviewer
         country: 'Kenya',
-        bio: 'Experienced reviewer across multiple categories',
+        bio: 'Experienced reviewer across multiple sectors',
       },
       {
         email: 'reviewer.tech2@maali.test',
         firstName: 'Grace',
         lastName: 'Innovation',
         role: 'reviewer',
-        categories: ['Technology'],
+        sectors: ['Technology'],
         country: 'South Africa',
         bio: 'Tech innovation specialist',
       },
@@ -607,16 +688,16 @@ async function main() {
 
     const reviewerIds = [];
     for (const reviewer of reviewers) {
-      const { categories, ...userData } = reviewer;
+      const { sectors, ...userData } = reviewer;
       const reviewerId = await createUserWithProfile(userData);
       reviewerIds.push(reviewerId);
       
-      // Assign reviewer to categories
-      for (const category of categories) {
-        await assignReviewerToCategory(reviewerId, category);
+      // Assign reviewer to sectors
+      for (const sector of sectors) {
+        await assignReviewerToSector(reviewerId, sector);
       }
       
-      console.log(`   ✅ Created reviewer: ${reviewer.email} (${reviewerId.substring(0, 8)}...) - Categories: ${categories.join(', ')}`);
+      console.log(`   ✅ Created reviewer: ${reviewer.email} (${reviewerId.substring(0, 8)}...) - Sectors: ${sectors.join(', ')}`);
     }
     console.log(`\n   ✅ Created ${reviewers.length} reviewers\n`);
 
@@ -719,49 +800,13 @@ async function main() {
     }
     console.log(`\n   ✅ Created ${applicants.length} applicants\n`);
 
-    // Step 4: Get open projects and ensure they have category_id
-    console.log('📝 Step 4: Fetching open projects...');
-    let projects = await getOpenProjects();
-    if (projects.length === 0) {
-      console.log('   ⚠️  No open projects found. Please seed projects first using supabase/seed.sql');
+    // Step 4: Get open opportunities (with sector_id) for creating applications
+    console.log('📝 Step 4: Fetching open opportunities...');
+    let opportunities = await getOpenOpportunities();
+    if (opportunities.length === 0) {
+      console.log('   ⚠️  No open opportunities found. Please seed opportunities first using supabase/seed.sql or scripts/seed.js');
       return;
     }
-    
-    // Ensure projects have category_id set (required for reviewer assignment)
-    console.log('   🔧 Ensuring projects have category_id set...');
-    let fixedCount = 0;
-    for (const project of projects) {
-      if (!project.category_id && project.category) {
-        // Try to find category by name
-        const categoryId = await getCategoryId(project.category).catch(() => null);
-        if (categoryId) {
-          const { error } = await supabase
-            .from('projects')
-            .update({ category_id: categoryId })
-            .eq('id', project.id);
-          
-          if (!error) {
-            project.category_id = categoryId;
-            fixedCount++;
-          }
-        }
-      }
-    }
-    
-    if (fixedCount > 0) {
-      console.log(`   ✅ Fixed ${fixedCount} projects to have category_id\n`);
-    }
-    
-    // Filter to only projects with category_id
-    projects = projects.filter(p => p.category_id !== null);
-    
-    if (projects.length === 0) {
-      console.log('   ⚠️  No projects with category_id found. Cannot create applications with reviewer assignments.');
-      console.log('   💡 Please ensure projects have category_id set in the database.');
-      return;
-    }
-    
-    console.log(`   ✅ Found ${projects.length} open projects with category_id\n`);
 
     // Step 5: Create Applications and Assign Reviewers
     console.log('📝 Step 5: Creating applications and assigning reviewers...');
@@ -910,17 +955,17 @@ async function main() {
       },
     ];
 
-    // Map projects to categories for better assignment
-    const projectCategoryMap = new Map();
-    projects.forEach(project => {
-      const categoryName = project.categories?.name || 'Technology';
-      if (!projectCategoryMap.has(categoryName)) {
-        projectCategoryMap.set(categoryName, []);
+    // Map opportunities to sectors for better assignment
+    const opportunitySectorMap = new Map();
+    opportunities.forEach(opp => {
+      const sectorName = opp.sectors?.name || 'Technology';
+      if (!opportunitySectorMap.has(sectorName)) {
+        opportunitySectorMap.set(sectorName, []);
       }
-      projectCategoryMap.get(categoryName).push(project);
+      opportunitySectorMap.get(sectorName).push(opp);
     });
 
-    // Create 20 applications - distribute across applicants and projects
+    // Create 20 applications - distribute across applicants and opportunities
     const applicationIds = [];
     let applicantIndex = 0;
     let templateIndex = 0;
@@ -931,23 +976,26 @@ async function main() {
       const currentApplicant = applicants[applicantIndex % applicants.length];
       applicantIndex++;
 
-      // Select project based on category distribution
+      // Select opportunity based on sector distribution
       // Technology: 40%, Agriculture: 30%, FinTech: 30%
-      let categoryName;
+      let sectorName;
       const rand = Math.random();
       if (rand < 0.4) {
-        categoryName = 'Technology';
+        sectorName = 'Technology';
       } else if (rand < 0.7) {
-        categoryName = 'Agriculture';
+        sectorName = 'Agriculture';
       } else {
-        categoryName = 'FinTech';
+        sectorName = 'FinTech';
       }
 
-      // Get a project from the selected category
-      const categoryProjects = projectCategoryMap.get(categoryName) || projectCategoryMap.get('Technology') || projects;
-      const project = categoryProjects[i % categoryProjects.length];
+      // Get an opportunity from the selected sector
+      const sectorOpportunities =
+        opportunitySectorMap.get(sectorName) ||
+        opportunitySectorMap.get('Technology') ||
+        opportunities;
+      const opportunity = sectorOpportunities[i % sectorOpportunities.length];
       
-      if (!project) continue;
+      if (!opportunity) continue;
 
       // Use template content but customize for current applicant
       const template = applicationTemplates[templateIndex % applicationTemplates.length];
@@ -955,7 +1003,7 @@ async function main() {
 
       const applicationId = await createApplication({
         userId: currentApplicant.userId,
-        projectId: project.id,
+        opportunityId: opportunity.id,
         companyName: template.companyName,
         contactEmail: currentApplicant.email,
         contactPhone: template.contactPhone,
@@ -965,13 +1013,17 @@ async function main() {
       });
       
       applicationIds.push(applicationId);
-      console.log(`   ✅ Created application ${i + 1}/20: ${template.companyName} by ${currentApplicant.email} for "${project.title}" (${categoryName})`);
+      console.log(
+        `   ✅ Created application ${i + 1}/20: ${template.companyName} by ${currentApplicant.email} for "${opportunity.title}" (${sectorName})`
+      );
 
       // Use the RPC function to auto-assign reviewers (this tests the actual assignment logic)
       try {
-        // Verify project has category_id before attempting assignment
-        if (!project.category_id) {
-          console.log(`   ⚠️  Skipping assignment: Project "${project.title}" has no category_id (only has category: ${project.categories?.name || 'unknown'})`);
+        // Verify opportunity has sector_id before attempting assignment
+        if (!opportunity.sector_id) {
+          console.log(
+            `   ⚠️  Skipping assignment: Opportunity "${opportunity.title}" has no sector_id (only has sector: ${opportunity.sectors?.name || 'unknown'})`
+          );
           continue;
         }
 
@@ -989,7 +1041,7 @@ async function main() {
         } else if (assignmentData && assignmentData.length > 0) {
           console.log(`   ✅ Auto-assigned ${assignmentData.length} reviewer(s) via RPC function`);
         } else {
-          console.log(`   ⚠️  No reviewers assigned (RPC returned empty array - may need more reviewers for ${categoryName})`);
+          console.log(`   ⚠️  No reviewers assigned (RPC returned empty array - may need more reviewers for ${sectorName})`);
         }
       } catch (error) {
         console.log(`   ⚠️  Assignment error: ${error.message}`);
@@ -1013,10 +1065,10 @@ async function main() {
     for (let i = 0; i < applicationIds.length; i++) {
       const applicationId = applicationIds[i];
       
-      // Get application details to find user_id and project_id
+      // Get application details to find user_id and opportunity_id
       const { data: application, error: appError } = await supabase
         .from('applications')
-        .select('user_id, project_id')
+        .select('user_id, opportunity_id')
         .eq('id', applicationId)
         .single();
 
@@ -1061,7 +1113,7 @@ async function main() {
             .insert({
               user_id: application.user_id,
               application_id: applicationId,
-              project_id: application.project_id,
+              opportunity_id: application.opportunity_id,
               file_name: testFile.name,
               file_path: storagePath,
               file_size: fileBuffer.length,
@@ -1110,8 +1162,8 @@ async function main() {
     } else {
       console.log(`   ⚠️  Warning: No reviewer assignments found!`);
       console.log(`   💡 Possible reasons:`);
-      console.log(`      - Projects may not have category_id set (check projects table)`);
-      console.log(`      - Reviewers may not be assigned to categories (check reviewer_categories table)`);
+      console.log(`      - Opportunities may not have sector_id set (check opportunities table)`);
+      console.log(`      - Reviewers may not be assigned to sectors (check reviewer_sectors table)`);
       console.log(`      - RPC function may have failed (check error messages above)\n`);
     }
 
@@ -1164,15 +1216,15 @@ async function main() {
           scoreSet = scoreSets[5 + Math.floor(Math.random() * 2)]; // Last 2 are reject
         }
 
-        // Get application to find project category (for proper scoring)
+        // Get application to find project sector (for proper scoring)
         const { data: application } = await supabase
           .from('applications')
           .select(`
             id,
-            project_id,
-            projects!inner(
+            opportunity_id,
+            opportunities!inner(
               id,
-              category
+              sector_id
             )
           `)
           .eq('id', assignment.application_id)
@@ -1228,6 +1280,7 @@ async function main() {
     console.log('✅ Seed data creation complete!\n');
     console.log('📊 Summary:');
     console.log(`   • 1 Admin user (admin@maali.test)`);
+    console.log(`   • 1 Partner user (partner@maali.test) linked to Maali Test Partner Org`);
     console.log(`   • ${reviewers.length} Reviewer users`);
     console.log(`   • ${applicants.length} Applicant users`);
     console.log(`   • ${applicationIds.length} Applications created (distributed across Technology, Agriculture, FinTech)`);
@@ -1236,6 +1289,7 @@ async function main() {
     console.log(`   • ${reviewScoresCreated} Review scores created (simulating completed reviews)\n`);
     console.log('🔐 Login Credentials (all passwords: TestPassword123!):');
     console.log('   Admin: admin@maali.test');
+    console.log('   Partner: partner@maali.test');
     console.log('   Reviewers: reviewer.tech@maali.test, reviewer.agriculture@maali.test, etc.');
     console.log('   Applicants: applicant1@maali.test, applicant2@maali.test, etc.\n');
     console.log('💡 Next Steps:');

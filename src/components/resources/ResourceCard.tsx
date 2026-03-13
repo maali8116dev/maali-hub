@@ -1,4 +1,4 @@
-import { Download, ExternalLink, FileText, Video, Table2, Presentation, Link as LinkIcon, Clock, Eye } from "lucide-react";
+﻿import { Download, ExternalLink, FileText, Video, Table2, Presentation, Link as LinkIcon, Clock, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -171,3 +171,11 @@ export function ResourceCard({ resource, onDownload, variant = "default" }: Reso
     </Card>
   );
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+﻿import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -19,7 +19,7 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
   beforeAll(async () => {
     if (!supabaseAdmin) {
       // eslint-disable-next-line no-console
-      console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY not set — skipping email_queue integration tests.');
+      console.warn('âš ï¸  SUPABASE_SERVICE_ROLE_KEY not set -” skipping email_queue integration tests.');
       return;
     }
 
@@ -136,5 +136,13 @@ describe('email_queue / claim_email_batch (DB Integration)', () => {
     30000
   );
 });
+
+
+
+
+
+
+
+
 
 

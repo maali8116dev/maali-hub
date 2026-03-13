@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -386,7 +386,7 @@ export type Database = {
       blog_posts: {
         Row: {
           author: string
-          category: string
+          sector: string
           content: string
           created_at: string
           created_by: string | null
@@ -404,7 +404,7 @@ export type Database = {
         }
         Insert: {
           author: string
-          category: string
+          sector: string
           content: string
           created_at?: string
           created_by?: string | null
@@ -422,7 +422,7 @@ export type Database = {
         }
         Update: {
           author?: string
-          category?: string
+          sector?: string
           content?: string
           created_at?: string
           created_by?: string | null
@@ -440,7 +440,7 @@ export type Database = {
         }
         Relationships: []
       }
-      categories: {
+      sectors: {
         Row: {
           created_at: string
           description: string | null
@@ -569,7 +569,7 @@ export type Database = {
       faqs: {
         Row: {
           answer: string
-          category: string
+          sector: string
           created_at: string
           created_by: string | null
           display_order: number | null
@@ -580,7 +580,7 @@ export type Database = {
         }
         Insert: {
           answer: string
-          category: string
+          sector: string
           created_at?: string
           created_by?: string | null
           display_order?: number | null
@@ -591,7 +591,7 @@ export type Database = {
         }
         Update: {
           answer?: string
-          category?: string
+          sector?: string
           created_at?: string
           created_by?: string | null
           display_order?: number | null
@@ -746,7 +746,7 @@ export type Database = {
       opportunities: {
         Row: {
           application_fee: number | null
-          category_id: number | null
+          sector_id: number | null
           country: string | null
           created_at: string
           created_by: string | null
@@ -768,6 +768,7 @@ export type Database = {
           max_applicants: number | null
           opportunity_type: Database["public"]["Enums"]["opportunity_type"]
           organization_name: string | null
+          partner_id: number | null
           program_format: Database["public"]["Enums"]["program_format"] | null
           requirements: string | null
           start_date: string | null
@@ -777,7 +778,7 @@ export type Database = {
         }
         Insert: {
           application_fee?: number | null
-          category_id?: number | null
+          sector_id?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -799,6 +800,7 @@ export type Database = {
           max_applicants?: number | null
           opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
           organization_name?: string | null
+          partner_id?: number | null
           program_format?: Database["public"]["Enums"]["program_format"] | null
           requirements?: string | null
           start_date?: string | null
@@ -808,7 +810,7 @@ export type Database = {
         }
         Update: {
           application_fee?: number | null
-          category_id?: number | null
+          sector_id?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
@@ -830,6 +832,7 @@ export type Database = {
           max_applicants?: number | null
           opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
           organization_name?: string | null
+          partner_id?: number | null
           program_format?: Database["public"]["Enums"]["program_format"] | null
           requirements?: string | null
           start_date?: string | null
@@ -839,10 +842,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "opportunities_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "opportunities_sector_id_fkey"
+            columns: ["sector_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
@@ -938,7 +948,7 @@ export type Database = {
       }
       partners: {
         Row: {
-          category: string
+          sector: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -953,7 +963,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
-          category: string
+          sector: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -968,7 +978,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
-          category?: string
+          sector?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1058,6 +1068,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          partner_id: number | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
@@ -1072,6 +1083,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          partner_id?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
@@ -1086,17 +1098,26 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          partner_id?: number | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
           application_fee: number | null
-          category: string | null
-          category_id: number | null
+          sector: string | null
+          sector_id: number | null
           created_at: string
           created_by: string | null
           current_applicants: number | null
@@ -1116,8 +1137,8 @@ export type Database = {
         }
         Insert: {
           application_fee?: number | null
-          category?: string | null
-          category_id?: number | null
+          sector?: string | null
+          sector_id?: number | null
           created_at?: string
           created_by?: string | null
           current_applicants?: number | null
@@ -1137,8 +1158,8 @@ export type Database = {
         }
         Update: {
           application_fee?: number | null
-          category?: string | null
-          category_id?: number | null
+          sector?: string | null
+          sector_id?: number | null
           created_at?: string
           created_by?: string | null
           current_applicants?: number | null
@@ -1158,10 +1179,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "projects_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "projects_sector_id_fkey"
+            columns: ["sector_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "sectors"
             referencedColumns: ["id"]
           },
         ]
@@ -1228,7 +1249,7 @@ export type Database = {
       }
       resources: {
         Row: {
-          category: string
+          sector: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -1245,7 +1266,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          category: string
+          sector: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1262,7 +1283,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          category?: string
+          sector?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1347,31 +1368,31 @@ export type Database = {
           },
         ]
       }
-      reviewer_categories: {
+      reviewer_sectors: {
         Row: {
-          category_id: number | null
+          sector_id: number | null
           created_at: string
           id: string
           reviewer_id: string
         }
         Insert: {
-          category_id?: number | null
+          sector_id?: number | null
           created_at?: string
           id?: string
           reviewer_id: string
         }
         Update: {
-          category_id?: number | null
+          sector_id?: number | null
           created_at?: string
           id?: string
           reviewer_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "reviewer_categories_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "reviewer_sectors_sector_id_fkey"
+            columns: ["sector_id"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "sectors"
             referencedColumns: ["id"]
           },
         ]
@@ -1440,7 +1461,7 @@ export type Database = {
       }
       success_stories: {
         Row: {
-          category: string
+          sector: string
           company: string
           created_at: string
           created_by: string | null
@@ -1458,7 +1479,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          category: string
+          sector: string
           company: string
           created_at?: string
           created_by?: string | null
@@ -1476,7 +1497,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          category?: string
+          sector?: string
           company?: string
           created_at?: string
           created_by?: string | null
@@ -1644,11 +1665,11 @@ export type Database = {
         Args: { p_application_id: string; p_reviewer_ids: string[] }
         Returns: undefined
       }
-      assign_reviewer_category: {
-        Args: { p_category_name: string; p_reviewer_id: string }
+      assign_reviewer_sector: {
+        Args: { p_sector_name: string; p_reviewer_id: string }
         Returns: {
-          category_id: number
-          category_name: string
+          sector_id: number
+          sector_name: string
           created_at: string
           id: string
           reviewer_id: string
@@ -1663,7 +1684,7 @@ export type Database = {
       }
       calculate_review_score:
         | { Args: { p_scores: Json }; Returns: number }
-        | { Args: { p_category: string; p_scores: Json }; Returns: number }
+        | { Args: { p_sector: string; p_scores: Json }; Returns: number }
         | {
             Args: { p_rubric_version_id?: string; p_scores: Json }
             Returns: number
@@ -1701,8 +1722,8 @@ export type Database = {
         Args: { p_notes?: string; p_rubric: Json }
         Returns: string
       }
-      generate_category_slug: {
-        Args: { category_name: string }
+      generate_sector_slug: {
+        Args: { sector_name: string }
         Returns: string
       }
       generate_invoice_number: { Args: never; Returns: string }
@@ -1744,7 +1765,7 @@ export type Database = {
         Args: never
         Returns: {
           average_score: number
-          categories: Json
+          sectors: Json
           email: string
           first_name: string
           last_name: string
@@ -1897,7 +1918,7 @@ export type Database = {
       }
       get_projects_with_filters: {
         Args: {
-          p_category?: string
+          p_sector?: string
           p_location?: string
           p_page?: number
           p_page_size?: number
@@ -1945,8 +1966,8 @@ export type Database = {
           application_status: string
           assigned_at: string
           assignment_id: string
-          category_id: number
-          category_name: string
+          sector_id: number
+          sector_name: string
           created_at: string
           is_draft: boolean
           project_id: number
@@ -1959,7 +1980,7 @@ export type Database = {
         Args: { p_reviewer_id: string }
         Returns: {
           average_score: number
-          categories: Json
+          sectors: Json
           completed_reviews: Json
           pending_assignments: Json
           reviewer: Json
@@ -2230,3 +2251,11 @@ export const Constants = {
     },
   },
 } as const
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hooks for managing reviewer assignments
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -108,7 +108,7 @@ export const useReviewerAssignments = (reviewerId?: string) => {
     queryFn: async () => {
       if (!reviewerId) return [];
       
-      // Server-side join (assignment + application + category label) to avoid client joins
+      // Server-side join (assignment + application + sector label) to avoid client joins
       const { data, error } = await supabase.rpc(
         'get_reviewer_assignments_with_application' as any,
         { p_reviewer_id: reviewerId }
@@ -140,28 +140,28 @@ export const useReviewerWorkload = (reviewerId?: string) => {
   });
 };
 
-// Get reviewer categories
-// Reviewer categories are relatively static and don't change frequently
-export const useReviewerCategories = (reviewerId?: string) => {
+// Get reviewer sectors
+// Reviewer sectors are relatively static and don't change frequently
+export const useReviewersectors = (reviewerId?: string) => {
   return useQuery({
-    queryKey: ['reviewer-categories', reviewerId],
+    queryKey: ['reviewer-sectors', reviewerId],
     queryFn: async () => {
       if (!reviewerId) return [];
       
       const { data, error } = await supabase
-        .from('reviewer_categories')
+        .from('reviewer_sectors')
         .select(`
           *,
-          categories:category_id(name)
+          sectors:sector_id(name)
         `)
         .eq('reviewer_id', reviewerId);
       
       if (error) throw error;
       
-      // Transform to include category name for backward compatibility and deduplicate
+      // Transform to include sector name for backward compatibility and deduplicate
       const transformed = (data || []).map((item: any) => ({
         ...item,
-        category: item.categories?.name || 'Unknown',
+        sector: item.sectors?.name || 'Unknown',
       })) as ReviewerCategory[];
       
       // Deduplicate by id to prevent duplicates
@@ -169,11 +169,11 @@ export const useReviewerCategories = (reviewerId?: string) => {
         new Map(transformed.map(item => [item.id, item])).values()
       );
       
-      // Sort by category name
-      return unique.sort((a, b) => a.category.localeCompare(b.category));
+      // Sort by sector name
+      return unique.sort((a, b) => a.sector.localeCompare(b.sector));
     },
     enabled: !!reviewerId,
-    staleTime: Infinity, // Never consider stale - reviewer categories rarely change
+    staleTime: Infinity, // Never consider stale - reviewer sectors rarely change
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -243,4 +243,12 @@ export const useAddConflict = () => {
     },
   });
 };
+
+
+
+
+
+
+
+
 

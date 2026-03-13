@@ -1,4 +1,4 @@
-import { FileText, Video, Table2, Presentation, Link as LinkIcon, LayoutGrid, LucideIcon } from "lucide-react";
+﻿import { FileText, Video, Table2, Presentation, Link as LinkIcon, LayoutGrid, LucideIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -110,3 +110,11 @@ export function ResourceTabs({ resources, onDownload }: ResourceTabsProps) {
     </Tabs>
   );
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -100,7 +100,7 @@ describe('Dashboard - Data Viewing', () => {
     firstName: 'John',
     lastName: 'Doe',
     businessName: 'Tech Solutions',
-    businessSector: 'Technology',
+    businesssector: 'Technology',
     country: 'Ghana',
     bio: 'Entrepreneur',
     avatarUrl: null,
@@ -300,7 +300,7 @@ describe('Dashboard - Data Viewing', () => {
 
   it('displays profile completion percentage', async () => {
     // Create a profile that results in ~71% completion (5 out of 7 fields filled)
-    // Dashboard calculates: firstName, lastName, bio, country, businessName, businessSector, avatarUrl
+    // Dashboard calculates: firstName, lastName, bio, country, businessName, businesssector, avatarUrl
     const profileFor75Percent = {
       ...mockProfile,
       firstName: 'John',
@@ -308,7 +308,7 @@ describe('Dashboard - Data Viewing', () => {
       bio: 'Entrepreneur',
       country: 'Ghana',
       businessName: 'Tech Solutions',
-      // businessSector is already set
+      // businesssector is already set
       // avatarUrl is null (not filled)
     };
 
@@ -581,4 +581,12 @@ describe('Dashboard - Data Viewing', () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

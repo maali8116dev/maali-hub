@@ -13,12 +13,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAllCategories } from "@/hooks/useCategories";
+import { useAllSectors } from "@/hooks/useSectors";
 
 const successStorySchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
   company: z.string().min(1, "Company is required").min(2, "Company must be at least 2 characters"),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "Sector is required"),
   location: z.string().min(1, "Location is required"),
   funding_amount: z.string().min(1, "Funding amount is required"),
   funding_date: z.string().min(1, "Funding date is required"),
@@ -51,7 +51,7 @@ const SuccessStoryForm = () => {
     defaultValues: {
       name: "",
       company: "",
-      category: "",
+      sector: "",
       location: "",
       funding_amount: "",
       funding_date: "",
@@ -84,7 +84,7 @@ const SuccessStoryForm = () => {
       if (data) {
         setValue("name", data.name);
         setValue("company", data.company);
-        setValue("category", data.category);
+        setValue("sector", data.sector);
         setValue("location", data.location);
         setValue("funding_amount", data.funding_amount);
         setValue("funding_date", data.funding_date);
@@ -113,7 +113,7 @@ const SuccessStoryForm = () => {
       const storyData = {
         name: data.name,
         company: data.company,
-        category: data.category,
+        sector: data.sector,
         location: data.location,
         funding_amount: data.funding_amount,
         funding_date: data.funding_date,
@@ -163,8 +163,8 @@ const SuccessStoryForm = () => {
   };
 
   const imageUrl = watch("image_url");
-  const { data: categoriesData = [] } = useAllCategories();
-  const categories = categoriesData.map((cat) => cat.name);
+  const { data: sectorsData = [] } = useAllSectors();
+  const sectors = sectorsData.map((cat) => cat.name);
 
   if (isFetching) {
     return (
@@ -233,19 +233,19 @@ const SuccessStoryForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="category">Category *</Label>
+                    <Label htmlFor="sector">Sector *</Label>
                     <Select
-                      value={watch("category")}
-                      onValueChange={(value) => setValue("category", value)}
+                      value={watch("sector")}
+                      onValueChange={(value) => setValue("sector", value)}
                     >
-                      <SelectTrigger id="category">
-                        <SelectValue placeholder="Select category" />
+                      <SelectTrigger id="sector">
+                        <SelectValue placeholder="Select Sector" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.length === 0 ? (
-                          <SelectItem value="no-categories" disabled>No categories available</SelectItem>
+                        {sectors.length === 0 ? (
+                          <SelectItem value="no-sectors" disabled>No sectors available</SelectItem>
                         ) : (
-                          categories.map((cat) => (
+                          sectors.map((cat) => (
                             <SelectItem key={cat} value={cat}>
                               {cat}
                             </SelectItem>
@@ -253,8 +253,8 @@ const SuccessStoryForm = () => {
                         )}
                       </SelectContent>
                     </Select>
-                    {errors.category && (
-                      <p className="text-sm text-destructive mt-1">{errors.category.message}</p>
+                    {errors.sector && (
+                      <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
                     )}
                   </div>
 
@@ -443,4 +443,12 @@ const SuccessStoryForm = () => {
 };
 
 export default SuccessStoryForm;
+
+
+
+
+
+
+
+
 

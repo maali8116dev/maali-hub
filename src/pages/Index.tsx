@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustIndicators from "@/components/landing/TrustIndicators";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -61,3 +61,11 @@ const Index = () => {
 };
 
 export default Index;
+
+
+
+
+
+
+
+

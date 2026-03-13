@@ -1,4 +1,4 @@
-// src/config/activityLogging.ts
+﻿// src/config/activityLogging.ts
 
 import type { ActionType, EntityType } from "@/hooks/useActivityLogger";
 
@@ -59,4 +59,12 @@ export function shouldLogToDatabase(
   // Default: don't log unknown actions
   return false;
 }
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+﻿import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
 import { Users, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,7 +6,7 @@ import CustomFormField, {
   FormFieldType,
 } from "@/components/form/CustomFormField";
 import { ApplicationFormValues } from "../schemas";
-import { PRIMARY_SECTORS } from "../constants";
+import { PRIMARY_sectorS } from "../constants";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step2OrganizationalBackgroundProps {
@@ -82,27 +82,27 @@ export function Step2OrganizationalBackground({
             maxLength={1200}
           />
 
-          {/* Primary Sectors - Checkbox Group */}
+          {/* Primary sectors - Checkbox Group */}
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Primary Sector(s)
+              Primary sector(s)
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {PRIMARY_SECTORS.map((sector) => (
+              {PRIMARY_sectorS.map((sector) => (
                 <div
                   key={sector.value}
                   className="flex items-center space-x-2"
                 >
                   <Checkbox
                     id={`sector-${sector.value}`}
-                    checked={watch("primarySectors")?.includes(sector.value) || false}
+                    checked={watch("primarysectors")?.includes(sector.value) || false}
                     onCheckedChange={(checked) => {
-                      const current = watch("primarySectors") || [];
+                      const current = watch("primarysectors") || [];
                       const updated = checked
                         ? [...current, sector.value]
                         : current.filter((s) => s !== sector.value);
-                      setValue("primarySectors", updated);
-                      updateFormData({ primarySectors: updated });
+                      setValue("primarysectors", updated);
+                      updateFormData({ primarysectors: updated });
                     }}
                   />
                   <label
@@ -114,19 +114,19 @@ export function Step2OrganizationalBackground({
                 </div>
               ))}
             </div>
-            {watch("primarySectors")?.includes("Other") && (
+            {watch("primarysectors")?.includes("Other") && (
               <CustomFormField
                 control={control}
-                name="primarySectorOther"
+                name="primarysectorOther"
                 fieldType={FormFieldType.INPUT}
-                label="Other Sector (Please specify)"
+                label="Other sector (Please specify)"
                 placeholder="Enter other sector"
                 className="mt-2"
               />
             )}
-            {formState.errors.primarySectors && (
+            {formState.errors.primarysectors && (
               <p className="text-sm text-destructive mt-1">
-                {String(formState.errors.primarySectors.message)}
+                {String(formState.errors.primarysectors.message)}
               </p>
             )}
           </div>
@@ -179,4 +179,12 @@ export function Step2OrganizationalBackground({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo } from "react";
+﻿import { ReactNode, useEffect, useMemo } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -62,7 +62,7 @@ const RoleBasedRoute = ({
     const role = userRole || "applicant";
     const { pathname } = location;
 
-    // Applicant dashboard routes — redirect non-applicants to their own dashboard
+    // Applicant dashboard routes -redirect non-applicants to their own dashboard
     if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
       if (role === "reviewer") {
         return pathname === "/dashboard"
@@ -81,21 +81,21 @@ const RoleBasedRoute = ({
       }
     }
 
-    // Partner routes — only partners and admins allowed
+    // Partner routes -only partners and admins allowed
     if (pathname.startsWith("/partner")) {
       if (role !== "partner" && role !== "admin") {
         return getDashboardForRole(role);
       }
     }
 
-    // Reviewer routes — only reviewers and admins allowed
+    // Reviewer routes -only reviewers and admins allowed
     if (pathname.startsWith("/reviewer")) {
       if (role !== "reviewer" && role !== "admin") {
         return getDashboardForRole(role);
       }
     }
 
-    // Admin routes — only admins allowed
+    // Admin routes -only admins allowed
     if (pathname.startsWith("/admin")) {
       if (role !== "admin") {
         return getDashboardForRole(role);
@@ -133,4 +133,12 @@ const RoleBasedRoute = ({
 };
 
 export default RoleBasedRoute;
+
+
+
+
+
+
+
+
 

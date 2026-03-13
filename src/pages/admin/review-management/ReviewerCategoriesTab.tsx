@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
@@ -18,15 +18,15 @@ import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
 import { TrendingUp, Plus, X, Eye } from 'lucide-react';
 import { AddCategoryForm } from './AddCategoryForm';
 
-interface ReviewerCategoriesTabProps {
+interface ReviewersectorsTabProps {
   reviewers: any[];
-  categories: string[];
+  sectors: string[];
 }
 
-export const ReviewerCategoriesTab = ({
+export const ReviewersectorsTab = ({
   reviewers,
-  categories,
-}: ReviewerCategoriesTabProps) => {
+  sectors,
+}: ReviewersectorsTabProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -34,17 +34,17 @@ export const ReviewerCategoriesTab = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
-  // Extract reviewer categories from reviewers data (already included in RPC response)
-  const reviewerCategories = useMemo(() => {
-    const allCategories: any[] = [];
+  // Extract reviewer sectors from reviewers data (already included in RPC response)
+  const reviewersectors = useMemo(() => {
+    const allsectors: any[] = [];
     reviewers.forEach((reviewer: any) => {
-      if (reviewer.categories && Array.isArray(reviewer.categories)) {
-        reviewer.categories.forEach((cat: any) => {
-          allCategories.push({
+      if (reviewer.sectors && Array.isArray(reviewer.sectors)) {
+        reviewer.sectors.forEach((cat: any) => {
+          allsectors.push({
             id: cat.id,
             reviewer_id: reviewer.user_id,
-            category_id: cat.category_id,
-            category: cat.category_name,
+            sector_id: cat.sector_id,
+            sector: cat.sector_name,
             reviewer: {
               user_id: reviewer.user_id,
               first_name: reviewer.first_name,
@@ -54,19 +54,19 @@ export const ReviewerCategoriesTab = ({
         });
       }
     });
-    // Sort by category name
-    return allCategories.sort((a: any, b: any) => a.category.localeCompare(b.category));
+    // Sort by sector name
+    return allsectors.sort((a: any, b: any) => a.sector.localeCompare(b.sector));
   }, [reviewers]);
 
-  // Refetch function for categories (will refetch reviewers which includes categories)
-  const refetchCategories = () => {
+  // Refetch function for sectors (will refetch reviewers which includes sectors)
+  const refetchsectors = () => {
     queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
   };
 
   // Transform reviewers data for the table
   const reviewersTableData = useMemo(() => {
     return reviewers.map((reviewer) => {
-      const reviewerCats = reviewerCategories.filter(
+      const reviewerCats = reviewersectors.filter(
         (rc: any) => rc.reviewer_id === reviewer.user_id
       );
       const workload = reviewer.workload || 0;
@@ -74,35 +74,35 @@ export const ReviewerCategoriesTab = ({
       return {
         ...reviewer,
         workload,
-        categories: reviewerCats.map((rc: any) => ({
+        sectors: reviewerCats.map((rc: any) => ({
           id: rc.id,
-          name: rc.category,
+          name: rc.sector,
         })),
       };
     });
-  }, [reviewers, reviewerCategories]);
+  }, [reviewers, reviewersectors]);
 
   const addCategory = useMutation({
-    mutationFn: async ({ reviewerId, category }: { reviewerId: string; category: string }) => {
-      // Use RPC function for atomic category assignment
+    mutationFn: async ({ reviewerId, sector }: { reviewerId: string; sector: string }) => {
+      // Use RPC function for atomic sector assignment
       // This handles validation, duplicate checking, and insertion in one call
       const { data, error } = await supabase.rpc(
-        'assign_reviewer_category' as any,
+        'assign_reviewer_sector' as any,
         {
           p_reviewer_id: reviewerId,
-          p_category_name: category,
+          p_sector_name: sector,
         }
       );
       
       if (error) {
         // RPC function provides clear error messages
-        throw new Error(error.message || `Failed to assign category "${category}"`);
+        throw new Error(error.message || `Failed to assign sector "${sector}"`);
       }
       
       // Handle return value - RPC returns array or single object
       const result = Array.isArray(data) ? data : (data ? [data] : []);
       if (result.length === 0) {
-        throw new Error(`Failed to assign category "${category}"`);
+        throw new Error(`Failed to assign sector "${sector}"`);
       }
       
       return result[0];
@@ -115,18 +115,18 @@ export const ReviewerCategoriesTab = ({
       // Wait a brief moment to ensure database transaction is committed
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Invalidate reviewers query (which includes categories and workload)
+      // Invalidate reviewers query (which includes sectors and workload)
       await queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
       
       // Also explicitly refetch to ensure UI updates
-      await refetchCategories();
+      await refetchsectors();
       
-      toast({ title: 'Category Added', description: 'Reviewer category added successfully.' });
+      toast({ title: 'sector Added', description: 'Reviewer sector added successfully.' });
     },
     onError: (error: Error) => {
       toast({ 
         title: 'Error', 
-        description: error.message || 'Failed to add category assignment.',
+        description: error.message || 'Failed to add sector assignment.',
         variant: 'destructive',
       });
     },
@@ -135,18 +135,18 @@ export const ReviewerCategoriesTab = ({
   const removeCategory = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('reviewer_categories')
+        .from('reviewer_sectors')
         .delete()
         .eq('id', id);
       
       if (error) throw error;
     },
     onSuccess: async () => {
-      // Invalidate reviewers query (which includes categories and workload)
+      // Invalidate reviewers query (which includes sectors and workload)
       await queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
       // Explicitly refetch to ensure UI updates
-      await refetchCategories();
-      toast({ title: 'Category Removed', description: 'Reviewer category removed.' });
+      await refetchsectors();
+      toast({ title: 'sector Removed', description: 'Reviewer sector removed.' });
     },
   });
 
@@ -198,14 +198,14 @@ export const ReviewerCategoriesTab = ({
       },
     },
     {
-      accessorKey: 'categories',
-      header: 'Categories',
+      accessorKey: 'sectors',
+      header: 'sectors',
       cell: ({ row }) => {
-        const categories = row.original.categories || [];
+        const sectors = row.original.sectors || [];
         return (
           <div className="flex flex-wrap gap-2 max-w-md">
-            {categories.length > 0 ? (
-              categories.map((cat: any) => (
+            {sectors.length > 0 ? (
+              sectors.map((cat: any) => (
                 <Badge key={cat.id} variant="secondary" className="flex items-center gap-1">
                   {cat.name}
                   <X
@@ -219,7 +219,7 @@ export const ReviewerCategoriesTab = ({
                 </Badge>
               ))
             ) : (
-              <span className="text-sm text-muted-foreground">No categories assigned</span>
+              <span className="text-sm text-muted-foreground">No sectors assigned</span>
             )}
           </div>
         );
@@ -250,7 +250,7 @@ export const ReviewerCategoriesTab = ({
               disabled={addCategory.isPending || removeCategory.isPending}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Category
+              Add sector
             </Button>
           </div>
         );
@@ -264,7 +264,7 @@ export const ReviewerCategoriesTab = ({
         <CardHeader>
           <CardTitle>Reviewers</CardTitle>
           <CardDescription>
-            Manage reviewer categories and view workload. Reviewers can only review applications in their assigned categories.
+            Manage reviewer sectors and view workload. Reviewers can only review applications in their assigned sectors.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -284,15 +284,15 @@ export const ReviewerCategoriesTab = ({
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Reviewer Category</DialogTitle>
+                <DialogTitle>Add Reviewer sector</DialogTitle>
               </DialogHeader>
               <AddCategoryForm
                 key={formKey}
                 reviewers={reviewers}
-                categories={categories}
+                sectors={sectors}
                 selectedReviewerId={selectedReviewer}
-                onSubmit={(reviewerId, category) =>
-                  addCategory.mutate({ reviewerId, category })
+                onSubmit={(reviewerId, sector) =>
+                  addCategory.mutate({ reviewerId, sector })
                 }
                 isSubmitting={addCategory.isPending}
                 onDialogClose={() => setDialogOpen(false)}
@@ -304,7 +304,7 @@ export const ReviewerCategoriesTab = ({
             <DataTable
               columns={reviewerColumns}
               data={reviewersTableData}
-              searchPlaceholder="Search by reviewer name, category, or workload..."
+              searchPlaceholder="Search by reviewer name, sector, or workload..."
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
@@ -315,4 +315,12 @@ export const ReviewerCategoriesTab = ({
     </div>
   );
 };
+
+
+
+
+
+
+
+
 

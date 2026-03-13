@@ -1,4 +1,4 @@
-import { useSearchParams, useNavigate } from "react-router-dom";
+﻿import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -136,3 +136,11 @@ const PaymentCancel = () => (
 );
 
 export default PaymentCancel;
+
+
+
+
+
+
+
+

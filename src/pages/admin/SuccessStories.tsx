@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ type SuccessStory = {
   id: number;
   name: string;
   company: string;
-  category: string;
+  sector: string;
   location: string;
   funding_amount: string;
   funding_date: string;
@@ -74,7 +74,7 @@ const AdminSuccessStories = () => {
   const filteredStories = stories.filter((story) =>
     story.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     story.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    story.category.toLowerCase().includes(searchQuery.toLowerCase())
+    story.sector.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = (id: number) => {
@@ -154,7 +154,7 @@ const AdminSuccessStories = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search stories by name, company, or category..."
+              placeholder="Search stories by name, company, or sector..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -188,11 +188,11 @@ const AdminSuccessStories = () => {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
-                          (e.target as HTMLImageElement).parentElement!.innerHTML = "🌟";
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = "ðŸŒŸ";
                         }}
                       />
                     ) : (
-                      <span className="text-2xl">🌟</span>
+                      <span className="text-2xl">ðŸŒŸ</span>
                     )}
                   </div>
                   <div className="flex-1">
@@ -200,7 +200,7 @@ const AdminSuccessStories = () => {
                       <h3 className="font-semibold">{story.company}</h3>
                       {story.featured && <Badge variant="default">Featured</Badge>}
                       {getStatusBadge(story.status)}
-                      <Badge variant="outline">{story.category}</Badge>
+                      <Badge variant="outline">{story.sector}</Badge>
                     </div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">
                       {story.name}
@@ -266,4 +266,12 @@ const AdminSuccessStories = () => {
 };
 
 export default AdminSuccessStories;
+
+
+
+
+
+
+
+
 

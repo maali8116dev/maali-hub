@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { setupMocks } from './test-utils';
 
@@ -82,3 +82,11 @@ describe('Step 3: Project Overview', () => {
     expect(store.isStepValid(3)).toBe(true);
   });
 });
+
+
+
+
+
+
+
+

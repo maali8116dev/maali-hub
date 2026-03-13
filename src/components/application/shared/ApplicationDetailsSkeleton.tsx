@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/components/ui/skeleton";
 
 const ApplicationDetailsSkeleton = () => (
   <div className="space-y-6">
@@ -17,4 +17,12 @@ const ApplicationDetailsSkeleton = () => (
 );
 
 export default ApplicationDetailsSkeleton;
+
+
+
+
+
+
+
+
 

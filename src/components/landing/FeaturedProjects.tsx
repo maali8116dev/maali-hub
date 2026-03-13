@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import ProjectCard from "./ProjectCard";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -72,7 +72,7 @@ const FeaturedProjects = () => {
                 id={opportunity.id}
                 title={opportunity.title}
                 description={opportunity.description}
-                category={opportunity.tags?.[0]?.name || "Uncategorized"}
+                sector={opportunity.tags?.[0]?.name || "Uncategorized"}
                 location={opportunity.location}
                 fundingAmount={opportunity.fundingAmount}
                 deadline={opportunity.deadline}
@@ -106,3 +106,11 @@ const FeaturedProjects = () => {
 };
 
 export default FeaturedProjects;
+
+
+
+
+
+
+
+

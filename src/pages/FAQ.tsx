@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,29 +12,29 @@ const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: faqs, isLoading, error } = useFAQs();
 
-  // Group FAQs by category
-  const faqCategories = useMemo(() => {
+  // Group FAQs by sector
+  const faqsectors = useMemo(() => {
     if (!faqs) return [];
     
     const grouped = faqs.reduce((acc, faq) => {
-      if (!acc[faq.category]) {
-        acc[faq.category] = [];
+      if (!acc[faq.sector]) {
+        acc[faq.sector] = [];
       }
-      acc[faq.category].push(faq);
+      acc[faq.sector].push(faq);
       return acc;
     }, {} as Record<string, FAQ[]>);
 
     return Object.entries(grouped)
-      .map(([category, questions]) => ({
-        category,
+      .map(([sector, questions]) => ({
+        sector,
         questions: questions.sort((a, b) => a.display_order - b.display_order),
       }))
-      .sort((a, b) => a.category.localeCompare(b.category));
+      .sort((a, b) => a.sector.localeCompare(b.sector));
   }, [faqs]);
 
   // Filter FAQs based on search
-  const filteredCategories = useMemo(() => {
-    if (!searchQuery) return faqCategories;
+  const filteredsectors = useMemo(() => {
+    if (!searchQuery) return faqsectors;
 
     const searchLower = searchQuery.toLowerCase();
     const matchingFAQs = faqs?.filter(
@@ -47,11 +47,11 @@ const FAQPage = () => {
 
     return [
       {
-        category: "Search Results",
+        sector: "Search Results",
         questions: matchingFAQs,
       },
     ];
-  }, [searchQuery, faqs, faqCategories]);
+  }, [searchQuery, faqs, faqsectors]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,12 +122,12 @@ const FAQPage = () => {
         {/* FAQ Accordion */}
         {!isLoading && !error && (
           <div className="space-y-6 mb-12">
-            {filteredCategories.map((category, categoryIndex) => (
+            {filteredsectors.map((sector, categoryIndex) => (
               <Card key={categoryIndex}>
                 <CardContent className="pt-6">
-                  <h2 className="text-2xl font-bold mb-4">{category.category}</h2>
+                  <h2 className="text-2xl font-bold mb-4">{sector.sector}</h2>
                   <Accordion type="single" collapsible className="w-full">
-                    {category.questions.map((faq, faqIndex) => (
+                    {sector.questions.map((faq, faqIndex) => (
                       <AccordionItem key={faq.id} value={`item-${categoryIndex}-${faqIndex}`}>
                         <AccordionTrigger className="text-left">
                           {faq.question}
@@ -145,7 +145,7 @@ const FAQPage = () => {
         )}
 
         {/* Empty State */}
-        {!isLoading && !error && filteredCategories.length === 0 && (
+        {!isLoading && !error && filteredsectors.length === 0 && (
           <Card className="mb-12">
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground mb-4">
@@ -194,3 +194,11 @@ const FAQPage = () => {
 };
 
 export default FAQPage;
+
+
+
+
+
+
+
+

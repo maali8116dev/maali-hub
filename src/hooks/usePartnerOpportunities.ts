@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { usePartnerOrg } from "@/hooks/usePartnerOrg";
 
 export type PartnerOpportunity = {
   id: number;
@@ -20,9 +21,8 @@ export type PartnerOpportunity = {
   featured: boolean;
   currency: string;
   opportunityType: string;
-  organizationName: string | null;
   country: string | null;
-  categoryId: number | null;
+  sectorId: number | null;
   createdAt: string;
 };
 
@@ -31,17 +31,16 @@ export type PartnerOpportunityFormData = {
   description: string;
   status: string;
   deadline: string;
-  fundingAmount: string;
+  fundingAmount?: string;
   location: string;
   imageUrl?: string;
   requirements?: string;
   eligibilityCriteria?: string;
   maxApplicants?: number;
   currency?: string;
-  opportunityType?: string;
-  organizationName?: string;
+  opportunityType?: string | null;
   country?: string;
-  categoryId?: number;
+  sectorId?: number;
   tags?: string[]; // Tag names (existing or new)
 };
 
@@ -63,23 +62,25 @@ function transformOpportunity(data: any): PartnerOpportunity {
     featured: data.featured,
     currency: data.currency,
     opportunityType: data.opportunity_type,
-    organizationName: data.organization_name,
     country: data.country,
-    categoryId: data.category_id,
+    sectorId: data.sector_id,
     createdAt: data.created_at,
   };
 }
 
 export function usePartnerOpportunities() {
   const { user } = useAuth();
+  const { data: partnerOrg } = usePartnerOrg();
 
   return useQuery({
-    queryKey: ["partner-opportunities", user?.id],
+    queryKey: ["partner-opportunities", user?.id, partnerOrg?.id],
     queryFn: async () => {
+      if (!partnerOrg?.id) return [];
+
       const { data, error } = await supabase
         .from("opportunities")
         .select("*")
-        .eq("created_by", user!.id)
+        .eq("partner_id", partnerOrg.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -91,15 +92,18 @@ export function usePartnerOpportunities() {
 
 export function usePartnerOpportunity(id?: number) {
   const { user } = useAuth();
+  const { data: partnerOrg } = usePartnerOrg();
 
   return useQuery({
-    queryKey: ["partner-opportunity", id],
+    queryKey: ["partner-opportunity", id, partnerOrg?.id],
     queryFn: async () => {
+      if (!id || !partnerOrg?.id) throw new Error("Partner organization not found");
+
       const { data, error } = await supabase
         .from("opportunities")
         .select("*")
         .eq("id", id!)
-        .eq("created_by", user!.id)
+        .eq("partner_id", partnerOrg.id)
         .single();
 
       if (error) throw error;
@@ -113,17 +117,29 @@ export function usePartnerOpportunity(id?: number) {
 async function syncTags(opportunityId: number, tagNames: string[]) {
   if (!tagNames.length) return;
 
-  // For each tag name, upsert into opportunity_tags
+  // For each tag name, insert if missing (avoid UPDATE RLS)
   const resolvedTagIds: number[] = [];
   for (const name of tagNames) {
     const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    const { data: upserted, error } = await (supabase
+    const { data: inserted, error } = await (supabase
       .from("opportunity_tags" as any)
-      .upsert({ name, slug }, { onConflict: "slug" })
+      .upsert({ name, slug }, { onConflict: "slug", ignoreDuplicates: true })
       .select("id")
       .single() as any);
-    if (error) throw error;
-    resolvedTagIds.push(upserted.id);
+    if (error && error.code !== "PGRST116") throw error;
+
+    if (inserted?.id) {
+      resolvedTagIds.push(inserted.id);
+      continue;
+    }
+
+    const { data: existing, error: selectError } = await (supabase
+      .from("opportunity_tags" as any)
+      .select("id")
+      .eq("slug", slug)
+      .single() as any);
+    if (selectError) throw selectError;
+    resolvedTagIds.push(existing.id);
   }
 
   // Delete old mappings then insert new ones
@@ -140,6 +156,7 @@ export function useCreatePartnerOpportunity() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: partnerOrg } = usePartnerOrg();
 
   return useMutation({
     mutationFn: async (formData: PartnerOpportunityFormData) => {
@@ -150,7 +167,7 @@ export function useCreatePartnerOpportunity() {
           description: formData.description,
           status: formData.status || "open",
           deadline: formData.deadline,
-          funding_amount: formData.fundingAmount,
+          funding_amount: formData.opportunityType === "grant" ? formData.fundingAmount || null : null,
           location: formData.location,
           image_url: formData.imageUrl || null,
           requirements: formData.requirements || null,
@@ -158,11 +175,12 @@ export function useCreatePartnerOpportunity() {
           application_fee: 0,
           max_applicants: formData.maxApplicants || null,
           currency: formData.currency || "USD",
-          opportunity_type: (formData.opportunityType as any) || "grant",
-          organization_name: formData.organizationName || null,
+          opportunity_type: (formData.opportunityType as any) || null,
           country: formData.country || null,
-          category_id: formData.categoryId || null,
+          sector_id: formData.sectorId || null,
           created_by: user!.id,
+          // Link opportunity to the partner organization, if one is associated
+          partner_id: partnerOrg?.id ?? null,
         })
         .select()
         .single();
@@ -197,7 +215,7 @@ export function useUpdatePartnerOpportunity() {
           description: formData.description,
           status: formData.status,
           deadline: formData.deadline,
-          funding_amount: formData.fundingAmount,
+          funding_amount: formData.opportunityType === "grant" ? formData.fundingAmount || null : null,
           location: formData.location,
           image_url: formData.imageUrl || null,
           requirements: formData.requirements || null,
@@ -205,10 +223,9 @@ export function useUpdatePartnerOpportunity() {
           application_fee: 0,
           max_applicants: formData.maxApplicants || null,
           currency: formData.currency || "USD",
-          opportunity_type: (formData.opportunityType as any) || "grant",
-          organization_name: formData.organizationName || null,
+          opportunity_type: (formData.opportunityType as any) || null,
           country: formData.country || null,
-          category_id: formData.categoryId || null,
+          sector_id: formData.sectorId || null,
         })
         .eq("id", id)
         .eq("created_by", user!.id)
@@ -249,3 +266,11 @@ export function usePartnerOpportunityTags(opportunityId?: number) {
     enabled: !!opportunityId,
   });
 }
+
+
+
+
+
+
+
+

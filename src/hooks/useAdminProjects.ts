@@ -7,7 +7,7 @@ export type Project = {
   id: number;
   title: string;
   description: string;
-  category: string;
+  sector: string;
   status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string;
   fundingAmount: string;
@@ -22,12 +22,13 @@ export type Project = {
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
+  partnerId?: number | null;
 };
 
 export type ProjectFormData = {
   title: string;
   description: string;
-  category: string;
+  sector: string;
   status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string; // YYYY-MM-DD format
   fundingAmount: string;
@@ -39,6 +40,7 @@ export type ProjectFormData = {
   maxApplicants?: number;
   currentApplicants?: number;
   featured?: boolean;
+  partnerId?: number | null;
 };
 
 // Transform Supabase snake_case to camelCase
@@ -47,7 +49,7 @@ function transformProject(data: any): Project {
     id: data.id,
     title: data.title,
     description: data.description,
-    category: data.categories?.name || 'Uncategorized',
+    sector: data.sectors?.name || "Uncategorized",
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount,
@@ -60,29 +62,30 @@ function transformProject(data: any): Project {
     currentApplicants: data.current_applicants || 0,
     featured: data.featured ?? false,
     createdBy: data.created_by,
+    partnerId: data.partner_id || null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
 }
 
-// Helper function to look up category_id from category name
-async function getCategoryId(categoryName: string | undefined): Promise<number | null> {
-  if (!categoryName) return null;
+// Helper function to look up sector_id from sector name
+async function getSectorId(sectorName: string | undefined): Promise<number | null> {
+  if (!sectorName) return null;
   
-  const { data: categoryData, error } = await supabase
-    .from("categories")
+  const { data: sectorData, error } = await supabase
+    .from("sectors")
     .select("id")
-    .eq("name", categoryName)
+    .eq("name", sectorName)
     .eq("is_active", true)
     .single();
   
-  if (!error && categoryData) {
-    return categoryData.id;
+  if (!error && sectorData) {
+    return sectorData.id;
   }
   
-  // If category not found, return null (will be handled gracefully)
-  if (error && error.code !== 'PGRST116') {
-    console.warn(`Error looking up category "${categoryName}":`, error.message);
+  // If sector not found, return null (will be handled gracefully)
+  if (error && error.code !== "PGRST116") {
+    console.warn(`Error looking up sector "${sectorName}":`, error.message);
   }
   
   return null;
@@ -107,14 +110,16 @@ async function toSnakeCase(data: Partial<ProjectFormData>): Promise<Record<strin
   if (data.currentApplicants !== undefined) result.current_applicants = data.currentApplicants || 0;
   if (data.featured !== undefined) result.featured = data.featured ?? false;
   
-  // Handle category - convert category name to category_id
-  if (data.category !== undefined) {
-    // Look up category_id from category name
-    const categoryId = await getCategoryId(data.category);
-    if (categoryId === null) {
-      throw new Error(`Category "${data.category}" not found. Please select a valid category.`);
+  // Handle sector - convert sector name to sector_id
+  if (data.sector !== undefined) {
+    const sectorId = await getSectorId(data.sector);
+    if (sectorId === null) {
+      throw new Error(`Sector "${data.sector}" not found. Please select a valid sector.`);
     }
-    result.category_id = categoryId;
+    result.sector_id = sectorId;
+  }
+  if (data.partnerId !== undefined) {
+    result.partner_id = data.partnerId ?? null;
   }
   
   return result;
@@ -131,7 +136,7 @@ export function useAdminProjects() {
         .from("opportunities" as any)
         .select(`
           *,
-          categories:category_id(name)
+          sectors:sector_id(name)
         `)
         .order("created_at", { ascending: false });
 
@@ -156,7 +161,7 @@ export function useProject(id: number | undefined) {
         .from("opportunities" as any)
         .select(`
           *,
-          categories:category_id(name)
+          sectors:sector_id(name)
         `)
         .eq("id", id)
         .single();
@@ -182,32 +187,32 @@ export function useCreateProject() {
       const { data: session } = await supabase.auth.getSession();
       const userId = session?.session?.user?.id;
       
-      // Look up category_id from category name
-      let categoryId: number | null = null;
-      if (data.category) {
-        const { data: categoryData, error: categoryError } = await supabase
-          .from("categories")
+      // Look up sector_id from sector name
+      let sectorId: number | null = null;
+      if (data.sector) {
+        const { data: sectorData, error: sectorError } = await supabase
+          .from("sectors")
           .select("id")
-          .eq("name", data.category)
+          .eq("name", data.sector)
           .eq("is_active", true)
           .single();
         
-        if (!categoryError && categoryData) {
-          categoryId = categoryData.id;
-        } else if (categoryError && categoryError.code !== 'PGRST116') {
+        if (!sectorError && sectorData) {
+          sectorId = sectorData.id;
+        } else if (sectorError && sectorError.code !== "PGRST116") {
           // PGRST116 is "not found" - we'll allow it but log a warning
-          console.warn(`Category "${data.category}" not found in categories table. category_id will be null.`);
+          console.warn(`sector "${data.sector}" not found in sectors table. sector_id will be null.`);
         }
       }
       
-      if (!categoryId) {
-        throw new Error(`Category "${data.category}" not found. Please select a valid category.`);
+      if (!sectorId) {
+        throw new Error(`sector "${data.sector}" not found. Please select a valid sector.`);
       }
 
       const insertData = {
         title: data.title,
         description: data.description,
-        category_id: categoryId,
+        sector_id: sectorId,
         status: data.status,
         deadline: data.deadline,
         funding_amount: data.fundingAmount,
@@ -220,6 +225,7 @@ export function useCreateProject() {
         current_applicants: data.currentApplicants || 0,
         featured: data.featured ?? false,
         created_by: userId || null,
+        partner_id: data.partnerId ?? null,
       };
 
       const { data: result, error } = await supabase
@@ -227,7 +233,7 @@ export function useCreateProject() {
         .insert(insertData)
         .select(`
           *,
-          categories:category_id(name)
+          sectors:sector_id(name)
         `)
         .single();
 
@@ -245,7 +251,7 @@ export function useCreateProject() {
         entityType: "opportunity",
         entityId: String(project.id),
         description: `Created opportunity: ${project.title}`,
-        metadata: { title: project.title, category: project.category },
+        metadata: { title: project.title, sector: project.sector },
       });
       
       toast({
@@ -281,7 +287,7 @@ export function useUpdateProject() {
         .eq("id", id)
         .select(`
           *,
-          categories:category_id(name)
+          sectors:sector_id(name)
         `)
         .single();
 
@@ -371,3 +377,11 @@ export function useDeleteProject() {
     },
   });
 }
+
+
+
+
+
+
+
+

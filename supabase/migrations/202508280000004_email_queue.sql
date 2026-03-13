@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.email_queue (
   next_attempt_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   last_error TEXT,
   
-  -- Deduplication key (optional) â€” prevents sending the same email twice
+  -- Deduplication key (optional) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢-šÂ¬Ã‚Â prevents sending the same email twice
   idempotency_key TEXT UNIQUE,
   
   -- Audit
@@ -71,7 +71,7 @@ CREATE TRIGGER trg_email_queue_updated_at
 -- RLS: only service_role should access this table
 ALTER TABLE public.email_queue ENABLE ROW LEVEL SECURITY;
 
--- No user-level access â€” only service_role (used by edge functions) can read/write
+-- No user-level access ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢-šÂ¬Ã‚Â only service_role (used by edge functions) can read/write
 -- This is enforced by not creating any policies for authenticated/anon roles.
 
 COMMENT ON TABLE public.email_queue IS 'Outbox table for reliable email delivery with retry logic.';
@@ -109,3 +109,4 @@ COMMENT ON FUNCTION public.claim_email_batch(integer) IS 'Atomically claims a ba
 
 
 -- ============================================
+

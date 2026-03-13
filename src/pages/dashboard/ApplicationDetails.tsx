@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+﻿import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -319,3 +319,11 @@ const ApplicationDetails = () => {
 };
 
 export default ApplicationDetails;
+
+
+
+
+
+
+
+

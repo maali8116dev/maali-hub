@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.system_rubric (
 -- Create unique constraint to ensure only one row
 CREATE UNIQUE INDEX IF NOT EXISTS system_rubric_single_row_idx ON public.system_rubric ((1));
 
--- Migrate existing rubric data (use the first category rubric found, or create default)
+-- Migrate existing rubric data (use the first Sector rubric found, or create default)
 DO $$
 DECLARE
   default_rubric JSONB;
@@ -31,7 +31,7 @@ BEGIN
   SELECT 
     '00000000-0000-0000-0000-000000000001'::uuid,
     COALESCE(
-      (SELECT rubric FROM public.category_rubrics ORDER BY created_at ASC LIMIT 1),
+      (SELECT rubric FROM public.sector_rubrics ORDER BY created_at ASC LIMIT 1),
       default_rubric
     )
   ON CONFLICT (id) DO NOTHING;
@@ -49,7 +49,7 @@ CREATE POLICY "Admins can manage system rubric"
 ON public.system_rubric FOR ALL
 USING (public.get_user_role(auth.uid()) = 'admin');
 
--- Update calculate_review_score function to use system rubric (remove category parameter)
+-- Update calculate_review_score function to use system rubric (remove Sector parameter)
 CREATE OR REPLACE FUNCTION public.calculate_review_score(p_scores JSONB)
 RETURNS NUMERIC
 LANGUAGE plpgsql
@@ -107,9 +107,9 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_category_name TEXT;
+  v_sector_name TEXT;
 BEGIN
-  -- Calculate overall score using system rubric (no category needed)
+  -- Calculate overall score using system rubric (no Sector needed)
   NEW.overall_score := public.calculate_review_score(NEW.scores);
   NEW.updated_at := now();
 
@@ -127,13 +127,14 @@ EXECUTE FUNCTION public.update_updated_at_column();
 GRANT SELECT ON public.system_rubric TO anon, authenticated;
 GRANT ALL ON public.system_rubric TO service_role;
 
--- Drop old category_rubrics table (after migration)
+-- Drop old sector_rubrics table (after migration)
 -- Note: This will cascade delete any foreign key references
-DROP TABLE IF EXISTS public.category_rubrics CASCADE;
+DROP TABLE IF EXISTS public.sector_rubrics CASCADE;
 
 -- Add comment
-COMMENT ON TABLE public.system_rubric IS 'Single system-wide rubric that applies to all applications regardless of category';
+COMMENT ON TABLE public.system_rubric IS 'Single system-wide rubric that applies to all applications regardless of Sector';
 
 
 
 -- ============================================
+

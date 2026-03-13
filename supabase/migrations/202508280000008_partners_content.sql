@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.partners (
   description TEXT,
   logo_url TEXT,
   website_url TEXT,
-  category TEXT NOT NULL CHECK (category IN ('Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic')),
+  Sector TEXT NOT NULL CHECK (Sector IN ('Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic')),
   display_order INTEGER DEFAULT 0,
   featured BOOLEAN DEFAULT false,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
@@ -27,10 +27,15 @@ CREATE TABLE IF NOT EXISTS public.partners (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
+-- Add user_id column to partners table to link partner orgs to user accounts
+ALTER TABLE public.partners ADD COLUMN IF NOT EXISTS user_id uuid;
+
+-- Add unique constraint so each user can only be linked to one partner org
+ALTER TABLE public.partners ADD CONSTRAINT partners_user_id_unique UNIQUE (user_id);
 
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_partners_status ON public.partners(status);
-CREATE INDEX IF NOT EXISTS idx_partners_category ON public.partners(category);
+CREATE INDEX IF NOT EXISTS idx_partners_Sector ON public.partners(Sector);
 CREATE INDEX IF NOT EXISTS idx_partners_featured ON public.partners(featured);
 CREATE INDEX IF NOT EXISTS idx_partners_display_order ON public.partners(display_order);
 
@@ -68,8 +73,60 @@ BEFORE UPDATE ON public.partners
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
--- Add comment
-COMMENT ON TABLE public.partners IS 'Partner organizations displayed on the About page';
+
+-- Partners can INSERT their own opportunities
+CREATE POLICY "Partners can create their own opportunities"
+ON public.opportunities
+FOR INSERT
+TO authenticated
+WITH CHECK (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid());
+
+-- Partners can UPDATE their own opportunities
+CREATE POLICY "Partners can update their own opportunities"
+ON public.opportunities
+FOR UPDATE
+TO authenticated
+USING (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid())
+WITH CHECK (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid());
+
+-- Partners can view applications for their own opportunities
+CREATE POLICY "Partners can view applications for their opportunities"
+ON public.applications
+FOR SELECT
+TO authenticated
+USING (
+  get_user_role(auth.uid()) = 'partner'
+  AND EXISTS (
+    SELECT 1 FROM public.opportunities
+    WHERE opportunities.id = applications.opportunity_id
+    AND opportunities.created_by = auth.uid()
+  )
+);
+
+-- Partners can view documents for applications on their opportunities
+CREATE POLICY "Partners can view documents for their opportunity applications"
+ON public.application_documents
+FOR SELECT
+TO authenticated
+USING (
+  get_user_role(auth.uid()) = 'partner'
+  AND EXISTS (
+    SELECT 1 FROM public.applications a
+    JOIN public.opportunities o ON o.id = a.opportunity_id
+    WHERE a.id = application_documents.application_id
+    AND o.created_by = auth.uid()
+  )
+);
+
+
+
+
+-- Allow partners to update their own partner org row (description, logo_url, website_url)
+CREATE POLICY "Partners can update their own org"
+ON public.partners
+FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- ============================================
 -- Create Success Stories Table
@@ -81,7 +138,7 @@ CREATE TABLE IF NOT EXISTS public.success_stories (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   company TEXT NOT NULL,
-  category TEXT NOT NULL,
+  Sector TEXT NOT NULL,
   location TEXT NOT NULL,
   funding_amount TEXT NOT NULL,
   funding_date DATE NOT NULL,
@@ -98,7 +155,7 @@ CREATE TABLE IF NOT EXISTS public.success_stories (
 
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_success_stories_status ON public.success_stories(status);
-CREATE INDEX IF NOT EXISTS idx_success_stories_category ON public.success_stories(category);
+CREATE INDEX IF NOT EXISTS idx_success_stories_Sector ON public.success_stories(Sector);
 CREATE INDEX IF NOT EXISTS idx_success_stories_featured ON public.success_stories(featured);
 CREATE INDEX IF NOT EXISTS idx_success_stories_display_order ON public.success_stories(display_order);
 CREATE INDEX IF NOT EXISTS idx_success_stories_funding_date ON public.success_stories(funding_date);
@@ -235,3 +292,4 @@ USING (
 
 
 -- ============================================
+

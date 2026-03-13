@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Calendar, FileText, Shield, AlertCircle } from "lucide-react";
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
@@ -206,8 +206,8 @@ const AdminUserDetails = () => {
               <span>{user.businessName || "Not provided"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Business Sector</span>
-              <span>{user.businessSector || "Not provided"}</span>
+              <span className="text-muted-foreground">Business sector</span>
+              <span>{user.businesssector || "Not provided"}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Country</span>
@@ -316,4 +316,12 @@ const AdminUserDetails = () => {
 };
 
 export default AdminUserDetails;
+
+
+
+
+
+
+
+
 

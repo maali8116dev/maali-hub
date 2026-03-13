@@ -145,11 +145,11 @@ GRANT EXECUTE ON FUNCTION public.get_opportunity_applications_ranked(INTEGER) TO
 COMMENT ON FUNCTION public.get_opportunity_applications_ranked(INTEGER) IS 'Returns all applications for an opportunity ranked by average review score. Includes review statistics, variance, and aggregated recommendations. Only accessible to admins.';
 
 -- Update get_eligible_reviewers_for_application to use opportunity_id
--- Note: This function uses category_id from opportunities via tags, but we need to adapt it
--- For now, we'll use the first tag's category_id if available, or require category_id on opportunities
--- Actually, we should check how categories relate to opportunities now - they're via tags
--- For reviewer assignment, we still need category_id. Let's check if opportunities should have a primary_category_id
--- For now, we'll update to get category from opportunity tags
+-- Note: This function uses sector_id from opportunities via tags, but we need to adapt it
+-- For now, we'll use the first tag's sector_id if available, or require sector_id on opportunities
+-- Actually, we should check how sectors relate to opportunities now - they're via tags
+-- For reviewer assignment, we still need sector_id. Let's check if opportunities should have a primary_sector_id
+-- For now, we'll update to get Sector from opportunity tags
 CREATE OR REPLACE FUNCTION public.get_eligible_reviewers_for_application(
   p_application_id uuid
 )
@@ -164,7 +164,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_category_id integer;
+  v_sector_id integer;
 BEGIN
   -- Only admins can call this function
   IF NOT EXISTS (
@@ -174,37 +174,37 @@ BEGIN
     RAISE EXCEPTION 'Unauthorized';
   END IF;
 
-  -- Get category_id from opportunity via tags
-  -- For now, we'll get the first tag's category_id
-  -- Note: This assumes tags map to categories. If not, we may need to add category_id directly to opportunities
+  -- Get sector_id from opportunity via tags
+  -- For now, we'll get the first tag's sector_id
+  -- Note: This assumes tags map to sectors. If not, we may need to add sector_id directly to opportunities
   SELECT c.id
-  INTO v_category_id
+  INTO v_sector_id
   FROM public.applications a
   JOIN public.opportunities o ON a.opportunity_id = o.id
   LEFT JOIN public.opportunity_tag_map otm ON otm.opportunity_id = o.id
   LEFT JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
-  LEFT JOIN public.categories c ON c.name = ot.name
+  LEFT JOIN public.sectors c ON c.name = ot.name
   WHERE a.id = p_application_id
   LIMIT 1;
 
-  -- Fallback: try to get category_id from old category column if it exists
-  -- Actually, we removed category_id from opportunities, so we need another approach
-  -- For now, let's use the first matching category by tag name
-  IF v_category_id IS NULL THEN
-    -- Try alternative: get category from opportunity tags that match category names
+  -- Fallback: try to get sector_id from old Sector column if it exists
+  -- Actually, we removed sector_id from opportunities, so we need another approach
+  -- For now, let's use the first matching Sector by tag name
+  IF v_sector_id IS NULL THEN
+    -- Try alternative: get Sector from opportunity tags that match Sector names
     SELECT c.id
-    INTO v_category_id
+    INTO v_sector_id
     FROM public.applications a
     JOIN public.opportunities o ON a.opportunity_id = o.id
     LEFT JOIN public.opportunity_tag_map otm ON otm.opportunity_id = o.id
     LEFT JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
-    LEFT JOIN public.categories c ON LOWER(c.name) = LOWER(ot.name)
+    LEFT JOIN public.sectors c ON LOWER(c.name) = LOWER(ot.name)
     WHERE a.id = p_application_id
     LIMIT 1;
   END IF;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no matching category via tags';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no matching Sector via tags';
   END IF;
 
   RETURN QUERY
@@ -213,9 +213,9 @@ BEGIN
     COALESCE(pr.first_name, '')::text,
     COALESCE(pr.last_name, '')::text,
     public.get_reviewer_workload(rc.reviewer_id)::integer AS workload
-  FROM public.reviewer_categories rc
+  FROM public.reviewer_sectors rc
   JOIN public.profiles pr ON pr.user_id = rc.reviewer_id
-  WHERE rc.category_id = v_category_id
+  WHERE rc.sector_id = v_sector_id
     AND pr.role = 'reviewer'
     AND rc.reviewer_id NOT IN (
       SELECT rcf.reviewer_id
@@ -237,7 +237,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_category_id integer;
+  v_sector_id integer;
   v_count integer;
   v_id uuid;
 BEGIN
@@ -253,27 +253,27 @@ BEGIN
     RAISE EXCEPTION 'Exactly 2 reviewers must be provided';
   END IF;
 
-  -- Get category_id from opportunity via tags
+  -- Get sector_id from opportunity via tags
   SELECT c.id
-  INTO v_category_id
+  INTO v_sector_id
   FROM public.applications a
   JOIN public.opportunities o ON a.opportunity_id = o.id
   LEFT JOIN public.opportunity_tag_map otm ON otm.opportunity_id = o.id
   LEFT JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
-  LEFT JOIN public.categories c ON LOWER(c.name) = LOWER(ot.name)
+  LEFT JOIN public.sectors c ON LOWER(c.name) = LOWER(ot.name)
   WHERE a.id = p_application_id
   LIMIT 1;
 
-  IF v_category_id IS NULL THEN
-    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no matching category via tags';
+  IF v_sector_id IS NULL THEN
+    RAISE EXCEPTION 'Application or opportunity not found, or opportunity has no matching Sector via tags';
   END IF;
 
-  -- Validate reviewers are eligible for this category and not conflicted
+  -- Validate reviewers are eligible for this Sector and not conflicted
   SELECT COUNT(*)
   INTO v_count
   FROM unnest(p_reviewer_ids) r(reviewer_id)
   JOIN public.profiles pr ON pr.user_id = r.reviewer_id AND pr.role = 'reviewer'
-  JOIN public.reviewer_categories rc ON rc.reviewer_id = r.reviewer_id AND rc.category_id = v_category_id
+  JOIN public.reviewer_sectors rc ON rc.reviewer_id = r.reviewer_id AND rc.sector_id = v_sector_id
   WHERE r.reviewer_id NOT IN (
     SELECT rcf.reviewer_id FROM public.reviewer_conflicts rcf WHERE rcf.application_id = p_application_id
   );
@@ -569,6 +569,7 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.validate_application_submission(UUID, INTEGER) TO authenticated;
+
 
 
 

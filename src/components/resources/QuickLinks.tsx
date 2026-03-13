@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { HelpCircle, Users, MessageCircle, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -71,3 +71,11 @@ export function QuickLinks() {
     </section>
   );
 }
+
+
+
+
+
+
+
+

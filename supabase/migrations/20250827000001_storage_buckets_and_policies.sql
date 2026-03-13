@@ -1,11 +1,5 @@
--- ============================================
--- Consolidated storage buckets and RLS policies
--- ============================================
--- This migration preserves the final storage setup after squashing:
--- - Buckets: application-docs, user-avatars, project-images, mentor-avatars, resource-files
--- - Storage object policies for user/admin/reviewer access
--- - MIME type restrictions from QA hardening
--- ============================================
+
+
 -- NOTE: DO NOT AUTO-FORMAT THIS FILE - SQL string literals must stay on single lines
 
 -- Ensure buckets exist with expected visibility flags
@@ -344,3 +338,4 @@ USING (
       AND role = 'admin'
   )
 );
+

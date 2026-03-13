@@ -19,7 +19,7 @@ import {
   usePartnerOpportunityTags,
   PartnerOpportunityFormData,
 } from "@/hooks/usePartnerOpportunities";
-import { useCategories } from "@/hooks/useCategories";
+import { useSectors } from "@/hooks/useSectors";
 import { useOpportunityTags } from "@/hooks/useOpportunities";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ const schema = z.object({
   description: z.string().min(50, "Description must be at least 50 characters"),
   status: z.enum(["new", "open", "closing-soon", "closed"]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be YYYY-MM-DD"),
-  fundingAmount: z.string().min(1, "Funding amount is required"),
+  fundingAmount: z.string().optional(),
   location: z.string().min(1, "Location is required"),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
@@ -38,14 +38,14 @@ const schema = z.object({
   ),
   currency: z.string().optional(),
   country: z.string().optional(),
-  organizationName: z.string().optional(),
-  categoryId: z.preprocess(
+  sectorId: z.preprocess(
     (v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v),
     z.number().int().optional()
   ),
   opportunityType: z
     .enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"])
-    .default("grant"),
+    .nullable()
+    .optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -57,7 +57,7 @@ const PartnerOpportunityForm = () => {
   const opportunityId = id ? parseInt(id) : undefined;
 
   const { data: opportunity, isLoading } = usePartnerOpportunity(opportunityId);
-  const { data: categories = [] } = useCategories();
+  const { data: sectors = [] } = useSectors();
   const { data: allTags = [] } = useOpportunityTags();
   const { data: existingTagNames = [] } = usePartnerOpportunityTags(opportunityId);
   const createOpp = useCreatePartnerOpportunity();
@@ -74,12 +74,12 @@ const PartnerOpportunityForm = () => {
     defaultValues: {
       title: "", description: "", status: "open", deadline: "", fundingAmount: "",
       location: "", requirements: "", eligibilityCriteria: "", currency: "USD",
-      country: "", organizationName: "", opportunityType: "grant",
+      country: "", opportunityType: null,
     },
   });
 
   const status = watch("status");
-  const categoryId = watch("categoryId");
+  const sectorId = watch("sectorId");
   const opportunityType = watch("opportunityType");
 
   // Populate form when editing
@@ -97,9 +97,8 @@ const PartnerOpportunityForm = () => {
         maxApplicants: opportunity.maxApplicants || undefined,
         currency: opportunity.currency || "USD",
         country: opportunity.country || "",
-        organizationName: opportunity.organizationName || "",
-        categoryId: opportunity.categoryId || undefined,
-        opportunityType: (opportunity.opportunityType as any) || "grant",
+        sectorId: opportunity.sectorId || undefined,
+        opportunityType: (opportunity.opportunityType as any) || null,
       });
     }
   }, [opportunity, isEditing, reset]);
@@ -153,8 +152,7 @@ const PartnerOpportunityForm = () => {
       maxApplicants: data.maxApplicants,
       currency: data.currency,
       country: data.country,
-      organizationName: data.organizationName,
-      categoryId: data.categoryId,
+      sectorId: data.sectorId,
       opportunityType: data.opportunityType,
       tags: selectedTags,
     };
@@ -224,11 +222,11 @@ const PartnerOpportunityForm = () => {
                 </Select>
               </div>
               <div>
-                <Label>Category</Label>
-                <Select value={categoryId?.toString() || ""} onValueChange={(v) => setValue("categoryId", parseInt(v), { shouldValidate: true })}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <Label>sector</Label>
+                <Select value={sectorId?.toString() || ""} onValueChange={(v) => setValue("sectorId", parseInt(v), { shouldValidate: true })}>
+                  <SelectTrigger><SelectValue placeholder="Select sector" /></SelectTrigger>
                   <SelectContent>
-                    {categories.map((c) => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                    {sectors.map((c) => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -246,6 +244,30 @@ const PartnerOpportunityForm = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {opportunityType === "grant" && (
+                <>
+                  <div>
+                    <Label htmlFor="fundingAmount">Funding Amount *</Label>
+                    <Input
+                      id="fundingAmount"
+                      {...register("fundingAmount", {
+                        validate: (value) =>
+                          opportunityType !== "grant" || (value && value.trim().length > 0) || "Funding amount is required",
+                      })}
+                      className={errors.fundingAmount ? "border-destructive" : ""}
+                    />
+                    {errors.fundingAmount && (
+                      <p className="text-sm text-destructive mt-1">{errors.fundingAmount.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="currency">Currency</Label>
+                    <Input id="currency" {...register("currency")} placeholder="USD" />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="deadline">Deadline *</Label>
                 <Input id="deadline" type="date" {...register("deadline")} className={errors.deadline ? "border-destructive" : ""} />
@@ -257,34 +279,30 @@ const PartnerOpportunityForm = () => {
                 {errors.location && <p className="text-sm text-destructive mt-1">{errors.location.message}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fundingAmount">Funding Amount *</Label>
-                <Input id="fundingAmount" {...register("fundingAmount")} className={errors.fundingAmount ? "border-destructive" : ""} />
-                {errors.fundingAmount && <p className="text-sm text-destructive mt-1">{errors.fundingAmount.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="currency">Currency</Label>
-                <Input id="currency" {...register("currency")} placeholder="USD" />
-              </div>
-            </div>
+         
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="country">Country</Label>
                 <Input id="country" {...register("country")} placeholder="e.g., Kenya" />
               </div>
-              <div>
-                <Label htmlFor="organizationName">Organization Name</Label>
-                <Input id="organizationName" {...register("organizationName")} />
-              </div>
             </div>
             <div>
               <Label htmlFor="requirements">Requirements</Label>
-              <Textarea id="requirements" {...register("requirements")} rows={3} />
+              <Textarea
+                id="requirements"
+                {...register("requirements")}
+                rows={3}
+                placeholder="Comma-separated requirements (e.g., Business plan, Pitch deck, Financials)"
+              />
             </div>
             <div>
               <Label htmlFor="eligibilityCriteria">Eligibility Criteria</Label>
-              <Textarea id="eligibilityCriteria" {...register("eligibilityCriteria")} rows={3} />
+              <Textarea
+                id="eligibilityCriteria"
+                {...register("eligibilityCriteria")}
+                rows={3}
+                placeholder="Comma-separated eligibility (e.g., Women-led startup, Registered business)"
+              />
             </div>
 
             {/* Tags */}
@@ -383,3 +401,11 @@ const PartnerOpportunityForm = () => {
 };
 
 export default PartnerOpportunityForm;
+
+
+
+
+
+
+
+

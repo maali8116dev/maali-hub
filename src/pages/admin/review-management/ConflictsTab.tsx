@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { supabase } from '@/integrations/supabase/client';
@@ -123,4 +123,12 @@ export const ConflictsTab = () => {
     </Card>
   );
 };
+
+
+
+
+
+
+
+
 

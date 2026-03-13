@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { AlertTriangle, X, Mail, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,3 +104,11 @@ const EmailVerificationBanner = ({ email, onDismiss }: EmailVerificationBannerPr
 };
 
 export default EmailVerificationBanner;
+
+
+
+
+
+
+
+

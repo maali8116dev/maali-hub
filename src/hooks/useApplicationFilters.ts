@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 
 /**
  * Generic application type that has at least a status property
@@ -116,4 +116,12 @@ export function useApplicationFilters<T extends ApplicationWithStatus>({
     setStatusFilter,
   };
 }
+
+
+
+
+
+
+
+
 

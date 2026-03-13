@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 
 interface ComplianceCardProps {
@@ -90,4 +90,12 @@ const ComplianceCard = ({ application }: ComplianceCardProps) => {
 };
 
 export default ComplianceCard;
+
+
+
+
+
+
+
+
 

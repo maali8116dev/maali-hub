@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ApplicationStatusBadge from "./ApplicationStatusBadge";
@@ -33,4 +33,12 @@ const ApplicationHeader = ({ title, applicationId, status, backRoute }: Applicat
 };
 
 export default ApplicationHeader;
+
+
+
+
+
+
+
+
 

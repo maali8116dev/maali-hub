@@ -1,4 +1,4 @@
-import { type LucideIcon } from "lucide-react";
+﻿import { type LucideIcon } from "lucide-react";
 
 interface InfoFieldProps {
   icon: LucideIcon;
@@ -27,4 +27,12 @@ const InfoField = ({ icon: Icon, label, value, breakWords, breakAll }: InfoField
 );
 
 export default InfoField;
+
+
+
+
+
+
+
+
 

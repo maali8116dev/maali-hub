@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -61,7 +61,7 @@ const PaymentSuccessContent = () => {
                 <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/30 flex items-center justify-center">
                   <Loader2 className="h-8 w-8 text-blue-600 dark:text-blue-500 animate-spin" />
                 </div>
-                <CardTitle className="text-2xl">Confirming Payment…</CardTitle>
+                <CardTitle className="text-2xl">Confirming Payment-¦</CardTitle>
                 <CardDescription>
                   We're verifying your payment with our payment processor. This usually takes a few seconds.
                 </CardDescription>
@@ -119,3 +119,11 @@ const PaymentSuccess = () => (
 );
 
 export default PaymentSuccess;
+
+
+
+
+
+
+
+

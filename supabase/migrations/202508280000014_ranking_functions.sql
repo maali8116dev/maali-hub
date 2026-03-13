@@ -284,3 +284,4 @@ COMMENT ON FUNCTION public.get_project_applications_ranked(INTEGER) IS 'Returns 
 
 
 -- ============================================
+

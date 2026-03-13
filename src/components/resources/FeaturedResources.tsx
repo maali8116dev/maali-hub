@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+﻿import { Sparkles } from "lucide-react";
 import type { Resource } from "@/hooks/useResources";
 import { ResourceCard } from "./ResourceCard";
 
@@ -35,3 +35,11 @@ export function FeaturedResources({ resources, onDownload }: FeaturedResourcesPr
     </section>
   );
 }
+
+
+
+
+
+
+
+

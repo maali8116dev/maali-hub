@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 
@@ -88,16 +88,16 @@ const Footer = () => {
                 <h4 className="font-semibold text-sm">We Accept</h4>
                 <div className="flex flex-wrap gap-3 items-center">
                   <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
-                    💳 Credit Cards
+                    ðŸ’³ Credit Cards
                   </div>
                   <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
-                    📱 Mobile Money
+                    ðŸ“± Mobile Money
                   </div>
                   <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
-                    🏦 Bank Transfer
+                    ðŸ¦ Bank Transfer
                   </div>
                   <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-xs font-medium">
-                    💰 PayPal
+                    ðŸ’° PayPal
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -183,9 +183,9 @@ const Footer = () => {
         <div className="py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Maali. All rights reserved. Powered by TechNuru & GAT.
+              Â© {currentYear} Maali. All rights reserved. Powered by TechNuru & GAT.
               <div className="text-primary font-medium mt-1">
-                Demo Application • Created by Dr. Wilfried Zoungrana
+                Demo Application -¢ Created by Dr. Wilfried Zoungrana
               </div>
             </div>
             
@@ -213,3 +213,10 @@ const Footer = () => {
 };
 
 export default Footer;
+
+
+
+
+
+
+

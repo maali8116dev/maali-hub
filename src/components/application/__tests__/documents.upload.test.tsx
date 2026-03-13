@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { useApplicationFormStore } from '@/stores/applicationForm';
@@ -162,3 +162,11 @@ describe('Step 5: Document Upload', () => {
     );
   });
 });
+
+
+
+
+
+
+
+

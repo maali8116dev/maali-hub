@@ -1,20 +1,20 @@
-import Navigation from "@/components/Navigation";
+﻿import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Handshake, Heart, Globe } from "lucide-react";
 
 const Partners = () => {
-  const partnerCategories = [
+  const partnersectors = [
     {
       title: "Funding Partners",
       icon: Building2,
       description: "Organizations providing financial support to entrepreneurs",
       partners: [
-        { name: "African Development Bank", logo: "🏦", description: "Leading development finance institution" },
-        { name: "Mastercard Foundation", logo: "💳", description: "Advancing financial inclusion across Africa" },
-        { name: "Tony Elumelu Foundation", logo: "🌟", description: "Empowering African entrepreneurs" },
-        { name: "African Business Angels Network", logo: "👔", description: "Connecting startups with angel investors" }
+        { name: "African Development Bank", logo: "ðŸ¦", description: "Leading development finance institution" },
+        { name: "Mastercard Foundation", logo: "ðŸ’³", description: "Advancing financial inclusion across Africa" },
+        { name: "Tony Elumelu Foundation", logo: "ðŸŒŸ", description: "Empowering African entrepreneurs" },
+        { name: "African Business Angels Network", logo: "ðŸ‘”", description: "Connecting startups with angel investors" }
       ]
     },
     {
@@ -22,10 +22,10 @@ const Partners = () => {
       icon: Handshake,
       description: "Organizations offering mentorship and business support",
       partners: [
-        { name: "Techstars", logo: "🚀", description: "Global startup accelerator network" },
-        { name: "Y Combinator", logo: "💡", description: "Premier startup accelerator" },
-        { name: "Andela", logo: "💻", description: "Building remote engineering teams" },
-        { name: "MEST Africa", logo: "🎓", description: "Training the next generation of tech entrepreneurs" }
+        { name: "Techstars", logo: "ðŸš€", description: "Global startup accelerator network" },
+        { name: "Y Combinator", logo: "ðŸ’¡", description: "Premier startup accelerator" },
+        { name: "Andela", logo: "ðŸ’»", description: "Building remote engineering teams" },
+        { name: "MEST Africa", logo: "ðŸŽ“", description: "Training the next generation of tech entrepreneurs" }
       ]
     },
     {
@@ -33,9 +33,9 @@ const Partners = () => {
       icon: Heart,
       description: "Organizations focused on social impact and community development",
       partners: [
-        { name: "Acumen", logo: "❤️", description: "Patient capital for social enterprises" },
-        { name: "Village Capital", logo: "🌍", description: "Supporting impact-driven startups" },
-        { name: "Unreasonable Group", logo: "⚡", description: "Accelerating ventures solving global challenges" }
+        { name: "Acumen", logo: "â¤ï¸", description: "Patient capital for social enterprises" },
+        { name: "Village Capital", logo: "ðŸŒ", description: "Supporting impact-driven startups" },
+        { name: "Unreasonable Group", logo: "âš¡", description: "Accelerating ventures solving global challenges" }
       ]
     },
     {
@@ -43,9 +43,9 @@ const Partners = () => {
       icon: Globe,
       description: "Organizations with strong regional presence",
       partners: [
-        { name: "East Africa Ventures", logo: "🌐", description: "Supporting East African startups" },
-        { name: "West Africa Innovation Network", logo: "🔗", description: "Connecting West African innovators" },
-        { name: "Southern Africa Tech Hub", logo: "💼", description: "Fostering tech innovation in Southern Africa" }
+        { name: "East Africa Ventures", logo: "ðŸŒ", description: "Supporting East African startups" },
+        { name: "West Africa Innovation Network", logo: "ðŸ”—", description: "Connecting West African innovators" },
+        { name: "Southern Africa Tech Hub", logo: "ðŸ’¼", description: "Fostering tech innovation in Southern Africa" }
       ]
     }
   ];
@@ -62,17 +62,17 @@ const Partners = () => {
           </p>
         </div>
 
-        {partnerCategories.map((category, categoryIndex) => {
-          const Icon = category.icon;
+        {partnersectors.map((sector, categoryIndex) => {
+          const Icon = sector.icon;
           return (
             <div key={categoryIndex} className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <Icon className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-bold">{category.title}</h2>
+                <h2 className="text-2xl font-bold">{sector.title}</h2>
               </div>
-              <p className="text-muted-foreground mb-6">{category.description}</p>
+              <p className="text-muted-foreground mb-6">{sector.description}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.partners.map((partner, partnerIndex) => (
+                {sector.partners.map((partner, partnerIndex) => (
                   <Card key={partnerIndex} className="hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -118,4 +118,12 @@ const Partners = () => {
 };
 
 export default Partners;
+
+
+
+
+
+
+
+
 

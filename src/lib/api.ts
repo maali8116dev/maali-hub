@@ -98,7 +98,7 @@ export const api = {
       firstName: string | null;
       lastName: string | null;
       businessName: string | null;
-      businessSector: string | null;
+      businesssector: string | null;
       country: string | null;
       bio: string | null;
       avatarUrl: string | null;
@@ -133,9 +133,9 @@ export const api = {
 
   // Projects (public GET endpoints, auth required for POST/PATCH/DELETE)
   projects: {
-    getAll: (params?: { category?: string; status?: string; search?: string; limit?: number; offset?: number }) => {
+    getAll: (params?: { sector?: string; status?: string; search?: string; limit?: number; offset?: number }) => {
       const queryParams = new URLSearchParams();
-      if (params?.category) queryParams.append("category", params.category);
+      if (params?.sector) queryParams.append("sector", params.sector);
       if (params?.status) queryParams.append("status", params.status);
       if (params?.search) queryParams.append("search", params.search);
       if (params?.limit) queryParams.append("limit", params.limit.toString());
@@ -148,7 +148,7 @@ export const api = {
       );
     },
     getById: (id: number) => apiRequest(`/api/projects/${id}`, {}, false), // Public endpoint
-    getCategories: () => apiRequest<string[]>("/api/projects/categories/list", {}, false), // Public endpoint
+    getSectors: () => apiRequest<string[]>("/api/projects/sectors/list", {}, false), // Public endpoint
     create: (data: any) => apiRequest("/api/projects", { method: "POST", body: JSON.stringify(data) }, true),
     update: (id: number, data: any) => apiRequest(`/api/projects/${id}`, { method: "PATCH", body: JSON.stringify(data) }, true),
     delete: (id: number) => apiRequest(`/api/projects/${id}`, { method: "DELETE" }, true),
@@ -156,4 +156,12 @@ export const api = {
 };
 
 export default api;
+
+
+
+
+
+
+
+
 

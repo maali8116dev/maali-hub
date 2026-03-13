@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -347,15 +347,15 @@ const Profile = () => {
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between py-1">
                 <span>Basic Information</span>
-                <span className="text-success">✓ Complete</span>
+                <span className="text-success">âœ“ Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span>Company Details</span>
-                <span className="text-success">✓ Complete</span>
+                <span className="text-success">âœ“ Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span>Bio & Description</span>
-                <span className="text-success">✓ Complete</span>
+                <span className="text-success">âœ“ Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span>Documents</span>
@@ -370,4 +370,12 @@ const Profile = () => {
 };
 
 export default Profile;
+
+
+
+
+
+
+
+
 

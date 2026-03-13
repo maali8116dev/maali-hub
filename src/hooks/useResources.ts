@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteFileByUrl, uploadFileToBucket } from "@/lib/storageUploads";
 import { toast } from "sonner";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 
@@ -7,7 +8,7 @@ export interface Resource {
   id: string;
   title: string;
   description: string | null;
-  category: string;
+  sector: string;
   file_type: string;
   file_url: string | null;
   file_size: number | null;
@@ -23,7 +24,7 @@ export interface Resource {
 export interface ResourceFormData {
   title: string;
   description?: string;
-  category: string;
+  sector: string;
   file_type: string;
   file_url?: string;
   file_size?: number;
@@ -32,7 +33,7 @@ export interface ResourceFormData {
   is_published?: boolean;
 }
 
-const RESOURCE_CATEGORIES = [
+const RESOURCE_sectors = [
   "Application Guides",
   "Video Tutorials",
   "Templates",
@@ -55,11 +56,11 @@ const FILE_TYPES = [
   "event"
 ] as const;
 
-export { RESOURCE_CATEGORIES, FILE_TYPES };
+export { RESOURCE_sectors, FILE_TYPES };
 
 // Fetch published resources (public)
 // Resources are static content that rarely changes (download_count updated via mutation)
-export const useResources = (filters?: { category?: string; fileType?: string }) => {
+export const useResources = (filters?: { sector?: string; fileType?: string }) => {
   return useQuery({
     queryKey: ["resources", "published", filters],
     queryFn: async () => {
@@ -67,11 +68,11 @@ export const useResources = (filters?: { category?: string; fileType?: string })
         .from("resources")
         .select("*")
         .eq("is_published", true)
-        .order("category")
+        .order("sector")
         .order("title", { ascending: true });
 
-      if (filters?.category) {
-        query = query.eq("category", filters.category);
+      if (filters?.sector) {
+        query = query.eq("sector", filters.sector);
       }
       if (filters?.fileType) {
         query = query.eq("file_type", filters.fileType);
@@ -98,7 +99,7 @@ export const useAdminResources = () => {
       const { data, error } = await supabase
         .from("resources")
         .select("*")
-        .order("category")
+        .order("sector")
         .order("title", { ascending: true });
 
       if (error) throw error;
@@ -126,23 +127,23 @@ export const useResource = (id: string | undefined) => {
   });
 };
 
-// Fetch unique categories from resources
-// Categories are static content that rarely changes
-export const useResourceCategories = () => {
+// Fetch unique sectors from resources
+// sectors are static content that rarely changes
+export const useResourcesectors = () => {
   return useQuery({
-    queryKey: ["resources", "categories"],
+    queryKey: ["resources", "sectors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("resources")
-        .select("category")
+        .select("sector")
         .eq("is_published", true);
 
       if (error) throw error;
       
-      const uniqueCategories = [...new Set(data.map(r => r.category))].sort();
-      return uniqueCategories;
+      const uniquesectors = [...new Set(data.map(r => r.sector))].sort();
+      return uniquesectors;
     },
-    staleTime: Infinity, // Never consider stale - categories rarely change
+    staleTime: Infinity, // Never consider stale - sectors rarely change
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -178,7 +179,7 @@ export const useCreateResource = () => {
         entityType: "document",
         entityId: resource.id,
         description: `Created resource: ${resource.title}`,
-        metadata: { title: resource.title, category: resource.category },
+        metadata: { title: resource.title, sector: resource.sector },
       });
       toast.success("Resource created successfully");
     },
@@ -313,31 +314,23 @@ export const useIncrementDownload = () => {
 
 // Upload resource file
 export const uploadResourceFile = async (file: File): Promise<{ url: string; size: number }> => {
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-  const filePath = `${fileName}`;
+  const { publicUrl } = await uploadFileToBucket(file, {
+    bucket: "resource-files",
+    isPublic: true,
+  });
 
-  const { error: uploadError } = await supabase.storage
-    .from("resource-files")
-    .upload(filePath, file);
-
-  if (uploadError) throw uploadError;
-
-  const { data } = supabase.storage
-    .from("resource-files")
-    .getPublicUrl(filePath);
-
-  return { url: data.publicUrl, size: file.size };
+  return { url: publicUrl ?? "", size: file.size };
 };
 
 // Delete resource file
 export const deleteResourceFile = async (fileUrl: string): Promise<void> => {
-  const urlParts = fileUrl.split("/");
-  const fileName = urlParts[urlParts.length - 1];
-
-  const { error } = await supabase.storage
-    .from("resource-files")
-    .remove([fileName]);
-
-  if (error) throw error;
+  await deleteFileByUrl("resource-files", fileUrl);
 };
+
+
+
+
+
+
+
+

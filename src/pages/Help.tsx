@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 const Help = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const helpCategories = [
+  const helpsectors = [
     {
       title: "Getting Started",
       icon: BookOpen,
@@ -55,21 +55,21 @@ const Help = () => {
   ];
 
   const popularArticles = [
-    { title: "How do I apply for funding?", category: "Applications" },
-    { title: "What documents do I need?", category: "Applications" },
-    { title: "How long does the review process take?", category: "Applications" },
-    { title: "Can I edit my application after submission?", category: "Applications" },
-    { title: "How do I track my application status?", category: "Applications" }
+    { title: "How do I apply for funding?", sector: "Applications" },
+    { title: "What documents do I need?", sector: "Applications" },
+    { title: "How long does the review process take?", sector: "Applications" },
+    { title: "Can I edit my application after submission?", sector: "Applications" },
+    { title: "How do I track my application status?", sector: "Applications" }
   ];
 
-  const filteredCategories = searchQuery
-    ? helpCategories.filter(category =>
-        category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.articles.some(article =>
+  const filteredsectors = searchQuery
+    ? helpsectors.filter(sector =>
+        sector.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        sector.articles.some(article =>
           article.title.toLowerCase().includes(searchQuery.toLowerCase())
         )
       )
-    : helpCategories;
+    : helpsectors;
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +107,7 @@ const Help = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold mb-1">{article.title}</h3>
-                        <p className="text-sm text-muted-foreground">{article.category}</p>
+                        <p className="text-sm text-muted-foreground">{article.sector}</p>
                       </div>
                       <Button variant="ghost" size="sm">
                         View
@@ -120,33 +120,33 @@ const Help = () => {
           </div>
         )}
 
-        {/* Help Categories */}
+        {/* Help sectors */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
-            {searchQuery ? "Search Results" : "Browse by Category"}
+            {searchQuery ? "Search Results" : "Browse by sector"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredCategories.map((category, index) => {
-              const Icon = category.icon;
+            {filteredsectors.map((sector, index) => {
+              const Icon = sector.icon;
               return (
                 <Card key={index} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-center gap-3 mb-2">
                       <Icon className="h-5 w-5 text-primary" />
-                      <CardTitle>{category.title}</CardTitle>
+                      <CardTitle>{sector.title}</CardTitle>
                     </div>
-                    <CardDescription>{category.description}</CardDescription>
+                    <CardDescription>{sector.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {category.articles.map((article, articleIndex) => (
+                      {sector.articles.map((article, articleIndex) => (
                         <li key={articleIndex}>
                           <a
                             href={article.link}
                             className="text-sm text-primary hover:underline flex items-center justify-between"
                           >
                             <span>{article.title}</span>
-                            <span>→</span>
+                            <span>â†’</span>
                           </a>
                         </li>
                       ))}
@@ -158,7 +158,7 @@ const Help = () => {
           </div>
         </div>
 
-        {filteredCategories.length === 0 && searchQuery && (
+        {filteredsectors.length === 0 && searchQuery && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground mb-4">No articles found matching your search.</p>
@@ -216,4 +216,12 @@ const Help = () => {
 };
 
 export default Help;
+
+
+
+
+
+
+
+
 

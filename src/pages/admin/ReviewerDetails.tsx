@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+﻿import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
@@ -57,7 +57,7 @@ export const ReviewerDetails = () => {
   const workload = reviewerDetails?.workload || 0;
   const completedReviews = (reviewerDetails?.completed_reviews || []) as any[];
   const pendingAssignments = (reviewerDetails?.pending_assignments || []) as any[];
-  const categories = ((reviewerDetails?.categories || []) as any[]).map((cat: any) => cat.category_name || 'Unknown') as string[];
+  const sectors = ((reviewerDetails?.sectors || []) as any[]).map((cat: any) => cat.sector_name || 'Unknown') as string[];
 
   // Combine and format reviews + assignments
   const reviews = useMemo(() => {
@@ -147,13 +147,13 @@ export const ReviewerDetails = () => {
       },
     },
     {
-      accessorKey: 'category',
+      accessorKey: 'sector',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Category" />
+        <SortableColumnHeader column={column} title="sector" />
       ),
       cell: ({ row }) => {
         const project = row.original.application?.project;
-        const categoryName = project?.category?.name || 'N/A';
+        const categoryName = project?.sector.name || 'N/A';
         return (
           <Badge variant="outline">
             {categoryName}
@@ -161,8 +161,8 @@ export const ReviewerDetails = () => {
         );
       },
       sortingFn: (rowA, rowB) => {
-        const catA = rowA.original.application?.project?.category?.name || '';
-        const catB = rowB.original.application?.project?.category?.name || '';
+        const catA = rowA.original.application?.project?.sector.name || '';
+        const catB = rowB.original.application?.project?.sector.name || '';
         return catA.localeCompare(catB);
       },
     },
@@ -387,16 +387,16 @@ export const ReviewerDetails = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Categories</CardTitle>
+            <CardTitle className="text-sm font-medium">Assigned sectors</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{categories.length}</div>
+            <div className="text-2xl font-bold">{sectors.length}</div>
             <div className="flex flex-wrap gap-1 mt-2">
               {isLoadingDetails ? (
                 <Skeleton className="h-5 w-20" />
-              ) : categories.length > 0 ? (
-                categories.slice(0, 3).map((cat: string) => (
+              ) : sectors.length > 0 ? (
+                sectors.slice(0, 3).map((cat: string) => (
                   <Badge key={cat} variant="secondary" className="text-xs">
                     {cat}
                   </Badge>
@@ -463,7 +463,7 @@ export const ReviewerDetails = () => {
             <DataTable
               columns={reviewColumns}
               data={reviews}
-              searchPlaceholder="Search by project title, category, or recommendation..."
+              searchPlaceholder="Search by project title, sector, or recommendation..."
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
@@ -476,4 +476,12 @@ export const ReviewerDetails = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
 

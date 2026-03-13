@@ -46,6 +46,7 @@ BEGIN
   SELECT COUNT(DISTINCT o.id)
   INTO v_total_count
   FROM public.opportunities o
+  LEFT JOIN public.partners p ON p.id = o.partner_id
   LEFT JOIN public.opportunity_tag_map otm ON otm.opportunity_id = o.id
   LEFT JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
   WHERE
@@ -72,7 +73,7 @@ BEGIN
       o.description ILIKE '%' || p_search || '%' OR
       o.location ILIKE '%' || p_search || '%' OR
       o.country ILIKE '%' || p_search || '%' OR
-      o.organization_name ILIKE '%' || p_search || '%' OR
+      p.name ILIKE '%' || p_search || '%' OR
       o.funding_amount::TEXT ILIKE '%' || p_search || '%'
     );
 
@@ -83,8 +84,13 @@ BEGIN
   RETURN QUERY
   WITH filtered_opportunities AS (
     SELECT DISTINCT
-      o.*
+      o.*,
+      p.name AS partner_name,
+      p.logo_url AS partner_logo_url,
+      s.name AS sector_name
     FROM public.opportunities o
+    LEFT JOIN public.partners p ON p.id = o.partner_id
+    LEFT JOIN public.sectors s ON s.id = o.sector_id
     LEFT JOIN public.opportunity_tag_map otm ON otm.opportunity_id = o.id
     LEFT JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
     WHERE
@@ -111,7 +117,7 @@ BEGIN
         o.description ILIKE '%' || p_search || '%' OR
         o.location ILIKE '%' || p_search || '%' OR
         o.country ILIKE '%' || p_search || '%' OR
-        o.organization_name ILIKE '%' || p_search || '%' OR
+        p.name ILIKE '%' || p_search || '%' OR
         o.funding_amount::TEXT ILIKE '%' || p_search || '%'
       )
     ORDER BY o.created_at DESC
@@ -156,4 +162,5 @@ GRANT EXECUTE ON FUNCTION public.get_opportunities_with_filters(
 COMMENT ON FUNCTION public.get_opportunities_with_filters(
   TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT[], TEXT, INTEGER, INTEGER
 ) IS 'Returns filtered and paginated opportunities with tags included. Supports filtering by opportunity type, program format, funding type, experience level, country, status, location, tags, and search text.';
+
 

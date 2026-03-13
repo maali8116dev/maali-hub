@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface ActivityLog {
@@ -129,3 +129,11 @@ export function useRecentActivity(limit: number = 10) {
     data: result.data?.logs,
   };
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ const AdminMentors = () => {
   const filteredMentors = mentors?.filter(mentor => {
     const matchesSearch = 
       mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mentor.sector?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mentor.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mentor.country?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = 
       statusFilter === "all" ||
@@ -43,7 +43,7 @@ const AdminMentors = () => {
   // Stats
   const totalMentors = mentors?.length || 0;
   const publishedMentors = mentors?.filter(m => m.is_published).length || 0;
-  const uniqueSectors = [...new Set(mentors?.map(m => m.sector).filter(Boolean))].length;
+  const uniquesectors = [...new Set(mentors?.map(m => m.sector).filter(Boolean))].length;
 
   return (
     <div className="space-y-6">
@@ -86,12 +86,12 @@ const AdminMentors = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Sectors</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">sectors</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Briefcase className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{uniqueSectors}</span>
+              <span className="text-2xl font-bold">{uniquesectors}</span>
             </div>
           </CardContent>
         </Card>
@@ -159,7 +159,7 @@ const AdminMentors = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Mentor</TableHead>
-                  <TableHead>Sector</TableHead>
+                  <TableHead>sector</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Expertise</TableHead>
                   <TableHead>Status</TableHead>
@@ -185,7 +185,7 @@ const AdminMentors = () => {
                           {mentor.sector}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">-/span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -195,7 +195,7 @@ const AdminMentors = () => {
                           {mentor.country}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground">-/span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -275,3 +275,11 @@ const AdminMentors = () => {
 };
 
 export default AdminMentors;
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -58,7 +58,7 @@ export function OnboardingChecklist({
     profile.firstName && 
     profile.lastName && 
     profile.country && 
-    profile.businessSector;
+    profile.businesssector;
 
   const hasApplications = applications.length > 0;
   const hasSubmittedApplication = applications.some(app => app.status !== 'draft');
@@ -252,4 +252,12 @@ export function OnboardingChecklist({
     </Card>
   );
 }
+
+
+
+
+
+
+
+
 

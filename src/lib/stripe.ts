@@ -1,4 +1,4 @@
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+﻿import { loadStripe, Stripe } from "@stripe/stripe-js";
 
 // Stripe publishable key - should be set in environment variables
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
@@ -59,4 +59,12 @@ export const formatAmountFromStripe = (amount: number, currency: string = "usd")
   }
   return zeroDecimalCurrency ? amount : amount / 100;
 };
+
+
+
+
+
+
+
+
 

@@ -171,7 +171,7 @@ const QualifiedApplicants = () => {
         <div>
           <h1 className="text-2xl font-bold">Qualified Applicants</h1>
           <p className="text-muted-foreground">
-            {opportunity?.title || "Loading..."} — Ranked by review scores
+            {opportunity?.title || "Loading..."} - Ranked by review scores
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -277,3 +277,11 @@ const QualifiedApplicants = () => {
 };
 
 export default QualifiedApplicants;
+
+
+
+
+
+
+
+

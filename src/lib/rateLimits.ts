@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Rate Limit Configuration
  *
  * The SINGLE SOURCE OF TRUTH lives in the `rate_limit_config` database table.
@@ -10,7 +10,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// ─── Types ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type RateLimitOperationType =
   | "sign_in"
   | "sign_up"
@@ -31,7 +31,7 @@ export interface RateLimitConfig {
   window: number;
 }
 
-// ─── Fallback defaults (only used if DB fetch fails) ────────────────
+// â”€â”€â”€ Fallback defaults (only used if DB fetch fails) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FALLBACK_LIMITS: Record<RateLimitOperationType, RateLimitConfig> = {
   sign_in:                   { max: 5,  window: 15 },
   sign_up:                   { max: 3,  window: 60 },
@@ -46,7 +46,7 @@ const FALLBACK_LIMITS: Record<RateLimitOperationType, RateLimitConfig> = {
   email_verification_resend: { max: 3,  window: 60 },
 };
 
-// ─── Live config (populated from DB) ────────────────────────────────
+// â”€â”€â”€ Live config (populated from DB) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let liveConfig: Record<string, RateLimitConfig> | null = null;
 let fetchPromise: Promise<void> | null = null;
 
@@ -91,7 +91,7 @@ export function initRateLimitConfig(): void {
   }
 }
 
-// ─── Public API ─────────────────────────────────────────────────────
+// â”€â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Returns the rate limit config for a given operation.
@@ -127,3 +127,11 @@ export function isRateLimitError(errorMessage: string): boolean {
     lower.includes("rate_limit")
   );
 }
+
+
+
+
+
+
+
+

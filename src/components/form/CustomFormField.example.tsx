@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Example usage of CustomFormField component
  * 
  * This file demonstrates how to use the CustomFormField component
@@ -21,7 +21,7 @@ const applicationFormSchema = z.object({
   location: z.string().min(2, "Location is required"),
   projectDescription: z.string().min(50, "Description must be at least 50 characters"),
   fundingAmount: z.string().min(1, "Funding amount is required"),
-  businessSector: z.string().min(1, "Please select a business sector"),
+  businesssector: z.string().min(1, "Please select a business sector"),
   termsAccepted: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
@@ -39,7 +39,7 @@ export function ApplicationFormExample() {
       location: "",
       projectDescription: "",
       fundingAmount: "",
-      businessSector: "",
+      businesssector: "",
       termsAccepted: false
     },
   });
@@ -91,9 +91,9 @@ export function ApplicationFormExample() {
         {/* Select Dropdown */}
         <CustomFormField
           control={form.control}
-          name="businessSector"
+          name="businesssector"
           fieldType={FormFieldType.SELECT}
-          label="Business Sector"
+          label="Business sector"
           placeholder="Select your business sector"
           options={[
             { value: "technology", label: "Technology" },
@@ -252,4 +252,12 @@ export function MultistepFormExample() {
     </Form>
   );
 }
+
+
+
+
+
+
+
+
 

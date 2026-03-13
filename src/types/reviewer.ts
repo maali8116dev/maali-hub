@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Shared types for reviewer functionality
  */
 
 export interface ReviewerCategory {
   id: string;
   reviewer_id: string;
-  category: string;
+  sector: string;
   created_at: string;
 }
 
@@ -126,4 +126,12 @@ export type RpcReviewScoreWithReviewerRow = {
   reviewer_first_name: string | null;
   reviewer_last_name: string | null;
 };
+
+
+
+
+
+
+
+
 

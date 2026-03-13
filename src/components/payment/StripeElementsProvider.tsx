@@ -1,4 +1,4 @@
-import { Elements } from "@stripe/react-stripe-js";
+﻿import { Elements } from "@stripe/react-stripe-js";
 import { getStripe } from "@/lib/stripe";
 import { ReactNode } from "react";
 
@@ -44,4 +44,12 @@ export function StripeElementsProvider({
     </Elements>
   );
 }
+
+
+
+
+
+
+
+
 

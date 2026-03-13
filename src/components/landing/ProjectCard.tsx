@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Calendar, MapPin, DollarSign, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, DollarSign, ArrowRight, Building2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,7 @@ interface DatabaseProjectCardProps {
   id: number;
   title: string;
   description: string;
-  category: string;
+  sector: string;
   location: string;
   fundingAmount: string;
   deadline: string;
@@ -33,13 +33,15 @@ interface DatabaseProjectCardProps {
   status: string;
   createdAt?: string;
   hasSubmittedApplication?: boolean;
+  organizationName?: string | null;
+  partnerLogoUrl?: string | null;
 }
 
 type ProjectCardProps = LegacyProjectCardProps | DatabaseProjectCardProps;
 
 // Type guard to check if it's a database project
 function isDatabaseProject(props: ProjectCardProps): props is DatabaseProjectCardProps {
-  return 'category' in props && 'location' in props && 'currentApplicants' in props;
+  return 'sector' in props && 'location' in props && 'currentApplicants' in props;
 }
 
 const ProjectCard = (props: ProjectCardProps) => {
@@ -51,9 +53,12 @@ const ProjectCard = (props: ProjectCardProps) => {
   const id = props.id;
   const title = props.title;
   const description = props.description;
-  const sector = isDatabaseProject(props) ? props.category : props.sector;
+  const sector = isDatabaseProject(props) ? props.sector : props.sector;
   const country = isDatabaseProject(props) ? props.location : props.country;
   const fundingAmount = props.fundingAmount;
+  const fundingDisplay = fundingAmount?.trim() ? fundingAmount : "";
+  const partnerName = isDatabaseProject(props) ? props.organizationName : undefined;
+  const partnerLogoUrl = isDatabaseProject(props) ? props.partnerLogoUrl : undefined;
   const deadline = props.deadline;
   const status = props.status;
   const createdAt = isDatabaseProject(props) ? props.createdAt : undefined;
@@ -112,9 +117,13 @@ const ProjectCard = (props: ProjectCardProps) => {
 
   const locations = parseLocations(country);
 
+  const plainDescription = description
+    ? description.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+    : "";
+
   return (
     <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-border flex flex-col h-full">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex justify-between items-start mb-2">
           <Badge variant="secondary" className="text-xs">
             {sector}
@@ -128,38 +137,54 @@ const ProjectCard = (props: ProjectCardProps) => {
             {title}
           </h3>
         </Link>
+        {partnerName && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            {partnerLogoUrl ? (
+              <img
+                src={partnerLogoUrl}
+                alt={partnerName}
+                className="h-6 w-6 rounded-full object-cover border border-border"
+              />
+            ) : (
+              <Building2 className="h-4 w-4" />
+            )}
+            <span className="truncate">{partnerName}</span>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="pb-4 flex-1">
         <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-          {description}
+          {plainDescription}
         </p>
         
         <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <DollarSign className="h-4 w-4" />
-              <span>{fundingAmount}</span>
-            </div>
+          <div className="grid grid-cols-1 gap-2">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>{formatDeadline(deadline)}</span>
             </div>
+            <div className="flex items-start gap-2 text-muted-foreground">
+              <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              {locations.length > 1 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {locations.map((loc, index) => (
+                    <Badge key={index} variant="outline" className="text-xs font-normal">
+                      {loc}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <span className="break-words">{locations[0] || country}</span>
+              )}
+            </div>
           </div>
-          <div className={`flex items-start gap-2 text-muted-foreground ${locations.length > 1 ? '' : ''}`}>
-            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            {locations.length > 1 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {locations.map((loc, index) => (
-                  <Badge key={index} variant="outline" className="text-xs font-normal">
-                    {loc}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <span className="break-words">{locations[0] || country}</span>
-            )}
-          </div>
+          {fundingDisplay && (
+            <div className="flex items-center gap-2 text-muted-foreground text-xs">
+              <DollarSign className="h-4 w-4" />
+              <span>{fundingDisplay}</span>
+            </div>
+          )}
         </div>
       </CardContent>
       
@@ -211,3 +236,11 @@ const ProjectCard = (props: ProjectCardProps) => {
 };
 
 export default ProjectCard;
+
+
+
+
+
+
+
+

@@ -17,14 +17,14 @@ import { useFAQ, useCreateFAQ, useUpdateFAQ, useAdminFAQs } from "@/hooks/useFAQ
 const faqSchema = z.object({
   question: z.string().min(1, "Question is required").min(10, "Question must be at least 10 characters"),
   answer: z.string().min(1, "Answer is required").min(20, "Answer must be at least 20 characters"),
-  category: z.string().min(1, "Category is required"),
+  sector: z.string().min(1, "Sector is required"),
   display_order: z.number().min(0, "Display order must be 0 or greater"),
   is_published: z.boolean(),
 });
 
 type FAQFormValues = z.infer<typeof faqSchema>;
 
-const DEFAULT_CATEGORIES = [
+const DEFAULT_sectors = [
   "General",
   "Applications",
   "Payments",
@@ -44,11 +44,11 @@ const FAQForm = () => {
   const createFAQ = useCreateFAQ();
   const updateFAQ = useUpdateFAQ();
 
-  // Get existing categories from FAQs
-  const existingCategories = allFAQs
-    ? [...new Set(allFAQs.map((f) => f.category))]
+  // Get existing sectors from FAQs
+  const existingsectors = allFAQs
+    ? [...new Set(allFAQs.map((f) => f.sector))]
     : [];
-  const categories = [...new Set([...DEFAULT_CATEGORIES, ...existingCategories])].sort();
+  const sectors = [...new Set([...DEFAULT_sectors, ...existingsectors])].sort();
 
   const {
     register,
@@ -62,21 +62,21 @@ const FAQForm = () => {
     defaultValues: {
       question: "",
       answer: "",
-      category: "",
+      sector: "",
       display_order: 0,
       is_published: true,
     },
   });
 
   const isPublished = watch("is_published");
-  const selectedCategory = watch("category");
+  const selectedCategory = watch("sector");
 
   useEffect(() => {
     if (faq && isEditing) {
       reset({
         question: faq.question,
         answer: faq.answer,
-        category: faq.category,
+        sector: faq.sector,
         display_order: faq.display_order,
         is_published: faq.is_published,
       });
@@ -87,7 +87,7 @@ const FAQForm = () => {
     const faqData = {
       question: data.question,
       answer: data.answer,
-      category: data.category,
+      sector: data.sector,
       display_order: data.display_order,
       is_published: data.is_published,
     };
@@ -210,24 +210,24 @@ const FAQForm = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="sector">Sector *</Label>
                   <Select
                     value={selectedCategory}
-                    onValueChange={(value) => setValue("category", value)}
+                    onValueChange={(value) => setValue("sector", value)}
                   >
-                    <SelectTrigger id="category" className={errors.category ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Select category" />
+                    <SelectTrigger id="sector" className={errors.sector ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Select Sector" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
+                      {sectors.map((cat) => (
                         <SelectItem key={cat} value={cat}>
                           {cat}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.category && (
-                    <p className="text-sm text-destructive mt-1">{errors.category.message}</p>
+                  {errors.sector && (
+                    <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
                   )}
                 </div>
 
@@ -245,7 +245,7 @@ const FAQForm = () => {
                     <p className="text-sm text-destructive mt-1">{errors.display_order.message}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">
-                    Lower numbers appear first within a category
+                    Lower numbers appear first within a sector
                   </p>
                 </div>
               </CardContent>
@@ -286,3 +286,11 @@ const FAQForm = () => {
 };
 
 export default FAQForm;
+
+
+
+
+
+
+
+

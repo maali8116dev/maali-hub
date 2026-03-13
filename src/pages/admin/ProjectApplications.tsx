@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQueryClient } from "@tanstack/react-query";
@@ -559,7 +559,7 @@ const ProjectApplications = () => {
           <DialogHeader>
             <DialogTitle>Reviewer Scores</DialogTitle>
             <DialogDescription>
-              {scoreModalApp?.applicant_name} · Rank #{scoreModalApp?.rank_position}
+              {scoreModalApp?.applicant_name} Â· Rank #{scoreModalApp?.rank_position}
             </DialogDescription>
           </DialogHeader>
           {scoreModalApp ? (
@@ -629,4 +629,12 @@ const ProjectApplications = () => {
 };
 
 export default ProjectApplications;
+
+
+
+
+
+
+
+
 

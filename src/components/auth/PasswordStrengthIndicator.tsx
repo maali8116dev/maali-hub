@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -163,4 +163,12 @@ export function PasswordStrengthIndicator({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Helper to get default form values from store data
  */
 import type { ApplicationFormData } from '@/stores/applicationForm';
@@ -16,8 +16,8 @@ export function getFormDefaults(formData: ApplicationFormData): Partial<Applicat
     phoneNumber: formData.phoneNumber || "",
     yearEstablished: formData.yearEstablished || undefined,
     coreMissionPurpose: formData.coreMissionPurpose || "",
-    primarySectors: formData.primarySectors || [],
-    primarySectorOther: formData.primarySectorOther || "",
+    primarysectors: formData.primarysectors || [],
+    primarysectorOther: formData.primarysectorOther || "",
     numberOfTeamMembers: formData.numberOfTeamMembers || undefined,
     keyTeamMembersRoles: formData.keyTeamMembersRoles || "",
     previousGrantsFundingReceived: formData.previousGrantsFundingReceived || false,
@@ -33,4 +33,12 @@ export function getFormDefaults(formData: ApplicationFormData): Partial<Applicat
     documents: [],
   };
 }
+
+
+
+
+
+
+
+
 

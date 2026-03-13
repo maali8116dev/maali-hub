@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import {
   Users,
   Building2,
@@ -146,13 +146,13 @@ export function Step6Review({
                 </p>
               </div>
             )}
-            {formData.primarySectors && formData.primarySectors.length > 0 && (
+            {formData.primarysectors && formData.primarysectors.length > 0 && (
               <div className="md:col-span-2">
-                <span className="text-muted-foreground">Primary Sector(s):</span>
+                <span className="text-muted-foreground">Primary sector(s):</span>
                 <p className="font-medium mt-1">
-                  {formData.primarySectors.join(", ")}
-                  {formData.primarySectorOther &&
-                    ` (${formData.primarySectorOther})`}
+                  {formData.primarysectors.join(", ")}
+                  {formData.primarysectorOther &&
+                    ` (${formData.primarysectorOther})`}
                 </p>
               </div>
             )}
@@ -364,4 +364,12 @@ export function Step6Review({
     </div>
   );
 }
+
+
+
+
+
+
+
+
 

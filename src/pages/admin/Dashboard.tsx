@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Briefcase, TrendingUp, DollarSign, Clock, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -213,7 +213,7 @@ const AdminDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium truncate">{activity.description}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {activity.actionType} · {activity.entityType.replace('_', ' ')}
+                      {activity.actionType} Â· {activity.entityType.replace('_', ' ')}
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -230,3 +230,11 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+
+
+
+
+
+

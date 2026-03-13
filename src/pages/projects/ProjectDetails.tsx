@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+﻿import { useParams, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -127,7 +127,7 @@ const ProjectDetails = () => {
             location: opportunity.location ? { name: opportunity.location } : undefined,
             startDate: opportunity.createdAt,
             endDate: opportunity.deadline,
-            category: opportunity.tags?.[0]?.name || "Uncategorized",
+            sector: opportunity.tags?.[0]?.name || "Uncategorized",
           }}
           id="project-schema"
         />
@@ -171,3 +171,11 @@ const ProjectDetails = () => {
 };
 
 export default ProjectDetails;
+
+
+
+
+
+
+
+

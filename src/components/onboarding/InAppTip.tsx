@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { X, Lightbulb, Info, CheckCircle, AlertCircle } from 'lucide-react';
@@ -103,4 +103,12 @@ export function InAppTip({
     </Alert>
   );
 }
+
+
+
+
+
+
+
+
 

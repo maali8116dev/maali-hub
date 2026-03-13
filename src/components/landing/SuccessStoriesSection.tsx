@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DollarSign, MapPin, Calendar, TrendingUp, ArrowRight } from "lucide-react";
@@ -60,13 +60,13 @@ const SuccessStoriesSection = () => {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = "none";
-                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-4xl">🌟</div>';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-4xl">ðŸŒŸ</div>';
                           }}
                         />
                       </div>
                     ) : (
                       <div className="w-full h-32 rounded-lg bg-muted flex items-center justify-center text-4xl">
-                        🌟
+                        ðŸŒŸ
                       </div>
                     )}
                   </div>
@@ -79,7 +79,7 @@ const SuccessStoriesSection = () => {
                   <CardDescription className="text-sm sm:text-base font-medium">
                     {story.name}
                   </CardDescription>
-                  <Badge variant="outline" className="mt-2 text-xs">{story.category}</Badge>
+                  <Badge variant="outline" className="mt-2 text-xs">{story.sector}</Badge>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground line-clamp-3">{story.description}</p>
@@ -130,4 +130,12 @@ const SuccessStoriesSection = () => {
 };
 
 export default SuccessStoriesSection;
+
+
+
+
+
+
+
+
 

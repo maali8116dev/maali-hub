@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // We need to mock supabase BEFORE the module loads (it auto-calls initRateLimitConfig)
 vi.mock("@/integrations/supabase/client", () => ({
@@ -16,7 +16,7 @@ import { getRateLimit, rateLimitMessage, isRateLimitError } from "../rateLimits"
 import type { RateLimitOperationType } from "../rateLimits";
 
 describe("rateLimits", () => {
-  // ─── getRateLimit ─────────────────────────────────────────────
+  // â”€â”€â”€ getRateLimit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("getRateLimit", () => {
     it("returns fallback config for known operation types", () => {
       const config = getRateLimit("sign_in");
@@ -51,14 +51,14 @@ describe("rateLimits", () => {
     });
 
     it("returns generic fallback for unknown operation types", () => {
-      // Cast to bypass TS — simulates an unexpected value at runtime
+      // Cast to bypass TS -” simulates an unexpected value at runtime
       const config = getRateLimit("nonexistent_op" as RateLimitOperationType);
       expect(config.max).toBeDefined();
       expect(config.window).toBeDefined();
     });
   });
 
-  // ─── rateLimitMessage ─────────────────────────────────────────
+  // â”€â”€â”€ rateLimitMessage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitMessage", () => {
     it("generates a human-readable message for sign_in (minutes window)", () => {
       const msg = rateLimitMessage("sign_in");
@@ -86,7 +86,7 @@ describe("rateLimits", () => {
     });
   });
 
-  // ─── isRateLimitError ─────────────────────────────────────────
+  // â”€â”€â”€ isRateLimitError â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("isRateLimitError", () => {
     it('detects "Too many" in error message', () => {
       expect(isRateLimitError("Too many application submissions")).toBe(true);
@@ -111,4 +111,12 @@ describe("rateLimits", () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 

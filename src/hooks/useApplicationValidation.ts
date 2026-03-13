@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hook for application form validation logic
  */
 import { useToast } from '@/hooks/use-toast';
@@ -56,4 +56,12 @@ export function useApplicationValidation() {
     validateAll,
   };
 }
+
+
+
+
+
+
+
+
 

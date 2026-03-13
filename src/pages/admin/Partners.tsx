@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, ExternalLink, User } from "lucide-react";
@@ -24,7 +24,7 @@ type Partner = {
   description: string | null;
   logo_url: string | null;
   website_url: string | null;
-  category: string;
+  sector: string;
   display_order: number;
   featured: boolean;
   status: string;
@@ -123,7 +123,7 @@ const AdminPartners = () => {
                 }}
               />
             ) : (
-              <span className="text-lg">🏢</span>
+              <span className="text-lg">ðŸ¢</span>
             )}
           </div>
         );
@@ -149,8 +149,8 @@ const AdminPartners = () => {
       },
     },
     {
-      accessorKey: "category",
-      header: "Category",
+      accessorKey: "sector",
+      header: "sector",
       cell: ({ row }) => {
         const colors: Record<string, string> = {
           Funding: "bg-blue-500/15 text-blue-700 border-blue-300",
@@ -160,8 +160,8 @@ const AdminPartners = () => {
           Technology: "bg-teal-500/15 text-teal-700 border-teal-300",
           Strategic: "bg-pink-500/15 text-pink-700 border-pink-300",
         };
-        const cls = colors[row.original.category] || "bg-muted text-muted-foreground";
-        return <Badge variant="outline" className={cls}>{row.original.category}</Badge>;
+        const cls = colors[row.original.sector] || "bg-muted text-muted-foreground";
+        return <Badge variant="outline" className={cls}>{row.original.sector}</Badge>;
       },
     },
     {
@@ -213,7 +213,7 @@ const AdminPartners = () => {
             Visit
           </a>
         ) : (
-          <span className="text-muted-foreground text-sm">—</span>
+          <span className="text-muted-foreground text-sm">-/span>
         ),
     },
     {
@@ -259,7 +259,7 @@ const AdminPartners = () => {
         columns={columns}
         data={partners}
         searchKey="name"
-        searchPlaceholder="Search by name or category..."
+        searchPlaceholder="Search by name or sector..."
         pageSize={10}
         enableExport={false}
         onRefresh={fetchPartners}
@@ -287,3 +287,11 @@ const AdminPartners = () => {
 };
 
 export default AdminPartners;
+
+
+
+
+
+
+
+

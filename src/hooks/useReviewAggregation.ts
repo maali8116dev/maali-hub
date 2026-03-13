@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Hooks and utilities for review aggregation and decision engine
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -142,10 +142,10 @@ export const useReviewAggregation = (applicationId: string, totalAssignedOverrid
  * Decision Engine: Rule-based automatic decision making
  * 
  * Rules:
- * - IF avg_score ≥ approveThreshold AND variance ≤ varianceThreshold → APPROVE
- * - IF avg_score ≤ rejectThreshold → REJECT
- * - IF variance > varianceThreshold → REQUEST_MORE_INFO
- * - IF not all reviewers submitted → INSUFFICIENT_REVIEWS
+ * - IF avg_score â‰¥ approveThreshold AND variance â‰¤ varianceThreshold â†’ APPROVE
+ * - IF avg_score â‰¤ rejectThreshold â†’ REJECT
+ * - IF variance > varianceThreshold â†’ REQUEST_MORE_INFO
+ * - IF not all reviewers submitted â†’ INSUFFICIENT_REVIEWS
  */
 export function calculateDecision(
   aggregation: ReviewAggregation | null,
@@ -185,7 +185,7 @@ export function calculateDecision(
     reasoning.push(`Only ${total_reviews} of ${expectedReviewers} reviewers have submitted (${pending_reviewers} pending).`);
   }
 
-  // Rule 1: High variance indicates disagreement → REQUEST_MORE_INFO
+  // Rule 1: High variance indicates disagreement â†’ REQUEST_MORE_INFO
   if (score_variance !== null && score_variance > varianceThreshold) {
     recommendedDecision = 'request_info';
     confidence = 0.6;
@@ -194,7 +194,7 @@ export function calculateDecision(
       `Average score: ${average_score.toFixed(2)}/10`
     );
   }
-  // Rule 2: Low average score → REJECT
+  // Rule 2: Low average score â†’ REJECT
   else if (average_score <= rejectThreshold) {
     recommendedDecision = 'reject';
     confidence = Math.min(0.9, 0.5 + (rejectThreshold - average_score) / rejectThreshold);
@@ -203,7 +203,7 @@ export function calculateDecision(
       `Reviewer recommendations: ${recommendations.approve} approve, ${recommendations.reject} reject, ${recommendations.request_info} request info`
     );
   }
-  // Rule 3: High average + low variance → APPROVE
+  // Rule 3: High average + low variance â†’ APPROVE
   else if (average_score >= approveThreshold && (score_variance === null || score_variance <= varianceThreshold)) {
     recommendedDecision = 'approve';
     confidence = Math.min(0.95, 0.7 + (average_score - approveThreshold) / (10 - approveThreshold));
@@ -222,7 +222,7 @@ export function calculateDecision(
       `Reviewer recommendations: ${recommendations.approve} approve, ${recommendations.reject} reject, ${recommendations.request_info} request info`
     );
   }
-  // Rule 4: Medium scores or mixed signals → REQUEST_MORE_INFO
+  // Rule 4: Medium scores or mixed signals â†’ REQUEST_MORE_INFO
   else {
     recommendedDecision = 'request_info';
     confidence = 0.5;
@@ -280,4 +280,12 @@ export const useDecisionEngine = (
     enabled: !!applicationId && !!aggregation,
   });
 };
+
+
+
+
+
+
+
+
 

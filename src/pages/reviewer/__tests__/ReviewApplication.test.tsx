@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase } from '@/integrations/supabase/client';
 import { createNotification } from '@/hooks/useNotifications';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
@@ -560,4 +560,12 @@ describe('ReviewApplication - Approve/Reject Business Logic', () => {
     });
   });
 });
+
+
+
+
+
+
+
+
 
