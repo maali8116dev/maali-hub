@@ -222,7 +222,7 @@ const PartnerOpportunityForm = () => {
                 </Select>
               </div>
               <div>
-                <Label>sector</Label>
+                <Label>Sector</Label>
                 <Select value={sectorId?.toString() || ""} onValueChange={(v) => setValue("sectorId", parseInt(v), { shouldValidate: true })}>
                   <SelectTrigger><SelectValue placeholder="Select sector" /></SelectTrigger>
                   <SelectContent>

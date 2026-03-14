@@ -1,4 +1,5 @@
--- Allow partners to insert new tags
+-- Allow partners to insert new tags (drop if exists so this migration is idempotent with consolidated schema)
+DROP POLICY IF EXISTS "Partners can create tags" ON public.opportunity_tags;
 CREATE POLICY "Partners can create tags"
 ON public.opportunity_tags
 FOR INSERT
@@ -6,6 +7,7 @@ TO authenticated
 WITH CHECK (get_user_role(auth.uid()) = 'partner');
 
 -- Allow partners to insert tag mappings for their own opportunities
+DROP POLICY IF EXISTS "Partners can manage tag maps for own opportunities" ON public.opportunity_tag_map;
 CREATE POLICY "Partners can manage tag maps for own opportunities"
 ON public.opportunity_tag_map
 FOR INSERT
@@ -20,6 +22,7 @@ WITH CHECK (
 );
 
 -- Allow partners to delete tag maps for their own opportunities
+DROP POLICY IF EXISTS "Partners can delete tag maps for own opportunities" ON public.opportunity_tag_map;
 CREATE POLICY "Partners can delete tag maps for own opportunities"
 ON public.opportunity_tag_map
 FOR DELETE

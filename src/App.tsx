@@ -105,7 +105,6 @@ const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"))
 const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
 const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
-const PartnerQualifiedApplicants = lazy(() => import("./pages/partner/QualifiedApplicants"));
 const PartnerNotifications = lazy(() => import("./pages/partner/Notifications"));
 
 // Test page
@@ -791,18 +790,6 @@ const App = () => {
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
                   <PartnerOpportunityApplications />
-                </PartnerLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/partner/opportunities/:id/qualified"
-            element={
-              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
-                <PartnerLayout>
-                  <PartnerQualifiedApplicants />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>

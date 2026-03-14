@@ -102,11 +102,7 @@ const formatProjectDate = (dateString: string) => {
             label="Location" 
             value={project.location}
           />
-          <InfoField 
-            icon={DollarSign} 
-            label="Funding Amount" 
-            value={formatCurrency(project.fundingAmount, project.currency)}
-          />
+        
           <InfoField 
             icon={Calendar} 
             label="Application Deadline" 
@@ -114,9 +110,15 @@ const formatProjectDate = (dateString: string) => {
           />
           <InfoField 
             icon={Tag} 
-            label="sector" 
+            label="Sector" 
             value={project.tags?.[0]?.name || "Uncategorized"}
           />
+          { project.fundingAmount && (
+            <InfoField 
+            icon={DollarSign} 
+            label="Funding Amount" 
+            value={formatCurrency(project.fundingAmount, project.currency)}
+          />)}
         </div>
 
         {/* Opportunity Details */}
@@ -176,41 +178,6 @@ const formatProjectDate = (dateString: string) => {
           </div>
         )}
 
-        {/* Requirements */}
-        {project.requirements && (
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Tag className="h-5 w-5" />
-              Requirements
-            </h4>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div 
-                className="prose prose-sm max-w-none [&>*:last-child]:mb-0"
-                dangerouslySetInnerHTML={{ 
-                  __html: project.requirements 
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Eligibility Criteria */}
-        {project.eligibilityCriteria && (
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Eligibility Criteria
-            </h4>
-            <div className="bg-muted/30 rounded-lg p-4">
-              <div 
-                className="prose prose-sm max-w-none [&>*:last-child]:mb-0"
-                dangerouslySetInnerHTML={{ 
-                  __html: project.eligibilityCriteria 
-                }}
-              />
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

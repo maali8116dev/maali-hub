@@ -2204,7 +2204,13 @@ CREATE POLICY "Partners can create tags"
 ON public.opportunity_tags
 FOR INSERT
 TO authenticated
-WITH CHECK (get_user_role((select auth.uid())) = 'partner');
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE user_id = (select auth.uid())
+    AND role = 'partner'
+  )
+);
 
 -- Create Opportunities Table
 CREATE TABLE IF NOT EXISTS public.opportunities (
@@ -2316,7 +2322,11 @@ ON public.opportunity_tag_map
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  (get_user_role((select auth.uid())) = 'partner')
+  (EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE user_id = (select auth.uid())
+    AND role = 'partner'
+  ))
   AND EXISTS (
     SELECT 1 FROM public.opportunities
     WHERE opportunities.id = opportunity_tag_map.opportunity_id
@@ -2329,7 +2339,11 @@ ON public.opportunity_tag_map
 FOR DELETE
 TO authenticated
 USING (
-  (get_user_role((select auth.uid())) = 'partner')
+  (EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE user_id = (select auth.uid())
+    AND role = 'partner'
+  ))
   AND EXISTS (
     SELECT 1 FROM public.opportunities
     WHERE opportunities.id = opportunity_tag_map.opportunity_id

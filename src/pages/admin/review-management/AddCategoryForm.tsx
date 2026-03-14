@@ -81,7 +81,7 @@ export const AddCategoryForm = ({
         </div>
       )}
       <div className="space-y-2">
-        <Label>sector</Label>
+        <Label>Sector</Label>
         <Select value={sector} onValueChange={setCategory}>
           <SelectTrigger>
             <SelectValue placeholder="Select sector" />

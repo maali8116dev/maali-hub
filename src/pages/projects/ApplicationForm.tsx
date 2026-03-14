@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
@@ -22,12 +22,12 @@ const ApplicationFormContent = () => {
   const projectId = id ? parseInt(id, 10) : undefined;
   const isNewApplication = searchParams.get("new") === "true";
 
-  const { data: projectState, isLoading: isCheckingProject } = useQuery({
-    queryKey: ["project-application-state", projectId],
+  const { data: opportunityState, isLoading: isLoadingOpportunity } = useQuery({
+    queryKey: ["opportunity-application-state", projectId],
     queryFn: async () => {
       if (!projectId) return null;
       const { data, error } = await supabase
-        .from("projects")
+        .from("opportunities")
         .select("id, title, status, deadline")
         .eq("id", projectId)
         .maybeSingle();
@@ -89,23 +89,23 @@ const ApplicationFormContent = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isCheckingProject ? (
-              <p className="text-sm text-muted-foreground">Checking project availability...</p>
-            ) : projectState && !isProjectOpen(projectState.status, projectState.deadline) ? (
+            {isLoadingOpportunity ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : opportunityState && !isProjectOpen(opportunityState.status, opportunityState.deadline) ? (
               <div className="space-y-4">
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Applications Closed</AlertTitle>
                   <AlertDescription>
-                    This project is closed. New applications and edits are disabled.
+                    This opportunity is closed. New applications and edits are disabled.
                   </AlertDescription>
                 </Alert>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(`/opportunities/${projectState.id}`)}
+                  onClick={() => navigate(`/opportunities/${opportunityState.id}`)}
                 >
-                  Back to Project
+                  Back to Opportunity
                 </Button>
               </div>
             ) : (
