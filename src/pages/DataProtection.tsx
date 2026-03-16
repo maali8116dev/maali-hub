@@ -83,19 +83,19 @@ const DataProtection = () => {
               </p>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span><strong>Contract:</strong> To fulfill our contract with you and provide our services</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span><strong>Consent:</strong> When you have given clear consent for specific processing activities</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span><strong>Legal Obligation:</strong> To comply with legal requirements and regulations</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span><strong>Legitimate Interests:</strong> For our legitimate business interests, balanced against your rights</span>
                 </li>
               </ul>
@@ -130,19 +130,19 @@ const DataProtection = () => {
               </p>
               <ul className="space-y-2 text-muted-foreground mb-4">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Use your account settings to update or delete certain information</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Contact us at privacy@maali.africa with your request</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Include sufficient information to verify your identity</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Specify which right you wish to exercise</span>
                 </li>
               </ul>
@@ -179,15 +179,15 @@ const DataProtection = () => {
               </p>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Notify relevant supervisory authorities within 72 hours, where required by law</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Inform affected users without undue delay if the breach poses a high risk to their rights</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>Provide clear information about the nature of the breach and recommended actions</span>
                 </li>
               </ul>

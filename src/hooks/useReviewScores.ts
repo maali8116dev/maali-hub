@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Hooks for managing review scores
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -36,10 +36,10 @@ export const useSubmitReview = () => {
         .eq('user_id', reviewerId)
         .single();
 
-      // Get application and project information for activity log
+      // Get application and opportunity information for activity log
       const { data: application } = await supabase
         .from('applications')
-        .select('project_id, projects:project_id(title)')
+        .select('opportunity_id, opportunities:opportunity_id(title)')
         .eq('id', applicationId)
         .single();
 
@@ -89,8 +89,8 @@ export const useSubmitReview = () => {
           reviewer_name: reviewerName,
           reviewer_role: reviewerProfile?.role || 'reviewer',
           application_id: applicationId,
-          project_id: application?.project_id || null,
-          project_title: (application?.projects as any)?.title || null,
+          opportunity_id: application?.opportunity_id || null,
+          opportunity_title: (application?.opportunities as any)?.title || null,
           overall_score: typeof overallScore === 'number' ? overallScore.toFixed(2) : String(overallScore || '0.00'),
           recommendation,
           scores,

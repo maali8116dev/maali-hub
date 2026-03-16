@@ -225,7 +225,8 @@ ALTER FUNCTION "public"."auto_generate_invoice_number"() OWNER TO "postgres";
 
 COMMENT ON FUNCTION "public"."auto_generate_invoice_number"() IS 'Trigger function: auto-generates invoice number and sets timestamps on status transitions. Properly handles both INSERT and UPDATE operations.';
 
-
+-- Drop first: parameter name change (e.g. p_category -> p_Sector) not allowed by CREATE OR REPLACE
+DROP FUNCTION IF EXISTS "public"."calculate_review_score"("jsonb", "text");
 
 CREATE OR REPLACE FUNCTION "public"."calculate_review_score"("p_scores" "jsonb", "p_Sector" "text") RETURNS numeric
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
@@ -612,6 +613,8 @@ COMMENT ON FUNCTION "public"."generate_invoice_number"() IS 'Generates a sequent
 
 -- Function get_admin_stats removed - will be updated to use opportunities in opportunities migration
 
+-- Drop first: return type (OUT params) changed; CREATE OR REPLACE cannot change it
+DROP FUNCTION IF EXISTS "public"."get_all_reviewers_with_details"();
 
 CREATE OR REPLACE FUNCTION "public"."get_all_reviewers_with_details"() RETURNS TABLE("reviewer_id" "uuid", "first_name" "text", "last_name" "text", "email" "text", "workload" integer, "sectors" "jsonb", "total_reviews" integer, "average_score" numeric)
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -776,97 +779,6 @@ $$;
 
 
 ALTER FUNCTION "public"."get_application_assignments_with_reviewers"("p_application_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_application_details"("p_application_id" "uuid") RETURNS TABLE("application" "jsonb", "project" "jsonb", "documents" "jsonb")
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO 'public'
-    AS $$
-DECLARE
-  v_app   public.applications%ROWTYPE;
-  v_role  TEXT;
-BEGIN
-  -- 1. Authenticate
-  IF auth.uid() IS NULL THEN
-    RAISE EXCEPTION 'Authentication required.';
-  END IF;
-
-  -- 2. Fetch the application (single PK lookup, reused below)
-  SELECT *
-  INTO v_app
-  FROM public.applications
-  WHERE id = p_application_id;
-
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Application not found.';
-  END IF;
-
-  -- 3. Authorise
-  v_role := public.get_user_role(auth.uid());
-
-  IF v_app.user_id <> auth.uid()
-     AND COALESCE(v_role, '') NOT IN ('admin', 'reviewer')
-  THEN
-    RAISE EXCEPTION 'Access denied.';
-  END IF;
-
-  -- 4. Return application + opportunity + documents in one go.
-  --    Re-uses v_app via the WHERE clause on the same PK (single index hit).
-  RETURN QUERY
-  SELECT
-    to_jsonb(a.*) AS application,
-
-    CASE
-      WHEN o.id IS NULL THEN NULL
-      ELSE to_jsonb(o.*) || jsonb_build_object(
-             'tags', COALESCE(
-               (
-                 SELECT jsonb_agg(
-                   jsonb_build_object(
-                     'id', ot.id,
-                     'name', ot.name,
-                     'slug', ot.slug
-                   )
-                 )
-                 FROM public.opportunity_tag_map otm
-                 JOIN public.opportunity_tags ot ON ot.id = otm.tag_id
-                 WHERE otm.opportunity_id = o.id
-               ),
-               '[]'::jsonb
-             )
-           )
-    END AS opportunity,
-
-    COALESCE(
-      (
-        SELECT jsonb_agg(to_jsonb(d.*) ORDER BY d.created_at DESC)
-        FROM (
-          -- Linked documents
-          SELECT ad.*
-          FROM public.application_documents ad
-          WHERE ad.application_id = a.id
-
-          UNION  -- UNION deduplicates automatically
-
-          -- Unlinked fallback: same user+opportunity, no application link
-          SELECT ad.*
-          FROM public.application_documents ad
-          WHERE ad.user_id      = a.user_id
-            AND ad.opportunity_id   = a.opportunity_id
-            AND ad.application_id IS NULL
-        ) d
-      ),
-      '[]'::jsonb
-    ) AS documents
-
-  FROM public.applications a
-  LEFT JOIN public.opportunities o ON o.id = a.opportunity_id
-  WHERE a.id = p_application_id;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."get_application_details"("p_application_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_application_review_scores_with_reviewers"("p_application_id" "uuid") RETURNS TABLE("id" "uuid", "application_id" "uuid", "reviewer_id" "uuid", "assignment_id" "uuid", "scores" "jsonb", "overall_score" numeric, "comments" "text", "recommendation" "text", "submitted_at" timestamp with time zone, "created_at" timestamp with time zone, "updated_at" timestamp with time zone, "reviewer_user_id" "uuid", "reviewer_first_name" "text", "reviewer_last_name" "text")
@@ -1062,6 +974,7 @@ ALTER FUNCTION "public"."get_rate_limit_config"("p_operation_type" "text", OUT "
 
 -- Function get_reviewer_assignments_with_application removed - will be replaced with opportunities support in opportunities migration
 
+DROP FUNCTION IF EXISTS "public"."get_reviewer_full_details"("uuid");
 
 CREATE OR REPLACE FUNCTION "public"."get_reviewer_full_details"("p_reviewer_id" "uuid") RETURNS TABLE("reviewer" "jsonb", "workload" integer, "total_reviews" integer, "total_assignments" integer, "average_score" numeric, "completed_reviews" "jsonb", "pending_assignments" "jsonb", "sectors" "jsonb")
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -1174,6 +1087,8 @@ $$;
 
 ALTER FUNCTION "public"."get_reviewer_workload"("p_reviewer_id" "uuid") OWNER TO "postgres";
 
+
+DROP FUNCTION IF EXISTS "public"."get_user_applications_with_opportunities"("uuid");
 
 CREATE OR REPLACE FUNCTION "public"."get_user_applications_with_opportunities"("p_user_id" "uuid") RETURNS TABLE("application" "jsonb", "project" "jsonb")
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -3690,12 +3605,6 @@ GRANT ALL ON FUNCTION "public"."get_all_users_for_admin"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_application_assignments_with_reviewers"("p_application_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_application_assignments_with_reviewers"("p_application_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_application_assignments_with_reviewers"("p_application_id" "uuid") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."get_application_details"("p_application_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_application_details"("p_application_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_application_details"("p_application_id" "uuid") TO "service_role";
 
 
 

@@ -1,4 +1,4 @@
-﻿import { useCallback } from "react";
+import { useCallback } from "react";
 import { 
   trackEvent as posthogTrack, 
   identifyUser as posthogIdentify, 
@@ -70,21 +70,21 @@ export const useAnalytics = () => {
   }, []);
 
   // Application funnel tracking helpers
-  const trackApplicationStart = useCallback((projectId: number, projectTitle: string) => {
+  const trackApplicationStart = useCallback((opportunityId: number, projectTitle: string) => {
     track("application_started", {
-      project_id: projectId,
+      opportunity_id: opportunityId,
       project_title: projectTitle,
       timestamp: new Date().toISOString(),
     });
   }, [track]);
 
   const trackApplicationStep = useCallback((
-    projectId: number, 
-    stepNumber: number, 
+    opportunityId: number,
+    stepNumber: number,
     stepName: string
   ) => {
     track("application_step_completed", {
-      project_id: projectId,
+      opportunity_id: opportunityId,
       step_number: stepNumber,
       step_name: stepName,
       timestamp: new Date().toISOString(),
@@ -92,22 +92,22 @@ export const useAnalytics = () => {
   }, [track]);
 
   const trackApplicationSubmit = useCallback((
-    projectId: number, 
+    opportunityId: number,
     applicationId: string
   ) => {
     track("application_submitted", {
-      project_id: projectId,
+      opportunity_id: opportunityId,
       application_id: applicationId,
       timestamp: new Date().toISOString(),
     });
   }, [track]);
 
   const trackApplicationAbandon = useCallback((
-    projectId: number, 
+    opportunityId: number,
     lastStep: number
   ) => {
     track("application_abandoned", {
-      project_id: projectId,
+      opportunity_id: opportunityId,
       last_step: lastStep,
       timestamp: new Date().toISOString(),
     });

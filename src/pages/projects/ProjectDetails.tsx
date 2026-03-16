@@ -1,4 +1,4 @@
-﻿import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { useOpportunityDetails } from "@/hooks/useOpportunityDetails";
 import { ProjectInfo } from "@/components/projects/ProjectInfo";
 import { ProjectRequirements } from "@/components/projects/ProjectRequirements";
+import { OpportunityDocumentsCard } from "@/components/projects/OpportunityDocumentsCard";
 import { ProjectApplicationSidebar } from "@/components/projects/ProjectApplicationSidebar";
 import { SEO } from "@/components/seo/SEO";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -127,7 +128,7 @@ const ProjectDetails = () => {
             location: opportunity.location ? { name: opportunity.location } : undefined,
             startDate: opportunity.createdAt,
             endDate: opportunity.deadline,
-            sector: opportunity.tags?.[0]?.name || "Uncategorized",
+            sector: opportunity.sector || opportunity.tags?.[0]?.name || "Uncategorized",
           }}
           id="project-schema"
         />
@@ -149,6 +150,7 @@ const ProjectDetails = () => {
           {/* Project Details */}
           <div className="lg:col-span-2 space-y-6">
             <ProjectInfo project={opportunity} />
+            <OpportunityDocumentsCard opportunityId={opportunity.id} />
             <ProjectRequirements project={opportunity} />
           </div>
 

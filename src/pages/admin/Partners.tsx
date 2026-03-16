@@ -213,7 +213,7 @@ const AdminPartners = () => {
             Visit
           </a>
         ) : (
-          <span className="text-muted-foreground text-sm">-/span>
+          <span className="text-muted-foreground text-sm">-</span>
         ),
     },
     {

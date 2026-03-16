@@ -1,27 +1,19 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useProject, useCreateProject, useUpdateProject, ProjectFormData } from "@/hooks/useAdminProjects";
+import { useOpportunityTags } from "@/hooks/useOpportunities";
+import { syncOpportunityTags, usePartnerOpportunityTags } from "@/hooks/usePartnerOpportunities";
 import { useSectors } from "@/hooks/useSectors";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useOpportunityFiles } from "@/hooks/useOpportunityFiles";
+import { OpportunityFormContent } from "@/components/opportunity/OpportunityFormContent";
 import { getProjectApplicationStateLabel } from "@/lib/projectAvailability";
 
-// Helper to safely handle optional numeric inputs that may come through as NaN
 const optionalNumber = (schema: z.ZodNumber) =>
   z.preprocess((val) => {
-    // react-hook-form with valueAsNumber passes NaN for empty fields
     if (val === "" || val === null || (typeof val === "number" && isNaN(val))) {
       return undefined;
     }
@@ -31,15 +23,28 @@ const optionalNumber = (schema: z.ZodNumber) =>
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required").min(5, "Title must be at least 5 characters"),
   description: z.string().min(1, "Description is required").min(50, "Description must be at least 50 characters"),
-  sector: z.string().min(1, "sector is required"),
+  sectorId: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || (typeof val === "number" && isNaN(val))) {
+        return undefined;
+      }
+      return val;
+    },
+    z.number().int().optional()
+  ),
+  opportunityType: z
+    .enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"])
+    .nullable()
+    .optional(),
   status: z.enum(["new", "open", "closing-soon", "closed", "archived"]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be in YYYY-MM-DD format"),
-  fundingAmount: z.string().min(1, "Funding amount is required"),
+  fundingAmount: z.string().optional(),
+  currency: z.string().optional(),
   location: z.string().min(1, "Location is required"),
+  country: z.string().optional(),
   imageUrl: z.string().optional().or(z.literal("")),
   requirements: z.string().optional(),
   eligibilityCriteria: z.string().optional(),
-  applicationFee: optionalNumber(z.number().min(0, "Application fee must be 0 or greater")),
   maxApplicants: optionalNumber(z.number().int().positive("Max applicants must be a positive number")),
   currentApplicants: optionalNumber(z.number().int().min(0, "Current applicants cannot be negative")),
   featured: z.boolean().optional(),
@@ -55,50 +60,51 @@ const ProjectForm = () => {
 
   const { data: project, isLoading: isLoadingProject } = useProject(projectId);
   const { data: sectors = [] } = useSectors();
+  const { data: allTags = [] } = useOpportunityTags();
+  const { data: existingTagNames = [] } = usePartnerOpportunityTags(projectId);
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
 
-  // Image upload hook
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const { documents, isUploading: isFilesUploading, upload, uploadWithId, remove } = useOpportunityFiles(projectId);
+
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "project-images",
     folder: "projects",
     maxSizeMB: 5,
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    setValue,
-    watch,
-    reset,
-    getValues,
-  } = useForm<ProjectFormValues>({
+  const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       title: "",
       description: "",
-      sector: "",
+      sectorId: undefined,
+      opportunityType: null,
       status: "open",
       deadline: "",
       fundingAmount: "",
+      currency: "USD",
       location: "",
+      country: "",
       imageUrl: "",
       requirements: "",
       eligibilityCriteria: "",
-      applicationFee: undefined,
       maxApplicants: undefined,
       currentApplicants: undefined,
       featured: false,
     },
   });
 
-  const status = watch("status");
-  const sector = watch("sector");
-  const imageUrl = watch("imageUrl");
-  const deadline = watch("deadline");
-  
-  // Handle image deletion - also delete from storage if it's a Supabase URL
+  const { setValue } = form;
+  const status = form.watch("status");
+  const deadline = form.watch("deadline");
+
   const handleImageDelete = async (url: string): Promise<boolean> => {
     if (url && url.includes("storage/v1/object/public/project-images")) {
       const deleted = await deleteImage(url);
@@ -112,412 +118,159 @@ const ProjectForm = () => {
     return true;
   };
 
-  // Load project data when editing
+  const tagSuggestions =
+    tagInput.trim().length > 0
+      ? allTags
+          .filter(
+            (tag) =>
+              tag.name.toLowerCase().includes(tagInput.toLowerCase()) &&
+              !selectedTags.includes(tag.name)
+          )
+          .slice(0, 6)
+      : [];
+
+  const addTag = (name: string) => {
+    const trimmed = name.trim();
+    if (trimmed && !selectedTags.includes(trimmed)) {
+      setSelectedTags((prev) => [...prev, trimmed]);
+    }
+    setTagInput("");
+    setShowSuggestions(false);
+  };
+
+  const removeTag = (name: string) => {
+    setSelectedTags((prev) => prev.filter((tag) => tag !== name));
+  };
+
+  const handleTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (event.key === "Backspace" && !tagInput && selectedTags.length > 0) {
+      removeTag(selectedTags[selectedTags.length - 1]);
+    }
+  };
+
   useEffect(() => {
     if (project && isEditing) {
-      // Format deadline for date input (YYYY-MM-DD)
-      const deadlineDate = project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : "";
-      
-      reset({
+      const deadlineDate = project.deadline ? new Date(project.deadline).toISOString().split("T")[0] : "";
+      form.reset({
         title: project.title,
         description: project.description,
-        sector: project.sector,
+        sectorId: project.sectorId || undefined,
+        opportunityType: (project.opportunityType as any) || null,
         status: project.status,
         deadline: deadlineDate,
         fundingAmount: project.fundingAmount,
+        currency: project.currency || "USD",
         location: project.location,
+        country: project.country || "",
         imageUrl: project.imageUrl || "",
         requirements: project.requirements || "",
         eligibilityCriteria: project.eligibilityCriteria || "",
-        applicationFee: project.applicationFee ? parseFloat(project.applicationFee.toString()) : undefined,
         maxApplicants: project.maxApplicants || undefined,
         currentApplicants: project.currentApplicants || undefined,
         featured: project.featured || false,
       });
     }
-  }, [project, isEditing, reset]);
+  }, [project, isEditing, form]);
+
+  useEffect(() => {
+    if (existingTagNames.length > 0) {
+      setSelectedTags(existingTagNames);
+    }
+  }, [existingTagNames]);
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
+      const isGrant = data.opportunityType === "grant";
       const formData: ProjectFormData = {
         title: data.title,
         description: data.description,
-        sector: data.sector,
+        sectorId: data.sectorId,
+        opportunityType: data.opportunityType ?? null,
         status: data.status,
         deadline: data.deadline,
-        fundingAmount: data.fundingAmount,
+        fundingAmount: isGrant ? data.fundingAmount || null : null,
+        currency: isGrant ? data.currency || "USD" : null,
         location: data.location,
+        country: data.country || null,
         imageUrl: data.imageUrl || undefined,
         requirements: data.requirements || undefined,
         eligibilityCriteria: data.eligibilityCriteria || undefined,
-        applicationFee: data.applicationFee || undefined,
         maxApplicants: data.maxApplicants || undefined,
-        currentApplicants: data.currentApplicants || undefined,
+        ...(isEditing ? {} : { currentApplicants: data.currentApplicants || undefined }),
         featured: data.featured || false,
       };
 
       if (isEditing && projectId) {
         await updateProject.mutateAsync({ id: projectId, data: formData });
+        if (selectedTags.length) {
+          await syncOpportunityTags(projectId, selectedTags);
+        }
       } else {
-        await createProject.mutateAsync(formData);
+        const created = await createProject.mutateAsync(formData);
+        if (selectedTags.length) {
+          await syncOpportunityTags(created.id, selectedTags);
+        }
+        for (const file of pendingFiles) {
+          await uploadWithId(created.id, file);
+        }
+        setPendingFiles([]);
       }
 
-      navigate("/admin/projects");
+      navigate("/admin/opportunities");
     } catch (error) {
-      // Error handling is done in the mutation hooks
       console.error("Error saving project:", error);
     }
   };
 
-  if (isEditing && isLoadingProject) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <p className="text-muted-foreground">Loading project...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            {isEditing ? "Edit Project" : "Create New Project"}
-          </h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            {isEditing ? "Update project details" : "Fill in the details to create a new funding opportunity"}
-          </p>
-        </div>
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/admin/projects")}
-          className="w-full sm:w-auto min-h-[44px]"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Projects
-        </Button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Project Information</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Enter the basic information for the funding opportunity</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    placeholder="e.g., African Women Tech Entrepreneurs Grant"
-                    className={errors.title ? "border-destructive" : ""}
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Description *</Label>
-                  <RichTextEditor
-                    value={watch("description")}
-                    onChange={(value) => setValue("description", value, { shouldValidate: true })}
-                    placeholder="Provide a comprehensive description of the funding opportunity. Use formatting to make it clear and engaging..."
-                    error={!!errors.description}
-                  />
-                  {errors.description && (
-                    <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="sector">sector *</Label>
-                    <Select
-                      key={`sector-${project?.id || "new"}-${sector}`}
-                      value={sector || ""}
-                      onValueChange={(value) => setValue("sector", value, { shouldValidate: true })}
-                    >
-                      <SelectTrigger id="sector" className={errors.sector ? "border-destructive" : ""}>
-                        <SelectValue placeholder="Select sector" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sectors.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.name}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.sector && (
-                      <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="status">Status *</Label>
-                    <Select
-                      key={`status-${project?.id || 'new'}-${status}`}
-                      value={status || "open"}
-                      onValueChange={(value) => setValue("status", value as "new" | "open" | "closing-soon" | "closed" | "archived", { shouldValidate: true })}
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="open">Open</SelectItem>
-                        <SelectItem value="closing-soon">Closing Soon</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="deadline">Deadline *</Label>
-                    <Input
-                      id="deadline"
-                      type="date"
-                      {...register("deadline")}
-                      className={errors.deadline ? "border-destructive" : ""}
-                    />
-                    {errors.deadline && (
-                      <p className="text-sm text-destructive mt-1">{errors.deadline.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      {...register("location")}
-                      placeholder="e.g., Kenya, Nigeria, All Africa"
-                      className={errors.location ? "border-destructive" : ""}
-                    />
-                    {errors.location && (
-                      <p className="text-sm text-destructive mt-1">{errors.location.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="fundingAmount">Funding Amount *</Label>
-                  <Input
-                    id="fundingAmount"
-                    {...register("fundingAmount")}
-                    placeholder="e.g., Up to $50,000"
-                    className={errors.fundingAmount ? "border-destructive" : ""}
-                  />
-                  {errors.fundingAmount && (
-                    <p className="text-sm text-destructive mt-1">{errors.fundingAmount.message}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Additional Details</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Optional information about requirements and eligibility</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="requirements">Requirements</Label>
-                  <Textarea
-                    id="requirements"
-                    {...register("requirements")}
-                    placeholder="Comma-separated requirements (e.g., Business plan, Pitch deck, Financials)"
-                    rows={4}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="eligibilityCriteria">Eligibility Criteria</Label>
-                  <Textarea
-                    id="eligibilityCriteria"
-                    {...register("eligibilityCriteria")}
-                    placeholder="Comma-separated eligibility (e.g., Women-led startup, Registered business)"
-                    rows={4}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Image */}
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Project Image</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Upload an image for this project (optional)</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <ImageUpload
-                  value={imageUrl || undefined}
-                  onChange={(url) => setValue("imageUrl", url || "")}
-                  onUpload={uploadImage}
-                  onDelete={handleImageDelete}
-                  isUploading={isUploading}
-                  uploadProgress={uploadProgress}
-                  variant="banner"
-                  placeholder="Upload Project Image"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                />
-                {errors.imageUrl && (
-                  <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Supported formats: JPG, PNG, WebP, GIF. Max size: 5MB
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Application Settings */}
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Application Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="applicationFee">Application Fee</Label>
-                  <Input
-                    id="applicationFee"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    {...register("applicationFee", { valueAsNumber: true })}
-                    placeholder="0.00"
-                    className={errors.applicationFee ? "border-destructive" : ""}
-                  />
-                  {errors.applicationFee && (
-                    <p className="text-sm text-destructive mt-1">{errors.applicationFee.message}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave empty for free applications
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="maxApplicants">Max Applicants</Label>
-                  <Input
-                    id="maxApplicants"
-                    type="number"
-                    min="1"
-                    {...register("maxApplicants", { valueAsNumber: true })}
-                    placeholder="Unlimited"
-                    className={errors.maxApplicants ? "border-destructive" : ""}
-                  />
-                  {errors.maxApplicants && (
-                    <p className="text-sm text-destructive mt-1">{errors.maxApplicants.message}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Leave empty for unlimited applicants
-                  </p>
-                </div>
-
-                {isEditing && (
-                  <div>
-                    <Label htmlFor="currentApplicants">Current Applicants</Label>
-                    <Input
-                      id="currentApplicants"
-                      type="number"
-                      min="0"
-                      {...register("currentApplicants", { valueAsNumber: true })}
-                      className={errors.currentApplicants ? "border-destructive" : ""}
-                    />
-                    {errors.currentApplicants && (
-                      <p className="text-sm text-destructive mt-1">{errors.currentApplicants.message}</p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Application Window State</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Derived from project status and deadline.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-                <p className="text-sm font-medium">
-                  {getProjectApplicationStateLabel(status, deadline)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Applicants can apply and edit drafts only while this is open.
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Featured Toggle */}
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-                  Featured Project
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="featured">Show on Homepage</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Featured projects appear on the landing page
-                    </p>
-                  </div>
-                  <Switch
-                    id="featured"
-                    checked={watch("featured") || false}
-                    onCheckedChange={(checked) => setValue("featured", checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Actions */}
-            <Card>
-              <CardContent className="p-4 pt-6 sm:p-6">
-                <div className="space-y-2">
-                  <Button type="submit" className="w-full min-h-[44px]" disabled={isSubmitting}>
-                    <Save className="h-4 w-4 mr-2" />
-                    {isSubmitting ? "Saving..." : isEditing ? "Update Project" : "Create Project"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full min-h-[44px]"
-                    onClick={() => navigate("/admin/projects")}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </form>
-    </div>
+    <OpportunityFormContent
+      variant="admin"
+      form={form}
+      backHref="/admin/opportunities"
+      backLabel="Back to Opportunities"
+      onBack={() => navigate("/admin/opportunities")}
+      isEditing={isEditing}
+      isSubmitting={form.formState.isSubmitting}
+      isLoading={isEditing && isLoadingProject}
+      title={isEditing ? "Edit Opportunity" : "Create New Opportunity"}
+      subtitle={isEditing ? "Update opportunity details" : "Fill in the details to create a new opportunity"}
+      sectors={sectors}
+      allTags={allTags}
+      selectedTags={selectedTags}
+      tagInput={tagInput}
+      showSuggestions={showSuggestions}
+      tagInputRef={tagInputRef}
+      tagSuggestions={tagSuggestions}
+      setTagInput={setTagInput}
+      setShowSuggestions={setShowSuggestions}
+      addTag={addTag}
+      removeTag={removeTag}
+      handleTagKeyDown={handleTagKeyDown}
+      onSubmit={onSubmit}
+      documents={documents}
+      isFilesUploading={isFilesUploading}
+      upload={upload}
+      remove={remove}
+      pendingFiles={pendingFiles}
+      setPendingFiles={setPendingFiles}
+      uploadWithId={uploadWithId}
+      showImageSection
+      imageUrl={form.watch("imageUrl")}
+      onImageChange={(url) => setValue("imageUrl", url || "")}
+      onImageUpload={uploadImage}
+      onImageDelete={handleImageDelete}
+      isImageUploading={isUploading}
+      imageUploadProgress={uploadProgress}
+      showApplicationState
+      applicationStateLabel={getProjectApplicationStateLabel(status, deadline)}
+      showCurrentApplicants={isEditing}
+      currentApplicantsCount={form.watch("currentApplicants") ?? 0}
+      showFeatured
+    />
   );
 };
 
 export default ProjectForm;
-
-
-
-
-
-
-
-
-

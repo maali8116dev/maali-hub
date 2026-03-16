@@ -4,7 +4,7 @@
  * This script creates:
  * - 1 Admin user
  * - 1 Partner user (can create opportunities)
- * - 5 Reviewer users (assigned to different sectors)
+ * - 7 Reviewer users (each sector has 2+ reviewers)
  * - 10 Applicant users
  * - 20 Applications from applicants (distributed across sectors)
  * - Reviewer assignments using the actual RPC function (to test assignment logic)
@@ -500,6 +500,8 @@ async function cleanupSeedData() {
       'reviewer.fintech@maali.test',
       'reviewer.multi@maali.test',
       'reviewer.tech2@maali.test',
+      'reviewer.agriculture2@maali.test',
+      'reviewer.fintech2@maali.test',
       'applicant1@maali.test', // Used by notification integration tests
       'applicant2@maali.test',
       'applicant3@maali.test',
@@ -683,6 +685,24 @@ async function main() {
         sectors: ['Technology'],
         country: 'South Africa',
         bio: 'Tech innovation specialist',
+      },
+      {
+        email: 'reviewer.agriculture2@maali.test',
+        firstName: 'Abena',
+        lastName: 'Crops',
+        role: 'reviewer',
+        sectors: ['Agriculture'],
+        country: 'Ghana',
+        bio: 'Agribusiness and value chain specialist',
+      },
+      {
+        email: 'reviewer.fintech2@maali.test',
+        firstName: 'Kofi',
+        lastName: 'Payments',
+        role: 'reviewer',
+        sectors: ['FinTech'],
+        country: 'Ghana',
+        bio: 'Digital payments and mobile money expert',
       },
     ];
 

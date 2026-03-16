@@ -97,7 +97,7 @@ const BlogDetail = () => {
               <User className="h-4 w-4" />
               <span className="font-medium">{blogPost.author}</span>
               {blogPost.authorRole && (
-                <span className="text-xs">-¢ {blogPost.authorRole}</span>
+                <span className="text-xs">• {blogPost.authorRole}</span>
               )}
             </div>
             <div className="flex items-center gap-2">

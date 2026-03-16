@@ -377,11 +377,11 @@ const DocumentItem = ({
           <p className="font-medium truncate text-sm sm:text-base">{doc.fileName}</p>
           <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
             <span>{formatFileSize(doc.fileSize)}</span>
-            <span>-¢</span>
+            <span>•</span>
             <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
             {showApplicationBadge && doc.applicationId && (
               <>
-                <span>-¢</span>
+                <span>•</span>
                 <Badge variant="outline" className="text-xs">
                   {t('dashboard:documents.badges.application')}
                 </Badge>
@@ -389,7 +389,7 @@ const DocumentItem = ({
             )}
             {doc.isLibraryDocument && (
               <>
-                <span>-¢</span>
+                <span>•</span>
                 <Badge variant="secondary" className="text-xs">
                   {t('dashboard:documents.badges.library')}
                 </Badge>

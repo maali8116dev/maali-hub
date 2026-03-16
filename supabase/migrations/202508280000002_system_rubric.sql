@@ -20,31 +20,33 @@ CREATE TABLE IF NOT EXISTS public.system_rubric (
 -- Create unique constraint to ensure only one row
 CREATE UNIQUE INDEX IF NOT EXISTS system_rubric_single_row_idx ON public.system_rubric ((1));
 
--- Migrate existing rubric data (use the first Sector rubric found, or create default)
+-- Migrate existing rubric data (use the first Sector rubric if table exists, else default)
 DO $$
 DECLARE
   default_rubric JSONB;
+  migrated_rubric JSONB := NULL;
 BEGIN
   default_rubric := $json${"criteria": [{"name": "innovation", "weight": 0.25, "max_score": 10, "description": ""}, {"name": "feasibility", "weight": 0.25, "max_score": 10, "description": ""}, {"name": "impact", "weight": 0.25, "max_score": 10, "description": ""}, {"name": "team", "weight": 0.25, "max_score": 10, "description": ""}]}$json$::jsonb;
-  
+
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'sector_rubrics') THEN
+    SELECT rubric INTO migrated_rubric FROM public.sector_rubrics ORDER BY created_at ASC LIMIT 1;
+  END IF;
+
   INSERT INTO public.system_rubric (id, rubric)
-  SELECT 
-    '00000000-0000-0000-0000-000000000001'::uuid,
-    COALESCE(
-      (SELECT rubric FROM public.sector_rubrics ORDER BY created_at ASC LIMIT 1),
-      default_rubric
-    )
+  VALUES ('00000000-0000-0000-0000-000000000001'::uuid, COALESCE(migrated_rubric, default_rubric))
   ON CONFLICT (id) DO NOTHING;
 END $$;
 
 -- Enable RLS
 ALTER TABLE public.system_rubric ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for system_rubric
+-- RLS Policies for system_rubric (idempotent)
+DROP POLICY IF EXISTS "Everyone can view system rubric" ON public.system_rubric;
 CREATE POLICY "Everyone can view system rubric"
 ON public.system_rubric FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage system rubric" ON public.system_rubric;
 CREATE POLICY "Admins can manage system rubric"
 ON public.system_rubric FOR ALL
 USING (public.get_user_role(auth.uid()) = 'admin');
@@ -117,7 +119,8 @@ BEGIN
 END;
 $$;
 
--- Create updated_at trigger for system_rubric
+-- Create updated_at trigger for system_rubric (idempotent)
+DROP TRIGGER IF EXISTS update_system_rubric_updated_at ON public.system_rubric;
 CREATE TRIGGER update_system_rubric_updated_at
 BEFORE UPDATE ON public.system_rubric
 FOR EACH ROW

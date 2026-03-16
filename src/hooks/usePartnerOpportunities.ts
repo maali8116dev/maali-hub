@@ -114,7 +114,7 @@ export function usePartnerOpportunity(id?: number) {
 }
 
 /** Upsert tags by name and link them to an opportunity */
-async function syncTags(opportunityId: number, tagNames: string[]) {
+export async function syncOpportunityTags(opportunityId: number, tagNames: string[]) {
   if (!tagNames.length) return;
 
   // For each tag name, insert if missing (avoid UPDATE RLS)
@@ -186,7 +186,7 @@ export function useCreatePartnerOpportunity() {
         .single();
 
       if (error) throw error;
-      if (formData.tags?.length) await syncTags(data.id, formData.tags);
+      if (formData.tags?.length) await syncOpportunityTags(data.id, formData.tags);
       return data;
     },
     onSuccess: () => {
@@ -233,7 +233,7 @@ export function useUpdatePartnerOpportunity() {
         .single();
 
       if (error) throw error;
-      if (formData.tags !== undefined) await syncTags(id, formData.tags);
+      if (formData.tags !== undefined) await syncOpportunityTags(id, formData.tags);
       return data;
     },
     onSuccess: () => {

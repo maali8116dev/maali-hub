@@ -4,14 +4,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY") || "";
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2023-10-16",
   httpClient: Stripe.createFetchHttpClient(),
 });
 
 interface CreateCheckoutRequest {
   applicationId: string;
-  projectId: number;
+  opportunityId?: number;
+  projectId?: number;
   successUrl?: string;
   cancelUrl?: string;
 }
@@ -43,9 +45,17 @@ serve(async (req: Request) => {
   }
 
   try {
+    if (!stripeSecretKey || !stripeSecretKey.startsWith("sk_")) {
+      return new Response(
+        JSON.stringify({ error: "Payment is not configured. Set STRIPE_SECRET_KEY for this environment." }),
+        { status: 503, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse body FIRST to get token fallback
     const body: CreateCheckoutRequest & { token?: string } = await req.json();
-    const { applicationId, projectId, successUrl, cancelUrl } = body;
+    const { applicationId, opportunityId, projectId, successUrl, cancelUrl } = body;
+    const resolvedOpportunityId = opportunityId ?? projectId;
 
     const auth = await authenticateRequest(req, { bodyToken: body.token });
     if (!auth.user) {
@@ -53,14 +63,14 @@ serve(async (req: Request) => {
     }
     const user = auth.user;
 
-    if (!applicationId || !projectId) {
+    if (!applicationId || !resolvedOpportunityId) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
-    // Get project fee using service role
+    // Get platform fee using service role
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -69,7 +79,7 @@ serve(async (req: Request) => {
     // Verify application ownership and project match
     const { data: application, error: applicationError } = await supabaseAdmin
       .from("applications")
-      .select("id, user_id, project_id, status, application_fee_paid")
+      .select("id, user_id, opportunity_id, status, application_fee_paid")
       .eq("id", applicationId)
       .maybeSingle();
 
@@ -87,9 +97,9 @@ serve(async (req: Request) => {
       );
     }
 
-    if (application.project_id !== projectId) {
+    if (application.opportunity_id !== resolvedOpportunityId) {
       return new Response(
-        JSON.stringify({ error: "Application/project mismatch" }),
+        JSON.stringify({ error: "Application/opportunity mismatch" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
@@ -101,23 +111,36 @@ serve(async (req: Request) => {
       );
     }
 
-    const { data: project, error: projectError } = await supabaseAdmin
-      .from("projects")
-      .select("title, application_fee")
-      .eq("id", projectId)
-      .single();
+    const { data: opportunity, error: opportunityError } = await supabaseAdmin
+      .from("opportunities")
+      .select("title")
+      .eq("id", resolvedOpportunityId)
+      .maybeSingle();
 
-    if (projectError || !project) {
+    if (opportunityError || !opportunity) {
       return new Response(
-        JSON.stringify({ error: "Project not found" }),
+        JSON.stringify({ error: "Opportunity not found" }),
         { status: 404, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
-    const fee = parseFloat(project.application_fee);
+    const { data: settings, error: settingsError } = await supabaseAdmin
+      .from("platform_settings")
+      .select("application_fee")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (settingsError) {
+      return new Response(
+        JSON.stringify({ error: "Failed to load application fee settings" }),
+        { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    const fee = Number(settings?.application_fee ?? 0);
     if (!fee || fee <= 0) {
       return new Response(
-        JSON.stringify({ error: "No application fee for this project" }),
+        JSON.stringify({ error: "No application fee configured" }),
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
@@ -152,8 +175,8 @@ serve(async (req: Request) => {
             currency: "usd",
             unit_amount: amountInCents,
             product_data: {
-              name: `Application Fee - ${project.title || "Project"}`,
-              description: `Application fee for ${project.title}`,
+              name: `Application Fee - ${opportunity.title || "Opportunity"}`,
+              description: `Application fee for ${opportunity.title}`,
             },
           },
           quantity: 1,
@@ -162,14 +185,21 @@ serve(async (req: Request) => {
       metadata: {
         userId: user.id,
         applicationId,
-        projectId: projectId.toString(),
+        opportunityId: resolvedOpportunityId.toString(),
       },
       success_url: checkoutSuccessUrl,
       cancel_url: checkoutCancelUrl,
     });
 
-    // Create transaction record
-    await supabaseAdmin
+    // Resolve payment_intent id (Stripe can return string or object)
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : (session.payment_intent && typeof session.payment_intent === "object" && "id" in session.payment_intent)
+          ? (session.payment_intent as { id: string }).id
+          : null;
+
+    const { error: insertError } = await supabaseAdmin
       .from("transactions")
       .insert({
         user_id: user.id,
@@ -178,16 +208,24 @@ serve(async (req: Request) => {
         amount: fee,
         currency: "USD",
         provider: "stripe",
-        provider_payment_intent_id: (session.payment_intent as string) || null,
+        provider_payment_intent_id: paymentIntentId,
         provider_transaction_id: session.id,
-        description: `Application fee for ${project.title}`,
+        description: `Application fee for ${opportunity.title}`,
         billing_email: user.email || null,
         application_id: applicationId,
-        project_id: projectId,
+        opportunity_id: resolvedOpportunityId,
         metadata: {
           checkout_session_id: session.id,
         },
       });
+
+    if (insertError) {
+      console.error("Transaction insert error:", insertError);
+      return new Response(
+        JSON.stringify({ error: "Failed to record transaction", detail: insertError.message }),
+        { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
 
     console.log("Checkout session created:", session.id, "for application:", applicationId);
 
@@ -196,9 +234,14 @@ serve(async (req: Request) => {
       { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Error creating checkout session:", error instanceof Error ? error.message : String(error));
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error creating checkout session:", message);
+    const isStripeAuth = typeof message === "string" && (message.includes("API") || message.includes("key") || message.includes("Unauthorized"));
+    const clientMessage = isStripeAuth
+      ? "Payment is not configured. Set STRIPE_SECRET_KEY for this environment."
+      : "Failed to create checkout session";
     return new Response(
-      JSON.stringify({ error: "Failed to create checkout session" }),
+      JSON.stringify({ error: clientMessage, detail: message }),
       { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );
   }

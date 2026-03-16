@@ -440,7 +440,7 @@ const Billing = () => {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-sm sm:text-base">
-                          {method.brand || method.type} -¢-¢-¢-¢ {method.last4}
+                          {method.brand || method.type} •••• {method.last4}
                         </p>
                         {method.method_type === "primary" ? (
                           <Badge variant="default" className="text-xs">Primary</Badge>
@@ -567,7 +567,7 @@ onClick={() => handleDownloadInvoice(item.id, item.receipt_url, item.invoice_pdf
                         </TableCell>
                         <TableCell>{item.description}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">
-                          {item.invoice_number || "-}
+                          {item.invoice_number || "-"}
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(item.amount, item.currency)}

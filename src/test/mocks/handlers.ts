@@ -1,4 +1,4 @@
-﻿import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 // Mock data
 const mockProjects = [
@@ -41,6 +41,13 @@ const mockProjects = [
     created_by: 'admin-123',
     created_at: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
+  },
+];
+
+const mockPlatformSettings = [
+  {
+    id: 1,
+    application_fee: 0,
   },
 ];
 
@@ -122,6 +129,11 @@ export const handlers = [
     }
 
     return HttpResponse.json([]);
+  }),
+
+  // Mock Supabase REST API for platform settings
+  http.get('*/rest/v1/platform_settings', () => {
+    return HttpResponse.json(mockPlatformSettings);
   }),
 
   // Mock Supabase REST API for applications

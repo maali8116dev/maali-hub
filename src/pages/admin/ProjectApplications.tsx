@@ -190,7 +190,7 @@ const ProjectApplications = () => {
                 const value = Number(event.target.value);
                 if (Number.isNaN(value)) return;
                 setProjectId(value);
-                navigate(`/admin/projects/${value}/applications`);
+                navigate(`/admin/opportunities/${value}/applications`);
                 setSelectedIds(new Set());
               }}
             >

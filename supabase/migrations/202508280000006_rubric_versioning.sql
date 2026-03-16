@@ -34,11 +34,13 @@ CREATE INDEX IF NOT EXISTS idx_rubric_versions_version ON public.rubric_versions
 -- Enable RLS
 ALTER TABLE public.rubric_versions ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for rubric_versions
+-- RLS Policies for rubric_versions (idempotent)
+DROP POLICY IF EXISTS "Everyone can view rubric versions" ON public.rubric_versions;
 CREATE POLICY "Everyone can view rubric versions"
 ON public.rubric_versions FOR SELECT
 USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage rubric versions" ON public.rubric_versions;
 CREATE POLICY "Admins can manage rubric versions"
 ON public.rubric_versions FOR ALL
 USING (public.get_user_role(auth.uid()) = 'admin');
@@ -272,13 +274,15 @@ BEGIN
 END;
 $$;
 
--- Trigger to sync system_rubric when a new version is activated
+-- Trigger to sync system_rubric when a new version is activated (idempotent)
+DROP TRIGGER IF EXISTS sync_system_rubric_on_version_activate ON public.rubric_versions;
 CREATE TRIGGER sync_system_rubric_on_version_activate
 AFTER UPDATE OF is_active ON public.rubric_versions
 FOR EACH ROW
 WHEN (NEW.is_active = true)
 EXECUTE FUNCTION public.sync_system_rubric_with_active_version();
 
+DROP TRIGGER IF EXISTS sync_system_rubric_on_version_insert ON public.rubric_versions;
 CREATE TRIGGER sync_system_rubric_on_version_insert
 AFTER INSERT ON public.rubric_versions
 FOR EACH ROW

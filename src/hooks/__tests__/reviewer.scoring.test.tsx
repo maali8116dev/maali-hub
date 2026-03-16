@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
@@ -44,6 +44,24 @@ const createWrapper = () => {
   );
 };
 
+const buildProfileQuery = () => ({
+  select: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  single: vi.fn().mockResolvedValue({
+    data: { first_name: 'Jane', last_name: 'Reviewer', role: 'reviewer' },
+    error: null,
+  }),
+});
+
+const buildApplicationQuery = () => ({
+  select: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  single: vi.fn().mockResolvedValue({
+    data: { project_id: 1, projects: { title: 'Test Opportunity' } },
+    error: null,
+  }),
+});
+
 // ============================================================
 // Hook-level tests (mocked Supabase client)
 // ============================================================
@@ -69,6 +87,8 @@ describe('useSubmitReview (Hook)', () => {
     (supabase.from as any).mockImplementation((table: string) => {
       if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
       if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
+      if (table === 'profiles') return buildProfileQuery();
+      if (table === 'applications') return buildApplicationQuery();
       return {};
     });
 
@@ -119,6 +139,8 @@ describe('useSubmitReview (Hook)', () => {
     (supabase.from as any).mockImplementation((table: string) => {
       if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
       if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
+      if (table === 'profiles') return buildProfileQuery();
+      if (table === 'applications') return buildApplicationQuery();
       return {};
     });
 
@@ -148,6 +170,8 @@ describe('useSubmitReview (Hook)', () => {
       (supabase.from as any).mockImplementation((table: string) => {
         if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
         if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
+        if (table === 'profiles') return buildProfileQuery();
+        if (table === 'applications') return buildApplicationQuery();
         return {};
       });
 

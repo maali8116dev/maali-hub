@@ -4,6 +4,8 @@
 -- This function provides optimized server-side filtering, searching, and pagination
 -- for opportunities. Replaces client-side filtering with a single database query.
 -- ============================================
+-- Drop first: return type may differ from existing
+DROP FUNCTION IF EXISTS public.get_opportunities_with_filters(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT[], TEXT, INTEGER, INTEGER);
 
 CREATE OR REPLACE FUNCTION public.get_opportunities_with_filters(
   p_opportunity_type TEXT DEFAULT NULL,

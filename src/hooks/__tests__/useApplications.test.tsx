@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -30,14 +30,14 @@ describe('useApplications', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches applications with project details successfully', async () => {
+  it('fetches applications with opportunity details successfully', async () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' };
     (useAuth as any).mockReturnValue({ user: mockUser });
 
     const mockApplication = {
       id: 'app-1',
       user_id: 'user-123',
-      project_id: 1,
+      opportunity_id: 1,
       company_name: 'Tech Solutions',
       contact_email: 'john@tech.com',
       contact_phone: '+1234567890',
@@ -49,7 +49,7 @@ describe('useApplications', () => {
       updated_at: '2024-01-15T00:00:00Z',
     };
 
-    const mockProject = {
+    const mockOpportunity = {
       id: 1,
       title: 'AgriTech Innovation Fund',
       sector: 'Agriculture',
@@ -62,7 +62,7 @@ describe('useApplications', () => {
       data: [
         {
           application: mockApplication,
-          project: mockProject,
+          opportunity: mockOpportunity,
         },
       ],
       error: null,
@@ -104,14 +104,14 @@ describe('useApplications', () => {
     expect(result.current.data).toEqual([]);
   });
 
-  it('handles missing project gracefully', async () => {
+  it('handles missing opportunity gracefully', async () => {
     const mockUser = { id: 'user-123', email: 'test@example.com' };
     (useAuth as any).mockReturnValue({ user: mockUser });
 
     const mockApplication = {
       id: 'app-1',
       user_id: 'user-123',
-      project_id: 999, // Non-existent project
+      opportunity_id: 999, // Non-existent opportunity
       company_name: 'Tech Solutions',
       contact_email: 'john@tech.com',
       status: 'pending',
@@ -120,12 +120,12 @@ describe('useApplications', () => {
       updated_at: '2024-01-15T00:00:00Z',
     };
 
-    // Mock RPC call with null project (project doesn't exist)
+    // Mock RPC call with null opportunity (opportunity doesn't exist)
     (supabase.rpc as any).mockResolvedValue({
       data: [
         {
           application: mockApplication,
-          project: null, // Project not found
+          opportunity: null, // Opportunity not found
         },
       ],
       error: null,
@@ -152,7 +152,7 @@ describe('useApplications', () => {
     const mockApplication = {
       id: 'app-1',
       user_id: 'user-123',
-      project_id: 1,
+      opportunity_id: 1,
       company_name: 'Tech Solutions',
       contact_email: 'john@tech.com',
       status: 'under_review', // Should map to 'pending'
@@ -161,7 +161,7 @@ describe('useApplications', () => {
       updated_at: '2024-01-15T00:00:00Z',
     };
 
-    const mockProject = {
+    const mockOpportunity = {
       id: 1,
       title: 'Test Project',
       sector: 'Technology',
@@ -174,7 +174,7 @@ describe('useApplications', () => {
       data: [
         {
           application: mockApplication,
-          project: mockProject,
+          opportunity: mockOpportunity,
         },
       ],
       error: null,

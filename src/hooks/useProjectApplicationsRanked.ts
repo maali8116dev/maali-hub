@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type RankedReviewerScore = {
@@ -35,8 +35,8 @@ export function useProjectApplicationsRanked(projectId?: number) {
     queryFn: async () => {
       if (!projectId) return [];
       const { data, error } = await supabase.rpc(
-        "get_project_applications_ranked" as any,
-        { p_project_id: projectId }
+        "get_opportunity_applications_ranked" as any,
+        { p_opportunity_id: projectId }
       );
 
       if (error) {

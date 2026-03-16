@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Hooks and utilities for review aggregation and decision engine
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +17,7 @@ export const useReviewAggregation = (applicationId: string, totalAssignedOverrid
 
   return useQuery({
     queryKey: ['review-aggregation', applicationId, totalAssignedOverride ?? 'auto'],
+    enabled: !!applicationId,
     queryFn: async () => {
       if (!applicationId) return null;
 

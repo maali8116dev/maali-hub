@@ -1,4 +1,4 @@
-﻿import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -38,7 +38,7 @@ const PaymentCancelContent = () => {
     try {
       const { data: appData, error: appError } = await supabase
         .from("applications")
-        .select("id, project_id")
+        .select("id, opportunity_id")
         .eq("id", applicationId)
         .single();
 
@@ -51,7 +51,7 @@ const PaymentCancelContent = () => {
         {
           body: {
             applicationId: appData.id,
-            projectId: appData.project_id,
+            opportunityId: appData.opportunity_id,
             successUrl: `${window.location.origin}/payment/success?application_id=${appData.id}`,
             cancelUrl: `${window.location.origin}/payment/cancel?application_id=${appData.id}`,
           },

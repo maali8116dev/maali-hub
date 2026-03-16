@@ -1,4 +1,4 @@
-﻿import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,6 @@ import {
   OrganizationalBackgroundCard,
   ProjectDetailsCard,
   SocialLinksCard,
-  ComplianceCard,
   DocumentsCard,
   ApplicationMetadataCard,
   AdminReviewSidebar,
@@ -64,9 +63,9 @@ const ApplicationDetails = () => {
       if (!app) throw new Error("Application not found");
 
       const { data: project } = await supabase
-        .from("projects")
+        .from("opportunities")
         .select("*")
-        .eq("id", app.project_id)
+        .eq("id", app.opportunity_id)
         .maybeSingle();
 
       const { data: applicantProfile } = await supabase
@@ -81,7 +80,7 @@ const ApplicationDetails = () => {
 
       return {
         ...app,
-        projectTitle: project?.title || "Unknown Project",
+        projectTitle: project?.title || "Unknown Opportunity",
         project,
         applicantName,
         applicantEmail: app.contact_email,
@@ -113,12 +112,12 @@ const ApplicationDetails = () => {
       }
 
       let unlinkedDocs: typeof linkedDocs = [];
-      if (application?.user_id && application?.project_id) {
+      if (application?.user_id && application?.opportunity_id) {
         const { data: userDocs, error: userError } = await supabase
           .from("application_documents")
           .select("*")
           .eq("user_id", application.user_id)
-          .eq("project_id", application.project_id)
+          .eq("opportunity_id", application.opportunity_id)
           .is("application_id", null)
           .order("created_at", { ascending: false });
 
@@ -184,7 +183,7 @@ const ApplicationDetails = () => {
         {
           body: {
             applicationId: application.id,
-            projectId: application.project_id,
+            opportunityId: application.opportunity_id,
             successUrl: `${window.location.origin}/payment/success?application_id=${application.id}`,
             cancelUrl: `${window.location.origin}/payment/cancel?application_id=${application.id}`,
           },
@@ -242,7 +241,6 @@ const ApplicationDetails = () => {
           <OrganizationalBackgroundCard application={application} />
           <ProjectDetailsCard application={application} showProjectLink />
           <SocialLinksCard application={application} />
-          <ComplianceCard application={application} />
           <DocumentsCard
             documents={documents}
             isLoading={documentsLoading}
@@ -299,7 +297,7 @@ const ApplicationDetails = () => {
               </Button>
               {application.status === "draft" && (
                 isProjectOpen(application.project?.status, application.project?.deadline) ? (
-                  <Link to={`/opportunities/${application.project_id}/apply`} className="w-full block">
+                  <Link to={`/opportunities/${application.opportunity_id}/apply`} className="w-full block">
                     <Button className="w-full min-h-[44px]">
                       Continue Application
                     </Button>

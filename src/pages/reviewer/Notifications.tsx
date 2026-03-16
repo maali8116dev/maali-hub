@@ -1,7 +1,7 @@
 ﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle, Loader2, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
@@ -188,7 +188,7 @@ const Notifications = () => {
                         {notification.link && (
                           <Link to={notification.link}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs">
-                              View details â†’
+                              View details <ArrowRight className="h-4 w-4" />
                             </Button>
                           </Link>
                         )}

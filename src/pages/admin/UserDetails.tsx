@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Calendar, FileText, Shield, AlertCircle } from "lucide-react";
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
@@ -34,14 +34,14 @@ const AdminUserDetails = () => {
   const { data: users = [], isLoading, error } = useUsers();
   const updateUserRole = useUpdateUserRole();
   const [roleChangeDialogOpen, setRoleChangeDialogOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"admin" | "reviewer" | "applicant" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"admin" | "reviewer" | "applicant" | "partner" | null>(null);
 
   const user = useMemo(() => {
     if (!userId) return null;
     return users.find((item) => item.userId === userId) || null;
   }, [users, userId]);
 
-  const handleRoleChange = (newRole: "admin" | "reviewer" | "applicant") => {
+  const handleRoleChange = (newRole: "admin" | "reviewer" | "applicant" | "partner") => {
     if (!user) return;
     // Only show dialog if role is actually changing
     if (newRole === user.role) return;
@@ -140,6 +140,8 @@ const AdminUserDetails = () => {
                 <Badge variant="secondary">Admin</Badge>
               ) : user.role === "reviewer" ? (
                 <Badge variant="outline">Reviewer</Badge>
+              ) : user.role === "partner" ? (
+                <Badge variant="outline">Partner</Badge>
               ) : (
                 <Badge variant="outline">Applicant</Badge>
               )}
@@ -252,6 +254,8 @@ const AdminUserDetails = () => {
                 <Badge variant="secondary">Admin</Badge>
               ) : user.role === "reviewer" ? (
                 <Badge variant="outline">Reviewer</Badge>
+              ) : user.role === "partner" ? (
+                <Badge variant="outline">Partner</Badge>
               ) : (
                 <Badge variant="outline">Applicant</Badge>
               )}
@@ -262,7 +266,7 @@ const AdminUserDetails = () => {
               <Select
                 value={user.role}
                 onValueChange={(value) =>
-                  handleRoleChange(value as "admin" | "reviewer" | "applicant")
+                  handleRoleChange(value as "admin" | "reviewer" | "applicant" | "partner")
                 }
                 disabled={updateUserRole.isPending}
               >
@@ -272,6 +276,7 @@ const AdminUserDetails = () => {
                 <SelectContent>
                   <SelectItem value="applicant">Applicant</SelectItem>
                   <SelectItem value="reviewer">Reviewer</SelectItem>
+                  <SelectItem value="partner">Partner</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>

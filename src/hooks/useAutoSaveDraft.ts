@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ApplicationFormData } from "@/stores/applicationForm";
@@ -65,7 +65,7 @@ export const useAutoSaveDraft = ({
 
       const draftData = {
         user_id: user.id,
-        project_id: formData.projectId,
+        opportunity_id: formData.projectId,
         applicant_type: formData.applicantType || null,
         full_legal_name: formData.fullLegalName || null,
         organization_name: formData.organizationName || null,
@@ -122,7 +122,7 @@ export const useAutoSaveDraft = ({
           .from("applications")
           .select("id")
           .eq("user_id", user.id)
-          .eq("project_id", formData.projectId)
+          .eq("opportunity_id", formData.projectId)
           .eq("is_draft", true)
           .maybeSingle();
 
@@ -190,7 +190,7 @@ export const useAutoSaveDraft = ({
         .from("applications")
         .select("id, applicant_type, full_legal_name, organization_name, registration_id_number, country_of_residence, city_region, contact_email, contact_phone, year_established, core_mission_purpose, primary_sectors, primary_sector_other, team_size, key_team_members_roles, previous_grants_funding_received, previous_grants_funding_details, project_title, project_summary, geographic_focus, linkedin_url, github_url, twitter_url, website_url, other_social_links, information_accurate_confirmed, conflict_of_interest_declared, reporting_requirements_agreed, data_processing_consented, declaration_date, application_fee_paid, stripe_payment_intent_id")
         .eq("user_id", user.id)
-        .eq("project_id", formData.projectId)
+        .eq("opportunity_id", formData.projectId)
         .eq("is_draft", true)
         .maybeSingle();
 

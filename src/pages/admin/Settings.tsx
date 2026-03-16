@@ -1,21 +1,32 @@
-﻿import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Database, Bell } from "lucide-react";
+import { Shield, Database, Bell, CreditCard } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { usePlatformFee, useUpdatePlatformFee } from "@/hooks/usePlatformFee";
 
 const AdminSettings = () => {
   const { toast } = useToast();
+  const { data: applicationFee = 0, isLoading: isLoadingFee } = usePlatformFee();
+  const updatePlatformFee = useUpdatePlatformFee();
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
     applicationAlerts: true,
     maintenanceMode: false,
   });
+  const [localFee, setLocalFee] = useState<number>(applicationFee);
 
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isLoadingFee) {
+      setLocalFee(applicationFee);
+    }
+  }, [applicationFee, isLoadingFee]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -27,6 +38,30 @@ const AdminSettings = () => {
       });
       setSaving(false);
     }, 1000);
+  };
+
+  const handleSaveFee = async () => {
+    if (Number.isNaN(localFee) || localFee < 0) {
+      toast({
+        title: "Invalid fee",
+        description: "Application fee must be 0 or greater.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await updatePlatformFee.mutateAsync(Number(localFee));
+      toast({
+        title: "Application fee updated",
+        description: "The system-wide application fee has been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Save failed",
+        description: error?.message || "Failed to update application fee.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -110,6 +145,39 @@ const AdminSettings = () => {
               }
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Application Fee */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Application Fee
+          </CardTitle>
+          <CardDescription>
+            Set a system-wide application fee for all opportunities
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="application-fee">Fee (USD)</Label>
+            <Input
+              id="application-fee"
+              type="number"
+              min="0"
+              step="0.01"
+              value={localFee}
+              onChange={(event) => setLocalFee(Number(event.target.value))}
+              className="max-w-[200px]"
+            />
+            <p className="text-sm text-muted-foreground">
+              Use 0 for free applications.
+            </p>
+          </div>
+          <Button onClick={handleSaveFee} disabled={updatePlatformFee.isPending}>
+            {updatePlatformFee.isPending ? "Saving..." : "Save Application Fee"}
+          </Button>
         </CardContent>
       </Card>
 

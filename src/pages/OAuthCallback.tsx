@@ -1,8 +1,35 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+
+/** Ensure a profile row exists for the current user (fallback when DB trigger has not run yet, e.g. OAuth). */
+async function ensureProfileForUser(userId: string, userMetadata: Record<string, unknown> | null): Promise<void> {
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
+
+  if (existing) return;
+
+  const meta = userMetadata ?? {};
+  let firstName: string | null = (meta.first_name as string) ?? null;
+  let lastName: string | null = (meta.last_name as string) ?? null;
+  const fullName = (meta.full_name as string) ?? (meta.name as string);
+  if ((!firstName && !lastName) && fullName && typeof fullName === 'string') {
+    const parts = fullName.trim().split(/\s+/);
+    firstName = parts[0] ?? null;
+    lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
+  }
+
+  await supabase.from('profiles').insert({
+    user_id: userId,
+    first_name: firstName || null,
+    last_name: lastName || null,
+  });
+}
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
@@ -11,13 +38,10 @@ const OAuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Check for hash fragments (OAuth tokens)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
         const errorParam = hashParams.get('error');
         const errorDescription = hashParams.get('error_description');
 
-        // If there's an error in the callback
         if (errorParam) {
           setError(errorDescription || errorParam || 'Authentication failed');
           setTimeout(() => {
@@ -26,8 +50,6 @@ const OAuthCallback = () => {
           return;
         }
 
-        // Supabase automatically processes hash fragments when getSession is called
-        // Wait a moment for Supabase to process the session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
@@ -39,15 +61,22 @@ const OAuthCallback = () => {
         }
 
         if (session) {
-          // Clean up the hash from URL before navigating
           window.history.replaceState(null, '', '/auth/callback');
-          
-          // Small delay to ensure session is fully established
+
+          // Ensure profile exists (trigger may not have run yet for OAuth signups)
+          try {
+            await ensureProfileForUser(session.user.id, session.user.user_metadata);
+          } catch (profileErr) {
+            // Ignore unique violation (profile created by trigger); log others
+            if ((profileErr as { code?: string })?.code !== '23505') {
+              console.warn('OAuth callback: ensure profile', profileErr);
+            }
+          }
+
           setTimeout(() => {
             navigate('/dashboard', { replace: true });
           }, 100);
         } else {
-          // No session established, redirect to auth
           setError('Failed to establish session. Please try again.');
           setTimeout(() => {
             navigate('/auth', { replace: true });

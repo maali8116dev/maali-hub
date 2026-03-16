@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -63,7 +63,7 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
         applicantName: app.applicant_name || "Unknown Applicant",
         applicantEmail: app.applicant_email || "No email",
         projectTitle: app.project_title || "Unknown Project",
-        projectId: app.project_id,
+        opportunityId: app.opportunity_id ?? app.project_id,
         submittedAt: app.submitted_at,
         status: finalStatus,
         contactEmail: app.contact_email || "N/A",

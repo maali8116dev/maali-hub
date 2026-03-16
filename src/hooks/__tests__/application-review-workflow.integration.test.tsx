@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Integration tests -” complete review workflow hits the REAL database.
  *
  * Tests: Application Submission â†’ Reviewer Assignment â†’ Review Submission â†’ Aggregation â†’ Decision
@@ -36,6 +36,8 @@ const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
       auth: { persistSession: false, autoRefreshToken: false },
     })
   : null;
+
+const itIf = supabaseAdmin ? it : it.skip;
 
 // Mock useToast
 vi.mock('@/hooks/use-toast', () => ({
@@ -310,7 +312,7 @@ describe('Application Review Workflow - Integration Tests', () => {
   }, 30000);
 
   describe('Complete Review Workflow', () => {
-    it('should complete full review workflow: assignment â†’ reviews â†’ aggregation â†’ decision', async () => {
+    itIf('should complete full review workflow: assignment â†’ reviews â†’ aggregation â†’ decision', async () => {
       // Step 1: Assign reviewers using RPC
       const { result: assignResult } = renderHook(() => useAssignReviewers(), {
         wrapper: createWrapper(),
@@ -513,7 +515,7 @@ describe('Application Review Workflow - Integration Tests', () => {
       expect(scoresResult.current.data!.length).toBeGreaterThanOrEqual(2);
     }, 90000);
 
-    it('should handle workflow with conflicting recommendations', async () => {
+    itIf('should handle workflow with conflicting recommendations', async () => {
       // Create a new application for this test
       const { data: newAppData } = await (supabaseAdmin!
         .from('applications') as any)

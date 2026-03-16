@@ -338,7 +338,7 @@ const Dashboard = () => {
                     <h3 className="font-semibold text-sm sm:text-base truncate">{app.opportunityTitle}</h3>
                     <div className="flex flex-wrap items-center gap-1 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="truncate">{app.sector}</span>
-                      <span className="hidden sm:inline">-¢</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>{t('dashboard:dashboard.recentApplications.submitted')} {formatDate(app.submittedAt)}</span>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -347,40 +354,42 @@ const AdminReviewSidebar = ({
           <div className="space-y-3">
             <div className="space-y-1">
               <label className="text-sm font-medium">Reviewer 1</label>
-              <select
-                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
-                value={selectedReviewer1}
-                onChange={(e) => setSelectedReviewer1(e.target.value)}
+              <Select
+                value={selectedReviewer1 || undefined}
+                onValueChange={(v) => setSelectedReviewer1(v ?? "")}
                 disabled={eligibleLoading || setReviewersMutation.isPending}
               >
-                <option value="" disabled>
-                  Select reviewer
-                </option>
-                {eligibleReviewers.map((r) => (
-                  <option key={r.reviewer_id} value={r.reviewer_id}>
-                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select reviewer" />
+                </SelectTrigger>
+                <SelectContent className="z-[100]" position="popper">
+                  {eligibleReviewers.map((r) => (
+                    <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
+                      {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1">
               <label className="text-sm font-medium">Reviewer 2</label>
-              <select
-                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
-                value={selectedReviewer2}
-                onChange={(e) => setSelectedReviewer2(e.target.value)}
+              <Select
+                value={selectedReviewer2 || undefined}
+                onValueChange={(v) => setSelectedReviewer2(v ?? "")}
                 disabled={eligibleLoading || setReviewersMutation.isPending}
               >
-                <option value="" disabled>
-                  Select reviewer
-                </option>
-                {eligibleReviewers.map((r) => (
-                  <option key={r.reviewer_id} value={r.reviewer_id}>
-                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select reviewer" />
+                </SelectTrigger>
+                <SelectContent className="z-[100]" position="popper">
+                  {eligibleReviewers.map((r) => (
+                    <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
+                      {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

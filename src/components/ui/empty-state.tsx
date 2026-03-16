@@ -56,7 +56,7 @@ export function EmptyState({
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               {tips.map((tip, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">-¢</span>
+                  <span className="text-primary mt-0.5">•</span>
                   <span>{tip}</span>
                 </li>
               ))}

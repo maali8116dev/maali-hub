@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real Supabase client
@@ -37,6 +37,8 @@ const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
       auth: { persistSession: false, autoRefreshToken: false },
     })
   : null;
+
+const itIf = supabaseAdmin ? it : it.skip;
 
 // Mock useAuth to return our test user
 vi.mock('@/hooks/useAuth');
@@ -257,7 +259,7 @@ describe('useApplications - Integration Tests', () => {
   }, 30000);
 
   describe('useApplications', () => {
-    it('fetches applications with project details successfully from real database', async () => {
+  itIf('fetches applications with project details successfully from real database', async () => {
       const { result } = renderHook(() => useApplications(), {
         wrapper: createWrapper(),
       });
@@ -295,7 +297,7 @@ describe('useApplications - Integration Tests', () => {
       }
     });
 
-    it('correctly joins applications with projects', async () => {
+  itIf('correctly joins applications with projects', async () => {
       const { result } = renderHook(() => useApplications(), {
         wrapper: createWrapper(),
       });
@@ -322,7 +324,7 @@ describe('useApplications - Integration Tests', () => {
       }
     });
 
-    it('maps status correctly (under_review to pending)', async () => {
+  itIf('maps status correctly (under_review to pending)', async () => {
       const { result } = renderHook(() => useApplications(), {
         wrapper: createWrapper(),
       });
@@ -350,7 +352,7 @@ describe('useApplications - Integration Tests', () => {
       }
     });
 
-    it('includes project status and deadline information', async () => {
+  itIf('includes project status and deadline information', async () => {
       const { result } = renderHook(() => useApplications(), {
         wrapper: createWrapper(),
       });
@@ -374,7 +376,7 @@ describe('useApplications - Integration Tests', () => {
       }
     });
 
-    it('returns empty array when user has no applications', async () => {
+  itIf('returns empty array when user has no applications', async () => {
       // Create a new user with no applications
       const emptyUserEmail = `int-empty-user-${testTimestamp}@maali.test`;
       const { data: emptyUserData, error: emptyUserError } = await supabaseAdmin.auth.admin.createUser({
@@ -427,7 +429,7 @@ describe('useApplications - Integration Tests', () => {
       await supabaseAdmin.auth.admin.deleteUser(emptyUserId);
     }, 30000);
 
-    it('does not fetch when user is not authenticated', () => {
+    itIf('does not fetch when user is not authenticated', () => {
       (useAuth as any).mockReturnValue({ user: null });
 
       const { result } = renderHook(() => useApplications(), {
@@ -439,7 +441,7 @@ describe('useApplications - Integration Tests', () => {
       expect(result.current.data).toBeUndefined();
     });
 
-    it('handles errors gracefully', async () => {
+    itIf('handles errors gracefully', async () => {
       // Temporarily break the RPC by using an invalid user ID format
       // This tests error handling
       (useAuth as any).mockReturnValue({ user: { id: 'invalid-uuid-format', email: 'test@test.com' } });

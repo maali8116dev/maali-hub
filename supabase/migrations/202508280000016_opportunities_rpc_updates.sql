@@ -16,6 +16,7 @@
 
 -- Update get_project_applications_ranked to get_opportunity_applications_ranked
 DROP FUNCTION IF EXISTS public.get_project_applications_ranked(INTEGER) CASCADE;
+DROP FUNCTION IF EXISTS public.get_opportunity_applications_ranked(INTEGER);
 
 CREATE FUNCTION public.get_opportunity_applications_ranked(
   p_opportunity_id INTEGER
@@ -506,12 +507,19 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Check for existing non-draft application and get its ID
-  SELECT COUNT(*), MAX(id) INTO v_existing_count, v_existing_application_id
+  -- Check for existing non-draft application and get its ID (no max(uuid) in PG, use LIMIT 1)
+  SELECT COUNT(*) INTO v_existing_count
   FROM public.applications
   WHERE user_id = p_user_id
     AND opportunity_id = p_opportunity_id
     AND is_draft = false;
+
+  SELECT id INTO v_existing_application_id
+  FROM public.applications
+  WHERE user_id = p_user_id
+    AND opportunity_id = p_opportunity_id
+    AND is_draft = false
+  LIMIT 1;
 
   -- Validate opportunity status
   IF v_opportunity.status != 'open' THEN

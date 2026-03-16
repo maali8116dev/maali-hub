@@ -30,58 +30,67 @@ CREATE TABLE IF NOT EXISTS public.partners (
 -- Add user_id column to partners table to link partner orgs to user accounts
 ALTER TABLE public.partners ADD COLUMN IF NOT EXISTS user_id uuid;
 
--- Add unique constraint so each user can only be linked to one partner org
+-- Add unique constraint so each user can only be linked to one partner org (idempotent)
+ALTER TABLE public.partners DROP CONSTRAINT IF EXISTS partners_user_id_unique;
 ALTER TABLE public.partners ADD CONSTRAINT partners_user_id_unique UNIQUE (user_id);
 
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_partners_status ON public.partners(status);
-CREATE INDEX IF NOT EXISTS idx_partners_Sector ON public.partners(Sector);
+-- Index on Sector/sector (column name may be either case depending on schema)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'partners' AND column_name = 'Sector') THEN
+    CREATE INDEX IF NOT EXISTS idx_partners_Sector ON public.partners("Sector");
+  ELSIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'partners' AND column_name = 'sector') THEN
+    CREATE INDEX IF NOT EXISTS idx_partners_Sector ON public.partners(sector);
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_partners_featured ON public.partners(featured);
 CREATE INDEX IF NOT EXISTS idx_partners_display_order ON public.partners(display_order);
 
 -- Enable Row Level Security
 ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
--- Everyone can view active partners
+-- RLS Policies (idempotent)
+DROP POLICY IF EXISTS "Active partners are viewable by everyone" ON public.partners;
 CREATE POLICY "Active partners are viewable by everyone"
 ON public.partners
 FOR SELECT
 USING (status = 'active' OR public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can create partners
+DROP POLICY IF EXISTS "Admins can create partners" ON public.partners;
 CREATE POLICY "Admins can create partners"
 ON public.partners
 FOR INSERT
 WITH CHECK (public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can update partners
+DROP POLICY IF EXISTS "Admins can update partners" ON public.partners;
 CREATE POLICY "Admins can update partners"
 ON public.partners
 FOR UPDATE
 USING (public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can delete partners
+DROP POLICY IF EXISTS "Admins can delete partners" ON public.partners;
 CREATE POLICY "Admins can delete partners"
 ON public.partners
 FOR DELETE
 USING (public.get_user_role(auth.uid()) = 'admin');
 
--- Create trigger for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_partners_updated_at ON public.partners;
 CREATE TRIGGER update_partners_updated_at
 BEFORE UPDATE ON public.partners
 FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 
--- Partners can INSERT their own opportunities
+DROP POLICY IF EXISTS "Partners can create their own opportunities" ON public.opportunities;
 CREATE POLICY "Partners can create their own opportunities"
 ON public.opportunities
 FOR INSERT
 TO authenticated
 WITH CHECK (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid());
 
--- Partners can UPDATE their own opportunities
+DROP POLICY IF EXISTS "Partners can update their own opportunities" ON public.opportunities;
 CREATE POLICY "Partners can update their own opportunities"
 ON public.opportunities
 FOR UPDATE
@@ -89,7 +98,7 @@ TO authenticated
 USING (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid())
 WITH CHECK (get_user_role(auth.uid()) = 'partner' AND created_by = auth.uid());
 
--- Partners can view applications for their own opportunities
+DROP POLICY IF EXISTS "Partners can view applications for their opportunities" ON public.applications;
 CREATE POLICY "Partners can view applications for their opportunities"
 ON public.applications
 FOR SELECT
@@ -103,7 +112,7 @@ USING (
   )
 );
 
--- Partners can view documents for applications on their opportunities
+DROP POLICY IF EXISTS "Partners can view documents for their opportunity applications" ON public.application_documents;
 CREATE POLICY "Partners can view documents for their opportunity applications"
 ON public.application_documents
 FOR SELECT
@@ -121,7 +130,7 @@ USING (
 
 
 
--- Allow partners to update their own partner org row (description, logo_url, website_url)
+DROP POLICY IF EXISTS "Partners can update their own org" ON public.partners;
 CREATE POLICY "Partners can update their own org"
 ON public.partners
 FOR UPDATE
@@ -155,7 +164,14 @@ CREATE TABLE IF NOT EXISTS public.success_stories (
 
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_success_stories_status ON public.success_stories(status);
-CREATE INDEX IF NOT EXISTS idx_success_stories_Sector ON public.success_stories(Sector);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'success_stories' AND column_name = 'Sector') THEN
+    CREATE INDEX IF NOT EXISTS idx_success_stories_Sector ON public.success_stories("Sector");
+  ELSIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'success_stories' AND column_name = 'sector') THEN
+    CREATE INDEX IF NOT EXISTS idx_success_stories_Sector ON public.success_stories(sector);
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_success_stories_featured ON public.success_stories(featured);
 CREATE INDEX IF NOT EXISTS idx_success_stories_display_order ON public.success_stories(display_order);
 CREATE INDEX IF NOT EXISTS idx_success_stories_funding_date ON public.success_stories(funding_date);
@@ -163,32 +179,32 @@ CREATE INDEX IF NOT EXISTS idx_success_stories_funding_date ON public.success_st
 -- Enable Row Level Security
 ALTER TABLE public.success_stories ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
--- Everyone can view published success stories
+-- RLS Policies (idempotent)
+DROP POLICY IF EXISTS "Published success stories are viewable by everyone" ON public.success_stories;
 CREATE POLICY "Published success stories are viewable by everyone"
 ON public.success_stories
 FOR SELECT
 USING (status = 'published' OR public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can create success stories
+DROP POLICY IF EXISTS "Admins can create success stories" ON public.success_stories;
 CREATE POLICY "Admins can create success stories"
 ON public.success_stories
 FOR INSERT
 WITH CHECK (public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can update success stories
+DROP POLICY IF EXISTS "Admins can update success stories" ON public.success_stories;
 CREATE POLICY "Admins can update success stories"
 ON public.success_stories
 FOR UPDATE
 USING (public.get_user_role(auth.uid()) = 'admin');
 
--- Only admins can delete success stories
+DROP POLICY IF EXISTS "Admins can delete success stories" ON public.success_stories;
 CREATE POLICY "Admins can delete success stories"
 ON public.success_stories
 FOR DELETE
 USING (public.get_user_role(auth.uid()) = 'admin');
 
--- Create trigger for automatic timestamp updates
+DROP TRIGGER IF EXISTS update_success_stories_updated_at ON public.success_stories;
 CREATE TRIGGER update_success_stories_updated_at
 BEFORE UPDATE ON public.success_stories
 FOR EACH ROW

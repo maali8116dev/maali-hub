@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -19,8 +19,10 @@ export const mockProject = {
   id: 1,
   title: 'Test Project',
   sector: 'Technology',
-  application_fee: 0, // Free project for testing
+  application_fee: 0, // Legacy per-opportunity fee (not used)
 };
+
+export const mockPlatformFee = 0;
 
 export const mockDocuments = [
   {

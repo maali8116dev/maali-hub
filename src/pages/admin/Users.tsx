@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,7 +103,18 @@ const AdminUsers = () => {
             </Badge>
           );
         }
-        return <Badge variant="outline" className="text-xs">Applicant</Badge>;
+        if (user.role === "partner") {
+          return (
+            <Badge variant="outline" className="text-xs">
+              Partner
+            </Badge>
+          );
+        }
+        return (
+          <Badge variant="outline" className="text-xs">
+            Applicant
+          </Badge>
+        );
       },
     },
     {

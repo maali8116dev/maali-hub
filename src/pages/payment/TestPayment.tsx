@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ export default function TestPayment() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const projectId = Number(searchParams.get("projectId") || searchParams.get("project_id")) ||12;
+  const opportunityId = Number(searchParams.get("opportunityId") || searchParams.get("opportunity_id")) || 7;
   type SubmitPayload = {
     success?: boolean;
     error?: string;
@@ -62,25 +62,16 @@ export default function TestPayment() {
     setIsLoading(true);
 
     try {
-      // Ensure project exists and has a fee
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
+      // Ensure opportunity exists
+      const { data: opportunity, error: opportunityError } = await supabase
+        .from("opportunities")
         .select("id, title, application_fee")
-        .eq("id", projectId)
+        .eq("id", opportunityId)
         .single();
 
-      if (projectError || !project) {
-        console.error(`Project not found for ID ${projectId}`, projectError);
-        throw new Error("The selected project could not be found. Please check the project ID and try again.");
-      }
-
-      const feeValue = project.application_fee ? String(project.application_fee) : "0";
-      const projectFee = parseFloat(feeValue);
-      if (!projectFee || projectFee <= 0) {
-        await supabase
-          .from("projects")
-          .update({ application_fee: 50 })
-          .eq("id", projectId);
+      if (opportunityError || !opportunity) {
+        console.error(`Opportunity not found for ID ${opportunityId}`, opportunityError);
+        throw new Error("The selected opportunity could not be found. Please check the opportunity ID and try again.");
       }
 
       // Use the same edge function as the application form submit flow
@@ -93,7 +84,7 @@ export default function TestPayment() {
         city_region: "Test City",
         contact_email: user.email || "test@example.com",
         contact_phone: "+1234567890",
-        project_title: project.title || "Test Project",
+        project_title: opportunity.title || "Test Opportunity",
         project_summary: "Test payment application",
         geographic_focus: "Test Location",
         linkedin_url: null,
@@ -121,7 +112,7 @@ export default function TestPayment() {
       // Try calling the edge function with explicit Authorization header
       const result = await supabase.functions.invoke("submit-application", {
         body: {
-          projectId,
+          opportunityId,
           applicationData,
           libraryDocumentIds: [],
         },
@@ -149,7 +140,7 @@ export default function TestPayment() {
         
         const retryResult = await supabase.functions.invoke("submit-application", {
           body: {
-            projectId,
+            opportunityId,
             applicationData,
             libraryDocumentIds: [],
           },
@@ -174,7 +165,7 @@ export default function TestPayment() {
             .from("applications")
             .select("id")
             .eq("user_id", user.id)
-            .eq("project_id", projectId)
+            .eq("opportunity_id", opportunityId)
             .maybeSingle();
 
       if (existingAppError) {
@@ -190,7 +181,7 @@ export default function TestPayment() {
             {
               body: {
                 applicationId: existingApplicationId,
-                projectId,
+                opportunityId,
                 successUrl: `${window.location.origin}/payment/success?application_id=${existingApplicationId}`,
                 cancelUrl: `${window.location.origin}/payment/cancel?application_id=${existingApplicationId}`,
               },
@@ -247,7 +238,7 @@ export default function TestPayment() {
         return;
       }
 
-      throw new Error("Application submitted but no payment was required. The project fee may be $0.");
+      throw new Error("Application submitted but no payment was required. The opportunity fee may be $0.");
     } catch (error) {
       console.error("Payment error:", error);
       toast({
@@ -270,7 +261,7 @@ export default function TestPayment() {
             Test Payment
           </CardTitle>
           <CardDescription>
-            Create a test application and open Stripe Checkout (dev only)
+            Create a test application for an opportunity and open Stripe Checkout (dev only). Use ?opportunityId=14 in the URL.
           </CardDescription>
         </CardHeader>
         <CardContent>

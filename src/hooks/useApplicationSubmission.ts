@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Hook for handling application submission logic
  */
 import { useState } from "react";
@@ -26,6 +26,8 @@ type SubmitApplicationResponse = {
   requiresPayment?: boolean;
   checkoutUrl?: string;
   resumedExistingApplication?: boolean;
+  opportunityStatus?: string | null;
+  opportunityDeadline?: string | null;
 };
 
 /**
@@ -85,37 +87,37 @@ export function useApplicationSubmission() {
     return null;
   };
 
-  const validateProjectIsOpen = async (projectId: number): Promise<boolean> => {
-    const { data: project, error } = await supabase
-      .from("projects")
+  const validateProjectIsOpen = async (opportunityId: number): Promise<boolean> => {
+    const { data: opportunity, error } = await supabase
+      .from("opportunities")
       .select("id, title, status, deadline")
-      .eq("id", projectId)
+      .eq("id", opportunityId)
       .maybeSingle();
 
     if (error) throw error;
 
-    if (!project || !isProjectOpen(project.status, project.deadline)) {
+    if (!opportunity || !isProjectOpen(opportunity.status, opportunity.deadline)) {
       toast({
         title: "Applications Closed",
         description:
           "This project is closed. You can no longer submit or edit applications.",
         variant: "destructive",
       });
-      navigate(projectId ? `/opportunities/${projectId}` : "/opportunities");
+      navigate(opportunityId ? `/opportunities/${opportunityId}` : "/opportunities");
       return false;
     }
 
     return true;
   };
 
-  const checkExistingApplication = async (projectId: number) => {
+  const checkExistingApplication = async (opportunityId: number) => {
     if (!user) return null;
 
     const { data, error } = await supabase
       .from("applications")
       .select("id, status")
       .eq("user_id", user.id)
-      .eq("project_id", projectId)
+      .eq("opportunity_id", opportunityId)
       .eq("is_draft", false)
       .maybeSingle();
 
@@ -198,7 +200,7 @@ export function useApplicationSubmission() {
 
   const submitApplication = async (draftId?: string | null) => {
     if (!user || !formData.projectId) {
-      throw new Error("User and project ID are required");
+      throw new Error("User and opportunity ID are required");
     }
 
     setIsSubmitting(true);
@@ -207,7 +209,7 @@ export function useApplicationSubmission() {
     let uploadedDocuments: UploadedDocForCleanup[] = [];
 
     try {
-      // Upload new files (as library documents, will be linked after application creation)
+      // Upload new files with opportunity_id set (application_id linked by edge function after creation)
       let uploadedDocumentIds: string[] = [];
       if (selectedFiles.length > 0) {
         try {
@@ -222,7 +224,7 @@ export function useApplicationSubmission() {
             selectedFiles,
             undefined,
             formData.projectId,
-            true
+            false
           );
 
           uploadedDocumentIds = uploadedDocs.map((doc) => doc.id);
@@ -291,7 +293,7 @@ export function useApplicationSubmission() {
         {
           body: {
             draftId,
-            projectId: formData.projectId,
+            opportunityId: formData.projectId,
             applicationData,
             libraryDocumentIds: allDocumentIds,
             token: session.access_token,
@@ -341,6 +343,16 @@ export function useApplicationSubmission() {
         // Log the raw error for debugging, show friendly message to user
         const rawError = payload?.error || edgeError?.message || "Unknown error";
         console.error("Submission failed:", rawError);
+        if (payload?.errorCode === "OPPORTUNITY_CLOSED") {
+          console.error("[Submission] OPPORTUNITY_CLOSED - status used by validation:", payload?.opportunityStatus ?? "(not returned)");
+          console.error("[Submission] OPPORTUNITY_CLOSED - deadline used:", payload?.opportunityDeadline ?? "(not returned)");
+        }
+        if (edgeError) {
+          console.error("Edge function error details:", edgeError);
+        }
+        if (data && typeof data === "object") {
+          console.error("Edge function response:", data);
+        }
         throw new Error(getUserFriendlyError(payload?.errorCode, rawError));
       }
 

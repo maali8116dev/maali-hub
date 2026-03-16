@@ -8,10 +8,14 @@ export type Project = {
   title: string;
   description: string;
   sector: string;
+  sectorId: number | null;
   status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string;
   fundingAmount: string;
+  currency: string | null;
+  opportunityType: string | null;
   location: string;
+  country: string | null;
   imageUrl: string | null;
   requirements: string | null;
   eligibilityCriteria: string | null;
@@ -28,11 +32,15 @@ export type Project = {
 export type ProjectFormData = {
   title: string;
   description: string;
-  sector: string;
+  sector?: string;
+  sectorId?: number | null;
   status: "new" | "open" | "closing-soon" | "closed" | "archived";
   deadline: string; // YYYY-MM-DD format
-  fundingAmount: string;
+  fundingAmount?: string | null;
+  currency?: string | null;
+  opportunityType?: string | null;
   location: string;
+  country?: string | null;
   imageUrl?: string;
   requirements?: string;
   eligibilityCriteria?: string;
@@ -50,10 +58,14 @@ function transformProject(data: any): Project {
     title: data.title,
     description: data.description,
     sector: data.sectors?.name || "Uncategorized",
+    sectorId: data.sector_id ?? null,
     status: data.status,
     deadline: data.deadline,
     fundingAmount: data.funding_amount,
+    currency: data.currency ?? null,
+    opportunityType: data.opportunity_type ?? null,
     location: data.location,
+    country: data.country ?? null,
     imageUrl: data.image_url,
     requirements: data.requirements,
     eligibilityCriteria: data.eligibility_criteria,
@@ -100,8 +112,11 @@ async function toSnakeCase(data: Partial<ProjectFormData>): Promise<Record<strin
   if (data.description !== undefined) result.description = data.description;
   if (data.status !== undefined) result.status = data.status;
   if (data.deadline !== undefined) result.deadline = data.deadline;
-  if (data.fundingAmount !== undefined) result.funding_amount = data.fundingAmount;
+  if (data.fundingAmount !== undefined) result.funding_amount = data.fundingAmount || null;
+  if (data.currency !== undefined) result.currency = data.currency || null;
+  if (data.opportunityType !== undefined) result.opportunity_type = data.opportunityType || null;
   if (data.location !== undefined) result.location = data.location;
+  if (data.country !== undefined) result.country = data.country || null;
   if (data.imageUrl !== undefined) result.image_url = data.imageUrl || null;
   if (data.requirements !== undefined) result.requirements = data.requirements || null;
   if (data.eligibilityCriteria !== undefined) result.eligibility_criteria = data.eligibilityCriteria || null;
@@ -110,8 +125,10 @@ async function toSnakeCase(data: Partial<ProjectFormData>): Promise<Record<strin
   if (data.currentApplicants !== undefined) result.current_applicants = data.currentApplicants || 0;
   if (data.featured !== undefined) result.featured = data.featured ?? false;
   
-  // Handle sector - convert sector name to sector_id
-  if (data.sector !== undefined) {
+  // Handle sector - prefer sectorId, fall back to sector name
+  if (data.sectorId !== undefined) {
+    result.sector_id = data.sectorId || null;
+  } else if (data.sector !== undefined) {
     const sectorId = await getSectorId(data.sector);
     if (sectorId === null) {
       throw new Error(`Sector "${data.sector}" not found. Please select a valid sector.`);
@@ -187,9 +204,9 @@ export function useCreateProject() {
       const { data: session } = await supabase.auth.getSession();
       const userId = session?.session?.user?.id;
       
-      // Look up sector_id from sector name
-      let sectorId: number | null = null;
-      if (data.sector) {
+      // Resolve sector_id from sectorId or sector name
+      let sectorId: number | null = data.sectorId ?? null;
+      if (!sectorId && data.sector) {
         const { data: sectorData, error: sectorError } = await supabase
           .from("sectors")
           .select("id")
@@ -206,7 +223,7 @@ export function useCreateProject() {
       }
       
       if (!sectorId) {
-        throw new Error(`sector "${data.sector}" not found. Please select a valid sector.`);
+        throw new Error("Sector is required. Please select a valid sector.");
       }
 
       const insertData = {
@@ -215,8 +232,11 @@ export function useCreateProject() {
         sector_id: sectorId,
         status: data.status,
         deadline: data.deadline,
-        funding_amount: data.fundingAmount,
+        funding_amount: data.fundingAmount || null,
+        currency: data.currency || "USD",
+        opportunity_type: data.opportunityType || null,
         location: data.location,
+        country: data.country || null,
         image_url: data.imageUrl || null,
         requirements: data.requirements || null,
         eligibility_criteria: data.eligibilityCriteria || null,

@@ -38,7 +38,7 @@ const AdminProjects = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("applications")
-        .select("project_id")
+        .select("opportunity_id")
         .eq("status", "approved")
         .eq("is_draft", false);
 
@@ -46,7 +46,7 @@ const AdminProjects = () => {
 
       // Get unique opportunity IDs that have approved applications
       const opportunityIdsWithWinners = new Set(
-        (data || []).map((app: any) => app.project_id)
+        (data || []).map((app: any) => app.opportunity_id)
       );
 
       return Array.from(opportunityIdsWithWinners) as number[];
@@ -175,7 +175,7 @@ const AdminProjects = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/admin/projects/${project.id}`)}
+              onClick={() => navigate(`/admin/opportunities/${project.id}`)}
               title="View project"
             >
               <Eye className="h-4 w-4" />
@@ -183,7 +183,7 @@ const AdminProjects = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/admin/projects/${project.id}/applications`)}
+              onClick={() => navigate(`/admin/opportunities/${project.id}/applications`)}
               title="View ranked applications"
             >
               <ClipboardCheck className="h-4 w-4" />
@@ -191,7 +191,7 @@ const AdminProjects = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(`/admin/projects/${project.id}/edit`)}
+              onClick={() => navigate(`/admin/opportunities/${project.id}/edit`)}
               title="Edit project"
             >
               <Edit className="h-4 w-4" />
@@ -237,7 +237,7 @@ const AdminProjects = () => {
           </p>
         </div>
         <Button 
-          onClick={() => navigate("/admin/projects/new")}
+          onClick={() => navigate("/admin/opportunities/new")}
           className="w-full sm:w-auto min-h-[44px]"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -266,7 +266,7 @@ const AdminProjects = () => {
               <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium mb-2">No opportunities found</p>
               <p className="text-sm mb-4">Start by creating your first funding opportunity.</p>
-              <Button onClick={() => navigate("/admin/projects/new")}>
+              <Button onClick={() => navigate("/admin/opportunities/new")}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Opportunity
               </Button>

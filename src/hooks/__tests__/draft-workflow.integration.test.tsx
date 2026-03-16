@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real Supabase client
@@ -38,6 +38,8 @@ const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
       auth: { persistSession: false, autoRefreshToken: false },
     })
   : null;
+
+const itIf = supabaseAdmin ? it : it.skip;
 
 // Mock useToast
 vi.mock('@/hooks/use-toast', () => ({
@@ -202,7 +204,7 @@ describe('Draft Workflow - Integration Tests', () => {
   }, 30000);
 
   describe('Complete Draft Workflow', () => {
-    it('should complete full draft workflow: create â†’ save â†’ load â†’ submit', async () => {
+    itIf('should complete full draft workflow: create â†’ save â†’ load â†’ submit', async () => {
       const mockFormData: ApplicationFormData = {
         projectId: testProjectId,
         applicantType: 'Individual',
@@ -354,7 +356,7 @@ describe('Draft Workflow - Integration Tests', () => {
       // This is tested by the guard logic in the hook
     }, 60000);
 
-    it('should handle draft workflow with multiple auto-saves', async () => {
+    itIf('should handle draft workflow with multiple auto-saves', async () => {
       const mockFormData: ApplicationFormData = {
         projectId: testProjectId,
         applicantType: 'Organization',
@@ -454,7 +456,7 @@ describe('Draft Workflow - Integration Tests', () => {
       expect(finalDraft?.is_draft).toBe(true);
     }, 60000);
 
-    it('should handle draft load when no draft exists', async () => {
+    itIf('should handle draft load when no draft exists', async () => {
       // Create a different project for this test to avoid conflicts
       const { data: newProjectData, error: newProjectError } = await supabaseAdmin!
         .from('projects')

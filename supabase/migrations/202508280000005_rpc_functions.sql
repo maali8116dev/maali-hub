@@ -104,6 +104,8 @@ COMMENT ON FUNCTION public.get_opportunity_details_with_user_status IS 'Returns 
 
 -- Fix get_reviewer_applications function to use opportunities instead of projects
 -- Updated to use opportunities table and opportunity_id
+-- Drop first because return type (OUT params) changed; CREATE OR REPLACE cannot change it
+DROP FUNCTION IF EXISTS public.get_reviewer_applications(UUID);
 
 CREATE OR REPLACE FUNCTION public.get_reviewer_applications(
   p_reviewer_id UUID DEFAULT auth.uid()

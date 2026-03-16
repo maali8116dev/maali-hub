@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -338,7 +338,7 @@ const MultiStepApplicationForm = () => {
               {/* Step 5: Documents */}
               {currentStep === 5 && (
                 <Step5Documents
-                  projectId={formData.projectId}
+                  opportunityId={formData.projectId}
                   applicantType={formData.applicantType}
                   onFilesChange={handleFilesChange}
                   onLibraryDocumentsChange={handleLibraryDocumentsChange}

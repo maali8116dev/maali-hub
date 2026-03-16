@@ -116,10 +116,10 @@ const AdminFAQ = () => {
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by sector" />
+                <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All sectors</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {sectors.map((sector) => (
                   <SelectItem key={sector} value={sector}>
                     {sector}

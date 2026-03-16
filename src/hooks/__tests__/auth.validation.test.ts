@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 import * as z from 'zod';
@@ -45,6 +45,7 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
 // Test user credentials
 const TEST_USER_EMAIL = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.com';
 const TEST_USER_PASSWORD = import.meta.env.VITE_TEST_USER_PASSWORD || 'testpassword123';
+const HAS_TEST_CREDENTIALS = Boolean(import.meta.env.VITE_TEST_USER_EMAIL && import.meta.env.VITE_TEST_USER_PASSWORD);
 
 describe('Auth Validation - Business Logic', () => {
   beforeEach(() => {
@@ -356,6 +357,7 @@ describe('Auth Validation - Business Logic', () => {
   });
 
   describe('Auth Integration Tests - Real Login', () => {
+    const itIfAuth = HAS_TEST_CREDENTIALS ? it : it.skip;
     beforeAll(async () => {
       // Sign out any existing session
       await supabase.auth.signOut();
@@ -371,12 +373,7 @@ describe('Auth Validation - Business Logic', () => {
       await supabase.auth.signOut();
     });
 
-    it('should successfully sign in with valid credentials', async () => {
-      if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
-        return;
-      }
-
+    itIfAuth('should successfully sign in with valid credentials', async () => {
       // Validate credentials first
       const validationResult = signInSchema.safeParse({
         email: TEST_USER_EMAIL,
@@ -430,12 +427,7 @@ describe('Auth Validation - Business Logic', () => {
       expect(validationResult.success).toBe(false);
     });
 
-    it('should reject sign in with wrong password', async () => {
-      if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
-        return;
-      }
-
+    itIfAuth('should reject sign in with wrong password', async () => {
       const { error } = await supabase.auth.signInWithPassword({
         email: TEST_USER_EMAIL,
         password: 'wrongpassword123',
@@ -457,12 +449,7 @@ describe('Auth Validation - Business Logic', () => {
       expect(error?.message).toContain('Invalid login credentials');
     }, { timeout: 10000 });
 
-    it('should maintain session after successful login', async () => {
-      if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
-        return;
-      }
-
+    itIfAuth('should maintain session after successful login', async () => {
       // Sign in
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: TEST_USER_EMAIL,
@@ -480,12 +467,7 @@ describe('Auth Validation - Business Logic', () => {
       expect(sessionData.session?.user.email).toBe(TEST_USER_EMAIL);
     }, { timeout: 10000 });
 
-    it('should sign out successfully', async () => {
-      if (!TEST_USER_EMAIL || TEST_USER_EMAIL === 'test@example.com') {
-        console.warn('âš ï¸  Skipping login test: VITE_TEST_USER_EMAIL not set');
-        return;
-      }
-
+    itIfAuth('should sign out successfully', async () => {
       // Sign in first
       await supabase.auth.signInWithPassword({
         email: TEST_USER_EMAIL,

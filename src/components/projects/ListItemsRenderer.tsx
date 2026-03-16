@@ -67,7 +67,7 @@ export function ListItemsRenderer({
     .split(/[\n,]+/)
     .filter((line) => line.trim())
     .map((item) => {
-      const cleanedItem = item.replace(/^[--¢]\s*/, "").trim();
+      const cleanedItem = item.replace(/^[-•]\s*/, "").trim();
       const isNumbered = /^\d+[\.\)]\s/.test(cleanedItem);
       const displayText = cleanedItem.replace(/^\d+[\.\)]\s/, "");
       const number = cleanedItem.match(/^\d+/)?.[0];

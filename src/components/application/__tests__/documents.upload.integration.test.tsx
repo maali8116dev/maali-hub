@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -90,17 +90,17 @@ describe('Document Upload - Real Integration Tests', () => {
     console.log(`   User ID: ${testUser.id}`);
 
     // Find a project to link applications to
-    const { data: projects, error: projectError } = await supabase
-      .from('projects')
+    const { data: opportunities, error: opportunityError } = await supabase
+      .from('opportunities')
       .select('id')
       .limit(1);
 
-    if (projectError) {
-      console.warn('âš ï¸  Could not fetch a project for application linking:', projectError);
-    } else if (!projects || projects.length === 0) {
-      console.warn('âš ï¸  No projects found. Applications will not be created.');
+    if (opportunityError) {
+      console.warn('âš ï¸  Could not fetch a project for application linking:', opportunityError);
+    } else if (!opportunities || opportunities.length === 0) {
+      console.warn('âš ï¸  No opportunities found. Applications will not be created.');
     } else {
-      projectId = projects[0].id;
+      projectId = opportunities[0].id;
       console.log(`âœ… Using project ID for applications: ${projectId}`);
     }
   });
@@ -212,7 +212,7 @@ describe('Document Upload - Real Integration Tests', () => {
       .insert({
         user_id: testUser.id,
         application_id: applicationId || null,
-        project_id: projectId || null,
+        opportunity_id: projectId || null,
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
@@ -251,7 +251,7 @@ describe('Document Upload - Real Integration Tests', () => {
       .from('applications') as any)
       .insert({
         user_id: testUser.id,
-        project_id: projectId,
+        opportunity_id: projectId,
         applicant_type: 'Organization',
         full_legal_name: 'Integration Test User',
         organization_name: 'Integration Test Org',

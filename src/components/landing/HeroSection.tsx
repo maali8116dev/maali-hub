@@ -1,5 +1,5 @@
-﻿import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Globe, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Users, Globe, TrendingUp, Check, Lightbulb, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -125,7 +125,7 @@ const HeroSection = () => {
               <div className="absolute top-20 right-10 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
-                    <span className="text-success-foreground text-lg font-bold">âœ“</span>
+                    <Check className="h-6 w-6 text-success-foreground" />
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Ahmed's Startup</div>
@@ -138,7 +138,7 @@ const HeroSection = () => {
               <div className="absolute bottom-10 left-5 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '1.5s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-lg font-bold">ðŸ’¡</span>
+                    <Lightbulb className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Kofi's Tech Hub</div>
@@ -151,7 +151,7 @@ const HeroSection = () => {
               <div className="absolute top-0 left-20 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '2s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                    <span className="text-accent-foreground text-lg font-bold">ðŸš€</span>
+                    <Rocket className="h-6 w-6 text-accent-foreground" />
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">Samuel's Venture</div>

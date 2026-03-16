@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Briefcase, TrendingUp, DollarSign, Clock, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            <Link to="/admin/projects">
+            <Link to="/admin/opportunities">
               <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
                 <Briefcase className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
                 <span className="truncate">Manage Projects</span>

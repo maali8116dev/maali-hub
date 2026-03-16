@@ -1,4 +1,4 @@
-﻿import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isOpportunityOpen } from "@/lib/opportunityAvailability";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
+import { usePlatformFee } from "@/hooks/usePlatformFee";
 
 interface ProjectApplicationSidebarProps {
   project: OpportunityWithTags;
@@ -29,6 +30,7 @@ export function ProjectApplicationSidebar({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { data: applicationFee = 0 } = usePlatformFee();
 
   const isDisabled = !isOpportunityOpen(project.status, project.deadline);
   const projectId = project.id.toString();
@@ -172,10 +174,9 @@ export function ProjectApplicationSidebar({
           </>
         )}
 
-        {project.applicationFee && Number(project.applicationFee) > 0 && (
+        {applicationFee > 0 && (
           <p className="text-xs text-muted-foreground mt-3 text-center">
-            Application fee: ${Number(project.applicationFee).toFixed(2)}{" "}
-            (processed at submission)
+            Application fee: ${Number(applicationFee).toFixed(2)} (processed at submission)
           </p>
         )}
       </CardContent>

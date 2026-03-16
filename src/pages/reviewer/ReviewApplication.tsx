@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,6 @@ import {
   OrganizationalBackgroundCard,
   ProjectDetailsCard,
   SocialLinksCard,
-  ComplianceCard,
   DocumentsCard,
   ApplicationMetadataCard,
 } from "@/components/application/shared";
@@ -80,9 +79,9 @@ const ReviewApplication = () => {
       if (!app) throw new Error("Application not found");
 
       const { data: project } = await supabase
-        .from("projects")
+        .from("opportunities")
         .select("*")
-        .eq("id", app.project_id)
+        .eq("id", app.opportunity_id)
         .maybeSingle();
 
       const { data: applicantProfile } = await supabase
@@ -97,7 +96,7 @@ const ReviewApplication = () => {
 
       return {
         ...app,
-        projectTitle: project?.title || "Unknown Project",
+        projectTitle: project?.title || "Unknown Opportunity",
         applicantName,
         applicantEmail: app.contact_email,
         submittedAt: app.created_at,
@@ -123,12 +122,12 @@ const ReviewApplication = () => {
       }
 
       let unlinkedDocs: typeof linkedDocs = [];
-      if (application?.user_id && application?.project_id) {
+      if (application?.user_id && application?.opportunity_id) {
         const { data: userDocs, error: userError } = await (supabase
           .from("application_documents")
           .select("*")
           .eq("user_id", application.user_id)
-          .eq("project_id", application.project_id)
+          .eq("opportunity_id", application.opportunity_id)
           .is("application_id", null)
           .order("created_at", { ascending: false }) as any);
 
@@ -227,7 +226,6 @@ const ReviewApplication = () => {
           <OrganizationalBackgroundCard application={application} />
           <ProjectDetailsCard application={application} />
           <SocialLinksCard application={application} />
-          <ComplianceCard application={application} />
           <DocumentsCard
             documents={documents}
             isLoading={documentsLoading}
@@ -354,9 +352,9 @@ const ReviewApplication = () => {
                   </p>
                 </div>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>-¢ Admins manage users, projects, and system settings</p>
-                  <p>-¢ Reviewers evaluate and make decisions on applications</p>
-                  <p>-¢ This separation ensures clear accountability and audit trails</p>
+                  <p>• Admins manage users, projects, and system settings</p>
+                  <p>• Reviewers evaluate and make decisions on applications</p>
+                  <p>• This separation ensures clear accountability and audit trails</p>
                 </div>
               </CardContent>
             </Card>

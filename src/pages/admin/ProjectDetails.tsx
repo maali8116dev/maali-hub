@@ -1,9 +1,10 @@
-﻿import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, MapPin, DollarSign, Users, Star, ExternalLink } from "lucide-react";
 import { useProject } from "@/hooks/useAdminProjects";
+import { usePlatformFee } from "@/hooks/usePlatformFee";
 
 const AdminProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,7 @@ const AdminProjectDetails = () => {
   const projectId = id ? parseInt(id) : undefined;
 
   const { data: project, isLoading, error } = useProject(projectId);
+  const { data: applicationFee = 0 } = usePlatformFee();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -42,7 +44,7 @@ const AdminProjectDetails = () => {
   if (error || !project) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate("/admin/projects")}>
+        <Button variant="ghost" onClick={() => navigate("/admin/opportunities")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Projects
         </Button>
@@ -61,7 +63,7 @@ const AdminProjectDetails = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/admin/projects")}>
+          <Button variant="ghost" onClick={() => navigate("/admin/opportunities")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Projects
           </Button>
@@ -73,7 +75,7 @@ const AdminProjectDetails = () => {
               View Public Page
             </Button>
           </Link>
-          <Button onClick={() => navigate(`/admin/projects/${project.id}/edit`)}>
+          <Button onClick={() => navigate(`/admin/opportunities/${project.id}/edit`)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Project
           </Button>
@@ -182,16 +184,16 @@ const AdminProjectDetails = () => {
                   </p>
                 </div>
               </div>
-
-              {project.applicationFee !== undefined && project.applicationFee > 0 && (
+{/* 
+              {applicationFee > 0 && (
                 <div className="flex items-center gap-3">
                   <DollarSign className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Application Fee</p>
-                    <p className="font-semibold">${project.applicationFee}</p>
+                    <p className="font-semibold">${applicationFee.toFixed(2)}</p>
                   </div>
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
 

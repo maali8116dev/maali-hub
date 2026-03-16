@@ -563,12 +563,15 @@ serve(async (req: Request): Promise<Response> => {
     const initialStatus = hasFee ? "pending_payment" : "pending";
 
     if (!v.can_submit) {
+      const errorCode = v.has_existing_application ? "ALREADY_APPLIED" : "OPPORTUNITY_CLOSED";
       console.log("[submit-application] decision=validation_blocked", {
         userId: user.id,
         opportunityId,
+        opportunityStatus: v.opportunity_status ?? "(null)",
+        opportunityDeadline: v.deadline ?? "(null)",
         hasExistingApplication: !!v.has_existing_application,
         existingApplicationId: v.existing_application_id ?? null,
-        errorCode: v.has_existing_application ? "ALREADY_APPLIED" : "OPPORTUNITY_CLOSED",
+        errorCode,
       });
 
       if (v.has_existing_application) {
@@ -649,11 +652,13 @@ serve(async (req: Request): Promise<Response> => {
 
       return jsonResponse(req, 409, {
         success: false,
-        error: v.error_message || "Cannot submit application",
+        error: v.reason || "Cannot submit application",
         errorCode: v.has_existing_application
           ? "ALREADY_APPLIED"
           : "OPPORTUNITY_CLOSED",
         existingApplicationId: v.existing_application_id ?? null,
+        opportunityStatus: v.opportunity_status ?? null,
+        opportunityDeadline: v.deadline ?? null,
       });
     }
 

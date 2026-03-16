@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,7 +11,7 @@ export interface UploadedDocument {
   createdAt: string;
   applicationId?: string;
   isLibraryDocument?: boolean;
-  projectId?: number;
+  opportunityId?: number;
 }
 
 interface UploadProgress {
@@ -21,10 +21,10 @@ interface UploadProgress {
 }
 
 interface UseDocumentUploadReturn {
-  uploadDocument: (file: File, applicationId?: string, projectId?: number, isLibrary?: boolean) => Promise<UploadedDocument | null>;
-  uploadDocuments: (files: File[], applicationId?: string, projectId?: number, isLibrary?: boolean) => Promise<UploadedDocument[]>;
+  uploadDocument: (file: File, applicationId?: string, opportunityId?: number, isLibrary?: boolean) => Promise<UploadedDocument | null>;
+  uploadDocuments: (files: File[], applicationId?: string, opportunityId?: number, isLibrary?: boolean) => Promise<UploadedDocument[]>;
   uploadToLibrary: (file: File) => Promise<UploadedDocument | null>;
-  linkLibraryDocumentToApplication: (documentId: string, applicationId: string, projectId?: number) => Promise<UploadedDocument | null>;
+  linkLibraryDocumentToApplication: (documentId: string, applicationId: string, opportunityId?: number) => Promise<UploadedDocument | null>;
   deleteDocument: (document: UploadedDocument) => Promise<boolean>;
   fetchUserDocuments: () => Promise<UploadedDocument[]>;
   fetchLibraryDocuments: () => Promise<UploadedDocument[]>;
@@ -77,7 +77,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const uploadDocument = useCallback(async (
     file: File,
     applicationId?: string,
-    projectId?: number,
+    opportunityId?: number,
     isLibrary: boolean = false
   ): Promise<UploadedDocument | null> => {
     // Validate file
@@ -151,7 +151,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         .insert({
           user_id: user.id,
           application_id: isLibrary ? null : (applicationId || null),
-          project_id: isLibrary ? null : (projectId || null),
+          opportunity_id: isLibrary ? null : (opportunityId || null),
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
@@ -176,7 +176,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: docData.created_at,
         applicationId: docData.application_id || undefined,
         isLibraryDocument: docData.is_library_document || false,
-        projectId: docData.project_id || undefined,
+        opportunityId: docData.opportunity_id || undefined,
       };
 
       // Add to local state
@@ -206,14 +206,14 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const uploadDocuments = useCallback(async (
     files: File[],
     applicationId?: string,
-    projectId?: number,
+    opportunityId?: number,
     isLibrary: boolean = false
   ): Promise<UploadedDocument[]> => {
     setIsUploading(true);
     const results: UploadedDocument[] = [];
 
     for (const file of files) {
-      const result = await uploadDocument(file, applicationId, projectId, isLibrary);
+      const result = await uploadDocument(file, applicationId, opportunityId, isLibrary);
       if (result) {
         results.push(result);
       }
@@ -301,7 +301,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -318,7 +318,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: doc.created_at,
         applicationId: doc.application_id || undefined,
         isLibraryDocument: doc.is_library_document || false,
-        projectId: doc.project_id || undefined,
+        opportunityId: doc.opportunity_id || undefined,
       }));
 
       setDocuments(docs);
@@ -343,7 +343,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     try {
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false });
 
@@ -360,7 +360,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: doc.created_at,
         applicationId: doc.application_id || undefined,
         isLibraryDocument: doc.is_library_document || false,
-        projectId: doc.project_id || undefined,
+        opportunityId: doc.opportunity_id || undefined,
       }));
 
       setDocuments(docs);
@@ -384,13 +384,13 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const linkLibraryDocumentToApplication = useCallback(async (
     documentId: string,
     applicationId: string,
-    projectId?: number
+    opportunityId?: number
   ): Promise<UploadedDocument | null> => {
     try {
       // First, get the library document
       const { data: libraryDoc, error: fetchError } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("id", documentId)
         .eq("is_library_document", true)
         .is("application_id", null)
@@ -407,7 +407,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         .insert({
           user_id: libraryDoc.user_id,
           application_id: applicationId,
-          project_id: projectId || null,
+          opportunity_id: opportunityId || null,
           file_name: libraryDoc.file_name,
           file_path: libraryDoc.file_path, // Same file, different record
           file_size: libraryDoc.file_size,
@@ -430,7 +430,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: docData.created_at,
         applicationId: docData.application_id || undefined,
         isLibraryDocument: false,
-        projectId: docData.project_id || undefined,
+        opportunityId: docData.opportunity_id || undefined,
       };
 
       toast({
@@ -461,7 +461,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, project_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
         .eq("user_id", user.id)
         .eq("is_library_document", true)
         .is("application_id", null)
@@ -480,7 +480,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: doc.created_at,
         applicationId: undefined,
         isLibraryDocument: true,
-        projectId: undefined,
+        opportunityId: undefined,
       }));
 
       return docs;

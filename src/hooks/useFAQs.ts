@@ -1,4 +1,4 @@
-﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
@@ -33,11 +33,11 @@ export const useFAQs = () => {
         .from("faqs")
         .select("*")
         .eq("is_published", true)
-        .order("sector", { ascending: true })
+        .order("Sector", { ascending: true })
         .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
-      return data as FAQ[];
+      return (data || []).map(normalizeFaqRow) as FAQ[];
     },
     staleTime: Infinity, // Never consider stale - FAQs rarely change
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
@@ -47,6 +47,22 @@ export const useFAQs = () => {
   });
 };
 
+// DB column is "Sector" (capital S); normalize to FAQ shape with lowercase sector
+function normalizeFaqRow(row: Record<string, unknown>): FAQ {
+  const r = row as Record<string, unknown>;
+  return {
+    id: r.id as number,
+    question: r.question as string,
+    answer: r.answer as string,
+    sector: (r.Sector ?? r.sector ?? "") as string,
+    display_order: (r.display_order as number) ?? 0,
+    is_published: (r.is_published as boolean) ?? true,
+    created_at: r.created_at as string,
+    updated_at: r.updated_at as string,
+    created_by: r.created_by as string | null,
+  };
+}
+
 // Fetch all FAQs for admin (including unpublished)
 export const useAdminFAQs = () => {
   return useQuery({
@@ -55,11 +71,11 @@ export const useAdminFAQs = () => {
       const { data, error } = await (supabase
         .from("faqs")
         .select("*")
-        .order("sector", { ascending: true })
+        .order("Sector", { ascending: true })
         .order("display_order", { ascending: true }) as any);
 
       if (error) throw error;
-      return data as FAQ[];
+      return (data || []).map(normalizeFaqRow) as FAQ[];
     },
   });
 };
@@ -77,11 +93,17 @@ export const useFAQ = (id: number | undefined) => {
         .maybeSingle() as any);
 
       if (error) throw error;
-      return data as FAQ | null;
+      return data ? normalizeFaqRow(data as Record<string, unknown>) : null;
     },
     enabled: !!id,
   });
 };
+
+// DB expects column "Sector" (capital S)
+function faqFormToDb(faq: Partial<FAQFormData>) {
+  const { sector, ...rest } = faq as Partial<FAQFormData> & { sector?: string };
+  return { ...rest, ...(sector !== undefined && { Sector: sector }), created_by: undefined };
+}
 
 // Create FAQ mutation
 export const useCreateFAQ = () => {
@@ -91,18 +113,18 @@ export const useCreateFAQ = () => {
   return useMutation({
     mutationFn: async (faq: FAQFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+      const row = faqFormToDb(faq);
       const { data, error } = await (supabase
         .from("faqs")
         .insert({
-          ...faq,
+          ...row,
           created_by: user?.id,
         })
         .select()
         .single() as any);
 
       if (error) throw error;
-      return data as FAQ;
+      return normalizeFaqRow((data || {}) as Record<string, unknown>) as FAQ;
     },
     onSuccess: (faq) => {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
@@ -129,15 +151,17 @@ export const useUpdateFAQ = () => {
 
   return useMutation({
     mutationFn: async ({ id, faq }: { id: number; faq: Partial<FAQFormData> }) => {
+      const payload = faqFormToDb(faq);
+      delete (payload as Record<string, unknown>).created_by;
       const { data, error } = await (supabase
         .from("faqs")
-        .update(faq)
+        .update(payload)
         .eq("id", id)
         .select()
         .single() as any);
 
       if (error) throw error;
-      return data as FAQ;
+      return normalizeFaqRow((data || {}) as Record<string, unknown>) as FAQ;
     },
     onSuccess: (faq) => {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
@@ -207,7 +231,7 @@ export const useToggleFAQPublished = () => {
         .single() as any);
 
       if (error) throw error;
-      return data as FAQ;
+      return normalizeFaqRow((data || {}) as Record<string, unknown>) as FAQ;
     },
     onSuccess: (data: FAQ) => {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });

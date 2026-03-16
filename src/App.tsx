@@ -302,18 +302,6 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/projects"
-            element={
-              <RoleBasedRoute allowedRoles={["admin"]}>
-              <ProtectedRoute requireAuth={true}>
-                <AdminLayout>
-                  <AdminProjects />
-                </AdminLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
             path="/admin/opportunities"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
@@ -326,7 +314,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/projects/new"
+            path="/admin/opportunities/new"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
               <ProtectedRoute requireAuth={true}>
@@ -338,7 +326,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/projects/:id"
+            path="/admin/opportunities/:id"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
               <ProtectedRoute requireAuth={true}>
@@ -350,7 +338,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/projects/:id/edit"
+            path="/admin/opportunities/:id/edit"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
               <ProtectedRoute requireAuth={true}>
@@ -410,7 +398,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/projects/:id/applications"
+            path="/admin/opportunities/:id/applications"
             element={
               <RoleBasedRoute allowedRoles={["admin"]}>
               <ProtectedRoute requireAuth={true}>

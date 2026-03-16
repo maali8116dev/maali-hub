@@ -101,23 +101,23 @@ const Cookies = () => {
               </p>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>To enable core platform functionality and security</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>To remember your preferences and settings</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>To analyze platform usage and improve our services</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>To provide personalized content and recommendations</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-primary mt-1">-¢</span>
+                  <span className="text-primary mt-1">•</span>
                   <span>To track the effectiveness of our marketing campaigns</span>
                 </li>
               </ul>
@@ -172,10 +172,10 @@ const Cookies = () => {
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm font-semibold mb-2">How to manage cookies in your browser:</p>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>-¢ Chrome: Settings â†’ Privacy and Security â†’ Cookies</li>
-                  <li>-¢ Firefox: Options â†’ Privacy & Security â†’ Cookies</li>
-                  <li>-¢ Safari: Preferences â†’ Privacy â†’ Cookies</li>
-                  <li>-¢ Edge: Settings â†’ Privacy â†’ Cookies</li>
+                  <li>• Chrome: Settings • Privacy and Security • Cookies</li>
+                  <li>• Firefox: Options • Privacy & Security • Cookies</li>
+                  <li>• Safari: Preferences • Privacy • Cookies</li>
+                  <li>• Edge: Settings • Privacy • Cookies</li>
                 </ul>
               </div>
             </CardContent>

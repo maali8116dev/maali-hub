@@ -1,90 +1,88 @@
-﻿import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { useCreatePaymentIntent } from "@/hooks/usePayment";
-import { StripeElementsProvider } from "@/components/payment/StripeElementsProvider";
-import { PaymentForm } from "@/components/payment/PaymentForm";
+import { Button } from "@/components/ui/button";
+import { Loader2, CheckCircle2, AlertCircle, CreditCard } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useApplicationFormStore } from "@/stores/applicationForm";
+import { usePlatformFee } from "@/hooks/usePlatformFee";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentStepProps {
-  projectId: number;
+  opportunityId: number;
   applicationId?: string;
   onPaymentSuccess: () => void;
 }
 
-export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: PaymentStepProps) {
+export function PaymentStep({ opportunityId, applicationId, onPaymentSuccess }: PaymentStepProps) {
   const hasCalledSuccess = useRef(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paymentComplete, setPaymentComplete] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const { updateFormData, formData } = useApplicationFormStore();
-  const createPaymentIntent = useCreatePaymentIntent();
+  const { toast } = useToast();
 
-  // Fetch project to get application fee
-  const { data: project, isLoading: isLoadingProject } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("id, title, application_fee")
-        .eq("id", projectId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId,
-  });
+  const {
+    data: applicationFee = 0,
+    isLoading: isLoadingFee,
+  } = usePlatformFee();
 
   // If already paid or no fee, auto-complete
   useEffect(() => {
-    if (!project || isLoadingProject) return;
-    
-    const noFee = !project.application_fee || project.application_fee === 0;
+    if (isLoadingFee) return;
+
+    const noFee = !applicationFee || applicationFee === 0;
     const alreadyPaid = formData.paymentCompleted;
-    
+
     if ((noFee || alreadyPaid) && !hasCalledSuccess.current) {
       hasCalledSuccess.current = true;
       onPaymentSuccess();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project, isLoadingProject]);
+  }, [applicationFee, isLoadingFee, formData.paymentCompleted, onPaymentSuccess]);
 
-  // Create payment intent when fee exists and not yet paid
-  useEffect(() => {
-    if (!project || !project.application_fee || project.application_fee === 0) return;
-    if (formData.paymentCompleted || clientSecret) return;
-
-    // application_fee is stored in dollars in the database
-    const feeInDollars = project.application_fee;
-
-    createPaymentIntent.mutate(
-      {
-        amount: feeInDollars,
-        currency: "usd",
-        applicationId,
-        projectId,
-        description: `Application fee for ${project.title || "project"}`,
-      },
-      {
-        onSuccess: (data) => {
-          setClientSecret(data.clientSecret);
-          updateFormData({ paymentIntentId: data.paymentIntentId });
+  const redirectToCheckout = async () => {
+    if (!applicationId) {
+      toast({
+        title: "Complete application first",
+        description: "Submit your application; you will be redirected to pay after submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsRedirecting(true);
+    setCheckoutError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: {
+          applicationId,
+          opportunityId,
+          successUrl: `${window.location.origin}/payment/success?application_id=${applicationId}`,
+          cancelUrl: `${window.location.origin}/payment/cancel?application_id=${applicationId}`,
         },
-      }
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project]);
+      });
 
-  const handlePaymentSuccess = () => {
-    setPaymentComplete(true);
-    updateFormData({ paymentCompleted: true });
-    onPaymentSuccess();
+      if (error) {
+        const body = (error as { context?: { body?: { error?: string } } })?.context?.body;
+        const msg = body?.error || error.message || "Failed to start payment";
+        setCheckoutError(msg);
+        return;
+      }
+
+      if (data?.url) {
+        window.location.assign(data.url);
+        return;
+      }
+
+      setCheckoutError("Could not open payment page. Please try again.");
+    } catch (e) {
+      setCheckoutError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setIsRedirecting(false);
+    }
   };
 
-  if (isLoadingProject) {
+  if (isLoadingFee) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -97,12 +95,12 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
   }
 
   // No fee required
-  if (!project?.application_fee || project.application_fee === 0) {
+  if (!applicationFee || applicationFee === 0) {
     return (
       <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
         <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-500" />
         <AlertDescription className="text-blue-800 dark:text-blue-200">
-          This project has no application fee. You can proceed to review and submit your application.
+          This opportunity has no application fee. You can proceed to review and submit your application.
         </AlertDescription>
       </Alert>
     );
@@ -120,52 +118,59 @@ export function PaymentStep({ projectId, applicationId, onPaymentSuccess }: Paym
     );
   }
 
-  // Creating payment intent
-  if (createPaymentIntent.isPending || !clientSecret) {
+  // No application ID yet: tell user to submit first
+  if (!applicationId) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center justify-center py-8 gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Setting up payment...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Payment intent creation failed
-  if (createPaymentIntent.isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to initialize payment. Please try again or contact support.
+      <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
+        <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+        <AlertDescription className="text-amber-800 dark:text-amber-200">
+          Complete and submit your application. You will be redirected to the secure payment page to pay the application fee.
         </AlertDescription>
       </Alert>
     );
   }
 
-  const feeInDollars = project.application_fee;
+  // Checkout error
+  if (checkoutError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="space-y-2">
+          <p>{checkoutError}</p>
+          <Button size="sm" variant="outline" onClick={redirectToCheckout} disabled={isRedirecting}>
+            {isRedirecting ? "Opening…" : "Try again"}
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
-  // Show Stripe payment form
+  // Pay via Stripe Checkout (redirect)
   return (
-    <StripeElementsProvider clientSecret={clientSecret}>
-      <PaymentForm
-        clientSecret={clientSecret}
-        amount={feeInDollars}
-        currency="USD"
-        onSuccess={handlePaymentSuccess}
-        description={`Application fee for ${project.title || "this project"}`}
-      />
-    </StripeElementsProvider>
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Application fee: ${Number(applicationFee).toFixed(2)}. You will be redirected to our secure payment page.
+        </p>
+        <Button
+          type="button"
+          onClick={redirectToCheckout}
+          disabled={isRedirecting}
+          className="gap-2"
+        >
+          {isRedirecting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Opening payment page…
+            </>
+          ) : (
+            <>
+              <CreditCard className="h-4 w-4" />
+              Pay application fee
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
-
-
-
-
-
-
-
-

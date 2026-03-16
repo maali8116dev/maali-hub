@@ -155,6 +155,7 @@ const AdminMentors = () => {
               )}
             </div>
           ) : (
+            <>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -169,6 +170,7 @@ const AdminMentors = () => {
               </TableHeader>
               <TableBody>
                 {filteredMentors?.map((mentor) => (
+                  <>
                   <TableRow key={mentor.id}>
                     <TableCell>
                       <div className="font-medium">{mentor.name}</div>
@@ -185,7 +187,7 @@ const AdminMentors = () => {
                           {mentor.sector}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">-/span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -195,7 +197,7 @@ const AdminMentors = () => {
                           {mentor.country}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">-/span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -264,13 +266,15 @@ const AdminMentors = () => {
                       </div>
                     </TableCell>
                   </TableRow>
+                  </>
                 ))}
               </TableBody>
             </Table>
+            </>
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
   );
 };
 

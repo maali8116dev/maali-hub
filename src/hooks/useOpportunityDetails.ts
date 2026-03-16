@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOpportunityDraft } from "@/hooks/useUserDrafts";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +39,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
         .from("opportunities" as any)
         .select(`
           *,
+          sector:sectors(name),
           tags:opportunity_tag_map(
             tag:opportunity_tags(id, name, slug)
           )
@@ -76,10 +77,11 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       
       // Transform the nested structure
       const tags = ((data as any).tags || []).map((t: any) => t.tag).filter(Boolean);
-      
-      // Transform snake_case to camelCase and add tags
+      const sectorName = (data as any).sector?.name ?? null;
+
+      // Transform snake_case to camelCase and add tags; pass sector name from join
       return {
-        ...transformOpportunity({ ...data, tags }),
+        ...transformOpportunity({ ...data, tags, sector_name: sectorName }),
         tags,
       } as OpportunityWithTags;
     },
@@ -103,7 +105,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
         .from("applications")
         .select("id, status, is_draft")
         .eq("user_id", user.id)
-        .eq("project_id", parseInt(opportunityId))
+        .eq("opportunity_id", parseInt(opportunityId))
         .eq("is_draft", false)
         .order("created_at", { ascending: false })
         .limit(1)

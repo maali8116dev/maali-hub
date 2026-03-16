@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -8,7 +8,7 @@ export type Transaction = {
   userName: string;
   userEmail: string;
   applicationId: string | null;
-  projectId: number | null;
+  opportunityId: number | null;
   projectTitle: string | null;
   type: "application_fee" | "subscription" | "refund" | "other";
   status: "pending" | "processing" | "completed" | "failed" | "refunded" | "cancelled";
@@ -78,9 +78,9 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
       return [];
     }
 
-    // Get unique user IDs and project IDs
+    // Get unique user IDs and opportunity IDs
     const userIds = [...new Set(transactionsData.map((tx: any) => tx.user_id).filter(Boolean))];
-    const projectIds = [...new Set(transactionsData.map((tx: any) => tx.project_id).filter(Boolean))];
+    const opportunityIds = [...new Set(transactionsData.map((tx: any) => tx.opportunity_id ?? tx.project_id).filter(Boolean))];
     
     // Fetch profiles for all users
     const profilesMap = new Map<string, { firstName: string | null; lastName: string | null }>();
@@ -102,19 +102,19 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
       }
     }
 
-    // Get project titles for transactions that have project_id
-    const projectsMap = new Map<number, string>();
-    if (projectIds.length > 0) {
-      const { data: projects, error: projectsError } = await supabase
-        .from("projects")
+    // Get opportunity titles for transactions that have opportunity_id
+    const opportunitiesMap = new Map<number, string>();
+    if (opportunityIds.length > 0) {
+      const { data: opportunities, error: opportunitiesError } = await supabase
+        .from("opportunities")
         .select("id, title")
-        .in("id", projectIds);
+        .in("id", opportunityIds);
       
-      if (projectsError) {
-        console.error("Error fetching projects:", projectsError);
-      } else if (projects) {
-        projects.forEach((p) => {
-          projectsMap.set(p.id, p.title);
+      if (opportunitiesError) {
+        console.error("Error fetching opportunities:", opportunitiesError);
+      } else if (opportunities) {
+        opportunities.forEach((o) => {
+          opportunitiesMap.set(o.id, o.title);
         });
       }
     }
@@ -127,7 +127,8 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
         : tx.billing_email || "Unknown User";
       
       const userEmail = tx.billing_email || "N/A";
-      const projectTitle = tx.project_id ? projectsMap.get(tx.project_id) || null : null;
+      const oppId = tx.opportunity_id ?? tx.project_id;
+      const opportunityTitle = oppId ? opportunitiesMap.get(oppId) || null : null;
 
       return {
         id: tx.id,
@@ -135,8 +136,8 @@ async function fetchAllTransactions(): Promise<Transaction[]> {
         userName,
         userEmail,
         applicationId: tx.application_id,
-        projectId: tx.project_id,
-        projectTitle,
+        opportunityId: oppId,
+        projectTitle: opportunityTitle,
         type: tx.type,
         status: tx.status,
         amount: parseFloat(tx.amount),

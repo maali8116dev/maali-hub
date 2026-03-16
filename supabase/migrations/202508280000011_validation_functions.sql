@@ -120,6 +120,9 @@ COMMENT ON FUNCTION public.validate_application_submission(UUID, INTEGER) IS 'Va
 -- Optimizes pre-submission checks by combining multiple queries
 -- ============================================
 
+-- Drop first: return type (OUT params) changed; CREATE OR REPLACE cannot change it
+DROP FUNCTION IF EXISTS public.get_application_submission_preview(UUID, INTEGER);
+
 CREATE OR REPLACE FUNCTION public.get_application_submission_preview(
   p_user_id UUID,
   p_opportunity_id INTEGER

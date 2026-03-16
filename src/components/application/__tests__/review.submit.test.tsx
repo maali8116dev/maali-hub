@@ -1,7 +1,7 @@
-﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { supabase } from '@/integrations/supabase/client';
-import { setupMocks, mockProject, populateFormStore, defaultApplicationPayload, ApplicationPayload } from './test-utils';
+import { setupMocks, mockPlatformFee, populateFormStore, defaultApplicationPayload, ApplicationPayload } from './test-utils';
 
 // Mock dependencies
 vi.mock('@/hooks/useAuth');
@@ -156,8 +156,8 @@ describe('Step 6: Payment', () => {
   });
 
   it('should skip payment step for free projects', () => {
-    // Projects with application_fee of 0 should skip payment
-    expect(mockProject.application_fee).toBe(0);
+    // System-wide application fee of 0 should skip payment
+    expect(mockPlatformFee).toBe(0);
   });
 });
 

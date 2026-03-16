@@ -1,10 +1,11 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase, CreditCard } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 import InfoField from "@/components/application/shared/InfoField";
+import { usePlatformFee } from "@/hooks/usePlatformFee";
 
 interface ProjectInfoProps {
   project: OpportunityWithTags;
@@ -31,6 +32,7 @@ const getStatusColor = (status: string) => {
  * Component for displaying project information
  */
 export function ProjectInfo({ project }: ProjectInfoProps) {
+  const { data: applicationFee = 0 } = usePlatformFee();
   const displayStatus = getProjectDisplayStatus(
     project.status,
     project.deadline,
@@ -72,7 +74,7 @@ const formatProjectDate = (dateString: string) => {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start mb-4">
-          <Badge variant="secondary">{project.tags?.[0]?.name || "Uncategorized"}</Badge>
+          <Badge variant="secondary">{project.sector || project.tags?.[0]?.name || "Uncategorized"}</Badge>
           <Badge className={getStatusColor(displayStatus)}>
             {displayStatus}
           </Badge>
@@ -111,7 +113,7 @@ const formatProjectDate = (dateString: string) => {
           <InfoField 
             icon={Tag} 
             label="Sector" 
-            value={project.tags?.[0]?.name || "Uncategorized"}
+            value={project.sector || project.tags?.[0]?.name || "Uncategorized"}
           />
           { project.fundingAmount && (
             <InfoField 
@@ -152,13 +154,13 @@ const formatProjectDate = (dateString: string) => {
         </div>
 
         {/* Application & Capacity Information */}
-        {(project.applicationFee || project.maxApplicants || project.currentApplicants > 0) && (
+        {/* {(applicationFee > 0 || project.maxApplicants || project.currentApplicants > 0) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {project.applicationFee && project.applicationFee > 0 && (
+            {applicationFee > 0 && (
               <InfoField 
                 icon={CreditCard} 
                 label="Application Fee" 
-                value={formatCurrency(project.applicationFee.toString(), project.currency)}
+                value={formatCurrency(applicationFee.toString(), project.currency)}
               />
             )}
             {project.maxApplicants && (
@@ -176,7 +178,7 @@ const formatProjectDate = (dateString: string) => {
               />
             )}
           </div>
-        )}
+        )} */}
 
       </CardContent>
     </Card>

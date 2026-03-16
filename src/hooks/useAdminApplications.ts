@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -16,7 +16,7 @@ export type AdminApplication = {
   applicantName: string;
   applicantEmail: string;
   projectTitle: string;
-  projectId: number;
+  opportunityId: number;
   submittedAt: string;
   status: "pending" | "approved" | "rejected" | "draft" | "under_review" | "pending_payment";
   contactEmail: string;
@@ -97,10 +97,10 @@ async function fetchAllApplicationsForAdmin(): Promise<AdminApplication[]> {
 
       return {
         id: app.id,
-        applicantName: app.applicant_name || "Unknown Applicant",
+        applicantName: app.applicant_name || app.applicant_email || "Unknown Applicant",
         applicantEmail: app.applicant_email || "No email",
-        projectTitle: app.project_title || "Unknown Project",
-        projectId: app.project_id,
+        projectTitle: app.project_title ?? app.opportunity_title ?? "Unknown Project",
+        opportunityId: app.opportunity_id ?? app.project_id,
         submittedAt: app.submitted_at,
         status: finalStatus,
         contactEmail: app.contact_email || "N/A",

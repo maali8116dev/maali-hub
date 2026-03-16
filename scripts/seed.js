@@ -16,6 +16,13 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { lookup } from 'node:dns/promises';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const TEST_FILES_DIR = path.join(__dirname, '..', 'src', 'test', 'files');
+const BUCKET_OPPORTUNITY_FILES = 'opportunity-files';
 
 dotenv.config();
 const args = new Set(process.argv.slice(2));
@@ -186,7 +193,10 @@ async function seedProjects() {
       sector_id: technologyId,
       status: 'closed',
       deadline: '2025-12-15',
-      funding_amount: '$50,000',
+      opportunity_type: 'training',
+        program_format: 'hybrid',
+        funding_type: 'no_funding',
+        funding_amount: null,
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800',
       requirements: 'Business plan\nPitch deck\nFinancial projections\nTeam bios\nProof of concept or MVP',
@@ -195,6 +205,7 @@ async function seedProjects() {
       max_applicants: 50,
       current_applicants: 234,
       featured: false,
+      seed_documents: true,
     },
     {
       title: 'FinTech for Financial Inclusion',
@@ -203,7 +214,10 @@ async function seedProjects() {
       sector_id: fintechId,
       status: 'open',
       deadline: '2025-10-20',
-      funding_amount: '$75,000',
+      opportunity_type: 'training',
+      program_format: 'online',
+      funding_type: 'no_funding',
+      funding_amount: null,
       location: 'West Africa',
       image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800',
       requirements: 'Technical documentation\nRegulatory compliance proof\nUser acquisition metrics\nScalability plan',
@@ -212,6 +226,7 @@ async function seedProjects() {
       max_applicants: 30,
       current_applicants: 89,
       featured: true,
+      seed_documents: true,
     },
     {
       title: 'AI and Machine Learning Innovation Fund',
@@ -220,7 +235,10 @@ async function seedProjects() {
       sector_id: technologyId,
       status: 'open',
       deadline: '2027-11-30',
-      funding_amount: '$100,000',
+      opportunity_type: 'training',
+      program_format: 'hybrid',
+      funding_type: 'no_funding',
+      funding_amount: null,
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800',
       requirements: 'Technical architecture\nAI/ML model documentation\nData privacy compliance\nUse case validation',
@@ -229,6 +247,7 @@ async function seedProjects() {
       max_applicants: 20,
       current_applicants: 45,
       featured: true,
+      seed_documents: false,
     },
     {
       title: 'E-commerce Platform Development Grant',
@@ -237,6 +256,9 @@ async function seedProjects() {
       sector_id: technologyId,
       status: 'open',
       deadline: '2028-01-15',
+      opportunity_type: 'training',
+      program_format: 'online',
+      funding_type: 'partially_funded',
       funding_amount: '$40,000',
       location: 'East Africa',
       image_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
@@ -246,23 +268,28 @@ async function seedProjects() {
       max_applicants: 40,
       current_applicants: 0,
       featured: false,
+      seed_documents: false,
     },
     {
       title: 'Sustainable Agriculture Innovation Fund',
-      description: 'Funding innovative agricultural solutions for food security in rural communities. This includes smart farming technologies, irrigation systems, crop management apps, and sustainable farming practices.',
+      description: 'Training and capacity-building for agricultural innovators: workshops on smart farming, irrigation, crop management, and sustainable practices. No funding; participants receive materials and certificates.',
       sector: 'Agriculture',
       sector_id: agricultureId,
       status: 'open',
       deadline: '2027-11-30',
-      funding_amount: '$25,000',
+      opportunity_type: 'training',
+      program_format: 'hybrid',
+      funding_type: 'no_funding',
+      funding_amount: null,
       location: 'East Africa',
       image_url: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
-      requirements: 'Project proposal\nImpact assessment\nSustainability plan\nCommunity engagement strategy',
-      eligibility_criteria: 'Agriculture-focused solution\nRural community focus\nSustainable practices\nDemonstrable impact on food security',
-      application_fee: 10.00,
+      requirements: 'Short project or community description\nCV or organizational profile\nCompleted pre-course questionnaire',
+      eligibility_criteria: 'Agriculture or community focus\nRural or smallholder context\nCommitment to attend sessions',
+      application_fee: 0.00,
       max_applicants: 60,
       current_applicants: 156,
       featured: false,
+      seed_documents: true,
     },
     {
       title: 'Smart Irrigation System for Smallholder Farmers',
@@ -271,6 +298,9 @@ async function seedProjects() {
       sector_id: agricultureId,
       status: 'open',
       deadline: '2027-12-20',
+      opportunity_type: 'grant',
+      program_format: 'in_person',
+      funding_type: 'fully_funded',
       funding_amount: '$60,000',
       location: 'Sub-Saharan Africa',
       image_url: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
@@ -280,6 +310,7 @@ async function seedProjects() {
       max_applicants: 25,
       current_applicants: 78,
       featured: true,
+      seed_documents: false,
     },
     {
       title: 'AgriTech Supply Chain Innovation',
@@ -288,6 +319,9 @@ async function seedProjects() {
       sector_id: agricultureId,
       status: 'open',
       deadline: '2027-10-10',
+      opportunity_type: 'grant',
+      program_format: 'hybrid',
+      funding_type: 'partially_funded',
       funding_amount: '$35,000',
       location: 'West Africa',
       image_url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800',
@@ -297,6 +331,7 @@ async function seedProjects() {
       max_applicants: 35,
       current_applicants: 92,
       featured: false,
+      seed_documents: false,
     },
     {
       title: 'Mobile Money Solutions Grant',
@@ -305,6 +340,9 @@ async function seedProjects() {
       sector_id: fintechId,
       status: 'open',
       deadline: '2027-12-05',
+      opportunity_type: 'grant',
+      program_format: 'online',
+      funding_type: 'fully_funded',
       funding_amount: '$55,000',
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800',
@@ -314,6 +352,7 @@ async function seedProjects() {
       max_applicants: 45,
       current_applicants: 123,
       featured: false,
+      seed_documents: false,
     },
     {
       title: 'Cryptocurrency and Blockchain for Development',
@@ -322,6 +361,9 @@ async function seedProjects() {
       sector_id: fintechId,
       status: 'open',
       deadline: '2028-02-28',
+      opportunity_type: 'grant',
+      program_format: 'online',
+      funding_type: 'fully_funded',
       funding_amount: '$80,000',
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800',
@@ -331,23 +373,28 @@ async function seedProjects() {
       max_applicants: 15,
       current_applicants: 0,
       featured: true,
+      seed_documents: false,
     },
     {
       title: 'EdTech Innovation for Rural Education',
-      description: 'Supporting educational technology platforms that improve access to quality education in rural and underserved African communities.',
+      description: 'Training program for educators and innovators building educational technology for rural and underserved African communities. No funding; participants gain skills, curriculum templates, and certification.',
       sector: 'Technology',
       sector_id: technologyId,
       status: 'open',
       deadline: '2027-11-25',
-      funding_amount: '$45,000',
+      opportunity_type: 'training',
+      program_format: 'online',
+      funding_type: 'no_funding',
+      funding_amount: null,
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1503676260728-1c6019ae5030?w=800',
-      requirements: 'Educational content\nPlatform demo\nImpact assessment\nScalability plan',
-      eligibility_criteria: 'EdTech platform\nRural focus\nQuality education access\nScalable solution',
-      application_fee: 5.00,
+      requirements: 'CV or bio\nShort statement of interest\nOptional: sample lesson or curriculum outline',
+      eligibility_criteria: 'Educators, NGO staff, or innovators\nRural or underserved community focus\nCommitment to complete the training',
+      application_fee: 0.00,
       max_applicants: 50,
       current_applicants: 167,
       featured: false,
+      seed_documents: true,
     },
     {
       title: 'Healthcare Technology Innovation',
@@ -356,6 +403,9 @@ async function seedProjects() {
       sector_id: technologyId,
       status: 'open',
       deadline: '2027-12-10',
+      opportunity_type: 'grant',
+      program_format: 'hybrid',
+      funding_type: 'fully_funded',
       funding_amount: '$65,000',
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800',
@@ -365,6 +415,7 @@ async function seedProjects() {
       max_applicants: 30,
       current_applicants: 98,
       featured: false,
+      seed_documents: false,
     },
     {
       title: 'Green Energy Technology Fund',
@@ -373,6 +424,9 @@ async function seedProjects() {
       sector_id: technologyId,
       status: 'open',
       deadline: '2027-10-15',
+      opportunity_type: 'grant',
+      program_format: 'hybrid',
+      funding_type: 'fully_funded',
       funding_amount: '$90,000',
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800',
@@ -382,29 +436,43 @@ async function seedProjects() {
       max_applicants: 20,
       current_applicants: 67,
       featured: true,
+      seed_documents: false,
     },
     {
       title: 'Transportation and Logistics Tech',
-      description: 'Funding for technology solutions that improve transportation, logistics, and mobility in African cities and rural areas.',
+      description: 'Short training course on technology solutions for transportation and logistics in African markets. No funding; participants learn tools and frameworks and receive a certificate.',
       sector: 'Technology',
       sector_id: technologyId,
       status: 'open',
       deadline: '2028-01-30',
-      funding_amount: '$50,000',
+      opportunity_type: 'training',
+      program_format: 'online',
+      funding_type: 'no_funding',
+      funding_amount: null,
       location: 'Pan-African',
       image_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
-      requirements: 'Business model\nTechnology solution\nMarket analysis\nScalability plan',
-      eligibility_criteria: 'Transport/logistics solution\nAfrican market focus\nInnovative approach\nScalable technology',
-      application_fee: 10.00,
+      requirements: 'CV or LinkedIn profile\nShort motivation statement\nUpload: one-page summary of your current role or project',
+      eligibility_criteria: 'Interest in transport or logistics\nAfrican market focus\nAbility to complete online modules',
+      application_fee: 0.00,
       max_applicants: 40,
       current_applicants: 0,
       featured: false,
+      seed_documents: true,
     },
   ];
 
   // Insert opportunities (check for existing ones first to avoid duplicates)
   let insertedCount = 0;
   let skippedCount = 0;
+  let documentsSeeded = 0;
+
+  // Actual test files from src/test/files — uploaded to storage and linked in opportunity_documents
+  const testFileSpecs = [
+    { diskName: 'test-document.pdf', file_name: 'Application Guidelines.pdf', file_type: 'application/pdf' },
+    { diskName: 'text-document.txt', file_name: 'Required Documents Checklist.txt', file_type: 'text/plain' },
+    { diskName: 'test-document.txt.docx', file_name: 'Application Template.docx', file_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+    { diskName: 'test-document.doc', file_name: 'Sample Document.doc', file_type: 'application/msword' },
+  ];
 
   for (const project of projects) {
     // Check if opportunity with same title already exists
@@ -419,35 +487,75 @@ async function seedProjects() {
       continue;
     }
 
-    const { error } = await supabase
+    const payload = {
+      title: project.title,
+      description: project.description,
+      sector_id: project.sector_id,
+      status: project.status,
+      deadline: project.deadline,
+      opportunity_type: project.opportunity_type ?? 'grant',
+      program_format: project.program_format ?? 'hybrid',
+      funding_type: project.funding_type ?? 'fully_funded',
+      funding_amount: project.funding_amount ?? null,
+      location: project.location,
+      image_url: project.image_url,
+      requirements: project.requirements,
+      eligibility_criteria: project.eligibility_criteria,
+      application_fee: project.application_fee,
+      max_applicants: project.max_applicants,
+      current_applicants: project.current_applicants,
+      featured: project.featured,
+    };
+
+    const { data: inserted, error } = await supabase
       .from('opportunities')
-      .insert({
-        title: project.title,
-        description: project.description,
-        sector_id: project.sector_id,
-        status: project.status,
-        deadline: project.deadline,
-        funding_amount: project.funding_amount,
-        location: project.location,
-        image_url: project.image_url,
-        requirements: project.requirements,
-        eligibility_criteria: project.eligibility_criteria,
-        application_fee: project.application_fee,
-        max_applicants: project.max_applicants,
-        current_applicants: project.current_applicants,
-        featured: project.featured,
-      });
+      .insert(payload)
+      .select('id')
+      .single();
 
     if (error) {
       console.error(`   ⚠️  Failed to insert opportunity "${project.title}":`, error.message);
       // Continue with other projects instead of failing completely
     } else {
       insertedCount++;
+      // Upload actual test files to storage and seed opportunity_documents for this opportunity
+      if (inserted?.id && project.seed_documents) {
+        const opportunityId = inserted.id;
+        for (const spec of testFileSpecs) {
+          const localPath = path.join(TEST_FILES_DIR, spec.diskName);
+          let buffer;
+          try {
+            buffer = await readFile(localPath);
+          } catch (readErr) {
+            console.error(`   ⚠️  Could not read ${spec.diskName}:`, readErr.message);
+            continue;
+          }
+          const storagePath = `opportunity_${opportunityId}/${spec.diskName}`;
+          const { error: uploadError } = await supabase.storage
+            .from(BUCKET_OPPORTUNITY_FILES)
+            .upload(storagePath, buffer, { contentType: spec.file_type, upsert: true });
+          if (uploadError) {
+            console.error(`   ⚠️  Storage upload failed for ${spec.diskName}:`, uploadError.message);
+            continue;
+          }
+          const { error: docError } = await supabase.from('opportunity_documents').insert({
+            opportunity_id: opportunityId,
+            file_path: storagePath,
+            file_name: spec.file_name,
+            file_size: buffer.length,
+            file_type: spec.file_type,
+          });
+          if (!docError) documentsSeeded++;
+        }
+      }
     }
   }
 
   if (insertedCount > 0) {
     console.log(`   ✅ ${insertedCount} opportunities inserted successfully`);
+  }
+  if (documentsSeeded > 0) {
+    console.log(`   ✅ ${documentsSeeded} opportunity documents added (files in ${BUCKET_OPPORTUNITY_FILES})`);
   }
   if (skippedCount > 0) {
     console.log(`   ℹ️  ${skippedCount} opportunities already exist (skipped)`);

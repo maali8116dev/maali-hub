@@ -125,7 +125,7 @@ const Terms = () => {
                 <ul className="space-y-2">
                   {section.content.map((item, itemIndex) => (
                     <li key={itemIndex} className="flex items-start gap-2 text-muted-foreground">
-                      <span className="text-primary mt-1">-¢</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>{item}</span>
                     </li>
                   ))}

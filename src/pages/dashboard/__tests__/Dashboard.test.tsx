@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -49,8 +49,8 @@ describe('Dashboard - Data Viewing', () => {
   const mockApplications = [
     {
       id: 'app-1',
-      projectId: 1,
-      projectTitle: 'AgriTech Innovation Fund',
+      opportunityId: 1,
+      opportunityTitle: 'AgriTech Innovation Fund',
       status: 'pending' as const,
       submittedAt: '2024-01-15T00:00:00Z',
       sector: 'Agriculture',
@@ -58,14 +58,14 @@ describe('Dashboard - Data Viewing', () => {
       fundingAmount: '$50,000',
       companyName: 'Tech Solutions',
       contactEmail: 'john@tech.com',
-      projectDescription: 'Innovative solution',
+      projectSummary: 'Innovative solution',
       createdAt: '2024-01-15T00:00:00Z',
       updatedAt: '2024-01-15T00:00:00Z',
     },
     {
       id: 'app-2',
-      projectId: 2,
-      projectTitle: 'Tech Startup Grant',
+      opportunityId: 2,
+      opportunityTitle: 'Tech Startup Grant',
       status: 'approved' as const,
       submittedAt: '2024-01-10T00:00:00Z',
       sector: 'Technology',
@@ -73,14 +73,14 @@ describe('Dashboard - Data Viewing', () => {
       fundingAmount: '$75,000',
       companyName: 'Startup Inc',
       contactEmail: 'startup@example.com',
-      projectDescription: 'Tech startup',
+      projectSummary: 'Tech startup',
       createdAt: '2024-01-10T00:00:00Z',
       updatedAt: '2024-01-12T00:00:00Z',
     },
     {
       id: 'app-3',
-      projectId: 3,
-      projectTitle: 'FinTech Grant',
+      opportunityId: 3,
+      opportunityTitle: 'FinTech Grant',
       status: 'rejected' as const,
       submittedAt: '2024-01-05T00:00:00Z',
       sector: 'Finance',
@@ -88,7 +88,7 @@ describe('Dashboard - Data Viewing', () => {
       fundingAmount: '$100,000',
       companyName: 'Finance Corp',
       contactEmail: 'finance@example.com',
-      projectDescription: 'Financial solution',
+      projectSummary: 'Financial solution',
       createdAt: '2024-01-05T00:00:00Z',
       updatedAt: '2024-01-08T00:00:00Z',
     },
@@ -118,6 +118,16 @@ describe('Dashboard - Data Viewing', () => {
       data: undefined,
       isLoading: false,
       error: null,
+    });
+    (useProfile as any).mockReturnValue({
+      data: mockProfile,
+      isLoading: false,
+    });
+    (useProfileCompletion as any).mockReturnValue({
+      isIncomplete: false,
+      completionPercentage: 85,
+      missingFields: [],
+      isLoading: false,
     });
   });
 
@@ -533,8 +543,8 @@ describe('Dashboard - Data Viewing', () => {
   it('shows only first 3 applications in recent section', async () => {
     const manyApplications = Array.from({ length: 10 }, (_, i) => ({
       id: `app-${i + 1}`,
-      projectId: i + 1,
-      projectTitle: `Project ${i + 1}`,
+      opportunityId: i + 1,
+      opportunityTitle: `Project ${i + 1}`,
       status: 'pending' as const,
       submittedAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
       sector: 'Technology',
@@ -542,7 +552,7 @@ describe('Dashboard - Data Viewing', () => {
       fundingAmount: '$50,000',
       companyName: `Company ${i + 1}`,
       contactEmail: `company${i + 1}@example.com`,
-      projectDescription: `Description ${i + 1}`,
+      projectSummary: `Description ${i + 1}`,
       createdAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
       updatedAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`,
     }));

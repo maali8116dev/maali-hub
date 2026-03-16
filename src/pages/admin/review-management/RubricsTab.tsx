@@ -83,7 +83,7 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
                           )}
                         </div>
                         <div className="text-sm">
-                          Weight: {(criterion.weight * 100).toFixed(0)}% -¢ Max: {criterion.max_score}
+                          Weight: {(criterion.weight * 100).toFixed(0)}% • Max: {criterion.max_score}
                         </div>
                       </div>
                     ))}

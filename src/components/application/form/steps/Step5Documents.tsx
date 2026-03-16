@@ -1,15 +1,15 @@
-﻿import DocumentUploadSection from "@/components/application/DocumentUploadSection";
+import DocumentUploadSection from "@/components/application/DocumentUploadSection";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step5DocumentsProps {
-  projectId?: number;
+  opportunityId?: number;
   applicantType?: "Individual" | "Organization" | "Startup / SME" | "NGO / Non-profit" | "Research / Academic";
   onFilesChange: (files: File[]) => void;
   onLibraryDocumentsChange: (documentIds: string[]) => void;
 }
 
 export function Step5Documents({
-  projectId,
+  opportunityId,
   applicantType,
   onFilesChange,
   onLibraryDocumentsChange,
@@ -24,7 +24,7 @@ export function Step5Documents({
       </div>
 
       <DocumentUploadSection
-        projectId={projectId}
+        opportunityId={opportunityId}
         onFilesChange={onFilesChange}
         onLibraryDocumentsChange={onLibraryDocumentsChange}
         applicantType={applicantType}

@@ -13,7 +13,7 @@ export type Profile = {
   country: string | null;
   bio: string | null;
   avatarUrl: string | null;
-  role: "admin" | "reviewer" | "applicant";
+  role: "admin" | "reviewer" | "applicant" | "partner";
   createdAt: string;
   updatedAt: string;
 };

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Integration tests -” hooks hit the REAL database.
  *
  * We mock `@/integrations/supabase/client` to return a real Supabase client
@@ -37,6 +37,8 @@ const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
       auth: { persistSession: false, autoRefreshToken: false },
     })
   : null;
+
+const itIf = supabaseAdmin ? it : it.skip;
 
 // Mock useAuth to return our test user
 vi.mock('@/hooks/useAuth');
@@ -131,7 +133,7 @@ describe('useProfile - Integration Tests', () => {
   }, 30000);
 
   describe('useProfile', () => {
-    it('returns null when profile does not exist (PGRST116)', async () => {
+    itIf('returns null when profile does not exist (PGRST116)', async () => {
       const { result } = renderHook(() => useProfile(), {
         wrapper: createWrapper(),
       });
@@ -148,7 +150,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.isError).toBe(false);
     });
 
-    it('fetches profile successfully from real database', async () => {
+    itIf('fetches profile successfully from real database', async () => {
       // First create a profile
       const { data: profileData, error: profileError } = await supabaseAdmin
         .from('profiles')
@@ -191,7 +193,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.bio).toBe('Entrepreneur');
     });
 
-    it('transforms snake_case to camelCase correctly', async () => {
+    itIf('transforms snake_case to camelCase correctly', async () => {
       // Update the profile to test transformation
       await supabaseAdmin
         .from('profiles')
@@ -223,7 +225,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.avatarUrl).toBe('https://example.com/avatar.jpg');
     });
 
-    it('does not fetch when user is not authenticated', () => {
+    itIf('does not fetch when user is not authenticated', () => {
       (useAuth as any).mockReturnValue({ user: null });
 
       const { result } = renderHook(() => useProfile(), {
@@ -237,7 +239,7 @@ describe('useProfile - Integration Tests', () => {
   });
 
   describe('useUpdateProfile', () => {
-    it('updates existing profile successfully', async () => {
+    itIf('updates existing profile successfully', async () => {
       // Ensure profile exists
       if (!testProfileId) {
         const { data: profileData } = await supabaseAdmin
@@ -282,7 +284,7 @@ describe('useProfile - Integration Tests', () => {
       expect(result.current.data?.bio).toBe('Updated bio');
     });
 
-    it('creates new profile when update fails with PGRST116 (profile does not exist)', async () => {
+    itIf('creates new profile when update fails with PGRST116 (profile does not exist)', async () => {
       // Delete the profile first
       if (testProfileId) {
         await supabaseAdmin
@@ -327,7 +329,7 @@ describe('useProfile - Integration Tests', () => {
       }
     });
 
-    it('handles partial updates correctly', async () => {
+    itIf('handles partial updates correctly', async () => {
       // Ensure profile exists
       if (!testProfileId) {
         const { data: profileData } = await supabaseAdmin
@@ -366,7 +368,7 @@ describe('useProfile - Integration Tests', () => {
       // Other fields should remain unchanged
     });
 
-    it('handles avatar_url correctly (null vs undefined)', async () => {
+    itIf('handles avatar_url correctly (null vs undefined)', async () => {
       // Ensure profile exists
       if (!testProfileId) {
         const { data: profileData } = await supabaseAdmin

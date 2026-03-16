@@ -1,9 +1,8 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Draft {
   id: string;
-  project_id?: number;
   opportunity_id?: number;
   organization_name: string | null;
   updated_at: string;
@@ -18,7 +17,7 @@ export const useUserDrafts = () => {
 
       const { data, error } = await (supabase
         .from("applications")
-        .select("id, project_id, organization_name, updated_at")
+        .select("id, opportunity_id, organization_name, updated_at")
         .eq("user_id", user.id)
         .eq("is_draft", true)
         .order("updated_at", { ascending: false }) as any);
@@ -42,7 +41,7 @@ export const useProjectDraft = (projectId: number | undefined) => {
         .from("applications")
         .select("id, organization_name, updated_at")
         .eq("user_id", user.id)
-        .eq("project_id", projectId)
+        .eq("opportunity_id", projectId)
         .eq("is_draft", true)
         .maybeSingle();
 
@@ -66,7 +65,7 @@ export const useOpportunityDraft = (opportunityId: number | undefined) => {
         .from("applications")
         .select("id, organization_name, updated_at")
         .eq("user_id", user.id)
-        .eq("project_id", opportunityId)
+        .eq("opportunity_id", opportunityId)
         .eq("is_draft", true)
         .maybeSingle() as any);
 
