@@ -269,7 +269,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       await savePaymentMethod(userId, paymentIntentId, session.customer_email || null);
     }
 
-    // Queue payment receipt email after PDF generation/transaction update.
+    // Send our internal receipt email (with generated PDF). Ensure Stripe Dashboard →
+    // Settings → Emails → "Successful payments" is OFF so customers get only this receipt.
     await enqueuePaymentReceiptEmail(applicationId, userId, session.amount_total, "usd", paymentIntentId, invoicePdfUrl);
     
     // Assign reviewers now that payment is confirmed

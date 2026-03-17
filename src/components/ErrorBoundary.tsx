@@ -1,4 +1,5 @@
-﻿import * as Sentry from "@sentry/react";
+import * as Sentry from "@sentry/react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -39,11 +40,8 @@ const ErrorFallback = ({ error, resetError }: FallbackProps) => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
           </Button>
-          <Button 
-            onClick={() => window.location.href = "/"} 
-            variant="outline"
-          >
-            Go to Homepage
+          <Button asChild variant="outline">
+            <Link to="/">Go to Homepage</Link>
           </Button>
         </div>
 

@@ -16,7 +16,7 @@ CREATE OR REPLACE FUNCTION public.get_eligible_reviewers_for_application(
 RETURNS TABLE(
   reviewer_id uuid,
   first_name text,
-  last_name text,
+  last_name text, 
   workload integer
 )
 LANGUAGE plpgsql
@@ -196,6 +196,7 @@ COMMENT ON FUNCTION public.admin_set_application_reviewers IS
 -- This fixes the "2/3" display issue by showing actual reviewer count instead of estimate
 -- This migration runs AFTER the remote schema migration (20260305214555) to add total_assignments
 
+
 DROP FUNCTION IF EXISTS public.get_admin_applications() CASCADE;
 
 CREATE FUNCTION public.get_admin_applications()
@@ -203,7 +204,7 @@ CREATE FUNCTION public.get_admin_applications()
   id UUID,
   applicant_name TEXT,
   applicant_email TEXT,
-  opportunity_title TEXT,
+  project_title TEXT,
   opportunity_id INTEGER,
   submitted_at TIMESTAMP WITH TIME ZONE,
   status TEXT,
@@ -222,7 +223,6 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Only allow admins (not reviewers)
   IF NOT EXISTS (
     SELECT 1
     FROM public.profiles p_check
@@ -237,10 +237,11 @@ BEGIN
     a.id,
     COALESCE(
       NULLIF(TRIM(p.first_name || ' ' || p.last_name), ''),
+      a.contact_email,
       'Unknown Applicant'
     ) AS applicant_name,
     COALESCE(a.contact_email, 'No email') AS applicant_email,
-    COALESCE(o.title, 'Unknown Opportunity') AS opportunity_title,
+    COALESCE(o.title, 'Unknown Project') AS project_title,
     a.opportunity_id,
     a.created_at AS submitted_at,
     CASE
@@ -309,6 +310,10 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_admin_applications() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_admin_applications() TO service_role;
+
+COMMENT ON FUNCTION public.get_admin_applications() IS
+'Returns all applications for admin view. Uses project_title and falls back to contact_email when applicant profile name is missing.';
 
 -- ============================================
 -- Auto-update Application Status on Reviews

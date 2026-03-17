@@ -1,7 +1,8 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +11,7 @@ import { useFAQs, FAQ } from "@/hooks/useFAQs";
 
 const FAQPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: faqs, isLoading, error } = useFAQs();
+  const { data: faqs, isLoading, error, refetch } = useFAQs();
 
   // Group FAQs by sector
   const faqsectors = useMemo(() => {
@@ -109,12 +110,9 @@ const FAQPage = () => {
               <p className="text-destructive mb-4">
                 Failed to load FAQs. Please try again later.
               </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-              >
+              <Button onClick={() => refetch()} variant="default">
                 Retry
-              </button>
+              </Button>
             </CardContent>
           </Card>
         )}

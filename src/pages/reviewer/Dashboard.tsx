@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useReviewerApplications } from "@/hooks/useReviewerApplications";
@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDate, REVIEW_DEADLINE_TOOLTIP } from "@/lib/dateUtils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ReviewerDashboard = () => {
   const navigate = useNavigate();
@@ -282,9 +283,16 @@ const ReviewerDashboard = () => {
                             Submitted: {new Date(app.submittedAt).toLocaleDateString()}
                           </p>
                           {app.reviewDeadline && (
-                            <p className={`text-xs ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
-                              Deadline: {formatDate(new Date(app.reviewDeadline))}
-                            </p>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className={`text-xs cursor-help ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
+                                  Deadline: {formatDate(new Date(app.reviewDeadline))}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>{REVIEW_DEADLINE_TOOLTIP}</p>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                       </div>

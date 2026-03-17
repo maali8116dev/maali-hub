@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { InAppTip } from "@/components/onboarding/InAppTip";
 import { getApplicationStatusBadge } from "@/lib/statusBadges";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDate, REVIEW_DEADLINE_TOOLTIP } from "@/lib/dateUtils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 
 const ReviewerApplications = () => {
@@ -96,7 +97,10 @@ const ReviewerApplications = () => {
       {
         accessorKey: 'reviewDeadline',
         header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Review Deadline" />
+          <div className="flex items-center gap-1">
+            <SortableColumnHeader column={column} title="Review Deadline" />
+            <HelpTooltip content={REVIEW_DEADLINE_TOOLTIP} />
+          </div>
         ),
         cell: ({ row }) => {
           const app = row.original;
@@ -109,23 +113,30 @@ const ReviewerApplications = () => {
           const isApproaching = app.daysUntilDeadline !== null && app.daysUntilDeadline <= 2 && !isOverdue;
           
           return (
-            <div className="flex items-center gap-2">
-              <span className={`text-sm ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : ''}`}>
-                {formatDate(deadlineDate)}
-              </span>
-              {isOverdue && (
-                <Badge variant="destructive" className="text-xs">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  Overdue
-                </Badge>
-              )}
-              {isApproaching && !isOverdue && (
-                <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
-                </Badge>
-              )}
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 cursor-help w-fit">
+                  <span className={`text-sm ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : ''}`}>
+                    {formatDate(deadlineDate)}
+                  </span>
+                  {isOverdue && (
+                    <Badge variant="destructive" className="text-xs">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Overdue
+                    </Badge>
+                  )}
+                  {isApproaching && !isOverdue && (
+                    <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
+                    </Badge>
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>{REVIEW_DEADLINE_TOOLTIP}</p>
+              </TooltipContent>
+            </Tooltip>
           );
         },
         sortingFn: (rowA, rowB) => {

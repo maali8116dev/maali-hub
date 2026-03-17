@@ -27,6 +27,9 @@ type ReceiptLocale = "en" | "fr";
 
 interface ReceiptCopy {
   paymentReceipt: string;
+  thanksTitle: string;
+  hereIsReceipt: string;
+  total: string;
   billedTo: string;
   receiptDetails: string;
   dateLabel: string;
@@ -40,6 +43,7 @@ interface ReceiptCopy {
   applicationLabel: string;
   subtotal: string;
   totalPaid: string;
+  payments: string;
   notes: string;
   confirmationNote: string;
   keepReceiptNote: string;
@@ -48,40 +52,48 @@ interface ReceiptCopy {
 
 const RECEIPT_COPY: Record<ReceiptLocale, ReceiptCopy> = {
   en: {
-    paymentReceipt: "PAYMENT RECEIPT",
-    billedTo: "BILLED TO",
-    receiptDetails: "RECEIPT DETAILS",
+    paymentReceipt: "Payment Receipt",
+    thanksTitle: "Thanks for your payment",
+    hereIsReceipt: "Here's your receipt for",
+    total: "Total",
+    billedTo: "Billed to",
+    receiptDetails: "Receipt details",
     dateLabel: "Date",
     statusLabel: "Status",
-    paymentMethodPrefix: "Payment: Card ending in",
-    description: "DESCRIPTION",
-    qty: "QTY",
-    unitPrice: "UNIT PRICE",
-    amount: "AMOUNT",
+    paymentMethodPrefix: "Card ending in",
+    description: "Description",
+    qty: "Qty",
+    unitPrice: "Unit price",
+    amount: "Amount",
     applicationFee: "Application fee",
     applicationLabel: "Application",
     subtotal: "Subtotal",
-    totalPaid: "Total Paid",
+    totalPaid: "Total paid",
+    payments: "Payments",
     notes: "Notes",
     confirmationNote: "Your application fee has been confirmed and your application is under review.",
     keepReceiptNote: "Please keep this receipt for your records.",
     transactionIdLabel: "Transaction ID",
   },
   fr: {
-    paymentReceipt: "RECU DE PAIEMENT",
-    billedTo: "FACTURE A",
-    receiptDetails: "DETAILS DU RECU",
+    paymentReceipt: "Recu de paiement",
+    thanksTitle: "Merci pour votre paiement",
+    hereIsReceipt: "Voici votre recu pour",
+    total: "Total",
+    billedTo: "Facture a",
+    receiptDetails: "Details du recu",
     dateLabel: "Date",
     statusLabel: "Statut",
-    paymentMethodPrefix: "Paiement : Carte se terminant par",
-    description: "DESCRIPTION",
-    qty: "QTE",
-    unitPrice: "PRIX UNITAIRE",
-    amount: "MONTANT",
+    paymentMethodPrefix: "Carte se terminant par",
+    description: "Description",
+    qty: "Qte",
+    unitPrice: "Prix unitaire",
+    amount: "Montant",
     applicationFee: "Frais de candidature",
     applicationLabel: "Candidature",
     subtotal: "Sous-total",
     totalPaid: "Total paye",
+    payments: "Paiements",
     notes: "Remarques",
     confirmationNote: "Vos frais de candidature ont ete confirmes et votre dossier est en cours d'examen.",
     keepReceiptNote: "Veuillez conserver ce recu pour vos dossiers.",
@@ -168,6 +180,9 @@ function getDesignSystemColors() {
     
     // Accent - Vibrant Green
     accent: hslToRgb(140, 55, 45),
+    
+    // Destructive / Total (red like Uber receipt)
+    destructive: hslToRgb(0, 72, 51),
   };
 }
 
@@ -228,361 +243,181 @@ export async function generateReceiptPdf(data: ReceiptData): Promise<Uint8Array>
   const ds = getDesignSystemColors();
   
   // Convert to pdf-lib rgb format
+  const destructiveRgb = rgb(ds.destructive.r, ds.destructive.g, ds.destructive.b);
   const colors = {
     primary: rgb(ds.primary.r, ds.primary.g, ds.primary.b),
-    primaryLight: rgb(ds.primaryLight.r, ds.primaryLight.g, ds.primaryLight.b),
-    warning: rgb(ds.warning.r, ds.warning.g, ds.warning.b),
-    background: rgb(ds.background.r, ds.background.g, ds.background.b),
     foreground: rgb(ds.foreground.r, ds.foreground.g, ds.foreground.b),
-    card: rgb(ds.card.r, ds.card.g, ds.card.b),
-    muted: rgb(ds.muted.r, ds.muted.g, ds.muted.b),
     mutedForeground: rgb(ds.mutedForeground.r, ds.mutedForeground.g, ds.mutedForeground.b),
     border: rgb(ds.border.r, ds.border.g, ds.border.b),
     success: rgb(ds.success.r, ds.success.g, ds.success.b),
-    white: rgb(1, 1, 1),
   };
 
-  // Header band with primary color (Terra Cotta)
-  const headerHeight = 140;
-  
-  page.drawRectangle({
-    x: 0,
-    y: pageHeight - headerHeight,
-    width: pageWidth,
-    height: headerHeight,
-    color: colors.primary,
-  });
+  const tableWidth = right - left;
+  const unitPrice = `${data.currency} ${data.amount}`;
+  const lineItemTitle = data.projectTitle && data.projectTitle !== "N/A"
+    ? `${copy.applicationFee} - ${data.projectTitle}`
+    : copy.applicationFee;
 
-  // Accent stripe at top (Golden Orange warning color)
-  page.drawRectangle({
-    x: 0,
-    y: pageHeight - headerHeight,
-    width: pageWidth,
-    height: 8,
-    color: colors.warning,
-  });
+  let y = pageHeight - 48;
 
-  // Logo (optional from RECEIPT_LOGO_URL)
+  // ----- Header: logo left, date right (minimal, no band) -----
   const logo = await tryEmbedLogo(pdfDoc);
   if (logo) {
-    const maxLogoWidth = 120;
-    const scale = Math.min(maxLogoWidth / logo.width, 40 / logo.height);
+    const maxLogoW = 100;
+    const scale = Math.min(maxLogoW / logo.width, 28 / logo.height);
     page.drawImage(logo, {
       x: left,
-      y: pageHeight - 100,
+      y: y - logo.height * scale,
       width: logo.width * scale,
       height: logo.height * scale,
     });
   } else {
-    page.drawText("MAALI", {
+    page.drawText("Maali", {
       x: left,
-      y: pageHeight - 90,
-      size: 20,
+      y: y - 14,
+      size: 18,
       font: boldFont,
-      color: colors.white,
+      color: colors.foreground,
     });
   }
+  page.drawText(data.paymentDate, {
+    x: right - font.widthOfTextAtSize(data.paymentDate, 10),
+    y: y - 12,
+    size: 10,
+    font,
+    color: colors.mutedForeground,
+  });
+  y -= 44;
 
-  page.drawText(copy.paymentReceipt, {
+  // ----- Personalized thanks + intro -----
+  const thanksText = `${copy.thanksTitle}, ${data.userName || "there"}`;
+  page.drawText(thanksText, {
     x: left,
-    y: pageHeight - 115,
-    size: 11,
-    font,
-    color: colors.white,
-  });
-
-  page.drawText(data.invoiceNumber, {
-    x: right - boldFont.widthOfTextAtSize(data.invoiceNumber, 13),
-    y: pageHeight - 88,
-    size: 13,
+    y,
+    size: 16,
     font: boldFont,
-    color: colors.white,
-  });
-
-  let y = pageHeight - 170;
-
-  // Meta blocks with card styling (matching shadcn card component)
-  const cardPadding = 16; // 16pt = 4 * 4pt (Tailwind spacing)
-  // Adjust card height based on whether we have billing email and payment method
-  const hasExtraInfo = data.billingEmail || data.paymentMethodLast4;
-  const cardHeight = hasExtraInfo ? 100 : 80;
-  const cardWidth = 260;
-  
-  // Left card - Billed To
-  page.drawRectangle({
-    x: left,
-    y: y - cardHeight,
-    width: cardWidth,
-    height: cardHeight,
-    color: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-  });
-
-  // Right card - Receipt Details
-  page.drawRectangle({
-    x: right - cardWidth,
-    y: y - cardHeight,
-    width: cardWidth,
-    height: cardHeight,
-    color: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-  });
-
-  // Billed To section
-  page.drawText(copy.billedTo, { 
-    x: left + cardPadding, 
-    y: y - 20, 
-    size: 9, 
-    font: boldFont, 
-    color: colors.mutedForeground 
-  });
-  page.drawText(data.userName || "Applicant", { 
-    x: left + cardPadding, 
-    y: y - 38, 
-    size: 12, 
-    font: boldFont, 
-    color: colors.foreground 
-  });
-
-  // Track y position for application ID
-  let applicationIdY = y - 56;
-  
-  // Add billing email if available
-  if (data.billingEmail) {
-    page.drawText(data.billingEmail, { 
-      x: left + cardPadding, 
-      y: y - 56, 
-      size: 9, 
-      font, 
-      color: colors.mutedForeground 
-    });
-    applicationIdY = y - 74; // Adjust for email
-  }
-
-  if (data.applicationId) {
-    page.drawText(`${copy.applicationLabel}: ${data.applicationId}`, { 
-      x: left + cardPadding, 
-      y: applicationIdY, 
-      size: 9, 
-      font, 
-      color: colors.mutedForeground 
-    });
-  }
-
-  // Receipt Details section
-  page.drawText(copy.receiptDetails, { 
-    x: right - cardWidth + cardPadding, 
-    y: y - 20, 
-    size: 9, 
-    font: boldFont, 
-    color: colors.mutedForeground 
-  });
-  page.drawText(`${copy.dateLabel}: ${data.paymentDate}`, { 
-    x: right - cardWidth + cardPadding, 
-    y: y - 38, 
-    size: 10, 
-    font, 
-    color: colors.foreground 
-  });
-  page.drawText(`${copy.statusLabel}: ${data.statusLabel}`, { 
-    x: right - cardWidth + cardPadding, 
-    y: y - 56, 
-    size: 10, 
-    font, 
-    color: colors.success 
-  });
-
-  // Add payment method if available
-  if (data.paymentMethodLast4) {
-    page.drawText(`${copy.paymentMethodPrefix} ${data.paymentMethodLast4}`, { 
-      x: right - cardWidth + cardPadding, 
-      y: y - 74, 
-      size: 9, 
-      font, 
-      color: colors.mutedForeground 
-    });
-  }
-
-  y -= cardHeight + 24; // Add spacing between cards and table
-
-  // Table header with primary color
-  const tableX = left;
-  const tableWidth = right - left;
-  const rowHeight = 32;
-
-  page.drawRectangle({
-    x: tableX,
-    y: y - rowHeight,
-    width: tableWidth,
-    height: rowHeight,
-    color: colors.primary,
-  });
-
-  const colDescription = tableX + cardPadding;
-  const colQty = tableX + tableWidth - 200;
-  const colUnit = tableX + tableWidth - 140;
-  const colAmount = tableX + tableWidth - cardPadding;
-
-  page.drawText(copy.description, { 
-    x: colDescription, 
-    y: y - 20, 
-    size: 9, 
-    font: boldFont, 
-    color: colors.white 
-  });
-  page.drawText(copy.qty, { 
-    x: colQty, 
-    y: y - 20, 
-    size: 9, 
-    font: boldFont, 
-    color: colors.white 
-  });
-  page.drawText(copy.unitPrice, { 
-    x: colUnit, 
-    y: y - 20, 
-    size: 9, 
-    font: boldFont, 
-    color: colors.white 
-  });
-  page.drawText(copy.amount, {
-    x: colAmount - boldFont.widthOfTextAtSize(copy.amount, 9),
-    y: y - 20,
-    size: 9,
-    font: boldFont,
-    color: colors.white,
-  });
-
-  y -= rowHeight;
-
-  // Table body row with card background
-  page.drawRectangle({
-    x: tableX,
-    y: y - rowHeight,
-    width: tableWidth,
-    height: rowHeight,
-    color: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-  });
-
-  const lineItemTitle = data.projectTitle && data.projectTitle !== "N/A"
-    ? `${copy.applicationFee} - ${data.projectTitle}`
-    : copy.applicationFee;
-  const unitPrice = `${data.currency} ${data.amount}`;
-
-  page.drawText(lineItemTitle, {
-    x: colDescription,
-    y: y - 20,
-    size: 10,
-    font,
-    color: colors.foreground,
-    maxWidth: colQty - colDescription - 8,
-  });
-
-  page.drawText("1", { 
-    x: colQty, 
-    y: y - 20, 
-    size: 10, 
-    font, 
-    color: colors.foreground 
-  });
-  page.drawText(unitPrice, { 
-    x: colUnit, 
-    y: y - 20, 
-    size: 10, 
-    font, 
-    color: colors.foreground 
-  });
-  page.drawText(unitPrice, {
-    x: colAmount - font.widthOfTextAtSize(unitPrice, 10),
-    y: y - 20,
-    size: 10,
-    font,
     color: colors.foreground,
   });
-
-  y -= rowHeight + 20;
-
-  // Totals box with muted background (matching Tailwind muted color)
-  const totalsWidth = 220;
-  const totalsX = right - totalsWidth;
-
-  page.drawRectangle({
-    x: totalsX,
-    y: y - 70,
-    width: totalsWidth,
-    height: 70,
-    color: colors.muted,
-    borderColor: colors.border,
-    borderWidth: 1,
-  });
-
-  page.drawText(copy.subtotal, { 
-    x: totalsX + cardPadding, 
-    y: y - 24, 
-    size: 10, 
-    font, 
-    color: colors.mutedForeground 
-  });
-  page.drawText(unitPrice, {
-    x: totalsX + totalsWidth - cardPadding - font.widthOfTextAtSize(unitPrice, 10),
-    y: y - 24,
-    size: 10,
-    font,
-    color: colors.foreground,
-  });
-
-  page.drawText(copy.totalPaid, { 
-    x: totalsX + cardPadding, 
-    y: y - 48, 
-    size: 11, 
-    font: boldFont, 
-    color: colors.foreground 
-  });
-  page.drawText(unitPrice, {
-    x: totalsX + totalsWidth - cardPadding - boldFont.widthOfTextAtSize(unitPrice, 11),
-    y: y - 48,
-    size: 11,
-    font: boldFont,
-    color: colors.primary,
-  });
-
-  y -= 90;
-
-  // Notes section
-  page.drawText(copy.notes, { 
-    x: left, 
-    y, 
-    size: 11, 
-    font: boldFont, 
-    color: colors.foreground 
-  });
-  y -= 18;
-
-  page.drawText(
-    copy.confirmationNote,
-    { 
-      x: left, 
-      y, 
-      size: 10, 
-      font, 
-      color: colors.mutedForeground 
-    }
-  );
-
-  y -= 16;
-  page.drawText(copy.keepReceiptNote, {
+  y -= 20;
+  const introText = data.projectTitle && data.projectTitle !== "N/A"
+    ? `${copy.hereIsReceipt} ${data.projectTitle}.`
+    : `${copy.hereIsReceipt} your application.`;
+  page.drawText(introText, {
     x: left,
     y,
     size: 10,
     font,
     color: colors.mutedForeground,
   });
+  y -= 28;
 
+  // ----- Total (bold left, amount right in red) -----
+  page.drawText(copy.total, {
+    x: left,
+    y,
+    size: 12,
+    font: boldFont,
+    color: colors.foreground,
+  });
+  page.drawText(unitPrice, {
+    x: right - boldFont.widthOfTextAtSize(unitPrice, 12),
+    y,
+    size: 12,
+    font: boldFont,
+    color: destructiveRgb,
+  });
+  y -= 8;
+  page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 0.5, color: colors.border });
+  y -= 20;
+
+  // ----- Itemized: 1 Application fee - Title / amount -----
+  page.drawText(`1 ${lineItemTitle}`, {
+    x: left,
+    y,
+    size: 10,
+    font,
+    color: colors.foreground,
+    maxWidth: tableWidth - 80,
+  });
+  page.drawText(unitPrice, {
+    x: right - font.widthOfTextAtSize(unitPrice, 10),
+    y,
+    size: 10,
+    font,
+    color: colors.foreground,
+  });
+  y -= 18;
+  page.drawText(copy.subtotal, { x: left, y, size: 10, font, color: colors.mutedForeground });
+  page.drawText(unitPrice, {
+    x: right - font.widthOfTextAtSize(unitPrice, 10),
+    y,
+    size: 10,
+    font,
+    color: colors.foreground,
+  });
+  y -= 10;
+  page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 0.5, color: colors.border });
+  y -= 24;
+
+  // ----- Payments section -----
+  page.drawText(copy.payments, {
+    x: left,
+    y,
+    size: 11,
+    font: boldFont,
+    color: colors.foreground,
+  });
+  y -= 18;
+  const cardLine = data.paymentMethodLast4
+    ? `${copy.paymentMethodPrefix} ${data.paymentMethodLast4}`
+    : "Payment";
+  page.drawText(cardLine, { x: left, y, size: 10, font, color: colors.foreground });
+  page.drawText(data.paymentDate, {
+    x: right - font.widthOfTextAtSize(data.paymentDate, 9),
+    y,
+    size: 9,
+    font,
+    color: colors.mutedForeground,
+  });
+  y -= 14;
+  page.drawText(data.statusLabel, { x: left, y, size: 9, font, color: colors.success });
+  page.drawText(unitPrice, {
+    x: right - font.widthOfTextAtSize(unitPrice, 10),
+    y,
+    size: 10,
+    font,
+    color: colors.foreground,
+  });
+  y -= 14;
+  page.drawLine({ start: { x: left, y }, end: { x: right, y }, thickness: 0.5, color: colors.border });
+  y -= 24;
+
+  // ----- Order / details footer -----
+  page.drawText(
+    data.projectTitle && data.projectTitle !== "N/A"
+      ? `Application fee for ${data.projectTitle}`
+      : "Application fee",
+    { x: left, y, size: 10, font, color: colors.mutedForeground }
+  );
+  y -= 16;
+  page.drawText(copy.confirmationNote, {
+    x: left,
+    y,
+    size: 9,
+    font,
+    color: colors.mutedForeground,
+    maxWidth: tableWidth,
+  });
+  y -= 14;
+  page.drawText(copy.keepReceiptNote, {
+    x: left,
+    y,
+    size: 9,
+    font,
+    color: colors.mutedForeground,
+  });
   if (data.transactionId) {
-    y -= 20;
+    y -= 16;
     page.drawText(`${copy.transactionIdLabel}: ${data.transactionId}`, {
       x: left,
       y,
@@ -592,25 +427,23 @@ export async function generateReceiptPdf(data: ReceiptData): Promise<Uint8Array>
     });
   }
 
-  // Footer with border (matching Tailwind border color)
+  // Footer line + copyright
   page.drawLine({
-    start: { x: left, y: 80 },
-    end: { x: right, y: 80 },
+    start: { x: left, y: 72 },
+    end: { x: right, y: 72 },
     thickness: 1,
     color: colors.border,
   });
-
-  page.drawText(`Copyright ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.`, {
+  page.drawText(`© ${new Date().getFullYear()} Maali Opportunity Hub. All rights reserved.`, {
     x: left,
-    y: 64,
+    y: 56,
     size: 9,
     font,
     color: colors.mutedForeground,
   });
-
   page.drawText("support@maali.africa", {
     x: right - font.widthOfTextAtSize("support@maali.africa", 9),
-    y: 64,
+    y: 56,
     size: 9,
     font,
     color: colors.mutedForeground,

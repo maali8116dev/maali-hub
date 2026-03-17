@@ -1,4 +1,8 @@
-﻿import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns";
+import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns";
+
+/** Tooltip text for review deadline (reviewer applications/dashboard). */
+export const REVIEW_DEADLINE_TOOLTIP =
+  "Complete your review by this date. It's set to the opportunity deadline + 7 days (or 7 days from assignment if no opportunity deadline).";
 
 export type DateFormat = "short" | "long" | "relative" | "datetime" | "time";
 

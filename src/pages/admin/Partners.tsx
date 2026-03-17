@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, ExternalLink, User } from "lucide-react";
@@ -48,7 +48,6 @@ const AdminPartners = () => {
       const { data, error } = await supabase
         .from("partners")
         .select("*")
-        .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) throw error;

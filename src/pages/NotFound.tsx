@@ -1,4 +1,4 @@
-﻿import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,31 +77,30 @@ const NotFound = () => {
                   You might be looking for:
                 </p>
                 <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <a
-                    href="/opportunities"
+                  <Link
+                    to="/opportunities"
                     className="text-primary hover:underline transition-colors"
                   >
                     Projects
-                  </a>
-                  <a
-                    href="/dashboard"
+                  </Link>
+                  <Link
+                    to="/dashboard"
                     className="text-primary hover:underline transition-colors"
                   >
                     Dashboard
-                  </a>
-                  <a
-                    href="/about"
+                  </Link>
+                  <Link
+                    to="/about"
                     className="text-primary hover:underline transition-colors"
                   >
                     About
-                  </a>
-                  <a
-                    href="/contact"
+                  </Link>
+                  <Link
+                    to="/contact"
                     className="text-primary hover:underline transition-colors"
                   >
                     Contact
-                  </a>
-                 
+                  </Link>
                 </div>
               </div>
             </CardContent>

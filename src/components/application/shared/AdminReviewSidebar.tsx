@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import {
@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Clock,
   Star,
+  X,
 } from "lucide-react";
 import type { ApplicationAssignment, ReviewScore, ReviewAggregation } from "@/hooks/useReviewerAssignment";
 
@@ -49,9 +50,9 @@ const AdminReviewSidebar = ({
   applicationId,
 }: AdminReviewSidebarProps) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isManageOpen, setIsManageOpen] = useState(false);
-  const [selectedReviewer1, setSelectedReviewer1] = useState<string>("");
-  const [selectedReviewer2, setSelectedReviewer2] = useState<string>("");
+  const [selectedReviewerIds, setSelectedReviewerIds] = useState<string[]>([]);
 
   const { data: eligibleReviewers = [], isLoading: eligibleLoading, refetch: refetchEligible } = useQuery({
     queryKey: ["eligible-reviewers-for-application", applicationId],
@@ -74,19 +75,22 @@ const AdminReviewSidebar = ({
   const setReviewersMutation = useMutation({
     mutationFn: async () => {
       if (!applicationId) throw new Error("Missing application id");
-      if (!selectedReviewer1 || !selectedReviewer2) {
+      if (selectedReviewerIds.length < 2) {
         throw new Error("Select 2 reviewers");
       }
-      if (selectedReviewer1 === selectedReviewer2) {
-        throw new Error("Reviewers must be different");
-      }
+      const unique = [...new Set(selectedReviewerIds)];
+      if (unique.length < 2) throw new Error("Reviewers must be different");
       const { error } = await supabase.rpc("admin_set_application_reviewers" as any, {
         p_application_id: applicationId,
-        p_reviewer_ids: [selectedReviewer1, selectedReviewer2],
+        p_reviewer_ids: selectedReviewerIds.slice(0, 2),
       });
       if (error) throw error;
     },
     onSuccess: async () => {
+      if (applicationId) {
+        queryClient.invalidateQueries({ queryKey: ["application-assignments", applicationId] });
+        queryClient.invalidateQueries({ queryKey: ["review-aggregation", applicationId] });
+      }
       toast({
         title: "Reviewers updated",
         description: "Assignments were updated successfully.",
@@ -104,11 +108,25 @@ const AdminReviewSidebar = ({
 
   const openManage = async () => {
     setIsManageOpen(true);
-    // prefill selections from existing assignments (if any)
-    setSelectedReviewer1(assignments[0]?.reviewer_id || "");
-    setSelectedReviewer2(assignments[1]?.reviewer_id || "");
+    setSelectedReviewerIds(assignments.slice(0, 2).map((a) => a.reviewer_id).filter(Boolean));
     await refetchEligible();
   };
+
+  const addReviewer = (reviewerId: string) => {
+    if (selectedReviewerIds.includes(reviewerId) || selectedReviewerIds.length >= 2) return;
+    setSelectedReviewerIds((prev) => [...prev, reviewerId]);
+  };
+  const removeReviewer = (reviewerId: string) => {
+    setSelectedReviewerIds((prev) => prev.filter((id) => id !== reviewerId));
+  };
+  const reviewerName = (id: string) => {
+    const r = eligibleReviewers.find((x) => x.reviewer_id === id);
+    if (r) return `${r.first_name} ${r.last_name}`.trim() || id;
+    const a = assignments.find((x) => x.reviewer_id === id);
+    if (a?.reviewer) return `${a.reviewer.first_name} ${a.reviewer.last_name}`.trim() || id;
+    return id;
+  };
+  const availableToAdd = eligibleReviewers.filter((r) => !selectedReviewerIds.includes(r.reviewer_id));
 
   return (
     <>
@@ -347,49 +365,46 @@ const AdminReviewSidebar = ({
           <DialogHeader>
             <DialogTitle>Assign reviewers</DialogTitle>
             <DialogDescription>
-              Select exactly 2 eligible reviewers for this application.
+              Select exactly 2 eligible reviewers. Add from the dropdown and remove with the × on each pill.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Reviewer 1</label>
-              <Select
-                value={selectedReviewer1 || undefined}
-                onValueChange={(v) => setSelectedReviewer1(v ?? "")}
-                disabled={eligibleLoading || setReviewersMutation.isPending}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select reviewer" />
-                </SelectTrigger>
-                <SelectContent className="z-[100]" position="popper">
-                  {eligibleReviewers.map((r) => (
-                    <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
-                      {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Reviewer 2</label>
-              <Select
-                value={selectedReviewer2 || undefined}
-                onValueChange={(v) => setSelectedReviewer2(v ?? "")}
-                disabled={eligibleLoading || setReviewersMutation.isPending}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select reviewer" />
-                </SelectTrigger>
-                <SelectContent className="z-[100]" position="popper">
-                  {eligibleReviewers.map((r) => (
-                    <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
-                      {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Reviewers</label>
+              <div className="flex flex-wrap gap-2 min-h-9 p-2 border rounded-md bg-muted/30">
+                {selectedReviewerIds.map((id) => (
+                  <Badge key={id} variant="secondary" className="flex items-center gap-1">
+                    {reviewerName(id)}
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => removeReviewer(id)}
+                      aria-label={`Remove ${reviewerName(id)}`}
+                    />
+                  </Badge>
+                ))}
+                {selectedReviewerIds.length < 2 && (
+                  <Select
+                    value=""
+                    onValueChange={(v) => v && addReviewer(v)}
+                    disabled={eligibleLoading || setReviewersMutation.isPending}
+                  >
+                    <SelectTrigger className="w-[180px] border-0 bg-transparent shadow-none focus:ring-0 h-8">
+                      <SelectValue placeholder="Add reviewer..." />
+                    </SelectTrigger>
+                    <SelectContent className="z-[100]" position="popper">
+                      {availableToAdd.map((r) => (
+                        <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
+                          {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                        </SelectItem>
+                      ))}
+                      {availableToAdd.length === 0 && (
+                        <div className="py-2 px-2 text-sm text-muted-foreground">No more eligible reviewers</div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
@@ -402,7 +417,7 @@ const AdminReviewSidebar = ({
               </Button>
               <Button
                 onClick={() => setReviewersMutation.mutate()}
-                disabled={setReviewersMutation.isPending}
+                disabled={setReviewersMutation.isPending || selectedReviewerIds.length !== 2}
               >
                 {setReviewersMutation.isPending ? "Saving..." : "Save"}
               </Button>

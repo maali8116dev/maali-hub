@@ -47,13 +47,12 @@ const Opportunities = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { user } = useAuth();
 
   // Fetch opportunities with filters
-  const { data, isLoading, error } = useOpportunities({
+  const { data, isLoading, error, refetch } = useOpportunities({
     tags: selectedsector
       ? [selectedsector.toLowerCase().replace(/\s+/g, "-")]
       : selectedTag
@@ -132,7 +131,7 @@ const Opportunities = () => {
     return true;
   });
 
-  const hasActiveFilters = !!(selectedsector || selectedStatus || selectedLocation || selectedPartner || selectedTag || selectedYear);
+  const hasActiveFilters = !!(selectedsector || selectedStatus || selectedLocation || selectedPartner || selectedTag);
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -141,7 +140,6 @@ const Opportunities = () => {
     setSelectedLocation(null);
     setSelectedPartner(null);
     setSelectedTag(null);
-    setSelectedYear(null);
     setCurrentPage(1);
   };
 
@@ -315,33 +313,6 @@ const Opportunities = () => {
                   </Select>
                 </div>
 
-                {/* Year Filter */}
-                <div className="w-full md:w-auto">
-                  <Label htmlFor="year-filter" className="mb-2 block">Year</Label>
-                  <Select
-                    value={selectedYear || "all"}
-                    onValueChange={(value) => {
-                      setSelectedYear(value === "all" ? null : value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger id="year-filter" className="w-full md:w-[120px]">
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All years</SelectItem>
-                      {(() => {
-                        const currentYear = new Date().getFullYear();
-                        const years: number[] = [];
-                        for (let y = currentYear + 1; y >= currentYear - 6; y--) years.push(y);
-                        return years.map((y) => (
-                          <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                        ));
-                      })()}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Clear Filters */}
                 {hasActiveFilters && (
                   <Button variant="outline" onClick={handleClearFilters} className="w-full md:w-auto">
@@ -364,7 +335,7 @@ const Opportunities = () => {
                 <p className="text-destructive mb-4">
                   {error instanceof Error ? error.message : "Failed to load opportunities"}
                 </p>
-                <Button onClick={() => window.location.reload()}>Retry</Button>
+                <Button onClick={() => refetch()}>Retry</Button>
               </div>
             </CardContent>
           </Card>

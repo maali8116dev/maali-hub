@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -183,7 +183,7 @@ const AdminApplications = () => {
               </p>
               <Button
                 variant="outline"
-                onClick={() => window.location.reload()}
+                onClick={() => refetch()}
                 className="mt-4"
               >
                 Retry

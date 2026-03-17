@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useAuth } from "@/hooks/useAuth";
 import { usePartnerOrg, useUpdatePartnerOrg } from "@/hooks/usePartnerOrg";
+import { useSectors } from "@/hooks/useSectors";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,8 +21,9 @@ const PartnerSettings = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
-  const [sector, setSector] = useState<string>("Funding");
+  const [sector, setSector] = useState<string>("");
 
+  const { data: sectors = [] } = useSectors();
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "partner-logos",
     folder: `partner-logos/${user?.id || ""}`,
@@ -34,7 +36,7 @@ const PartnerSettings = () => {
       setDescription(partnerOrg.description || "");
       setWebsiteUrl(partnerOrg.website_url || "");
       setLogoUrl(partnerOrg.logo_url || "");
-      setSector(partnerOrg.sector || "Funding");
+      setSector(partnerOrg.sector || "");
     }
   }, [partnerOrg]);
 
@@ -97,17 +99,18 @@ const PartnerSettings = () => {
               <div className="space-y-2">
                 <Label>Organization Logo</Label>
                 <ImageUpload
-                  value={logoUrl}
+                  value={logoUrl || undefined}
+                  onChange={(url) => setLogoUrl(url || "")}
                   onUpload={uploadImage}
-                  onRemove={async () => {
-                    if (logoUrl) {
-                      await deleteImage(logoUrl);
-                    }
-                    setLogoUrl("");
+                  onDelete={async (url) => {
+                    const ok = await deleteImage(url);
+                    if (ok) setLogoUrl("");
+                    return ok;
                   }}
                   isUploading={isUploading}
                   uploadProgress={uploadProgress}
                   placeholder="Upload Logo"
+                  variant="avatar"
                 />
               </div>
 
@@ -149,12 +152,11 @@ const PartnerSettings = () => {
                     <SelectValue placeholder="Select sector" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Funding">Funding</SelectItem>
-                    <SelectItem value="Support">Support</SelectItem>
-                    <SelectItem value="Impact">Impact</SelectItem>
-                    <SelectItem value="Regional">Regional</SelectItem>
-                    <SelectItem value="Technology">Technology</SelectItem>
-                    <SelectItem value="Strategic">Strategic</SelectItem>
+                    {sectors.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -162,7 +164,7 @@ const PartnerSettings = () => {
               <div className="flex justify-end">
                 <Button
                   onClick={handleSave}
-                  disabled={updatePartner.isPending || !name.trim()}
+                  disabled={updatePartner.isPending || !name.trim() || !sector}
                 >
                   {updatePartner.isPending ? "Saving..." : "Save Changes"}
                 </Button>

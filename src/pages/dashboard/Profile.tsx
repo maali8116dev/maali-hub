@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { KycVerificationSection } from "@/components/profile/KycVerificationSect
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { data: profile, isLoading, error } = useProfile();
+  const { data: profile, isLoading, error, refetch } = useProfile();
   const updateProfile = useUpdateProfile();
   
   // Local form state
@@ -127,7 +127,7 @@ const Profile = () => {
             <p className="text-destructive mb-4">
               {error instanceof Error ? error.message : "Failed to load profile"}
             </p>
-            <Button onClick={() => window.location.reload()}>Retry</Button>
+            <Button onClick={() => refetch()}>Retry</Button>
           </div>
         </CardContent>
       </Card>

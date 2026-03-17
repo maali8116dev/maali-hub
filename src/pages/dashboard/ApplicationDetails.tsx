@@ -74,9 +74,10 @@ const ApplicationDetails = () => {
         .eq("user_id", app.user_id)
         .maybeSingle();
 
-      const applicantName = applicantProfile
-        ? `${applicantProfile.first_name || ""} ${applicantProfile.last_name || ""}`.trim() || "Unknown Applicant"
-        : "Unknown Applicant";
+      const profileName = applicantProfile
+        ? `${applicantProfile.first_name || ""} ${applicantProfile.last_name || ""}`.trim() || null
+        : null;
+      const applicantName = (app.full_legal_name && app.full_legal_name.trim()) || profileName || "Unknown Applicant";
 
       return {
         ...app,

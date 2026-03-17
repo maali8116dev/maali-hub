@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSectors } from "@/hooks/useSectors";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
@@ -64,7 +65,7 @@ const PartnerForm = () => {
       description: "",
       logo_url: "",
       website_url: "",
-      sector: "Funding",
+      sector: "",
       display_order: 0,
       featured: false,
       status: "active",
@@ -105,7 +106,7 @@ const PartnerForm = () => {
         setValue("logo_url", data.logo_url || "");
         setOldLogoUrl(data.logo_url);
         setValue("website_url", data.website_url || "");
-        setValue("sector", data.sector);
+        setValue("sector", (data as any).sector ?? (data as any).Sector ?? "");
         setValue("display_order", data.display_order ?? 0);
         setValue("featured", data.featured ?? false);
         setValue("status", data.status as PartnerFormValues["status"]);
@@ -181,8 +182,7 @@ const PartnerForm = () => {
   };
 
   const logoUrl = watch("logo_url");
-  // Partner sectors are fixed and defined in the database CHECK constraint
-  const partnersectors = ['Funding', 'Support', 'Impact', 'Regional', 'Technology', 'Strategic'];
+  const { data: sectors = [] } = useSectors();
 
   if (isFetching) {
     return (
@@ -317,30 +317,13 @@ const PartnerForm = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {partnersectors.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      {sectors.map((s) => (
+                        <SelectItem key={s.id} value={s.name}>
+                          {s.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="display_order">Display Order</Label>
-                  <Input
-                    id="display_order"
-                    type="number"
-                    {...register("display_order", { valueAsNumber: true })}
-                    min="0"
-                    className={errors.display_order ? "border-destructive" : ""}
-                  />
-                  {errors.display_order && (
-                    <p className="text-sm text-destructive mt-1">{errors.display_order.message}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Lower numbers appear first
-                  </p>
                 </div>
 
                 <div>

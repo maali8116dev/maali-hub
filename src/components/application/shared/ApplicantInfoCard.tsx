@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   User,
   Building2,
@@ -20,9 +20,6 @@ const ApplicantInfoCard = ({ application }: ApplicantInfoCardProps) => (
     </CardHeader>
     <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {application.applicantName && (
-          <InfoField icon={User} label="Applicant" value={application.applicantName} breakWords />
-        )}
         {application.applicant_type && (
           <InfoField icon={User} label="Applicant Type" value={application.applicant_type} />
         )}

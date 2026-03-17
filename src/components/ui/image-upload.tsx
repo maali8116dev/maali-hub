@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,7 +35,7 @@ export const ImageUpload = ({
 
   const handleFileSelect = async (file: File) => {
     const url = await onUpload(file);
-    if (url) {
+    if (url && typeof onChange === "function") {
       onChange(url);
     }
   };
@@ -71,10 +71,10 @@ export const ImageUpload = ({
   const handleRemove = async () => {
     if (value && onDelete) {
       const deleted = await onDelete(value);
-      if (deleted) {
+      if (deleted && typeof onChange === "function") {
         onChange(null);
       }
-    } else {
+    } else if (typeof onChange === "function") {
       onChange(null);
     }
   };

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -231,9 +231,13 @@ const AdminFinancial = () => {
                 </a>
               </Button>
             )}
-            {tx.receiptUrl && (
+            {(tx.invoicePdfUrl || tx.receiptUrl) && (
               <Button variant="outline" size="sm" asChild>
-                <a href={tx.receiptUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={tx.invoicePdfUrl || tx.receiptUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Receipt
                 </a>
