@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -98,8 +98,7 @@ export type Database = {
           file_type: string | null
           id: string
           is_library_document: boolean | null
-          opportunity_id: number | null
-          project_id: number | null
+          opportunity_id: number
           user_id: string | null
         }
         Insert: {
@@ -111,8 +110,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
-          opportunity_id?: number | null
-          project_id?: number | null
+          opportunity_id: number
           user_id?: string | null
         }
         Update: {
@@ -124,8 +122,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_library_document?: boolean | null
-          opportunity_id?: number | null
-          project_id?: number | null
+          opportunity_id?: number
           user_id?: string | null
         }
         Relationships: [
@@ -141,13 +138,6 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "application_documents_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -184,7 +174,6 @@ export type Database = {
           primary_sector_other: string | null
           primary_sectors: Json | null
           problem_statement: string | null
-          project_id: number
           project_summary: string | null
           project_title: string | null
           proposed_solution: string | null
@@ -234,7 +223,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_id: number
           project_summary?: string | null
           project_title?: string | null
           proposed_solution?: string | null
@@ -284,7 +272,6 @@ export type Database = {
           primary_sector_other?: string | null
           primary_sectors?: Json | null
           problem_statement?: string | null
-          project_id?: number
           project_summary?: string | null
           project_title?: string | null
           proposed_solution?: string | null
@@ -309,13 +296,6 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -386,7 +366,6 @@ export type Database = {
       blog_posts: {
         Row: {
           author: string
-          sector: string
           content: string
           created_at: string
           created_by: string | null
@@ -396,6 +375,7 @@ export type Database = {
           image_url: string
           published_at: string | null
           read_time: string
+          Sector: string
           status: string
           tags: string | null
           title: string
@@ -404,7 +384,6 @@ export type Database = {
         }
         Insert: {
           author: string
-          sector: string
           content: string
           created_at?: string
           created_by?: string | null
@@ -414,6 +393,7 @@ export type Database = {
           image_url: string
           published_at?: string | null
           read_time: string
+          Sector: string
           status?: string
           tags?: string | null
           title: string
@@ -422,7 +402,6 @@ export type Database = {
         }
         Update: {
           author?: string
-          sector?: string
           content?: string
           created_at?: string
           created_by?: string | null
@@ -432,41 +411,12 @@ export type Database = {
           image_url?: string
           published_at?: string | null
           read_time?: string
+          Sector?: string
           status?: string
           tags?: string | null
           title?: string
           updated_at?: string
           views?: number | null
-        }
-        Relationships: []
-      }
-      sectors: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: number
-          is_active: boolean | null
-          name: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          is_active?: boolean | null
-          name: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          is_active?: boolean | null
-          name?: string
-          slug?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -569,35 +519,35 @@ export type Database = {
       faqs: {
         Row: {
           answer: string
-          sector: string
           created_at: string
           created_by: string | null
           display_order: number | null
           id: number
           is_published: boolean | null
           question: string
+          Sector: string
           updated_at: string
         }
         Insert: {
           answer: string
-          sector: string
           created_at?: string
           created_by?: string | null
           display_order?: number | null
           id?: number
           is_published?: boolean | null
           question: string
+          Sector: string
           updated_at?: string
         }
         Update: {
           answer?: string
-          sector?: string
           created_at?: string
           created_by?: string | null
           display_order?: number | null
           id?: number
           is_published?: boolean | null
           question?: string
+          Sector?: string
           updated_at?: string
         }
         Relationships: []
@@ -746,11 +696,10 @@ export type Database = {
       opportunities: {
         Row: {
           application_fee: number | null
-          sector_id: number | null
           country: string | null
           created_at: string
           created_by: string | null
-          currency: string
+          currency: string | null
           current_applicants: number | null
           deadline: string
           description: string
@@ -760,17 +709,19 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           featured: boolean
-          funding_amount: string
+          funding_amount: string | null
           funding_type: Database["public"]["Enums"]["funding_type"] | null
           id: number
           image_url: string | null
           location: string
           max_applicants: number | null
-          opportunity_type: Database["public"]["Enums"]["opportunity_type"]
-          organization_name: string | null
+          opportunity_type:
+            | Database["public"]["Enums"]["opportunity_type"]
+            | null
           partner_id: number | null
           program_format: Database["public"]["Enums"]["program_format"] | null
           requirements: string | null
+          sector_id: number | null
           start_date: string | null
           status: string
           title: string
@@ -778,11 +729,10 @@ export type Database = {
         }
         Insert: {
           application_fee?: number | null
-          sector_id?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
-          currency?: string
+          currency?: string | null
           current_applicants?: number | null
           deadline: string
           description: string
@@ -792,17 +742,19 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           featured?: boolean
-          funding_amount: string
+          funding_amount?: string | null
           funding_type?: Database["public"]["Enums"]["funding_type"] | null
           id?: number
           image_url?: string | null
           location: string
           max_applicants?: number | null
-          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
-          organization_name?: string | null
+          opportunity_type?:
+            | Database["public"]["Enums"]["opportunity_type"]
+            | null
           partner_id?: number | null
           program_format?: Database["public"]["Enums"]["program_format"] | null
           requirements?: string | null
+          sector_id?: number | null
           start_date?: string | null
           status?: string
           title: string
@@ -810,11 +762,10 @@ export type Database = {
         }
         Update: {
           application_fee?: number | null
-          sector_id?: number | null
           country?: string | null
           created_at?: string
           created_by?: string | null
-          currency?: string
+          currency?: string | null
           current_applicants?: number | null
           deadline?: string
           description?: string
@@ -824,17 +775,19 @@ export type Database = {
             | Database["public"]["Enums"]["experience_level"]
             | null
           featured?: boolean
-          funding_amount?: string
+          funding_amount?: string | null
           funding_type?: Database["public"]["Enums"]["funding_type"] | null
           id?: number
           image_url?: string | null
           location?: string
           max_applicants?: number | null
-          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
-          organization_name?: string | null
+          opportunity_type?:
+            | Database["public"]["Enums"]["opportunity_type"]
+            | null
           partner_id?: number | null
           program_format?: Database["public"]["Enums"]["program_format"] | null
           requirements?: string | null
+          sector_id?: number | null
           start_date?: string | null
           status?: string
           title?: string
@@ -842,34 +795,69 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "opportunities_sector_id_fkey"
-            columns: ["sector_id"]
-            isOneToOne: false
-            referencedRelation: "sectors"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "opportunities_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "opportunities_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_documents: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          opportunity_id: number
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          opportunity_id: number
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          opportunity_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_documents_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
         ]
       }
       opportunity_tag_map: {
         Row: {
-          id: number
           opportunity_id: number
           tag_id: number
         }
         Insert: {
-          id?: number
           opportunity_id: number
           tag_id: number
         }
         Update: {
-          id?: number
           opportunity_id?: number
           tag_id?: number
         }
@@ -893,62 +881,29 @@ export type Database = {
       opportunity_tags: {
         Row: {
           created_at: string
+          description: string | null
           id: number
           name: string
           slug: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: number
           name: string
           slug: string
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: number
           name?: string
           slug?: string
         }
         Relationships: []
       }
-      partner_users: {
-        Row: {
-          created_at: string
-          id: string
-          joined_at: string
-          partner_id: number
-          role: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          joined_at?: string
-          partner_id: number
-          role?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          joined_at?: string
-          partner_id?: number
-          role?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "partner_users_partner_id_fkey"
-            columns: ["partner_id"]
-            isOneToOne: false
-            referencedRelation: "partners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       partners: {
         Row: {
-          sector: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -957,13 +912,13 @@ export type Database = {
           id: number
           logo_url: string | null
           name: string
+          sector: string
           status: string
           updated_at: string
           user_id: string | null
           website_url: string | null
         }
         Insert: {
-          sector: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -972,13 +927,13 @@ export type Database = {
           id?: number
           logo_url?: string | null
           name: string
+          sector: string
           status?: string
           updated_at?: string
           user_id?: string | null
           website_url?: string | null
         }
         Update: {
-          sector?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -987,6 +942,7 @@ export type Database = {
           id?: number
           logo_url?: string | null
           name?: string
+          sector?: string
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -1057,6 +1013,27 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          application_fee: number
+          created_at: string
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          application_fee?: number
+          created_at?: string
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          application_fee?: number
+          created_at?: string
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1109,80 +1086,6 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      projects: {
-        Row: {
-          application_fee: number | null
-          sector: string | null
-          sector_id: number | null
-          created_at: string
-          created_by: string | null
-          current_applicants: number | null
-          deadline: string
-          description: string
-          eligibility_criteria: string | null
-          featured: boolean
-          funding_amount: string
-          id: number
-          image_url: string | null
-          location: string
-          max_applicants: number | null
-          requirements: string | null
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          application_fee?: number | null
-          sector?: string | null
-          sector_id?: number | null
-          created_at?: string
-          created_by?: string | null
-          current_applicants?: number | null
-          deadline: string
-          description: string
-          eligibility_criteria?: string | null
-          featured?: boolean
-          funding_amount: string
-          id?: number
-          image_url?: string | null
-          location: string
-          max_applicants?: number | null
-          requirements?: string | null
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          application_fee?: number | null
-          sector?: string | null
-          sector_id?: number | null
-          created_at?: string
-          created_by?: string | null
-          current_applicants?: number | null
-          deadline?: string
-          description?: string
-          eligibility_criteria?: string | null
-          featured?: boolean
-          funding_amount?: string
-          id?: number
-          image_url?: string | null
-          location?: string
-          max_applicants?: number | null
-          requirements?: string | null
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_sector_id_fkey"
-            columns: ["sector_id"]
-            isOneToOne: false
-            referencedRelation: "sectors"
             referencedColumns: ["id"]
           },
         ]
@@ -1249,7 +1152,6 @@ export type Database = {
       }
       resources: {
         Row: {
-          sector: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -1262,11 +1164,11 @@ export type Database = {
           id: string
           is_featured: boolean | null
           is_published: boolean | null
+          Sector: string
           title: string
           updated_at: string
         }
         Insert: {
-          sector: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1279,11 +1181,11 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          Sector: string
           title: string
           updated_at?: string
         }
         Update: {
-          sector?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1296,6 +1198,7 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          Sector?: string
           title?: string
           updated_at?: string
         }
@@ -1368,35 +1271,6 @@ export type Database = {
           },
         ]
       }
-      reviewer_sectors: {
-        Row: {
-          sector_id: number | null
-          created_at: string
-          id: string
-          reviewer_id: string
-        }
-        Insert: {
-          sector_id?: number | null
-          created_at?: string
-          id?: string
-          reviewer_id: string
-        }
-        Update: {
-          sector_id?: number | null
-          created_at?: string
-          id?: string
-          reviewer_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviewer_sectors_sector_id_fkey"
-            columns: ["sector_id"]
-            isOneToOne: false
-            referencedRelation: "sectors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       reviewer_conflicts: {
         Row: {
           application_id: string
@@ -1425,6 +1299,35 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviewer_sectors: {
+        Row: {
+          created_at: string
+          id: string
+          reviewer_id: string
+          sector_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reviewer_id: string
+          sector_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reviewer_id?: string
+          sector_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviewer_sectors_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectors"
             referencedColumns: ["id"]
           },
         ]
@@ -1459,9 +1362,38 @@ export type Database = {
         }
         Relationships: []
       }
+      sectors: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       success_stories: {
         Row: {
-          sector: string
           company: string
           created_at: string
           created_by: string | null
@@ -1475,11 +1407,11 @@ export type Database = {
           impact_metrics: string | null
           location: string
           name: string
+          sector: string
           status: string
           updated_at: string
         }
         Insert: {
-          sector: string
           company: string
           created_at?: string
           created_by?: string | null
@@ -1493,11 +1425,11 @@ export type Database = {
           impact_metrics?: string | null
           location: string
           name: string
+          sector: string
           status?: string
           updated_at?: string
         }
         Update: {
-          sector?: string
           company?: string
           created_at?: string
           created_by?: string | null
@@ -1511,6 +1443,7 @@ export type Database = {
           impact_metrics?: string | null
           location?: string
           name?: string
+          sector?: string
           status?: string
           updated_at?: string
         }
@@ -1553,8 +1486,8 @@ export type Database = {
           invoice_pdf_url: string | null
           invoice_url: string | null
           metadata: Json | null
+          opportunity_id: number
           payment_method_id: string | null
-          project_id: number | null
           provider: string | null
           provider_payment_intent_id: string | null
           provider_transaction_id: string | null
@@ -1580,8 +1513,8 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
+          opportunity_id: number
           payment_method_id?: string | null
-          project_id?: number | null
           provider?: string | null
           provider_payment_intent_id?: string | null
           provider_transaction_id?: string | null
@@ -1607,8 +1540,8 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
+          opportunity_id?: number
           payment_method_id?: string | null
-          project_id?: number | null
           provider?: string | null
           provider_payment_intent_id?: string | null
           provider_transaction_id?: string | null
@@ -1632,13 +1565,6 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1665,14 +1591,24 @@ export type Database = {
         Args: { p_application_id: string; p_reviewer_ids: string[] }
         Returns: undefined
       }
-      assign_reviewer_sector: {
-        Args: { p_sector_name: string; p_reviewer_id: string }
+      assign_reviewer_category: {
+        Args: { p_category_name: string; p_reviewer_id: string }
         Returns: {
-          sector_id: number
-          sector_name: string
+          category_id: number
+          category_name: string
           created_at: string
           id: string
           reviewer_id: string
+        }[]
+      }
+      assign_reviewer_sector: {
+        Args: { p_reviewer_id: string; p_sector_name: string }
+        Returns: {
+          created_at: string
+          id: string
+          reviewer_id: string
+          sector_id: number
+          sector_name: string
         }[]
       }
       assign_reviewers_to_application: {
@@ -1684,7 +1620,7 @@ export type Database = {
       }
       calculate_review_score:
         | { Args: { p_scores: Json }; Returns: number }
-        | { Args: { p_sector: string; p_scores: Json }; Returns: number }
+        | { Args: { p_scores: Json; p_Sector: string }; Returns: number }
         | {
             Args: { p_rubric_version_id?: string; p_scores: Json }
             Returns: number
@@ -1698,6 +1634,30 @@ export type Database = {
           p_window_minutes: number
         }
         Returns: Json
+      }
+      claim_email_batch: {
+        Args: { p_limit: number }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          max_attempts: number
+          next_attempt_at: string
+          payload: Json
+          sent_at: string | null
+          status: string
+          to_email: string
+          type: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "email_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       cleanup_old_pending_payment_applications: {
         Args: { p_days_old?: number }
@@ -1722,11 +1682,12 @@ export type Database = {
         Args: { p_notes?: string; p_rubric: Json }
         Returns: string
       }
-      generate_sector_slug: {
-        Args: { sector_name: string }
+      generate_category_slug: {
+        Args: { category_name: string }
         Returns: string
       }
       generate_invoice_number: { Args: never; Returns: string }
+      generate_sector_slug: { Args: { sector_name: string }; Returns: string }
       get_active_rubric_version: { Args: never; Returns: string }
       get_admin_applications: {
         Args: never
@@ -1736,7 +1697,7 @@ export type Database = {
           contact_email: string
           contact_phone: string
           id: string
-          project_id: number
+          opportunity_id: number
           project_title: string
           review_deadline: string
           review_notes: string
@@ -1765,11 +1726,11 @@ export type Database = {
         Args: never
         Returns: {
           average_score: number
-          sectors: Json
           email: string
           first_name: string
           last_name: string
           reviewer_id: string
+          sectors: Json
           total_reviews: number
           workload: number
         }[]
@@ -1812,7 +1773,7 @@ export type Database = {
         Returns: {
           application: Json
           documents: Json
-          project: Json
+          opportunity: Json
         }[]
       }
       get_application_review_scores_with_reviewers: {
@@ -1835,11 +1796,11 @@ export type Database = {
         }[]
       }
       get_application_submission_preview: {
-        Args: { p_project_id: number; p_user_id: string }
+        Args: { p_opportunity_id: number; p_user_id: string }
         Returns: {
           can_submit: boolean
           existing_application: Json
-          project: Json
+          opportunity: Json
           validation_error: string
         }[]
       }
@@ -1884,6 +1845,30 @@ export type Database = {
         }
         Returns: Json
       }
+      get_opportunity_applications_ranked: {
+        Args: { p_opportunity_id: number }
+        Returns: {
+          applicant_email: string
+          applicant_name: string
+          application_id: string
+          average_score: number
+          rank_position: number
+          recommendations: Json
+          reviewer_scores: Json
+          score_variance: number
+          status: string
+          submitted_at: string
+          total_reviews: number
+        }[]
+      }
+      get_opportunity_details_with_user_status: {
+        Args: { p_opportunity_id: number; p_user_id?: string }
+        Returns: {
+          draft_application: Json
+          existing_application: Json
+          opportunity: Json
+        }[]
+      }
       get_partner_opportunity_applications_ranked: {
         Args: { p_opportunity_id: number }
         Returns: {
@@ -1900,25 +1885,9 @@ export type Database = {
           total_reviews: number
         }[]
       }
-      get_project_applications_ranked: {
-        Args: { p_project_id: number }
-        Returns: {
-          applicant_email: string
-          applicant_name: string
-          application_id: string
-          average_score: number
-          rank_position: number
-          recommendations: Json
-          reviewer_scores: Json
-          score_variance: number
-          status: string
-          submitted_at: string
-          total_reviews: number
-        }[]
-      }
       get_projects_with_filters: {
         Args: {
-          p_sector?: string
+          p_category?: string
           p_location?: string
           p_page?: number
           p_page_size?: number
@@ -1944,11 +1913,15 @@ export type Database = {
           assigned_at: string
           assignment_id: string
           assignment_status: string
+          company_name: string
           contact_email: string
           contact_phone: string
+          funding_amount: string
           id: string
-          project_id: number
+          location: string
+          opportunity_id: number
           project_title: string
+          review_deadline: string
           review_notes: string
           reviewed_at: string
           reviewed_by: string
@@ -1956,7 +1929,6 @@ export type Database = {
           reviewer_decisions: Json
           status: string
           submitted_at: string
-          total_assignments: number
         }[]
       }
       get_reviewer_assignments_with_application: {
@@ -1966,8 +1938,8 @@ export type Database = {
           application_status: string
           assigned_at: string
           assignment_id: string
-          sector_id: number
-          sector_name: string
+          category_id: number
+          category_name: string
           created_at: string
           is_draft: boolean
           project_id: number
@@ -1980,10 +1952,10 @@ export type Database = {
         Args: { p_reviewer_id: string }
         Returns: {
           average_score: number
-          sectors: Json
           completed_reviews: Json
           pending_assignments: Json
           reviewer: Json
+          sectors: Json
           total_assignments: number
           total_reviews: number
           workload: number
@@ -1999,7 +1971,10 @@ export type Database = {
       }
       get_user_applications_with_opportunities: {
         Args: { p_user_id: string }
-        Returns: Json
+        Returns: {
+          application: Json
+          opportunity: Json
+        }[]
       }
       get_user_applications_with_projects: {
         Args: { p_user_id: string }
@@ -2012,9 +1987,11 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           approved_applications: number
+          draft_applications: number
           pending_applications: number
           rejected_applications: number
           total_applications: number
+          total_opportunities_applied: number
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
@@ -2032,17 +2009,16 @@ export type Database = {
         Returns: boolean
       }
       validate_application_submission: {
-        Args: { p_project_id: number; p_user_id: string }
+        Args: { p_opportunity_id: number; p_user_id: string }
         Returns: {
+          application_fee: number
           can_submit: boolean
-          error_message: string
+          deadline: string
           existing_application_id: string
           has_existing_application: boolean
-          is_project_open: boolean
-          project_deadline: string
-          project_fee: number
-          project_status: string
-          project_title: string
+          opportunity_status: string
+          opportunity_title: string
+          reason: string
         }[]
       }
     }
@@ -2071,15 +2047,15 @@ export type Database = {
         | "business_registration"
       kyc_status: "pending" | "verified" | "rejected" | "expired"
       opportunity_type:
-        | "grant"
-        | "fellowship"
-        | "scholarship"
-        | "internship"
-        | "training"
-        | "competition"
         | "accelerator"
-        | "incubator"
+        | "competition"
+        | "fellowship"
+        | "grant"
+        | "hackathon"
+        | "internship"
         | "job"
+        | "scholarship"
+        | "training"
       program_format: "online" | "in_person" | "hybrid"
       user_role: "admin" | "reviewer" | "applicant" | "partner"
     }
@@ -2236,26 +2212,18 @@ export const Constants = {
       ],
       kyc_status: ["pending", "verified", "rejected", "expired"],
       opportunity_type: [
-        "grant",
-        "fellowship",
-        "scholarship",
-        "internship",
-        "training",
-        "competition",
         "accelerator",
-        "incubator",
+        "competition",
+        "fellowship",
+        "grant",
+        "hackathon",
+        "internship",
         "job",
+        "scholarship",
+        "training",
       ],
       program_format: ["online", "in_person", "hybrid"],
       user_role: ["admin", "reviewer", "applicant", "partner"],
     },
   },
 } as const
-
-
-
-
-
-
-
-
