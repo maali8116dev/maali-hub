@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSectors } from "@/hooks/useSectors";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { PartnerLinkedUserCombobox, type PartnerLinkedUser } from "@/components/admin/PartnerLinkedUserCombobox";
 
 const partnerSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
@@ -31,12 +32,6 @@ const partnerSchema = z.object({
 
 type PartnerFormValues = z.infer<typeof partnerSchema>;
 
-type PartnerUser = {
-  user_id: string;
-  first_name: string | null;
-  last_name: string | null;
-};
-
 const PartnerForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,7 +40,7 @@ const PartnerForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(isEditing);
   const [oldLogoUrl, setOldLogoUrl] = useState<string | null>(null);
-  const [partnerUsers, setPartnerUsers] = useState<PartnerUser[]>([]);
+  const [partnerUsers, setPartnerUsers] = useState<PartnerLinkedUser[]>([]);
 
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "partner-logos",
@@ -362,25 +357,17 @@ const PartnerForm = () => {
                 <CardTitle>Linked User Account</CardTitle>
                 <CardDescription>Link this partner org to a user with the partner role</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Select
+              <CardContent className="space-y-2">
+                <Label htmlFor="partner-linked-user">Partner user</Label>
+                <PartnerLinkedUserCombobox
+                  id="partner-linked-user"
+                  users={partnerUsers}
                   value={watch("user_id") || ""}
-                  onValueChange={(value) => setValue("user_id", value === "none" ? "" : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a partner user..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No linked user</SelectItem>
-                    {partnerUsers.map((u) => (
-                      <SelectItem key={u.user_id} value={u.user_id}>
-                        {u.first_name || ""} {u.last_name || ""} ({u.user_id.slice(0, 8)}...)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Only users with the "partner" role are shown. Assign the partner role first via Users management.
+                  onValueChange={(userId) => setValue("user_id", userId)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Searchable list of users with the &quot;partner&quot; role only. Assign the role in Users management
+                  if someone is missing.
                 </p>
               </CardContent>
             </Card>
