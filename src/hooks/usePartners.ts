@@ -17,7 +17,7 @@ export function useFeaturedPartners() {
     queryKey: ["partners", "featured"],
     queryFn: async (): Promise<Partner[]> => {
       const { data, error } = await (supabase as any)
-        .from("partners")
+        .from("partners_public" as any)
         .select("id, name, logo_url, website_url, display_order")
         .eq("status", "active")
         .eq("featured", true)
@@ -43,7 +43,7 @@ export function useActivePartners() {
     queryKey: ["partners", "active"],
     queryFn: async (): Promise<Pick<Partner, "id" | "name">[]> => {
       const { data, error } = await (supabase as any)
-        .from("partners")
+        .from("partners_public" as any)
         .select("id, name")
         .eq("status", "active")
         .order("name", { ascending: true });

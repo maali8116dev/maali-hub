@@ -28,8 +28,8 @@ const About = () => {
   const fetchPartners = async () => {
     try {
       setIsLoadingPartners(true);
-      const { data, error } = await supabase
-        .from("partners")
+      const { data, error } = await (supabase as any)
+        .from("partners_public")
         .select("*")
         .eq("status", "active")
         .order("display_order", { ascending: true })
