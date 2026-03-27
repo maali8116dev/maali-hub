@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main export file for reviewer assignment hooks
  * Re-exports all hooks from focused modules for backward compatibility
  */
@@ -34,6 +34,7 @@ export {
 
 // Re-export review score hooks
 export {
+  useSaveReviewDraft,
   useSubmitReview,
   useApplicationReviewScores,
 } from './useReviewScores';

@@ -33,6 +33,8 @@ const resetPasswordSchema = z.object({
 // Use real Supabase client for integration tests
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ";
+const SUPABASE_SERVICE_ROLE_KEY =
+  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // Create a real Supabase client for integration tests
 const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -42,10 +44,17 @@ const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   }
 });
 
+const supabaseAdmin = SUPABASE_SERVICE_ROLE_KEY
+  ? createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null;
+
 // Test user credentials
 const TEST_USER_EMAIL = import.meta.env.VITE_TEST_USER_EMAIL || 'test@example.com';
 const TEST_USER_PASSWORD = import.meta.env.VITE_TEST_USER_PASSWORD || 'testpassword123';
 const HAS_TEST_CREDENTIALS = Boolean(import.meta.env.VITE_TEST_USER_EMAIL && import.meta.env.VITE_TEST_USER_PASSWORD);
+const HAS_SERVICE_ROLE = Boolean(SUPABASE_SERVICE_ROLE_KEY);
 
 describe('Auth Validation - Business Logic', () => {
   beforeEach(() => {
@@ -357,60 +366,68 @@ describe('Auth Validation - Business Logic', () => {
   });
 
   describe('Auth Integration Tests - Real Login', () => {
-    const itIfAuth = HAS_TEST_CREDENTIALS ? it : it.skip;
+    const itIfAuth = HAS_SERVICE_ROLE ? it : it.skip;
+    let authTestEmail = TEST_USER_EMAIL;
+    let authTestPassword = TEST_USER_PASSWORD;
+    let createdUserId: string | null = null;
+
     beforeAll(async () => {
-      // Sign out any existing session
       await supabase.auth.signOut();
+
+      // If service role exists, create a guaranteed valid user for integration tests.
+      if (supabaseAdmin) {
+        authTestEmail = `auth-int-${Date.now()}@maali.test`;
+        authTestPassword = `AuthTest!${Date.now()}`;
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+          email: authTestEmail,
+          password: authTestPassword,
+          email_confirm: true,
+        });
+        if (error) throw error;
+        createdUserId = data.user?.id ?? null;
+      }
     });
 
     afterAll(async () => {
-      // Clean up: sign out after tests
       await supabase.auth.signOut();
+      if (supabaseAdmin && createdUserId) {
+        await supabaseAdmin.auth.admin.deleteUser(createdUserId);
+      }
     });
 
     beforeEach(async () => {
-      // Ensure we're signed out before each test
       await supabase.auth.signOut();
     });
 
     itIfAuth('should successfully sign in with valid credentials', async () => {
-      // Validate credentials first
       const validationResult = signInSchema.safeParse({
-        email: TEST_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
+        email: authTestEmail,
+        password: authTestPassword,
       });
-
       expect(validationResult.success).toBe(true);
 
-      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: TEST_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
+        email: authTestEmail,
+        password: authTestPassword,
       });
 
       expect(error).toBeNull();
       expect(data.user).not.toBeNull();
-      expect(data.user?.email).toBe(TEST_USER_EMAIL);
+      expect(data.user?.email).toBe(authTestEmail);
       expect(data.session).not.toBeNull();
-
-      console.log(`âœ… Successfully signed in as ${TEST_USER_EMAIL}`);
     }, { timeout: 10000 });
 
     it('should reject sign in with invalid email format', async () => {
       const invalidEmail = 'invalid-email-format';
-
-      // Validation should fail
       const validationResult = signInSchema.safeParse({
         email: invalidEmail,
-        password: TEST_USER_PASSWORD,
+        password: authTestPassword,
       });
-
       expect(validationResult.success).toBe(false);
 
-      // Supabase should also reject it
       const { error } = await supabase.auth.signInWithPassword({
         email: invalidEmail,
-        password: TEST_USER_PASSWORD,
+        password: authTestPassword,
       });
 
       expect(error).not.toBeNull();
@@ -418,75 +435,61 @@ describe('Auth Validation - Business Logic', () => {
     }, { timeout: 10000 });
 
     it('should reject sign in with empty password', async () => {
-      // Validation should fail
       const validationResult = signInSchema.safeParse({
-        email: TEST_USER_EMAIL,
+        email: authTestEmail,
         password: '',
       });
-
       expect(validationResult.success).toBe(false);
     });
 
     itIfAuth('should reject sign in with wrong password', async () => {
       const { error } = await supabase.auth.signInWithPassword({
-        email: TEST_USER_EMAIL,
+        email: authTestEmail,
         password: 'wrongpassword123',
       });
-
       expect(error).not.toBeNull();
       expect(error?.message).toContain('Invalid login credentials');
     }, { timeout: 10000 });
 
     it('should reject sign in with non-existent email', async () => {
       const nonExistentEmail = 'nonexistent@example.com';
-
       const { error } = await supabase.auth.signInWithPassword({
         email: nonExistentEmail,
         password: 'somepassword123',
       });
-
       expect(error).not.toBeNull();
       expect(error?.message).toContain('Invalid login credentials');
     }, { timeout: 10000 });
 
     itIfAuth('should maintain session after successful login', async () => {
-      // Sign in
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: TEST_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
+        email: authTestEmail,
+        password: authTestPassword,
       });
 
       expect(signInError).toBeNull();
       expect(signInData.session).not.toBeNull();
 
-      // Check session
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
       expect(sessionError).toBeNull();
       expect(sessionData.session).not.toBeNull();
-      expect(sessionData.session?.user.email).toBe(TEST_USER_EMAIL);
+      expect(sessionData.session?.user.email).toBe(authTestEmail);
     }, { timeout: 10000 });
 
     itIfAuth('should sign out successfully', async () => {
-      // Sign in first
       await supabase.auth.signInWithPassword({
-        email: TEST_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
+        email: authTestEmail,
+        password: authTestPassword,
       });
 
-      // Verify we're signed in
       const { data: beforeSignOut } = await supabase.auth.getSession();
       expect(beforeSignOut.session).not.toBeNull();
 
-      // Sign out
       const { error: signOutError } = await supabase.auth.signOut();
       expect(signOutError).toBeNull();
 
-      // Verify we're signed out
       const { data: afterSignOut } = await supabase.auth.getSession();
       expect(afterSignOut.session).toBeNull();
-
-      console.log('âœ… Successfully signed out');
     }, { timeout: 10000 });
   });
 });

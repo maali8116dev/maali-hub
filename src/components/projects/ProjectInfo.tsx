@@ -88,7 +88,7 @@ const formatProjectDate = (dateString: string) => {
             <img
               src={project.imageUrl}
               alt={project.title}
-              className="w-full h-64 object-cover rounded-lg"
+              className="w-full h-[400px] object-cover rounded-lg"
             />
           </div>
         )}

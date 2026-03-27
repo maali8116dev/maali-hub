@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import { useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment';
+import { useSaveReviewDraft, useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,7 @@ const ReviewScoringForm = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { mutate: submitReview, isPending } = useSubmitReview();
+  const { mutate: saveDraft, isPending: isSavingDraft } = useSaveReviewDraft();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Persisted reviewer-specific check so disabled state survives page reloads
@@ -56,7 +57,7 @@ const ReviewScoringForm = ({
     staleTime: 30 * 1000,
   });
 
-  const hasSubmittedReview = !!existingReview || isSubmitted;
+  const hasSubmittedReview = !!existingReview?.submitted_at || isSubmitted;
 
   const normalizeScores = (value: unknown): Record<string, number> => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -78,10 +79,10 @@ const ReviewScoringForm = ({
 
   // Sync local state with existing review
   useEffect(() => {
-    if (existingReview && !isSubmitted) {
+    if (existingReview?.submitted_at && !isSubmitted) {
       setIsSubmitted(true);
     }
-  }, [existingReview, isSubmitted]);
+  }, [existingReview?.submitted_at, isSubmitted]);
 
   // Get system rubric (applies to all applications)
   const { data: rubric } = useSystemRubric();
@@ -160,7 +161,7 @@ const ReviewScoringForm = ({
 
   const onSubmit = (data: any) => {
     // Prevent multiple submissions
-    if (existingReviewLoading || hasSubmittedReview || isPending) {
+    if (existingReviewLoading || hasSubmittedReview || isPending || isSavingDraft) {
       return;
     }
 
@@ -198,13 +199,48 @@ const ReviewScoringForm = ({
     );
   };
 
+  const onSaveDraft = () => {
+    if (existingReviewLoading || hasSubmittedReview || isPending || isSavingDraft) {
+      return;
+    }
+
+    const data = form.getValues();
+    saveDraft(
+      {
+        applicationId,
+        reviewerId,
+        assignmentId,
+        scores: data.scores || {},
+        comments: data.comments,
+        recommendation: data.recommendation,
+      },
+      {
+        onSuccess: async (savedDraft) => {
+          queryClient.setQueryData(['review-score', applicationId, reviewerId], savedDraft);
+          await queryClient.invalidateQueries({ queryKey: ['review-score', applicationId, reviewerId] });
+          toast({
+            title: 'Draft Saved',
+            description: 'Your review draft has been saved. You can continue later.',
+          });
+        },
+        onError: (error: any) => {
+          toast({
+            title: 'Save Failed',
+            description: error.message || 'Failed to save draft. Please try again.',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <CardTitle>Review Scoring</CardTitle>
-          <HelpTooltip 
-            content="Score each criterion using the slider or number input. Your scores are weighted according to the rubric. Once submitted, you cannot edit your review."
+          <HelpTooltip
+            content="Use Save Draft to pause and continue later. Once submitted, you cannot edit your review."
             side="right"
           />
         </div>
@@ -332,6 +368,14 @@ const ReviewScoringForm = ({
               disabled={existingReviewLoading || hasSubmittedReview || isPending}
             >
               Reset
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onSaveDraft}
+              disabled={existingReviewLoading || hasSubmittedReview || isPending || isSavingDraft}
+            >
+              {isSavingDraft ? 'Saving draft...' : 'Save Draft'}
             </Button>
             <Button type="submit" disabled={existingReviewLoading || hasSubmittedReview || isPending}>
               {isPending ? 'Submitting...' : hasSubmittedReview ? 'Review Submitted' : 'Submit Review'}

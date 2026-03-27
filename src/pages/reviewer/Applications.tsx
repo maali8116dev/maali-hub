@@ -27,7 +27,7 @@ const ReviewerApplications = () => {
   } = useApplicationFilters({
     applications,
     defaultFilter: "pending",
-    statusValues: ["pending", "under_review", "approved", "rejected"],
+    statusValues: ["draft", "pending", "under_review", "approved", "rejected"],
   });
 
   // Filter and process applications with days pending and deadline calculations
@@ -183,6 +183,7 @@ const ReviewerApplications = () => {
         const reviewProgress = app.reviewProgress;
         
         const statusDescriptions: Record<string, string> = {
+          draft: "You saved a draft review and can continue from where you left off",
           pending: "Application is pending review by all assigned reviewers",
           under_review: `Review in progress: ${reviewProgress?.completed || 0} of ${reviewProgress?.total || 0} reviewers have submitted`,
           approved: "Application has been approved",
@@ -236,7 +237,11 @@ const ReviewerApplications = () => {
               onClick={() => navigate(`/reviewer/applications/${app.id}`)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              {statusFilter === "pending" ? "Start Review" : "Review"}
+              {statusFilter === "pending"
+                ? "Start Review"
+                : statusFilter === "draft"
+                  ? "Continue Review"
+                  : "Review"}
             </Button>
           );
         },
@@ -306,6 +311,7 @@ const ReviewerApplications = () => {
           <div className="flex gap-2 flex-wrap">
             {[
               { value: "all", label: "All" },
+              { value: "draft", label: "Drafts" },
               { value: "pending", label: "Pending" },
               { value: "under_review", label: "Under Review" },
               { value: "approved", label: "Approved" },
@@ -348,6 +354,8 @@ const ReviewerApplications = () => {
           <CardTitle className="text-base sm:text-lg">
             {statusFilter === "all" 
               ? "All Applications" 
+              : statusFilter === "draft"
+              ? "Draft Reviews"
               : statusFilter === "pending"
               ? "Pending Applications"
               : statusFilter === "under_review"

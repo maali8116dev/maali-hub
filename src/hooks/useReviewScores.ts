@@ -9,6 +9,63 @@ import type {
 } from '@/types/reviewer';
 import { logActivityDirect } from './useActivityLogger';
 
+// Save review draft (pause and continue later)
+export const useSaveReviewDraft = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      reviewerId,
+      assignmentId,
+      scores,
+      comments,
+      recommendation,
+    }: {
+      applicationId: string;
+      reviewerId: string;
+      assignmentId: string;
+      scores: Record<string, number>;
+      comments?: string;
+      recommendation: 'approve' | 'reject' | 'request_info';
+    }) => {
+      const { data, error } = await supabase
+        .from('review_scores')
+        .upsert(
+          {
+            application_id: applicationId,
+            reviewer_id: reviewerId,
+            assignment_id: assignmentId,
+            scores,
+            comments: comments || null,
+            recommendation,
+            submitted_at: null,
+          },
+          {
+            onConflict: 'application_id,reviewer_id',
+          }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await supabase
+        .from('application_assignments')
+        .update({ status: 'in_progress' })
+        .eq('id', assignmentId);
+
+      return data as ReviewScore;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['review-scores', data.application_id] });
+      queryClient.invalidateQueries({ queryKey: ['application-assignments', data.application_id] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-applications'] });
+    },
+  });
+};
+
 // Submit review score
 export const useSubmitReview = () => {
   const queryClient = useQueryClient();
@@ -106,6 +163,7 @@ export const useSubmitReview = () => {
       queryClient.invalidateQueries({ queryKey: ['review-aggregation', data.application_id] });
       queryClient.invalidateQueries({ queryKey: ['application-assignments', data.application_id] });
       queryClient.invalidateQueries({ queryKey: ['reviewer-workload'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewer-applications'] });
     },
   });
 };

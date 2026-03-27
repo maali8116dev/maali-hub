@@ -49,14 +49,19 @@ async function fetchReviewerApplications(reviewerId: string): Promise<AdminAppli
         ? app.reviewer_decisions
         : [];
 
-      const completedReviews = reviewerDecisions.length;
+      const completedReviews = reviewerDecisions.filter((decision: any) => !!decision?.submittedAt).length;
       const hasReviews = completedReviews > 0;
+      const hasOwnDraft = reviewerDecisions.some(
+        (decision: any) => decision?.reviewerId === reviewerId && !decision?.submittedAt
+      );
       const baseStatus = statusMap[app.status || "pending"] || "pending";
       
       // Determine if application is under review (has some reviews but not final decision)
-      const finalStatus = hasReviews && baseStatus === "pending" 
-        ? "under_review" 
-        : baseStatus;
+      const finalStatus = hasOwnDraft && baseStatus === "pending"
+        ? "draft"
+        : hasReviews && baseStatus === "pending"
+          ? "under_review"
+          : baseStatus;
 
       return {
         id: app.id,

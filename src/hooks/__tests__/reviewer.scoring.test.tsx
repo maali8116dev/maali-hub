@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import { useSubmitReview, useApplicationReviewScores } from '../useReviewerAssignment';
+import { useSaveReviewDraft, useSubmitReview, useApplicationReviewScores } from '../useReviewerAssignment';
 import { supabase } from '@/integrations/supabase/client';
 
 // Mock Supabase client for hook-level tests
@@ -185,6 +185,75 @@ describe('useSubmitReview (Hook)', () => {
       expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({ recommendation }), expect.any(Object));
       vi.clearAllMocks();
     }
+  });
+});
+
+describe('useSaveReviewDraft (Hook)', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('should save draft with submitted_at null and mark assignment in_progress', async () => {
+    const mockDraft = {
+      id: 'score-1',
+      application_id: 'app-123',
+      reviewer_id: 'reviewer-456',
+      assignment_id: 'assignment-789',
+      scores: { innovation: 7, feasibility: 6 },
+      comments: 'Draft notes',
+      recommendation: 'request_info' as const,
+      submitted_at: null,
+    };
+
+    const mockUpsert = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockSingle = vi.fn().mockResolvedValue({ data: mockDraft, error: null });
+    const mockUpdate = vi.fn().mockReturnThis();
+    const mockEq = vi.fn().mockResolvedValue({ data: null, error: null });
+
+    (supabase.from as any).mockImplementation((table: string) => {
+      if (table === 'review_scores') return { upsert: mockUpsert, select: mockSelect, single: mockSingle };
+      if (table === 'application_assignments') return { update: mockUpdate, eq: mockEq };
+      return {};
+    });
+
+    const { result } = renderHook(() => useSaveReviewDraft(), { wrapper: createWrapper() });
+    result.current.mutate({
+      applicationId: 'app-123',
+      reviewerId: 'reviewer-456',
+      assignmentId: 'assignment-789',
+      scores: { innovation: 7, feasibility: 6 },
+      comments: 'Draft notes',
+      recommendation: 'request_info',
+    });
+
+    await waitFor(() => { expect(result.current.isSuccess).toBe(true); });
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        submitted_at: null,
+        recommendation: 'request_info',
+      }),
+      expect.any(Object)
+    );
+    expect(mockUpdate).toHaveBeenCalledWith({ status: 'in_progress' });
+  });
+
+  it('should handle draft save errors', async () => {
+    const mockUpsert = vi.fn().mockReturnThis();
+    const mockSelect = vi.fn().mockReturnThis();
+    const mockSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'Save failed', code: 'PGRST116' } });
+
+    (supabase.from as any).mockReturnValue({ upsert: mockUpsert, select: mockSelect, single: mockSingle });
+
+    const { result } = renderHook(() => useSaveReviewDraft(), { wrapper: createWrapper() });
+    result.current.mutate({
+      applicationId: 'app-123',
+      reviewerId: 'reviewer-456',
+      assignmentId: 'assignment-789',
+      scores: { innovation: 8 },
+      recommendation: 'approve',
+    });
+
+    await waitFor(() => { expect(result.current.isError).toBe(true); });
+    expect(result.current.error).toBeDefined();
   });
 });
 
