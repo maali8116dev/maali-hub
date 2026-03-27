@@ -802,6 +802,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "opportunities_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "opportunities_sector_id_fkey"
             columns: ["sector_id"]
             isOneToOne: false
@@ -1086,6 +1093,13 @@ export type Database = {
             columns: ["partner_id"]
             isOneToOne: false
             referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1582,6 +1596,48 @@ export type Database = {
           metadata: Json | null
           user_id: string | null
           user_name: string | null
+        }
+        Relationships: []
+      }
+      partners_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          featured: boolean | null
+          id: number | null
+          logo_url: string | null
+          name: string | null
+          sector: string | null
+          status: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          featured?: boolean | null
+          id?: number | null
+          logo_url?: string | null
+          name?: string | null
+          sector?: string | null
+          status?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          featured?: boolean | null
+          id?: number | null
+          logo_url?: string | null
+          name?: string | null
+          sector?: string | null
+          status?: string | null
+          updated_at?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
