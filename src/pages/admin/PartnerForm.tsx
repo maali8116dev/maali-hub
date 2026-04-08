@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,6 +17,7 @@ import { useSectors } from "@/hooks/useSectors";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { PartnerLinkedUserCombobox, type PartnerLinkedUser } from "@/components/admin/PartnerLinkedUserCombobox";
+import { BackButton } from "@/components/ui/back-button";
 
 const partnerSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
@@ -200,10 +201,7 @@ const PartnerForm = () => {
             {isEditing ? "Update partner details" : "Fill in the details to add a new partner"}
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate("/admin/partners")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Partners
-        </Button>
+        <BackButton label="Back to Partners" link="/admin/partners" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>

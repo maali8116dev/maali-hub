@@ -58,6 +58,31 @@ const FILE_TYPES = [
 
 export { RESOURCE_sectors, FILE_TYPES };
 
+function normalizeResourceRow(row: Record<string, unknown>): Resource {
+  const r = row as Record<string, unknown>;
+  return {
+    id: r.id as string,
+    title: r.title as string,
+    description: (r.description as string | null) ?? null,
+    sector: (r.Sector ?? r.sector ?? "") as string,
+    file_type: r.file_type as string,
+    file_url: (r.file_url as string | null) ?? null,
+    file_size: (r.file_size as number | null) ?? null,
+    duration: (r.duration as string | null) ?? null,
+    is_featured: (r.is_featured as boolean) ?? false,
+    is_published: (r.is_published as boolean) ?? true,
+    download_count: (r.download_count as number) ?? 0,
+    created_by: (r.created_by as string | null) ?? null,
+    created_at: r.created_at as string,
+    updated_at: r.updated_at as string,
+  };
+}
+
+function resourceFormToDb(data: Partial<ResourceFormData>) {
+  const { sector, ...rest } = data as Partial<ResourceFormData> & { sector?: string };
+  return { ...rest, ...(sector !== undefined && { Sector: sector }) };
+}
+
 // Fetch published resources (public)
 // Resources are static content that rarely changes (download_count updated via mutation)
 export const useResources = (filters?: { sector?: string; fileType?: string }) => {
@@ -68,11 +93,11 @@ export const useResources = (filters?: { sector?: string; fileType?: string }) =
         .from("resources")
         .select("*")
         .eq("is_published", true)
-        .order("sector")
+        .order("Sector")
         .order("title", { ascending: true });
 
       if (filters?.sector) {
-        query = query.eq("sector", filters.sector);
+        query = query.eq("Sector", filters.sector);
       }
       if (filters?.fileType) {
         query = query.eq("file_type", filters.fileType);
@@ -81,7 +106,7 @@ export const useResources = (filters?: { sector?: string; fileType?: string }) =
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Resource[];
+      return (data || []).map((row) => normalizeResourceRow(row as Record<string, unknown>));
     },
     staleTime: Infinity, // Never consider stale - resources rarely change
     gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
@@ -99,11 +124,11 @@ export const useAdminResources = () => {
       const { data, error } = await supabase
         .from("resources")
         .select("*")
-        .order("sector")
+        .order("Sector")
         .order("title", { ascending: true });
 
       if (error) throw error;
-      return data as Resource[];
+      return (data || []).map((row) => normalizeResourceRow(row as Record<string, unknown>));
     },
   });
 };
@@ -121,7 +146,7 @@ export const useResource = (id: string | undefined) => {
         .single();
 
       if (error) throw error;
-      return data as Resource;
+      return normalizeResourceRow((data || {}) as Record<string, unknown>);
     },
     enabled: !!id,
   });
@@ -135,12 +160,12 @@ export const useResourcesectors = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("resources")
-        .select("sector")
+        .select("Sector")
         .eq("is_published", true);
 
       if (error) throw error;
       
-      const uniquesectors = [...new Set(data.map(r => r.sector))].sort();
+      const uniquesectors = [...new Set((data || []).map((r: any) => r.Sector).filter(Boolean))].sort();
       return uniquesectors;
     },
     staleTime: Infinity, // Never consider stale - sectors rarely change
@@ -163,14 +188,14 @@ export const useCreateResource = () => {
       const { data: resource, error } = await supabase
         .from("resources")
         .insert({
-          ...data,
+          ...resourceFormToDb(data),
           created_by: user.user?.id,
         })
         .select()
         .single();
 
       if (error) throw error;
-      return resource as Resource;
+      return normalizeResourceRow((resource || {}) as Record<string, unknown>);
     },
     onSuccess: (resource) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
@@ -198,13 +223,13 @@ export const useUpdateResource = () => {
     mutationFn: async ({ id, data }: { id: string; data: Partial<ResourceFormData> }) => {
       const { data: resource, error } = await supabase
         .from("resources")
-        .update(data)
+        .update(resourceFormToDb(data))
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
-      return resource as Resource;
+      return normalizeResourceRow((resource || {}) as Record<string, unknown>);
     },
     onSuccess: (resource) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });

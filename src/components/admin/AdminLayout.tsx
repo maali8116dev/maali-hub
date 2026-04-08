@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -238,7 +239,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
-          {children}
+          <Suspense
+            fallback={
+              <div className="flex min-h-[240px] items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
         </div>
       </SidebarInset>
     </SidebarProvider>

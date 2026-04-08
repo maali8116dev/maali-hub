@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAllSectors } from "@/hooks/useSectors";
+import { BackButton } from "@/components/ui/back-button";
 
 const blogPostSchema = z.object({
   title: z.string().min(1, "Title is required").min(10, "Title must be at least 10 characters"),
@@ -108,10 +109,7 @@ const BlogForm = () => {
             {isEditing ? "Update blog post details" : "Fill in the details to create a new blog post"}
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate("/admin/blog")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Blog
-        </Button>
+        <BackButton label="Back to Blog" link="/admin/blog" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>

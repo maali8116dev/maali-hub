@@ -31,6 +31,8 @@
     "seed:projects": "node scripts/seed.js",
     "seed:users": "node scripts/seed-users-and-reviewers.js",
     "seed:users:local": "node scripts/seed-users-and-reviewers.js --local",
+    "seed:content": "node scripts/seed-content.js",
+    "seed:content:local": "node scripts/seed-content.js --local",
     "cleanup:projects": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/scripts/cleanup-projects.sql",
     "cleanup:projects:remote": "echo 'Please run cleanup-projects.sql in Supabase Dashboard SQL Editor'"
   },

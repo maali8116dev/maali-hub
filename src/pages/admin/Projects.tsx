@@ -148,12 +148,14 @@ const AdminProjects = () => {
       },
     },
     {
-      accessorKey: 'fundingAmount',
+      accessorKey: 'opportunityType',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Funding" />
+        <SortableColumnHeader column={column} title="Opportunity Type" />
       ),
       cell: ({ row }) => {
-        return <span>{row.original.fundingAmount}</span>;
+        const value = row.original.opportunityType;
+        if (!value) return <span className="text-muted-foreground">-</span>;
+        return <span className="capitalize">{String(value).replace(/_/g, " ")}</span>;
       },
     },
     {

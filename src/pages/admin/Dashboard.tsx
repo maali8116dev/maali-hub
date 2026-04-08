@@ -7,6 +7,49 @@ import { useAdminStats } from "@/hooks/useAdminStats";
 import { useRecentActivity } from "@/hooks/useActivityLogs";
 import { format, formatDistanceToNow } from "date-fns";
 
+const toTitleCase = (value: string) =>
+  value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const formatActivityDescription = (activity: {
+  actionType: string;
+  entityType: string;
+  description: string;
+  userName?: string | null;
+  metadata?: Record<string, unknown> | null;
+}) => {
+  const actor = activity.userName?.trim() || "A user";
+  const meta = activity.metadata || {};
+  const projectTitle = (meta.project_title as string) || (meta.opportunity_title as string);
+  const applicantName = (meta.applicant_name as string) || (meta.full_legal_name as string);
+  const reviewerName = meta.reviewer_name as string;
+
+  if (activity.entityType === "application") {
+    if (activity.actionType === "submit") {
+      if (applicantName && projectTitle) return `${applicantName} submitted an application for "${projectTitle}".`;
+      if (applicantName) return `${applicantName} submitted an application.`;
+      return `${actor} submitted an application.`;
+    }
+    if (activity.actionType === "assign_reviewers") {
+      const reviewerCount = meta.reviewer_count as number | undefined;
+      if (reviewerCount) return `${actor} assigned ${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} to an application.`;
+      return `${actor} assigned reviewers to an application.`;
+    }
+    if (activity.actionType === "review") {
+      if (reviewerName) return `${reviewerName} submitted a review.`;
+      return `${actor} submitted a review.`;
+    }
+  }
+
+  const cleanDescription = activity.description?.replace(/opportunity ID:\s*\d+/i, "an opportunity");
+  if (cleanDescription && cleanDescription.trim().length > 0) {
+    return cleanDescription;
+  }
+
+  return `${actor} ${activity.actionType.replace(/_/g, " ")} ${activity.entityType.replace(/_/g, " ")}.`;
+};
+
 const AdminDashboard = () => {
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(10);
@@ -211,9 +254,11 @@ const AdminDashboard = () => {
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium truncate">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {activity.actionType} Â· {activity.entityType.replace('_', ' ')}
+                    <p className="text-xs sm:text-sm font-medium truncate">
+                      {formatActivityDescription(activity)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {toTitleCase(activity.actionType)} · {toTitleCase(activity.entityType)}
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">

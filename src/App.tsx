@@ -190,103 +190,26 @@ const App = () => {
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/data-protection" element={<DataProtection />} />
           <Route path="/tests/error" element={<ErrorTest />} />
-          {/* Dashboard Routes - Protected, requires authentication, role-based redirect */}
+          {/* Dashboard Routes - nested to keep layout mounted */}
           <Route
             path="/dashboard"
             element={
               <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Dashboard />
-                </DashboardLayout>
-              </ProtectedRoute>
+                <ProtectedRoute requireAuth={true}>
+                  <DashboardLayout />
+                </ProtectedRoute>
               </RoleBasedRoute>
             }
-          />
-          <Route
-            path="/dashboard/applications"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Applications />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/applications/:id"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <ApplicationDetails />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/documents"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Documents />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/notifications"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Notifications />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/profile"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Profile />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/settings"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Settings />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/billing"
-            element={
-              <RoleBasedRoute>
-              <ProtectedRoute requireAuth={true}>
-                <DashboardLayout>
-                  <Billing />
-                </DashboardLayout>
-              </ProtectedRoute>
-              </RoleBasedRoute>
-            }
-          />
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="applications" element={<Applications />} />
+            <Route path="applications/:id" element={<ApplicationDetails />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="billing" element={<Billing />} />
+          </Route>
 
           {/* Admin Routes - Protected, requires authentication and admin role */}
           <Route

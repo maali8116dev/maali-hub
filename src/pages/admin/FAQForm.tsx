@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFAQ, useCreateFAQ, useUpdateFAQ, useAdminFAQs } from "@/hooks/useFAQs";
+import { BackButton } from "@/components/ui/back-button";
 
 const faqSchema = z.object({
   question: z.string().min(1, "Question is required").min(10, "Question must be at least 10 characters"),
@@ -132,10 +133,7 @@ const FAQForm = () => {
             {isEditing ? "Update FAQ details" : "Fill in the details to create a new FAQ"}
           </p>
         </div>
-        <Button variant="ghost" onClick={() => navigate("/admin/faq")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to FAQs
-        </Button>
+        <BackButton label="Back to FAQs" link="/admin/faq" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>

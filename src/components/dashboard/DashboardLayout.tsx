@@ -1,4 +1,5 @@
-﻿import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Suspense } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications, useUnreadNotificationCount, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from "@/hooks/useNotifications";
@@ -227,7 +228,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {user && !user.email_confirmed_at && user.email && (
             <EmailVerificationBanner email={user.email} />
           )}
-          {children}
+          <Suspense
+            fallback={
+              <div className="flex min-h-[240px] items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            }
+          >
+            {children ?? <Outlet />}
+          </Suspense>
         </div>
       </SidebarInset>
     </SidebarProvider>
