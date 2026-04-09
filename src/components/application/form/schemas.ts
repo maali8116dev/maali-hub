@@ -1,4 +1,4 @@
-﻿import * as z from "zod";
+import * as z from "zod";
 import { emailSchema } from "@/lib/emailValidation";
 import { isValidPhoneNumber } from "libphonenumber-js";
 
@@ -51,9 +51,8 @@ export const step1Schema = z.object({
   phoneNumber: phoneNumberSchema,
 });
 
-// Step 2: Organizational Background Schema (conditional - only required if not Individual)
-export const step2Schema = z
-  .object({
+// Step 2: Organizational Background base schema
+export const step2BaseSchema = z.object({
     yearEstablished: z.preprocess(
       (val) => (val === "" || val === undefined ? undefined : Number(val)),
       z
@@ -87,8 +86,10 @@ export const step2Schema = z
       .refine((val) => !val || countWords(val) <= 400, {
         message: "Previous grants / funding details must not exceed 400 words",
       }),
-  })
-  .refine(
+  });
+
+// Step 2 for grant opportunities: includes previous grants conditional validation
+export const step2Schema = step2BaseSchema.refine(
     (data) => {
       // If previous grants received is true, details are required
       if (
@@ -113,8 +114,8 @@ export const step3Schema = z.object({
   projectSummary: z
     .string()
     .min(1, "Project summary is required")
-    .refine((val) => countWords(val) >= 50, {
-      message: "Project summary must be at least 50 words",
+    .refine((val) => countWords(val) >= 30, {
+      message: "Project summary must be at least 30 words",
     })
     .refine((val) => countWords(val) <= 400, {
       message: "Project summary must not exceed 400 words",
@@ -122,21 +123,25 @@ export const step3Schema = z.object({
   geographicFocus: z.string().min(2, "Geographic focus is required"),
 });
 
-// Step 4: Compliance & Declarations Schema
-export const step4Schema = z.object({
+// Step 4: Compliance & Declarations base schema
+export const step4BaseSchema = z.object({
   informationAccurateConfirmed: z.boolean().refine((val) => val === true, {
     message: "You must confirm that the information provided is accurate",
   }),
   conflictOfInterestDeclared: z.boolean().refine((val) => val === true, {
     message: "You must declare any conflicts of interest",
   }),
-  reportingRequirementsAgreed: z.boolean().refine((val) => val === true, {
-    message: "You must agree to reporting requirements",
-  }),
   dataProcessingConsented: z.boolean().refine((val) => val === true, {
     message: "You must consent to data processing",
   }),
   declarationDate: z.date().optional(),
+});
+
+// Grant compliance requires reporting requirements
+export const step4Schema = step4BaseSchema.extend({
+  reportingRequirementsAgreed: z.boolean().refine((val) => val === true, {
+    message: "You must agree to reporting requirements",
+  }),
 });
 
 // Step 5: Social Links Schema (optional)

@@ -1,4 +1,4 @@
-﻿import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
 import { Users, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +16,7 @@ interface Step2OrganizationalBackgroundProps {
   formState: UseFormStateReturn<ApplicationFormValues>;
   formData: ApplicationFormData;
   updateFormData: (data: Partial<ApplicationFormData>) => void;
+  isGrantType?: boolean;
 }
 
 export function Step2OrganizationalBackground({
@@ -25,6 +26,7 @@ export function Step2OrganizationalBackground({
   formState,
   formData,
   updateFormData,
+  isGrantType = true,
 }: Step2OrganizationalBackgroundProps) {
   return (
     <div className="space-y-4">
@@ -142,38 +144,40 @@ export function Step2OrganizationalBackground({
             maxLength={1200}
           />
 
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="previousGrants"
-                checked={watch("previousGrantsFundingReceived") || false}
-                onCheckedChange={(checked) => {
-                  setValue("previousGrantsFundingReceived", checked as boolean);
-                  updateFormData({
-                    previousGrantsFundingReceived: checked as boolean,
-                  });
-                }}
-              />
-              <label
-                htmlFor="previousGrants"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Previous grants or funding received
-              </label>
+          {isGrantType && (
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="previousGrants"
+                  checked={watch("previousGrantsFundingReceived") || false}
+                  onCheckedChange={(checked) => {
+                    setValue("previousGrantsFundingReceived", checked as boolean);
+                    updateFormData({
+                      previousGrantsFundingReceived: checked as boolean,
+                    });
+                  }}
+                />
+                <label
+                  htmlFor="previousGrants"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Previous grants or funding received
+                </label>
+              </div>
+              {watch("previousGrantsFundingReceived") && (
+                <CustomFormField
+                  control={control}
+                  name="previousGrantsFundingDetails"
+                  fieldType={FormFieldType.TEXTAREA}
+                  label="Previous Grants / Funding Details"
+                  placeholder="Provide details about previous grants or funding received..."
+                  description="Maximum 400 words"
+                  rows={4}
+                  maxLength={2400}
+                />
+              )}
             </div>
-            {watch("previousGrantsFundingReceived") && (
-              <CustomFormField
-                control={control}
-                name="previousGrantsFundingDetails"
-                fieldType={FormFieldType.TEXTAREA}
-                label="Previous Grants / Funding Details"
-                placeholder="Provide details about previous grants or funding received..."
-                description="Maximum 400 words"
-                rows={4}
-                maxLength={2400}
-              />
-            )}
-          </div>
+          )}
         </>
       )}
     </div>

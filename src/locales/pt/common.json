@@ -52,6 +52,63 @@
     "next": "Próximo",
     "saving": "Salvando...",
     "completionPrompt": "Complete seu perfil para desbloquear todos os recursos"
+  },
+  "projectApplicationSidebar": {
+    "loginRequiredTitle": "Login obrigatorio",
+    "loginRequiredStartNew": "Faca login ou crie uma conta para iniciar uma nova candidatura.",
+    "loginRequiredContinue": "Faca login ou crie uma conta para continuar sua candidatura.",
+    "loginRequiredApply": "Faca login ou crie uma conta para se candidatar a esta oportunidade.",
+    "applicationsClosed": "Candidaturas encerradas",
+    "startYourApplication": "Iniciar sua candidatura",
+    "applicationApproved": "Candidatura aprovada",
+    "applicationSubmitted": "Candidatura enviada",
+    "alreadySubmitted": "Voce ja enviou uma candidatura para esta oportunidade (status: {{status}}). Voce nao pode enviar outra.",
+    "pending": "pendente",
+    "viewYourApplication": "Ver sua candidatura",
+    "savedDraftTitle": "Voce tem um rascunho salvo",
+    "lastSaved": "Ultimo salvamento:",
+    "at": "as",
+    "continueDraft": "Continuar rascunho",
+    "startNewApplication": "Iniciar nova candidatura",
+    "noLongerAccepting": "Esta oportunidade nao esta mais aceitando candidaturas.",
+    "readyToApply": "Pronto para se candidatar a esta oportunidade? Clique abaixo para iniciar o processo de candidatura.",
+    "applicationClosed": "Candidatura encerrada",
+    "beginApplication": "Iniciar candidatura",
+    "applicationFee": "Taxa de candidatura: ${{amount}} (processada na submissao)"
+  },
+  "opportunitiesPage": {
+    "title": "Oportunidades atuais",
+    "subtitle": "Descubra oportunidades e programas criados para fortalecer empreendedores africanos",
+    "searchPlaceholder": "Buscar oportunidades por titulo, descricao, localizacao ou tags...",
+    "clearSearchAria": "Limpar busca",
+    "browseByTag": "Navegar por tag",
+    "filters": {
+      "sector": "Setor",
+      "selectSector": "Selecionar setor",
+      "allSectors": "Todos os setores",
+      "region": "Regiao",
+      "selectRegion": "Selecionar regiao",
+      "allRegions": "Todas as regioes",
+      "partner": "Parceiro",
+      "selectPartner": "Selecionar parceiro",
+      "allPartners": "Todos os parceiros",
+      "status": "Status",
+      "selectStatus": "Selecionar status",
+      "allStatuses": "Todos os status",
+      "open": "Aberto",
+      "closed": "Fechado"
+    },
+    "clearFilters": "Limpar filtros",
+    "failedToLoad": "Falha ao carregar oportunidades",
+    "showingRange": "Mostrando {{start}} a {{end}} de {{total}} {{noun}}",
+    "opportunitySingular": "oportunidade",
+    "opportunitiesPlural": "oportunidades",
+    "show": "Mostrar",
+    "empty": {
+      "title": "Nenhuma oportunidade encontrada",
+      "withFilters": "Tente ajustar a busca ou os filtros para encontrar mais oportunidades.",
+      "default": "Nao ha oportunidades disponiveis no momento. Volte mais tarde."
+    }
   }
 }
 

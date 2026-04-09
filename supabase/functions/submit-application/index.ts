@@ -93,10 +93,11 @@ async function cleanupOrphanDocumentsForUser(
 
   const { data: docs, error: fetchErr } = await supabaseAdmin
     .from("application_documents")
-    .select("id, file_path, application_id")
+    .select("id, file_path, application_id, is_library_document")
     .in("id", documentIds)
     .eq("user_id", userId)
-    .is("application_id", null);
+    .is("application_id", null)
+    .eq("is_library_document", false);
 
   if (fetchErr || !docs?.length) return;
 
@@ -150,36 +151,75 @@ async function linkDocumentsToApplication(params: {
 
   const { data: docs, error: fetchErr } = await supabaseAdmin
     .from("application_documents")
-    .select("id, application_id")
+    .select("id, application_id, file_name, file_path, file_size, file_type, is_library_document")
     .in("id", documentIds)
     .eq("user_id", userId);
 
   if (fetchErr) throw fetchErr;
 
-  const docRows = (docs ?? []) as ApplicationDocumentRef[];
+  const docRows = (docs ?? []) as Array<{
+    id: string;
+    application_id: string | null;
+    file_name: string;
+    file_path: string;
+    file_size: number | null;
+    file_type: string | null;
+    is_library_document: boolean | null;
+  }>;
   const docMap = new Map(docRows.map((d) => [d.id, d]));
-  const validUnlinkedIds = documentIds.filter((id) => {
-    const d = docMap.get(id) as
-      | { id: string; application_id: string | null }
-      | undefined;
-    return d && !d.application_id;
-  });
-  const failedIds = documentIds.filter((id) => !validUnlinkedIds.includes(id));
 
-  if (!validUnlinkedIds.length) return { linked: 0, failedIds };
+  const existingDocs = documentIds
+    .map((id) => docMap.get(id))
+    .filter((d): d is NonNullable<typeof d> => !!d);
+  const failedIds = documentIds.filter((id) => !docMap.has(id));
+  const unlinkedDocs = existingDocs.filter((d) => !d.application_id);
+  failedIds.push(...existingDocs.filter((d) => !!d.application_id).map((d) => d.id));
 
-  const { count } = await supabaseAdmin
-    .from("application_documents")
-    .update({
+  const uploadDocIds = unlinkedDocs
+    .filter((d) => !d.is_library_document)
+    .map((d) => d.id);
+  const libraryDocs = unlinkedDocs.filter((d) => !!d.is_library_document);
+
+  let linkedCount = 0;
+
+  // For freshly uploaded docs, link in-place.
+  if (uploadDocIds.length > 0) {
+    const { count } = await supabaseAdmin
+      .from("application_documents")
+      .update({
+        application_id: applicationId,
+        opportunity_id: opportunityId,
+      })
+      .in("id", uploadDocIds)
+      .eq("user_id", userId)
+      .is("application_id", null)
+      .eq("is_library_document", false);
+    linkedCount += count ?? uploadDocIds.length;
+  }
+
+  // For library docs, keep originals and create linked copies.
+  if (libraryDocs.length > 0) {
+    const inserts = libraryDocs.map((d) => ({
+      user_id: userId,
       application_id: applicationId,
       opportunity_id: opportunityId,
+      file_name: d.file_name,
+      file_path: d.file_path,
+      file_size: d.file_size,
+      file_type: d.file_type,
       is_library_document: false,
-    })
-    .in("id", validUnlinkedIds)
-    .eq("user_id", userId)
-    .is("application_id", null);
+    }));
 
-  return { linked: count ?? validUnlinkedIds.length, failedIds };
+    const { data: inserted, error: insertErr } = await supabaseAdmin
+      .from("application_documents")
+      .insert(inserts)
+      .select("id");
+
+    if (insertErr) throw insertErr;
+    linkedCount += inserted?.length ?? inserts.length;
+  }
+
+  return { linked: linkedCount, failedIds };
 }
 
 function getTrustedBaseUrl(req: Request): string {

@@ -11,10 +11,10 @@ const Partners = () => {
       icon: Building2,
       description: "Organizations providing financial support to entrepreneurs",
       partners: [
-        { name: "African Development Bank", logo: "ðŸ¦", description: "Leading development finance institution" },
-        { name: "Mastercard Foundation", logo: "ðŸ’³", description: "Advancing financial inclusion across Africa" },
-        { name: "Tony Elumelu Foundation", logo: "ðŸŒŸ", description: "Empowering African entrepreneurs" },
-        { name: "African Business Angels Network", logo: "ðŸ‘”", description: "Connecting startups with angel investors" }
+        { name: "African Development Bank", logo: "logo.png", description: "Leading development finance institution" },
+        { name: "Mastercard Foundation", logo: "logo.png", description: "Advancing financial inclusion across Africa" },
+        { name: "Tony Elumelu Foundation", logo: "logo.png", description: "Empowering African entrepreneurs" },
+        { name: "African Business Angels Network", logo: "logo.png", description: "Connecting startups with angel investors" }
       ]
     },
     {
@@ -22,10 +22,10 @@ const Partners = () => {
       icon: Handshake,
       description: "Organizations offering mentorship and business support",
       partners: [
-        { name: "Techstars", logo: "ðŸš€", description: "Global startup accelerator network" },
-        { name: "Y Combinator", logo: "ðŸ’¡", description: "Premier startup accelerator" },
-        { name: "Andela", logo: "ðŸ’»", description: "Building remote engineering teams" },
-        { name: "MEST Africa", logo: "ðŸŽ“", description: "Training the next generation of tech entrepreneurs" }
+        { name: "Techstars", logo: "logo.png", description: "Global startup accelerator network" },
+        { name: "Y Combinator", logo: "logo.png", description: "Premier startup accelerator" },
+        { name: "Andela", logo: "logo.png", description: "Building remote engineering teams" },
+        { name: "MEST Africa", logo: "logo.png", description: "Training the next generation of tech entrepreneurs" }
       ]
     },
     {
@@ -33,9 +33,9 @@ const Partners = () => {
       icon: Heart,
       description: "Organizations focused on social impact and community development",
       partners: [
-        { name: "Acumen", logo: "â¤ï¸", description: "Patient capital for social enterprises" },
-        { name: "Village Capital", logo: "ðŸŒ", description: "Supporting impact-driven startups" },
-        { name: "Unreasonable Group", logo: "âš¡", description: "Accelerating ventures solving global challenges" }
+        { name: "Acumen", logo: "logo.png", description: "Patient capital for social enterprises" },
+        { name: "Village Capital", logo: "logo.png", description: "Supporting impact-driven startups" },
+        { name: "Unreasonable Group", logo: "logo.png", description: "Accelerating ventures solving global challenges" }
       ]
     },
     {
@@ -43,9 +43,9 @@ const Partners = () => {
       icon: Globe,
       description: "Organizations with strong regional presence",
       partners: [
-        { name: "East Africa Ventures", logo: "ðŸŒ", description: "Supporting East African startups" },
-        { name: "West Africa Innovation Network", logo: "ðŸ”—", description: "Connecting West African innovators" },
-        { name: "Southern Africa Tech Hub", logo: "ðŸ’¼", description: "Fostering tech innovation in Southern Africa" }
+        { name: "East Africa Ventures", logo: "logo.png", description: "Supporting East African startups" },
+        { name: "West Africa Innovation Network", logo: "logo.png", description: "Connecting West African innovators" },
+        { name: "Southern Africa Tech Hub", logo: "logo.png", description: "Fostering tech innovation in Southern Africa" }
       ]
     }
   ];

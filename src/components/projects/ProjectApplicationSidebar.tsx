@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isOpportunityOpen } from "@/lib/opportunityAvailability";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 import { usePlatformFee } from "@/hooks/usePlatformFee";
+import { useTranslation } from "react-i18next";
 
 interface ProjectApplicationSidebarProps {
   project: OpportunityWithTags;
@@ -31,6 +32,7 @@ export function ProjectApplicationSidebar({
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: applicationFee = 0 } = usePlatformFee();
+  const { t } = useTranslation(["common"]);
 
   const isDisabled = !isOpportunityOpen(project.status, project.deadline);
   const projectId = project.id.toString();
@@ -38,10 +40,10 @@ export function ProjectApplicationSidebar({
   const handleNavigateToApplication = (newApplication = false) => {
     if (!user) {
       toast({
-        title: "Login Required",
+        title: t("common:projectApplicationSidebar.loginRequiredTitle"),
         description: newApplication
-          ? "Please log in or create an account to start a new application."
-          : "Please log in or create an account to continue your application.",
+          ? t("common:projectApplicationSidebar.loginRequiredStartNew")
+          : t("common:projectApplicationSidebar.loginRequiredContinue"),
         variant: "default",
       });
       navigate("/auth", {
@@ -60,7 +62,9 @@ export function ProjectApplicationSidebar({
     <Card className="sticky top-8">
       <CardHeader>
         <CardTitle>
-          {isDisabled ? "Applications Closed" : "Start Your Application"}
+          {isDisabled
+            ? t("common:projectApplicationSidebar.applicationsClosed")
+            : t("common:projectApplicationSidebar.startYourApplication")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -69,10 +73,10 @@ export function ProjectApplicationSidebar({
           <Alert className="mb-4 border-blue-500/50 bg-blue-500/5">
             <LogIn className="h-4 w-4 text-blue-500" />
             <AlertTitle className="text-blue-800 dark:text-blue-200">
-              Login Required
+              {t("common:projectApplicationSidebar.loginRequiredTitle")}
             </AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-300">
-              Please log in or create an account to apply for this opportunity.
+              {t("common:projectApplicationSidebar.loginRequiredApply")}
             </AlertDescription>
           </Alert>
         )}
@@ -95,17 +99,17 @@ export function ProjectApplicationSidebar({
               className={hasApprovedApplication ? "text-success" : "text-primary"}
             >
               {hasApprovedApplication
-                ? "Application Approved"
-                : "Application Submitted"}
+                ? t("common:projectApplicationSidebar.applicationApproved")
+                : t("common:projectApplicationSidebar.applicationSubmitted")}
             </AlertTitle>
             <AlertDescription
               className={
                 hasApprovedApplication ? "text-success/80" : "text-primary/80"
               }
             >
-              You already submitted an application for this opportunity (status:{" "}
-              {existingApplication?.status || "pending"}). You can't submit another
-              one.
+              {t("common:projectApplicationSidebar.alreadySubmitted", {
+                status: existingApplication?.status || t("common:projectApplicationSidebar.pending"),
+              })}
             </AlertDescription>
           </Alert>
         )}
@@ -119,16 +123,18 @@ export function ProjectApplicationSidebar({
               navigate(`/dashboard/applications/${existingApplication!.id}`)
             }
           >
-            View Your Application
+            {t("common:projectApplicationSidebar.viewYourApplication")}
           </Button>
         ) : draft ? (
           <>
             <div className="bg-muted/50 rounded-lg p-3 mb-4">
               <p className="text-sm font-medium text-foreground mb-1">
-                You have a saved draft
+                {t("common:projectApplicationSidebar.savedDraftTitle")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Last saved: {new Date(draft.updated_at).toLocaleDateString()} at{" "}
+                {t("common:projectApplicationSidebar.lastSaved")}{" "}
+                {new Date(draft.updated_at).toLocaleDateString()}{" "}
+                {t("common:projectApplicationSidebar.at")}{" "}
                 {new Date(draft.updated_at).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -143,7 +149,7 @@ export function ProjectApplicationSidebar({
               onClick={() => handleNavigateToApplication(false)}
             >
               <Edit className="h-4 w-4 mr-2" />
-              Continue Draft
+              {t("common:projectApplicationSidebar.continueDraft")}
             </Button>
             <Button
               className="w-full"
@@ -152,15 +158,15 @@ export function ProjectApplicationSidebar({
               disabled={isDisabled}
               onClick={() => handleNavigateToApplication(true)}
             >
-              Start New Application
+              {t("common:projectApplicationSidebar.startNewApplication")}
             </Button>
           </>
         ) : (
           <>
             <p className="text-sm text-muted-foreground mb-4">
               {isDisabled
-                ? "This opportunity is no longer accepting applications."
-                : "Ready to apply for this grant? Click below to begin the application process."}
+                ? t("common:projectApplicationSidebar.noLongerAccepting")
+                : t("common:projectApplicationSidebar.readyToApply")}
             </p>
             <Button
               className="w-full"
@@ -169,14 +175,18 @@ export function ProjectApplicationSidebar({
               disabled={isDisabled}
               onClick={() => handleNavigateToApplication(false)}
             >
-              {isDisabled ? "Application Closed" : "Begin Application"}
+              {isDisabled
+                ? t("common:projectApplicationSidebar.applicationClosed")
+                : t("common:projectApplicationSidebar.beginApplication")}
             </Button>
           </>
         )}
 
         {applicationFee > 0 && (
           <p className="text-xs text-muted-foreground mt-3 text-center">
-            Application fee: ${Number(applicationFee).toFixed(2)} (processed at submission)
+            {t("common:projectApplicationSidebar.applicationFee", {
+              amount: Number(applicationFee).toFixed(2),
+            })}
           </p>
         )}
       </CardContent>

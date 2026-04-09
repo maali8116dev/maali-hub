@@ -1,9 +1,12 @@
 {
   "home": "Início",
+  "opportunities": "Oportunidades",
   "projects": "Projetos",
   "about": "Sobre",
   "resources": "Recursos",
+  "blog": "Blog",
   "contact": "Contato",
+  "language": "Idioma",
   "login": "Entrar",
   "getStarted": "Começar",
   "signOut": "Sair",

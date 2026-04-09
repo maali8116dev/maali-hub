@@ -52,6 +52,142 @@
     "next": "Suivant",
     "saving": "Enregistrement...",
     "completionPrompt": "Complétez votre profil pour débloquer toutes les fonctionnalités"
+  },
+  "projectApplicationSidebar": {
+    "loginRequiredTitle": "Connexion requise",
+    "loginRequiredStartNew": "Veuillez vous connecter ou créer un compte pour commencer une nouvelle candidature.",
+    "loginRequiredContinue": "Veuillez vous connecter ou créer un compte pour continuer votre candidature.",
+    "loginRequiredApply": "Veuillez vous connecter ou créer un compte pour postuler à cette opportunité.",
+    "applicationsClosed": "Candidatures fermées",
+    "startYourApplication": "Commencer votre candidature",
+    "applicationApproved": "Candidature approuvée",
+    "applicationSubmitted": "Candidature soumise",
+    "alreadySubmitted": "Vous avez deja soumis une candidature pour cette opportunité (statut : {{status}}). Vous ne pouvez pas en soumettre une autre.",
+    "pending": "en attente",
+    "viewYourApplication": "Voir votre candidature",
+    "savedDraftTitle": "Vous avez un brouillon enregistré",
+    "lastSaved": "Dernière sauvegarde :",
+    "at": "a",
+    "continueDraft": "Continuer le brouillon",
+    "startNewApplication": "Commencer une nouvelle candidature",
+    "noLongerAccepting": "Cette opportunité n'accepte plus de candidatures.",
+    "readyToApply": "Prêt a postuler a cette opportunité ? Cliquez ci-dessous pour commencer le processus de candidature.",
+    "applicationClosed": "Candidature fermée",
+    "beginApplication": "Commencer la candidature",
+    "applicationFee": "Frais de candidature : ${{amount}} (traités a la soumission)"
+  },
+  "opportunitiesPage": {
+    "title": "Opportunités en cours",
+    "subtitle": "Découvrez des opportunités et des programmes conçus pour soutenir les entrepreneurs africains",
+    "searchPlaceholder": "Rechercher des opportunités par titre, description, lieu ou tags...",
+    "clearSearchAria": "Effacer la recherche",
+    "browseByTag": "Parcourir par tag",
+    "filters": {
+      "sector": "Secteur",
+      "selectSector": "Sélectionner un secteur",
+      "allSectors": "Tous les secteurs",
+      "region": "Région",
+      "selectRegion": "Sélectionner une région",
+      "allRegions": "Toutes les régions",
+      "partner": "Partenaire",
+      "selectPartner": "Sélectionner un partenaire",
+      "allPartners": "Tous les partenaires",
+      "status": "Statut",
+      "selectStatus": "Sélectionner un statut",
+      "allStatuses": "Tous les statuts",
+      "open": "Ouvert",
+      "closed": "Fermé"
+    },
+    "clearFilters": "Effacer les filtres",
+    "failedToLoad": "Impossible de charger les opportunités",
+    "showingRange": "Affichage de {{start}} à {{end}} sur {{total}} {{noun}}",
+    "opportunitySingular": "opportunité",
+    "opportunitiesPlural": "opportunités",
+    "show": "Afficher",
+    "empty": {
+      "title": "Aucune opportunité trouvée",
+      "withFilters": "Essayez d'ajuster votre recherche ou vos filtres pour trouver plus d'opportunités.",
+      "default": "Aucune opportunité n'est disponible pour le moment. Revenez plus tard."
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "title": "Contactez-nous",
+      "subtitle": "Entrez en contact avec notre équipe. Nous sommes la pour vous aider a réussir."
+    },
+    "validation": {
+      "firstNameRequired": "Le prénom est requis",
+      "firstNameTooLong": "Le prénom est trop long",
+      "lastNameRequired": "Le nom est requis",
+      "lastNameTooLong": "Le nom est trop long",
+      "subjectRequired": "Veuillez sélectionner un sujet",
+      "messageMin": "Le message doit contenir au moins 10 caractères",
+      "messageTooLong": "Le message est trop long"
+    },
+    "toasts": {
+      "submitFailed": "Échec de l'envoi du message. Veuillez réessayer.",
+      "submitSuccess": "Votre message a été envoyé avec succès ! Nous vous répondrons sous 24 heures.",
+      "unexpectedError": "Une erreur inattendue est survenue. Veuillez réessayer."
+    },
+    "form": {
+      "title": "Envoyez-nous un message",
+      "description": "Remplissez le formulaire ci-dessous et nous vous répondrons dès que possible.",
+      "firstNameLabel": "Prénom *",
+      "firstNamePlaceholder": "Entrez votre prénom",
+      "lastNameLabel": "Nom *",
+      "lastNamePlaceholder": "Entrez votre nom",
+      "emailLabel": "Email *",
+      "emailPlaceholder": "Entrez votre adresse email",
+      "phoneLabel": "Numéro de téléphone",
+      "phonePlaceholder": "Entrez votre numéro de téléphone",
+      "countryLabel": "Pays",
+      "countryPlaceholder": "Sélectionnez votre pays",
+      "countryOther": "Autre",
+      "subjectLabel": "Sujet *",
+      "subjectPlaceholder": "Sélectionnez un sujet",
+      "subjectFunding": "Demande de financement",
+      "subjectApplication": "Assistance candidature",
+      "subjectPartnership": "Partenariat",
+      "subjectTechnical": "Support technique",
+      "subjectGeneral": "Demande générale",
+      "messageLabel": "Message *",
+      "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+      "sending": "Envoi...",
+      "submit": "Envoyer le message"
+    },
+    "success": {
+      "title": "Message envoyé avec succès !",
+      "description": "Merci de nous avoir contactés. Nous avons bien reçu votre message et vous répondrons sous 24 heures.",
+      "sendAnother": "Envoyer un autre message"
+    },
+    "contactInfo": {
+      "title": "Informations de contact",
+      "emailTitle": "Envoyez-nous un email",
+      "emailDescription": "Nous répondrons sous 24 heures",
+      "callTitle": "Appelez-nous",
+      "callDescription": "Lun-Ven, 9h-18h WAT",
+      "officeTitle": "Bureau",
+      "officeDescription": "Opérations panafricaines",
+      "responseTimeTitle": "Temps de réponse",
+      "responseTimeValue": "24 heures",
+      "responseTimeDescription": "Temps moyen de réponse"
+    },
+    "officeLocations": {
+      "title": "Bureaux",
+      "description": "Nous opérons a travers l'Afrique avec des hubs régionaux"
+    },
+    "quickSupport": {
+      "title": "Support rapide",
+      "description": "Besoin d'une assistance immédiate ? Consultez notre FAQ ou planifiez un appel avec notre équipe.",
+      "viewFaq": "Voir la FAQ",
+      "scheduleCall": "Planifier un appel"
+    },
+    "cta": {
+      "title": "Prêt a commencer ?",
+      "description": "N'attendez plus : découvrez les opportunités disponibles dès maintenant",
+      "browseProjects": "Parcourir les projets",
+      "createAccount": "Créer un compte"
+    }
   }
 }
 

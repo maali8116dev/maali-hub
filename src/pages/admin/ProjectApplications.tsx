@@ -191,7 +191,6 @@ const ProjectApplications = () => {
                 if (Number.isNaN(value)) return;
                 setProjectId(value);
                 navigate(`/admin/opportunities/${value}/applications`);
-                setSelectedIds(new Set());
               }}
             >
               <option value="" disabled>

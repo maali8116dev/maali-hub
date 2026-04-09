@@ -1,4 +1,5 @@
-﻿import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+import { useEffect } from "react";
+import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ApplicationFormValues } from "../schemas";
 import type { ApplicationFormData } from "@/stores/applicationForm";
@@ -9,6 +10,7 @@ interface Step7ComplianceProps {
   setValue: UseFormSetValue<ApplicationFormValues>;
   formState: UseFormStateReturn<ApplicationFormValues>;
   updateFormData: (data: Partial<ApplicationFormData>) => void;
+  isGrantType?: boolean;
 }
 
 export function Step7Compliance({
@@ -17,7 +19,17 @@ export function Step7Compliance({
   setValue,
   formState,
   updateFormData,
+  isGrantType = true,
 }: Step7ComplianceProps) {
+  useEffect(() => {
+    // Non-grant flows do not show reporting requirements.
+    // Set this to true so shared step validation does not block progression.
+    if (!isGrantType && !watch("reportingRequirementsAgreed")) {
+      setValue("reportingRequirementsAgreed", true);
+      updateFormData({ reportingRequirementsAgreed: true });
+    }
+  }, [isGrantType, setValue, updateFormData, watch]);
+
   return (
     <div className="space-y-4">
       <div>
@@ -99,40 +111,42 @@ export function Step7Compliance({
           )}
         </div>
 
-        <div className="border rounded-lg p-4 space-y-3">
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="reportingRequirements"
-              checked={!!watch("reportingRequirementsAgreed")}
-              onCheckedChange={(checked) => {
-                setValue("reportingRequirementsAgreed", !!checked);
-                updateFormData({
-                  reportingRequirementsAgreed: !!checked,
-                });
-              }}
-              className="mt-1"
-            />
-            <div className="flex-1">
-              <label
-                htmlFor="reportingRequirements"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Agreement to reporting requirements{" "}
-                <span className="text-destructive">*</span>
-              </label>
-              <p className="text-sm text-muted-foreground mt-1">
-                I agree to provide regular progress reports, financial
-                statements, and other documentation as required by the funding
-                organization.
-              </p>
+        {isGrantType && (
+          <div className="border rounded-lg p-4 space-y-3">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="reportingRequirements"
+                checked={!!watch("reportingRequirementsAgreed")}
+                onCheckedChange={(checked) => {
+                  setValue("reportingRequirementsAgreed", !!checked);
+                  updateFormData({
+                    reportingRequirementsAgreed: !!checked,
+                  });
+                }}
+                className="mt-1"
+              />
+              <div className="flex-1">
+                <label
+                  htmlFor="reportingRequirements"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Agreement to reporting requirements{" "}
+                  <span className="text-destructive">*</span>
+                </label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  I agree to provide regular progress reports, financial
+                  statements, and other documentation as required by the funding
+                  organization.
+                </p>
+              </div>
             </div>
+            {formState.errors.reportingRequirementsAgreed && (
+              <p className="text-sm text-destructive ml-7">
+                {String(formState.errors.reportingRequirementsAgreed.message)}
+              </p>
+            )}
           </div>
-          {formState.errors.reportingRequirementsAgreed && (
-            <p className="text-sm text-destructive ml-7">
-              {String(formState.errors.reportingRequirementsAgreed.message)}
-            </p>
-          )}
-        </div>
+        )}
 
         <div className="border rounded-lg p-4 space-y-3">
           <div className="flex items-start space-x-3">

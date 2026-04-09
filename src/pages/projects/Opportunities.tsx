@@ -33,6 +33,7 @@ import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 // Fallback tags shown when DB has fewer than the limit
 const FALLBACK_TAGS = [
@@ -41,6 +42,7 @@ const FALLBACK_TAGS = [
 ];
 
 const Opportunities = () => {
+  const { t } = useTranslation(["common"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedsector, setSelectedsector] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -165,10 +167,10 @@ const Opportunities = () => {
         {/* Hero header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            Current Opportunities
+            {t("common:opportunitiesPage.title")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover funding opportunities and programs designed to empower African entrepreneurs
+            {t("common:opportunitiesPage.subtitle")}
           </p>
         </div>
 
@@ -179,6 +181,7 @@ const Opportunities = () => {
             <Input
               type="text"
               placeholder="Search opportunities by title, description, location, or tags..."
+              placeholder={t("common:opportunitiesPage.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-10 h-12 text-base"
@@ -187,7 +190,7 @@ const Opportunities = () => {
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
+                aria-label={t("common:opportunitiesPage.clearSearchAria")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -199,7 +202,7 @@ const Opportunities = () => {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Tag className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Browse by tag</span>
+            <span className="text-sm font-medium text-muted-foreground">{t("common:opportunitiesPage.browseByTag")}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {cloudTags.map((tag) => {
@@ -237,7 +240,7 @@ const Opportunities = () => {
               <div className="flex flex-col md:flex-row gap-4 items-end">
                 {/* sector Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="sector-filter" className="mb-2 block">Sector</Label>
+                  <Label htmlFor="sector-filter" className="mb-2 block">{t("common:opportunitiesPage.filters.sector")}</Label>
                   <Select
                     value={selectedsector || "all"}
                     onValueChange={(value) => {
@@ -246,10 +249,10 @@ const Opportunities = () => {
                     }}
                   >
                     <SelectTrigger id="sector-filter" className="w-full">
-                      <SelectValue placeholder="Select sector" />
+                      <SelectValue placeholder={t("common:opportunitiesPage.filters.selectSector")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All sectors</SelectItem>
+                      <SelectItem value="all">{t("common:opportunitiesPage.filters.allSectors")}</SelectItem>
                       {sectors.map((sector) => (
                         <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                       ))}
@@ -259,16 +262,16 @@ const Opportunities = () => {
 
                 {/* Region Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="location-filter" className="mb-2 block">Region</Label>
+                  <Label htmlFor="location-filter" className="mb-2 block">{t("common:opportunitiesPage.filters.region")}</Label>
                   <Select
                     value={selectedLocation || "all"}
                     onValueChange={(value) => setSelectedLocation(value === "all" ? null : value)}
                   >
                     <SelectTrigger id="location-filter" className="w-full">
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder={t("common:opportunitiesPage.filters.selectRegion")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Regions</SelectItem>
+                      <SelectItem value="all">{t("common:opportunitiesPage.filters.allRegions")}</SelectItem>
                       {locations.map((location) => (
                         <SelectItem key={location} value={location}>{location}</SelectItem>
                       ))}
@@ -278,16 +281,16 @@ const Opportunities = () => {
 
                 {/* Partner Filter */}
                 <div className="flex-1 w-full md:w-auto">
-                  <Label htmlFor="partner-filter" className="mb-2 block">Partner</Label>
+                  <Label htmlFor="partner-filter" className="mb-2 block">{t("common:opportunitiesPage.filters.partner")}</Label>
                   <Select
                     value={selectedPartner || "all"}
                     onValueChange={(value) => setSelectedPartner(value === "all" ? null : value)}
                   >
                     <SelectTrigger id="partner-filter" className="w-full">
-                      <SelectValue placeholder="Select partner" />
+                      <SelectValue placeholder={t("common:opportunitiesPage.filters.selectPartner")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Partners</SelectItem>
+                      <SelectItem value="all">{t("common:opportunitiesPage.filters.allPartners")}</SelectItem>
                       {partners.map((partner) => (
                         <SelectItem key={partner.id} value={partner.name}>{partner.name}</SelectItem>
                       ))}
@@ -297,18 +300,18 @@ const Opportunities = () => {
 
                 {/* Status Filter */}
                 <div className="w-full md:w-auto">
-                  <Label htmlFor="status-filter" className="mb-2 block">Status</Label>
+                  <Label htmlFor="status-filter" className="mb-2 block">{t("common:opportunitiesPage.filters.status")}</Label>
                   <Select
                     value={selectedStatus || "all"}
                     onValueChange={(value) => setSelectedStatus(value === "all" ? null : value)}
                   >
                     <SelectTrigger id="status-filter" className="w-full md:w-[160px]">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t("common:opportunitiesPage.filters.selectStatus")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="all">{t("common:opportunitiesPage.filters.allStatuses")}</SelectItem>
+                      <SelectItem value="open">{t("common:opportunitiesPage.filters.open")}</SelectItem>
+                      <SelectItem value="closed">{t("common:opportunitiesPage.filters.closed")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -317,7 +320,7 @@ const Opportunities = () => {
                 {hasActiveFilters && (
                   <Button variant="outline" onClick={handleClearFilters} className="w-full md:w-auto">
                     <X className="h-4 w-4 mr-2" />
-                    Clear Filters
+                    {t("common:opportunitiesPage.clearFilters")}
                   </Button>
                 )}
               </div>
@@ -333,9 +336,9 @@ const Opportunities = () => {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <p className="text-destructive mb-4">
-                  {error instanceof Error ? error.message : "Failed to load opportunities"}
+                  {error instanceof Error ? error.message : t("common:opportunitiesPage.failedToLoad")}
                 </p>
-                <Button onClick={() => refetch()}>Retry</Button>
+                <Button onClick={() => refetch()}>{t("common:tryAgain")}</Button>
               </div>
             </CardContent>
           </Card>
@@ -439,12 +442,17 @@ const Opportunities = () => {
                   {/* Results info */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
                     <div className="text-muted-foreground order-2 sm:order-1">
-                      Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                      {Math.min(currentPage * itemsPerPage, total)} of {total}{" "}
-                      opportunit{total !== 1 ? "ies" : "y"}
+                      {t("common:opportunitiesPage.showingRange", {
+                        start: (currentPage - 1) * itemsPerPage + 1,
+                        end: Math.min(currentPage * itemsPerPage, total),
+                        total,
+                        noun: total !== 1
+                          ? t("common:opportunitiesPage.opportunitiesPlural")
+                          : t("common:opportunitiesPage.opportunitySingular"),
+                      })}
                     </div>
                     <div className="flex items-center gap-2 order-1 sm:order-2">
-                      <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">Show:</Label>
+                      <Label htmlFor="items-per-page" className="text-sm whitespace-nowrap">{t("common:opportunitiesPage.show")}:</Label>
                       <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
                         <SelectTrigger id="items-per-page" className="w-[80px] h-10">
                           <SelectValue />
@@ -467,15 +475,15 @@ const Opportunities = () => {
             <CardContent className="pt-6">
               <EmptyState
                 icon={Search}
-                title="No opportunities found"
+                title={t("common:opportunitiesPage.empty.title")}
                 description={
                   searchQuery || hasActiveFilters
-                    ? "Try adjusting your search terms or filters to find more opportunities."
-                    : "There are no opportunities available at the moment. Check back later for new opportunities."
+                    ? t("common:opportunitiesPage.empty.withFilters")
+                    : t("common:opportunitiesPage.empty.default")
                 }
                 action={
                   searchQuery || hasActiveFilters
-                    ? { label: "Clear Filters", onClick: handleClearFilters, variant: "outline" }
+                    ? { label: t("common:opportunitiesPage.clearFilters"), onClick: handleClearFilters, variant: "outline" }
                     : undefined
                 }
               />

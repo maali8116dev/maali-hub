@@ -64,6 +64,42 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const resolveOpportunityIdForDocument = useCallback(async (
+    userId: string,
+    explicitOpportunityId?: number
+  ): Promise<number> => {
+    if (typeof explicitOpportunityId === "number" && Number.isFinite(explicitOpportunityId)) {
+      return explicitOpportunityId;
+    }
+
+    // Prefer a user's most recent application opportunity
+    const { data: recentApplication } = await supabase
+      .from("applications")
+      .select("opportunity_id")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (typeof recentApplication?.opportunity_id === "number") {
+      return recentApplication.opportunity_id;
+    }
+
+    // Fallback: any available opportunity
+    const { data: anyOpportunity } = await supabase
+      .from("opportunities")
+      .select("id")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (typeof anyOpportunity?.id === "number") {
+      return anyOpportunity.id;
+    }
+
+    throw new Error("No opportunity found to associate document with. Please try again after opportunities are available.");
+  }, []);
+
   const validateFile = useCallback((file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {
       return `File "${file.name}" is too large. Maximum size is 10MB.`;
@@ -144,6 +180,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         )
       );
 
+      const resolvedOpportunityId = await resolveOpportunityIdForDocument(user.id, opportunityId);
+
       // Save metadata to database
       // Library documents should have application_id = null
       const { data: docData, error: dbError } = await supabase
@@ -151,7 +189,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         .insert({
           user_id: user.id,
           application_id: isLibrary ? null : (applicationId || null),
-          opportunity_id: isLibrary ? null : (opportunityId || null),
+          opportunity_id: resolvedOpportunityId,
           file_name: file.name,
           file_path: filePath,
           file_size: file.size,
@@ -201,7 +239,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       });
       return null;
     }
-  }, [toast, validateFile]);
+  }, [toast, validateFile, resolveOpportunityIdForDocument]);
 
   const uploadDocuments = useCallback(async (
     files: File[],

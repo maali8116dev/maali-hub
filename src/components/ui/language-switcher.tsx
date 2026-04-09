@@ -1,4 +1,4 @@
-﻿import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +10,9 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const languages = [
-  { code: 'en', name: 'English', flag: 'ðŸ‡¬ðŸ‡§' },
-  { code: 'fr', name: 'FranÃ§ais', flag: 'ðŸ‡«ðŸ‡·' },
-  // { code: 'pt', name: 'PortuguÃªs', flag: 'ðŸ‡µðŸ‡¹' }
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  // { code: 'pt', name: 'Português', flag: '🇵🇹' }
 ];
 
 export function LanguageSwitcher() {

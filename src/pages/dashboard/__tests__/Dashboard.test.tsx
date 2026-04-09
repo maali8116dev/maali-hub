@@ -32,7 +32,7 @@ vi.mock('react-i18next', () => ({
         'dashboard:dashboard.stats.approved': 'Approved',
         'dashboard:dashboard.stats.rejected': 'Rejected',
         'dashboard:dashboard.emptyState.noApplications': 'No applications yet',
-        'dashboard:dashboard.emptyState.noApplicationsDesc': 'Start applying to funding opportunities to see your applications here.',
+        'dashboard:dashboard.emptyState.noApplicationsDesc': 'Start applying to opportunities to see your applications here.',
         'dashboard:dashboard.profileCompletion.complete': 'Complete',
         'dashboard:dashboard.profileCompletion.title': 'Profile Completion',
         'dashboard:dashboard.profileCompletion.status': 'Progress',
@@ -302,7 +302,7 @@ describe('Dashboard - Data Viewing', () => {
       expect(screen.getByText('No applications yet')).toBeInTheDocument();
       expect(
         screen.getByText(
-          'Start applying to funding opportunities to see your applications here.'
+          'Start applying to opportunities to see your applications here.'
         )
       ).toBeInTheDocument();
     });

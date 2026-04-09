@@ -4,8 +4,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminStats } from "@/hooks/useAdminStats";
-import { useRecentActivity } from "@/hooks/useActivityLogs";
+import { useRecentActivity, type ActivityLog } from "@/hooks/useActivityLogs";
 import { format, formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const toTitleCase = (value: string) =>
   value
@@ -33,8 +34,8 @@ const formatActivityDescription = (activity: {
     }
     if (activity.actionType === "assign_reviewers") {
       const reviewerCount = meta.reviewer_count as number | undefined;
-      if (reviewerCount) return `${actor} assigned ${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} to an application.`;
-      return `${actor} assigned reviewers to an application.`;
+      if (reviewerCount) return `${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} assigned to this application.`;
+      return "Reviewers assigned to this application.";
     }
     if (activity.actionType === "review") {
       if (reviewerName) return `${reviewerName} submitted a review.`;
@@ -50,16 +51,80 @@ const formatActivityDescription = (activity: {
   return `${actor} ${activity.actionType.replace(/_/g, " ")} ${activity.entityType.replace(/_/g, " ")}.`;
 };
 
+const getApplicationRef = (activity: ActivityLog) => {
+  const meta = activity.metadata || {};
+  return (
+    (meta.application_id as string | undefined) ||
+    (meta.app_id as string | undefined) ||
+    activity.entityId ||
+    ""
+  );
+};
+
+const combineRecentActivities = (activities: ActivityLog[]) => {
+  const combined: ActivityLog[] = [];
+  let i = 0;
+
+  while (i < activities.length) {
+    const current = activities[i];
+    const older = activities[i + 1];
+
+    const canCombine =
+      current?.entityType === "application" &&
+      current?.actionType === "assign_reviewers" &&
+      older?.entityType === "application" &&
+      older?.actionType === "submit" &&
+      getApplicationRef(current) !== "" &&
+      getApplicationRef(current) === getApplicationRef(older);
+
+    if (canCombine) {
+      const reviewerCount = (current.metadata?.reviewer_count as number | undefined) || undefined;
+      const appMeta = older.metadata || {};
+      const projectTitle = (appMeta.project_title as string) || (appMeta.opportunity_title as string);
+      const applicantName = (appMeta.applicant_name as string) || (appMeta.full_legal_name as string);
+
+      let description = "Application submitted and review team assigned.";
+      if (applicantName && projectTitle) {
+        description = `${applicantName} submitted an application for "${projectTitle}", and ${reviewerCount ? `${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} assigned` : "reviewers assigned"}.`;
+      } else if (applicantName) {
+        description = `${applicantName} submitted an application, and ${reviewerCount ? `${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} assigned` : "reviewers assigned"}.`;
+      } else if (reviewerCount) {
+        description = `Application submitted and ${reviewerCount} reviewer${reviewerCount === 1 ? "" : "s"} assigned.`;
+      }
+
+      combined.push({
+        ...current,
+        actionType: "submission_and_assignment",
+        description,
+        metadata: {
+          ...(older.metadata || {}),
+          ...(current.metadata || {}),
+          combined_event: true,
+        },
+      });
+      i += 2;
+      continue;
+    }
+
+    combined.push(current);
+    i += 1;
+  }
+
+  return combined;
+};
+
 const AdminDashboard = () => {
+  const { t } = useTranslation(["dashboard"]);
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(10);
+  const displayActivity = recentActivity ? combineRecentActivities(recentActivity) : [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Overview of platform activity and statistics
+          {t("dashboard:adminDashboard.subtitle")}
         </p>
       </div>
 
@@ -67,7 +132,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.totalUsers")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -77,7 +142,7 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.totalUsers.toLocaleString() || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  Registered users
+                  {t("dashboard:adminDashboard.stats.registeredUsers")}
                 </p>
               </>
             )}
@@ -86,7 +151,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Projects</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.totalProjects")}</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -96,7 +161,9 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.totalProjects || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  {stats?.activeProjects || 0} active opportunities
+                  {t("dashboard:adminDashboard.stats.activeOpportunities", {
+                    count: stats?.activeProjects || 0,
+                  })}
                 </p>
               </>
             )}
@@ -105,7 +172,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Applications</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.totalApplications")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -115,7 +182,7 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.totalApplications.toLocaleString() || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  All time submissions
+                  {t("dashboard:adminDashboard.stats.allTimeSubmissions")}
                 </p>
               </>
             )}
@@ -124,7 +191,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Pending Reviews</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.pendingReviews")}</CardTitle>
             <Clock className="h-4 w-4 text-warning hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -134,7 +201,7 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.pendingApplications || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  Awaiting review
+                  {t("dashboard:adminDashboard.stats.awaitingReview")}
                 </p>
               </>
             )}
@@ -143,7 +210,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Approved</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.approved")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500 hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -153,7 +220,7 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.approvedApplications || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  Successfully approved
+                  {t("dashboard:adminDashboard.stats.successfullyApproved")}
                 </p>
               </>
             )}
@@ -162,7 +229,7 @@ const AdminDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Rejected</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t("dashboard:adminDashboard.stats.rejected")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -172,7 +239,7 @@ const AdminDashboard = () => {
               <>
                 <div className="text-xl sm:text-2xl font-bold">{stats?.rejectedApplications || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                  Not approved
+                  {t("dashboard:adminDashboard.stats.notApproved")}
                 </p>
               </>
             )}
@@ -183,32 +250,32 @@ const AdminDashboard = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("dashboard:adminDashboard.quickActions.title")}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <Link to="/admin/opportunities">
               <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
                 <Briefcase className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">Manage Projects</span>
+                <span className="truncate">{t("dashboard:adminDashboard.quickActions.manageProjects")}</span>
               </Button>
             </Link>
             <Link to="/admin/applications">
               <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
                 <FileText className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">Review Apps</span>
+                <span className="truncate">{t("dashboard:adminDashboard.quickActions.reviewApps")}</span>
               </Button>
             </Link>
             <Link to="/admin/users">
               <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
                 <Users className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">Manage Users</span>
+                <span className="truncate">{t("dashboard:adminDashboard.quickActions.manageUsers")}</span>
               </Button>
             </Link>
             <Link to="/admin/activity-logs">
               <Button variant="outline" className="w-full min-h-[44px] text-xs sm:text-sm">
                 <Activity className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="truncate">Activity Logs</span>
+                <span className="truncate">{t("dashboard:adminDashboard.quickActions.activityLogs")}</span>
               </Button>
             </Link>
           </div>
@@ -218,10 +285,10 @@ const AdminDashboard = () => {
       {/* Recent Activity */}
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Recent Activity</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("dashboard:adminDashboard.recentActivity.title")}</CardTitle>
           <Link to="/admin/activity-logs">
             <Button variant="ghost" size="sm" className="min-h-[44px] w-full sm:w-auto">
-              View All
+              {t("dashboard:adminDashboard.recentActivity.viewAll")}
             </Button>
           </Link>
         </CardHeader>
@@ -238,17 +305,17 @@ const AdminDashboard = () => {
                 </div>
               ))}
             </div>
-          ) : !recentActivity || recentActivity.length === 0 ? (
+          ) : displayActivity.length === 0 ? (
             <div className="text-center py-8">
               <Activity className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground mt-2 text-sm sm:text-base">No recent activity</p>
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base">{t("dashboard:adminDashboard.recentActivity.emptyTitle")}</p>
               <p className="text-xs text-muted-foreground">
-                Activity will appear here as users interact with the platform
+                {t("dashboard:adminDashboard.recentActivity.emptyDescription")}
               </p>
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
-              {recentActivity.map((activity) => (
+              {displayActivity.map((activity) => (
                 <div
                   key={activity.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2"
@@ -258,7 +325,9 @@ const AdminDashboard = () => {
                       {formatActivityDescription(activity)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {toTitleCase(activity.actionType)} · {toTitleCase(activity.entityType)}
+                      {activity.actionType === "submission_and_assignment"
+                        ? t("dashboard:adminDashboard.recentActivity.combinedLabel")
+                        : `${toTitleCase(activity.actionType)} · ${toTitleCase(activity.entityType)}`}
                     </p>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">

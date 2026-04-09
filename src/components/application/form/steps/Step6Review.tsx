@@ -1,4 +1,4 @@
-﻿import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   Building2,
@@ -7,12 +7,14 @@ import {
   Edit2,
 } from "lucide-react";
 import type { ApplicationFormData } from "@/stores/applicationForm";
+import { getProjectOverviewCopy } from "../constants";
 
 interface Step6ReviewProps {
   formData: ApplicationFormData;
   selectedFiles: File[];
   selectedLibraryDocIds: string[];
   goToStep: (step: number) => void;
+  isGrantType?: boolean;
 }
 
 export function Step6Review({
@@ -20,7 +22,10 @@ export function Step6Review({
   selectedFiles,
   selectedLibraryDocIds,
   goToStep,
+  isGrantType = true,
 }: Step6ReviewProps) {
+  const { sectionTitle, titleLabel, summaryLabel, locationLabel } = getProjectOverviewCopy(isGrantType);
+
   return (
     <div className="space-y-6">
       <div>
@@ -166,7 +171,7 @@ export function Step6Review({
                 </p>
               </div>
             )}
-            {formData.previousGrantsFundingReceived && (
+            {isGrantType && formData.previousGrantsFundingReceived && (
               <div className="md:col-span-2">
                 <span className="text-muted-foreground">
                   Previous Grants / Funding:
@@ -185,7 +190,7 @@ export function Step6Review({
         <div className="flex items-center justify-between">
           <h4 className="font-medium flex items-center gap-2">
             <FileText className="h-4 w-4 text-primary" />
-            Project Overview
+            {sectionTitle}
           </h4>
           <Button
             type="button"
@@ -200,19 +205,19 @@ export function Step6Review({
         </div>
         <div className="space-y-4 text-sm">
           <div>
-            <span className="text-muted-foreground">Project Title:</span>
+            <span className="text-muted-foreground">{titleLabel}:</span>
             <p className="font-medium">
               {formData.projectTitle || "Not provided"}
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Project Summary:</span>
+            <span className="text-muted-foreground">{summaryLabel}:</span>
             <p className="font-medium mt-1 whitespace-pre-wrap">
               {formData.projectSummary || "Not provided"}
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Geographic Focus:</span>
+            <span className="text-muted-foreground">{locationLabel}:</span>
             <p className="font-medium">
               {formData.geographicFocus || "Not provided"}
             </p>

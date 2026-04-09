@@ -20,6 +20,85 @@
     "profile": "Perfil",
     "billing": "Faturamento",
     "settings": "Configurações"
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie as configurações e preferências da sua conta",
+    "notifications": {
+      "title": "Notificações",
+      "description": "Escolha quais notificações deseja receber",
+      "emailNotifications": "Notificações por e-mail",
+      "emailNotificationsDesc": "Receba atualizações por e-mail sobre suas candidaturas",
+      "applicationUpdates": "Atualizações de candidaturas",
+      "applicationUpdatesDesc": "Seja notificado quando o status da sua candidatura mudar",
+      "newsletter": "Newsletter",
+      "newsletterDesc": "Receba nossa newsletter mensal com oportunidades de financiamento"
+    },
+    "preferences": {
+      "title": "Preferências",
+      "description": "Personalize sua experiência",
+      "language": "Idioma",
+      "theme": "Tema",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "security": {
+      "title": "Segurança",
+      "description": "Gerencie as configurações de segurança da sua conta",
+      "currentPassword": "Senha atual",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar nova senha",
+      "enterCurrentPassword": "Digite a senha atual",
+      "enterNewPassword": "Digite a nova senha",
+      "confirmNewPassword": "Confirme a nova senha",
+      "updatePassword": "Atualizar senha"
+    },
+    "dangerZone": {
+      "title": "Zona de perigo",
+      "description": "Ações irreversíveis e destrutivas",
+      "deleteAccount": "Excluir conta",
+      "deleteAccountDesc": "Excluir permanentemente sua conta e todos os dados associados"
+    },
+    "save": {
+      "saving": "Salvando...",
+      "saveChanges": "Salvar alterações",
+      "saved": "Configurações salvas",
+      "savedDesc": "Suas preferências foram atualizadas.",
+      "languageUpdated": "Idioma atualizado",
+      "themeUpdated": "Tema atualizado"
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Visao geral da atividade e das estatisticas da plataforma",
+    "stats": {
+      "totalUsers": "Total de usuarios",
+      "registeredUsers": "Usuarios registrados",
+      "totalProjects": "Total de projetos",
+      "activeOpportunities": "{{count}} oportunidades ativas",
+      "totalApplications": "Total de candidaturas",
+      "allTimeSubmissions": "Submissoes totais",
+      "pendingReviews": "Revisoes pendentes",
+      "awaitingReview": "Aguardando revisao",
+      "approved": "Aprovado",
+      "successfullyApproved": "Aprovado com sucesso",
+      "rejected": "Rejeitado",
+      "notApproved": "Nao aprovado"
+    },
+    "quickActions": {
+      "title": "Acoes rapidas",
+      "manageProjects": "Gerenciar projetos",
+      "reviewApps": "Revisar candidaturas",
+      "manageUsers": "Gerenciar usuarios",
+      "activityLogs": "Logs de atividade"
+    },
+    "recentActivity": {
+      "title": "Atividade recente",
+      "viewAll": "Ver tudo",
+      "emptyTitle": "Nenhuma atividade recente",
+      "emptyDescription": "A atividade aparecera aqui conforme os usuarios interagem com a plataforma",
+      "combinedLabel": "Submissao + Atribuicao de revisores · Candidatura"
+    }
   }
 }
 

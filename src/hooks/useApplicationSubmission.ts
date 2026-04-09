@@ -198,7 +198,10 @@ export function useApplicationSubmission() {
     );
   }
 
-  const submitApplication = async (draftId?: string | null) => {
+  const submitApplication = async (
+    draftId?: string | null,
+    opportunityType?: string | null
+  ) => {
     if (!user || !formData.projectId) {
       throw new Error("User and opportunity ID are required");
     }
@@ -245,6 +248,7 @@ export function useApplicationSubmission() {
         }
       }
 
+      const isGrantType = (opportunityType ?? "grant") === "grant";
       const applicationData = {
         applicant_type: formData.applicantType,
         full_legal_name: formData.fullLegalName,
@@ -264,7 +268,9 @@ export function useApplicationSubmission() {
         other_social_links: formData.otherSocialLinks || null,
         information_accurate_confirmed: formData.informationAccurateConfirmed,
         conflict_of_interest_declared: formData.conflictOfInterestDeclared,
-        reporting_requirements_agreed: formData.reportingRequirementsAgreed,
+        reporting_requirements_agreed: isGrantType
+          ? formData.reportingRequirementsAgreed
+          : true,
         data_processing_consented: formData.dataProcessingConsented,
         ...(formData.applicantType !== "Individual" && {
           year_established: formData.yearEstablished || null,
@@ -273,10 +279,12 @@ export function useApplicationSubmission() {
           primary_sector_other: formData.primarysectorOther || null,
           team_size: formData.numberOfTeamMembers || null,
           key_team_members_roles: formData.keyTeamMembersRoles || null,
-          previous_grants_funding_received:
-            formData.previousGrantsFundingReceived || false,
-          previous_grants_funding_details:
-            formData.previousGrantsFundingDetails || null,
+          previous_grants_funding_received: isGrantType
+            ? formData.previousGrantsFundingReceived || false
+            : false,
+          previous_grants_funding_details: isGrantType
+            ? formData.previousGrantsFundingDetails || null
+            : null,
         }),
       };
 

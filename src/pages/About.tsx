@@ -277,7 +277,7 @@ const About = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button variant="secondary" size="lg" className="min-h-[48px]">
-              Apply for Funding
+              Apply for Opportunities
             </Button>
             <Button variant="outline" size="lg" className="bg-white/10 border-white/20 text-white hover:bg-white/20 min-h-[48px]">
               Become a Partner

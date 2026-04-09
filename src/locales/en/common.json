@@ -52,6 +52,63 @@
     "next": "Next",
     "saving": "Saving...",
     "completionPrompt": "Complete your profile to unlock all features"
+  },
+  "projectApplicationSidebar": {
+    "loginRequiredTitle": "Login Required",
+    "loginRequiredStartNew": "Please log in or create an account to start a new application.",
+    "loginRequiredContinue": "Please log in or create an account to continue your application.",
+    "loginRequiredApply": "Please log in or create an account to apply for this opportunity.",
+    "applicationsClosed": "Applications Closed",
+    "startYourApplication": "Start Your Application",
+    "applicationApproved": "Application Approved",
+    "applicationSubmitted": "Application Submitted",
+    "alreadySubmitted": "You already submitted an application for this opportunity (status: {{status}}). You can't submit another one.",
+    "pending": "pending",
+    "viewYourApplication": "View Your Application",
+    "savedDraftTitle": "You have a saved draft",
+    "lastSaved": "Last saved:",
+    "at": "at",
+    "continueDraft": "Continue Draft",
+    "startNewApplication": "Start New Application",
+    "noLongerAccepting": "This opportunity is no longer accepting applications.",
+    "readyToApply": "Ready to apply for this opportunity? Click below to begin the application process.",
+    "applicationClosed": "Application Closed",
+    "beginApplication": "Begin Application",
+    "applicationFee": "Application fee: ${{amount}} (processed at submission)"
+  },
+  "opportunitiesPage": {
+    "title": "Current Opportunities",
+    "subtitle": "Discover funding opportunities and programs designed to empower African entrepreneurs",
+    "searchPlaceholder": "Search opportunities by title, description, location, or tags...",
+    "clearSearchAria": "Clear search",
+    "browseByTag": "Browse by tag",
+    "filters": {
+      "sector": "Sector",
+      "selectSector": "Select sector",
+      "allSectors": "All sectors",
+      "region": "Region",
+      "selectRegion": "Select region",
+      "allRegions": "All Regions",
+      "partner": "Partner",
+      "selectPartner": "Select partner",
+      "allPartners": "All Partners",
+      "status": "Status",
+      "selectStatus": "Select status",
+      "allStatuses": "All Statuses",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "clearFilters": "Clear Filters",
+    "failedToLoad": "Failed to load opportunities",
+    "showingRange": "Showing {{start}} to {{end}} of {{total}} {{noun}}",
+    "opportunitySingular": "opportunity",
+    "opportunitiesPlural": "opportunities",
+    "show": "Show",
+    "empty": {
+      "title": "No opportunities found",
+      "withFilters": "Try adjusting your search terms or filters to find more opportunities.",
+      "default": "There are no opportunities available at the moment. Check back later for new opportunities."
+    }
   }
 }
 

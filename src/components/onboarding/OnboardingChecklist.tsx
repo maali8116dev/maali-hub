@@ -98,7 +98,7 @@ export function OnboardingChecklist({
     {
       id: 'submit-application',
       label: 'Submit your first application',
-      description: 'Apply for funding to get started',
+      description: 'Apply for opportunities to get started',
       completed: hasSubmittedApplication,
       action: hasSubmittedApplication ? undefined : {
         label: 'Start Application',

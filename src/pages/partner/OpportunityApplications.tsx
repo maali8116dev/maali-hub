@@ -64,25 +64,15 @@ const PartnerOpportunityApplications = () => {
         header: ({ column }) => (
           <SortableColumnHeader column={column} title="Applicant" />
         ),
-        cell: ({ row }) => (
-          <div>
-            <p className="font-medium">{row.original.applicant_name}</p>
-            <p className="text-xs text-muted-foreground">
-              {row.original.applicant_email}
-            </p>
-          </div>
+        cell: ({ row }) => <p className="font-medium">{row.original.applicant_name}</p>,
+      },
+      {
+        accessorKey: "applicant_email",
+        header: ({ column }) => (
+          <SortableColumnHeader column={column} title="Email" />
         ),
-      },
-      {
-        accessorKey: "organization_name",
-        header: "Organization",
-        cell: ({ row }) => row.original.organization_name || "—",
-      },
-      {
-        accessorKey: "project_title",
-        header: "Project Title",
         cell: ({ row }) => (
-          <span className="text-sm">{row.original.project_title || "—"}</span>
+          <span className="text-sm text-muted-foreground">{row.original.applicant_email || "—"}</span>
         ),
       },
       {
@@ -202,7 +192,7 @@ const PartnerOpportunityApplications = () => {
             <DataTable
               columns={columns}
               data={rankedApplications}
-              searchPlaceholder="Search by applicant name, email, or organization..."
+              searchPlaceholder="Search by applicant name or email..."
               pageSize={10}
               enableSorting={true}
               enablePagination={true}

@@ -57,7 +57,7 @@
     },
     "emptyState": {
       "noApplications": "No applications yet",
-      "noApplicationsDesc": "Start applying to funding opportunities to see your applications here.",
+      "noApplicationsDesc": "Start applying to opportunities to see your applications here.",
       "browseOpportunities": "Browse Opportunities",
       "viewGuide": "View Guide",
       "tips": {
@@ -75,10 +75,10 @@
   },
   "applications": {
     "title": "My Applications",
-    "subtitle": "Track and manage your funding applications",
-    "helpTooltip": "Track the status of all your funding applications. You can filter by status, search, and view detailed information about each application.",
+    "subtitle": "Track and manage your applications",
+    "helpTooltip": "Track the status of all your applications. You can filter by status, search, and view detailed information about each application.",
     "firstTimeTip": {
-      "title": "Ready to apply for funding?",
+      "title": "Ready to apply for opportunities?",
       "description": "Browse available opportunities and submit your first application. Make sure your profile is complete to increase your chances of approval.",
       "action": "Browse Opportunities"
     },
@@ -147,7 +147,7 @@
       "applicationUpdates": "Application Updates",
       "applicationUpdatesDesc": "Get notified when your application status changes",
       "newsletter": "Newsletter",
-      "newsletterDesc": "Receive our monthly newsletter with funding opportunities"
+      "newsletterDesc": "Receive our monthly newsletter with new opportunities"
     },
     "preferences": {
       "title": "Preferences",
@@ -211,7 +211,7 @@
     "subtitle": "Manage your document library and application documents",
     "uploadToLibrary": "Upload to Library",
     "uploading": "Uploading...",
-    "applyForFunding": "Apply for Funding",
+    "applyForFunding": "Apply for Opportunities",
     "searchPlaceholder": "Search documents...",
     "tabs": {
       "library": "Library",
@@ -249,7 +249,7 @@
   "resources": {
     "hero": {
       "title": "Resource Library",
-      "description": "Access guides, templates, tutorials, and tools to help you succeed in your funding applications",
+      "description": "Access guides, templates, tutorials, and tools to help you succeed in your opportunity applications",
       "searchPlaceholder": "Search resources...",
       "availableCount": "{{count}} resources available"
     },
@@ -289,6 +289,37 @@
         "directory": "Directory",
         "event": "Event"
       }
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Overview of platform activity and statistics",
+    "stats": {
+      "totalUsers": "Total Users",
+      "registeredUsers": "Registered users",
+      "totalProjects": "Total Projects",
+      "activeOpportunities": "{{count}} active opportunities",
+      "totalApplications": "Total Applications",
+      "allTimeSubmissions": "All time submissions",
+      "pendingReviews": "Pending Reviews",
+      "awaitingReview": "Awaiting review",
+      "approved": "Approved",
+      "successfullyApproved": "Successfully approved",
+      "rejected": "Rejected",
+      "notApproved": "Not approved"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "manageProjects": "Manage Projects",
+      "reviewApps": "Review Apps",
+      "manageUsers": "Manage Users",
+      "activityLogs": "Activity Logs"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "viewAll": "View All",
+      "emptyTitle": "No recent activity",
+      "emptyDescription": "Activity will appear here as users interact with the platform",
+      "combinedLabel": "Submission + Reviewer Assignment · Application"
     }
   }
 }

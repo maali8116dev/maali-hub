@@ -1,4 +1,4 @@
-﻿import i18n from 'i18next';
+import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
@@ -54,7 +54,7 @@ i18n
       escapeValue: false, // React already escapes values
     },
     detection: {
-      // Detection order: localStorage (saved preference) â†’ querystring â†’ pathname â†’ navigator (browser) â†’ htmlTag
+      // Detection order: localStorage (saved preference) -> querystring -> pathname -> navigator (browser) -> htmlTag
       order: ['localStorage', 'querystring', 'pathname', 'navigator', 'htmlTag'],
       // Cache the detected language
       caches: ['localStorage'],
@@ -64,7 +64,7 @@ i18n
       lookupFromPathIndex: 0,
       // Check HTML lang attribute
       lookupFromSubdomainIndex: 0,
-      // Convert detected language codes (e.g., 'fr-FR' â†’ 'fr', 'pt-BR' â†’ 'pt')
+      // Convert detected language codes (e.g., 'fr-FR' -> 'fr', 'pt-BR' -> 'pt')
       convertDetectedLanguage: (lng: string) => {
         // Map language codes to supported languages
         const languageMap: Record<string, string> = {
@@ -85,7 +85,7 @@ i18n
           return languageMap[lng];
         }
         
-        // Extract base language code (e.g., 'fr-FR' â†’ 'fr')
+        // Extract base language code (e.g., 'fr-FR' -> 'fr')
         const baseLang = lng.split('-')[0];
         
         // Return base language if supported, otherwise fallback to 'en'

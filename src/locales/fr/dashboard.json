@@ -211,7 +211,7 @@
     "subtitle": "Gérez votre bibliothèque de documents et les documents de candidature",
     "uploadToLibrary": "Télécharger dans la bibliothèque",
     "uploading": "Téléchargement...",
-    "applyForFunding": "Postuler pour un financement",
+    "applyForFunding": "Postuler aux opportunités",
     "searchPlaceholder": "Rechercher des documents...",
     "tabs": {
       "library": "Bibliothèque",
@@ -289,6 +289,37 @@
         "directory": "Répertoire",
         "event": "Événement"
       }
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Aperçu de l'activité de la plateforme et des statistiques",
+    "stats": {
+      "totalUsers": "Utilisateurs totaux",
+      "registeredUsers": "Utilisateurs inscrits",
+      "totalProjects": "Projets totaux",
+      "activeOpportunities": "{{count}} opportunités actives",
+      "totalApplications": "Candidatures totales",
+      "allTimeSubmissions": "Soumissions cumulées",
+      "pendingReviews": "Évaluations en attente",
+      "awaitingReview": "En attente d'évaluation",
+      "approved": "Approuvé",
+      "successfullyApproved": "Approuvé avec succès",
+      "rejected": "Rejeté",
+      "notApproved": "Non approuvé"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "manageProjects": "Gérer les projets",
+      "reviewApps": "Évaluer les candidatures",
+      "manageUsers": "Gérer les utilisateurs",
+      "activityLogs": "Journaux d'activité"
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "viewAll": "Voir tout",
+      "emptyTitle": "Aucune activité récente",
+      "emptyDescription": "L'activité apparaîtra ici au fur et à mesure des interactions",
+      "combinedLabel": "Soumission + Attribution des évaluateurs · Candidature"
     }
   }
 }

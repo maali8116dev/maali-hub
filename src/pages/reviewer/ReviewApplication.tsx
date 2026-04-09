@@ -98,6 +98,7 @@ const ReviewApplication = () => {
       return {
         ...app,
         projectTitle: project?.title || "Unknown Opportunity",
+        project,
         applicantName,
         applicantEmail: app.contact_email,
         submittedAt: app.created_at,

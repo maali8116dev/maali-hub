@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,8 +16,8 @@ const Navigation = () => {
 
   const languages = [
     { code: 'en', name: 'English' },
-    { code: 'fr', name: 'FranÃ§ais' },
-    // { code: 'pt', name: 'PortuguÃªs' }
+    { code: 'fr', name: 'Français' },
+    // { code: 'pt', name: 'Português' }
   ];
 
   const currentLang = i18n.language || 'en';
@@ -137,7 +137,7 @@ const Navigation = () => {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "block px-4 py-3 rounded-lg text-base font-medium transition-colors min-h-[48px] flex items-center",
+                  " px-4 py-3 rounded-lg text-base font-medium transition-colors min-h-[48px] flex items-center",
                   location.pathname === item.href 
                     ? "text-primary bg-primary/10" 
                     : "text-foreground hover:text-primary hover:bg-muted/50"

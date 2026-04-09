@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApplicationFormSync } from "@/hooks/useApplicationFormSync";
 import { useApplicationValidation } from "@/hooks/useApplicationValidation";
 import { useApplicationSubmission } from "@/hooks/useApplicationSubmission";
+import { supabase } from "@/integrations/supabase/client";
 import type { ApplicationFormValues } from "./form/schemas";
 import { getStepSchema } from "./form/getStepSchema";
 import { getFormDefaults } from "./form/getFormDefaults";
@@ -113,6 +115,22 @@ const MultiStepApplicationForm = () => {
   // Get selected files from store (persists across navigation)
   const { selectedFiles, selectedLibraryDocIds, setSelectedFiles, setSelectedLibraryDocIds } = useApplicationFormStore();
 
+  const { data: opportunityType } = useQuery({
+    queryKey: ["application-form-opportunity-type", formData.projectId],
+    queryFn: async () => {
+      if (!formData.projectId) return null;
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select("opportunity_type")
+        .eq("id", formData.projectId)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.opportunity_type ?? null;
+    },
+    enabled: !!formData.projectId,
+  });
+  const isGrantType = (opportunityType ?? "grant") === "grant";
+
   // Memoize the files change callback
   const handleFilesChange = useCallback((files: File[]) => {
     setSelectedFiles(files);
@@ -125,7 +143,7 @@ const MultiStepApplicationForm = () => {
 
   // Initialize form with dynamic schema based on current step
   const form = useForm<ApplicationFormValues>({
-    resolver: zodResolver(getStepSchema(currentStep, formData.applicantType)) as any,
+    resolver: zodResolver(getStepSchema(currentStep, formData.applicantType, opportunityType)) as any,
     defaultValues: getFormDefaults(formData),
     mode: "onChange",
   });
@@ -188,7 +206,7 @@ const MultiStepApplicationForm = () => {
       return;
     }
 
-    await submitApplication(draftId);
+    await submitApplication(draftId, opportunityType);
   };
 
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -322,12 +340,13 @@ const MultiStepApplicationForm = () => {
                   formState={form.formState}
                   formData={formData}
                   updateFormData={updateFormData}
+                  isGrantType={isGrantType}
                 />
               )}
 
               {/* Step 3: Project Overview */}
               {currentStep === 3 && (
-                <Step3ProjectOverview control={form.control} />
+                <Step3ProjectOverview control={form.control} isGrantType={isGrantType} />
               )}
 
               {/* Step 4: Social Links */}
@@ -352,6 +371,7 @@ const MultiStepApplicationForm = () => {
                   selectedFiles={selectedFiles}
                   selectedLibraryDocIds={selectedLibraryDocIds}
                   goToStep={goToStep}
+                  isGrantType={isGrantType}
                 />
               )}
 
@@ -363,6 +383,7 @@ const MultiStepApplicationForm = () => {
                   setValue={form.setValue}
                   formState={form.formState}
                   updateFormData={updateFormData}
+                  isGrantType={isGrantType}
                 />
               )}
 
@@ -393,7 +414,7 @@ const MultiStepApplicationForm = () => {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Submitting-¦
+                        Submitting...
                       </>
                     ) : !isEmailVerified ? (
                       <>
