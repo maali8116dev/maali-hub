@@ -133,7 +133,7 @@ const ProjectCard = (props: ProjectCardProps) => {
           </Badge>
         </div>
         <Link to={`/opportunities/${id}`} className="block">
-          <h3 className="text-lg font-semibold group-hover:text-primary transition-colors cursor-pointer hover:underline">
+          <h3 className="text-lg font-semibold group-hover:text-primary transition-colors cursor-pointer hover:underline break-all line-clamp-2">
             {title}
           </h3>
         </Link>

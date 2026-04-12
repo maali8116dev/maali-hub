@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { checkEmailAllowedForAuth } from "@/lib/allowedEmailAuth";
 
 // Form schemas
 const signInSchema = z.object({
@@ -65,7 +66,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  
+
   // Get return URL from location state, or default to dashboard
   const getReturnUrl = () => {
     const from = location.state?.from as { pathname?: string } | undefined;
@@ -102,7 +103,6 @@ const Auth = () => {
     },
   });
 
-  // Check if user is already logged in or arriving from password reset
   useEffect(() => {
     const checkAuth = async () => {
       // Check for password reset (hash) flow
@@ -166,6 +166,17 @@ const Auth = () => {
         toast({
           title: "Invalid email",
           description: emailValidation.message || "Please use a valid email address.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const allowCheck = await checkEmailAllowedForAuth(data.email);
+      if (!allowCheck.ok) {
+        toast({
+          title: "Access restricted",
+          description: allowCheck.message,
           variant: "destructive",
         });
         setIsLoading(false);
@@ -341,6 +352,16 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      const allowCheck = await checkEmailAllowedForAuth(data.email);
+      if (!allowCheck.ok) {
+        toast({
+          title: "Access restricted",
+          description: allowCheck.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const result = await rateLimitedAuth("sign_in", {
         email: data.email,
         password: data.password,
@@ -414,6 +435,16 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
+      const allowCheck = await checkEmailAllowedForAuth(email);
+      if (!allowCheck.ok) {
+        toast({
+          title: "Access restricted",
+          description: allowCheck.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const redirectUrl = `${window.location.origin}/auth`;
 
       // Check rate limit via Edge Function first

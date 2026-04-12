@@ -35,7 +35,8 @@ const HeroSection = () => {
           src={heroImage}
           alt=""
           fetchPriority="high"
-          decoding="async"
+          loading="eager"
+          decoding="sync"
           className="absolute inset-0 w-full h-full object-cover animate-parallax"
           style={{ transform: 'scale(1.1)' }}
         />
