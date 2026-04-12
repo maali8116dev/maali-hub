@@ -53,27 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      allowed_emails: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          note: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          note?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          note?: string | null
-        }
-        Relationships: []
-      }
       application_assignments: {
         Row: {
           application_id: string
@@ -2072,7 +2051,6 @@ export type Database = {
         }[]
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
-      is_email_allowed: { Args: { p_email: string }; Returns: boolean }
       is_opportunity_open: {
         Args: { p_opportunity_id: number }
         Returns: boolean
