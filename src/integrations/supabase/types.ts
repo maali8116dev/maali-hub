@@ -1427,6 +1427,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_password: {
+        Row: {
+          created_at: string
+          id: number
+          password: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          password: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          password?: string
+        }
+        Relationships: []
+      }
       success_stories: {
         Row: {
           company: string
@@ -2099,6 +2117,7 @@ export type Database = {
           reason: string
         }[]
       }
+      verify_site_password: { Args: { p_password: string }; Returns: boolean }
     }
     Enums: {
       experience_level:
