@@ -110,7 +110,7 @@ describe('Draft Workflow - Integration Tests', () => {
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
-      .from('projects')
+      .from('opportunities' as any)
       .insert({
         title: `IntTest Draft Project ${testTimestamp}`,
         description: 'Integration test project for draft workflow',
@@ -180,12 +180,12 @@ describe('Draft Workflow - Integration Tests', () => {
       .from('applications')
       .delete()
       .eq('user_id', testUserId)
-      .eq('project_id', testProjectId);
+      .eq('opportunity_id', testProjectId);
 
     // Clean up test project
     if (testProjectId) {
       await supabaseAdmin
-        .from('projects')
+        .from('opportunities' as any)
         .delete()
         .eq('id', testProjectId);
     }
@@ -263,7 +263,7 @@ describe('Draft Workflow - Integration Tests', () => {
       expect(createdDraft).toBeDefined();
       expect(createdDraft?.is_draft).toBe(true);
       expect(createdDraft?.status).toBe('draft');
-      expect(createdDraft?.project_id).toBe(testProjectId);
+      expect(createdDraft?.opportunity_id).toBe(testProjectId);
       expect(createdDraft?.user_id).toBe(testUserId);
 
       // Step 2: Auto-save draft (update existing)
@@ -459,7 +459,7 @@ describe('Draft Workflow - Integration Tests', () => {
     itIf('should handle draft load when no draft exists', async () => {
       // Create a different project for this test to avoid conflicts
       const { data: newProjectData, error: newProjectError } = await supabaseAdmin!
-        .from('projects')
+        .from('opportunities' as any)
         .insert({
           title: `IntTest Draft Project No Draft ${testTimestamp}`,
           description: 'Integration test project for no draft test',
@@ -508,7 +508,7 @@ describe('Draft Workflow - Integration Tests', () => {
       } finally {
         // Clean up the test project
         await supabaseAdmin!
-          .from('projects')
+          .from('opportunities' as any)
           .delete()
           .eq('id', newProjectId);
       }

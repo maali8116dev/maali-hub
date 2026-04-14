@@ -68,7 +68,7 @@ describe('useAdminApplications (Hook)', () => {
   it('should fetch all applications excluding drafts', async () => {
     const mockRpcResponse = [
       {
-        id: 'app-1', user_id: 'user-1', project_id: 1,
+        id: 'app-1', user_id: 'user-1', opportunity_id: 1,
         contact_email: 'a1@example.com', company_name: 'Company 1',
         status: 'pending', is_draft: false, created_at: '2024-01-01T00:00:00Z',
         funding_amount: '$50,000', applicant_name: 'John Doe',
@@ -76,7 +76,7 @@ describe('useAdminApplications (Hook)', () => {
         submitted_at: '2024-01-01T00:00:00Z', reviewer_decisions: [],
       },
       {
-        id: 'app-2', user_id: 'user-2', project_id: 2,
+        id: 'app-2', user_id: 'user-2', opportunity_id: 2,
         contact_email: 'a2@example.com', company_name: 'Company 2',
         status: 'approved', is_draft: false, created_at: '2024-01-02T00:00:00Z',
         funding_amount: '$75,000', applicant_name: 'Jane Smith',
@@ -100,7 +100,7 @@ describe('useAdminApplications (Hook)', () => {
   it('should map status correctly (under_review preserved)', async () => {
     (supabase.rpc as any).mockResolvedValue({
       data: [{
-        id: 'app-1', user_id: 'user-1', project_id: 1,
+        id: 'app-1', user_id: 'user-1', opportunity_id: 1,
         contact_email: 'a1@example.com', status: 'under_review', is_draft: false,
         created_at: '2024-01-01T00:00:00Z', funding_amount: '$50,000',
         applicant_name: 'John Doe', applicant_email: 'a1@example.com',
@@ -126,7 +126,7 @@ describe('useAdminApplications (Hook)', () => {
   it('should handle missing profile gracefully', async () => {
     (supabase.rpc as any).mockResolvedValue({
       data: [{
-        id: 'app-1', user_id: 'user-1', project_id: 1,
+        id: 'app-1', user_id: 'user-1', opportunity_id: 1,
         contact_email: 'a1@example.com', status: 'pending', is_draft: false,
         created_at: '2024-01-01T00:00:00Z', funding_amount: '$50,000',
         applicant_name: null, applicant_email: null,
@@ -209,7 +209,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     const { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
     const sectorId = catData?.id || 1;
 
-    const { data: projectData, error: projectError } = await supabaseAdmin.from('projects').insert({
+    const { data: projectData, error: projectError } = await supabaseAdmin.from('opportunities' as any).insert({
       title: `Test Project ${Date.now()}`, description: 'Test', status: 'open',
       sector_id: sectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
@@ -231,7 +231,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
       }, { onConflict: 'user_id' });
 
       const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
-        user_id: ud.user.id, project_id: testProjectId, contact_email: email,
+        user_id: ud.user.id, opportunity_id: testProjectId, contact_email: email,
         organization_name: `Company ${i}`, status: i === 0 ? 'pending' : 'approved',
         is_draft: false,
       }).select('id').single();
@@ -242,7 +242,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
   afterAll(async () => {
     if (!supabaseAdmin) return;
     if (testApplicationIds.length) await supabaseAdmin.from('applications').delete().in('id', testApplicationIds);
-    if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
+    if (testProjectId) await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
     for (const id of [...testUserIds, adminUserId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(id); } catch { /* */ }
     }
@@ -268,7 +268,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
 
     // Insert an under_review application
     const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
-      user_id: testUserIds[0], project_id: testProjectId,
+      user_id: testUserIds[0], opportunity_id: testProjectId,
       contact_email: 'ur@test.com', status: 'under_review', is_draft: false,
     }).select('id').single();
 
@@ -288,7 +288,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
 
     // Insert a draft
     const { data: draftApp } = await (supabaseAdmin.from('applications') as any).insert({
-      user_id: testUserIds[0], project_id: testProjectId,
+      user_id: testUserIds[0], opportunity_id: testProjectId,
       contact_email: 'draft@test.com', status: 'pending', is_draft: true,
     }).select('id').single();
 

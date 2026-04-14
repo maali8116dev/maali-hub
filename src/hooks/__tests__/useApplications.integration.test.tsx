@@ -163,7 +163,7 @@ describe('useApplications - Integration Tests', () => {
 
     for (const project of testProjects) {
       const { data: newProject, error: projectError } = await supabaseAdmin
-        .from('projects')
+        .from('opportunities' as any)
         .insert(project)
         .select('id')
         .single();
@@ -177,7 +177,7 @@ describe('useApplications - Integration Tests', () => {
     const testApplications = [
       {
         user_id: testUserId,
-        project_id: testProjectIds[0],
+        opportunity_id: testProjectIds[0],
         contact_email: testEmail,
         organization_name: 'Test Company 1',
         country_of_residence: 'Ghana',
@@ -188,7 +188,7 @@ describe('useApplications - Integration Tests', () => {
       },
       {
         user_id: testUserId,
-        project_id: testProjectIds[1],
+        opportunity_id: testProjectIds[1],
         contact_email: testEmail,
         organization_name: 'Test Company 2',
         country_of_residence: 'Nigeria',
@@ -199,7 +199,7 @@ describe('useApplications - Integration Tests', () => {
       },
       {
         user_id: testUserId,
-        project_id: testProjectIds[0],
+        opportunity_id: testProjectIds[0],
         contact_email: testEmail,
         organization_name: 'Test Company 3',
         country_of_residence: 'Ghana',
@@ -240,7 +240,7 @@ describe('useApplications - Integration Tests', () => {
     // Clean up test projects
     if (testProjectIds.length > 0) {
       await supabaseAdmin
-        .from('projects')
+        .from('opportunities' as any)
         .delete()
         .in('id', testProjectIds);
     }

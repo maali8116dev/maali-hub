@@ -86,7 +86,7 @@ describe('useAssignReviewers -” real user flow', () => {
     testsectorId = catData?.id || 1;
 
     // Project
-    const { data: pj } = await supabaseAdmin.from('projects').insert({
+    const { data: pj } = await supabaseAdmin.from('opportunities' as any).insert({
       title: `IntTest Assign ${Date.now()}`, description: 'Test', status: 'open',
       sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
@@ -106,7 +106,7 @@ describe('useAssignReviewers -” real user flow', () => {
 
     // Application
     const { data: app } = await (supabaseAdmin.from('applications') as any).insert({
-      user_id: testApplicantId, project_id: testProjectId,
+      user_id: testApplicantId, opportunity_id: testProjectId,
       contact_email: aEmail, company_name: 'Test', status: 'pending', is_draft: false,
     }).select('id').single();
     testApplicationId = app!.id;
@@ -135,7 +135,7 @@ describe('useAssignReviewers -” real user flow', () => {
       await supabaseAdmin.from('application_assignments').delete().eq('application_id', testApplicationId);
       await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
     }
-    if (testProjectId) await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
+    if (testProjectId) await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
     for (const rid of testReviewerIds) {
       await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', rid);
     }
