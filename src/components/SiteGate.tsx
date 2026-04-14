@@ -20,7 +20,7 @@ export function SiteGate({ children }: { children: ReactNode }) {
     }
 
     (async () => {
-      const { data, error: rpcError } = await supabase.rpc("verify_site_password", {
+      const { data, error: rpcError } = await (supabase.rpc as any)("verify_site_password", {
         p_password: "",
       });
 
@@ -38,7 +38,7 @@ export function SiteGate({ children }: { children: ReactNode }) {
     setChecking(true);
     setError("");
 
-    const { data, error: rpcError } = await supabase.rpc("verify_site_password", {
+    const { data, error: rpcError } = await (supabase.rpc as any)("verify_site_password", {
       p_password: password,
     });
 

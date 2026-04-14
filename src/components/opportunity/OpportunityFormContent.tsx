@@ -132,7 +132,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
     showFeatured = false,
   } = props;
 
-  const { register, watch, setValue, formState, handleSubmit } = form;
+  const { register, watch, setValue, formState, handleSubmit } = form as UseFormReturn<any>;
   const errors = formState?.errors ?? {};
   const status = watch("status");
   const sectorId = watch("sectorId");
