@@ -53,24 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      site_password: {
-        Row: {
-          created_at: string
-          id: number
-          password: string
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          password: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          password?: string
-        }
-        Relationships: []
-      }
       allowed_emails: {
         Row: {
           created_at: string
@@ -2091,7 +2073,6 @@ export type Database = {
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
-      verify_site_password: { Args: { p_password: string }; Returns: boolean }
       is_opportunity_open: {
         Args: { p_opportunity_id: number }
         Returns: boolean
