@@ -106,7 +106,7 @@ describe('Application Review Workflow - Integration Tests', () => {
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
-      .from('projects')
+      .from('opportunities' as any)
       .insert({
         title: `IntTest Review Workflow Project ${testTimestamp}`,
         description: 'Integration test project for review workflow',
@@ -153,7 +153,7 @@ describe('Application Review Workflow - Integration Tests', () => {
       .from('applications') as any)
       .insert({
         user_id: testApplicantId,
-        project_id: testProjectId,
+        opportunity_id: testProjectId,
         contact_email: applicantEmail,
         organization_name: 'Test Organization',
         country_of_residence: 'Ghana',
@@ -277,7 +277,7 @@ describe('Application Review Workflow - Integration Tests', () => {
     // Clean up project
     if (testProjectId) {
       await supabaseAdmin
-        .from('projects')
+        .from('opportunities' as any)
         .delete()
         .eq('id', testProjectId);
     }
@@ -521,7 +521,7 @@ describe('Application Review Workflow - Integration Tests', () => {
         .from('applications') as any)
         .insert({
           user_id: testApplicantId,
-          project_id: testProjectId,
+          opportunity_id: testProjectId,
           contact_email: `int-conflict-${testTimestamp}@maali.test`,
           organization_name: 'Conflict Test Org',
           status: 'pending',

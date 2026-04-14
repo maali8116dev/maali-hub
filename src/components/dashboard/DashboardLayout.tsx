@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/sidebar";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {

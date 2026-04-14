@@ -106,7 +106,7 @@ beforeAll(async () => {
     .single();
   const sectorId = catData?.id || 1;
 
-  const { data: pj, error: pe } = await supabaseAdmin.from('projects').insert({
+  const { data: pj, error: pe } = await supabaseAdmin.from('opportunities' as any).insert({
     title: `IntTest Project ${Date.now()}`,
     description: 'Integration test project',
     status: 'open',
@@ -135,7 +135,7 @@ beforeAll(async () => {
 
     const { data: appData } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: ud.user.id,
-      project_id: testProjectId,
+      opportunity_id: testProjectId,
       contact_email: email,
       organization_name: `IntTest Company ${i}`,
       status: i === 0 ? 'pending' : 'approved',
@@ -151,7 +151,7 @@ afterAll(async () => {
     await supabaseAdmin.from('applications').delete().in('id', testApplicationIds);
   }
   if (testProjectId) {
-    await supabaseAdmin.from('projects').delete().eq('id', testProjectId);
+    await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
   }
   for (const uid of [...testUserIds, adminUserId]) {
     try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }
@@ -196,7 +196,7 @@ describe('useAdminApplications -” real user flow', () => {
     // Insert an under_review application
     const { data: urApp } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
-      project_id: testProjectId,
+      opportunity_id: testProjectId,
       contact_email: 'underreview@test.com',
       status: 'under_review',
       is_draft: false,
@@ -220,7 +220,7 @@ describe('useAdminApplications -” real user flow', () => {
 
     const { data: draft } = await (supabaseAdmin.from('applications') as any).insert({
       user_id: testUserIds[0],
-      project_id: testProjectId,
+      opportunity_id: testProjectId,
       contact_email: 'draft@test.com',
       status: 'pending',
       is_draft: true,
