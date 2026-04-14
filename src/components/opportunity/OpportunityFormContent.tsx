@@ -441,10 +441,10 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
 
             <OpportunityAttachmentsCard
               isEditing={!!isEditing}
-              documents={documents}
+              documents={documents as any}
               isUploading={isFilesUploading}
-              upload={upload}
-              remove={remove}
+              upload={upload as any}
+              remove={remove as any}
               pendingFiles={pendingFiles}
               setPendingFiles={setPendingFiles}
             />
