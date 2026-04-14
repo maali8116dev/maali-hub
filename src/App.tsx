@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
+import { SiteGate } from "@/components/SiteGate";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
@@ -154,6 +155,7 @@ const App = () => {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <ErrorBoundary>
+          <SiteGate>
           <TooltipProvider>
             <TrackingInitializer />
             <Toaster />
@@ -799,6 +801,7 @@ const App = () => {
               </Suspense>
         </BrowserRouter>
       </TooltipProvider>
+          </SiteGate>
     </ErrorBoundary>
     </QueryClientProvider>
   </ThemeProvider>

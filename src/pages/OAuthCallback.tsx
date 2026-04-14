@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { checkEmailAllowedForAuth } from '@/lib/allowedEmailAuth';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -68,16 +67,6 @@ const OAuthCallback = () => {
           if (!userEmail) {
             await supabase.auth.signOut();
             setError('Your account has no email on file. Please use email sign-in.');
-            setTimeout(() => {
-              navigate('/auth', { replace: true });
-            }, 3000);
-            return;
-          }
-
-          const allowCheck = await checkEmailAllowedForAuth(userEmail);
-          if (!allowCheck.ok) {
-            await supabase.auth.signOut();
-            setError(allowCheck.message);
             setTimeout(() => {
               navigate('/auth', { replace: true });
             }, 3000);

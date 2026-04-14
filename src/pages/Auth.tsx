@@ -16,7 +16,6 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
-import { checkEmailAllowedForAuth } from "@/lib/allowedEmailAuth";
 
 // Form schemas
 const signInSchema = z.object({
@@ -166,17 +165,6 @@ const Auth = () => {
         toast({
           title: "Invalid email",
           description: emailValidation.message || "Please use a valid email address.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const allowCheck = await checkEmailAllowedForAuth(data.email);
-      if (!allowCheck.ok) {
-        toast({
-          title: "Access restricted",
-          description: allowCheck.message,
           variant: "destructive",
         });
         setIsLoading(false);
@@ -352,16 +340,6 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const allowCheck = await checkEmailAllowedForAuth(data.email);
-      if (!allowCheck.ok) {
-        toast({
-          title: "Access restricted",
-          description: allowCheck.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
       const result = await rateLimitedAuth("sign_in", {
         email: data.email,
         password: data.password,
@@ -435,16 +413,6 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const allowCheck = await checkEmailAllowedForAuth(email);
-      if (!allowCheck.ok) {
-        toast({
-          title: "Access restricted",
-          description: allowCheck.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
       const redirectUrl = `${window.location.origin}/auth`;
 
       // Check rate limit via Edge Function first
