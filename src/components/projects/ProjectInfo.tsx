@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase, CreditCard } from "lucide-react";
@@ -94,7 +95,7 @@ const formatProjectDate = (dateString: string) => {
         )}
         <div 
           className="text-muted-foreground mb-6"
-          dangerouslySetInnerHTML={{ __html: project.description }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(project.description || "") }}
         />
 
         {/* Basic Information Grid */}
