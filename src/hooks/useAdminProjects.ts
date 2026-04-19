@@ -361,12 +361,12 @@ export function useDeleteProject() {
         .eq("id", id)
         .single();
       
-      const { error } = await supabase
-        .from("opportunities" as any)
-        .delete()
-        .eq("id", id);
+      const { data: deleted, error } = await supabase.rpc("admin_delete_opportunity", {
+        p_opportunity_id: id,
+      });
 
       if (error) throw error;
+      if (!deleted) throw new Error("Opportunity not found.");
       return { id, title: (project as any)?.title || "Unknown" };
     },
     onSuccess: (data) => {

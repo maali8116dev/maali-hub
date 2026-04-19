@@ -1,6 +1,6 @@
 
 -- Create allowed_emails table
-CREATE TABLE public.allowed_emails (
+CREATE TABLE IF NOT EXISTS public.allowed_emails (
   id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   email text NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),

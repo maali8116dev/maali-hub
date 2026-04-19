@@ -1,168 +1,194 @@
-﻿import Navigation from "@/components/Navigation";
+import { useState } from "react";
+import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Lock, Eye, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Shield } from "lucide-react";
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <Card className="mb-6">
+    <CardContent className="pt-6">
+      <h2 className="text-xl font-bold mb-3">{title}</h2>
+      <div className="text-muted-foreground space-y-2 text-sm leading-relaxed">{children}</div>
+    </CardContent>
+  </Card>
+);
 
 const Privacy = () => {
-  const sections = [
-    {
-      title: "Information We Collect",
-      icon: FileText,
-      content: [
-        "Personal Information: Name, email address, phone number, and other contact details you provide when creating an account.",
-        "Business Information: Company name, business registration details, financial information, and other business-related data you submit in applications.",
-        "Usage Data: Information about how you interact with our platform, including pages visited, time spent, and features used.",
-        "Technical Data: IP address, browser type, device information, and other technical data collected automatically."
-      ]
-    },
-    {
-      title: "How We Use Your Information",
-      icon: Eye,
-      content: [
-        "To provide and improve our services, including processing applications and facilitating communication with funders.",
-        "To personalize your experience and provide relevant funding opportunities.",
-        "To communicate with you about your account, applications, and important updates.",
-        "To analyze platform usage and improve our services.",
-        "To comply with legal obligations and protect our rights."
-      ]
-    },
-    {
-      title: "Data Sharing and Disclosure",
-      icon: Shield,
-      content: [
-        "We may share your application information with funding organizations when you apply for opportunities.",
-        "We may share data with service providers who assist us in operating our platform, subject to confidentiality agreements.",
-        "We may disclose information if required by law or to protect our rights and the rights of our users.",
-        "We do not sell your personal information to third parties."
-      ]
-    },
-    {
-      title: "Data Security",
-      icon: Lock,
-      content: [
-        "We implement industry-standard security measures to protect your data, including encryption and secure servers.",
-        "Access to your personal information is restricted to authorized personnel only.",
-        "While we strive to protect your data, no method of transmission over the internet is 100% secure.",
-        "You are responsible for maintaining the confidentiality of your account credentials."
-      ]
-    },
-    {
-      title: "Your Rights",
-      icon: FileText,
-      content: [
-        "Access: You can request access to the personal information we hold about you.",
-        "Correction: You can update or correct your personal information through your account settings.",
-        "Deletion: You can request deletion of your account and associated data, subject to legal and operational requirements.",
-        "Objection: You can object to certain processing of your personal information.",
-        "Data Portability: You can request a copy of your data in a portable format."
-      ]
-    },
-    {
-      title: "Cookies and Tracking",
-      icon: Eye,
-      content: [
-        "We use cookies and similar technologies to enhance your experience and analyze platform usage.",
-        "You can control cookie preferences through your browser settings.",
-        "Some features may not function properly if cookies are disabled.",
-        "For more information, please see our Cookie Policy."
-      ]
-    },
-    {
-      title: "Data Retention",
-      icon: Lock,
-      content: [
-        "We retain your personal information for as long as necessary to provide our services and comply with legal obligations.",
-        "Application data may be retained for longer periods to maintain records and support future opportunities.",
-        "You can request deletion of your data at any time, subject to legal requirements."
-      ]
-    },
-    {
-      title: "International Data Transfers",
-      icon: Shield,
-      content: [
-        "Your information may be transferred to and processed in countries other than your country of residence.",
-        "We ensure appropriate safeguards are in place to protect your data during international transfers.",
-        "By using our platform, you consent to the transfer of your information as described in this policy."
-      ]
-    }
-  ];
+  const [lang, setLang] = useState("en");
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-primary" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground">
-            Last updated: January 2024
-          </p>
+  <div className="min-h-screen bg-background">
+    <Navigation />
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="text-center mb-12">
+        <div className="flex justify-center mb-4">
+          <Shield className="h-12 w-12 text-primary" />
         </div>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          {lang === "de" ? "Datenschutzerklärung" : "Privacy Policy"}
+        </h1>
+        <p className="text-muted-foreground">
+          {lang === "de" ? "Stand: April 2026" : "Last updated: April 2026"}
+        </p>
+      </div>
 
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground mb-4">
-              At Maali, we are committed to protecting your privacy and ensuring the security of your personal information.
-              This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
-            </p>
-            <p className="text-muted-foreground">
-              By using Maali, you agree to the collection and use of information in accordance with this policy.
-              If you do not agree with our policies and practices, please do not use our services.
-            </p>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="en" onValueChange={setLang}>
+        <TabsList className="mb-8">
+          <TabsTrigger value="en">English</TabsTrigger>
+          <TabsTrigger value="de">Deutsch</TabsTrigger>
+        </TabsList>
 
-        <div className="space-y-6 mb-12">
-          {sections.map((section, index) => {
-            const Icon = section.icon;
-            return (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <h2 className="text-2xl font-bold">{section.title}</h2>
-                  </div>
-                  <ul className="space-y-2">
-                    {section.content.map((item, itemIndex) => (
-                      <li key={itemIndex} className="flex items-start gap-2 text-muted-foreground">
-                        <span className="text-primary mt-1">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <TabsContent value="en">
+          <Section title="Controller">
+            <p>Techin Global UG (haftungsbeschränkt)</p>
+            <p>Biluge Mushegera</p>
+            <p>Erfurt, Germany</p>
+            <p>Email: info@maali.tech</p>
+          </Section>
+          <Section title="General Information">
+            <p>Processing is carried out in accordance with GDPR.</p>
+          </Section>
+          <Section title="Data Processed">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Personal data</li>
+              <li>Contact data</li>
+              <li>Usage data</li>
+              <li>Technical data</li>
+            </ul>
+          </Section>
+          <Section title="Purpose & Legal Basis">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Website operation → Art. 6(1)(f) GDPR</li>
+              <li>Communication → Art. 6(1)(b) GDPR</li>
+              <li>Security → Art. 6(1)(f) GDPR</li>
+              <li>Payments → Art. 6(1)(b) GDPR</li>
+            </ul>
+          </Section>
+          <Section title="Server Logs">
+            <p>Technical data is collected for security purposes.</p>
+          </Section>
+          <Section title="Contact">
+            <p>Data is stored to process inquiries.</p>
+          </Section>
+          <Section title="Payments (Stripe)">
+            <p>Processed via Stripe Payments Europe Ltd., Ireland.</p>
+            <p>Data may be transferred to the US under Standard Contractual Clauses.</p>
+          </Section>
+          <Section title="Cookies">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Necessary cookies</li>
+              <li>Optional cookies with consent</li>
+            </ul>
+            <p>Consent can be withdrawn anytime.</p>
+          </Section>
+          <Section title="International Transfers">
+            <p>Transfers occur under appropriate safeguards.</p>
+          </Section>
+          <Section title="Retention">
+            <p>Data is stored only as long as necessary.</p>
+          </Section>
+          <Section title="Your Rights">
+            <p>Access, correction, deletion, restriction, portability, objection.</p>
+            <p>You may withdraw consent at any time.</p>
+          </Section>
+          <Section title="Complaint">
+            <p>You may contact a supervisory authority in Germany.</p>
+          </Section>
+          <Section title="Security">
+            <p>We implement appropriate safeguards.</p>
+          </Section>
+          <Section title="Automated Decisions">
+            <p>No automated decision-making.</p>
+          </Section>
+          <Section title="Changes">
+            <p>We may update this policy.</p>
+          </Section>
+        </TabsContent>
 
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="pt-6">
-            <h2 className="text-2xl font-bold mb-4">Contact Us</h2>
-            <p className="text-muted-foreground mb-4">
-              If you have any questions about this Privacy Policy or our data practices, please contact us:
-            </p>
-            <div className="space-y-2 text-muted-foreground">
-              <p><strong>Email:</strong> privacy@maali.africa</p>
-              <p><strong>Address:</strong> Nairobi, Kenya</p>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-      <Footer />
-    </div>
+        <TabsContent value="de">
+          <Section title="Verantwortlicher">
+            <p>Techin Global UG (haftungsbeschränkt)</p>
+            <p>Biluge Mushegera</p>
+            <p>Juri-Gagarin-Ring 132/92, 99084 Erfurt, Deutschland</p>
+            <p>E-Mail: info@maali.tech</p>
+          </Section>
+          <Section title="Allgemeine Hinweise">
+            <p>Die Datenverarbeitung erfolgt gemäß DSGVO, BDSG und TTDSG.</p>
+          </Section>
+          <Section title="Verarbeitete Daten">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Bestandsdaten</li>
+              <li>Kontaktdaten</li>
+              <li>Inhaltsdaten</li>
+              <li>Nutzungsdaten</li>
+              <li>Verbindungsdaten</li>
+            </ul>
+          </Section>
+          <Section title="Zwecke & Rechtsgrundlagen">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Websitebetrieb → Art. 6 Abs. 1 lit. f DSGVO</li>
+              <li>Kontakt → Art. 6 Abs. 1 lit. b DSGVO</li>
+              <li>Sicherheit → Art. 6 Abs. 1 lit. f DSGVO</li>
+              <li>Zahlungen → Art. 6 Abs. 1 lit. b DSGVO</li>
+            </ul>
+          </Section>
+          <Section title="Server-Logfiles">
+            <p>Erhebung von IP-Adresse, Browser, Systemdaten zur Sicherstellung der IT-Sicherheit.</p>
+          </Section>
+          <Section title="Kontaktaufnahme">
+            <p>Daten werden zur Bearbeitung von Anfragen gespeichert.</p>
+          </Section>
+          <Section title="Zahlungsdienstleister Stripe">
+            <p>Stripe Payments Europe Ltd., Dublin, Irland</p>
+            <p>Verarbeitet werden Zahlungs- und Transaktionsdaten.</p>
+            <p>Rechtsgrundlage: Vertragserfüllung und berechtigtes Interesse.</p>
+            <p>Datenübertragung in die USA auf Basis von Standardvertragsklauseln möglich.</p>
+            <p><a href="https://stripe.com/privacy" className="text-primary underline" target="_blank" rel="noreferrer">https://stripe.com/privacy</a></p>
+          </Section>
+          <Section title="Cookies">
+            <ul className="list-disc list-inside space-y-1">
+              <li>Notwendig → Art. 6 Abs. 1 lit. f DSGVO</li>
+              <li>Optional → Einwilligung erforderlich</li>
+            </ul>
+            <p>Widerruf jederzeit möglich.</p>
+          </Section>
+          <Section title="Drittlandübermittlung">
+            <p>Datenübertragung erfolgt nur mit geeigneten Garantien (Art. 44 ff. DSGVO).</p>
+          </Section>
+          <Section title="Speicherdauer">
+            <p>Nur so lange wie erforderlich oder gesetzlich vorgeschrieben.</p>
+          </Section>
+          <Section title="Rechte der Betroffenen">
+            <p>Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch.</p>
+            <p>Einwilligungen können jederzeit widerrufen werden.</p>
+          </Section>
+          <Section title="Beschwerderecht">
+            <p>Thüringer Landesbeauftragter für den Datenschutz und die Informationsfreiheit</p>
+          </Section>
+          <Section title="Datensicherheit">
+            <p>Technische und organisatorische Schutzmaßnahmen sind implementiert.</p>
+          </Section>
+          <Section title="Automatisierte Entscheidungen">
+            <p>Keine automatisierte Entscheidungsfindung gemäß Art. 22 DSGVO.</p>
+          </Section>
+          <Section title="Änderungen">
+            <p>Wir behalten uns Änderungen vor.</p>
+          </Section>
+        </TabsContent>
+      </Tabs>
+
+      <Card className="bg-primary/5 border-primary/20 mt-8">
+        <CardContent className="pt-6">
+          <h2 className="text-xl font-bold mb-3">Contact</h2>
+          <p className="text-muted-foreground text-sm">Email: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+          <p className="text-muted-foreground text-sm">Tel: +49 361 21886352</p>
+        </CardContent>
+      </Card>
+    </main>
+    <Footer />
+  </div>
   );
 };
 
 export default Privacy;
-
-
-
-
-
-
-
-
-
