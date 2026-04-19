@@ -1682,7 +1682,6 @@ export type Database = {
       }
     }
     Functions: {
-      admin_delete_opportunity: { Args: { p_opportunity_id: number }; Returns: boolean }
       admin_set_application_reviewers: {
         Args: { p_application_id: string; p_reviewer_ids: string[] }
         Returns: undefined
