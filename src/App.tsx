@@ -800,7 +800,6 @@ const App = () => {
               </Suspense>
         </BrowserRouter>
       </TooltipProvider>
-          </SiteGate>
     </ErrorBoundary>
     </QueryClientProvider>
   </ThemeProvider>
