@@ -85,10 +85,10 @@ const Navigation = () => {
             </div>
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-muted-foreground">
-                  Welcome back!
-                </span>
-                <Button variant="outline" onClick={signOut}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/join")}>
+                  My Membership
+                </Button>
+                <Button variant="outline" size="sm" onClick={signOut}>
                   Sign Out
                 </Button>
               </div>
@@ -97,8 +97,8 @@ const Navigation = () => {
                 <Button variant="outline" onClick={() => navigate("/auth")}>
                   Login
                 </Button>
-                <Button variant="hero" onClick={() => navigate("/auth")}>
-                  Get Started
+                <Button variant="hero" onClick={() => navigate("/join")}>
+                  Join MAALI
                 </Button>
               </>
             )}
@@ -137,16 +137,21 @@ const Navigation = () => {
             ))}
             <div className="pt-4 pb-2 space-y-2">
               {user ? (
-                <Button variant="outline" className="w-full" onClick={signOut}>
-                  Sign Out
-                </Button>
+                <>
+                  <Button variant="outline" className="w-full" onClick={() => { navigate("/join"); setIsMenuOpen(false); }}>
+                    My Membership
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={signOut}>
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
                     Login
                   </Button>
-                  <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>
-                    Get Started
+                  <Button variant="hero" className="w-full" onClick={() => navigate("/join")}>
+                    Join MAALI
                   </Button>
                 </>
               )}

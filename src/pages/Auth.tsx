@@ -64,8 +64,9 @@ const Auth = () => {
       } else {
         toast({
           title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration.",
+          description: "We've sent you a confirmation link. Once confirmed, you'll be taken to complete your membership.",
         });
+        navigate("/join");
       }
     } catch (error) {
       toast({

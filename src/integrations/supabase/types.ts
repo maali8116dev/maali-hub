@@ -112,6 +112,48 @@ export type Database = {
         }
         Relationships: []
       }
+      memberships: {
+        Row: {
+          id: string
+          user_id: string
+          tier: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string | null
+          amount_paid: number | null
+          starts_at: string
+          expires_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tier: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          amount_paid?: number | null
+          starts_at?: string
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          tier?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          amount_paid?: number | null
+          starts_at?: string
+          expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
