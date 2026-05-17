@@ -5,26 +5,26 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
+  { code: 'pt', name: 'Português' }
+];
+
+const NAV_ITEMS = [
+  { href: '/', label: 'Home' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/about', label: 'About' },
+  { href: '/resources', label: 'Resources' },
+  { href: '/contact', label: 'Contact' }
+];
+
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'pt', name: 'Português' }
-  ];
-
-  const navigationItems = [
-    { href: '/', label: 'Home' },
-    { href: '/projects', label: 'Projects' },
-    { href: '/about', label: 'About' },
-    { href: '/resources', label: 'Resources' },
-    { href: '/contact', label: 'Contact' }
-  ];
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
@@ -44,7 +44,7 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {navigationItems.map((item) => (
+              {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   to={item.href}
@@ -66,10 +66,10 @@ const Navigation = () => {
             <div className="relative group">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                {languages.find(lang => lang.code === currentLang)?.name}
+                {LANGUAGES.find(lang => lang.code === currentLang)?.name}
               </Button>
               <div className="absolute right-0 mt-2 w-40 bg-card border border-border rounded-md shadow-soft opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                {languages.map((lang) => (
+                {LANGUAGES.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => setCurrentLang(lang.code)}
@@ -120,7 +120,7 @@ const Navigation = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-card border-t border-border">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {navigationItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}

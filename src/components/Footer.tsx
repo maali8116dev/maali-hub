@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     platform: [
@@ -183,7 +184,7 @@ const Footer = () => {
         <div className="py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              © {currentYear} Maali. All rights reserved. Powered by TechNuru & GAT.
+              © {CURRENT_YEAR} Maali. All rights reserved. Powered by TechNuru & GAT.
               <div className="text-primary font-medium mt-1">
                 Demo Application • Created by Dr. Wilfried Zoungrana
               </div>
