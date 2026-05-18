@@ -43,6 +43,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Cookies = lazy(() => import("./pages/Cookies"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
 const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
+const Join = lazy(() => import("./pages/Join"));
 
 // Lazy-loaded payment pages
 const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
@@ -170,6 +171,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
+          <Route path="/join" element={<Join />} />
           <Route path="/opportunities/:id" element={<ProjectDetails />} />
           <Route path="/opportunities/:id/apply" element={<ApplicationForm />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
