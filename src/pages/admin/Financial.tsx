@@ -29,6 +29,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 const AdminFinancial = () => {
+  // application_fee rows are historical; new revenue is membership (see /join)
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");

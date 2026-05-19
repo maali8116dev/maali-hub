@@ -72,6 +72,26 @@ VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=<get from supabase:status output>
 ```
 
+### Google OAuth (local)
+
+**Studio → Authentication → Providers / OAuth apps will not load on local** — configure in `supabase/config.toml` instead (already wired for Google).
+
+1. In `.env` (project root):
+
+```env
+SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<google-web-client-id>
+SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=<google-client-secret>
+```
+
+2. [Google Cloud Console](https://console.cloud.google.com/) → your OAuth client → **Authorized redirect URIs**:
+   - `http://127.0.0.1:54321/auth/v1/callback`
+
+3. Restart: `npm run supabase:stop` then `npm run supabase:start`
+
+4. Confirm: `GET http://127.0.0.1:54321/auth/v1/settings` → `"google": true`
+
+App callback stays `http://localhost:8080/auth/callback` (see `Auth.tsx`).
+
 ## Troubleshooting
 
 ### Migration Errors

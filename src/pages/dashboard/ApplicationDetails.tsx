@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
@@ -33,9 +32,7 @@ const ApplicationDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: profile } = useProfile();
-  const { toast } = useToast();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [isRetryingPayment, setIsRetryingPayment] = useState(false);
 
   const isAdmin = profile?.role === "admin";
 
@@ -159,61 +156,6 @@ const ApplicationDetails = () => {
     }
   };
 
-  const parseEdgeErrorBody = (edgeError: unknown): Record<string, unknown> | null => {
-    const rawBody = (
-      edgeError as { context?: { body?: unknown } } | undefined
-    )?.context?.body;
-    if (!rawBody) return null;
-
-    try {
-      if (typeof rawBody === "string") return JSON.parse(rawBody) as Record<string, unknown>;
-      if (typeof rawBody === "object") return rawBody as Record<string, unknown>;
-    } catch {
-      return null;
-    }
-    return null;
-  };
-
-  const handleRetryPayment = async () => {
-    if (!application) return;
-    setIsRetryingPayment(true);
-
-    try {
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
-        "create-checkout-session",
-        {
-          body: {
-            applicationId: application.id,
-            opportunityId: application.opportunity_id,
-            successUrl: `${window.location.origin}/payment/success?application_id=${application.id}`,
-            cancelUrl: `${window.location.origin}/payment/cancel?application_id=${application.id}`,
-          },
-        },
-      );
-
-      if (checkoutError) {
-        const checkoutErrorBody = parseEdgeErrorBody(checkoutError);
-        const msg = (checkoutErrorBody?.error as string | undefined) ||
-          checkoutError.message ||
-          "Failed to create checkout session";
-        throw new Error(msg);
-      }
-
-      if (!checkoutData?.url) {
-        throw new Error("Checkout session response missing URL");
-      }
-
-      window.location.assign(checkoutData.url);
-    } catch (error) {
-      toast({
-        title: "Payment Setup Failed",
-        description: error instanceof Error ? error.message : "Could not start payment checkout.",
-        variant: "destructive",
-      });
-      setIsRetryingPayment(false);
-    }
-  };
-
   if (isLoading) {
     return <ApplicationDetailsSkeleton />;
   }
@@ -221,10 +163,6 @@ const ApplicationDetails = () => {
   if (error || !application) {
     return <ApplicationNotFound backRoute={getBackRoute()} error={error instanceof Error ? error : null} />;
   }
-
-  const canRetryPayment =
-    application.status === "pending_payment" &&
-    application.application_fee_paid === false;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -273,22 +211,6 @@ const ApplicationDetails = () => {
               <CardTitle className="text-base sm:text-lg">Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
-              {canRetryPayment && (
-                <Button
-                  onClick={handleRetryPayment}
-                  disabled={isRetryingPayment}
-                  className="w-full min-h-[44px]"
-                >
-                  {isRetryingPayment ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Redirecting...
-                    </>
-                  ) : (
-                    "Retry Payment"
-                  )}
-                </Button>
-              )}
               <Button
                 variant="outline"
                 onClick={() => navigate(getBackRoute())}

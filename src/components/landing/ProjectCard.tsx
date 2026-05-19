@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Calendar, MapPin, DollarSign, ArrowRight, Building2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useMembership } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
 import { getProjectDisplayStatus, isProjectOpen } from "@/lib/projectAvailability";
 
@@ -47,6 +48,7 @@ function isDatabaseProject(props: ProjectCardProps): props is DatabaseProjectCar
 const ProjectCard = (props: ProjectCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
   const { toast } = useToast();
   
   // Normalize props based on type
@@ -104,7 +106,8 @@ const ProjectCard = (props: ProjectCardProps) => {
     : status === 'closed';
 
   const hasSubmittedApplication = isDatabaseProject(props) && props.hasSubmittedApplication;
-  const applyDisabled = isDisabled || hasSubmittedApplication;
+  const needsMembership = !!user && !membershipLoading && !canApplyToOpportunities;
+  const applyDisabled = isDisabled || hasSubmittedApplication || needsMembership;
 
   // Parse location string to handle multiple countries (comma-separated)
   const parseLocations = (locationString: string): string[] => {
@@ -222,6 +225,8 @@ const ProjectCard = (props: ProjectCardProps) => {
                   variant: "default",
                 });
                 navigate("/auth", { state: { from: { pathname: `/opportunities/${id}/apply` } } });
+              } else if (needsMembership) {
+                navigate("/join");
               } else {
                 navigate(`/opportunities/${id}/apply`);
               }

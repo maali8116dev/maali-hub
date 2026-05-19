@@ -164,11 +164,26 @@ serve(async (req: Request) => {
     const checkoutSuccessUrl = `${baseUrl}/payment/success?application_id=${encodeURIComponent(applicationId)}`;
     const checkoutCancelUrl = `${baseUrl}/payment/cancel?application_id=${encodeURIComponent(applicationId)}`;
 
+    // Find or create a Stripe Customer so payment methods and history are saved
+    let stripeCustomerId: string | undefined;
+    if (user.email) {
+      const existingCustomers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (existingCustomers.data.length > 0) {
+        stripeCustomerId = existingCustomers.data[0].id;
+      } else {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { userId: user.id },
+        });
+        stripeCustomerId = customer.id;
+      }
+    }
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      customer_email: user.email,
+      ...(stripeCustomerId ? { customer: stripeCustomerId } : { customer_email: user.email }),
       line_items: [
         {
           price_data: {

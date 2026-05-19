@@ -2133,6 +2133,10 @@ export type Database = {
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
+      user_can_apply_to_opportunities: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       is_opportunity_open: {
         Args: { p_opportunity_id: number }
         Returns: boolean

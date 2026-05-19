@@ -23,8 +23,6 @@ type SubmitApplicationResponse = {
   errorCode?: string;
   existingApplicationId?: string | null;
   applicationId?: string;
-  requiresPayment?: boolean;
-  checkoutUrl?: string;
   resumedExistingApplication?: boolean;
   opportunityStatus?: string | null;
   opportunityDeadline?: string | null;
@@ -40,8 +38,8 @@ function getUserFriendlyError(errorCode?: string, _rawMessage?: string): string 
       return "You've already submitted an application for this opportunity.";
     case "PROJECT_CLOSED":
       return "This opportunity is no longer accepting applications.";
-    case "CHECKOUT_ERROR":
-      return "We couldn't set up the payment. Please try again or contact support.";
+    case "MEMBERSHIP_REQUIRED":
+      return "Full membership is required to apply. Join MAALI as a Full Member to continue.";
     case "UNAUTHORIZED":
       return "Your session has expired. Please sign in again to continue.";
     case "MISSING_PROJECT_ID":
@@ -208,6 +206,23 @@ export function useApplicationSubmission() {
 
     setIsSubmitting(true);
 
+    const { data: canApply, error: membershipError } = await supabase.rpc(
+      "user_can_apply_to_opportunities",
+      { p_user_id: user.id },
+    );
+    if (membershipError) {
+      console.error("Membership check failed:", membershipError);
+    } else if (canApply === false) {
+      toast({
+        title: "Membership required",
+        description: "Become a Full Member to submit applications.",
+        variant: "destructive",
+      });
+      navigate("/join");
+      setIsSubmitting(false);
+      return;
+    }
+
     // Track uploaded documents for cleanup on failure
     let uploadedDocuments: UploadedDocForCleanup[] = [];
 
@@ -348,6 +363,16 @@ export function useApplicationSubmission() {
           return;
         }
 
+        if (payload?.errorCode === "MEMBERSHIP_REQUIRED") {
+          toast({
+            title: "Membership required",
+            description: getUserFriendlyError("MEMBERSHIP_REQUIRED"),
+            variant: "destructive",
+          });
+          navigate("/join");
+          return;
+        }
+
         // Log the raw error for debugging, show friendly message to user
         const rawError = payload?.error || edgeError?.message || "Unknown error";
         console.error("Submission failed:", rawError);
@@ -362,21 +387,6 @@ export function useApplicationSubmission() {
           console.error("Edge function response:", data);
         }
         throw new Error(getUserFriendlyError(payload?.errorCode, rawError));
-      }
-
-      // Payment redirect
-      if (payload.requiresPayment && payload.checkoutUrl) {
-        toast({
-          title: "Application Saved - Payment Required",
-          description:
-            payload.resumedExistingApplication
-              ? "Your existing application is awaiting payment. Redirecting you to Stripe."
-              : "Your application has been saved. You will be redirected to complete the payment.",
-        });
-        reset();
-        setDraftId(null);
-        window.location.href = payload.checkoutUrl;
-        return;
       }
 
       toast({

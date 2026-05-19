@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
@@ -44,11 +44,7 @@ const Cookies = lazy(() => import("./pages/Cookies"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
 const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
 const Join = lazy(() => import("./pages/Join"));
-
-// Lazy-loaded payment pages
-const PaymentSuccess = lazy(() => import("./pages/payment/PaymentSuccess"));
-const PaymentCancel = lazy(() => import("./pages/payment/PaymentCancel"));
-const TestPayment = lazy(() => import("./pages/payment/TestPayment"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 
 // Lazy-loaded dashboard pages
 const DashboardLayout = lazy(() => import("@/components/dashboard/DashboardLayout"));
@@ -171,12 +167,22 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
-          <Route path="/join" element={<Join />} />
+          {/* Onboarding — authenticated but membership gate bypassed (they're completing it here) */}
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
+                <Onboarding />
+              </ProtectedRoute>
+            }
+          />
+          {/* Legacy join route — redirect to unified onboarding */}
+          <Route path="/join" element={<Navigate to="/onboarding" replace />} />
           <Route path="/opportunities/:id" element={<ProjectDetails />} />
           <Route path="/opportunities/:id/apply" element={<ApplicationForm />} />
-          <Route path="/payment/success" element={<PaymentSuccess />} />
-          <Route path="/payment/cancel" element={<PaymentCancel />} />
-          <Route path="/payment/test" element={<TestPayment />} />
+          <Route path="/payment/success" element={<Navigate to="/onboarding?awaiting=1" replace />} />
+          <Route path="/payment/cancel" element={<Navigate to="/onboarding" replace />} />
+          <Route path="/payment/test" element={<Navigate to="/onboarding" replace />} />
           
           {/* Footer Link Pages */}
           <Route path="/apply" element={<Apply />} />

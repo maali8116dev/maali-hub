@@ -12,6 +12,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { isProjectOpen } from "@/lib/projectAvailability";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useMembership } from "@/hooks/useMembership";
+import { MembershipRequiredBanner } from "@/components/MembershipRequiredBanner";
 
 const ApplicationFormContent = () => {
   const { id } = useParams();
@@ -21,6 +23,7 @@ const ApplicationFormContent = () => {
 
   const projectId = id ? parseInt(id, 10) : undefined;
   const isNewApplication = searchParams.get("new") === "true";
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
 
   const { data: opportunityState, isLoading: isLoadingOpportunity } = useQuery({
     queryKey: ["opportunity-application-state", projectId],
@@ -106,6 +109,13 @@ const ApplicationFormContent = () => {
                   onClick={() => navigate(`/opportunities/${opportunityState.id}`)}
                 >
                   Back to Opportunity
+                </Button>
+              </div>
+            ) : !membershipLoading && !canApplyToOpportunities ? (
+              <div className="space-y-4">
+                <MembershipRequiredBanner />
+                <Button type="button" variant="outline" onClick={() => navigate("/join")}>
+                  View membership options
                 </Button>
               </div>
             ) : (

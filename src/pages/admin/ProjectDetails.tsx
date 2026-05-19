@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, MapPin, DollarSign, Users, Star, ExternalLink } from "lucide-react";
 import { useProject } from "@/hooks/useAdminProjects";
-import { usePlatformFee } from "@/hooks/usePlatformFee";
 
 const AdminProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +11,6 @@ const AdminProjectDetails = () => {
   const projectId = id ? parseInt(id) : undefined;
 
   const { data: project, isLoading, error } = useProject(projectId);
-  const { data: applicationFee = 0 } = usePlatformFee();
 
   const getStatusBadge = (status: string) => {
     switch (status) {

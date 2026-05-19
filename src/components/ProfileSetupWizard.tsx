@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,10 +25,10 @@ const step1Schema = z.object({
   country: z.string().min(2, "Country is required"),
 });
 
-// Step 2: Business Details Schema
+// Step 2: Work & background schema
 const step2Schema = z.object({
   businessName: z.string().optional(),
-  businesssector: z.string().min(1, "Business sector is required"),
+  businesssector: z.string().min(1, "Field or sector is required"),
   bio: z.string().optional(),
 });
 

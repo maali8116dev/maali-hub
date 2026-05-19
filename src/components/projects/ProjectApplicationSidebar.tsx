@@ -7,7 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isOpportunityOpen } from "@/lib/opportunityAvailability";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
-import { usePlatformFee } from "@/hooks/usePlatformFee";
+import { useMembership } from "@/hooks/useMembership";
+import { MembershipRequiredBanner } from "@/components/MembershipRequiredBanner";
 import { useTranslation } from "react-i18next";
 
 interface ProjectApplicationSidebarProps {
@@ -31,13 +32,19 @@ export function ProjectApplicationSidebar({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { data: applicationFee = 0 } = usePlatformFee();
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
   const { t } = useTranslation(["common"]);
 
   const isDisabled = !isOpportunityOpen(project.status, project.deadline);
   const projectId = project.id.toString();
+  const needsMembership = !!user && !membershipLoading && !canApplyToOpportunities;
+  const applyBlocked = isDisabled || needsMembership;
 
   const handleNavigateToApplication = (newApplication = false) => {
+    if (needsMembership) {
+      navigate("/join");
+      return;
+    }
     if (!user) {
       toast({
         title: t("common:projectApplicationSidebar.loginRequiredTitle"),
@@ -114,6 +121,10 @@ export function ProjectApplicationSidebar({
           </Alert>
         )}
 
+        {needsMembership && !isDisabled && !hasSubmittedApplication && (
+          <MembershipRequiredBanner className="mb-4" />
+        )}
+
         {hasSubmittedApplication ? (
           <Button
             className="w-full"
@@ -145,7 +156,7 @@ export function ProjectApplicationSidebar({
               className="w-full mb-2"
               variant="hero"
               size="lg"
-              disabled={isDisabled}
+              disabled={applyBlocked}
               onClick={() => handleNavigateToApplication(false)}
             >
               <Edit className="h-4 w-4 mr-2" />
@@ -155,7 +166,7 @@ export function ProjectApplicationSidebar({
               className="w-full"
               variant="outline"
               size="lg"
-              disabled={isDisabled}
+              disabled={applyBlocked}
               onClick={() => handleNavigateToApplication(true)}
             >
               {t("common:projectApplicationSidebar.startNewApplication")}
@@ -172,7 +183,7 @@ export function ProjectApplicationSidebar({
               className="w-full"
               variant="hero"
               size="lg"
-              disabled={isDisabled}
+              disabled={applyBlocked}
               onClick={() => handleNavigateToApplication(false)}
             >
               {isDisabled
@@ -180,14 +191,6 @@ export function ProjectApplicationSidebar({
                 : t("common:projectApplicationSidebar.beginApplication")}
             </Button>
           </>
-        )}
-
-        {applicationFee > 0 && (
-          <p className="text-xs text-muted-foreground mt-3 text-center">
-            {t("common:projectApplicationSidebar.applicationFee", {
-              amount: Number(applicationFee).toFixed(2),
-            })}
-          </p>
         )}
       </CardContent>
     </Card>

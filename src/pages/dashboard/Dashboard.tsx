@@ -31,11 +31,6 @@ const Dashboard = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [dismissedPrompt, setDismissedPrompt] = useState(false);
 
-  // Clear the justSignedUp flag when component mounts
-  useEffect(() => {
-    localStorage.removeItem('justSignedUp');
-  }, []);
-
   // Check if prompt was dismissed
   useEffect(() => {
     const dismissed = localStorage.getItem('profilePromptDismissed');

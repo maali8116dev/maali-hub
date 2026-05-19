@@ -1,5 +1,7 @@
 # Application Submission Flow - Files Touched in Order
 
+> **Note:** Per-application Stripe checkout is archived. Only active **Full Members** (`tier = member`) may apply. See `archive/legacy-application-payment/README.md`.
+
 This document traces every file that is executed/touched when a user submits an application, in chronological order.
 
 ---

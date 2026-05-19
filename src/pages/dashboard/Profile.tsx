@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { User, Mail, Building, Phone, MapPin, Loader2 } from "lucide-react";
+import { User, Mail, Building, Phone, MapPin, Loader2, CheckCircle2, X } from "lucide-react";
 import { KycVerificationSection } from "@/components/profile/KycVerificationSection";
+import { MembershipProfileSection } from "@/components/profile/MembershipProfileSection";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -166,7 +167,7 @@ const Profile = () => {
             <h2 className="text-xl sm:text-2xl font-semibold">
               {formData.firstName || getProfileField("firstName", "first_name") || "User"} {formData.lastName || getProfileField("lastName", "last_name") || ""}
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base">{formData.businessName || getProfileField("businessName", "business_name") || "No company"}</p>
+            <p className="text-muted-foreground text-sm sm:text-base">{formData.businessName || getProfileField("businessName", "business_name") || "No organization listed"}</p>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">{formData.country || getProfileField("country", "country") || "No location"}</p>
           </div>
         </CardContent>
@@ -260,7 +261,7 @@ const Profile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company">Company/Organization</Label>
+              <Label htmlFor="company">Organization, employer, or school</Label>
               <div className="relative">
                 <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -269,7 +270,7 @@ const Profile = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, businessName: e.target.value })
                   }
-                  placeholder="Your company name"
+                  placeholder="Company, university, NGO, or employer (optional)"
                   className="pl-10 h-11 sm:h-10"
                 />
               </div>
@@ -283,11 +284,11 @@ const Profile = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, bio: e.target.value })
                 }
-                placeholder="Tell us about yourself and your business..."
+                placeholder="Tell us about yourself — your work, studies, skills, or what you're looking for..."
                 className="min-h-[100px] sm:min-h-[120px]"
               />
               <p className="text-xs text-muted-foreground">
-                A brief description helps funders understand your background
+                Optional. Helps reviewers and programs understand your background (founder, professional, or intern).
               </p>
             </div>
 
@@ -327,6 +328,8 @@ const Profile = () => {
         </CardContent>
       </Card>
 
+      <MembershipProfileSection />
+
       {/* Identity Verification */}
       <KycVerificationSection />
 
@@ -347,19 +350,19 @@ const Profile = () => {
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between py-1">
                 <span>Basic Information</span>
-                <span className="text-success">âœ“ Complete</span>
+                <span className="text-success"><CheckCircle2 className="h-4 w-4" /> Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span>Company Details</span>
-                <span className="text-success">âœ“ Complete</span>
+                <span>Work & education</span>
+                <span className="text-success"><CheckCircle2 className="h-4 w-4" /> Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span>Bio & Description</span>
-                <span className="text-success">âœ“ Complete</span>
+                <span className="text-success"><CheckCircle2 className="h-4 w-4" /> Complete</span>
               </div>
               <div className="flex items-center justify-between py-1">
                 <span>Documents</span>
-                <span className="text-warning">Incomplete</span>
+                <span className="text-warning"><X className="h-4 w-4" /> Incomplete</span>
               </div>
             </div>
           </div>

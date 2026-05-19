@@ -21,6 +21,9 @@ import Navigation from "@/components/Navigation";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
 
+// Price is authoritative in the edge function — these are display-only constants
+const MEMBER_PRICE_LABEL = "$2 / month";
+
 const SECTORS = [
   "Agriculture", "Education", "Energy", "FinTech", "Health",
   "Logistics", "Manufacturing", "Retail", "Technology", "Other",
@@ -44,7 +47,7 @@ const TIERS = [
   {
     id: "member" as const,
     name: "Full Member",
-    price: "$99 / year",
+    price: "$2 / month",
     badge: "Most Popular",
     description: "Unlock the full MAALI platform and apply to opportunities.",
     features: [
@@ -218,7 +221,7 @@ const PaymentForm = ({
   onSuccess,
   onBack,
 }: {
-  onSuccess: (paymentIntentId: string) => void;
+  onSuccess: () => void;
   onBack: () => void;
 }) => {
   const stripe = useStripe();
@@ -250,7 +253,9 @@ const PaymentForm = ({
       setError(confirmError.message ?? "Payment failed");
       setProcessing(false);
     } else if (paymentIntent?.status === "succeeded") {
-      onSuccess(paymentIntent.id);
+      // Membership activation is handled server-side by the Stripe webhook.
+      // Just advance the UI — the webhook will flip the membership to active.
+      onSuccess();
     }
   };
 
@@ -259,7 +264,7 @@ const PaymentForm = ({
       <div>
         <h2 className="text-2xl font-bold text-foreground">Payment</h2>
         <p className="text-muted-foreground mt-1">
-          Full Member — <span className="font-semibold text-foreground">$99 / year</span>. Cancel anytime.
+          Full Member — <span className="font-semibold text-foreground">{MEMBER_PRICE_LABEL}</span>. Cancel anytime.
         </p>
       </div>
 
@@ -279,7 +284,7 @@ const PaymentForm = ({
           {processing ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</>
           ) : (
-            "Pay $99 & Join"
+            "Pay $2 & Join"
           )}
         </Button>
       </div>
@@ -294,22 +299,19 @@ const PaymentForm = ({
 // ─── Step 3 wrapper: fetches clientSecret then mounts Elements ───────────────
 
 const StepPayment = ({
-  userId,
   onSuccess,
   onBack,
 }: {
-  userId: string;
-  onSuccess: (paymentIntentId: string) => void;
+  onSuccess: () => void;
   onBack: () => void;
 }) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
+    // The edge function verifies identity from the JWT — no userId in body
     supabase.functions
-      .invoke("create-membership-payment", {
-        body: { userId, tier: "member", amount: 9900 },
-      })
+      .invoke("create-membership-payment", { body: {} })
       .then(({ data, error }) => {
         if (error || !data?.clientSecret) {
           setFetchError("Could not initialise payment. Please try again.");
@@ -317,7 +319,7 @@ const StepPayment = ({
           setClientSecret(data.clientSecret);
         }
       });
-  }, [userId]);
+  }, []);
 
   if (fetchError) {
     return (
@@ -341,6 +343,7 @@ const StepPayment = ({
       <PaymentForm onSuccess={onSuccess} onBack={onBack} />
     </Elements>
   );
+
 };
 
 // ─── Main Join page ──────────────────────────────────────────────────────────
@@ -413,20 +416,8 @@ const Join = () => {
     }
   };
 
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    if (user) {
-      await supabase.from("memberships").insert({
-        user_id: user.id,
-        tier: "member",
-        status: "active",
-        stripe_payment_intent_id: paymentIntentId,
-        amount_paid: 9900,
-        starts_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-    }
-    setStep("done");
-  };
+  // Membership row is created/activated by the Stripe webhook — nothing to do client-side
+  const handlePaymentSuccess = () => setStep("done");
 
   if (!user) {
     return (
@@ -509,9 +500,8 @@ const Join = () => {
             {step === "tier" && (
               <StepTier onNext={handleTierSelect} />
             )}
-            {step === "payment" && user && (
+            {step === "payment" && (
               <StepPayment
-                userId={user.id}
                 onSuccess={handlePaymentSuccess}
                 onBack={() => setStep("tier")}
               />

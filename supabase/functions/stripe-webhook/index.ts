@@ -46,6 +46,7 @@ serve(async (req: Request) => {
 
   try {
     switch (event.type) {
+      // Legacy per-application fee checkouts (archived). New applies use membership on /join.
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutCompleted(session);
@@ -294,7 +295,249 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 }
 
+async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+  const paymentIntentId = paymentIntent.id;
+  const userId = paymentIntent.metadata?.userId;
+
+  if (!userId) {
+    console.error("[membership] payment_intent.succeeded missing userId metadata:", paymentIntentId);
+    return;
+  }
+
+  // Idempotency: already active — nothing to do
+  const { data: existing } = await supabaseAdmin
+    .from("memberships")
+    .select("id, status")
+    .eq("stripe_payment_intent_id", paymentIntentId)
+    .maybeSingle();
+
+  if (existing?.status === "active") {
+    console.log(`[membership] already active for payment intent ${paymentIntentId}, skipping`);
+    return;
+  }
+
+  if (existing) {
+    // Flip pending_payment → active
+    const { error } = await supabaseAdmin
+      .from("memberships")
+      .update({ status: "active" })
+      .eq("id", existing.id);
+
+    if (error) {
+      console.error("[membership] failed to activate membership:", error);
+      return;
+    }
+    console.log(`[membership] activated membership ${existing.id} for user ${userId}`);
+  } else {
+    // Fallback: no pending row (e.g. race or retry) — insert active directly
+    const { error } = await supabaseAdmin.from("memberships").insert({
+      user_id: userId,
+      tier: "member",
+      status: "active",
+      stripe_payment_intent_id: paymentIntentId,
+      amount_paid: 200,
+      starts_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    if (error) {
+      console.error("[membership] failed to insert membership on fallback:", error);
+      return;
+    }
+    console.log(`[membership] inserted active membership (fallback) for user ${userId}`);
+  }
+
+  // Insert a completed transaction row so it appears in billing history and admin financials
+  const invoiceNumber = `MBR-${paymentIntentId.substring(3, 11).toUpperCase()}`;
+  let transactionId: string | null = null;
+  try {
+    const { data: txRow, error: txError } = await supabaseAdmin
+      .from("transactions")
+      .insert({
+        user_id: userId,
+        type: "subscription",
+        status: "completed",
+        amount: 2.00,
+        currency: "usd",
+        provider: "stripe",
+        provider_payment_intent_id: paymentIntentId,
+        provider_transaction_id: paymentIntentId,
+        description: "Full Membership — MAALI ($2/month)",
+        invoice_number: invoiceNumber,
+        completed_at: new Date().toISOString(),
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (txError) {
+      console.error("[membership] failed to insert transaction:", txError);
+    } else {
+      transactionId = txRow?.id ?? null;
+      console.log(`[membership] transaction inserted: ${transactionId}`);
+    }
+  } catch (txErr) {
+    console.error("[membership] unexpected error inserting transaction:", txErr);
+  }
+
+  // Generate and store PDF receipt
+  let invoicePdfUrl: string | null = null;
+  try {
+    const { data: userProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const userName = userProfile
+      ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
+      : "Member";
+
+    // Fetch last4 from Stripe for the receipt
+    let paymentMethodLast4: string | null = null;
+    try {
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+      if (pi.payment_method && typeof pi.payment_method === "string") {
+        const pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+        paymentMethodLast4 = pm.card?.last4 ?? null;
+      }
+    } catch (pmErr) {
+      console.warn("[membership] could not fetch payment method details:", pmErr);
+    }
+
+    const invoiceNumber = `MBR-${paymentIntentId.substring(3, 11).toUpperCase()}`;
+    const paymentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const receiptData: ReceiptData = {
+      userName,
+      projectTitle: "Full Membership — MAALI",
+      applicationId: null,
+      amount: "2.00",   // always $2.00 for membership
+      currency: "USD",
+      paymentDate,
+      statusLabel: "Paid",
+      invoiceNumber,
+      transactionId: paymentIntentId,
+      billingEmail: null,
+      paymentMethodLast4,
+    };
+
+    const pdfBytes = await generateReceiptPdf(receiptData);
+    // Use the real transaction ID if available, else fall back to a payment-intent-scoped key
+    const storageId = transactionId ?? `mbr_${paymentIntentId}`;
+    invoicePdfUrl = await storeReceiptPdf(storageId, userId, pdfBytes);
+    console.log(`[membership] PDF receipt stored: ${invoicePdfUrl}`);
+
+    // Backfill the PDF URL onto the transaction row
+    if (transactionId && invoicePdfUrl) {
+      await supabaseAdmin
+        .from("transactions")
+        .update({ invoice_pdf_url: invoicePdfUrl })
+        .eq("id", transactionId);
+    }
+  } catch (pdfErr) {
+    console.error("[membership] failed to generate PDF receipt:", pdfErr);
+    // Non-fatal — continue to email + notification
+  }
+
+  // Send receipt email
+  try {
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const recipientEmail = authUser?.user?.email ?? null;
+
+    if (recipientEmail) {
+      const { data: userProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const recipientName = userProfile
+        ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
+        : "Member";
+
+      const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
+
+      const payload = {
+        recipientName,
+        projectTitle: "Full Membership — MAALI",
+        applicationId: null,
+        amount: "2.00",
+        currency: "USD",
+        paymentDate: new Date().toLocaleDateString("en-US", {
+          year: "numeric", month: "long", day: "numeric",
+        }),
+        transactionId: paymentIntentId,
+        actionUrl: `${siteUrl}/dashboard`,
+        invoicePdfUrl,
+      };
+
+      if (supabaseUrl) {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (internalSecret) headers["X-Internal-Secret"] = internalSecret;
+        if (serviceRoleKey) headers["Authorization"] = `Bearer ${serviceRoleKey}`;
+
+        const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            to: recipientEmail,
+            type: "payment_receipt",
+            data: payload,
+            allowPublic: true,
+          }),
+        });
+
+        if (res.ok) {
+          console.log(`[membership] receipt email sent to ${recipientEmail}`);
+        } else {
+          const errBody = await res.text();
+          console.error(`[membership] send-email failed (${res.status}): ${errBody}`);
+
+          // Fallback: queue it
+          await supabaseAdmin.from("email_queue").insert({
+            type: "payment_receipt",
+            to_email: recipientEmail,
+            payload,
+            idempotency_key: `membership_receipt:${paymentIntentId}`,
+          });
+        }
+      }
+    } else {
+      console.warn("[membership] no email found for user, skipping receipt email");
+    }
+  } catch (emailErr) {
+    console.error("[membership] failed to send receipt email:", emailErr);
+  }
+
+  // Notify the user their membership is live
+  try {
+    await supabaseAdmin.rpc("create_notification", {
+      p_user_id: userId,
+      p_title: "Full Membership Active",
+      p_message: "Your $2/month Full Membership is now active. You can apply to all funding opportunities.",
+      p_type: "payment",
+      p_link: "/dashboard",
+      p_metadata: { stripe_payment_intent_id: paymentIntentId },
+    });
+  } catch (notifErr) {
+    console.error("[membership] failed to send notification:", notifErr);
+  }
+}
+
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
+  // Membership payments are identified by metadata.tier — route them separately
+  if (paymentIntent.metadata?.tier === "member") {
+    await handleMembershipPaymentSuccess(paymentIntent);
+    return;
+  }
+
   const paymentIntentId = paymentIntent.id;
   let userId = paymentIntent.metadata?.userId;
   let applicationId = paymentIntent.metadata?.applicationId;

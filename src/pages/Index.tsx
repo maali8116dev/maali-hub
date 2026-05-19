@@ -1,4 +1,4 @@
-﻿import Navigation from "@/components/Navigation";
+import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustIndicators from "@/components/landing/TrustIndicators";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -7,6 +7,7 @@ import Benefits from "@/components/landing/Benefits";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
 import SuccessStoriesSection from "@/components/landing/SuccessStoriesSection";
 import Newsletter from "@/components/landing/Newsletter";
+import MembershipSection from "@/components/MembershipSection";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/seo/SEO";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -46,6 +47,7 @@ const Index = () => {
         <Navigation />
         <main>
           <HeroSection />
+          <MembershipSection />
           <TrustIndicators />
           <HowItWorks />
           <FeaturedProjects />

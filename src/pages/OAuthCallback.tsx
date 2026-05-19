@@ -4,15 +4,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
-/** Ensure a profile row exists for the current user (fallback when DB trigger has not run yet, e.g. OAuth). */
-async function ensureProfileForUser(userId: string, userMetadata: Record<string, unknown> | null): Promise<void> {
+/**
+ * Ensure a profile row exists for the current user.
+ * Returns true if the profile was newly created (i.e. first OAuth login),
+ * false if it already existed.
+ */
+async function ensureProfileForUser(
+  userId: string,
+  userMetadata: Record<string, unknown> | null,
+): Promise<boolean> {
   const { data: existing } = await supabase
     .from('profiles')
     .select('id')
     .eq('user_id', userId)
     .single();
 
-  if (existing) return;
+  if (existing) return false; // returning user
 
   const meta = userMetadata ?? {};
   let firstName: string | null = (meta.first_name as string) ?? null;
@@ -29,6 +36,8 @@ async function ensureProfileForUser(userId: string, userMetadata: Record<string,
     first_name: firstName || null,
     last_name: lastName || null,
   });
+
+  return true; // new user
 }
 
 const OAuthCallback = () => {
@@ -74,8 +83,9 @@ const OAuthCallback = () => {
           }
 
           // Ensure profile exists (trigger may not have run yet for OAuth signups)
+          let isNewUser = false;
           try {
-            await ensureProfileForUser(session.user.id, session.user.user_metadata);
+            isNewUser = await ensureProfileForUser(session.user.id, session.user.user_metadata);
           } catch (profileErr) {
             // Ignore unique violation (profile created by trigger); log others
             if ((profileErr as { code?: string })?.code !== '23505') {
@@ -83,8 +93,10 @@ const OAuthCallback = () => {
             }
           }
 
+          // New OAuth users go through onboarding; returning users go to dashboard
+          const destination = isNewUser ? '/onboarding' : '/dashboard';
           setTimeout(() => {
-            navigate('/dashboard', { replace: true });
+            navigate(destination, { replace: true });
           }, 100);
         } else {
           setError('Failed to establish session. Please try again.');

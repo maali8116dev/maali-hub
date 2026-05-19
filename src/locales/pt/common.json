@@ -34,7 +34,7 @@
     "step": "Etapa {{current}} de {{total}}",
     "complete": "Completo",
     "step1Title": "Informações básicas",
-    "step2Title": "Detalhes do negócio",
+    "step2Title": "Trajetória profissional",
     "firstName": "Primeiro Nome",
     "firstNamePlaceholder": "Digite seu primeiro nome",
     "lastName": "Sobrenome",
@@ -78,7 +78,7 @@
   },
   "opportunitiesPage": {
     "title": "Oportunidades atuais",
-    "subtitle": "Descubra oportunidades e programas criados para fortalecer empreendedores africanos",
+    "subtitle": "Descubra financiamentos, estágios e programas para fundadores, profissionais e estudantes africanos",
     "searchPlaceholder": "Buscar oportunidades por titulo, descricao, localizacao ou tags...",
     "clearSearchAria": "Limpar busca",
     "browseByTag": "Navegar por tag",

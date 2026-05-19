@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Partner = {
@@ -7,6 +7,12 @@ export type Partner = {
   logo_url: string | null;
   website_url: string | null;
   display_order: number;
+};
+
+export type PublicPartner = Partner & {
+  description: string | null;
+  sector: string;
+  featured: boolean;
 };
 
 /**
@@ -26,6 +32,29 @@ export function useFeaturedPartners() {
 
       if (error) throw error;
       return (data || []) as Partner[];
+    },
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+}
+
+/** All active partners for About page (grouped by sector in UI). */
+export function usePublicPartners() {
+  return useQuery({
+    queryKey: ["partners", "public"],
+    queryFn: async (): Promise<PublicPartner[]> => {
+      const { data, error } = await (supabase as any)
+        .from("partners_public" as any)
+        .select("*")
+        .eq("status", "active")
+        .order("display_order", { ascending: true })
+        .order("featured", { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as PublicPartner[];
     },
     staleTime: Infinity,
     gcTime: 24 * 60 * 60 * 1000,

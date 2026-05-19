@@ -1,12 +1,11 @@
 import DOMPurify from "dompurify";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase, CreditCard } from "lucide-react";
+import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 import InfoField from "@/components/application/shared/InfoField";
-import { usePlatformFee } from "@/hooks/usePlatformFee";
 
 interface ProjectInfoProps {
   project: OpportunityWithTags;
@@ -33,7 +32,6 @@ const getStatusColor = (status: string) => {
  * Component for displaying project information
  */
 export function ProjectInfo({ project }: ProjectInfoProps) {
-  const { data: applicationFee = 0 } = usePlatformFee();
   const displayStatus = getProjectDisplayStatus(
     project.status,
     project.deadline,

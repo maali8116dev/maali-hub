@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
@@ -7,11 +6,6 @@ import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
 /* ------------------------------------------------------------------ */
 /*  Shared clients                                                     */
 /* ------------------------------------------------------------------ */
-
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2023-10-16",
-  httpClient: Stripe.createFetchHttpClient(),
-});
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -59,16 +53,6 @@ interface SubmitApplicationRequest {
     previous_grants_funding_details?: string | null;
   };
   libraryDocumentIds?: string[];
-}
-
-interface CheckoutCreationParams {
-  req: Request;
-  userId: string;
-  userEmail: string | null;
-  applicationId: string;
-  opportunityId: number;
-  feeValue: number;
-  opportunityTitle: string;
 }
 
 interface ApplicationDocumentRef {
@@ -222,78 +206,6 @@ async function linkDocumentsToApplication(params: {
   return { linked: linkedCount, failedIds };
 }
 
-function getTrustedBaseUrl(req: Request): string {
-  const configured = Deno.env.get("SITE_URL");
-  if (configured) return configured.replace(/\/+$/, "");
-  const origin = req.headers.get("origin");
-  if (origin) return origin.replace(/\/+$/, "");
-  return "http://localhost:5173";
-}
-
-async function createCheckoutSessionForApplication(
-  params: CheckoutCreationParams,
-) {
-  const {
-    req,
-    userId,
-    userEmail,
-    applicationId,
-    opportunityId,
-    feeValue,
-    opportunityTitle,
-  } = params;
-
-  const baseUrl = getTrustedBaseUrl(req);
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    payment_method_types: ["card"],
-    customer_email: userEmail ?? undefined,
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          unit_amount: Math.round(feeValue * 100),
-          product_data: {
-            name: `Application Fee - ${opportunityTitle}`,
-            description: `Application fee for ${opportunityTitle}`,
-          },
-        },
-        quantity: 1,
-      },
-    ],
-    metadata: {
-      userId,
-      applicationId,
-      opportunity_id: opportunityId.toString(),
-    },
-    success_url: `${baseUrl}/payment/success?application_id=${encodeURIComponent(applicationId)}`,
-    cancel_url: `${baseUrl}/payment/cancel?application_id=${encodeURIComponent(applicationId)}`,
-  });
-
-  await supabaseAdmin
-    .from("transactions")
-    .insert({
-      user_id: userId,
-      type: "application_fee",
-      status: "pending",
-      amount: feeValue,
-      currency: "USD",
-      provider: "stripe",
-      provider_payment_intent_id: (session.payment_intent as string) || null,
-      provider_transaction_id: session.id,
-      description: `Application fee for ${opportunityTitle}`,
-      billing_email: userEmail,
-      application_id: applicationId,
-      opportunity_id: opportunityId,
-      metadata: { checkout_session_id: session.id },
-    })
-    .then(({ error }) => {
-      if (error) console.error("Transaction insert error:", error);
-    });
-
-  return session;
-}
-
 /** Build application row data from the request payload. */
 function buildApplicationRow(
   applicationData: SubmitApplicationRequest["applicationData"],
@@ -352,7 +264,6 @@ async function runSideEffects(params: {
   opportunityId: number;
   opportunityTitle: string;
   applicantType: string;
-  hasFee: boolean;
   initialStatus: string;
 }) {
   const {
@@ -361,7 +272,6 @@ async function runSideEffects(params: {
     opportunityId,
     opportunityTitle,
     applicantType,
-    hasFee,
     initialStatus,
   } = params;
 
@@ -380,9 +290,7 @@ async function runSideEffects(params: {
   }
 
   // 2. Notification
-  const notificationMessage = hasFee
-    ? `Your application for "${opportunityTitle}" has been successfully submitted. Please complete payment to proceed with review.`
-    : `Your application for "${opportunityTitle}" has been successfully submitted and is now under review.`;
+  const notificationMessage = `Your application for "${opportunityTitle}" has been successfully submitted and is now under review.`;
 
   try {
     await supabaseAdmin.rpc("create_notification", {
@@ -401,10 +309,9 @@ async function runSideEffects(params: {
     console.error("Notification error:", e);
   }
 
-  // 3. Reviewer assignment (only for free applications)
-  if (!hasFee) {
-    try {
-      const notifyAdminsMissingReviewer = async (availableCount: number) => {
+  // 3. Reviewer assignment
+  try {
+    const notifyAdminsMissingReviewer = async (availableCount: number) => {
         try {
           const { data: admins, error: adminsError } = await supabaseAdmin
             .from("profiles")
@@ -511,9 +418,8 @@ async function runSideEffects(params: {
           ),
         );
       }
-    } catch (e) {
-      console.error("Reviewer assignment error:", e);
-    }
+  } catch (e) {
+    console.error("Reviewer assignment error:", e);
   }
 }
 
@@ -596,14 +502,18 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const feeValue = v.application_fee != null ? Number(v.application_fee) : 0;
-    const hasFee = feeValue > 0;
     const opportunityTitle =
       v.opportunity_title || applicationData.project_title || "the opportunity";
-    const initialStatus = hasFee ? "pending_payment" : "pending";
+    const initialStatus = "pending";
 
     if (!v.can_submit) {
-      const errorCode = v.has_existing_application ? "ALREADY_APPLIED" : "OPPORTUNITY_CLOSED";
+      let errorCode = "OPPORTUNITY_CLOSED";
+      if (v.has_existing_application) {
+        errorCode = "ALREADY_APPLIED";
+      } else if (v.reason === "Full membership required") {
+        errorCode = "MEMBERSHIP_REQUIRED";
+      }
+
       console.log("[submit-application] decision=validation_blocked", {
         userId: user.id,
         opportunityId,
@@ -614,88 +524,10 @@ serve(async (req: Request): Promise<Response> => {
         errorCode,
       });
 
-      if (v.has_existing_application) {
-        const { data: existingApp, error: existingAppError } = await supabaseAdmin
-          .from("applications")
-          .select("id, user_id, opportunity_id, status, application_fee_paid, contact_email")
-          .eq("id", v.existing_application_id)
-          .eq("user_id", user.id)
-          .eq("opportunity_id", opportunityId)
-          .maybeSingle();
-
-        if (existingAppError) {
-          console.error("Existing application lookup error:", existingAppError);
-          return jsonResponse(req, 500, {
-            success: false,
-            error: "Failed to inspect existing application",
-            errorCode: "VALIDATION_ERROR",
-            existingApplicationId: v.existing_application_id ?? null,
-          });
-        }
-
-        const canResumeCheckout =
-          !!existingApp &&
-          !existingApp.application_fee_paid &&
-          (existingApp.status === "pending_payment" || hasFee);
-
-        if (canResumeCheckout && hasFee) {
-          if (!Deno.env.get("STRIPE_SECRET_KEY")) {
-            return jsonResponse(req, 500, {
-              success: false,
-              error: "Payment processing is not configured",
-              errorCode: "CHECKOUT_ERROR",
-              applicationId: existingApp.id,
-            });
-          }
-
-          try {
-            const checkoutUserEmail = user.email || existingApp.contact_email || applicationData.contact_email;
-            const session = await createCheckoutSessionForApplication({
-              req,
-              userId: user.id,
-              userEmail: checkoutUserEmail,
-              applicationId: existingApp.id,
-              opportunityId,
-              feeValue,
-              opportunityTitle,
-            });
-
-            console.log("[submit-application] decision=resume_checkout", {
-              userId: user.id,
-              opportunityId,
-              applicationId: existingApp.id,
-              checkoutSessionId: session.id,
-            });
-
-            return jsonResponse(req, 200, {
-              success: true,
-              applicationId: existingApp.id,
-              requiresPayment: true,
-              checkoutUrl: session.url,
-              resumedExistingApplication: true,
-            });
-          } catch (checkoutError) {
-            console.error("[submit-application] decision=checkout_failed", checkoutError);
-            return jsonResponse(req, 500, {
-              success: false,
-              error: `Failed to create checkout session: ${
-                checkoutError instanceof Error
-                  ? checkoutError.message
-                  : String(checkoutError)
-              }`,
-              errorCode: "CHECKOUT_ERROR",
-              applicationId: existingApp.id,
-            });
-          }
-        }
-      }
-
-      return jsonResponse(req, 409, {
+      return jsonResponse(req, errorCode === "MEMBERSHIP_REQUIRED" ? 403 : 409, {
         success: false,
         error: v.reason || "Cannot submit application",
-        errorCode: v.has_existing_application
-          ? "ALREADY_APPLIED"
-          : "OPPORTUNITY_CLOSED",
+        errorCode,
         existingApplicationId: v.existing_application_id ?? null,
         opportunityStatus: v.opportunity_status ?? null,
         opportunityDeadline: v.deadline ?? null,
@@ -808,91 +640,33 @@ serve(async (req: Request): Promise<Response> => {
       opportunityId,
       opportunityTitle,
       applicantType: applicationData.applicant_type,
-      hasFee,
       initialStatus,
     }).catch((e) => console.error("Side-effects error:", e));
 
-    // ── 7. Create checkout session if fee required ─────────────────
-    if (hasFee) {
-      if (!Deno.env.get("STRIPE_SECRET_KEY")) {
-        return jsonResponse(req, 500, {
-          success: false,
-          error: "Payment processing is not configured",
-          errorCode: "CHECKOUT_ERROR",
-          applicationId,
-        });
-      }
+    const userEmail = user.email || applicationData.contact_email;
+    await supabaseAdmin
+      .from("transactions")
+      .insert({
+        user_id: user.id,
+        type: "application_fee",
+        status: "completed",
+        amount: 0,
+        currency: "USD",
+        provider: null,
+        provider_payment_intent_id: null,
+        provider_transaction_id: null,
+        description: `Application for ${opportunityTitle} (membership)`,
+        billing_email: userEmail,
+        application_id: applicationId,
+        opportunity_id: opportunityId,
+        completed_at: new Date().toISOString(),
+        metadata: { membership_gated: true },
+      })
+      .then(({ error }) => {
+        if (error) console.error("Error creating audit transaction record:", error);
+      });
 
-      try {
-        const userEmail = user.email || applicationData.contact_email;
-        const session = await createCheckoutSessionForApplication({
-          req,
-          userId: user.id,
-          userEmail,
-          applicationId,
-          opportunityId,
-          feeValue,
-          opportunityTitle,
-        });
-
-        return jsonResponse(req, 200, {
-          success: true,
-          applicationId,
-          checkoutUrl: session.url,
-          requiresPayment: true,
-          linkedDocumentCount: docResult.linked,
-          ...(docResult.failedIds.length && {
-            documentLinkWarnings: docResult.failedIds,
-          }),
-        });
-      } catch (checkoutError) {
-        console.error("[submit-application] decision=checkout_failed", checkoutError);
-        await cleanupOrphanDocumentsForUser(user.id, libraryDocumentIds);
-        return jsonResponse(req, 500, {
-          success: false,
-          error: `Failed to create checkout session: ${
-            checkoutError instanceof Error
-              ? checkoutError.message
-              : String(checkoutError)
-          }`,
-          errorCode: "CHECKOUT_ERROR",
-          applicationId,
-        });
-      }
-    }
-
-    // ── 8. Create $0 transaction record for free applications (audit trail) ──
-    if (!hasFee) {
-      const userEmail = user.email || applicationData.contact_email;
-      await supabaseAdmin
-        .from("transactions")
-        .insert({
-          user_id: user.id,
-          type: "application_fee",
-          status: "completed", // Auto-complete since no payment needed
-          amount: 0,
-          currency: "USD",
-          provider: null, // No payment provider for free applications
-          provider_payment_intent_id: null,
-          provider_transaction_id: null,
-          description: `Application fee for ${opportunityTitle} (Free)`,
-          billing_email: userEmail,
-          application_id: applicationId,
-          opportunity_id: opportunityId,
-          completed_at: new Date().toISOString(),
-          metadata: { is_free_application: true },
-        })
-        .then(({ error }) => {
-          if (error) {
-            console.error("Error creating $0 transaction record:", error);
-            // Don't fail the submission if transaction record fails
-          } else {
-            console.log(`Created $0 transaction record for free application ${applicationId}`);
-          }
-        });
-    }
-
-    // ── 9. Success (no fee) ───────────────────────────────────────
+    // ── 7. Success ────────────────────────────────────────────────
     return jsonResponse(req, 200, {
       success: true,
       applicationId,

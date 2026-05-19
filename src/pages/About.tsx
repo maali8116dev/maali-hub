@@ -1,66 +1,14 @@
-﻿import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart, Target, Users, Globe, ExternalLink } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-
-type Partner = {
-  id: number;
-  name: string;
-  description: string | null;
-  logo_url: string | null;
-  website_url: string | null;
-  sector: string;
-  featured: boolean;
-};
+import { Heart, Target, Users, Globe } from "lucide-react";
+import { usePublicPartners } from "@/hooks/usePartners";
+import { PartnersCarousel } from "@/components/partners/PartnersCarousel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const About = () => {
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [isLoadingPartners, setIsLoadingPartners] = useState(true);
-
-  useEffect(() => {
-    fetchPartners();
-  }, []);
-
-  const fetchPartners = async () => {
-    try {
-      setIsLoadingPartners(true);
-      const { data, error } = await (supabase as any)
-        .from("partners_public")
-        .select("*")
-        .eq("status", "active")
-        .order("display_order", { ascending: true })
-        .order("featured", { ascending: false });
-
-      if (error) throw error;
-      setPartners(data || []);
-    } catch (error) {
-      console.error("Error fetching partners:", error);
-    } finally {
-      setIsLoadingPartners(false);
-    }
-  };
-
-  // Group partners by sector
-  const partnersByCategory = partners.reduce((acc, partner) => {
-    if (!acc[partner.sector]) {
-      acc[partner.sector] = [];
-    }
-    acc[partner.sector].push(partner);
-    return acc;
-  }, {} as Record<string, Partner[]>);
-
-  const categoryIcons: Record<string, typeof Heart> = {
-    Funding: Target,
-    Support: Users,
-    Impact: Heart,
-    Regional: Globe,
-    Technology: Globe,
-    Strategic: Users,
-  };
+  const { data: partners = [], isLoading: isLoadingPartners } = usePublicPartners();
   const values = [
     {
       icon: Heart,
@@ -193,79 +141,22 @@ const About = () => {
 
         {/* Partners Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">Our Partners</h2>
+          <h2 className="text-3xl font-bold text-center text-foreground mb-4">Our Partners</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
+            Organizations powering opportunities across Africa
+          </p>
           {isLoadingPartners ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading partners...</p>
+            <div className="flex gap-4 overflow-hidden px-8">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-56 min-w-[85%] sm:min-w-[48%] lg:min-w-[32%] shrink-0 rounded-lg" />
+              ))}
             </div>
           ) : partners.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No partners available at this time.</p>
             </div>
           ) : (
-            <div className="space-y-12">
-              {Object.entries(partnersByCategory).map(([sector, categoryPartners]) => {
-                const Icon = categoryIcons[sector] || Users;
-                return (
-                  <div key={sector}>
-                    <div className="flex items-center gap-3 mb-6">
-                      <Icon className="h-6 w-6 text-primary" />
-                      <h3 className="text-2xl font-bold">{sector} Partners</h3>
-                    </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {categoryPartners.map((partner) => (
-                        <Card key={partner.id} className="hover:shadow-elegant transition-all duration-300">
-                          <CardHeader>
-                            <div className="flex items-start justify-between mb-2">
-                              {partner.logo_url ? (
-                                <div className="w-16 h-16 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-                                  <img
-                                    src={partner.logo_url}
-                                    alt={partner.name}
-                                    className="w-full h-full object-contain"
-                                    onError={(e) => {
-                                      (e.target as HTMLImageElement).style.display = "none";
-                                      (e.target as HTMLImageElement).parentElement!.innerHTML = "ðŸ¢";
-                                    }}
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
-                                  ðŸ¢
-                                </div>
-                              )}
-                              {partner.featured && (
-                                <Badge variant="default" className="ml-auto">Featured</Badge>
-                              )}
-                            </div>
-                            <CardTitle className="text-xl">{partner.name}</CardTitle>
-                            <CardDescription className="text-primary font-medium">
-                              {partner.sector}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            {partner.description && (
-                              <p className="text-muted-foreground mb-3">{partner.description}</p>
-                            )}
-                            {partner.website_url && (
-                              <a
-                                href={partner.website_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                              >
-                                Visit Website
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <PartnersCarousel variant="card" partners={partners} className="px-8 md:px-14" />
           )}
         </div>
 

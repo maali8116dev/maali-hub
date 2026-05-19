@@ -1,5 +1,7 @@
 # What Happens When `application_fee` is Set to 0
 
+> **Superseded:** New applies require active Full Member membership (`/join`), not a $0 fee path. Per-application Stripe checkout is archived in `archive/legacy-application-payment/README.md`.
+
 ## Current Behavior
 
 When a project has `application_fee = 0` (or `null`), here's what happens during application submission:

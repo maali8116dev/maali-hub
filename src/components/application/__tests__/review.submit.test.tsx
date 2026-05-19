@@ -145,7 +145,7 @@ describe('Step 7: Review & Submit', () => {
   });
 });
 
-describe('Step 6: Payment', () => {
+describe('Membership apply gate', () => {
   beforeEach(() => {
     setupMocks();
   });
@@ -155,8 +155,7 @@ describe('Step 6: Payment', () => {
     localStorage.clear();
   });
 
-  it('should skip payment step for free projects', () => {
-    // System-wide application fee of 0 should skip payment
+  it('no longer uses per-application platform fee for gating', () => {
     expect(mockPlatformFee).toBe(0);
   });
 });

@@ -95,10 +95,7 @@ const Navigation = () => {
             </div>
             {user ? (
               <div className="flex items-center space-x-4">
-                <Button variant="outline" size="sm" onClick={() => navigate("/join")}>
-                  My Membership
-                </Button>
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+                <Button variant="outline" onClick={() => navigate("/dashboard")}>
                   {t('navigation:dashboard')}
                 </Button>
                 <Button variant="outline" onClick={signOut}>
@@ -175,10 +172,7 @@ const Navigation = () => {
             <div className="pt-3 pb-2 space-y-2 border-t border-border mt-2">
               {user ? (
                 <>
-                  <Button variant="outline" className="w-full min-h-[48px]" onClick={() => { navigate("/join"); setIsMenuOpen(false); }}>
-                    My Membership
-                  </Button>
-                  <Button variant="ghost" className="w-full min-h-[48px] justify-start" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}>
+                  <Button variant="outline" className="w-full min-h-[48px]" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}>
                     {t('navigation:dashboard')}
                   </Button>
                   <Button variant="outline" className="w-full min-h-[48px]" onClick={signOut}>

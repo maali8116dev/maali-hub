@@ -14,7 +14,7 @@ const mockProjects = [
     image_url: null,
     requirements: 'Must be a registered business',
     eligibility_criteria: 'African entrepreneurs',
-    application_fee: '100',
+    application_fee: '0',
     max_applicants: 50,
     current_applicants: 12,
     featured: true,
@@ -34,7 +34,7 @@ const mockProjects = [
     image_url: null,
     requirements: 'Tech startup',
     eligibility_criteria: 'Early stage startups',
-    application_fee: '150',
+    application_fee: '0',
     max_applicants: 30,
     current_applicants: 8,
     featured: false,
@@ -50,6 +50,20 @@ const mockPlatformSettings = [
     application_fee: 0,
   },
 ];
+
+const mockFullMemberMembership = {
+  id: 'membership-1',
+  user_id: 'user-123',
+  tier: 'member',
+  status: 'active',
+  stripe_customer_id: null,
+  stripe_payment_intent_id: null,
+  amount_paid: 200,
+  starts_at: '2024-01-01T00:00:00Z',
+  expires_at: '2099-12-31T00:00:00Z',
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
+};
 
 const mockProfile = {
   id: 'profile-123',
@@ -134,6 +148,31 @@ export const handlers = [
   // Mock Supabase REST API for platform settings
   http.get('*/rest/v1/platform_settings', () => {
     return HttpResponse.json(mockPlatformSettings);
+  }),
+
+  http.get('*/rest/v1/memberships', ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('user_id');
+    const tier = url.searchParams.get('tier');
+    const status = url.searchParams.get('status');
+
+    if (userId === 'eq.user-123' && status === 'eq.active') {
+      if (tier === 'eq.member') {
+        return HttpResponse.json([mockFullMemberMembership]);
+      }
+      if (tier === 'eq.community') {
+        return HttpResponse.json([
+          {
+            ...mockFullMemberMembership,
+            id: 'membership-community',
+            tier: 'community',
+          },
+        ]);
+      }
+      return HttpResponse.json([mockFullMemberMembership]);
+    }
+
+    return HttpResponse.json([]);
   }),
 
   // Mock Supabase REST API for applications

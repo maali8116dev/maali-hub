@@ -268,11 +268,8 @@ const Auth = () => {
           });
           signUpForm.reset();
           
-          // Mark that user just signed up to show profile wizard
-          localStorage.setItem('justSignedUp', 'true');
-          
-          // Redirect to return URL or dashboard
-          navigate(getReturnUrl());
+          // Redirect new users through onboarding to pick membership
+          navigate("/onboarding");
         } else {
           // Email confirmation required, but allow access anyway
           // Sign the user in programmatically if possible
@@ -286,14 +283,12 @@ const Auth = () => {
             
             if (signInError) {
               // If sign-in fails, user needs to verify email first
-              // But still redirect to dashboard - they can verify email from there
               toast({
                 title: "Account created!",
                 description: "Please check your email to verify your account. You can access the dashboard after verification.",
               });
               signUpForm.reset();
-              localStorage.setItem('justSignedUp', 'true');
-              navigate(getReturnUrl());
+              navigate("/onboarding");
             } else {
               // Successfully signed in (Supabase allows unverified sign-ins)
               toast({
@@ -301,8 +296,7 @@ const Auth = () => {
                 description: "Welcome! Please verify your email to submit applications.",
               });
               signUpForm.reset();
-              localStorage.setItem('justSignedUp', 'true');
-              navigate(getReturnUrl());
+              navigate("/onboarding");
             }
           } catch (err) {
             // Fallback: show message but still redirect
@@ -311,8 +305,7 @@ const Auth = () => {
               description: "Please check your email to verify your account.",
             });
             signUpForm.reset();
-            localStorage.setItem('justSignedUp', 'true');
-            navigate(getReturnUrl());
+            navigate("/onboarding");
           }
         }
       } else {
@@ -322,8 +315,7 @@ const Auth = () => {
           description: "Please check your email to verify your account.",
         });
         signUpForm.reset();
-        localStorage.setItem('justSignedUp', 'true');
-        navigate(getReturnUrl());
+        navigate("/onboarding");
       }
     } catch (error) {
       toast({
