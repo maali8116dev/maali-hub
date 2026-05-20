@@ -5,7 +5,8 @@ import { authenticateRequest, getCorsHeaders } from "../_shared/auth.ts";
 
 const MEMBER_PRICE_CENTS = 200; // $2.00/month — single source of truth
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
+const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2024-06-20",
 });
 
@@ -20,6 +21,16 @@ serve(async (req) => {
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (!stripeSecretKey || !stripeSecretKey.startsWith("sk_")) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "Payment is not configured. Add STRIPE_SECRET_KEY to supabase/functions/.env for local dev.",
+      }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 
   // Verify the caller is a logged-in Supabase user

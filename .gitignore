@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 .cursor
+.claude
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -28,6 +29,8 @@ dist-ssr
 .env.local
 .env.*.local
 .env.local.store
+.env.supabase
+supabase/functions/.env
 
 # Drizzle
 server/drizzle

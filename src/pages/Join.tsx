@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Check, Users, Zap, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -309,12 +310,14 @@ const StepPayment = ({
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    // The edge function verifies identity from the JWT — no userId in body
-    supabase.functions
-      .invoke("create-membership-payment", { body: {} })
+    invokeWithAuth<{ clientSecret?: string; error?: string }>("create-membership-payment")
       .then(({ data, error }) => {
         if (error || !data?.clientSecret) {
-          setFetchError("Could not initialise payment. Please try again.");
+          const msg =
+            data?.error || parseEdgeFunctionError(error) || error?.message;
+          setFetchError(
+            msg ? `Could not initialise payment: ${msg}` : "Could not initialise payment. Please try again.",
+          );
         } else {
           setClientSecret(data.clientSecret);
         }

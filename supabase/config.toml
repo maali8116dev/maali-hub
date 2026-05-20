@@ -1,7 +1,7 @@
 project_id = "alpudhhsmgtpmgpjfuqs"
 
 # Local OAuth: Studio Auth → Providers page does not load locally; configure here instead.
-# Add to project root .env (gitignored):
+# Add to .env.supabase (copy from .env.supabase.example; gitignored):
 #   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<from Google Cloud>
 #   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=<from Google Cloud>
 # Google Cloud → Authorized redirect URI: http://127.0.0.1:54321/auth/v1/callback
@@ -59,4 +59,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.rate-limited-auth]
+verify_jwt = false
+
+[functions.create-membership-payment]
 verify_jwt = false

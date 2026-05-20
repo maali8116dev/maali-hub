@@ -76,12 +76,14 @@ VITE_SUPABASE_ANON_KEY=<get from supabase:status output>
 
 **Studio → Authentication → Providers / OAuth apps will not load on local** — configure in `supabase/config.toml` instead (already wired for Google).
 
-1. In `.env` (project root):
+1. Copy `.env.supabase.example` → `.env.supabase` and set:
 
 ```env
 SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<google-web-client-id>
 SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=<google-client-secret>
 ```
+
+(Not in root `.env` — keeps OAuth secrets separate from Vite env.)
 
 2. [Google Cloud Console](https://console.cloud.google.com/) → your OAuth client → **Authorized redirect URIs**:
    - `http://127.0.0.1:54321/auth/v1/callback`
@@ -91,6 +93,10 @@ SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=<google-client-secret>
 4. Confirm: `GET http://127.0.0.1:54321/auth/v1/settings` → `"google": true`
 
 App callback stays `http://localhost:8080/auth/callback` (see `Auth.tsx`).
+
+### Membership payment (Stripe edge function)
+
+Copy `supabase/functions/.env.example` → `supabase/functions/.env` and set `STRIPE_SECRET_KEY` (same test key as root `.env`). Restart Supabase after changes.
 
 ## Troubleshooting
 

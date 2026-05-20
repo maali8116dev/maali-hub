@@ -125,14 +125,16 @@ The application will be available at `http://localhost:8080`
 
 ## 📚 Documentation
 
-- **[PROJECT_MANAGEMENT_SUMMARY.md](./PROJECT_MANAGEMENT_SUMMARY.md)** - Comprehensive project status and features
-- **[REVIEW_SYSTEM.md](./REVIEW_SYSTEM.md)** - Review system documentation
-- **[SEO_GUIDE.md](./SEO_GUIDE.md)** - SEO implementation guide
-- **[DATABASE_SETUP.md](./DATABASE_SETUP.md)** - Database setup instructions
-- **[BACKEND_SETUP.md](./BACKEND_SETUP.md)** - Backend configuration guide
-- **[STRIPE_SETUP.md](./STRIPE_SETUP.md)** - Stripe payment integration guide
-- **[SUPABASE_EMAIL_HOOK_SETUP.md](./SUPABASE_EMAIL_HOOK_SETUP.md)** - Email hook configuration
-- **[MAINTENANCE_MODE.md](./MAINTENANCE_MODE.md)** - Maintenance mode configuration
+Guides live in [`docs/`](./docs/):
+
+- **[PROJECT_MANAGEMENT_SUMMARY.md](./docs/PROJECT_MANAGEMENT_SUMMARY.md)** - Project status and features
+- **[LOCAL_DB_SETUP.md](./docs/LOCAL_DB_SETUP.md)** - Local Supabase, OAuth, Stripe
+- **[REVIEW_SYSTEM.md](./docs/REVIEW_SYSTEM.md)** - Review system
+- **[DATABASE_SETUP.md](./docs/DATABASE_SETUP.md)** - Database setup
+- **[STRIPE_SETUP.md](./docs/STRIPE_SETUP.md)** - Stripe payments and webhooks
+- **[SUPABASE_EMAIL_HOOK_SETUP.md](./docs/SUPABASE_EMAIL_HOOK_SETUP.md)** - Email hook
+- **[SEO_GUIDE.md](./docs/SEO_GUIDE.md)** - SEO
+- **[MAINTENANCE_MODE.md](./docs/MAINTENANCE_MODE.md)** - Maintenance mode
 
 ## 🧪 Testing
 

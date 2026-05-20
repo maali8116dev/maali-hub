@@ -50,16 +50,32 @@ const OAuthCallback = () => {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const errorParam = hashParams.get('error');
         const errorDescription = hashParams.get('error_description');
+        const decodeAuthMessage = (msg: string | null) =>
+          msg ? decodeURIComponent(msg.replace(/\+/g, ' ')) : null;
 
         if (errorParam) {
-          setError(errorDescription || errorParam || 'Authentication failed');
+          setError(decodeAuthMessage(errorDescription) || errorParam || 'Authentication failed');
           setTimeout(() => {
             navigate('/auth', { replace: true });
           }, 3000);
           return;
         }
 
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const authCode = new URLSearchParams(window.location.search).get('code');
+        let exchangeErrorMessage: string | null = null;
+
+        let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (!session && authCode) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
+          if (exchangeError) {
+            exchangeErrorMessage =
+              decodeAuthMessage(exchangeError.message) || exchangeError.message;
+          }
+          const refreshed = await supabase.auth.getSession();
+          session = refreshed.data.session;
+          sessionError = refreshed.error;
+        }
 
         if (sessionError) {
           setError(sessionError.message);
@@ -99,7 +115,9 @@ const OAuthCallback = () => {
             navigate(destination, { replace: true });
           }, 100);
         } else {
-          setError('Failed to establish session. Please try again.');
+          setError(
+            exchangeErrorMessage || 'Failed to establish session. Please try again.',
+          );
           setTimeout(() => {
             navigate('/auth', { replace: true });
           }, 3000);

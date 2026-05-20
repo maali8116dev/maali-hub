@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Users, Zap, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useMembership, useInvalidateMembership } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
@@ -357,11 +358,11 @@ const StepPayment = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.functions
-      .invoke("create-membership-payment", { body: {} })
+    invokeWithAuth<{ clientSecret?: string; error?: string }>("create-membership-payment")
       .then(({ data, error }) => {
         if (error || !data?.clientSecret) {
-          const msg = data?.error || error?.message || "Unknown error";
+          const msg =
+            data?.error || parseEdgeFunctionError(error) || error?.message || "Unknown error";
           setFetchError(`Could not initialise payment: ${msg}`);
         } else {
           setClientSecret(data.clientSecret);
