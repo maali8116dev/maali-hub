@@ -45,13 +45,9 @@ const Navigation = () => {
             <div className="flex-shrink-0">
               <Link to="/">
                 <img
-                  src={headerLogoPublic}
+                  src={headerLogo}
                   alt="Maali Opportunity Hub"
                   className="h-8 w-auto"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = headerLogoFallback;
-                  }}
                 />
               </Link>
             </div>
