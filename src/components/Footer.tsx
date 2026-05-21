@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { t } = useTranslation("landing");
+  const [footerEmail, setFooterEmail] = useState("");
+  const { subscribe, isSubmitting } = useNewsletterSubscribe();
 
   const footerLinks = {
     platform: [
@@ -70,18 +77,36 @@ const Footer = () => {
                 </div>
               </div>
 
-              {/* Newsletter Signup */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Stay Updated</h4>
+              <form
+                className="space-y-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const ok = await subscribe(footerEmail, "footer");
+                  if (ok) setFooterEmail("");
+                }}
+              >
+                <h4 className="font-semibold text-sm">{t("newsletter.title")}</h4>
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <input
+                  <Input
                     type="email"
-                    placeholder="Enter your email"
-                    className="flex-1 px-3 py-3 sm:py-2 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[44px]"
+                    placeholder={t("newsletter.emailPlaceholder")}
+                    value={footerEmail}
+                    onChange={(e) => setFooterEmail(e.target.value)}
+                    className="flex-1 min-h-[44px] sm:min-h-0"
+                    required
+                    disabled={isSubmitting}
                   />
-                  <Button variant="hero" size="sm" className="min-h-[44px] sm:min-h-0">Subscribe</Button>
+                  <Button
+                    type="submit"
+                    variant="hero"
+                    size="sm"
+                    className="min-h-[44px] sm:min-h-0"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("newsletter.subscribe")}
+                  </Button>
                 </div>
-              </div>
+              </form>
 
               {/* Payment Methods */}
               {/* <div className="space-y-3">

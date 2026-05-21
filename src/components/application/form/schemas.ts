@@ -106,8 +106,8 @@ export const step2Schema = step2BaseSchema.refine(
     }
   );
 
-// Step 3: Project Overview Schema
-export const step3Schema = z.object({
+// Step 3: Project Overview (geographic focus only for grants — optional)
+const step3CoreSchema = z.object({
   projectTitle: z
     .string()
     .min(1, "Project title is required"),
@@ -120,8 +120,20 @@ export const step3Schema = z.object({
     .refine((val) => countWords(val) <= 400, {
       message: "Project summary must not exceed 400 words",
     }),
-  geographicFocus: z.string().min(2, "Geographic focus is required"),
 });
+
+export const step3GrantSchema = step3CoreSchema.extend({
+  geographicFocus: z.string().optional(),
+});
+
+export const step3NonGrantSchema = step3CoreSchema;
+
+export function getStep3Schema(isGrantType: boolean) {
+  return isGrantType ? step3GrantSchema : step3NonGrantSchema;
+}
+
+/** @deprecated Use getStep3Schema(isGrantType) — kept for combined schema */
+export const step3Schema = step3GrantSchema;
 
 // Step 4: Compliance & Declarations base schema
 export const step4BaseSchema = z.object({

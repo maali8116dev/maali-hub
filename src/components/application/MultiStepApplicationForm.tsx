@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { useAutoSaveDraft } from "@/hooks/useAutoSaveDraft";
 import { useAuth } from "@/hooks/useAuth";
 import { useApplicationFormSync } from "@/hooks/useApplicationFormSync";
+import { useApplicantAutofill } from "@/hooks/useApplicantAutofill";
 import { useApplicationValidation } from "@/hooks/useApplicationValidation";
 import { useApplicationSubmission } from "@/hooks/useApplicationSubmission";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,8 +152,10 @@ const MultiStepApplicationForm = () => {
   // Sync form with store
   useApplicationFormSync(form, currentStep);
 
+  useApplicantAutofill({ draftLoaded, form });
+
   // Validation hook
-  const { validateAll } = useApplicationValidation();
+  const { validateAll } = useApplicationValidation(isGrantType);
 
   // Submission hook
   const { submitApplication, isSubmitting } = useApplicationSubmission();

@@ -4,6 +4,7 @@ import { Globe, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import headerLogo from "../../images/header_logo.png";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -43,9 +44,7 @@ const Navigation = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/">
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Maali
-                </h1>
+                <img src={headerLogo} alt="Maali Opportunity Hub" className="h-8 w-auto" />
               </Link>
             </div>
           </div>
@@ -108,7 +107,7 @@ const Navigation = () => {
                   {t('navigation:login')}
                 </Button>
                 <Button variant="hero" onClick={() => navigate("/join")}>
-                  Join MAALI
+                  Join Maali
                 </Button>
               </>
             )}
@@ -185,7 +184,7 @@ const Navigation = () => {
                     {t('navigation:login')}
                   </Button>
                   <Button variant="hero" className="w-full min-h-[48px]" onClick={() => { navigate("/join"); setIsMenuOpen(false); }}>
-                    Join MAALI
+                    Join Maali
                   </Button>
                 </>
               )}

@@ -46,7 +46,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, signOut } = useAuth();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   const { t } = useTranslation(['dashboard', 'common']);
-  
+
   // Get display name: profile name > email
   // User must be authenticated to access dashboard (enforced by ProtectedRoute)
   const displayName = profile?.firstName && profile?.lastName
@@ -122,8 +122,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <SidebarMenu>
                 {menuItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = location.pathname === item.href;
+                  const isActive =
+                    location.pathname === item.href ||
+                    (item.href === "/dashboard/applications" &&
+                      location.pathname.startsWith("/dashboard/applications"));
                   const isNotifications = item.href === "/dashboard/notifications";
+
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
@@ -135,11 +139,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                           <Icon />
                           <span>{item.label}</span>
                           {isNotifications && unreadCount > 0 && (
-                            <Badge 
-                              variant="destructive" 
+                            <Badge
+                              variant="destructive"
                               className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs"
                             >
-                              {unreadCount > 99 ? '99+' : unreadCount}
+                              {unreadCount > 99 ? "99+" : unreadCount}
                             </Badge>
                           )}
                         </Link>

@@ -1,11 +1,32 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, MapPin, Calendar, TrendingUp, ArrowRight } from "lucide-react";
+import { DollarSign, MapPin, Calendar, TrendingUp, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeaturedSuccessStories } from "@/hooks/useSuccessStories";
+
+function StoryImage({ src, alt }: { src?: string | null; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  const showPlaceholder = !src || failed;
+
+  return (
+    <div className="w-full h-32 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+      {showPlaceholder ? (
+        <ImageIcon className="h-10 w-10 text-muted-foreground" aria-hidden />
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
+  );
+}
 
 const SuccessStoriesSection = () => {
   const navigate = useNavigate();
@@ -20,7 +41,7 @@ const SuccessStoriesSection = () => {
             {t('successStories.title', 'Success')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('successStories.titleHighlight', 'Stories')}</span>
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            {t('successStories.subtitle', 'Discover how African entrepreneurs are transforming their communities and building successful businesses with funding from our platform.')}
+            {t('successStories.subtitle')}
           </p>
         </div>
 
@@ -52,23 +73,7 @@ const SuccessStoriesSection = () => {
               <Card key={story.id} className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 border-border">
                 <CardHeader>
                   <div className="mb-4">
-                    {story.image_url ? (
-                      <div className="w-full h-32 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
-                        <img
-                          src={story.image_url}
-                          alt={story.company}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
-                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-4xl">ðŸŒŸ</div>';
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full h-32 rounded-lg bg-muted flex items-center justify-center text-4xl">
-                        ðŸŒŸ
-                      </div>
-                    )}
+                    <StoryImage src={story.image_url} alt={story.company} />
                   </div>
                   <div className="flex items-center justify-between mb-2">
                     <CardTitle className="text-lg sm:text-xl">{story.company}</CardTitle>

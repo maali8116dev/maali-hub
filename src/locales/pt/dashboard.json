@@ -1,4 +1,9 @@
 {
+  "memberGate": {
+    "title": "Associação completa necessária",
+    "description": "A associação Comunidade permite explorar oportunidades. Faça upgrade para Membro completo para candidatar-se, enviar documentos e acompanhar candidaturas.",
+    "menuLocked": "Recurso de Membro completo"
+  },
   "menu": {
     "dashboard": "Painel",
     "applications": "Minhas candidaturas",

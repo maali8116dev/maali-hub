@@ -125,7 +125,7 @@ export function ProjectApplicationSidebar({
           <MembershipRequiredBanner className="mb-4" />
         )}
 
-        {hasSubmittedApplication ? (
+        {hasSubmittedApplication && !needsMembership ? (
           <Button
             className="w-full"
             variant="hero"
@@ -136,6 +136,8 @@ export function ProjectApplicationSidebar({
           >
             {t("common:projectApplicationSidebar.viewYourApplication")}
           </Button>
+        ) : hasSubmittedApplication && needsMembership ? (
+          <MembershipRequiredBanner className="mb-0" />
         ) : draft ? (
           <>
             <div className="bg-muted/50 rounded-lg p-3 mb-4">

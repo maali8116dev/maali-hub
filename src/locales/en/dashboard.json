@@ -1,4 +1,9 @@
 {
+  "memberGate": {
+    "title": "Full membership required",
+    "description": "Community membership lets you browse opportunities. Upgrade to a Full Member to apply, upload documents, and track applications.",
+    "menuLocked": "Full Member feature"
+  },
   "menu": {
     "dashboard": "Dashboard",
     "applications": "My Applications",
@@ -209,6 +214,12 @@
   "documents": {
     "title": "My Documents",
     "subtitle": "Manage your document library and application documents",
+    "subtitleSlots": "Upload once, reuse across applications. Application-specific files appear on each application detail page.",
+    "usageCount": "{{count}} of {{max}} documents used",
+    "fileTypes": {
+      "slots": "CV & cover letter: PDF, DOC, or DOCX only (PDF preferred) — max 10MB.",
+      "other": "Allowed: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP — max 10MB per file."
+    },
     "uploadToLibrary": "Upload to Library",
     "uploading": "Uploading...",
     "applyForFunding": "Apply for Opportunities",
@@ -244,6 +255,36 @@
     "badges": {
       "application": "Application",
       "library": "Library"
+    },
+    "limitReached": {
+      "title": "Document limit reached",
+      "description": "You can store up to {{max}} documents. You have {{remaining}} slot(s) left."
+    },
+    "slots": {
+      "sectionTitle": "Standard documents",
+      "upload": "Upload",
+      "replace": "Replace",
+      "cv": {
+        "label": "CV / Resume",
+        "description": "Your latest CV (PDF or Word). Uploading again replaces the previous file."
+      },
+      "id": {
+        "label": "National ID / Passport",
+        "description": "Verified through identity verification on your profile.",
+        "verified": "Verified",
+        "viewKyc": "View verification",
+        "completeKyc": "Complete verification"
+      },
+      "coverLetter": {
+        "label": "Cover letter",
+        "description": "Optional. PDF or Word. Reused when you apply unless you upload a new one."
+      }
+    },
+    "other": {
+      "title": "Other documents",
+      "description": "Certificates, portfolios, or any extra files (not typed slots).",
+      "upload": "Upload files",
+      "empty": "No other documents yet."
     }
   },
   "resources": {

@@ -100,9 +100,30 @@ const DocumentUploadSection = ({
     const loadLibrary = async () => {
       const docs = await fetchLibraryDocuments();
       setLibraryDocuments(docs);
+      if (storeLibraryIds.length === 0) {
+        const presetIds = docs
+          .filter((d) => d.documentType === "cv" || d.documentType === "cover_letter")
+          .map((d) => d.id);
+        if (presetIds.length > 0) {
+          setSelectedLibraryDocIdsLocal(presetIds);
+        }
+      }
     };
     loadLibrary();
-  }, [fetchLibraryDocuments]);
+  }, [fetchLibraryDocuments, storeLibraryIds.length]);
+
+  const slotLabel = (type: UploadedDocument["documentType"]) => {
+    if (type === "cv") return "CV / Resume";
+    if (type === "cover_letter") return "Cover letter";
+    return null;
+  };
+
+  const typedLibraryDocs = libraryDocuments.filter(
+    (d) => d.documentType === "cv" || d.documentType === "cover_letter",
+  );
+  const otherLibraryDocs = libraryDocuments.filter(
+    (d) => !d.documentType || d.documentType === null,
+  );
 
   // Sync local state changes to store and notify parent
   useEffect(() => {
@@ -135,7 +156,6 @@ const DocumentUploadSection = ({
       "image/jpeg",
       "image/jpg",
       "image/png",
-      "image/gif",
       "image/webp",
     ];
 
@@ -143,7 +163,7 @@ const DocumentUploadSection = ({
       return `File "${file.name}" is too large. Maximum size is 10MB.`;
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP.`;
+      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.`;
     }
     return null;
   };
@@ -294,6 +314,11 @@ const DocumentUploadSection = ({
             <CardTitle className="text-base flex items-center gap-2">
               <Library className="h-4 w-4" />
               Select from Library
+              {selectedLibraryDocIds.length > 0 && (
+                <span className="text-muted-foreground font-normal">
+                  ({selectedLibraryDocIds.length} selected)
+                </span>
+              )}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Choose documents from your library to reuse for this application
@@ -305,31 +330,42 @@ const DocumentUploadSection = ({
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="space-y-2">
-                {libraryDocuments.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <Checkbox
-                      id={`lib-doc-${doc.id}`}
-                      checked={selectedLibraryDocIds.includes(doc.id)}
-                      onCheckedChange={(checked) => handleLibraryDocToggle(doc.id, checked as boolean)}
-                    />
-                    <label
-                      htmlFor={`lib-doc-${doc.id}`}
-                      className="flex-1 flex items-center gap-3 cursor-pointer min-w-0"
-                    >
-                      <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">{doc.fileName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(doc.fileSize)} • {new Date(doc.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </label>
+              <div className="space-y-4">
+                {typedLibraryDocs.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      From your document library
+                    </p>
+                    {typedLibraryDocs.map((doc) => (
+                      <LibraryDocRow
+                        key={doc.id}
+                        doc={doc}
+                        badge={slotLabel(doc.documentType)}
+                        selected={selectedLibraryDocIds.includes(doc.id)}
+                        onToggle={handleLibraryDocToggle}
+                        formatFileSize={formatFileSize}
+                      />
+                    ))}
                   </div>
-                ))}
+                )}
+                {otherLibraryDocs.length > 0 && (
+                  <div className="space-y-2">
+                    {typedLibraryDocs.length > 0 && (
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Other saved files
+                      </p>
+                    )}
+                    {otherLibraryDocs.map((doc) => (
+                      <LibraryDocRow
+                        key={doc.id}
+                        doc={doc}
+                        selected={selectedLibraryDocIds.includes(doc.id)}
+                        onToggle={handleLibraryDocToggle}
+                        formatFileSize={formatFileSize}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -360,7 +396,7 @@ const DocumentUploadSection = ({
             multiple
             className="hidden"
             onChange={handleFileSelect}
-            accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp"
+            accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
           />
           
           <div className="space-y-3">
@@ -375,7 +411,7 @@ const DocumentUploadSection = ({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP (max 10MB each)
+              PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP (max 10MB each)
             </p>
             <p className="text-xs text-muted-foreground italic">
               Files will be uploaded when you submit your application
@@ -384,82 +420,50 @@ const DocumentUploadSection = ({
         </div>
       </div>
 
-      {/* Summary of Selected Documents */}
-      {(selectedFiles.length > 0 || selectedLibraryDocIds.length > 0) && (
+      {/* New files only — library picks stay in the checklist above */}
+      {selectedFiles.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              Selected Documents ({selectedFiles.length + selectedLibraryDocIds.length})
+              Files to upload on submit ({selectedFiles.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Selected Library Documents */}
-            {selectedLibraryDocIds.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">From Library:</p>
-                {libraryDocuments
-                  .filter(doc => selectedLibraryDocIds.includes(doc.id))
-                  .map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="flex items-center gap-3 p-2 border rounded bg-muted/30"
-                    >
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{doc.fileName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(doc.fileSize)}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">Library</Badge>
-                    </div>
-                  ))}
-              </div>
-            )}
-
-            {/* New Files to Upload */}
-            {selectedFiles.length > 0 && (
-              <div className="space-y-2">
-                {selectedLibraryDocIds.length > 0 && (
-                  <p className="text-sm font-medium text-muted-foreground mt-3">New Uploads:</p>
-                )}
-                {selectedFiles.map((selectedFile) => (
-                  <div
-                    key={selectedFile.id}
-                    className="flex items-center justify-between p-3 border rounded-lg bg-background"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {getFileIcon(selectedFile.file.type)}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(selectedFile.file.size)} • Ready to upload
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePreview(selectedFile)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteConfirm(selectedFile)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+          <CardContent className="space-y-2">
+            {selectedFiles.map((selectedFile) => (
+              <div
+                key={selectedFile.id}
+                className="flex items-center justify-between p-3 border rounded-lg bg-background"
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {getFileIcon(selectedFile.file.type)}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatFileSize(selectedFile.file.size)} • Ready to upload
+                    </p>
                   </div>
-                ))}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePreview(selectedFile)}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleteConfirm(selectedFile)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            )}
+            ))}
           </CardContent>
         </Card>
       )}
@@ -484,6 +488,49 @@ const DocumentUploadSection = ({
     </div>
   );
 };
+
+function LibraryDocRow({
+  doc,
+  badge,
+  selected,
+  onToggle,
+  formatFileSize,
+}: {
+  doc: UploadedDocument;
+  badge?: string | null;
+  selected: boolean;
+  onToggle: (docId: string, checked: boolean) => void;
+  formatFileSize: (bytes: number) => string;
+}) {
+  return (
+    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+      <Checkbox
+        id={`lib-doc-${doc.id}`}
+        checked={selected}
+        onCheckedChange={(checked) => onToggle(doc.id, checked as boolean)}
+      />
+      <label
+        htmlFor={`lib-doc-${doc.id}`}
+        className="flex-1 flex items-center gap-3 cursor-pointer min-w-0"
+      >
+        <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium truncate">{doc.fileName}</p>
+            {badge && (
+              <Badge variant="secondary" className="text-xs shrink-0">
+                {badge}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {formatFileSize(doc.fileSize)} • {new Date(doc.createdAt).toLocaleDateString()}
+          </p>
+        </div>
+      </label>
+    </div>
+  );
+}
 
 export default DocumentUploadSection;
 

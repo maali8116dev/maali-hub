@@ -6,7 +6,7 @@ import {
   step1Schema,
   step2Schema,
   step2BaseSchema,
-  step3Schema,
+  getStep3Schema,
   step5Schema,
   step4BaseSchema,
   step4Schema as grantComplianceSchema,
@@ -26,7 +26,7 @@ export function getStepSchema(
       if (applicantType === "Individual") return z.object({});
       return isGrantType ? step2Schema : step2BaseSchema;
     case 3:
-      return step3Schema;
+      return getStep3Schema(isGrantType);
     case 4:
       return step5Schema; // Social Links
     case 5:

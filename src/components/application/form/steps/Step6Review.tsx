@@ -8,6 +8,10 @@ import {
 } from "lucide-react";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 import { getProjectOverviewCopy } from "../constants";
+import {
+  applicantLocationLabel,
+  resolveGeographicFocus,
+} from "@/lib/applicationGeography";
 
 interface Step6ReviewProps {
   formData: ApplicationFormData;
@@ -25,6 +29,9 @@ export function Step6Review({
   isGrantType = true,
 }: Step6ReviewProps) {
   const { sectionTitle, titleLabel, summaryLabel, locationLabel } = getProjectOverviewCopy(isGrantType);
+  const resolvedLocation = resolveGeographicFocus(formData, isGrantType);
+  const showProjectGeography =
+    isGrantType && !!formData.geographicFocus?.trim();
 
   return (
     <div className="space-y-6">
@@ -216,12 +223,19 @@ export function Step6Review({
               {formData.projectSummary || "Not provided"}
             </p>
           </div>
-          <div>
-            <span className="text-muted-foreground">{locationLabel}:</span>
-            <p className="font-medium">
-              {formData.geographicFocus || "Not provided"}
-            </p>
-          </div>
+          {showProjectGeography ? (
+            <div>
+              <span className="text-muted-foreground">{locationLabel}:</span>
+              <p className="font-medium">{formData.geographicFocus}</p>
+            </div>
+          ) : (
+            <div>
+              <span className="text-muted-foreground">Location:</span>
+              <p className="font-medium">
+                {resolvedLocation || applicantLocationLabel(formData) || "Not provided"}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

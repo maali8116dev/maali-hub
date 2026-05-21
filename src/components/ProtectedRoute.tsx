@@ -1,11 +1,9 @@
-﻿import { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useMembership } from "@/hooks/useMembership";
-
-// Roles that do NOT need a membership to access their areas
-const MEMBERSHIP_EXEMPT_ROLES = ["admin", "reviewer", "partner"] as const;
+import { isMembershipExemptRole } from "@/lib/membershipAccess";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -23,7 +21,7 @@ const ProtectedRoute = ({
 
   // Only fetch profile/membership when we have a user
   const { data: profile, isPending: profilePending } = useProfile();
-  const { membership, loading: membershipLoading } = useMembership();
+  const { isPaidMember, loading: membershipLoading } = useMembership();
 
   // Allow bypassing auth only if explicitly set to false (for development)
   if (requireAuth === false) {
@@ -49,11 +47,8 @@ const ProtectedRoute = ({
 
   // Membership gate — skip for exempt roles and when caller opts out
   if (requireMembership) {
-    const role = profile?.role;
-    const isExempt = role && MEMBERSHIP_EXEMPT_ROLES.includes(role as any);
-
-    if (!isExempt && !membership) {
-      // No active membership → send through onboarding
+    if (!isMembershipExemptRole(profile?.role) && !isPaidMember) {
+      // No paid membership → send through onboarding
       return <Navigate to="/onboarding" replace />;
     }
   }

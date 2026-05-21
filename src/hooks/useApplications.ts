@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { isOpportunityOpen } from "@/lib/opportunityAvailability";
@@ -48,13 +48,39 @@ async function fetchApplicationsDirect(userId: string): Promise<ApplicationWithO
     return [];
   }
 
+  const rows = rpcData as { application: any; opportunity: any }[];
+
+  const sectorIds = [
+    ...new Set(
+      rows
+        .map((row) => row.opportunity?.sector_id as number | undefined)
+        .filter((id): id is number => id != null)
+    ),
+  ];
+
+  let sectorNameById = new Map<number, string>();
+  if (sectorIds.length > 0) {
+    const { data: sectors, error: sectorsError } = await supabase
+      .from("sectors")
+      .select("id, name")
+      .in("id", sectorIds);
+
+    if (sectorsError) throw sectorsError;
+
+    sectorNameById = new Map((sectors ?? []).map((s) => [s.id, s.name]));
+  }
+
   // Map RPC response to ApplicationWithOpportunity type
-  return (rpcData as any[]).map((row: { application: any; opportunity: any }) => {
+  return rows.map((row) => {
     const app = row.application;
     const opportunity = row.opportunity;
 
-    // Get first tag name as sector, or use opportunity type
-    const sector = opportunity?.tags?.[0]?.name || opportunity?.opportunity_type || "Unknown";
+    const sector =
+      (opportunity?.sector_id != null
+        ? sectorNameById.get(opportunity.sector_id)
+        : null) ||
+      opportunity?.opportunity_type ||
+      "Unknown";
 
     return {
       id: app.id,

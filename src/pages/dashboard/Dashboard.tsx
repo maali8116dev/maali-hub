@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, TrendingUp, Plus, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,15 +19,17 @@ import { InAppTip } from "@/components/onboarding/InAppTip";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { formatDate } from "@/lib/dateUtils";
 import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
+import { useMembership } from "@/hooks/useMembership";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['common', 'dashboard']);
   const { data: applications, isLoading: isLoadingApplications } = useApplications();
   const { data: dashboardStats, isLoading: isLoadingDashboardStats } = useUserDashboardStats();
-  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { isLoading: isLoadingProfile } = useProfile();
   const { isIncomplete, completionPercentage } = useProfileCompletion();
   const { user } = useAuth();
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
   const [showWizard, setShowWizard] = useState(false);
   const [dismissedPrompt, setDismissedPrompt] = useState(false);
 
@@ -65,23 +67,7 @@ const Dashboard = () => {
     return applications.slice(0, 3);
   }, [applications]);
 
-  // Calculate profile completion percentage
-  const profileCompletion = useMemo(() => {
-    if (!profile) return 0;
-    
-    const fields = [
-      profile.firstName,
-      profile.lastName,
-      profile.bio,
-      profile.country,
-      profile.businessName,
-      profile.businesssector,
-      profile.avatarUrl,
-    ];
-    
-    const filledFields = fields.filter((field) => field && field.trim() !== "").length;
-    return Math.round((filledFields / fields.length) * 100);
-  }, [profile]);
+  const profileCompletion = completionPercentage;
 
   const getStatusBadge = (status: string) => {
     return getApplicationStatusBadgeClassName(status);
@@ -178,8 +164,8 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Stats Cards */}
-      {isLoadingStats ? (
+      {/* Stats Cards — Full Member only */}
+      {canApplyToOpportunities && (isLoadingStats ? (
         <DashboardStatsSkeleton />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -247,7 +233,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
-      )}
+      ))}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
@@ -256,13 +242,26 @@ const Dashboard = () => {
             <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.quickActions.title')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-2 sm:p-6 sm:pt-2 space-y-2">
-            <Link to="/opportunities">
-              <Button variant="hero" className="w-full justify-start min-h-[44px]">
+            {canApplyToOpportunities ? (
+              <Link to="/opportunities">
+                <Button variant="hero" className="w-full justify-start min-h-[44px]">
+                  <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{t('dashboard:dashboard.quickActions.startNewApplication')}</span>
+                  <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                variant="hero"
+                className="w-full justify-start min-h-[44px] opacity-60"
+                disabled={membershipLoading}
+                onClick={() => navigate("/join")}
+              >
                 <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard:dashboard.quickActions.startNewApplication')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
-            </Link>
+            )}
             <Link to="/opportunities">
               <Button variant="outline" className="w-full justify-start min-h-[44px]">
                 <TrendingUp className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -270,13 +269,26 @@ const Dashboard = () => {
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
             </Link>
-            <Link to="/dashboard/applications">
-              <Button variant="outline" className="w-full justify-start min-h-[44px]">
+            {canApplyToOpportunities ? (
+              <Link to="/dashboard/applications">
+                <Button variant="outline" className="w-full justify-start min-h-[44px]">
+                  <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{t('dashboard:dashboard.quickActions.viewAllApplications')}</span>
+                  <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full justify-start min-h-[44px] opacity-60"
+                disabled={membershipLoading}
+                onClick={() => navigate("/join")}
+              >
                 <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{t('dashboard:dashboard.quickActions.viewAllApplications')}</span>
                 <ArrowRight className="h-4 w-4 ml-auto flex-shrink-0" />
               </Button>
-            </Link>
+            )}
           </CardContent>
         </Card>
 
@@ -308,7 +320,8 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Applications */}
+      {/* Recent Applications — Full Member only */}
+      {canApplyToOpportunities && (
       <Card>
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 sm:p-6">
           <CardTitle className="text-base sm:text-lg">{t('dashboard:dashboard.recentApplications.title')}</CardTitle>
@@ -375,6 +388,7 @@ const Dashboard = () => {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 };

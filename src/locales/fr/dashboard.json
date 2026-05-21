@@ -1,4 +1,9 @@
 {
+  "memberGate": {
+    "title": "Adhésion complète requise",
+    "description": "L'adhésion Communauté permet de parcourir les opportunités. Passez à Membre complet pour postuler, téléverser des documents et suivre vos candidatures.",
+    "menuLocked": "Réservé aux Membres complets"
+  },
   "menu": {
     "dashboard": "Tableau de bord",
     "applications": "Mes candidatures",
@@ -244,6 +249,42 @@
     "badges": {
       "application": "Candidature",
       "library": "Bibliothèque"
+    },
+    "subtitleSlots": "Téléversez une fois, réutilisez pour vos candidatures. Les fichiers liés à une candidature sont sur la page de détail.",
+    "usageCount": "{{count}} sur {{max}} documents",
+    "fileTypes": {
+      "slots": "CV et lettre : PDF, DOC ou DOCX uniquement (PDF recommandé) — 10 Mo max.",
+      "other": "Formats : PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP — 10 Mo max par fichier."
+    },
+    "limitReached": {
+      "title": "Limite atteinte",
+      "description": "Maximum {{max}} documents. Il reste {{remaining}} place(s)."
+    },
+    "slots": {
+      "sectionTitle": "Documents standard",
+      "upload": "Téléverser",
+      "replace": "Remplacer",
+      "cv": {
+        "label": "CV",
+        "description": "Votre CV le plus récent (PDF ou Word). Un nouveau fichier remplace l'ancien."
+      },
+      "id": {
+        "label": "Pièce d'identité / Passeport",
+        "description": "Vérifié via la vérification d'identité sur votre profil.",
+        "verified": "Vérifié",
+        "viewKyc": "Voir la vérification",
+        "completeKyc": "Compléter la vérification"
+      },
+      "coverLetter": {
+        "label": "Lettre de motivation",
+        "description": "Optionnel. PDF ou Word. Réutilisée sauf si vous en téléversez une nouvelle."
+      }
+    },
+    "other": {
+      "title": "Autres documents",
+      "description": "Certificats, portfolios ou fichiers supplémentaires.",
+      "upload": "Téléverser des fichiers",
+      "empty": "Aucun autre document."
     }
   },
   "resources": {

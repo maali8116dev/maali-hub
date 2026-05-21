@@ -67,4 +67,33 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## 5. Forms
+
+All forms must use **react-hook-form** with a **Zod schema** and `CustomFormField` for every input field.
+
+Required pattern:
+```tsx
+const schema = z.object({ ... });
+type FormValues = z.infer<typeof schema>;
+
+const form = useForm<FormValues>({
+  resolver: zodResolver(schema),
+  defaultValues: { ... },
+});
+
+// Wrap the form element with <Form {...form}>
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(onSubmit)}>
+    <CustomFormField control={form.control} name="..." fieldType={FormFieldType.INPUT} ... />
+  </form>
+</Form>
+```
+
+Rules:
+- Never use `useState` for form state — always `useForm`.
+- Never use raw `<Input>`, `<Textarea>`, `<Select>`, or `<PhoneInput>` for user-editable fields — always `CustomFormField`.
+- Use `form.reset(...)` to populate form values when data loads (e.g. in a `useEffect`), and to restore on cancel.
+- Read-only display fields (e.g. email) are exempt and may remain as plain elements.
+- `ImageUpload` is exempt — it is not a `CustomFormField` type and handles its own state via `form.setValue`.
+
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

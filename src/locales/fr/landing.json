@@ -1,17 +1,62 @@
 {
   "hero": {
-    "badge": "Rejoignez 500+ Entrepreneurs",
+    "badge": "Rejoignez 500+ membres à travers l'Afrique",
     "headline1": "Autonomiser",
-    "headline2": "les Entrepreneurs",
+    "headline2": "les Talents",
     "headline3": "Africains",
-    "subheadline": "Le moyen le plus rapide de découvrir et de postuler pour des opportunités de financement à travers l'Afrique.",
-    "description": "Connectez-vous avec un écosystème florissant d'entrepreneurs, soumettez des candidatures et transformez votre vision en réalité. Votre parcours vers le succès commence ici.",
-    "startApplication": "Commencer votre candidature",
-    "viewProjects": "Voir les projets",
-    "browseProjects": "Parcourir les projets",
-    "entrepreneurs": "Entrepreneurs",
+    "subheadline": "Un hub pour découvrir et postuler : subventions, emplois, stages, formations, bourses et plus.",
+    "description": "Que vous lanciez une entreprise, fassiez évoluer votre carrière ou débutiez comme étudiant ou stagiaire — connectez-vous aux programmes, partenaires et évaluateurs sur une plateforme de confiance.",
+    "startApplication": "Commencer",
+    "viewProjects": "Parcourir les opportunités",
+    "browseProjects": "Parcourir les opportunités",
+    "members": "Membres actifs",
     "countries": "Pays",
-    "totalFunding": "Financement total"
+    "totalSupport": "Prix et soutien",
+    "loginRequiredTitle": "Connexion requise",
+    "loginRequiredDescription": "Créez un compte gratuit ou connectez-vous pour parcourir et postuler aux opportunités sur Maali.",
+    "previewCard1": {
+      "name": "Startup d'Ahmed",
+      "detail": "Subvention 75K$",
+      "tag": "Fintech"
+    },
+    "previewCard2": {
+      "name": "Programme de Kofi",
+      "detail": "Fellowship EdTech",
+      "tag": "Éducation"
+    },
+    "previewCard3": {
+      "name": "Poste de Samuel",
+      "detail": "Stage tech",
+      "tag": "Technologie"
+    }
+  },
+  "membership": {
+    "badge": "Adhésion",
+    "title": "Rejoignez le réseau MAALI",
+    "subtitle": "Pour entrepreneurs, professionnels, étudiants et stagiaires. Parcourez gratuitement, ou débloquez les candidatures pour moins qu'un café par mois.",
+    "community": {
+      "name": "Community",
+      "price": "Gratuit",
+      "priceNote": "Sans carte bancaire",
+      "cta": "Rejoindre gratuitement",
+      "feature1": "Parcourir subventions, emplois, stages, formations et plus",
+      "feature2": "Accès aux ressources et guides publics",
+      "feature3": "Rejoindre le réseau communautaire MAALI",
+      "feature4": "Newsletter mensuelle des opportunités"
+    },
+    "member": {
+      "name": "Full Member",
+      "badge": "Le plus populaire",
+      "price": "2$",
+      "priceUnit": "/ mois",
+      "priceNote": "Annulable à tout moment",
+      "cta": "Devenir membre",
+      "feature1": "Tout Community inclus",
+      "feature2": "Postuler à tous les types d'opportunités",
+      "feature3": "Candidatures guidées en plusieurs étapes",
+      "feature4": "Événements et ateliers exclusifs membres"
+    },
+    "socialProof": "Rejoignez les talents africains qui construisent carrière et projets avec MAALI."
   },
   "trustIndicators": {
     "title": "Approuvé par les principales",
@@ -23,137 +68,214 @@
   "howItWorks": {
     "title": "Comment ça",
     "titleHighlight": "Fonctionne",
-    "subtitle": "Commencez en quatre étapes simples. De la découverte au financement, nous avons rationalisé tout le processus.",
+    "subtitle": "Quatre étapes de la découverte au résultat — pour entrepreneurs, professionnels, étudiants et stagiaires : subventions, emplois, stages, formations, bourses et plus.",
     "step1": {
-      "title": "Parcourir les opportunités",
-      "description": "Explorez les opportunités de financement dans divers secteurs. Filtrez par localisation, montant de financement et secteur pour trouver la correspondance parfaite."
+      "title": "Découvrir les opportunités",
+      "description": "Parcourez subventions, emplois, stages, formations, bourses, fellowships et autres programmes. Filtrez par secteur, lieu et type d'opportunité."
     },
     "step2": {
-      "title": "Créer votre profil",
-      "description": "Inscrivez-vous en quelques minutes et créez votre profil d'entrepreneur. Présentez votre entreprise, votre expérience et votre vision."
+      "title": "Rejoindre Maali",
+      "description": "Créez votre compte et profil. Rejoignez gratuitement en Community pour parcourir, ou devenez Full Member pour postuler à toute opportunité."
     },
     "step3": {
-      "title": "Soumettre une candidature",
-      "description": "Complétez votre candidature avec notre processus guidé. Téléchargez des documents, fournissez des détails et soumettez en toute confiance."
+      "title": "Postuler en confiance",
+      "description": "Candidature guidée en plusieurs étapes. Téléchargez des documents, enregistrez des brouillons et soumettez quand vous êtes prêt — financement ou parcours professionnel."
     },
     "step4": {
-      "title": "Obtenir un financement",
-      "description": "Suivez le statut de votre candidature en temps réel. Recevez des commentaires et obtenez un financement pour développer votre entreprise."
+      "title": "Suivi et résultats",
+      "description": "Des évaluateurs experts examinent les candidatures équitablement. Suivez l'avancement dans votre tableau de bord jusqu'à la sélection ou l'attribution."
     },
     "cta": "Commencer aujourd'hui"
   },
   "benefits": {
     "title": "Pourquoi choisir",
     "titleHighlight": "Maali",
-    "subtitle": "Nous avons créé une plateforme spécialement pour les entrepreneurs africains, répondant à vos besoins et défis uniques.",
+    "subtitle": "Conçu pour les talents africains — fondateurs, professionnels, étudiants et stagiaires — un seul endroit pour trouver et saisir de vraies opportunités.",
     "benefit1": {
       "title": "Rapide et Simple",
-      "description": "Complétez les candidatures en quelques minutes, pas en heures. Notre processus rationalisé vous fait gagner du temps."
+      "description": "Complétez les candidatures en minutes. Notre processus guidé convient aux subventions, emplois, stages et formations."
     },
     "benefit2": {
-      "title": "Opportunités Ciblées",
-      "description": "Trouvez des financements spécialement conçus pour les entrepreneurs et entreprises africains."
+      "title": "Tous les types d'opportunités",
+      "description": "Subventions, emplois, stages, formations, bourses, fellowships, accélérateurs et plus — pour les candidats africains."
     },
     "benefit3": {
       "title": "Support Expert",
-      "description": "Obtenez des conseils de mentors et examinateurs expérimentés tout au long de votre parcours."
+      "description": "Conseils de mentors et évaluateurs expérimentés tout au long de votre candidature et sélection."
     },
     "benefit4": {
       "title": "Résultats Prouvés",
-      "description": "Rejoignez des centaines d'entrepreneurs qui ont obtenu un financement grâce à notre plateforme."
+      "description": "Rejoignez des membres ayant obtenu financement, placements, fellowships et programmes via un processus équitable."
     }
   },
   "testimonials": {
     "title": "Histoires de",
     "titleHighlight": "Succès",
-    "subtitle": "Écoutez les entrepreneurs qui ont obtenu un financement avec succès grâce à Maali",
+    "subtitle": "Témoignages de membres ayant trouvé subventions, postes et programmes via Maali",
     "testimonial1": {
       "name": "Ahmed Hassan",
       "company": "FinTech Solutions",
       "location": "Kenya",
-      "quote": "Maali a rendu si facile de trouver et de postuler pour un financement. En 3 mois, j'ai obtenu 75K$ pour ma startup fintech. La plateforme est intuitive et l'équipe de support est incroyable.",
-      "result": "75K$ Financé",
+      "quote": "Maali a facilité la recherche de subvention et la candidature. En 3 mois j'ai obtenu 75K$ pour ma startup fintech.",
+      "result": "Subvention 75K$",
       "sector": "Fintech"
     },
     "testimonial2": {
       "name": "Kofi Mensah",
       "company": "Plateforme EdTech",
       "location": "Ghana",
-      "quote": "En tant qu'entrepreneur débutant, j'étais submergé par le processus de financement. Maali m'a guidé à chaque étape et m'a connecté avec les bonnes opportunités. Fortement recommandé !",
-      "result": "120K$ Investissement",
+      "quote": "En explorant des fellowships, Maali m'a guidé à chaque étape vers les programmes adaptés à mes objectifs.",
+      "result": "Fellowship obtenu",
       "sector": "Éducation"
     },
     "testimonial3": {
       "name": "Amina Okafor",
       "company": "AgriTech Innovations",
       "location": "Nigeria",
-      "quote": "Le support multilingue et la conception mobile-first l'ont rendu parfait pour moi. Je pouvais travailler sur ma candidature même avec un internet limité. Cette plateforme comprend vraiment les entrepreneurs africains.",
-      "result": "50K$ Financé",
+      "quote": "Le support multilingue et le mobile m'ont permis de candidater au stage même avec une connexion limitée.",
+      "result": "Stage obtenu",
       "sector": "Agriculture"
     }
   },
   "newsletter": {
     "title": "Restez informé des nouvelles opportunités",
-    "subtitle": "Soyez notifié lorsque de nouvelles opportunités de financement sont disponibles. Rejoignez notre newsletter et ne manquez jamais une chance de développer votre entreprise.",
+    "subtitle": "Soyez notifié des nouvelles subventions, emplois, stages, formations et bourses. Ne manquez aucune chance pour votre carrière ou projet.",
     "emailPlaceholder": "Entrez votre adresse email",
     "subscribe": "S'abonner",
     "subscribed": "Abonné !",
     "privacy": "Nous respectons votre vie privée. Désabonnez-vous à tout moment.",
     "thankYou": "Merci !",
-    "subscribedMessage": "Vous avez été abonné à notre newsletter."
+    "subscribedMessage": "Vous avez été abonné à notre newsletter.",
+    "alreadySubscribed": "Cet e-mail est déjà inscrit.",
+    "errorTitle": "Échec de l'inscription",
+    "errorGeneric": "Impossible d'enregistrer votre e-mail. Réessayez."
   },
   "featuredProjects": {
     "title": "Opportunités",
     "titleHighlight": "en Vedette",
-    "subtitle": "Découvrez les opportunités de financement dans divers secteurs. De l'agriculture à la technologie, trouvez la correspondance parfaite pour votre vision entrepreneuriale.",
-    "viewAll": "Voir tous les projets"
+    "subtitle": "Explorez des programmes dans tous les secteurs — financement, emploi, stage ou développement professionnel.",
+    "viewAll": "Voir toutes les opportunités"
   },
   "successStories": {
     "title": "Histoires de",
     "titleHighlight": "Succès",
-    "subtitle": "Découvrez comment les entrepreneurs africains transforment leurs communautés et construisent des entreprises prospères grâce au financement de notre plateforme.",
+    "subtitle": "Découvrez comment entrepreneurs, professionnels et diplômés progressent via subventions, emplois, stages et programmes sur Maali.",
     "viewAll": "Voir toutes les histoires de succès"
   },
   "featureShowcase": {
     "title": "Conçu pour les",
-    "titleHighlight": "Entrepreneurs Africains",
-    "subtitle": "Chaque fonctionnalité est conçue en tenant compte des défis et opportunités uniques de l'écosystème entrepreneurial africain.",
+    "titleHighlight": "Talents Africains",
+    "subtitle": "Chaque fonctionnalité soutient fondateurs, professionnels, étudiants et stagiaires sur le marché des opportunités africain.",
     "feature1": {
-      "title": "Système de Candidature Intelligent",
-      "description": "Processus de candidature guidé par IA avec modèles de documents et validation en temps réel pour garantir que votre soumission est complète et convaincante."
+      "title": "Candidatures Guidées",
+      "description": "Candidatures en plusieurs étapes avec documents, brouillons et validation pour une soumission complète."
     },
     "feature2": {
       "title": "Stockage Sécurisé de Documents",
-      "description": "Sécurité de niveau bancaire pour vos documents sensibles avec stockage crypté et accès contrôlé pour protéger votre propriété intellectuelle."
+      "description": "Sécurité bancaire pour documents sensibles avec stockage crypté et accès contrôlé."
     },
     "feature3": {
       "title": "Expérience Mobile-First",
-      "description": "Optimisé pour les appareils mobiles avec capacités hors ligne, garantissant que vous pouvez travailler sur les candidatures même avec une connectivité limitée."
+      "description": "Optimisé mobile pour découvrir et postuler même avec connectivité limitée."
     },
     "feature4": {
       "title": "Examen Collaboratif",
-      "description": "Processus d'examen transparent avec plusieurs parties prenantes, retours détaillés et communication claire tout au long de l'évaluation."
+      "description": "Examen transparent avec évaluateurs experts, retours détaillés et communication claire."
     },
     "feature5": {
       "title": "Support Multilingue",
-      "description": "Disponible en anglais, français et portugais pour servir les entrepreneurs dans toutes les régions d'Afrique sans problème."
+      "description": "Disponible en anglais, français et portugais pour tous les talents en Afrique."
     },
     "feature6": {
       "title": "Suivi des Progrès",
-      "description": "Mises à jour en temps réel sur le statut de votre candidature avec analyses détaillées et insights pour améliorer les soumissions futures."
+      "description": "Mises à jour en temps réel du statut de candidature avec insights pour s'améliorer."
     },
     "feature7": {
       "title": "Gestion des Échéances",
-      "description": "Notifications et rappels intelligents pour vous maintenir sur la bonne voie avec les échéances de candidature et la documentation requise."
+      "description": "Notifications et rappels pour échéances et documentation requise."
     },
     "feature8": {
       "title": "Communication Directe",
-      "description": "Système de messagerie intégré pour la communication directe avec les examinateurs, mentors et autres entrepreneurs de l'écosystème."
+      "description": "Messagerie avec évaluateurs, mentors et partenaires lorsque le programme le permet."
     },
     "feature9": {
-      "title": "Paiements Flexibles",
-      "description": "Plusieurs options de paiement incluant Mobile Money, Paystack et Stripe pour s'adapter aux différentes préférences et régions."
+      "title": "Adhésion Simple",
+      "description": "Parcours gratuit en Community, ou Full Member à 2$/mois pour postuler à tout type d'opportunité."
+    }
+  },
+  "apply": {
+    "hero": {
+      "title": "Commencez votre parcours d'opportunités",
+      "subtitle": "Rejoignez entrepreneurs, professionnels, étudiants et stagiaires africains : subventions, emplois, stages, formations, bourses et plus. Les Full Members peuvent postuler à tout programme sur Maali.",
+      "browseOpportunities": "Parcourir les opportunités",
+      "viewGuide": "Voir le guide de candidature"
+    },
+    "howItWorksTitle": "Comment ça fonctionne",
+    "ready": {
+      "title": "Prêt à postuler ?",
+      "description": "Parcourez les opportunités actuelles par secteur et type — trouvez les programmes adaptés à votre projet ou carrière.",
+      "cta": "Voir toutes les opportunités"
+    },
+    "help": {
+      "title": "Besoin d'aide ?",
+      "description": "Adhésion, processus de candidature et préparation avant de postuler.",
+      "guide": "Guide de candidature",
+      "faq": "Questions fréquentes"
+    },
+    "stats": {
+      "members": "Membres actifs",
+      "applications": "Candidatures soumises",
+      "support": "Prix et soutien"
+    }
+  },
+  "about": {
+    "title": "À propos de Maali",
+    "hero": "Maali Opportunity Hub est plus qu'un annuaire — un pont de confiance entre entrepreneurs, professionnels, étudiants et stagiaires africains et les subventions, emplois, stages, formations, bourses, fellowships et autres programmes sur le continent.",
+    "mission": {
+      "title": "Notre mission",
+      "description": "Démocratiser l'accès aux opportunités — financement, emplois, formation et parcours de carrière — pour les talents africains, en favorisant l'innovation et une croissance économique durable.",
+      "cta": "Rejoindre le réseau",
+      "stat": "1 000+",
+      "statLabel": "Membres et candidats accompagnés"
+    },
+    "values": {
+      "title": "Nos valeurs",
+      "empowerment": {
+        "title": "Autonomisation",
+        "description": "Ouvrir l'accès aux programmes qui font avancer projets et carrières — fondateurs, professionnels, étudiants et stagiaires."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Des outils modernes et clairs pour découvrir les programmes et soumettre des candidatures solides."
+      },
+      "collaboration": {
+        "title": "Collaboration",
+        "description": "Relier candidats, partenaires de programmes et évaluateurs experts dans un écosystème transparent."
+      },
+      "impact": {
+        "title": "Impact",
+        "description": "Des résultats concrets — subventions, placements, fellowships et progression de carrière — pour les communautés africaines."
+      }
+    },
+    "story": {
+      "title": "Notre histoire",
+      "p1": "Maali est né d'un constat simple : l'Afrique regorge de talents, pourtant beaucoup peinent encore à trouver et postuler aux bonnes opportunités.",
+      "p2": "Le nom Maali évoque richesse et valeur en somali — opportunité économique et croissance de carrière, pas seulement l'aide.",
+      "p3": "Via la technologie, l'adhésion et un processus d'examen équitable, nous aidons les talents africains à découvrir, postuler et suivre les résultats sur une seule plateforme.",
+      "ctaTitle": "Rejoignez le réseau",
+      "ctaDescription": "Participez au hub qui connecte les talents africains aux subventions, emplois, stages, formations et plus.",
+      "ctaButton": "Commencer aujourd'hui"
+    },
+    "partners": {
+      "title": "Nos partenaires",
+      "subtitle": "Organisations qui publient des opportunités et soutiennent les talents en Afrique",
+      "empty": "Aucun partenaire disponible pour le moment."
+    },
+    "cta": {
+      "title": "Prêt pour votre prochaine opportunité ?",
+      "subtitle": "Rejoignez les talents africains qui construisent projets et carrières via subventions, emplois, stages, formations, bourses et plus.",
+      "browse": "Parcourir les opportunités",
+      "partner": "Devenir partenaire"
     }
   }
 }
-

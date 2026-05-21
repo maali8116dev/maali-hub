@@ -59,16 +59,17 @@ export function Step3ProjectOverview({
         required
       />
 
-      <CustomFormField
-        control={control}
-        name="geographicFocus"
-        fieldType={FormFieldType.INPUT}
-        label={locationLabel}
-        placeholder={locationPlaceholder}
-        icon={MapPin}
-        iconPosition="left"
-        required
-      />
+      {isGrantType && (
+        <CustomFormField
+          control={control}
+          name="geographicFocus"
+          fieldType={FormFieldType.INPUT}
+          label={locationLabel}
+          placeholder={locationPlaceholder}
+          icon={MapPin}
+          iconPosition="left"
+        />
+      )}
     </div>
   );
 }

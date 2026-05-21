@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Save, Star, Tag, X } from "lucide-react";
-import { UseFormReturn } from "react-hook-form";
+import { FieldErrors, UseFormReturn } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { OpportunityAttachmentsCard } from "@/components/opportunity/OpportunityAttachmentsCard";
 
@@ -132,8 +133,20 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
     showFeatured = false,
   } = props;
 
+  const { toast } = useToast();
   const { register, watch, setValue, formState, handleSubmit } = form as UseFormReturn<any>;
   const errors = formState?.errors ?? {};
+
+  const onInvalid = (fieldErrors: FieldErrors) => {
+    const first = Object.values(fieldErrors).find(
+      (e) => e && typeof e === "object" && "message" in e && e.message
+    ) as { message?: string } | undefined;
+    toast({
+      title: "Check the form",
+      description: first?.message ?? "Fix the highlighted fields before saving.",
+      variant: "destructive",
+    });
+  };
   const status = watch("status");
   const sectorId = watch("sectorId");
   const opportunityType = watch("opportunityType");
@@ -162,7 +175,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
@@ -199,10 +212,10 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                   <div>
                     <Label>Opportunity Type *</Label>
                     <Select
-                      value={opportunityType || ""}
+                      value={opportunityType ?? ""}
                       onValueChange={(value) => setValue("opportunityType", value as any, { shouldValidate: true })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={errors.opportunityType ? "border-destructive" : ""}>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -217,6 +230,9 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                         <SelectItem value="job">Job</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.opportunityType && (
+                      <p className="text-sm text-destructive mt-1">{(errors as any).opportunityType.message}</p>
+                    )}
                   </div>
                   <div>
                     <Label>Sector</Label>

@@ -1,6 +1,14 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  MAX_LIBRARY_DOCUMENTS,
+  REPLACEABLE_SLOT_TYPES,
+  validateSlotFile,
+  type NamedSlotType,
+} from "@/lib/documentLibrary";
+
+export type DocumentType = "cv" | "cover_letter" | "id" | null;
 
 export interface UploadedDocument {
   id: string;
@@ -12,6 +20,7 @@ export interface UploadedDocument {
   applicationId?: string;
   isLibraryDocument?: boolean;
   opportunityId?: number;
+  documentType?: DocumentType;
 }
 
 interface UploadProgress {
@@ -21,9 +30,9 @@ interface UploadProgress {
 }
 
 interface UseDocumentUploadReturn {
-  uploadDocument: (file: File, applicationId?: string, opportunityId?: number, isLibrary?: boolean) => Promise<UploadedDocument | null>;
+  uploadDocument: (file: File, applicationId?: string, opportunityId?: number, isLibrary?: boolean, documentType?: DocumentType) => Promise<UploadedDocument | null>;
   uploadDocuments: (files: File[], applicationId?: string, opportunityId?: number, isLibrary?: boolean) => Promise<UploadedDocument[]>;
-  uploadToLibrary: (file: File) => Promise<UploadedDocument | null>;
+  uploadToLibrary: (file: File, documentType?: DocumentType) => Promise<UploadedDocument | null>;
   linkLibraryDocumentToApplication: (documentId: string, applicationId: string, opportunityId?: number) => Promise<UploadedDocument | null>;
   deleteDocument: (document: UploadedDocument) => Promise<boolean>;
   fetchUserDocuments: () => Promise<UploadedDocument[]>;
@@ -53,7 +62,6 @@ const ALLOWED_TYPES = [
   "image/jpeg",
   "image/jpg",
   "image/png",
-  "image/gif",
   "image/webp",
 ];
 
@@ -105,7 +113,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       return `File "${file.name}" is too large. Maximum size is 10MB.`;
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF, WEBP.`;
+      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.`;
     }
     return null;
   }, []);
@@ -114,7 +122,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     file: File,
     applicationId?: string,
     opportunityId?: number,
-    isLibrary: boolean = false
+    isLibrary: boolean = false,
+    documentType: DocumentType = null
   ): Promise<UploadedDocument | null> => {
     // Validate file
     const validationError = validateFile(file);
@@ -127,6 +136,22 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       return null;
     }
 
+    if (
+      isLibrary &&
+      documentType &&
+      REPLACEABLE_SLOT_TYPES.includes(documentType as NamedSlotType)
+    ) {
+      const slotError = validateSlotFile(file);
+      if (slotError) {
+        toast({
+          title: "Upload Error",
+          description: slotError,
+          variant: "destructive",
+        });
+        return null;
+      }
+    }
+
     // Get current user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -136,6 +161,63 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         variant: "destructive",
       });
       return null;
+    }
+
+    const { data: canApply, error: membershipError } = await supabase.rpc(
+      "user_can_apply_to_opportunities",
+      { p_user_id: user.id },
+    );
+    if (membershipError) {
+      console.error("Membership check failed:", membershipError);
+    } else if (canApply === false) {
+      toast({
+        title: "Membership required",
+        description: "Become a Full Member to upload documents.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    if (isLibrary) {
+      const { data: libraryRows, count, error: countError } = await supabase
+        .from("application_documents")
+        .select("id, file_path, document_type")
+        .eq("user_id", user.id)
+        .eq("is_library_document", true)
+        .is("application_id", null);
+
+      if (countError) {
+        console.error("Library count failed:", countError);
+      }
+
+      const rows = libraryRows ?? [];
+      const isReplaceableSlot =
+        documentType &&
+        REPLACEABLE_SLOT_TYPES.includes(documentType as NamedSlotType);
+      const existingSlotRows = isReplaceableSlot
+        ? rows.filter((r) => r.document_type === documentType)
+        : [];
+
+      const libraryCount = count ?? rows.length;
+      if (!isReplaceableSlot && libraryCount >= MAX_LIBRARY_DOCUMENTS) {
+        toast({
+          title: "Document limit reached",
+          description: `You can store up to ${MAX_LIBRARY_DOCUMENTS} documents in your library. Delete one to upload more.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      for (const row of existingSlotRows) {
+        await supabase.from("application_documents").delete().eq("id", row.id);
+        const { count: pathRefs } = await supabase
+          .from("application_documents")
+          .select("id", { count: "exact", head: true })
+          .eq("file_path", row.file_path);
+        if (!pathRefs) {
+          await supabase.storage.from(BUCKET_NAME).remove([row.file_path]);
+        }
+      }
     }
 
     // Generate unique file path: user_id/timestamp_filename
@@ -195,6 +277,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
           file_size: file.size,
           file_type: file.type,
           is_library_document: isLibrary,
+          document_type: documentType || null,
         })
         .select()
         .single();
@@ -215,6 +298,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         applicationId: docData.application_id || undefined,
         isLibraryDocument: docData.is_library_document || false,
         opportunityId: docData.opportunity_id || undefined,
+        documentType: (docData.document_type as DocumentType) ?? null,
       };
 
       // Add to local state
@@ -339,7 +423,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document, document_type")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -357,6 +441,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         applicationId: doc.application_id || undefined,
         isLibraryDocument: doc.is_library_document || false,
         opportunityId: doc.opportunity_id || undefined,
+        documentType: ((doc as any).document_type as DocumentType) ?? null,
       }));
 
       setDocuments(docs);
@@ -381,7 +466,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     try {
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document, document_type")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false });
 
@@ -399,6 +484,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         applicationId: doc.application_id || undefined,
         isLibraryDocument: doc.is_library_document || false,
         opportunityId: doc.opportunity_id || undefined,
+        documentType: ((doc as any).document_type as DocumentType) ?? null,
       }));
 
       setDocuments(docs);
@@ -413,9 +499,10 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
   // Upload document to library (reusable across applications)
   const uploadToLibrary = useCallback(async (
-    file: File
+    file: File,
+    documentType: DocumentType = null,
   ): Promise<UploadedDocument | null> => {
-    return uploadDocument(file, undefined, undefined, true);
+    return uploadDocument(file, undefined, undefined, true, documentType);
   }, [uploadDocument]);
 
   // Link a library document to an application (creates a copy/reference)
@@ -425,10 +512,25 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     opportunityId?: number
   ): Promise<UploadedDocument | null> => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data: canApply } = await supabase.rpc(
+        "user_can_apply_to_opportunities",
+        { p_user_id: user.id },
+      );
+      if (canApply === false) {
+        toast({
+          title: "Membership required",
+          description: "Become a Full Member to attach documents to applications.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
       // First, get the library document
       const { data: libraryDoc, error: fetchError } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document, document_type")
         .eq("id", documentId)
         .eq("is_library_document", true)
         .is("application_id", null)
@@ -499,7 +601,7 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
       const { data, error } = await supabase
         .from("application_documents")
-        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document")
+        .select("id, user_id, application_id, opportunity_id, file_name, file_path, file_size, file_type, created_at, is_library_document, document_type")
         .eq("user_id", user.id)
         .eq("is_library_document", true)
         .is("application_id", null)
@@ -518,9 +620,11 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
         createdAt: doc.created_at,
         applicationId: undefined,
         isLibraryDocument: true,
-        opportunityId: undefined,
+        opportunityId: doc.opportunity_id || undefined,
+        documentType: (doc.document_type as DocumentType) ?? null,
       }));
 
+      setDocuments(docs);
       return docs;
     } catch (error) {
       console.error("Fetch library documents error:", error);

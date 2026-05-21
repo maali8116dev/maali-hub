@@ -52,9 +52,9 @@ export const getProjectOverviewCopy = (isGrantType = true): ProjectOverviewCopy 
   summaryPlaceholder: isGrantType
     ? "Provide a summary of your project (minimum 30 words)..."
     : "Briefly describe your goals, fit, and expected outcomes (minimum 30 words)...",
-  locationLabel: isGrantType ? "Geographic Focus" : "Location / Geographic Focus",
+  locationLabel: isGrantType ? "Geographic focus (optional)" : "Location / Geographic Focus",
   locationPlaceholder: isGrantType
-    ? "Where will the project run?"
+    ? "Where will the project run? Leave blank to use your city/country from step 1."
     : "Where are you based or where will this opportunity apply?",
 });
 

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 import { useApplications } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
+import { useMembership } from '@/hooks/useMembership';
 import { cn } from '@/lib/utils';
 
 interface ChecklistItem {
@@ -35,6 +36,7 @@ export function OnboardingChecklist({
   const { user } = useAuth();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   const { data: applications = [], isLoading: isLoadingApplications } = useApplications();
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function OnboardingChecklist({
   }, []);
 
   // Don't render until data is loaded to prevent flash/flicker
-  if (isLoadingProfile || isLoadingApplications || !user) {
+  if (isLoadingProfile || isLoadingApplications || membershipLoading || !user) {
     return null;
   }
 
@@ -95,16 +97,22 @@ export function OnboardingChecklist({
         href: '/projects'
       }
     },
-    {
-      id: 'submit-application',
-      label: 'Submit your first application',
-      description: 'Apply for opportunities to get started',
-      completed: hasSubmittedApplication,
-      action: hasSubmittedApplication ? undefined : {
-        label: 'Start Application',
-        href: '/projects'
-      }
-    }
+    ...(canApplyToOpportunities
+      ? [
+          {
+            id: 'submit-application',
+            label: 'Submit your first application',
+            description: 'Apply for opportunities to get started',
+            completed: hasSubmittedApplication,
+            action: hasSubmittedApplication
+              ? undefined
+              : {
+                  label: 'Start Application',
+                  href: '/opportunities',
+                },
+          },
+        ]
+      : []),
   ];
 
   const completedCount = checklistItems.filter(item => item.completed).length;

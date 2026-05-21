@@ -19,8 +19,8 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="Empowering African Entrepreneurs"
-        description="Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here."
+        title="Empowering African Talent"
+        description="Discover grants, jobs, internships, trainings, scholarships, and more. Apply with confidence and track outcomes on Africa's opportunity hub."
         // Keywords are optional - modern search engines ignore meta keywords
         // Focus on quality content, title, and description instead
         url={siteUrl}
@@ -31,7 +31,7 @@ const Index = () => {
         data={{
           name: "Maali Platform",
           url: siteUrl,
-          description: "Empowering African entrepreneurs through funding opportunities and business support",
+          description: "Empowering African talent through grants, jobs, internships, trainings, scholarships, and career opportunities",
         }}
         id="organization-schema"
       />

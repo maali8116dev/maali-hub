@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Users, Zap, ArrowRight, Loader2 } from "lucide-react";
+import { Form } from "@/components/ui/form";
+import { Check, ArrowRight, Loader2 } from "lucide-react";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +24,6 @@ import { useToast } from "@/hooks/use-toast";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
 
 const MEMBER_PRICE_LABEL = "$2 / month";
-
 
 const AFRICAN_COUNTRIES = [
   "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
@@ -53,24 +57,33 @@ function useSectors() {
   return sectors;
 }
 
+// ─── Schema ───────────────────────────────────────────────────────────────────
+
+const profileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  organisationName: z.string().optional(),
+  sector: z.string().min(1, "Sector is required"),
+  country: z.string().min(1, "Country is required"),
+  cityRegion: z.string().min(1, "City / region is required"),
+  phoneNumber: z.string().min(1, "Phone number is required").refine(
+    (v) => { try { return isValidPhoneNumber(v); } catch { return false; } },
+    { message: "Enter a valid international number (e.g. +234 800 000 0000)" }
+  ),
+  bio: z.string().optional(),
+  avatarUrl: z.string().optional(),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Step = "profile" | "tier" | "payment" | "done";
-
-interface ProfileData {
-  firstName: string;
-  lastName: string;
-  organisationName: string;
-  sector: string;
-  country: string;
-  bio: string;
-}
+type Step = "profile" | "payment" | "done";
 
 // ─── Progress stepper ────────────────────────────────────────────────────────
 
 const STEP_LABELS: { id: Step; label: string }[] = [
   { id: "profile", label: "Profile" },
-  { id: "tier", label: "Membership" },
   { id: "payment", label: "Payment" },
 ];
 
@@ -108,191 +121,144 @@ const Stepper = ({ step }: { step: Step }) => {
 // ─── Step 1: Profile ─────────────────────────────────────────────────────────
 
 const StepProfile = ({
-  initial,
+  form,
   onNext,
   sectors,
+  userId,
 }: {
-  initial: ProfileData;
-  onNext: (data: ProfileData) => void;
+  form: ReturnType<typeof useForm<ProfileFormValues>>;
+  onNext: (data: ProfileFormValues) => Promise<void>;
   sectors: string[];
+  userId: string;
 }) => {
-  const [form, setForm] = useState(initial);
-  const [saving, setSaving] = useState(false);
+  const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
+    bucket: "user-avatars",
+    folder: userId,
+    maxSizeMB: 5,
+  });
 
-  // Re-sync if initial values arrive late (e.g. from auth metadata)
-  useEffect(() => { setForm(initial); }, [initial.firstName, initial.lastName]);
-
-  const set =
-    (k: keyof ProfileData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const valid = form.firstName && form.lastName && form.sector && form.country;
+  const handleImageDelete = async (url: string) => {
+    const deleted = await deleteImage(url);
+    if (deleted) form.setValue("avatarUrl", "");
+    return deleted;
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Complete your profile</h2>
-        <p className="text-muted-foreground mt-1">
-          This builds your MAALI profile — visible to partners and opportunity providers across the network.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name *</Label>
-          <Input id="firstName" value={form.firstName} onChange={set("firstName")} placeholder="Amara" />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Complete your profile</h2>
+          <p className="text-muted-foreground mt-1">
+            This builds your Maali profile — visible to partners and opportunity providers across the network.
+          </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name *</Label>
-          <Input id="lastName" value={form.lastName} onChange={set("lastName")} placeholder="Diallo" />
-        </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="organisationName">Company / Organisation / University <span className="text-muted-foreground font-normal">(optional)</span></Label>
-        <Input id="organisationName" value={form.organisationName} onChange={set("organisationName")} placeholder="e.g. Savanna Ventures, University of Accra, UNDP" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="sector">Sector / Field *</Label>
-          <Select value={form.sector} onValueChange={(v) => setForm((f) => ({ ...f, sector: v }))}>
-            <SelectTrigger id="sector">
-              <SelectValue placeholder={sectors.length ? "Select your field" : "Loading…"} />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-              {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <Label>Profile Picture <span className="text-muted-foreground font-normal">(optional)</span></Label>
+          <ImageUpload
+            value={form.watch("avatarUrl") || undefined}
+            onChange={(url) => form.setValue("avatarUrl", url || "")}
+            onUpload={uploadImage}
+            onDelete={handleImageDelete}
+            isUploading={isUploading}
+            uploadProgress={uploadProgress}
+            placeholder="Upload Profile Picture"
+            variant="avatar"
+          />
+          <p className="text-xs text-muted-foreground">JPG, PNG, WebP or GIF up to 5MB</p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="country">Country *</Label>
-          <Select value={form.country} onValueChange={(v) => setForm((f) => ({ ...f, country: v }))}>
-            <SelectTrigger id="country">
-              <SelectValue placeholder="Select country" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-              {AFRICAN_COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bio">Short Bio <span className="text-muted-foreground font-normal">(optional)</span></Label>
-        <Textarea
-          id="bio"
-          value={form.bio}
-          onChange={set("bio")}
+        <div className="grid grid-cols-2 gap-4">
+          <CustomFormField
+            control={form.control}
+            name="firstName"
+            fieldType={FormFieldType.INPUT}
+            label="First Name"
+            placeholder="Amara"
+            required
+          />
+          <CustomFormField
+            control={form.control}
+            name="lastName"
+            fieldType={FormFieldType.INPUT}
+            label="Last Name"
+            placeholder="Diallo"
+            required
+          />
+        </div>
+
+        <CustomFormField
+          control={form.control}
+          name="organisationName"
+          fieldType={FormFieldType.INPUT}
+          label="Company / Organisation / University (optional)"
+          placeholder="e.g. Savanna Ventures, University of Accra, UNDP"
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <CustomFormField
+            control={form.control}
+            name="sector"
+            fieldType={FormFieldType.SELECT}
+            label="Sector / Field"
+            placeholder={sectors.length ? "Select your field" : "Loading…"}
+            required
+            options={sectors.map((s) => ({ value: s, label: s }))}
+          />
+          <CustomFormField
+            control={form.control}
+            name="country"
+            fieldType={FormFieldType.SELECT}
+            label="Country"
+            placeholder="Select country"
+            required
+            options={AFRICAN_COUNTRIES.map((c) => ({ value: c, label: c }))}
+          />
+        </div>
+
+        <CustomFormField
+          control={form.control}
+          name="cityRegion"
+          fieldType={FormFieldType.INPUT}
+          label="City / Region"
+          placeholder="e.g. Lagos, Nairobi, Greater Accra"
+          required
+        />
+
+        <CustomFormField
+          control={form.control}
+          name="phoneNumber"
+          fieldType={FormFieldType.PHONE_INTERNATIONAL}
+          label="Phone Number"
+          placeholder="+234 800 000 0000"
+          required
+        />
+
+        <CustomFormField
+          control={form.control}
+          name="bio"
+          fieldType={FormFieldType.TEXTAREA}
+          label="Short Bio (optional)"
           placeholder="e.g. Software engineer looking for fellowships, entrepreneur in agri-tech, recent grad seeking internships in finance…"
           rows={3}
         />
-      </div>
 
-      <Button
-        className="w-full"
-        variant="hero"
-        disabled={!valid || saving}
-        onClick={() => { setSaving(true); onNext(form); }}
-      >
-        {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</> : <>Continue <ArrowRight className="ml-2 h-4 w-4" /></>}
-      </Button>
-    </div>
+        <Button
+          type="submit"
+          className="w-full"
+          variant="hero"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting
+            ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>
+            : <>Continue <ArrowRight className="ml-2 h-4 w-4" /></>}
+        </Button>
+      </form>
+    </Form>
   );
 };
 
-// ─── Step 2: Tier selection ───────────────────────────────────────────────────
-
-const TIERS = [
-  {
-    id: "community" as const,
-    name: "Community",
-    price: "Free",
-    badge: null,
-    icon: <Users className="h-5 w-5 text-muted-foreground" />,
-    description: "Browse the full range of opportunities across Africa.",
-    features: [
-      "Browse funding, jobs, internships & fellowships",
-      "Access public resources & guides",
-      "Join the MAALI community network",
-      "Monthly opportunities newsletter",
-    ],
-    cta: "Join Free",
-    variant: "outline" as const,
-  },
-  {
-    id: "member" as const,
-    name: "Full Member",
-    price: MEMBER_PRICE_LABEL,
-    badge: "Most Popular",
-    icon: <Zap className="h-5 w-5 text-primary" />,
-    description: "Apply to opportunities — funding, jobs, internships, fellowships and more.",
-    features: [
-      "Everything in Community",
-      "Apply to all opportunity types",
-      "Priority application review",
-      "Direct messaging with reviewers & partners",
-      "Featured profile in network",
-      "Exclusive member events & workshops",
-    ],
-    cta: "Become a Member",
-    variant: "hero" as const,
-  },
-];
-
-const StepTier = ({
-  onNext,
-  loading,
-}: {
-  onNext: (tier: "community" | "member") => void;
-  loading: boolean;
-}) => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-2xl font-bold text-foreground">Choose your membership</h2>
-      <p className="text-muted-foreground mt-1">
-        Whether you're an entrepreneur, professional, student, or researcher — MAALI has opportunities for you. Upgrade anytime.
-      </p>
-    </div>
-    <div className="grid gap-6 md:grid-cols-2">
-      {TIERS.map((tier) => (
-        <Card
-          key={tier.id}
-          className="relative flex flex-col border-2 hover:border-primary hover:shadow-elegant transition-all duration-200 cursor-pointer"
-          onClick={() => !loading && onNext(tier.id)}
-        >
-          {tier.badge && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-primary text-primary-foreground px-3">{tier.badge}</Badge>
-            </div>
-          )}
-          <CardContent className="flex flex-col h-full p-6 pt-8">
-            <div className="flex items-center gap-2 mb-1">
-              {tier.icon}
-              <span className="font-semibold text-foreground">{tier.name}</span>
-            </div>
-            <div className="text-3xl font-bold text-foreground mb-1">{tier.price}</div>
-            <p className="text-sm text-muted-foreground mb-5">{tier.description}</p>
-            <ul className="space-y-2 mb-6 flex-1">
-              {tier.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Button variant={tier.variant} className="w-full" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : tier.cta}
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
-// ─── Step 3: Stripe payment form ─────────────────────────────────────────────
+// ─── Step 2: Stripe payment form ─────────────────────────────────────────────
 
 const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) => {
   const stripe = useStripe();
@@ -323,7 +289,6 @@ const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
       setError(confirmError.message ?? "Payment failed");
       setProcessing(false);
     } else if (paymentIntent?.status === "succeeded") {
-      // Membership activated by webhook — just advance UI
       onSuccess();
     }
   };
@@ -398,101 +363,74 @@ const Onboarding = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const sectors = useSectors();
-  const { membership, loading: membershipLoading } = useMembership();
+  const { isPaidMember, loading: membershipLoading } = useMembership();
   const invalidateMembership = useInvalidateMembership();
 
   const [step, setStep] = useState<Step>("profile");
-  const [selectedTier, setSelectedTier] = useState<"community" | "member" | null>(null);
-  const [tierLoading, setTierLoading] = useState(false);
   const [activating, setActivating] = useState(false);
 
-  // Pre-fill from auth metadata (works for both email signup and Google OAuth)
-  const [profile, setProfile] = useState<ProfileData>({
-    firstName: user?.user_metadata?.first_name ?? (user?.user_metadata?.full_name as string ?? "").split(" ")[0] ?? "",
-    lastName: user?.user_metadata?.last_name ?? (user?.user_metadata?.full_name as string ?? "").split(" ").slice(1).join(" ") ?? "",
-    organisationName: "",
-    sector: "",
-    country: "",
-    bio: "",
+  // Single form instance — survives step transitions (back from payment keeps values)
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstName: user?.user_metadata?.first_name ?? (user?.user_metadata?.full_name as string ?? "").split(" ")[0] ?? "",
+      lastName: user?.user_metadata?.last_name ?? (user?.user_metadata?.full_name as string ?? "").split(" ").slice(1).join(" ") ?? "",
+      organisationName: "",
+      sector: "",
+      country: "",
+      cityRegion: "",
+      phoneNumber: "",
+      bio: "",
+      avatarUrl: "",
+    },
   });
 
-  // Update pre-fill if user loads after mount (OAuth)
+  // Pre-fill name if auth metadata arrives after mount (e.g. OAuth)
   useEffect(() => {
     if (!user) return;
     const meta = user.user_metadata ?? {};
     const fullName = (meta.full_name as string) ?? (meta.name as string) ?? "";
-    setProfile((p) => ({
-      ...p,
-      firstName: p.firstName || (meta.first_name as string) || fullName.split(" ")[0] || "",
-      lastName: p.lastName || (meta.last_name as string) || fullName.split(" ").slice(1).join(" ") || "",
-    }));
+    const current = form.getValues();
+    if (!current.firstName) form.setValue("firstName", (meta.first_name as string) || fullName.split(" ")[0] || "");
+    if (!current.lastName) form.setValue("lastName", (meta.last_name as string) || fullName.split(" ").slice(1).join(" ") || "");
   }, [user?.id]);
 
-  const saveProfileAndContinue = async (data: ProfileData) => {
-    setProfile(data);
-    if (user) {
-      const { error } = await supabase.from("profiles").upsert(
-        {
-          user_id: user.id,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          business_name: data.organisationName || null,
-          business_sector: data.sector,
-          country: data.country,
-          bio: data.bio || null,
-        },
-        { onConflict: "user_id" }
-      );
-      if (error) {
-        toast({ title: "Error saving profile", description: error.message, variant: "destructive" });
-        return;
-      }
+  const saveProfileAndContinue = async (data: ProfileFormValues) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        user_id: user.id,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        business_name: data.organisationName || null,
+        business_sector: data.sector,
+        country: data.country,
+        city_region: data.cityRegion,
+        phone_number: data.phoneNumber,
+        bio: data.bio || null,
+        avatar_url: data.avatarUrl || null,
+      },
+      { onConflict: "user_id" }
+    );
+    if (error) {
+      toast({ title: "Error saving profile", description: error.message, variant: "destructive" });
+      return;
     }
-    setStep("tier");
+    setStep("payment");
   };
 
-  const handleTierSelect = async (tier: "community" | "member") => {
-    setSelectedTier(tier);
-    setTierLoading(true);
-
-    if (tier === "community") {
-      if (user) {
-        const { error } = await supabase.from("memberships").insert({
-          user_id: user.id,
-          tier: "community",
-          status: "active",
-          starts_at: new Date().toISOString(),
-        });
-        if (error && error.code !== "23505") {
-          // 23505 = unique violation (already has membership) — treat as success
-          toast({ title: "Error", description: error.message, variant: "destructive" });
-          setTierLoading(false);
-          return;
-        }
-      }
-      // Invalidate so ProtectedRoute picks up the new membership immediately
-      invalidateMembership();
-      setStep("done");
-    } else {
-      setTierLoading(false);
-      setStep("payment");
-    }
-  };
-
-  // If they already have an active membership, skip onboarding
+  // If they already have a paid membership, skip onboarding
   useEffect(() => {
-    if (!membershipLoading && membership && step !== "done" && !activating) {
+    if (!membershipLoading && isPaidMember && step !== "done" && !activating) {
       navigate("/dashboard", { replace: true });
     }
-  }, [membershipLoading, membership, step, navigate, activating]);
+  }, [membershipLoading, isPaidMember, step, navigate, activating]);
 
-  // After Stripe confirms payment, the webhook may take a few seconds to flip
-  // the membership row from 'pending_payment' to 'active'. Poll briefly so the
-  // user isn't stuck looking at the form while activation lands.
+  // Poll for webhook activation after Stripe payment
   const waitForActivation = async () => {
     if (!user) return;
     setActivating(true);
-    const deadline = Date.now() + 20_000; // 20s budget
+    const deadline = Date.now() + 20_000;
     while (Date.now() < deadline) {
       invalidateMembership();
       const { data } = await supabase
@@ -516,11 +454,9 @@ const Onboarding = () => {
     });
   };
 
-  // Handle return from Stripe redirect (e.g. /payment/success -> /onboarding?awaiting=1)
+  // Handle return from Stripe redirect (/onboarding?awaiting=1)
   useEffect(() => {
     if (searchParams.get("awaiting") === "1" && user && !activating) {
-      setSelectedTier("member");
-      // Strip the query param so refresh doesn't re-trigger
       searchParams.delete("awaiting");
       setSearchParams(searchParams, { replace: true });
       waitForActivation();
@@ -528,7 +464,6 @@ const Onboarding = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, searchParams]);
 
-  // Wait for membership check before rendering anything — prevents step 1 flash
   if (membershipLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -537,7 +472,6 @@ const Onboarding = () => {
     );
   }
 
-  // Activation overlay — payment succeeded, waiting for webhook
   if (activating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -554,7 +488,6 @@ const Onboarding = () => {
     );
   }
 
-  // If not logged in, send to auth
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -568,9 +501,7 @@ const Onboarding = () => {
     );
   }
 
-  // Done screen
   if (step === "done") {
-    const isPaid = selectedTier === "member";
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="max-w-md w-full text-center space-y-6">
@@ -578,11 +509,9 @@ const Onboarding = () => {
             <Check className="h-8 w-8 text-success" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">Welcome to MAALI!</h2>
+            <h2 className="text-3xl font-bold mb-2">Welcome to Maali!</h2>
             <p className="text-muted-foreground">
-              {isPaid
-                ? "Your Full Membership is active. You can now apply to funding opportunities, jobs, internships, fellowships and more."
-                : "You've joined the MAALI community. Upgrade to Full Member anytime to start applying for opportunities."}
+              Your membership is active. You can now apply to funding opportunities, jobs, internships, fellowships and more.
             </p>
           </div>
           <Button variant="hero" className="w-full" onClick={() => navigate("/dashboard", { replace: true })}>
@@ -595,9 +524,8 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Minimal header — no full nav during onboarding */}
       <header className="border-b border-border px-6 py-4">
-        <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Maali</h1>
+        <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Maali Opportunity Hub</h1>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
@@ -606,19 +534,12 @@ const Onboarding = () => {
         <Card className="shadow-elegant">
           <CardContent className="p-6 sm:p-8">
             {step === "profile" && (
-              <StepProfile initial={profile} onNext={saveProfileAndContinue} sectors={sectors} />
-            )}
-            {step === "tier" && (
-              <StepTier onNext={handleTierSelect} loading={tierLoading} />
+              <StepProfile form={form} onNext={saveProfileAndContinue} sectors={sectors} userId={user.id} />
             )}
             {step === "payment" && (
               <StepPayment
-                onSuccess={() => {
-                  // Don't trust the local UI — wait for the webhook to flip
-                  // the membership to 'active' before declaring success.
-                  waitForActivation();
-                }}
-                onBack={() => setStep("tier")}
+                onSuccess={waitForActivation}
+                onBack={() => setStep("profile")}
               />
             )}
           </CardContent>

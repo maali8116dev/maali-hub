@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 import { useApplicationFormStore } from "@/stores/applicationForm";
+import { resolveGeographicFocus } from "@/lib/applicationGeography";
 import { isProjectOpen } from "@/lib/projectAvailability";
 import { isRateLimitError } from "@/lib/rateLimits";
 
@@ -275,7 +276,7 @@ export function useApplicationSubmission() {
         contact_phone: formData.phoneNumber,
         project_title: formData.projectTitle,
         project_summary: formData.projectSummary,
-        geographic_focus: formData.geographicFocus,
+        geographic_focus: resolveGeographicFocus(formData, isGrantType),
         linkedin_url: formData.linkedinUrl || null,
         github_url: formData.githubUrl || null,
         twitter_url: formData.twitterUrl || null,

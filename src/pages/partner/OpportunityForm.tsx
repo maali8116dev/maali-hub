@@ -17,9 +17,30 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import { OpportunityFormContent } from "@/components/opportunity/OpportunityFormContent";
 import { getProjectApplicationStateLabel } from "@/lib/projectAvailability";
 
+const opportunityTypeValues = [
+  "grant",
+  "fellowship",
+  "scholarship",
+  "internship",
+  "training",
+  "competition",
+  "accelerator",
+  "incubator",
+  "job",
+] as const;
+
+const plainTextLength = (html: string) =>
+  html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim().length;
+
 const partnerSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(50, "Description must be at least 50 characters"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .refine(
+      (val) => plainTextLength(val) >= 50,
+      "Description must be at least 50 characters"
+    ),
   status: z.enum(["new", "open", "closing-soon", "closed"]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Deadline must be YYYY-MM-DD"),
   fundingAmount: z.string().optional(),
@@ -37,10 +58,10 @@ const partnerSchema = z.object({
     (v) => (v === "" || v === null || (typeof v === "number" && isNaN(v)) ? undefined : v),
     z.number().int().optional()
   ),
-  opportunityType: z
-    .enum(["grant", "fellowship", "scholarship", "internship", "training", "competition", "accelerator", "incubator", "job"])
-    .nullable()
-    .optional(),
+  opportunityType: z.preprocess(
+    (v) => (v === "" || v === null ? undefined : v),
+    z.enum(opportunityTypeValues, { required_error: "Select an opportunity type" })
+  ),
 });
 
 type PartnerFormValues = z.infer<typeof partnerSchema>;
@@ -85,7 +106,7 @@ const PartnerOpportunityForm = () => {
       eligibilityCriteria: "",
       currency: "USD",
       country: "",
-      opportunityType: null,
+      opportunityType: undefined,
       sectorId: undefined,
       maxApplicants: undefined,
       imageUrl: "",
@@ -155,7 +176,7 @@ const PartnerOpportunityForm = () => {
         currency: opportunity.currency || "USD",
         country: opportunity.country || "",
         sectorId: opportunity.sectorId || undefined,
-        opportunityType: (opportunity.opportunityType as PartnerFormValues["opportunityType"]) || null,
+        opportunityType: opportunity.opportunityType as PartnerFormValues["opportunityType"],
         imageUrl: opportunity.imageUrl || "",
       });
     }
@@ -186,16 +207,20 @@ const PartnerOpportunityForm = () => {
       tags: selectedTags,
     };
 
-    if (isEditing && opportunityId) {
-      await updateOpp.mutateAsync({ id: opportunityId, data: formData });
-    } else {
-      const created = await createOpp.mutateAsync(formData);
-      for (const file of pendingFiles) {
-        await uploadWithId(created.id, file);
+    try {
+      if (isEditing && opportunityId) {
+        await updateOpp.mutateAsync({ id: opportunityId, data: formData });
+      } else {
+        const created = await createOpp.mutateAsync(formData);
+        for (const file of pendingFiles) {
+          await uploadWithId(created.id, file);
+        }
+        setPendingFiles([]);
       }
-      setPendingFiles([]);
+      navigate("/partner/opportunities");
+    } catch {
+      // useUpdatePartnerOpportunity / useCreatePartnerOpportunity show error toasts
     }
-    navigate("/partner/opportunities");
   };
 
   return (
@@ -206,7 +231,7 @@ const PartnerOpportunityForm = () => {
       backLabel="Back"
       onBack={() => navigate("/partner/opportunities")}
       isEditing={isEditing}
-      isSubmitting={form.formState.isSubmitting}
+      isSubmitting={form.formState.isSubmitting || createOpp.isPending || updateOpp.isPending}
       isLoading={isEditing && isLoading}
       title={isEditing ? "Edit Opportunity" : "Create New Opportunity"}
       subtitle={isEditing ? "Update your opportunity details" : "Set up a new funding opportunity"}

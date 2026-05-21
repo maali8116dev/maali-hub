@@ -11,6 +11,8 @@ export type Profile = {
   businessName: string | null;
   businesssector: string | null;
   country: string | null;
+  cityRegion: string | null;
+  phoneNumber: string | null;
   bio: string | null;
   avatarUrl: string | null;
   role: "admin" | "reviewer" | "applicant" | "partner";
@@ -28,6 +30,8 @@ function transformProfile(data: any): Profile {
     businessName: data.business_name || data.businessName,
     businesssector: data.business_sector || data.businesssector,
     country: data.country,
+    cityRegion: data.city_region || data.cityRegion,
+    phoneNumber: data.phone_number || data.phoneNumber,
     bio: data.bio,
     avatarUrl: data.avatar_url || data.avatarUrl,
     role: data.role,
@@ -42,7 +46,7 @@ function transformProfile(data: any): Profile {
 async function fetchProfileDirect(userId: string): Promise<Profile> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, user_id, first_name, last_name, business_name, business_sector, country, bio, avatar_url, role, created_at, updated_at")
+    .select("id, user_id, first_name, last_name, business_name, business_sector, country, city_region, phone_number, bio, avatar_url, role, created_at, updated_at")
     .eq("user_id", userId)
     .single();
 
@@ -62,6 +66,8 @@ async function updateProfileDirect(
     businessName?: string;
     businesssector?: string;
     country?: string;
+    cityRegion?: string;
+    phoneNumber?: string;
     bio?: string;
     avatarUrl?: string;
   }
@@ -76,6 +82,8 @@ async function updateProfileDirect(
       business_name: data.businessName,
       business_sector: data.businesssector,
       country: data.country,
+      city_region: data.cityRegion || null,
+      phone_number: data.phoneNumber || null,
       bio: data.bio,
       avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
     })
@@ -99,6 +107,8 @@ async function updateProfileDirect(
         business_name: data.businessName,
         business_sector: data.businesssector,
         country: data.country,
+        city_region: data.cityRegion || null,
+        phone_number: data.phoneNumber || null,
         bio: data.bio,
         avatar_url: data.avatarUrl === "" || data.avatarUrl === undefined ? null : data.avatarUrl,
       })
@@ -164,6 +174,8 @@ export function useUpdateProfile() {
       businessName?: string;
       businesssector?: string;
       country?: string;
+      cityRegion?: string;
+      phoneNumber?: string;
       bio?: string;
       avatarUrl?: string;
     }) => {

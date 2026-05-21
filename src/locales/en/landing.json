@@ -1,17 +1,62 @@
 {
   "hero": {
-    "badge": "Join 500+ Entrepreneurs",
+    "badge": "Join 500+ members across Africa",
     "headline1": "Empowering",
     "headline2": "African",
-    "headline3": "Entrepreneurs",
-    "subheadline": "The fastest way to discover and apply for funding opportunities across Africa.",
-    "description": "Connect with a thriving ecosystem of entrepreneurs, submit applications, and turn your vision into reality. Your journey to success starts here.",
-    "startApplication": "Start Your Application",
-    "viewProjects": "View Projects",
-    "browseProjects": "Browse Projects",
-    "entrepreneurs": "Entrepreneurs",
+    "headline3": "Talent",
+    "subheadline": "One hub to discover and apply for grants, jobs, internships, trainings, scholarships, and more.",
+    "description": "Whether you're building a venture, growing your career, or starting as a student or intern — connect with programs, partners, and reviewers on one trusted platform.",
+    "startApplication": "Get Started",
+    "viewProjects": "Browse Opportunities",
+    "browseProjects": "Browse Opportunities",
+    "members": "Active Members",
     "countries": "Countries",
-    "totalFunding": "Total Funding"
+    "totalSupport": "Awards & Support",
+    "loginRequiredTitle": "Sign in to continue",
+    "loginRequiredDescription": "Create a free account or sign in to browse and apply for opportunities on Maali.",
+    "previewCard1": {
+      "name": "Ahmed's Startup",
+      "detail": "$75K Grant Award",
+      "tag": "Fintech"
+    },
+    "previewCard2": {
+      "name": "Kofi's Program",
+      "detail": "EdTech Fellowship",
+      "tag": "Education"
+    },
+    "previewCard3": {
+      "name": "Samuel's Role",
+      "detail": "Tech Internship",
+      "tag": "Technology"
+    }
+  },
+  "membership": {
+    "badge": "Membership",
+    "title": "Join the MAALI Network",
+    "subtitle": "For entrepreneurs, professionals, students, and interns. Browse for free, or unlock applications for less than a cup of coffee a month.",
+    "community": {
+      "name": "Community",
+      "price": "Free",
+      "priceNote": "No credit card required",
+      "cta": "Join Free",
+      "feature1": "Browse grants, jobs, internships, trainings & more",
+      "feature2": "Access public resources & guides",
+      "feature3": "Join the MAALI community network",
+      "feature4": "Monthly opportunities newsletter"
+    },
+    "member": {
+      "name": "Full Member",
+      "badge": "Most Popular",
+      "price": "$2",
+      "priceUnit": "/ month",
+      "priceNote": "Cancel anytime. No lock-in.",
+      "cta": "Become a Member",
+      "feature1": "Everything in Community",
+      "feature2": "Apply to all opportunity types",
+      "feature3": "Guided multi-step applications",
+      "feature4": "Exclusive member events & workshops"
+    },
+    "socialProof": "Join African talent already building careers and ventures with MAALI."
   },
   "trustIndicators": {
     "title": "Trusted by leading",
@@ -23,137 +68,214 @@
   "howItWorks": {
     "title": "How It",
     "titleHighlight": "Works",
-    "subtitle": "Get started in four simple steps. From discovery to funding, we've streamlined the entire process.",
+    "subtitle": "Four steps from discovery to outcome — for entrepreneurs, professionals, students, and interns pursuing grants, jobs, internships, trainings, scholarships, and more.",
     "step1": {
-      "title": "Browse Opportunities",
-      "description": "Explore funding opportunities across various sectors. Filter by location, funding amount, and sector to find the perfect match."
+      "title": "Discover Opportunities",
+      "description": "Browse grants, jobs, internships, trainings, scholarships, fellowships, and other programs. Filter by sector, location, and opportunity type."
     },
     "step2": {
-      "title": "Create Your Profile",
-      "description": "Sign up in minutes and create your entrepreneur profile. Showcase your business, experience, and vision."
+      "title": "Join Maali",
+      "description": "Create your account and profile. Join free as Community to browse, or become a Full Member to apply to any opportunity on the platform."
     },
     "step3": {
-      "title": "Submit Application",
-      "description": "Complete your application with our guided process. Upload documents, provide details, and submit with confidence."
+      "title": "Apply with Confidence",
+      "description": "Use our guided multi-step application. Upload documents, save drafts, and submit when you're ready — whether you're applying for funding or a career program."
     },
     "step4": {
-      "title": "Get Funded",
-      "description": "Track your application status in real-time. Receive feedback and get funded to grow your business."
+      "title": "Review & Track Outcomes",
+      "description": "Expert reviewers evaluate applications fairly. Follow status updates in your dashboard through review, feedback, and final selection or award."
     },
     "cta": "Get Started Today"
   },
   "benefits": {
     "title": "Why Choose",
     "titleHighlight": "Maali",
-    "subtitle": "We've built a platform specifically for African entrepreneurs, addressing your unique needs and challenges.",
+    "subtitle": "Built for African talent — founders, professionals, students, and interns — with one place to find and pursue real opportunities.",
     "benefit1": {
       "title": "Fast & Simple",
-      "description": "Complete applications in minutes, not hours. Our streamlined process saves you time."
+      "description": "Complete applications in minutes, not hours. Our guided process works for grants, jobs, internships, and training programs alike."
     },
     "benefit2": {
-      "title": "Focused Opportunities",
-      "description": "Find funding specifically designed for African entrepreneurs and businesses."
+      "title": "Every Opportunity Type",
+      "description": "Grants, jobs, internships, trainings, scholarships, fellowships, accelerators, and more — curated for African applicants."
     },
     "benefit3": {
       "title": "Expert Support",
-      "description": "Get guidance from experienced mentors and reviewers throughout your journey."
+      "description": "Get guidance from experienced mentors and reviewers throughout your application and selection journey."
     },
     "benefit4": {
-      "title": "Proven Results",
-      "description": "Join hundreds of successful entrepreneurs who've secured funding through our platform."
+      "title": "Proven Outcomes",
+      "description": "Join members who've secured funding, placements, fellowships, and career programs through a fair, transparent process."
     }
   },
   "testimonials": {
     "title": "Success",
     "titleHighlight": "Stories",
-    "subtitle": "Hear from entrepreneurs who've successfully secured funding through Maali",
+    "subtitle": "Hear from members who found grants, roles, and programs through Maali",
     "testimonial1": {
       "name": "Ahmed Hassan",
       "company": "FinTech Solutions",
       "location": "Kenya",
-      "quote": "Maali made it so easy to find and apply for funding. Within 3 months, I secured $75K for my fintech startup. The platform is intuitive and the support team is amazing.",
-      "result": "$75K Funded",
+      "quote": "Maali made it easy to find the right grant and submit a strong application. Within 3 months I secured $75K for my fintech startup.",
+      "result": "$75K Grant",
       "sector": "Fintech"
     },
     "testimonial2": {
       "name": "Kofi Mensah",
       "company": "EdTech Platform",
       "location": "Ghana",
-      "quote": "As a first-time entrepreneur, I was overwhelmed by the funding process. Maali guided me through every step and connected me with the right opportunities. Highly recommended!",
-      "result": "$120K Investment",
+      "quote": "As a professional exploring fellowships, Maali guided me through every step and connected me with programs that fit my goals.",
+      "result": "Fellowship Selected",
       "sector": "Education"
     },
     "testimonial3": {
       "name": "Amina Okafor",
       "company": "AgriTech Innovations",
       "location": "Nigeria",
-      "quote": "The multilingual support and mobile-first design made it perfect for me. I could work on my application even with limited internet. This platform truly understands African entrepreneurs.",
-      "result": "$50K Funded",
+      "quote": "Multilingual support and mobile-first design meant I could work on my internship application even with limited connectivity.",
+      "result": "Internship Placed",
       "sector": "Agriculture"
     }
   },
   "newsletter": {
     "title": "Stay Updated on New Opportunities",
-    "subtitle": "Get notified when new funding opportunities are available. Join our newsletter and never miss a chance to grow your business.",
+    "subtitle": "Get notified when new grants, jobs, internships, trainings, and scholarships are listed. Never miss a chance to advance your career or venture.",
     "emailPlaceholder": "Enter your email address",
     "subscribe": "Subscribe",
     "subscribed": "Subscribed!",
     "privacy": "We respect your privacy. Unsubscribe at any time.",
     "thankYou": "Thank you!",
-    "subscribedMessage": "You've been subscribed to our newsletter."
+    "subscribedMessage": "You've been subscribed to our newsletter.",
+    "alreadySubscribed": "This email is already on our list.",
+    "errorTitle": "Subscription failed",
+    "errorGeneric": "Could not save your email. Please try again."
   },
   "featuredProjects": {
     "title": "Featured",
     "titleHighlight": "Opportunities",
-    "subtitle": "Discover funding opportunities across various sectors. From agriculture to technology, find the perfect match for your entrepreneurial vision.",
-    "viewAll": "View All Projects"
+    "subtitle": "Explore programs across sectors — from agriculture to technology — whether you're seeking funding, a role, an internship, or professional development.",
+    "viewAll": "View All Opportunities"
   },
   "successStories": {
     "title": "Success",
     "titleHighlight": "Stories",
-    "subtitle": "Discover how African entrepreneurs are transforming their communities and building successful businesses with funding from our platform.",
+    "subtitle": "See how African entrepreneurs, professionals, and graduates are advancing through grants, jobs, internships, and programs on Maali.",
     "viewAll": "View All Success Stories"
   },
   "featureShowcase": {
     "title": "Built for",
-    "titleHighlight": "African Entrepreneurs",
-    "subtitle": "Every feature is designed with the unique challenges and opportunities of the African entrepreneurship ecosystem in mind.",
+    "titleHighlight": "African Talent",
+    "subtitle": "Every feature supports founders, professionals, students, and interns navigating Africa's opportunity landscape.",
     "feature1": {
-      "title": "Smart Application System",
-      "description": "AI-guided application process with document templates and real-time validation to ensure your submission is complete and compelling."
+      "title": "Guided Applications",
+      "description": "Multi-step applications with document uploads, draft saving, and validation so your submission is complete and compelling."
     },
     "feature2": {
       "title": "Secure Document Storage",
-      "description": "Bank-level security for your sensitive documents with encrypted storage and controlled access to protect your intellectual property."
+      "description": "Bank-level security for sensitive documents with encrypted storage and controlled access to protect your information."
     },
     "feature3": {
       "title": "Mobile-First Experience",
-      "description": "Optimized for mobile devices with offline capabilities, ensuring you can work on applications even with limited connectivity."
+      "description": "Optimized for mobile devices so you can discover and apply even with limited connectivity."
     },
     "feature4": {
       "title": "Collaborative Review",
-      "description": "Transparent review process with multiple stakeholders, detailed feedback, and clear communication throughout the evaluation."
+      "description": "Transparent review with multiple expert reviewers, detailed feedback, and clear communication throughout evaluation."
     },
     "feature5": {
       "title": "Multilingual Support",
-      "description": "Available in English, French, and Portuguese to serve entrepreneurs across all regions of Africa seamlessly."
+      "description": "Available in English and French to serve talent across all regions of Africa."
     },
     "feature6": {
       "title": "Progress Tracking",
-      "description": "Real-time updates on your application status with detailed analytics and insights to improve future submissions."
+      "description": "Real-time application status updates with insights to improve future submissions."
     },
     "feature7": {
       "title": "Deadline Management",
-      "description": "Smart notifications and reminders to keep you on track with application deadlines and required documentation."
+      "description": "Smart notifications and reminders for application deadlines and required documentation."
     },
     "feature8": {
       "title": "Direct Communication",
-      "description": "Built-in messaging system for direct communication with reviewers, mentors, and other entrepreneurs in the ecosystem."
+      "description": "Messaging with reviewers, mentors, and partners in the ecosystem when programs allow it."
     },
     "feature9": {
-      "title": "Flexible Payments",
-      "description": "Multiple payment options including Mobile Money, Paystack, and Stripe to accommodate different preferences and regions."
+      "title": "Simple Membership",
+      "description": "Browse free as Community, or become a Full Member for $2/month to apply to any opportunity type on the platform."
+    }
+  },
+  "apply": {
+    "hero": {
+      "title": "Start Your Opportunity Journey",
+      "subtitle": "Join African entrepreneurs, professionals, students, and interns discovering grants, jobs, internships, trainings, scholarships, and more. Full Members can apply to any program on Maali.",
+      "browseOpportunities": "Browse Opportunities",
+      "viewGuide": "View Application Guide"
+    },
+    "howItWorksTitle": "How It Works",
+    "ready": {
+      "title": "Ready to Apply?",
+      "description": "Browse current opportunities across sectors and types — find programs that match your venture or career goals.",
+      "cta": "View All Opportunities"
+    },
+    "help": {
+      "title": "Need Help?",
+      "description": "Learn about membership, the application process, and what to prepare before you apply.",
+      "guide": "Application Guide",
+      "faq": "Frequently Asked Questions"
+    },
+    "stats": {
+      "members": "Active Members",
+      "applications": "Applications Submitted",
+      "support": "Awards & Support"
+    }
+  },
+  "about": {
+    "title": "About Maali",
+    "hero": "Maali Opportunity Hub is more than a listing site — it's a trusted bridge connecting African entrepreneurs, professionals, students, and interns with grants, jobs, internships, trainings, scholarships, fellowships, and other programs across the continent.",
+    "mission": {
+      "title": "Our Mission",
+      "description": "To democratize access to opportunities — funding, jobs, learning, and career pathways — for African talent, fostering innovation and sustainable economic growth across the continent.",
+      "cta": "Join the Network",
+      "stat": "1,000+",
+      "statLabel": "Members & Applicants Supported"
+    },
+    "values": {
+      "title": "Our Values",
+      "empowerment": {
+        "title": "Empowerment",
+        "description": "Opening doors for founders, professionals, students, and interns to access programs that advance their ventures and careers."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Modern, clear tools that help applicants discover programs and submit strong applications with confidence."
+      },
+      "collaboration": {
+        "title": "Collaboration",
+        "description": "Connecting applicants, program partners, and expert reviewers in one ecosystem built on trust and transparency."
+      },
+      "impact": {
+        "title": "Impact",
+        "description": "Driving real outcomes — grants, placements, fellowships, and career growth — for communities across Africa."
+      }
+    },
+    "story": {
+      "title": "Our Story",
+      "p1": "Maali was born from a simple observation: Africa is home to extraordinary talent, yet many founders, professionals, students, and interns still struggle to find and apply for the right opportunities.",
+      "p2": "Our name Maali relates to wealth and value in Somali — reflecting economic opportunity and career growth, not aid alone.",
+      "p3": "Through technology, membership, and a fair review process, we help African talent discover programs, apply with confidence, and track outcomes on one platform.",
+      "ctaTitle": "Join the Network",
+      "ctaDescription": "Be part of the hub connecting African talent to grants, jobs, internships, trainings, and more.",
+      "ctaButton": "Get Started Today"
+    },
+    "partners": {
+      "title": "Our Partners",
+      "subtitle": "Organizations listing opportunities and supporting talent across Africa",
+      "empty": "No partners available at this time."
+    },
+    "cta": {
+      "title": "Ready for Your Next Opportunity?",
+      "subtitle": "Join African talent building ventures and careers through grants, jobs, internships, trainings, scholarships, and more.",
+      "browse": "Browse Opportunities",
+      "partner": "Become a Partner"
     }
   }
 }
-

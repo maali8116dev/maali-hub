@@ -95,7 +95,7 @@ export function MembershipProfileSection() {
               Membership
             </CardTitle>
             <CardDescription className="mt-1">
-              Your MAALI tier controls access to funding applications
+              Your Maali tier controls access to opportunity applications
             </CardDescription>
           </div>
           {!loading && (

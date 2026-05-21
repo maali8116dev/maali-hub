@@ -25,6 +25,12 @@ const ApplicationFormContent = () => {
   const isNewApplication = searchParams.get("new") === "true";
   const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
 
+  useEffect(() => {
+    if (!membershipLoading && !canApplyToOpportunities) {
+      navigate("/join", { replace: true });
+    }
+  }, [membershipLoading, canApplyToOpportunities, navigate]);
+
   const { data: opportunityState, isLoading: isLoadingOpportunity } = useQuery({
     queryKey: ["opportunity-application-state", projectId],
     queryFn: async () => {

@@ -203,11 +203,13 @@ export function useCreatePartnerOpportunity() {
 
 export function useUpdatePartnerOpportunity() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const { toast } = useToast();
+  const { data: partnerOrg } = usePartnerOrg();
 
   return useMutation({
     mutationFn: async ({ id, data: formData }: { id: number; data: PartnerOpportunityFormData }) => {
+      if (!partnerOrg?.id) throw new Error("Partner organization not found");
+
       const { data, error } = await supabase
         .from("opportunities")
         .update({
@@ -228,7 +230,7 @@ export function useUpdatePartnerOpportunity() {
           sector_id: formData.sectorId || null,
         })
         .eq("id", id)
-        .eq("created_by", user!.id)
+        .eq("partner_id", partnerOrg.id)
         .select()
         .single();
 

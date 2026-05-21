@@ -1,79 +1,51 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { useProfile } from "./useProfile";
+import { useKycVerification } from "./useKycVerification";
 
 /**
- * Hook to check if a user's profile needs completion
- * Returns whether the profile is incomplete and what percentage is complete
+ * Hook to check if a user's profile needs completion.
+ * Returns whether the profile is incomplete and what percentage is complete.
+ * Includes KYC verification status as one of the completion items.
  */
 export function useProfileCompletion() {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { data: kyc, isLoading: isLoadingKyc } = useKycVerification();
+
+  const isLoading = isLoadingProfile || isLoadingKyc;
 
   const { isIncomplete, completionPercentage, missingFields } = useMemo(() => {
-    // If profile is loading, return loading state
     if (isLoading) {
-      return {
-        isIncomplete: false,
-        completionPercentage: 0,
-        missingFields: [],
-      };
+      return { isIncomplete: false, completionPercentage: 0, missingFields: [] };
     }
-    
-    // If profile doesn't exist yet (new user), consider it incomplete
+
     if (!profile) {
       return {
         isIncomplete: true,
         completionPercentage: 0,
-        missingFields: ['firstName', 'lastName', 'country', 'businesssector'],
+        missingFields: ["firstName", "lastName", "country", "businesssector"],
       };
     }
 
-    // Required fields for a complete profile
-    const requiredFields = [
-      { key: 'firstName', value: profile.firstName },
-      { key: 'lastName', value: profile.lastName },
-      { key: 'country', value: profile.country },
-      { key: 'businesssector', value: profile.businesssector },
+    const items = [
+      { key: "firstName",     value: profile.firstName,     required: true },
+      { key: "lastName",      value: profile.lastName,      required: true },
+      { key: "country",       value: profile.country,       required: true },
+      { key: "businesssector",value: profile.businesssector,required: true },
+      { key: "phoneNumber",   value: profile.phoneNumber,   required: false },
+      { key: "businessName",  value: profile.businessName,  required: false },
+      { key: "bio",           value: profile.bio,           required: false },
+      { key: "kyc",           value: kyc?.status === "verified" ? "verified" : null, required: false },
     ];
 
-    // Optional but recommended fields
-    const recommendedFields = [
-      { key: 'businessName', value: profile.businessName },
-      { key: 'bio', value: profile.bio },
-    ];
-
-    const allFields = [...requiredFields, ...recommendedFields];
-    const filledFields = allFields.filter(
-      (field) => field.value && field.value.trim() !== ""
-    );
-
-    const missingRequired = requiredFields.filter(
-      (field) => !field.value || field.value.trim() === ""
-    );
-
-    const completionPercentage = Math.round(
-      (filledFields.length / allFields.length) * 100
-    );
+    const filledCount = items.filter((i) => i.value && String(i.value).trim() !== "").length;
+    const missingRequired = items.filter((i) => i.required && (!i.value || String(i.value).trim() === ""));
 
     return {
       isIncomplete: missingRequired.length > 0,
-      completionPercentage,
-      missingFields: missingRequired.map((f) => f.key),
+      completionPercentage: Math.round((filledCount / items.length) * 100),
+      missingFields: missingRequired.map((i) => i.key),
     };
-  }, [profile, isLoading]);
+  }, [profile, kyc, isLoading]);
 
-  return {
-    isIncomplete,
-    completionPercentage,
-    missingFields,
-    isLoading,
-  };
+  return { isIncomplete, completionPercentage, missingFields, isLoading };
 }
-
-
-
-
-
-
-
-
-

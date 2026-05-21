@@ -87,6 +87,7 @@ const AdminActivityLogs = lazy(() => import("./pages/admin/ActivityLogs"));
 const AdminSectors = lazy(() => import("./pages/admin/Categories"));
 const AdminKyc = lazy(() => import("./pages/admin/Kyc"));
 const AdminNotifications = lazy(() => import("./pages/admin/Notifications"));
+const AdminInbound = lazy(() => import("./pages/admin/Inbound"));
 
 // Lazy-loaded reviewer pages
 const ReviewerLayout = lazy(() => import("@/components/reviewer/ReviewerLayout"));
@@ -372,6 +373,18 @@ const App = () => {
               <ProtectedRoute requireAuth={true}>
                 <AdminLayout>
                   <AdminNotifications />
+                </AdminLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/admin/inbound"
+            element={
+              <RoleBasedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <AdminLayout>
+                  <AdminInbound />
                 </AdminLayout>
               </ProtectedRoute>
               </RoleBasedRoute>

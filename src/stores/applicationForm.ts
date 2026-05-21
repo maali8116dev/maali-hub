@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface ApplicationFormData {
@@ -271,12 +271,7 @@ export const useApplicationFormStore = create<ApplicationFormStore>()(
             // Organizational Background is optional
             return true;
           case 3:
-            // Project Overview - required fields
-            return !!(
-              formData.projectTitle &&
-              formData.projectSummary &&
-              formData.geographicFocus
-            );
+            return !!(formData.projectTitle && formData.projectSummary);
           case 4:
             // Social Links - optional, always valid
             return true;

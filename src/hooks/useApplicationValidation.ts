@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Hook for application form validation logic
  */
 import { useToast } from '@/hooks/use-toast';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 
-export function useApplicationValidation() {
+export function useApplicationValidation(isGrantType = true) {
   const { toast } = useToast();
   const { formData } = useApplicationFormStore();
 
@@ -13,11 +13,11 @@ export function useApplicationValidation() {
       !formData.applicantType ||
       !formData.fullLegalName ||
       !formData.countryOfResidence ||
+      !formData.cityRegion ||
       !formData.emailAddress ||
       !formData.phoneNumber ||
       !formData.projectTitle ||
-      !formData.projectSummary ||
-      !formData.geographicFocus
+      !formData.projectSummary
     ) {
       toast({
         title: "Missing Information",
@@ -33,7 +33,7 @@ export function useApplicationValidation() {
     if (
       !formData.informationAccurateConfirmed ||
       !formData.conflictOfInterestDeclared ||
-      !formData.reportingRequirementsAgreed ||
+      (isGrantType && !formData.reportingRequirementsAgreed) ||
       !formData.dataProcessingConsented
     ) {
       toast({

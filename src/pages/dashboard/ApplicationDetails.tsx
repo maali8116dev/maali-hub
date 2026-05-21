@@ -26,6 +26,7 @@ import {
   AdminReviewSidebar,
 } from "@/components/application/shared";
 import type { DocumentItem } from "@/components/application/shared";
+import { MemberFeatureGate } from "@/components/MemberFeatureGate";
 
 const ApplicationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -165,6 +166,7 @@ const ApplicationDetails = () => {
   }
 
   return (
+    <MemberFeatureGate>
     <div className="space-y-4 sm:space-y-6">
       <ApplicationHeader
         title="Application Details"
@@ -236,6 +238,7 @@ const ApplicationDetails = () => {
         </div>
       </div>
     </div>
+    </MemberFeatureGate>
   );
 };
 

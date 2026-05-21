@@ -13,6 +13,7 @@ import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
+import authLogoIcon from "../../images/auth_logo_icon.png";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
@@ -538,9 +539,7 @@ const Auth = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
-              <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-white">
-                <span className="text-2xl font-bold">M</span>
-              </div>
+              <img src={authLogoIcon} alt="Maali" className="w-16 h-16 object-contain" />
             </div>
             <CardTitle className="text-2xl text-center">Set New Password</CardTitle>
             <CardDescription className="text-center">
@@ -605,11 +604,9 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          {/* Logo Placeholder */}
+          {/* Logo */}
           <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-gradient-primary text-white">
-              <span className="text-2xl font-bold">M</span>
-            </div>
+            <img src={authLogoIcon} alt="Maali" className="w-16 h-16 object-contain" />
           </div>
           <CardTitle className="text-2xl text-center">Welcome</CardTitle>
           <CardDescription className="text-center">

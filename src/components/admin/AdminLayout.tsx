@@ -22,6 +22,7 @@ import {
   UserCheck,
   Home,
   Bell,
+  Inbox,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,6 +55,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: "/admin/opportunities", label: "Opportunities", icon: Briefcase },
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/notifications", label: "Notifications", icon: Bell },
+    { href: "/admin/inbound", label: "Inbound", icon: Inbox },
     { href: "/admin/kyc", label: "KYC Requests", icon: Shield },
     { href: "/admin/review-management", label: "Review Management", icon: ClipboardCheck },
     { href: "/admin/financial", label: "Financial", icon: DollarSign },
@@ -132,7 +134,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     (item.href === "/admin/faq" && location.pathname.startsWith("/admin/faq")) ||
                     (item.href === "/admin/mentors" && location.pathname.startsWith("/admin/mentors")) ||
                     (item.href === "/admin/resources" && location.pathname.startsWith("/admin/resources")) ||
-                    (item.href === "/admin/sectors" && location.pathname.startsWith("/admin/sectors"));
+                    (item.href === "/admin/sectors" && location.pathname.startsWith("/admin/sectors")) ||
+                    (item.href === "/admin/inbound" && location.pathname.startsWith("/admin/inbound"));
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton

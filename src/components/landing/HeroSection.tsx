@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Globe, TrendingUp, Check, Lightbulb, Rocket } from "lucide-react";
+import { ArrowRight, Users, Globe, Award, Check, Lightbulb, GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
@@ -19,8 +19,8 @@ const HeroSection = () => {
     } else {
       // User not logged in, show toast and redirect to auth page
       toast({
-        title: "Login Required",
-        description: "Please log in or create an account to start applying for funding opportunities.",
+        title: t('hero.loginRequiredTitle'),
+        description: t('hero.loginRequiredDescription'),
         variant: "default",
       });
       navigate("/auth");
@@ -100,7 +100,7 @@ const HeroSection = () => {
                   <Users className="h-5 sm:h-6 w-5 sm:w-6 text-success mr-2" />
                 </div>
                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-success mb-0.5 sm:mb-1">500+</div>
-                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.entrepreneurs')}</div>
+                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.members')}</div>
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-1 sm:mb-2">
@@ -111,10 +111,10 @@ const HeroSection = () => {
               </div>
               <div className="text-center lg:text-left bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
                 <div className="flex items-center justify-center lg:justify-start mb-1 sm:mb-2">
-                  <TrendingUp className="h-5 sm:h-6 w-5 sm:w-6 text-warning mr-2" />
+                  <Award className="h-5 sm:h-6 w-5 sm:w-6 text-warning mr-2" />
                 </div>
                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-warning mb-0.5 sm:mb-1">$2M+</div>
-                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.totalFunding')}</div>
+                <div className="text-xs sm:text-sm text-white/90 font-medium">{t('hero.totalSupport')}</div>
               </div>
             </div>
           </div>
@@ -129,9 +129,9 @@ const HeroSection = () => {
                     <Check className="h-6 w-6 text-success-foreground" />
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Ahmed's Startup</div>
-                    <div className="text-sm text-muted-foreground">$75K Funded</div>
-                    <div className="text-xs text-success font-medium">Fintech Innovation</div>
+                    <div className="font-semibold text-foreground">{t('hero.previewCard1.name')}</div>
+                    <div className="text-sm text-muted-foreground">{t('hero.previewCard1.detail')}</div>
+                    <div className="text-xs text-success font-medium">{t('hero.previewCard1.tag')}</div>
                   </div>
                 </div>
               </div>
@@ -142,9 +142,9 @@ const HeroSection = () => {
                     <Lightbulb className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Kofi's Tech Hub</div>
-                    <div className="text-sm text-muted-foreground">$120K Investment</div>
-                    <div className="text-xs text-primary font-medium">EdTech Platform</div>
+                    <div className="font-semibold text-foreground">{t('hero.previewCard2.name')}</div>
+                    <div className="text-sm text-muted-foreground">{t('hero.previewCard2.detail')}</div>
+                    <div className="text-xs text-primary font-medium">{t('hero.previewCard2.tag')}</div>
                   </div>
                 </div>
               </div>
@@ -152,12 +152,12 @@ const HeroSection = () => {
               <div className="absolute top-0 left-20 bg-card/90 backdrop-blur-sm p-6 rounded-xl shadow-elegant border border-white/20 animate-float max-w-xs" style={{ animationDelay: '2s' }}>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                    <Rocket className="h-6 w-6 text-accent-foreground" />
+                    <GraduationCap className="h-6 w-6 text-accent-foreground" />
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground">Samuel's Venture</div>
-                    <div className="text-sm text-muted-foreground">$200K Series A</div>
-                    <div className="text-xs text-accent font-medium">E-commerce Solutions</div>
+                    <div className="font-semibold text-foreground">{t('hero.previewCard3.name')}</div>
+                    <div className="text-sm text-muted-foreground">{t('hero.previewCard3.detail')}</div>
+                    <div className="text-xs text-accent font-medium">{t('hero.previewCard3.tag')}</div>
                   </div>
                 </div>
               </div>

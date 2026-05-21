@@ -113,6 +113,7 @@ export type Database = {
         Row: {
           application_id: string | null
           created_at: string
+          document_type: string | null
           file_name: string
           file_path: string
           file_size: number | null
@@ -125,6 +126,7 @@ export type Database = {
         Insert: {
           application_id?: string | null
           created_at?: string
+          document_type?: string | null
           file_name: string
           file_path: string
           file_size?: number | null
@@ -137,6 +139,7 @@ export type Database = {
         Update: {
           application_id?: string | null
           created_at?: string
+          document_type?: string | null
           file_name?: string
           file_path?: string
           file_size?: number | null
@@ -663,6 +666,33 @@ export type Database = {
           expires_at?: string | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          source: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

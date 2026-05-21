@@ -1,17 +1,62 @@
 {
   "hero": {
-    "badge": "Junte-se a 500+ Empreendedores",
+    "badge": "Junte-se a 500+ membros em toda a África",
     "headline1": "Capacitando",
-    "headline2": "Empreendedores",
+    "headline2": "Talentos",
     "headline3": "Africanos",
-    "subheadline": "A forma mais rápida de descobrir e se candidatar a oportunidades de financiamento em toda a África.",
-    "description": "Conecte-se com um ecossistema próspero de empreendedores, envie candidaturas e transforme sua visão em realidade. Sua jornada para o sucesso começa aqui.",
-    "startApplication": "Iniciar sua candidatura",
-    "viewProjects": "Ver projetos",
-    "browseProjects": "Navegar projetos",
-    "entrepreneurs": "Empreendedores",
+    "subheadline": "Um hub para descobrir e candidatar-se a subsídios, empregos, estágios, formações, bolsas e mais.",
+    "description": "Seja construindo um negócio, crescendo na carreira ou começando como estudante ou estagiário — conecte-se a programas, parceiros e avaliadores numa plataforma confiável.",
+    "startApplication": "Começar",
+    "viewProjects": "Ver oportunidades",
+    "browseProjects": "Ver oportunidades",
+    "members": "Membros ativos",
     "countries": "Países",
-    "totalFunding": "Financiamento total"
+    "totalSupport": "Prémios e apoio",
+    "loginRequiredTitle": "Início de sessão necessário",
+    "loginRequiredDescription": "Crie uma conta gratuita ou entre para explorar e candidatar-se a oportunidades no Maali.",
+    "previewCard1": {
+      "name": "Startup do Ahmed",
+      "detail": "Subsídio de 75K$",
+      "tag": "Fintech"
+    },
+    "previewCard2": {
+      "name": "Programa do Kofi",
+      "detail": "Fellowship EdTech",
+      "tag": "Educação"
+    },
+    "previewCard3": {
+      "name": "Função do Samuel",
+      "detail": "Estágio em tech",
+      "tag": "Tecnologia"
+    }
+  },
+  "membership": {
+    "badge": "Associação",
+    "title": "Junte-se à rede MAALI",
+    "subtitle": "Para empreendedores, profissionais, estudantes e estagiários. Navegue grátis ou desbloqueie candidaturas por menos que um café por mês.",
+    "community": {
+      "name": "Community",
+      "price": "Grátis",
+      "priceNote": "Sem cartão de crédito",
+      "cta": "Entrar grátis",
+      "feature1": "Explorar subsídios, empregos, estágios, formações e mais",
+      "feature2": "Acesso a recursos e guias públicos",
+      "feature3": "Juntar-se à rede comunitária Maali",
+      "feature4": "Newsletter mensal de oportunidades"
+    },
+    "member": {
+      "name": "Full Member",
+      "badge": "Mais popular",
+      "price": "$2",
+      "priceUnit": "/ mês",
+      "priceNote": "Cancele quando quiser",
+      "cta": "Tornar-se membro",
+      "feature1": "Tudo do Community",
+      "feature2": "Candidatar-se a todos os tipos de oportunidade",
+      "feature3": "Candidaturas guiadas em várias etapas",
+      "feature4": "Eventos e workshops exclusivos para membros"
+    },
+    "socialProof": "Junte-se ao talento africano que constrói carreira e negócios com a MAALI."
   },
   "trustIndicators": {
     "title": "Confiado pelas principais",
@@ -21,137 +66,214 @@
   "howItWorks": {
     "title": "Como",
     "titleHighlight": "Funciona",
-    "subtitle": "Comece em quatro etapas simples. Da descoberta ao financiamento, simplificamos todo o processo.",
+    "subtitle": "Quatro etapas da descoberta ao resultado — para empreendedores, profissionais, estudantes e estagiários: subsídios, empregos, estágios, formações, bolsas e mais.",
     "step1": {
-      "title": "Navegar oportunidades",
-      "description": "Explore oportunidades de financiamento em vários setores. Filtre por localização, valor de financiamento e setor para encontrar a correspondência perfeita."
+      "title": "Descobrir oportunidades",
+      "description": "Explore subsídios, empregos, estágios, formações, bolsas, fellowships e outros programas. Filtre por setor, local e tipo de oportunidade."
     },
     "step2": {
-      "title": "Criar seu perfil",
-      "description": "Cadastre-se em minutos e crie seu perfil de empreendedor. Mostre seu negócio, experiência e visão."
+      "title": "Junte-se ao Maali",
+      "description": "Crie sua conta e perfil. Entre grátis como Community para navegar, ou torne-se Full Member para candidatar-se a qualquer oportunidade."
     },
     "step3": {
-      "title": "Enviar candidatura",
-      "description": "Complete sua candidatura com nosso processo guiado. Envie documentos, forneça detalhes e envie com confiança."
+      "title": "Candidate-se com confiança",
+      "description": "Candidatura guiada em várias etapas. Envie documentos, salve rascunhos e submeta quando estiver pronto — financiamento ou carreira."
     },
     "step4": {
-      "title": "Obter financiamento",
-      "description": "Acompanhe o status da sua candidatura em tempo real. Receba feedback e obtenha financiamento para expandir seu negócio."
+      "title": "Avaliação e resultados",
+      "description": "Avaliadores especializados analisam candidaturas com equidade. Acompanhe o status no painel até seleção ou premiação final."
     },
     "cta": "Começar hoje"
   },
   "benefits": {
     "title": "Por que escolher",
     "titleHighlight": "Maali",
-    "subtitle": "Criamos uma plataforma especificamente para empreendedores africanos, atendendo às suas necessidades e desafios únicos.",
+    "subtitle": "Feito para talento africano — fundadores, profissionais, estudantes e estagiários — num só lugar para encontrar oportunidades reais.",
     "benefit1": {
       "title": "Rápido e Simples",
-      "description": "Complete candidaturas em minutos, não em horas. Nosso processo simplificado economiza seu tempo."
+      "description": "Complete candidaturas em minutos. O processo guiado serve para subsídios, empregos, estágios e formações."
     },
     "benefit2": {
-      "title": "Oportunidades Focadas",
-      "description": "Encontre financiamentos especificamente projetados para empreendedores e empresas africanos."
+      "title": "Todos os tipos de oportunidade",
+      "description": "Subsídios, empregos, estágios, formações, bolsas, fellowships, aceleradoras e mais — para candidatos africanos."
     },
     "benefit3": {
       "title": "Suporte Especializado",
-      "description": "Obtenha orientação de mentores e revisores experientes em toda a sua jornada."
+      "description": "Orientação de mentores e avaliadores experientes em toda a candidatura e seleção."
     },
     "benefit4": {
       "title": "Resultados Comprovados",
-      "description": "Junte-se a centenas de empreendedores de sucesso que obtiveram financiamento através da nossa plataforma."
+      "description": "Junte-se a membros que obtiveram financiamento, colocações, fellowships e programas de carreira."
     }
   },
   "testimonials": {
     "title": "Histórias de",
     "titleHighlight": "Sucesso",
-    "subtitle": "Ouça empreendedores que obtiveram financiamento com sucesso através do Maali",
+    "subtitle": "Ouça membros que encontraram subsídios, funções e programas através do Maali",
     "testimonial1": {
       "name": "Ahmed Hassan",
       "company": "FinTech Solutions",
       "location": "Quênia",
-      "quote": "O Maali tornou tão fácil encontrar e se candidatar a financiamento. Em 3 meses, obtive 75K$ para minha startup fintech. A plataforma é intuitiva e a equipe de suporte é incrível.",
-      "result": "75K$ Financiado",
+      "quote": "O Maali facilitou encontrar o subsídio certo e enviar uma candidatura forte. Em 3 meses obtive 75K$ para minha startup fintech.",
+      "result": "Subsídio 75K$",
       "sector": "Fintech"
     },
     "testimonial2": {
       "name": "Kofi Mensah",
       "company": "Plataforma EdTech",
       "location": "Gana",
-      "quote": "Como empreendedor iniciante, fiquei sobrecarregado com o processo de financiamento. O Maali me guiou em cada etapa e me conectou com as oportunidades certas. Altamente recomendado!",
-      "result": "120K$ Investimento",
+      "quote": "Ao explorar fellowships, o Maali guiou-me em cada passo para programas alinhados aos meus objetivos.",
+      "result": "Fellowship selecionado",
       "sector": "Educação"
     },
     "testimonial3": {
       "name": "Amina Okafor",
       "company": "AgriTech Innovations",
       "location": "Nigéria",
-      "quote": "O suporte multilíngue e o design mobile-first tornaram perfeito para mim. Eu poderia trabalhar na minha candidatura mesmo com internet limitada. Esta plataforma realmente entende os empreendedores africanos.",
-      "result": "50K$ Financiado",
+      "quote": "Suporte multilíngue e design mobile permitiram candidatar-me ao estágio mesmo com internet limitada.",
+      "result": "Estágio colocado",
       "sector": "Agricultura"
     }
   },
   "newsletter": {
     "title": "Mantenha-se atualizado sobre novas oportunidades",
-    "subtitle": "Seja notificado quando novas oportunidades de financiamento estiverem disponíveis. Junte-se à nossa newsletter e nunca perca uma chance de expandir seu negócio.",
+    "subtitle": "Seja notificado sobre novos subsídios, empregos, estágios, formações e bolsas. Não perca chances de avançar na carreira ou no negócio.",
     "emailPlaceholder": "Digite seu endereço de email",
     "subscribe": "Inscrever-se",
     "subscribed": "Inscrito!",
     "privacy": "Respeitamos sua privacidade. Cancele a inscrição a qualquer momento.",
     "thankYou": "Obrigado!",
-    "subscribedMessage": "Você foi inscrito em nossa newsletter."
+    "subscribedMessage": "Você foi inscrito em nossa newsletter.",
+    "alreadySubscribed": "Este e-mail já está na nossa lista.",
+    "errorTitle": "Falha na inscrição",
+    "errorGeneric": "Não foi possível guardar o seu e-mail. Tente novamente."
   },
   "featuredProjects": {
     "title": "Oportunidades",
     "titleHighlight": "em Destaque",
-    "subtitle": "Descubra oportunidades de financiamento em vários setores. Da agricultura à tecnologia, encontre a correspondência perfeita para sua visão empreendedora.",
-    "viewAll": "Ver todos os projetos"
+    "subtitle": "Explore programas em vários setores — financiamento, emprego, estágio ou desenvolvimento profissional.",
+    "viewAll": "Ver todas as oportunidades"
   },
   "successStories": {
     "title": "Histórias de",
     "titleHighlight": "Sucesso",
-    "subtitle": "Descubra como os empreendedores africanos estão transformando suas comunidades e construindo negócios de sucesso com financiamento de nossa plataforma.",
+    "subtitle": "Veja como empreendedores, profissionais e graduados avançam com subsídios, empregos, estágios e programas no Maali.",
     "viewAll": "Ver todas as histórias de sucesso"
   },
   "featureShowcase": {
     "title": "Construído para",
-    "titleHighlight": "Empreendedores Africanos",
-    "subtitle": "Cada recurso é projetado com os desafios e oportunidades únicos do ecossistema empreendedor africano em mente.",
+    "titleHighlight": "Talento Africano",
+    "subtitle": "Cada recurso apoia fundadores, profissionais, estudantes e estagiários no panorama de oportunidades africanas.",
     "feature1": {
-      "title": "Sistema de Candidatura Inteligente",
-      "description": "Processo de candidatura guiado por IA com modelos de documentos e validação em tempo real para garantir que sua submissão esteja completa e convincente."
+      "title": "Candidaturas Guiadas",
+      "description": "Candidaturas em várias etapas com documentos, rascunhos e validação para uma submissão completa."
     },
     "feature2": {
       "title": "Armazenamento Seguro de Documentos",
-      "description": "Segurança de nível bancário para seus documentos sensíveis com armazenamento criptografado e acesso controlado para proteger sua propriedade intelectual."
+      "description": "Segurança bancária para documentos sensíveis com armazenamento encriptado e acesso controlado."
     },
     "feature3": {
       "title": "Experiência Mobile-First",
-      "description": "Otimizado para dispositivos móveis com capacidades offline, garantindo que você possa trabalhar em candidaturas mesmo com conectividade limitada."
+      "description": "Otimizado para mobile para descobrir e candidatar-se mesmo com conectividade limitada."
     },
     "feature4": {
       "title": "Revisão Colaborativa",
-      "description": "Processo de revisão transparente com múltiplas partes interessadas, feedback detalhado e comunicação clara durante toda a avaliação."
+      "description": "Revisão transparente com avaliadores especializados, feedback detalhado e comunicação clara."
     },
     "feature5": {
       "title": "Suporte Multilíngue",
-      "description": "Disponível em inglês, francês e português para servir empreendedores em todas as regiões da África sem problemas."
+      "description": "Disponível em inglês, francês e português para talento em toda a África."
     },
     "feature6": {
       "title": "Acompanhamento de Progresso",
-      "description": "Atualizações em tempo real sobre o status da sua candidatura com análises detalhadas e insights para melhorar submissões futuras."
+      "description": "Atualizações em tempo real do status da candidatura com insights para melhorar."
     },
     "feature7": {
       "title": "Gerenciamento de Prazos",
-      "description": "Notificações e lembretes inteligentes para mantê-lo no caminho certo com prazos de candidatura e documentação necessária."
+      "description": "Notificações e lembretes para prazos e documentação necessária."
     },
     "feature8": {
       "title": "Comunicação Direta",
-      "description": "Sistema de mensagens integrado para comunicação direta com revisores, mentores e outros empreendedores no ecossistema."
+      "description": "Mensagens com avaliadores, mentores e parceiros quando o programa permitir."
     },
     "feature9": {
-      "title": "Pagamentos Flexíveis",
-      "description": "Múltiplas opções de pagamento incluindo Mobile Money, Paystack e Stripe para acomodar diferentes preferências e regiões."
+      "title": "Associação Simples",
+      "description": "Navegue grátis como Community, ou Full Member por $2/mês para candidatar-se a qualquer tipo de oportunidade."
+    }
+  },
+  "apply": {
+    "hero": {
+      "title": "Comece a sua jornada de oportunidades",
+      "subtitle": "Junte-se a empreendedores, profissionais, estudantes e estagiários africanos: subsídios, empregos, estágios, formações, bolsas e mais. Full Members candidatam-se a qualquer programa no Maali.",
+      "browseOpportunities": "Ver oportunidades",
+      "viewGuide": "Ver guia de candidatura"
+    },
+    "howItWorksTitle": "Como funciona",
+    "ready": {
+      "title": "Pronto para candidatar-se?",
+      "description": "Explore oportunidades atuais por setor e tipo — encontre programas para o seu negócio ou carreira.",
+      "cta": "Ver todas as oportunidades"
+    },
+    "help": {
+      "title": "Precisa de ajuda?",
+      "description": "Saiba mais sobre associação, o processo de candidatura e o que preparar antes de aplicar.",
+      "guide": "Guia de candidatura",
+      "faq": "Perguntas frequentes"
+    },
+    "stats": {
+      "members": "Membros ativos",
+      "applications": "Candidaturas enviadas",
+      "support": "Prémios e apoio"
+    }
+  },
+  "about": {
+    "title": "Sobre o Maali",
+    "hero": "O Maali Opportunity Hub é mais que um diretório — é uma ponte de confiança entre empreendedores, profissionais, estudantes e estagiários africanos e subsídios, empregos, estágios, formações, bolsas, fellowships e outros programas no continente.",
+    "mission": {
+      "title": "A nossa missão",
+      "description": "Democratizar o acesso a oportunidades — financiamento, empregos, formação e percursos de carreira — para o talento africano, fomentando inovação e crescimento económico sustentável.",
+      "cta": "Juntar-se à rede",
+      "stat": "1.000+",
+      "statLabel": "Membros e candidatos apoiados"
+    },
+    "values": {
+      "title": "Os nossos valores",
+      "empowerment": {
+        "title": "Empoderamento",
+        "description": "Abrir portas para fundadores, profissionais, estudantes e estagiários acederem a programas que avançam negócios e carreiras."
+      },
+      "innovation": {
+        "title": "Inovação",
+        "description": "Ferramentas modernas e claras para descobrir programas e enviar candidaturas fortes com confiança."
+      },
+      "collaboration": {
+        "title": "Colaboração",
+        "description": "Ligar candidatos, parceiros de programas e avaliadores especializados num ecossistema transparente."
+      },
+      "impact": {
+        "title": "Impacto",
+        "description": "Resultados reais — subsídios, colocações, fellowships e crescimento profissional — para comunidades em África."
+      }
+    },
+    "story": {
+      "title": "A nossa história",
+      "p1": "O Maali nasceu de uma observação simples: África tem talento extraordinário, mas muitos fundadores, profissionais, estudantes e estagiários ainda lutam para encontrar e candidatar-se às oportunidades certas.",
+      "p2": "O nome Maali relaciona-se com riqueza e valor em somali — oportunidade económica e crescimento de carreira, não apenas ajuda.",
+      "p3": "Através de tecnologia, associação e um processo de avaliação justo, ajudamos o talento africano a descobrir programas, candidatar-se e acompanhar resultados numa só plataforma.",
+      "ctaTitle": "Junte-se à rede",
+      "ctaDescription": "Faça parte do hub que liga talento africano a subsídios, empregos, estágios, formações e mais.",
+      "ctaButton": "Começar hoje"
+    },
+    "partners": {
+      "title": "Os nossos parceiros",
+      "subtitle": "Organizações que listam oportunidades e apoiam talento em África",
+      "empty": "Nenhum parceiro disponível de momento."
+    },
+    "cta": {
+      "title": "Pronto para a sua próxima oportunidade?",
+      "subtitle": "Junte-se ao talento africano que constrói negócios e carreiras com subsídios, empregos, estágios, formações, bolsas e mais.",
+      "browse": "Ver oportunidades",
+      "partner": "Tornar-se parceiro"
     }
   }
 }
-

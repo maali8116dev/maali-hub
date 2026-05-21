@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
 import { formatDate } from "@/lib/dateUtils";
 import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 import { useTranslation } from "react-i18next";
+import { MemberFeatureGate } from "@/components/MemberFeatureGate";
 
 const Applications = () => {
   const navigate = useNavigate();
@@ -158,6 +159,7 @@ const Applications = () => {
   const isFirstTime = applications.length === 0;
 
   return (
+    <MemberFeatureGate>
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2">
@@ -309,6 +311,7 @@ const Applications = () => {
         </Card>
       )}
     </div>
+    </MemberFeatureGate>
   );
 };
 

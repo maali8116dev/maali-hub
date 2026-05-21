@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useApplicationFormStore } from '@/stores/applicationForm';
 import { setupMocks } from './test-utils';
 
@@ -65,7 +65,6 @@ describe('Step 3: Project Overview', () => {
     store.updateFormData({
       projectTitle: '',
       projectSummary: '',
-      geographicFocus: '',
     });
 
     // Step 3 should be invalid
@@ -75,7 +74,6 @@ describe('Step 3: Project Overview', () => {
     store.updateFormData({
       projectTitle: 'Innovative Tech Solution Project',
       projectSummary: 'This is a comprehensive project summary that meets the minimum word count requirement. The project aims to solve critical problems through innovative approaches and sustainable solutions. We will work with local communities to ensure maximum impact and long-term success.',
-      geographicFocus: 'West Africa',
     });
 
     // Step 3 should be valid

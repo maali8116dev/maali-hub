@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { 
   FileText, 
   Shield, 
@@ -8,7 +8,7 @@ import {
   TrendingUp,
   Clock,
   MessageSquare,
-  CreditCard
+  BadgeCheck
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -64,7 +64,7 @@ const FeatureShowcase = () => {
       color: "text-warning"
     },
     {
-      icon: CreditCard,
+      icon: BadgeCheck,
       title: t('featureShowcase.feature9.title'),
       description: t('featureShowcase.feature9.description'),
       color: "text-primary"
