@@ -6,9 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import headerLogoFallback from "@/assets/logo.webp";
-
-const headerLogoPublic = "/images/logo.webp";
+const headerLogo = "/images/logo.webp";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
