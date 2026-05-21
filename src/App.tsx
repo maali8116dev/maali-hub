@@ -14,6 +14,7 @@ import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
+import { RouteSEO } from "@/components/seo/RouteSEO";
 
 // Critical path - eagerly loaded
 import Index from "./pages/Index";
@@ -159,6 +160,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <CookieConsent />
+              <RouteSEO />
               <Suspense fallback={<PageFallback />}>
               <Routes>
           <Route path="/" element={<Index />} />
