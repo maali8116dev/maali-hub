@@ -17,3 +17,10 @@ if (fs.existsSync(heroSrc)) {
   fs.mkdirSync(heroDestDir, { recursive: true });
   fs.copyFileSync(heroSrc, heroDest);
 }
+
+const logoSrc = path.join(root, "src", "assets", "logo.webp");
+const logoDest = path.join(heroDestDir, "logo.webp");
+if (fs.existsSync(logoSrc)) {
+  fs.mkdirSync(heroDestDir, { recursive: true });
+  fs.copyFileSync(logoSrc, logoDest);
+}

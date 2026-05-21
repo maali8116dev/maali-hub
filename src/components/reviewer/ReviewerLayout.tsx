@@ -123,12 +123,6 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate("/dashboard")}>
-                <LayoutDashboard />
-                <span>User Dashboard</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               {user ? (
                 <SidebarMenuButton onClick={handleSignOut}>
                   <LogOut />
