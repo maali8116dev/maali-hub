@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "sync:favicons": "node scripts/sync-favicons.mjs",
+    "dev": "npm run sync:favicons && vite",
+    "build": "npm run sync:favicons && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

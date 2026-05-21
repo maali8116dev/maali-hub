@@ -66,6 +66,7 @@ export const ErrorBoundary = ({ children }: ErrorBoundaryProps) => {
       onError={(error, componentStack) => {
         console.error("Error caught by boundary:", error);
         console.error("Component stack:", componentStack);
+        Sentry.flush(2000);
       }}
     >
       {children}

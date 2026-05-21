@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,10 +13,11 @@ import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
-import authLogoIcon from "../../images/auth_logo_icon.png";
+import authLogoIcon from "@/assets/logo_icon.webp";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { BackButton } from "@/components/ui/back-button";
 
 // Form schemas
 const signInSchema = z.object({
@@ -58,6 +59,17 @@ const resetPasswordSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+function AuthPageLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+        <BackButton label="Back to Home" link="/" />
+      </div>
+      {children}
+    </div>
+  );
+}
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -535,7 +547,7 @@ const Auth = () => {
   // Password Reset View
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
+      <AuthPageLayout>
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
@@ -596,12 +608,12 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </AuthPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
+    <AuthPageLayout>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           {/* Logo */}
@@ -610,7 +622,7 @@ const Auth = () => {
           </div>
           <CardTitle className="text-2xl text-center">Welcome</CardTitle>
           <CardDescription className="text-center">
-            Join the community of African entrepreneurs
+            Join the community of African Talent
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -807,7 +819,7 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
+    </AuthPageLayout>
   );
 };
 

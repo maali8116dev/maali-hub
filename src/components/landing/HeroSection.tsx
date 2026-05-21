@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
-const heroImage = "/images/hero-agriculture.jpg";
+
+const heroImage = "/images/hero-agriculture.webp";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0 bg-transparent">
         <img 
           src={heroImage}
-          alt=""
+          alt={t('hero.imageAlt', { defaultValue: 'African entrepreneurs in agriculture' })}
           fetchPriority="high"
           loading="eager"
           decoding="sync"

@@ -23,12 +23,33 @@ export const useCookieConsent = () => {
     return stored ? JSON.parse(stored) : { analytics: false, marketing: false };
   });
 
+  // Sync state when another hook instance writes to localStorage (same tab or other tabs)
+  useEffect(() => {
+    const handleConsentChange = () => {
+      const storedConsent = localStorage.getItem(CONSENT_KEY);
+      const storedPrefs = localStorage.getItem(PREFERENCES_KEY);
+      setConsentStatus((storedConsent as ConsentStatus) || "pending");
+      setPreferences(storedPrefs ? JSON.parse(storedPrefs) : { analytics: false, marketing: false });
+    };
+    window.addEventListener("cookie-consent-changed", handleConsentChange);
+    window.addEventListener("storage", handleConsentChange); // cross-tab
+    return () => {
+      window.removeEventListener("cookie-consent-changed", handleConsentChange);
+      window.removeEventListener("storage", handleConsentChange);
+    };
+  }, []);
+
+  const notifyConsentChanged = () => {
+    window.dispatchEvent(new Event("cookie-consent-changed"));
+  };
+
   const acceptAll = useCallback(() => {
     const newPrefs = { analytics: true, marketing: true };
     localStorage.setItem(CONSENT_KEY, "accepted");
     localStorage.setItem(PREFERENCES_KEY, JSON.stringify(newPrefs));
     setConsentStatus("accepted");
     setPreferences(newPrefs);
+    notifyConsentChanged();
   }, []);
 
   const rejectAll = useCallback(() => {
@@ -37,6 +58,7 @@ export const useCookieConsent = () => {
     localStorage.setItem(PREFERENCES_KEY, JSON.stringify(newPrefs));
     setConsentStatus("rejected");
     setPreferences(newPrefs);
+    notifyConsentChanged();
   }, []);
 
   const savePreferences = useCallback((newPrefs: CookiePreferences) => {
@@ -45,6 +67,7 @@ export const useCookieConsent = () => {
     localStorage.setItem(PREFERENCES_KEY, JSON.stringify(newPrefs));
     setConsentStatus(status);
     setPreferences(newPrefs);
+    notifyConsentChanged();
   }, []);
 
   const resetConsent = useCallback(() => {
@@ -52,6 +75,7 @@ export const useCookieConsent = () => {
     localStorage.removeItem(PREFERENCES_KEY);
     setConsentStatus("pending");
     setPreferences({ analytics: false, marketing: false });
+    notifyConsentChanged();
   }, []);
 
   return {
