@@ -6,9 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import headerLogoFallback from "@/assets/logo.webp";
-
-const headerLogoPublic = "/images/logo.webp";
+const headerLogo = "/images/logo.webp";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -47,13 +45,9 @@ const Navigation = () => {
             <div className="flex-shrink-0">
               <Link to="/">
                 <img
-                  src={headerLogoPublic}
+                  src={headerLogo}
                   alt="Maali Opportunity Hub"
                   className="h-8 w-auto"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = headerLogoFallback;
-                  }}
                 />
               </Link>
             </div>
