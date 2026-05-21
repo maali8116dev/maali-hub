@@ -25,5 +25,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-# Sitemap location (update with your actual domain)
-# Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://maali-opportunity-hub.lovable.app/sitemap.xml

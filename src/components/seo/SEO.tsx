@@ -13,7 +13,7 @@ export interface SEOProps {
 
 const DEFAULT_TITLE = 'Maali - Empowering African Entrepreneurs';
 const DEFAULT_DESCRIPTION = 'Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here.';
-const DEFAULT_IMAGE = 'https://lovable.dev/opengraph-image-p98pqg.png';
+const DEFAULT_IMAGE = '/og-image-default.png';
 const DEFAULT_SITE_NAME = 'Maali Platform';
 
 const getSiteUrl = () => {
