@@ -629,70 +629,43 @@ export type Database = {
       }
       memberships: {
         Row: {
+          amount_paid: number | null
+          created_at: string
+          expires_at: string | null
           id: string
-          user_id: string
-          tier: string
+          starts_at: string
           status: string
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
-          amount_paid: number | null
-          starts_at: string
-          expires_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
           tier: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_payment_intent_id?: string | null
-          amount_paid?: number | null
-          starts_at?: string
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          tier?: string
-          status?: string
-          stripe_customer_id?: string | null
-          stripe_payment_intent_id?: string | null
-          amount_paid?: number | null
-          starts_at?: string
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      newsletter_subscribers: {
-        Row: {
-          email: string
-          id: string
-          source: string
-          subscribed_at: string
-          unsubscribed_at: string | null
-          user_id: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          email: string
+          amount_paid?: number | null
+          created_at?: string
+          expires_at?: string | null
           id?: string
-          source?: string
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          user_id?: string | null
+          starts_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          tier: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          email?: string
+          amount_paid?: number | null
+          created_at?: string
+          expires_at?: string | null
           id?: string
-          source?: string
-          subscribed_at?: string
-          unsubscribed_at?: string | null
-          user_id?: string | null
+          starts_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -747,6 +720,33 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          source: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1140,12 +1140,14 @@ export type Database = {
           bio: string | null
           business_name: string | null
           business_sector: string | null
+          city_region: string | null
           country: string | null
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
           partner_id: number | null
+          phone_number: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           user_id: string
@@ -1155,12 +1157,14 @@ export type Database = {
           bio?: string | null
           business_name?: string | null
           business_sector?: string | null
+          city_region?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
           partner_id?: number | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id: string
@@ -1170,12 +1174,14 @@ export type Database = {
           bio?: string | null
           business_name?: string | null
           business_sector?: string | null
+          city_region?: string | null
           country?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
           partner_id?: number | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           user_id?: string
@@ -2052,22 +2058,6 @@ export type Database = {
           total_reviews: number
         }[]
       }
-      get_projects_with_filters: {
-        Args: {
-          p_category?: string
-          p_location?: string
-          p_page?: number
-          p_page_size?: number
-          p_search?: string
-          p_status?: string
-        }
-        Returns: {
-          page: number
-          projects: Json
-          total_count: number
-          total_pages: number
-        }[]
-      }
       get_rate_limit_config: {
         Args: { p_operation_type: string }
         Returns: Record<string, unknown>
@@ -2163,10 +2153,6 @@ export type Database = {
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
-      user_can_apply_to_opportunities: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
       is_opportunity_open: {
         Args: { p_opportunity_id: number }
         Returns: boolean
@@ -2178,6 +2164,10 @@ export type Database = {
       }
       mark_notification_read: {
         Args: { p_notification_id: string }
+        Returns: boolean
+      }
+      user_can_apply_to_opportunities: {
+        Args: { p_user_id: string }
         Returns: boolean
       }
       validate_application_submission: {
