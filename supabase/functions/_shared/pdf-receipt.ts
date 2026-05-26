@@ -8,6 +8,8 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
+export type ReceiptKind = "application_fee" | "subscription";
+
 export interface ReceiptData {
   userName: string;
   projectTitle: string | null;
@@ -21,6 +23,7 @@ export interface ReceiptData {
   billingEmail: string | null;
   paymentMethodLast4: string | null;
   locale?: string | null;
+  receiptKind?: ReceiptKind;
 }
 
 type ReceiptLocale = "en" | "fr";
@@ -46,8 +49,10 @@ interface ReceiptCopy {
   payments: string;
   notes: string;
   confirmationNote: string;
+  membershipConfirmationNote: string;
   keepReceiptNote: string;
   transactionIdLabel: string;
+  membershipLabel: string;
 }
 
 const RECEIPT_COPY: Record<ReceiptLocale, ReceiptCopy> = {
@@ -72,8 +77,10 @@ const RECEIPT_COPY: Record<ReceiptLocale, ReceiptCopy> = {
     payments: "Payments",
     notes: "Notes",
     confirmationNote: "Your application fee has been confirmed and your application is under review.",
+    membershipConfirmationNote: "Your Full Membership is active. You can apply to funding opportunities on MAALI.",
     keepReceiptNote: "Please keep this receipt for your records.",
     transactionIdLabel: "Transaction ID",
+    membershipLabel: "Full Membership",
   },
   fr: {
     paymentReceipt: "Recu de paiement",
@@ -96,8 +103,10 @@ const RECEIPT_COPY: Record<ReceiptLocale, ReceiptCopy> = {
     payments: "Paiements",
     notes: "Remarques",
     confirmationNote: "Vos frais de candidature ont ete confirmes et votre dossier est en cours d'examen.",
+    membershipConfirmationNote: "Votre adhesion Full Member est active. Vous pouvez postuler aux opportunites sur MAALI.",
     keepReceiptNote: "Veuillez conserver ce recu pour vos dossiers.",
     transactionIdLabel: "ID de transaction",
+    membershipLabel: "Full Member",
   },
 };
 
@@ -254,9 +263,13 @@ export async function generateReceiptPdf(data: ReceiptData): Promise<Uint8Array>
 
   const tableWidth = right - left;
   const unitPrice = `${data.currency} ${data.amount}`;
-  const lineItemTitle = data.projectTitle && data.projectTitle !== "N/A"
-    ? `${copy.applicationFee} - ${data.projectTitle}`
-    : copy.applicationFee;
+  const isSubscription = data.receiptKind === "subscription";
+  const title = data.projectTitle && data.projectTitle !== "N/A" ? data.projectTitle : null;
+  const lineItemTitle = isSubscription
+    ? (title ?? copy.membershipLabel)
+    : title
+      ? `${copy.applicationFee} - ${title}`
+      : copy.applicationFee;
 
   let y = pageHeight - 48;
 
@@ -299,9 +312,11 @@ export async function generateReceiptPdf(data: ReceiptData): Promise<Uint8Array>
     color: colors.foreground,
   });
   y -= 20;
-  const introText = data.projectTitle && data.projectTitle !== "N/A"
-    ? `${copy.hereIsReceipt} ${data.projectTitle}.`
-    : `${copy.hereIsReceipt} your application.`;
+  const introText = isSubscription
+    ? `${copy.hereIsReceipt} ${title ?? copy.membershipLabel}.`
+    : title
+      ? `${copy.hereIsReceipt} ${title}.`
+      : `${copy.hereIsReceipt} your application.`;
   page.drawText(introText, {
     x: left,
     y,
@@ -394,13 +409,15 @@ export async function generateReceiptPdf(data: ReceiptData): Promise<Uint8Array>
 
   // ----- Order / details footer -----
   page.drawText(
-    data.projectTitle && data.projectTitle !== "N/A"
-      ? `Application fee for ${data.projectTitle}`
-      : "Application fee",
+    isSubscription
+      ? (title ?? copy.membershipLabel)
+      : title
+        ? `Application fee for ${title}`
+        : "Application fee",
     { x: left, y, size: 10, font, color: colors.mutedForeground }
   );
   y -= 16;
-  page.drawText(copy.confirmationNote, {
+  page.drawText(isSubscription ? copy.membershipConfirmationNote : copy.confirmationNote, {
     x: left,
     y,
     size: 9,

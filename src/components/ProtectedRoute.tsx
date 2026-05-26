@@ -21,7 +21,7 @@ const ProtectedRoute = ({
 
   // Only fetch profile/membership when we have a user
   const { data: profile, isPending: profilePending } = useProfile();
-  const { isPaidMember, loading: membershipLoading } = useMembership();
+  const { hasCompletedOnboarding, loading: membershipLoading } = useMembership();
 
   // Allow bypassing auth only if explicitly set to false (for development)
   if (requireAuth === false) {
@@ -47,8 +47,8 @@ const ProtectedRoute = ({
 
   // Membership gate — skip for exempt roles and when caller opts out
   if (requireMembership) {
-    if (!isMembershipExemptRole(profile?.role) && !isPaidMember) {
-      // No paid membership → send through onboarding
+    if (!isMembershipExemptRole(profile?.role) && !hasCompletedOnboarding) {
+      // First-time setup only (any memberships row = onboarding done once)
       return <Navigate to="/onboarding" replace />;
     }
   }

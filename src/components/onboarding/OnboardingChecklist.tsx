@@ -8,6 +8,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useApplications } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { useMembership } from '@/hooks/useMembership';
+import { useKycVerification } from '@/hooks/useKycVerification';
 import { cn } from '@/lib/utils';
 
 interface ChecklistItem {
@@ -37,6 +38,7 @@ export function OnboardingChecklist({
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   const { data: applications = [], isLoading: isLoadingApplications } = useApplications();
   const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
+  const { data: kyc, isLoading: isLoadingKyc } = useKycVerification();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -45,9 +47,12 @@ export function OnboardingChecklist({
   }, []);
 
   // Don't render until data is loaded to prevent flash/flicker
-  if (isLoadingProfile || isLoadingApplications || membershipLoading || !user) {
+  if (isLoadingProfile || isLoadingApplications || isLoadingKyc || membershipLoading || !user) {
     return null;
   }
+
+  const kycVerified = kyc?.status === 'verified';
+  const kycPending = kyc?.status === 'pending';
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -86,6 +91,25 @@ export function OnboardingChecklist({
         label: 'Complete Profile',
         href: '/dashboard/profile'
       }
+    },
+    {
+      id: 'verify-kyc',
+      label: 'Verify your identity (KYC)',
+      description: kycVerified
+        ? undefined
+        : kycPending
+          ? 'Your documents are under review'
+          : kyc?.status === 'rejected'
+            ? 'Update your documents and resubmit for verification'
+            : 'Upload ID and a selfie so we can verify your identity',
+      completed: kycVerified,
+      action:
+        kycVerified || kycPending
+          ? undefined
+          : {
+              label: kyc?.status === 'rejected' ? 'Resubmit KYC' : 'Verify KYC',
+              href: '/dashboard/profile',
+            },
     },
     {
       id: 'browse-opportunities',

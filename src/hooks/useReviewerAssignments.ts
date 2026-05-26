@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Hooks for managing reviewer assignments
  */
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +38,38 @@ export const useAssignReviewers = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['application-assignments', variables.applicationId] });
       queryClient.invalidateQueries({ queryKey: ['reviewer-workload'] });
+    },
+  });
+};
+
+/** Add one more reviewer (admin tie-breaker); does not replace existing assignments. */
+export const useAddApplicationReviewer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      reviewerId,
+    }: {
+      applicationId: string;
+      reviewerId: string;
+    }) => {
+      const { data, error } = await supabase.rpc("admin_add_application_reviewer" as any, {
+        p_application_id: applicationId,
+        p_reviewer_id: reviewerId,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["application-assignments", variables.applicationId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["eligible-reviewers-for-application", variables.applicationId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["review-aggregation", variables.applicationId] });
+      queryClient.invalidateQueries({ queryKey: ["reviewer-workload"] });
     },
   });
 };

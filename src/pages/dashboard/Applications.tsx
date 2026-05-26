@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,23 @@ import { getApplicationStatusBadgeClassName } from "@/lib/statusBadges";
 import { formatDate } from "@/lib/dateUtils";
 import { useApplicationFilters } from "@/hooks/useApplicationFilters";
 import { useTranslation } from "react-i18next";
-import { MemberFeatureGate } from "@/components/MemberFeatureGate";
+import { useMembership } from "@/hooks/useMembership";
+import { useProfile } from "@/hooks/useProfile";
+import { isMembershipExemptRole } from "@/lib/membershipAccess";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Zap } from "lucide-react";
+import { UpgradeMembershipModal } from "@/components/membership/UpgradeMembershipModal";
 
 const Applications = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['dashboard']);
+  const { canApplyToOpportunities, loading: membershipLoading } = useMembership();
+  const { data: profile } = useProfile();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const isCommunityUser =
+    !membershipLoading &&
+    !canApplyToOpportunities &&
+    !isMembershipExemptRole(profile?.role);
   const { data: applications = [], isLoading, error, refetch, isRefetching } = useApplications();
 
   const {
@@ -159,8 +171,17 @@ const Applications = () => {
   const isFirstTime = applications.length === 0;
 
   return (
-    <MemberFeatureGate>
     <div className="space-y-6">
+      {isCommunityUser && (
+        <Alert className="border-primary/30 bg-primary/5">
+          <Zap className="h-4 w-4 text-primary" />
+          <AlertTitle>Community plan — view only</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>You can view your previous applications below, but submitting new ones requires a Full Member plan ($2/month).</p>
+            <Button size="sm" variant="hero" onClick={() => setUpgradeOpen(true)}>Upgrade to Full Member</Button>
+          </AlertDescription>
+        </Alert>
+      )}
       <div>
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold">{t('dashboard:applications.title')}</h1>
@@ -310,8 +331,8 @@ const Applications = () => {
           </CardContent>
         </Card>
       )}
+      <UpgradeMembershipModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
-    </MemberFeatureGate>
   );
 };
 

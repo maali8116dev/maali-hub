@@ -1,4 +1,4 @@
-﻿/** Country list with ISO 3166-1 alpha-2 codes for phone input integration. */
+/** Country list with ISO 3166-1 alpha-2 codes for phone input integration. */
 export interface CountryEntry {
   /** Display name (stored in DB) */
   label: string;
@@ -207,9 +207,16 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "Zimbabwe", label: "Zimbabwe", code: "ZW" },
 ];
 
+/** Names that differ between onboarding lists and COUNTRIES entries */
+const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
+  Congo: "CG",
+  "Côte d'Ivoire": "CI",
+};
+
 /** Lookup ISO code from country name */
 export function getCountryCode(countryName: string | undefined): string | undefined {
   if (!countryName) return undefined;
+  if (COUNTRY_CODE_OVERRIDES[countryName]) return COUNTRY_CODE_OVERRIDES[countryName];
   return COUNTRIES.find((c) => c.value === countryName)?.code;
 }
 

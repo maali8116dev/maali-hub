@@ -139,6 +139,35 @@ export const useReviewAggregation = (applicationId: string, totalAssignedOverrid
   });
 };
 
+/** True when a 3rd reviewer helps break a near-threshold tie (not general mid-band scores). */
+export function suggestsTieBreakerReviewer(
+  aggregation: ReviewAggregation | null,
+  assignmentCount: number,
+  maxReviewers = 5,
+): boolean {
+  if (!aggregation || assignmentCount < 2 || assignmentCount >= maxReviewers) return false;
+  if (aggregation.total_reviews < 2) return false;
+
+  const { average_score, score_variance, recommendations } = aggregation;
+  const rejectThreshold = 5.0;
+  const approveThreshold = 8.0;
+
+  // Above ~6.5 or clear approve band — not a 5.0-style tie
+  if (average_score > rejectThreshold + 1.5) return false;
+  if (average_score >= approveThreshold) return false;
+
+  const approveRejectSplit =
+    recommendations.approve >= 1 && recommendations.reject >= 1;
+  const nearRejectThreshold =
+    average_score >= rejectThreshold - 1 && average_score <= rejectThreshold + 1;
+  const tightScoresNearThreshold =
+    score_variance !== null &&
+    score_variance < 0.5 &&
+    nearRejectThreshold;
+
+  return approveRejectSplit || tightScoresNearThreshold;
+}
+
 /**
  * Decision Engine: Rule-based automatic decision making
  * 

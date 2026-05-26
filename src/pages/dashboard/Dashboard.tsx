@@ -215,7 +215,7 @@ const Dashboard = () => {
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.approved}</div>
               <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-                {t('dashboard:dashboard.stats.successfullyFunded')}
+                {t('dashboard:dashboard.stats.approved')}
               </p>
             </CardContent>
           </Card>

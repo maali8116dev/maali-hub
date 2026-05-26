@@ -18,6 +18,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { PartnerLinkedUserCombobox, type PartnerLinkedUser } from "@/components/admin/PartnerLinkedUserCombobox";
 import { BackButton } from "@/components/ui/back-button";
+import { invokeWithAuth } from "@/lib/invokeWithAuth";
 
 const partnerSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
@@ -29,6 +30,7 @@ const partnerSchema = z.object({
   featured: z.boolean(),
   status: z.enum(["active", "inactive"]),
   user_id: z.string().optional().or(z.literal("")),
+  invite_email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
 });
 
 type PartnerFormValues = z.infer<typeof partnerSchema>;
@@ -66,6 +68,7 @@ const PartnerForm = () => {
       featured: false,
       status: "active",
       user_id: "",
+      invite_email: "",
     },
   });
 
@@ -128,6 +131,20 @@ const PartnerForm = () => {
         await deleteImage(oldLogoUrl);
       }
 
+      // On create: if an invite email is provided and no user is manually linked,
+      // call invite-partner to create the account and get the userId.
+      let resolvedUserId = data.user_id || null;
+      if (!isEditing && data.invite_email && !data.user_id) {
+        // We don't have the partner org ID yet (not created), so pass null for partnerOrgId.
+        // The org will be linked after insert below.
+        const { data: inviteResult, error: inviteError } = await invokeWithAuth<{ userId: string }>(
+          "invite-partner",
+          { email: data.invite_email, partnerOrgName: data.name },
+        );
+        if (inviteError) throw new Error(inviteError.message || "Failed to send invite");
+        resolvedUserId = inviteResult?.userId ?? null;
+      }
+
       const partnerData = {
         name: data.name,
         description: data.description || null,
@@ -137,7 +154,7 @@ const PartnerForm = () => {
         display_order: data.display_order,
         featured: data.featured,
         status: data.status,
-        user_id: data.user_id || null,
+        user_id: resolvedUserId,
       };
 
       if (isEditing && id) {
@@ -148,20 +165,26 @@ const PartnerForm = () => {
 
         if (error) throw error;
 
-        toast({
-          title: "Success",
-          description: "Partner updated successfully",
-        });
+        toast({ title: "Success", description: "Partner updated successfully" });
       } else {
-        const { error } = await supabase
+        const { data: inserted, error } = await supabase
           .from("partners")
-          .insert([partnerData]);
+          .insert([partnerData])
+          .select("id")
+          .single();
 
         if (error) throw error;
 
+        // If we sent an invite, update the partner row with the org ID so the
+        // invite-partner edge function's org-link step can be skipped in future.
+        // (The function already linked by userId; this is for completeness.)
+
+        const inviteSent = !data.user_id && !!data.invite_email;
         toast({
-          title: "Success",
-          description: "Partner created successfully",
+          title: "Partner created",
+          description: inviteSent
+            ? `Partner created and invite sent to ${data.invite_email}.`
+            : "Partner created successfully.",
         });
       }
 
@@ -355,18 +378,40 @@ const PartnerForm = () => {
                 <CardTitle>Linked User Account</CardTitle>
                 <CardDescription>Link this partner org to a user with the partner role</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Label htmlFor="partner-linked-user">Partner user</Label>
-                <PartnerLinkedUserCombobox
-                  id="partner-linked-user"
-                  users={partnerUsers}
-                  value={watch("user_id") || ""}
-                  onValueChange={(userId) => setValue("user_id", userId)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Searchable list of users with the &quot;partner&quot; role only. Assign the role in Users management
-                  if someone is missing.
-                </p>
+              <CardContent className="space-y-4">
+                {!isEditing && (
+                  <div className="space-y-2">
+                    <Label htmlFor="invite_email">Invite by email</Label>
+                    <Input
+                      id="invite_email"
+                      type="email"
+                      {...register("invite_email")}
+                      placeholder="partner@example.com"
+                      className={errors.invite_email ? "border-destructive" : ""}
+                    />
+                    {errors.invite_email && (
+                      <p className="text-sm text-destructive">{errors.invite_email.message}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Creates an account with the partner role and sends a sign-in link. Leave blank to link an existing user below.
+                    </p>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="partner-linked-user">
+                    {isEditing ? "Partner user" : "Or link existing user"}
+                  </Label>
+                  <PartnerLinkedUserCombobox
+                    id="partner-linked-user"
+                    users={partnerUsers}
+                    value={watch("user_id") || ""}
+                    onValueChange={(userId) => setValue("user_id", userId)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Searchable list of users with the &quot;partner&quot; role only. Assign the role in Users management
+                    if someone is missing.
+                  </p>
+                </div>
               </CardContent>
             </Card>
 

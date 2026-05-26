@@ -1,10 +1,9 @@
-﻿import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, X, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { usePartnerOrg } from "@/hooks/usePartnerOrg";
+import { usePartnerOrg, useUpdatePartnerOrg } from "@/hooks/usePartnerOrg";
 import { usePartnerStats } from "@/hooks/usePartnerStats";
 import { cn } from "@/lib/utils";
 
@@ -24,17 +23,12 @@ export function PartnerOnboardingChecklist({ onDismiss }: PartnerOnboardingCheck
   const navigate = useNavigate();
   const { data: org, isLoading: isLoadingOrg } = usePartnerOrg();
   const { data: stats, isLoading: isLoadingStats } = usePartnerStats();
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    setDismissed(localStorage.getItem("partner-checklist-dismissed") === "true");
-  }, []);
+  const updateOrg = useUpdatePartnerOrg();
 
   if (isLoadingOrg || isLoadingStats) return null;
 
-  const handleDismiss = () => {
-    setDismissed(true);
-    localStorage.setItem("partner-checklist-dismissed", "true");
+  const handleDismiss = async () => {
+    await updateOrg.mutateAsync({ onboarding_dismissed_at: new Date().toISOString() });
     onDismiss?.();
   };
 
@@ -77,6 +71,7 @@ export function PartnerOnboardingChecklist({ onDismiss }: PartnerOnboardingCheck
   const totalCount = items.length;
   const progressPercentage = (completedCount / totalCount) * 100;
   const allCompleted = completedCount === totalCount;
+  const dismissed = !!org?.onboarding_dismissed_at;
 
   if (dismissed || allCompleted) return null;
 

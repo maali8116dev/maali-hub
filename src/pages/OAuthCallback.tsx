@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { userNeedsOnboarding } from '@/lib/membershipAccess';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -98,19 +99,17 @@ const OAuthCallback = () => {
             return;
           }
 
-          // Ensure profile exists (trigger may not have run yet for OAuth signups)
-          let isNewUser = false;
           try {
-            isNewUser = await ensureProfileForUser(session.user.id, session.user.user_metadata);
+            await ensureProfileForUser(session.user.id, session.user.user_metadata);
           } catch (profileErr) {
-            // Ignore unique violation (profile created by trigger); log others
             if ((profileErr as { code?: string })?.code !== '23505') {
               console.warn('OAuth callback: ensure profile', profileErr);
             }
           }
 
-          // New OAuth users go through onboarding; returning users go to dashboard
-          const destination = isNewUser ? '/onboarding' : '/dashboard';
+          const destination = (await userNeedsOnboarding(session.user.id))
+            ? '/onboarding'
+            : '/dashboard';
           setTimeout(() => {
             navigate(destination, { replace: true });
           }, 100);

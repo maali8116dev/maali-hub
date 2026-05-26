@@ -1,14 +1,12 @@
-﻿import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock the supabase client (used by rateLimitedSignIn/SignUp)
-const mockSignInWithPassword = vi.fn();
-const mockSignUp = vi.fn();
+const mockSetSession = vi.fn();
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
-      signInWithPassword: (...args: any[]) => mockSignInWithPassword(...args),
-      signUp: (...args: any[]) => mockSignUp(...args),
+      setSession: (...args: any[]) => mockSetSession(...args),
     },
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
@@ -239,7 +237,15 @@ describe("rateLimitedAuth", () => {
 
     it("rateLimitedSignIn skips local auth on the denied call", async () => {
       mockFetchSequence([
-        { status: 200, body: { data: { user: { id: "u1" } } } },
+        {
+          status: 200,
+          body: {
+            data: {
+              user: { id: "u1" },
+              session: { access_token: "tok", refresh_token: "ref" },
+            },
+          },
+        },
         {
           status: 429,
           body: {
@@ -249,20 +255,17 @@ describe("rateLimitedAuth", () => {
         },
       ]);
 
-      mockSignInWithPassword.mockResolvedValue({
-        data: { session: { access_token: "tok" } },
-        error: null,
-      });
+      mockSetSession.mockResolvedValue({ data: { session: {} }, error: null });
 
-      // First call succeeds and signs in locally
+      // First call succeeds and sets session locally
       const ok = await rateLimitedSignIn("user@gmail.com", "pass123");
       expect(ok.error).toBeNull();
-      expect(mockSignInWithPassword).toHaveBeenCalledTimes(1);
+      expect(mockSetSession).toHaveBeenCalledTimes(1);
 
-      // Second call is denied -” local auth must NOT be called again
+      // Second call is denied — setSession must NOT be called again
       const denied = await rateLimitedSignIn("user@gmail.com", "pass123");
       expect(denied.error!.isRateLimited).toBe(true);
-      expect(mockSignInWithPassword).toHaveBeenCalledTimes(1); // still 1, not 2
+      expect(mockSetSession).toHaveBeenCalledTimes(1);
     });
 
     it("every denied response after the limit keeps returning rate-limited", async () => {
@@ -289,18 +292,20 @@ describe("rateLimitedAuth", () => {
   // â”€â”€â”€ rateLimitedSignIn (convenience wrapper) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitedSignIn()", () => {
     it("establishes local session after successful rate limit check", async () => {
-      mockFetchResponse(200, { data: { user: { id: "u1" } } });
-      mockSignInWithPassword.mockResolvedValue({
-        data: { session: { access_token: "tok" } },
-        error: null,
+      mockFetchResponse(200, {
+        data: {
+          user: { id: "u1" },
+          session: { access_token: "tok", refresh_token: "ref" },
+        },
       });
+      mockSetSession.mockResolvedValue({ data: { session: {} }, error: null });
 
       const result = await rateLimitedSignIn("user@gmail.com", "pass123");
 
       expect(result.error).toBeNull();
-      expect(mockSignInWithPassword).toHaveBeenCalledWith({
-        email: "user@gmail.com",
-        password: "pass123",
+      expect(mockSetSession).toHaveBeenCalledWith({
+        access_token: "tok",
+        refresh_token: "ref",
       });
     });
 
@@ -314,12 +319,16 @@ describe("rateLimitedAuth", () => {
 
       expect(result.error).not.toBeNull();
       expect(result.error!.isRateLimited).toBe(true);
-      expect(mockSignInWithPassword).not.toHaveBeenCalled();
+      expect(mockSetSession).not.toHaveBeenCalled();
     });
 
-    it("returns auth error if local signIn fails after rate limit passes", async () => {
-      mockFetchResponse(200, { data: {} });
-      mockSignInWithPassword.mockResolvedValue({
+    it("returns auth error if setSession fails after rate limit passes", async () => {
+      mockFetchResponse(200, {
+        data: {
+          session: { access_token: "tok", refresh_token: "ref" },
+        },
+      });
+      mockSetSession.mockResolvedValue({
         data: { session: null },
         error: { message: "Invalid login credentials" },
       });
@@ -334,26 +343,39 @@ describe("rateLimitedAuth", () => {
 
   // â”€â”€â”€ rateLimitedSignUp (convenience wrapper) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   describe("rateLimitedSignUp()", () => {
-    it("establishes local session after successful rate limit check", async () => {
-      mockFetchResponse(200, { data: { user: { id: "new-user" } } });
-      mockSignUp.mockResolvedValue({
-        data: { user: { id: "new-user" }, session: null },
-        error: null,
+    it("establishes local session when edge returns tokens", async () => {
+      mockFetchResponse(200, {
+        data: {
+          user: { id: "new-user" },
+          session: { access_token: "tok", refresh_token: "ref" },
+        },
       });
+      mockSetSession.mockResolvedValue({ data: { session: {} }, error: null });
 
       const result = await rateLimitedSignUp("new@gmail.com", "pass123", {
         data: { first_name: "Test" },
       });
 
       expect(result.error).toBeNull();
-      expect(mockSignUp).toHaveBeenCalledWith({
-        email: "new@gmail.com",
-        password: "pass123",
-        options: { data: { first_name: "Test" } },
+      expect(mockSetSession).toHaveBeenCalledWith({
+        access_token: "tok",
+        refresh_token: "ref",
       });
     });
 
-    it("does NOT call supabase.auth.signUp if rate limited", async () => {
+    it("does not call signUp again when edge returns user without session", async () => {
+      mockFetchResponse(200, {
+        data: { user: { id: "new-user" }, session: null },
+      });
+
+      const result = await rateLimitedSignUp("new@gmail.com", "pass123");
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({ user: { id: "new-user" }, session: null });
+      expect(mockSetSession).not.toHaveBeenCalled();
+    });
+
+    it("does NOT call setSession if rate limited", async () => {
       mockFetchResponse(429, {
         message: "Rate limited",
         code: "RATE_LIMIT_EXCEEDED",
@@ -362,7 +384,7 @@ describe("rateLimitedAuth", () => {
       const result = await rateLimitedSignUp("new@gmail.com", "pass123");
 
       expect(result.error!.isRateLimited).toBe(true);
-      expect(mockSignUp).not.toHaveBeenCalled();
+      expect(mockSetSession).not.toHaveBeenCalled();
     });
   });
 });

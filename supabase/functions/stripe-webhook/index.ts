@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
+import { resolveInvoiceNumber } from "../_shared/invoice-number.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2023-10-16",
@@ -68,6 +69,26 @@ serve(async (req: Request) => {
       case "payment_intent.canceled": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         await handlePaymentCanceled(paymentIntent);
+        break;
+      }
+
+      // ── Subscription lifecycle ──────────────────────────────────────────────
+
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(sub);
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(sub);
         break;
       }
 
@@ -297,30 +318,42 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const paymentIntentId = paymentIntent.id;
-  const userId = paymentIntent.metadata?.userId;
 
-  if (!userId) {
-    console.error("[membership] payment_intent.succeeded missing userId metadata:", paymentIntentId);
-    return;
-  }
-
-  // Idempotency: already active — nothing to do
   const { data: existing } = await supabaseAdmin
     .from("memberships")
-    .select("id, status")
+    .select("id, user_id, status, tier, stripe_subscription_id")
     .eq("stripe_payment_intent_id", paymentIntentId)
     .maybeSingle();
 
-  if (existing?.status === "active") {
+  const userId = paymentIntent.metadata?.userId ?? existing?.user_id;
+
+  if (!userId) {
+    console.error("[membership] payment_intent.succeeded missing userId:", paymentIntentId);
+    return;
+  }
+
+  if (existing?.status === "active" && existing.tier === "member") {
     console.log(`[membership] already active for payment intent ${paymentIntentId}, skipping`);
     return;
   }
 
+  let periodEnd: string | null = null;
+  if (existing?.stripe_subscription_id) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(existing.stripe_subscription_id);
+      periodEnd = new Date(sub.current_period_end * 1000).toISOString();
+    } catch { /* non-fatal */ }
+  }
+
   if (existing) {
-    // Flip pending_payment → active
     const { error } = await supabaseAdmin
       .from("memberships")
-      .update({ status: "active" })
+      .update({
+        tier: "member",
+        status: "active",
+        ...(periodEnd ? { expires_at: periodEnd } : {}),
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", existing.id);
 
     if (error) {
@@ -347,10 +380,21 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
     console.log(`[membership] inserted active membership (fallback) for user ${userId}`);
   }
 
-  // Insert a completed transaction row so it appears in billing history and admin financials
-  const invoiceNumber = `MBR-${paymentIntentId.substring(3, 11).toUpperCase()}`;
   let transactionId: string | null = null;
+  let invoiceNumber: string | null = null;
+  const { data: existingTx } = await supabaseAdmin
+    .from("transactions")
+    .select("id, invoice_number")
+    .eq("provider_payment_intent_id", paymentIntentId)
+    .maybeSingle();
+
+  if (existingTx) {
+    transactionId = existingTx.id;
+    invoiceNumber = existingTx.invoice_number;
+  }
+
   try {
+    if (!existingTx) {
     const { data: txRow, error: txError } = await supabaseAdmin
       .from("transactions")
       .insert({
@@ -363,21 +407,24 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
         provider_payment_intent_id: paymentIntentId,
         provider_transaction_id: paymentIntentId,
         description: "Full Membership — MAALI ($2/month)",
-        invoice_number: invoiceNumber,
         completed_at: new Date().toISOString(),
       })
-      .select("id")
+      .select("id, invoice_number")
       .maybeSingle();
 
     if (txError) {
       console.error("[membership] failed to insert transaction:", txError);
     } else {
       transactionId = txRow?.id ?? null;
-      console.log(`[membership] transaction inserted: ${transactionId}`);
+      invoiceNumber = txRow?.invoice_number ?? null;
+      console.log(`[membership] transaction inserted: ${transactionId}, invoice: ${invoiceNumber}`);
+    }
     }
   } catch (txErr) {
     console.error("[membership] unexpected error inserting transaction:", txErr);
   }
+
+  await savePaymentMethod(userId, paymentIntentId, paymentIntent.receipt_email || null);
 
   // Generate and store PDF receipt
   let invoicePdfUrl: string | null = null;
@@ -404,7 +451,16 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
       console.warn("[membership] could not fetch payment method details:", pmErr);
     }
 
-    const invoiceNumber = `MBR-${paymentIntentId.substring(3, 11).toUpperCase()}`;
+    if (!invoiceNumber && transactionId) {
+      try {
+        invoiceNumber = await resolveInvoiceNumber(transactionId, null);
+      } catch (invErr) {
+        console.warn("[membership] invoice number fallback:", invErr);
+      }
+    }
+    const receiptInvoiceNumber =
+      invoiceNumber ?? `INV-${paymentIntentId.substring(3, 11).toUpperCase()}`;
+
     const paymentDate = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -413,16 +469,17 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
 
     const receiptData: ReceiptData = {
       userName,
-      projectTitle: "Full Membership — MAALI",
+      projectTitle: "Full Membership — MAALI ($2/month)",
       applicationId: null,
       amount: "2.00",   // always $2.00 for membership
       currency: "USD",
       paymentDate,
       statusLabel: "Paid",
-      invoiceNumber,
+      invoiceNumber: receiptInvoiceNumber,
       transactionId: paymentIntentId,
       billingEmail: null,
       paymentMethodLast4,
+      receiptKind: "subscription",
     };
 
     const pdfBytes = await generateReceiptPdf(receiptData);
@@ -532,13 +589,19 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
 }
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
-  // Membership payments are identified by metadata.tier — route them separately
-  if (paymentIntent.metadata?.tier === "member") {
+  const paymentIntentId = paymentIntent.id;
+
+  // Subscription checkout: PI metadata may be empty; match pending membership row.
+  const { data: membershipPi } = await supabaseAdmin
+    .from("memberships")
+    .select("id")
+    .eq("stripe_payment_intent_id", paymentIntentId)
+    .maybeSingle();
+
+  if (paymentIntent.metadata?.tier === "member" || membershipPi) {
     await handleMembershipPaymentSuccess(paymentIntent);
     return;
   }
-
-  const paymentIntentId = paymentIntent.id;
   let userId = paymentIntent.metadata?.userId;
   let applicationId = paymentIntent.metadata?.applicationId;
 
@@ -872,15 +935,17 @@ async function generateAndStoreReceiptPdf(
       ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "N/A"
       : "N/A";
 
-    // Get opportunity title
-    let opportunityTitle: string | null = "N/A";
-    if (transaction.opportunity_id) {
+    const isSubscription = transaction.type === "subscription";
+    let opportunityTitle: string | null = null;
+    if (isSubscription) {
+      opportunityTitle = transaction.description || "Full Membership — MAALI";
+    } else if (transaction.opportunity_id) {
       const { data: opportunity } = await supabaseAdmin
         .from("opportunities")
         .select("title")
         .eq("id", transaction.opportunity_id)
         .maybeSingle();
-      opportunityTitle = opportunity?.title || "N/A";
+      opportunityTitle = opportunity?.title || null;
     }
 
     // Fetch payment method details from Stripe if payment intent ID exists
@@ -902,7 +967,15 @@ async function generateAndStoreReceiptPdf(
     // Format values
     const amount = parseFloat(transaction.amount).toFixed(2);
     const currency = (transaction.currency || "USD").toUpperCase();
-    const invoiceNumber = transaction.invoice_number || `TXN-${transaction.id.substring(0, 8).toUpperCase()}`;
+    let invoiceNumber = transaction.invoice_number;
+    if (!invoiceNumber) {
+      try {
+        invoiceNumber = await resolveInvoiceNumber(transactionId, null);
+      } catch (invErr) {
+        console.warn("[receipt] invoice number generation failed:", invErr);
+        invoiceNumber = `INV-${transaction.id.substring(0, 8).toUpperCase()}`;
+      }
+    }
     const paymentDate = new Date(transaction.completed_at || transaction.created_at).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -913,16 +986,17 @@ async function generateAndStoreReceiptPdf(
     // Generate PDF
     const receiptData: ReceiptData = {
       userName,
-      projectTitle: opportunityTitle, // Keep field name for PDF template compatibility
+      projectTitle: opportunityTitle,
       applicationId: transaction.application_id || null,
       amount,
       currency,
       paymentDate,
       statusLabel,
       invoiceNumber,
-      transactionId: transaction.provider_transaction_id || null,
+      transactionId: transaction.provider_payment_intent_id || transaction.provider_transaction_id || null,
       billingEmail: transaction.billing_email || null,
       paymentMethodLast4,
+      receiptKind: isSubscription ? "subscription" : "application_fee",
     };
 
     console.log("[Webhook] Generating PDF receipt...");
@@ -1233,4 +1307,351 @@ async function enqueuePaymentReceiptEmail(
   } catch (err) {
     console.error("Error enqueuing payment receipt email:", err);
   }
+}
+
+// ── Subscription webhook handlers ─────────────────────────────────────────────
+
+/**
+ * invoice.paid — fires for the initial payment AND every monthly renewal.
+ * For the initial charge, handlePaymentSuccess already activates the membership
+ * via payment_intent.succeeded. This handler handles renewals and syncs expires_at.
+ */
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const subscriptionId = typeof invoice.subscription === "string"
+    ? invoice.subscription
+    : invoice.subscription?.id ?? null;
+
+  if (!subscriptionId) {
+    console.log("[invoice.paid] No subscription ID — skipping (one-time charge)");
+    return;
+  }
+
+  // Retrieve the full subscription to get current_period_end
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const userId = subscription.metadata?.userId;
+
+  if (!userId) {
+    console.error("[invoice.paid] No userId in subscription metadata:", subscriptionId);
+    return;
+  }
+
+  const newPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+  const paymentIntentId = typeof invoice.payment_intent === "string"
+    ? invoice.payment_intent
+    : invoice.payment_intent?.id ?? null;
+
+  let existing: { id: string; status: string; tier: string } | null = null;
+  const { data: bySub } = await supabaseAdmin
+    .from("memberships")
+    .select("id, status, tier")
+    .eq("stripe_subscription_id", subscriptionId)
+    .maybeSingle();
+  existing = bySub;
+
+  if (!existing && paymentIntentId) {
+    const { data: byPi } = await supabaseAdmin
+      .from("memberships")
+      .select("id, status, tier")
+      .eq("stripe_payment_intent_id", paymentIntentId)
+      .maybeSingle();
+    existing = byPi;
+  }
+
+  if (!existing) {
+    const { data: rows } = await supabaseAdmin
+      .from("memberships")
+      .select("id, status, tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "pending_payment"])
+      .order("updated_at", { ascending: false })
+      .limit(1);
+    existing = rows?.[0] ?? null;
+  }
+
+  if (existing) {
+    const { error: memErr } = await supabaseAdmin
+      .from("memberships")
+      .update({
+        tier:                     "member",
+        status:                   "active",
+        stripe_subscription_id:   subscriptionId,
+        stripe_payment_intent_id: paymentIntentId ?? undefined,
+        cancel_at_period_end:     false,
+        expires_at:               newPeriodEnd,
+        updated_at:               new Date().toISOString(),
+      })
+      .eq("id", existing.id);
+    if (memErr) {
+      console.error("[invoice.paid] Failed to update membership:", memErr.message);
+      return;
+    }
+  } else {
+    // First-time activation fallback (race with payment_intent.succeeded handler)
+    await supabaseAdmin.from("memberships").insert({
+      user_id:                  userId,
+      tier:                     "member",
+      status:                   "active",
+      stripe_subscription_id:   subscriptionId,
+      stripe_payment_intent_id: paymentIntentId,
+      amount_paid:              invoice.amount_paid ?? 200,
+      starts_at:                new Date().toISOString(),
+      expires_at:               newPeriodEnd,
+    });
+  }
+
+  const stripeInvoiceId = invoice.id;
+  let existingTxId: string | null = null;
+  const { data: txByInvoice } = await supabaseAdmin
+    .from("transactions")
+    .select("id")
+    .eq("stripe_invoice_id", stripeInvoiceId)
+    .maybeSingle();
+  existingTxId = txByInvoice?.id ?? null;
+
+  if (!existingTxId && paymentIntentId) {
+    const { data: txByPi } = await supabaseAdmin
+      .from("transactions")
+      .select("id")
+      .eq("provider_payment_intent_id", paymentIntentId)
+      .maybeSingle();
+    existingTxId = txByPi?.id ?? null;
+  }
+
+  if (existingTxId) {
+    console.log(`[invoice.paid] Transaction already exists (${existingTxId}) for invoice ${stripeInvoiceId}`);
+    return;
+  }
+
+  const amountPaid = (invoice.amount_paid ?? 200) / 100;
+  const { data: txRow, error: txError } = await supabaseAdmin
+    .from("transactions")
+    .insert({
+      user_id:                  userId,
+      type:                     "subscription",
+      status:                   "completed",
+      amount:                   amountPaid,
+      currency:                 invoice.currency ?? "usd",
+      provider:                 "stripe",
+      provider_payment_intent_id: paymentIntentId,
+      provider_transaction_id:  paymentIntentId,
+      stripe_invoice_id:        stripeInvoiceId,
+      description:              "Full Membership — MAALI ($2/month)",
+      completed_at:             new Date().toISOString(),
+    })
+    .select("id, invoice_number")
+    .maybeSingle();
+
+  if (txError) {
+    console.error("[invoice.paid] Failed to insert transaction:", txError.message);
+    return;
+  }
+
+  const transactionId = txRow?.id ?? null;
+
+  // Generate PDF receipt and send email (same helpers used elsewhere)
+  let invoicePdfUrl: string | null = null;
+  if (transactionId && paymentIntentId) {
+    try {
+      const { data: userProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const userName = userProfile
+        ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
+        : "Member";
+
+      let paymentMethodLast4: string | null = null;
+      try {
+        const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+        if (pi.payment_method && typeof pi.payment_method === "string") {
+          const pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+          paymentMethodLast4 = pm.card?.last4 ?? null;
+        }
+      } catch { /* non-fatal */ }
+
+      let invoiceNumber = txRow?.invoice_number ?? null;
+      if (!invoiceNumber) {
+        try {
+          invoiceNumber = await resolveInvoiceNumber(transactionId, null);
+        } catch { /* non-fatal */ }
+      }
+
+      const receiptData: ReceiptData = {
+        userName,
+        projectTitle:        "Full Membership — MAALI ($2/month)",
+        applicationId:       null,
+        amount:              amountPaid.toFixed(2),
+        currency:            (invoice.currency ?? "usd").toUpperCase(),
+        paymentDate:         new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        statusLabel:         "Paid",
+        invoiceNumber:       invoiceNumber ?? `INV-${stripeInvoiceId.substring(3, 11).toUpperCase()}`,
+        transactionId:       paymentIntentId,
+        billingEmail:        invoice.customer_email ?? null,
+        paymentMethodLast4,
+        receiptKind:         "subscription",
+      };
+
+      const pdfBytes = await generateReceiptPdf(receiptData);
+      invoicePdfUrl  = await storeReceiptPdf(transactionId, userId, pdfBytes);
+
+      await supabaseAdmin
+        .from("transactions")
+        .update({ invoice_pdf_url: invoicePdfUrl })
+        .eq("id", transactionId);
+
+      console.log(`[invoice.paid] PDF receipt stored: ${invoicePdfUrl}`);
+    } catch (pdfErr) {
+      console.error("[invoice.paid] PDF generation failed (non-fatal):", pdfErr);
+    }
+  }
+
+  // Send receipt email
+  try {
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
+    const recipientEmail = authUser?.user?.email ?? invoice.customer_email ?? null;
+    if (recipientEmail) {
+      const { data: userProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const recipientName = userProfile
+        ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
+        : "Member";
+
+      const siteUrl      = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+      const supabaseUrl  = Deno.env.get("SUPABASE_URL");
+      const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
+
+      const payload = {
+        recipientName,
+        projectTitle:  "Full Membership — MAALI",
+        applicationId: null,
+        amount:        amountPaid.toFixed(2),
+        currency:      (invoice.currency ?? "usd").toUpperCase(),
+        paymentDate:   new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+        transactionId: paymentIntentId,
+        actionUrl:     `${siteUrl}/dashboard/billing`,
+        invoicePdfUrl,
+      };
+
+      if (supabaseUrl) {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (internalSecret) headers["X-Internal-Secret"] = internalSecret;
+        if (serviceKey)     headers["Authorization"]     = `Bearer ${serviceKey}`;
+
+        const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ to: recipientEmail, type: "payment_receipt", data: payload, allowPublic: true }),
+        });
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error(`[invoice.paid] send-email failed (${res.status}): ${errBody}`);
+          // Fallback to queue
+          await supabaseAdmin.from("email_queue").insert({
+            type: "payment_receipt",
+            to_email: recipientEmail,
+            payload,
+            idempotency_key: `membership_receipt:${stripeInvoiceId}`,
+          });
+        } else {
+          console.log(`[invoice.paid] Receipt email sent to ${recipientEmail}`);
+        }
+      }
+    }
+  } catch (emailErr) {
+    console.error("[invoice.paid] Email failed (non-fatal):", emailErr);
+  }
+
+  console.log(`[invoice.paid] Handled invoice ${stripeInvoiceId} for user ${userId}`);
+}
+
+/**
+ * customer.subscription.deleted — Stripe has terminated the subscription.
+ * Fires when cancel_at_period_end=true and the period has ended,
+ * or when cancelled immediately.
+ */
+async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+  const userId = sub.metadata?.userId;
+  if (!userId) {
+    console.error("[subscription.deleted] No userId in subscription metadata:", sub.id);
+    return;
+  }
+
+  const { error } = await supabaseAdmin.rpc("downgrade_membership_to_community", {
+    p_user_id: userId,
+  });
+
+  if (error) {
+    console.error("[subscription.deleted] Downgrade RPC failed:", error.message);
+    return;
+  }
+
+  // Notify the user
+  try {
+    await supabaseAdmin.rpc("create_notification", {
+      p_user_id:  userId,
+      p_title:    "Membership ended",
+      p_message:  "Your Full Membership has ended. You're now on the free Community plan. Upgrade any time to apply again.",
+      p_type:     "payment",
+      p_link:     "/dashboard/billing",
+      p_metadata: { stripe_subscription_id: sub.id },
+    });
+  } catch { /* non-fatal */ }
+
+  console.log(`[subscription.deleted] Downgraded user ${userId} to community`);
+}
+
+/**
+ * customer.subscription.updated — syncs cancel_at_period_end and expires_at
+ * in case the user or an admin changes the subscription via the Stripe Dashboard.
+ */
+async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
+  const userId = sub.metadata?.userId;
+  if (!userId) {
+    console.log("[subscription.updated] No userId in metadata — skipping");
+    return;
+  }
+
+  const newPeriodEnd = new Date(sub.current_period_end * 1000).toISOString();
+
+  const patch: Record<string, unknown> = {
+    cancel_at_period_end: sub.cancel_at_period_end,
+    expires_at:           newPeriodEnd,
+    updated_at:           new Date().toISOString(),
+  };
+
+  if (sub.status === "active") {
+    patch.tier = "member";
+    patch.status = "active";
+    patch.stripe_subscription_id = sub.id;
+  }
+
+  const { data: updated, error: updateErr } = await supabaseAdmin
+    .from("memberships")
+    .update(patch)
+    .eq("user_id", userId)
+    .eq("stripe_subscription_id", sub.id)
+    .select("id");
+
+  if (updateErr) {
+    console.error("[subscription.updated] Update failed:", updateErr.message);
+    return;
+  }
+
+  if (!updated?.length && sub.status === "active") {
+    await supabaseAdmin
+      .from("memberships")
+      .update(patch)
+      .eq("user_id", userId)
+      .eq("status", "pending_payment")
+      .eq("tier", "member");
+  }
+
+  console.log(`[subscription.updated] Synced sub ${sub.id} for user ${userId}: status=${sub.status}, cancel_at_period_end=${sub.cancel_at_period_end}`);
 }

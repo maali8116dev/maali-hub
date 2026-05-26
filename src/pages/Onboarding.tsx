@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import headerLogoFallback from "@/assets/logo.webp";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { loadStripe } from "@stripe/stripe-js";
@@ -15,15 +16,23 @@ import CustomFormField, { FormFieldType } from "@/components/form/CustomFormFiel
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { seedDefaultBillingAddress } from "@/lib/seedBillingAddress";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
-import { useMembership, useInvalidateMembership } from "@/hooks/useMembership";
+import {
+  useMembership,
+  useInvalidateMembership,
+  useSyncMembershipAfterOnboarding,
+} from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
+import { getCountryCode } from "@/components/application/form/countries";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
 
 const MEMBER_PRICE_LABEL = "$2 / month";
+const headerLogoPublic = "/images/logo.webp";
 
 const AFRICAN_COUNTRIES = [
   "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
@@ -143,6 +152,9 @@ const StepProfile = ({
     return deleted;
   };
 
+  const selectedCountry = useWatch({ control: form.control, name: "country" });
+  const phoneCountryCode = getCountryCode(selectedCountry) || "GH";
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
@@ -226,11 +238,14 @@ const StepProfile = ({
         />
 
         <CustomFormField
+          key={phoneCountryCode}
           control={form.control}
           name="phoneNumber"
           fieldType={FormFieldType.PHONE_INTERNATIONAL}
           label="Phone Number"
           placeholder="+234 800 000 0000"
+          country={phoneCountryCode}
+          defaultCountry={phoneCountryCode}
           required
         />
 
@@ -260,11 +275,32 @@ const StepProfile = ({
 
 // ─── Step 2: Stripe payment form ─────────────────────────────────────────────
 
-const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) => {
+type PaymentReceiptDetails = {
+  billingEmail: string;
+  country: string;
+  cityRegion: string;
+  fullName: string;
+  companyName?: string;
+};
+
+const PaymentForm = ({
+  onSuccess,
+  onBack,
+  onSkip,
+  receiptDetails,
+  userId,
+}: {
+  onSuccess: () => void;
+  onBack: () => void;
+  onSkip: () => void;
+  receiptDetails: PaymentReceiptDetails;
+  userId: string;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [billingEmail, setBillingEmail] = useState(receiptDetails.billingEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,6 +325,14 @@ const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
       setError(confirmError.message ?? "Payment failed");
       setProcessing(false);
     } else if (paymentIntent?.status === "succeeded") {
+      await seedDefaultBillingAddress({
+        userId,
+        billingEmail,
+        country: receiptDetails.country,
+        city: receiptDetails.cityRegion,
+        fullName: receiptDetails.fullName,
+        companyName: receiptDetails.companyName,
+      });
       onSuccess();
     }
   };
@@ -301,9 +345,28 @@ const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
           Full Member — <span className="font-semibold text-foreground">{MEMBER_PRICE_LABEL}</span>. Cancel anytime.
         </p>
       </div>
-      <div className="rounded-lg border border-border p-4 bg-card">
+      <div className="rounded-lg border border-border p-4 bg-card space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="billingEmail" className="text-sm font-medium">
+            Billing email for receipts
+          </Label>
+          <Input
+            id="billingEmail"
+            type="email"
+            value={billingEmail}
+            onChange={(e) => setBillingEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="h-11"
+          />
+          <p className="text-xs text-muted-foreground">
+            Street address and tax ID can be added later under Dashboard → Billing.
+          </p>
+        </div>
         <PaymentElement />
       </div>
+      <p className="text-xs text-muted-foreground">
+        Your card will appear under Dashboard → Billing after payment.
+      </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-3">
         <Button type="button" variant="outline" onClick={onBack} disabled={processing}>Back</Button>
@@ -314,11 +377,32 @@ const PaymentForm = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
       <p className="text-xs text-center text-muted-foreground">
         Payments are processed securely by Stripe. MAALI never stores your card details.
       </p>
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onSkip}
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
+        >
+          Continue with free Community account
+        </button>
+      </div>
     </form>
   );
 };
 
-const StepPayment = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) => {
+const StepPayment = ({
+  onSuccess,
+  onBack,
+  onSkip,
+  receiptDetails,
+  userId,
+}: {
+  onSuccess: () => void;
+  onBack: () => void;
+  onSkip: () => void;
+  receiptDetails: PaymentReceiptDetails;
+  userId: string;
+}) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -338,7 +422,16 @@ const StepPayment = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
   if (fetchError) return (
     <div className="space-y-4">
       <p className="text-destructive text-sm">{fetchError}</p>
-      <Button variant="outline" onClick={onBack}>Go back</Button>
+      <div className="flex gap-3">
+        <Button variant="outline" onClick={onBack}>Go back</Button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
+        >
+          Continue with free Community account
+        </button>
+      </div>
     </div>
   );
 
@@ -350,7 +443,13 @@ const StepPayment = ({ onSuccess, onBack }: { onSuccess: () => void; onBack: () 
 
   return (
     <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <PaymentForm onSuccess={onSuccess} onBack={onBack} />
+      <PaymentForm
+        onSuccess={onSuccess}
+        onBack={onBack}
+        onSkip={onSkip}
+        receiptDetails={receiptDetails}
+        userId={userId}
+      />
     </Elements>
   );
 };
@@ -363,8 +462,9 @@ const Onboarding = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const sectors = useSectors();
-  const { isPaidMember, loading: membershipLoading } = useMembership();
+  const { isActiveMember, isPaidMember, loading: membershipLoading } = useMembership();
   const invalidateMembership = useInvalidateMembership();
+  const syncMembership = useSyncMembershipAfterOnboarding();
 
   const [step, setStep] = useState<Step>("profile");
   const [activating, setActivating] = useState(false);
@@ -419,12 +519,67 @@ const Onboarding = () => {
     setStep("payment");
   };
 
-  // If they already have a paid membership, skip onboarding
+  // Bounce anyone who already has an active membership — they belong in the dashboard
   useEffect(() => {
-    if (!membershipLoading && isPaidMember && step !== "done" && !activating) {
+    if (!membershipLoading && isActiveMember && step !== "done" && !activating) {
       navigate("/dashboard", { replace: true });
     }
-  }, [membershipLoading, isPaidMember, step, navigate, activating]);
+  }, [membershipLoading, isActiveMember, step, navigate, activating]);
+
+  const skipToFreePlan = async () => {
+    if (!user) return;
+
+    const { data: existing, error: fetchError } = await supabase
+      .from("memberships")
+      .select("id, status, tier")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (fetchError) {
+      toast({ title: "Error", description: fetchError.message, variant: "destructive" });
+      return;
+    }
+
+    if (existing?.status === "active" && existing.tier === "member") {
+      await syncMembership();
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    if (existing?.status === "active" && existing.tier === "community") {
+      await syncMembership();
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    const communityActive = {
+      tier: "community" as const,
+      status: "active" as const,
+      stripe_customer_id: null,
+      stripe_payment_intent_id: null,
+      stripe_subscription_id: null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error } = existing
+      ? await supabase.from("memberships").update(communityActive).eq("id", existing.id)
+      : await supabase.from("memberships").insert({
+          user_id: user.id,
+          tier: "community",
+          status: "active",
+          starts_at: new Date().toISOString(),
+        });
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    await syncMembership();
+    navigate("/dashboard", { replace: true });
+  };
 
   // Poll for webhook activation after Stripe payment
   const waitForActivation = async () => {
@@ -525,7 +680,17 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-6 py-4">
-        <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">Maali Opportunity Hub</h1>
+        <Link to="/">
+          <img
+            src={headerLogoPublic}
+            alt="Maali Opportunity Hub"
+            className="h-8 w-auto"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = headerLogoFallback;
+            }}
+          />
+        </Link>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
@@ -540,6 +705,15 @@ const Onboarding = () => {
               <StepPayment
                 onSuccess={waitForActivation}
                 onBack={() => setStep("profile")}
+                onSkip={skipToFreePlan}
+                userId={user.id}
+                receiptDetails={{
+                  billingEmail: user.email ?? "",
+                  country: form.getValues("country"),
+                  cityRegion: form.getValues("cityRegion"),
+                  fullName: `${form.getValues("firstName")} ${form.getValues("lastName")}`.trim(),
+                  companyName: form.getValues("organisationName"),
+                }}
               />
             )}
           </CardContent>

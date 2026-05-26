@@ -1,10 +1,23 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { UpgradeMembershipModal } from "@/components/membership/UpgradeMembershipModal";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useMembership } from "@/hooks/useMembership";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useMembership, useInvalidateMembership } from "@/hooks/useMembership";
 import { formatDate } from "@/lib/dateUtils";
-import { Zap, Users, Loader2, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { invokeWithAuth } from "@/lib/invokeWithAuth";
+import { Zap, Users, Loader2, Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
 function formatTierLabel(tier: string) {
   return tier === "member" ? "Full Member" : "Community";
@@ -20,17 +33,27 @@ const MembershipStatusBadge = ({
   status,
   isExpired,
   canApply,
+  cancelAtPeriodEnd,
 }: {
   tier: string;
   status: string;
   isExpired: boolean;
   canApply: boolean;
+  cancelAtPeriodEnd: boolean;
 }) => {
   if (status === "pending_payment") {
     return (
       <Badge variant="outline" className="bg-amber-500/10 text-amber-700 border-amber-500/20">
         <Loader2 className="h-3 w-3 mr-1 animate-spin" />
         Payment pending
+      </Badge>
+    );
+  }
+  if (tier === "member" && cancelAtPeriodEnd) {
+    return (
+      <Badge variant="outline" className="bg-amber-500/10 text-amber-700 border-amber-500/20">
+        <Clock className="h-3 w-3 mr-1" />
+        Cancels at period end
       </Badge>
     );
   }
@@ -66,20 +89,62 @@ const MembershipStatusBadge = ({
 };
 
 export function MembershipProfileSection() {
-  const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     membership,
     loading,
     isPaidMember,
     canApplyToOpportunities,
     isMembershipExpired,
+    cancelAtPeriodEnd,
   } = useMembership();
+  const invalidateMembership = useInvalidateMembership();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [resuming, setResuming] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const tier = membership?.tier ?? "community";
   const status = membership?.status ?? "inactive";
   const showUpgrade =
     !loading &&
     (!membership || tier === "community" || isMembershipExpired || status === "pending_payment");
+
+  const handleResumeMembership = async () => {
+    setResuming(true);
+    const { error } = await invokeWithAuth("resume-membership");
+    setResuming(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      invalidateMembership();
+      toast({
+        title: "Membership resumed",
+        description: "Your cancellation has been undone. Your membership will continue to renew automatically.",
+      });
+    }
+  };
+
+  const handleCancelMembership = async () => {
+    setCancelling(true);
+    const { error } = await invokeWithAuth("cancel-membership");
+    setCancelling(false);
+    setShowCancelDialog(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      invalidateMembership();
+      const endsOn = membership?.expires_at
+        ? formatDate(membership.expires_at, "short")
+        : null;
+      toast({
+        title: "Membership cancellation scheduled",
+        description: endsOn
+          ? `Your Full Member access continues until ${endsOn}. After that you'll be on the Community plan.`
+          : "Your cancellation has been scheduled. You'll keep Full Member access until your billing period ends.",
+      });
+    }
+  };
 
   return (
     <Card>
@@ -104,6 +169,7 @@ export function MembershipProfileSection() {
               status={status}
               isExpired={isMembershipExpired}
               canApply={canApplyToOpportunities}
+              cancelAtPeriodEnd={cancelAtPeriodEnd}
             />
           )}
         </div>
@@ -134,7 +200,9 @@ export function MembershipProfileSection() {
               </div>
               {isPaidMember && (
                 <div>
-                  <dt className="text-muted-foreground">Renews / expires</dt>
+                  <dt className="text-muted-foreground">
+                    {cancelAtPeriodEnd ? "Access ends" : "Renews"}
+                  </dt>
                   <dd className="font-medium mt-0.5">
                     {membership.expires_at
                       ? formatDate(membership.expires_at, "short")
@@ -173,19 +241,74 @@ export function MembershipProfileSection() {
           </p>
         )}
 
-        {showUpgrade && (
-          <Button
-            variant={isMembershipExpired ? "default" : "hero"}
-            onClick={() => navigate("/join")}
-          >
-            {isMembershipExpired
-              ? "Renew membership"
-              : status === "pending_payment"
-                ? "Complete payment"
-                : "Upgrade to Full Member"}
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {showUpgrade && (
+            <Button
+              variant={isMembershipExpired ? "default" : "hero"}
+              onClick={() => setUpgradeOpen(true)}
+            >
+              {isMembershipExpired
+                ? "Renew membership"
+                : status === "pending_payment"
+                  ? "Complete payment"
+                  : "Upgrade to Full Member"}
+            </Button>
+          )}
+          {isPaidMember && !cancelAtPeriodEnd && (
+            <Button
+              variant="outline"
+              className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setShowCancelDialog(true)}
+            >
+              Cancel membership
+            </Button>
+          )}
+          {isPaidMember && cancelAtPeriodEnd && (
+            <Button
+              variant="outline"
+              onClick={handleResumeMembership}
+              disabled={resuming}
+            >
+              {resuming ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Resuming…</>
+              ) : (
+                "Resume membership"
+              )}
+            </Button>
+          )}
+        </div>
       </CardContent>
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Full Membership?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your Full Member access continues until{" "}
+              <span className="font-medium text-foreground">
+                {membership?.expires_at ? formatDate(membership.expires_at, "short") : "the end of your billing period"}
+              </span>
+              . After that you'll be moved to the free Community plan — you can still browse
+              opportunities and view your previous applications, but won't be able to submit new ones.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Keep membership</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelMembership}
+              disabled={cancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Cancelling…</>
+              ) : (
+                "Yes, cancel"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <UpgradeMembershipModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </Card>
   );
 }

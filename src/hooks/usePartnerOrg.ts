@@ -11,6 +11,10 @@ export interface PartnerOrg {
   sector: string;
   status: string;
   user_id: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  contact_country: string | null;
+  onboarding_dismissed_at: string | null;
 }
 
 export function usePartnerOrg() {
@@ -21,7 +25,7 @@ export function usePartnerOrg() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("partners")
-        .select("id, name, description, logo_url, website_url, sector, status, user_id")
+        .select("id, name, description, logo_url, website_url, sector, status, user_id, contact_name, contact_phone, contact_country, onboarding_dismissed_at")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -38,7 +42,7 @@ export function useUpdatePartnerOrg() {
 
   return useMutation({
     mutationFn: async (
-      updates: Partial<Pick<PartnerOrg, "name" | "description" | "logo_url" | "website_url" | "sector">>
+      updates: Partial<Pick<PartnerOrg, "name" | "description" | "logo_url" | "website_url" | "sector" | "contact_name" | "contact_phone" | "contact_country" | "onboarding_dismissed_at">>
     ) => {
       const { data, error } = await supabase
         .from("partners")

@@ -18,6 +18,7 @@ export type {
 // Re-export assignment hooks
 export {
   useAssignReviewers,
+  useAddApplicationReviewer,
   useApplicationAssignments,
   useReviewerAssignments,
   useReviewerWorkload,
@@ -44,6 +45,7 @@ export {
   useReviewAggregation,
   useDecisionEngine,
   calculateDecision,
+  suggestsTieBreakerReviewer,
 } from './useReviewAggregation';
 
 

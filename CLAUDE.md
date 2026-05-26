@@ -96,4 +96,7 @@ Rules:
 - Read-only display fields (e.g. email) are exempt and may remain as plain elements.
 - `ImageUpload` is exempt — it is not a `CustomFormField` type and handles its own state via `form.setValue`.
 
+
+alwayss use the caveman skill when replying
+
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

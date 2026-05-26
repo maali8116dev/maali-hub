@@ -75,156 +75,52 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get applications with user and project info for emails
-    const { data: applications, error: fetchError } = await supabaseAdmin
-      .from("applications")
-      .select(`
-        id,
-        user_id,
-        status,
-        project_id,
-        projects!inner(title),
-        profiles!applications_user_id_fkey(user_id, first_name, last_name, email)
-      `)
-      .in("id", applicationIds);
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: { headers: { Authorization: `Bearer ${auth.token}` } },
+      },
+    );
 
-    if (fetchError) {
-      console.error("Error fetching applications:", fetchError);
+    const { data: rpcResult, error: rpcError } = await userClient.rpc(
+      "admin_update_application_status",
+      {
+        p_application_ids: applicationIds,
+        p_status: status,
+        p_review_notes: reviewNotes ?? null,
+      },
+    );
+
+    if (rpcError) {
+      console.error("admin_update_application_status:", rpcError);
       return new Response(
-        JSON.stringify({ success: false, error: "Failed to fetch applications", errorCode: "FETCH_ERROR" }),
+        JSON.stringify({
+          success: false,
+          error: rpcError.message || "Failed to update applications",
+          errorCode: "RPC_ERROR",
+        }),
         { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
 
-    if (!applications || applications.length === 0) {
+    const result = rpcResult as { success?: boolean; error?: string; errorCode?: string; updatedCount?: number };
+    if (!result?.success) {
+      const statusCode = result?.errorCode === "NOT_FOUND" ? 404 : 400;
       return new Response(
-        JSON.stringify({ success: false, error: "No applications found", errorCode: "NOT_FOUND" }),
-        { status: 404, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        JSON.stringify({
+          success: false,
+          error: result?.error || "Update failed",
+          errorCode: result?.errorCode || "UPDATE_FAILED",
+        }),
+        { status: statusCode, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
       );
     }
-
-    const now = new Date().toISOString();
-    const defaultReviewNotes = status === "approved" 
-      ? "Selected as winner (ranked)" 
-      : status === "rejected"
-      ? "Not selected (ranked)"
-      : null;
-
-    // Update applications
-    const { data: updatedApps, error: updateError } = await supabaseAdmin
-      .from("applications")
-      .update({
-        status,
-        reviewed_by: user.id,
-        reviewed_at: now,
-        review_notes: reviewNotes || defaultReviewNotes,
-        updated_at: now,
-      })
-      .in("id", applicationIds)
-      .select("id, user_id, project_id, status");
-
-    if (updateError) {
-      console.error("Error updating applications:", updateError);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to update applications", errorCode: "UPDATE_ERROR" }),
-        { status: 500, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
-      );
-    }
-
-    // Log activity for each updated application
-    await Promise.allSettled(
-      updatedApps.map(async (app) => {
-        try {
-          await supabaseAdmin.from("activity_logs").insert({
-            user_id: user.id,
-            action_type: status === "approved" ? "approve" : status === "rejected" ? "reject" : "update",
-            entity_type: "application",
-            entity_id: app.id,
-            description: `Application status updated to ${status}`,
-            metadata: {
-              application_id: app.id,
-              project_id: app.project_id,
-              status,
-              reviewed_by: user.id,
-            },
-          });
-        } catch (logError) {
-          console.error(`Error logging activity for application ${app.id}:`, logError);
-        }
-      })
-    );
-
-    // Send emails and queue notifications
-    // Database trigger will create notifications, but we'll queue emails here
-    const baseUrl = Deno.env.get("SITE_URL") || req.headers.get("Origin") || "http://localhost:5173";
-    
-    await Promise.allSettled(
-      applications.map(async (app: any) => {
-        try {
-          const projectTitle = app.projects?.title || "the project";
-          const userEmail = app.profiles?.email;
-          const userName = app.profiles?.first_name 
-            ? `${app.profiles.first_name} ${app.profiles.last_name || ""}`.trim()
-            : "Applicant";
-          const applicationId = app.id;
-          const dashboardUrl = `${baseUrl}/dashboard/applications/${applicationId}`;
-
-          if (!userEmail) {
-            console.warn(`No email found for application ${applicationId}`);
-            return;
-          }
-
-          // Queue email based on status
-          let emailType: string;
-          let emailData: any;
-
-          if (status === "approved") {
-            emailType = "application_approved";
-            emailData = {
-              recipientName: userName,
-              projectTitle,
-              applicationId,
-              statusMessage: reviewNotes || defaultReviewNotes,
-              actionUrl: dashboardUrl,
-            };
-          } else if (status === "rejected") {
-            emailType = "application_rejected";
-            emailData = {
-              recipientName: userName,
-              projectTitle,
-              statusMessage: reviewNotes || defaultReviewNotes,
-              actionUrl: `${baseUrl}/projects`,
-            };
-          } else {
-            // pending - use generic status update
-            emailType = "status_update";
-            emailData = {
-              recipientName: userName,
-              projectTitle,
-              applicationId,
-              statusMessage: `Your application status has been updated to ${status}`,
-              actionUrl: dashboardUrl,
-            };
-          }
-
-          // Queue email in email_queue table
-          await supabaseAdmin.from("email_queue").insert({
-            type: emailType,
-            to_email: userEmail,
-            payload: emailData,
-            idempotency_key: `status_update:${applicationId}:${status}:${now}`,
-          });
-        } catch (emailError) {
-          console.error(`Error queuing email for application ${app.id}:`, emailError);
-          // Don't fail the update if email fails
-        }
-      })
-    );
 
     return new Response(
       JSON.stringify({
         success: true,
-        updatedCount: updatedApps.length,
+        updatedCount: result.updatedCount ?? applicationIds.length,
       }),
       { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
     );

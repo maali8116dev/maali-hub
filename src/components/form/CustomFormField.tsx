@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import { LucideIcon, Eye, EyeOff } from "lucide-react";
 import {
@@ -75,6 +75,8 @@ interface InputFieldProps<TFieldValues extends FieldValues = FieldValues>
 interface PhoneInternationalFieldProps<TFieldValues extends FieldValues = FieldValues>
   extends BaseFieldProps<TFieldValues> {
   fieldType: FormFieldType.PHONE_INTERNATIONAL;
+  /** ISO 3166-1 alpha-2 — updates flag/prefix when country select changes */
+  country?: string;
   defaultCountry?: string;
   icon?: LucideIcon;
   iconPosition?: "left" | "right";
@@ -220,13 +222,14 @@ const FieldRenderer = <TFieldValues extends FieldValues = FieldValues>({
 
     case FormFieldType.PHONE_INTERNATIONAL: {
       const phoneProps = props as PhoneInternationalFieldProps<TFieldValues>;
-      const { defaultCountry = "International" } = phoneProps;
+      const { country, defaultCountry = "GH" } = phoneProps;
       
       return (
         <FormControl>
           <PhoneInput
             international
-            defaultCountry={defaultCountry as any}
+            country={country as any}
+            defaultCountry={(country || defaultCountry) as any}
             value={field.value as string | undefined}
             onChange={(value) => field.onChange(value || "")}
             disabled={disabled}

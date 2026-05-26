@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Shared types for reviewer functionality
  */
 

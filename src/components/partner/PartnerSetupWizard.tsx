@@ -90,9 +90,14 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
         description: partnerOrg.description || "",
         website_url: partnerOrg.website_url || "",
       });
+      step2Form.reset({
+        contactName: partnerOrg.contact_name || "",
+        contactPhone: partnerOrg.contact_phone || "",
+        country: partnerOrg.contact_country || "",
+      });
       setLogoUrl(partnerOrg.logo_url || "");
     }
-  }, [partnerOrg, step1Form]);
+  }, [partnerOrg, step1Form, step2Form]);
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -108,40 +113,38 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSkip = () => {
-    localStorage.setItem("partner-wizard-dismissed", "true");
+  const handleSkip = async () => {
+    await updateOrg.mutateAsync({ onboarding_dismissed_at: new Date().toISOString() });
     onOpenChange(false);
   };
 
   const handleComplete = async () => {
     try {
       const step1Data = step1Form.getValues();
+      const step2Data = step2Form.getValues();
 
       await updateOrg.mutateAsync({
         description: step1Data.description,
         website_url: step1Data.website_url || null,
         logo_url: logoUrl || null,
+        contact_name: step2Data.contactName || null,
+        contact_phone: step2Data.contactPhone || null,
+        contact_country: step2Data.country || null,
+        onboarding_dismissed_at: new Date().toISOString(),
       });
-
-      localStorage.setItem("partner-wizard-dismissed", "true");
 
       toast({
         title: "Organization profile updated!",
         description: "Your partner organization is now set up.",
       });
 
-      // If they filled step 3 with an opportunity, navigate to create
       const step3Data = step3Form.getValues();
-      if (step3Data.opportunityTitle) {
-        onComplete?.();
-        onOpenChange(false);
-        navigate("/partner/opportunities/new");
-      } else {
-        onComplete?.();
-        onOpenChange(false);
-      }
-
+      onComplete?.();
+      onOpenChange(false);
       setCurrentStep(1);
+      if (step3Data.opportunityTitle) {
+        navigate("/partner/opportunities/new");
+      }
     } catch (error) {
       console.error("Failed to save partner org:", error);
       toast({

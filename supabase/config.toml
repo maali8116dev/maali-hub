@@ -63,3 +63,9 @@ verify_jwt = false
 
 [functions.create-membership-payment]
 verify_jwt = false
+
+[functions.resume-membership]
+verify_jwt = false
+
+[functions.invite-partner]
+verify_jwt = false

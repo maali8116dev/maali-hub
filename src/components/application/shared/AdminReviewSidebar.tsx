@@ -28,7 +28,27 @@ import {
   Star,
   X,
 } from "lucide-react";
-import type { ApplicationAssignment, ReviewScore, ReviewAggregation } from "@/hooks/useReviewerAssignment";
+import {
+  useAddApplicationReviewer,
+  suggestsTieBreakerReviewer,
+  type ApplicationAssignment,
+  type ReviewScore,
+  type ReviewAggregation,
+} from "@/hooks/useReviewerAssignment";
+import { useUpdateApplicationStatus } from "@/hooks/useUpdateApplicationStatus";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+const MAX_REVIEWERS_PER_APPLICATION = 5;
 
 interface AdminReviewSidebarProps {
   assignments: ApplicationAssignment[];
@@ -38,6 +58,7 @@ interface AdminReviewSidebarProps {
   scoresLoading: boolean;
   aggregationLoading: boolean;
   applicationId?: string;
+  applicationStatus?: string;
 }
 
 const AdminReviewSidebar = ({
@@ -48,11 +69,16 @@ const AdminReviewSidebar = ({
   scoresLoading,
   aggregationLoading,
   applicationId,
+  applicationStatus,
 }: AdminReviewSidebarProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isManageOpen, setIsManageOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedReviewerIds, setSelectedReviewerIds] = useState<string[]>([]);
+  const [addReviewerId, setAddReviewerId] = useState("");
+  const addReviewerMutation = useAddApplicationReviewer();
+  const updateStatusMutation = useUpdateApplicationStatus();
 
   const { data: eligibleReviewers = [], isLoading: eligibleLoading, refetch: refetchEligible } = useQuery({
     queryKey: ["eligible-reviewers-for-application", applicationId],
@@ -69,8 +95,40 @@ const AdminReviewSidebar = ({
         workload: number;
       }>;
     },
-    enabled: !!applicationId && isManageOpen,
+    enabled: !!applicationId && (isManageOpen || isAddOpen),
   });
+
+  const showTieBreakerHint =
+    !!reviewAggregation &&
+    suggestsTieBreakerReviewer(reviewAggregation, assignments.length, MAX_REVIEWERS_PER_APPLICATION);
+
+  const reviewsComplete =
+    !!reviewAggregation &&
+    assignments.length > 0 &&
+    reviewAggregation.pending_reviewers === 0 &&
+    reviewAggregation.total_reviews >= assignments.length;
+
+  const canSetFinalStatus =
+    !!applicationId && reviewsComplete && applicationStatus === "under_review";
+
+  const handleFinalStatus = async (status: "approved" | "rejected") => {
+    if (!applicationId) return;
+    try {
+      await updateStatusMutation.mutateAsync({
+        applicationIds: [applicationId],
+        status,
+      });
+      toast({
+        title: status === "approved" ? "Application approved" : "Application rejected",
+      });
+    } catch (err) {
+      toast({
+        title: "Could not update status",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
 
   const setReviewersMutation = useMutation({
     mutationFn: async () => {
@@ -111,6 +169,15 @@ const AdminReviewSidebar = ({
     setSelectedReviewerIds(assignments.slice(0, 2).map((a) => a.reviewer_id).filter(Boolean));
     await refetchEligible();
   };
+
+  const openAdd = async () => {
+    setIsAddOpen(true);
+    setAddReviewerId("");
+    await refetchEligible();
+  };
+
+  const assignedIds = new Set(assignments.map((a) => a.reviewer_id));
+  const eligibleNotAssigned = eligibleReviewers.filter((r) => !assignedIds.has(r.reviewer_id));
 
   const addReviewer = (reviewerId: string) => {
     if (selectedReviewerIds.includes(reviewerId) || selectedReviewerIds.length >= 2) return;
@@ -217,6 +284,64 @@ const AdminReviewSidebar = ({
                   </div>
                 </div>
               )}
+              {showTieBreakerHint && assignments.length < MAX_REVIEWERS_PER_APPLICATION && (
+                <p className="text-xs text-warning pt-2 border-t">
+                  Reviewers disagree near the reject threshold (~5/10) — add another reviewer to
+                  break the tie (up to {MAX_REVIEWERS_PER_APPLICATION} total).
+                </p>
+              )}
+              {applicationStatus === "under_review" &&
+                reviewAggregation.pending_reviewers > 0 && (
+                  <p className="text-xs text-muted-foreground pt-2 border-t">
+                    Stays under review until all assigned reviewers submit (
+                    {reviewAggregation.total_reviews}/{assignments.length} done).
+                  </p>
+                )}
+              {canSetFinalStatus && (
+                <div className="pt-3 border-t space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    All reviews in — approve or reject to update status.
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button
+                      className="flex-1 min-h-[44px]"
+                      disabled={updateStatusMutation.isPending}
+                      onClick={() => handleFinalStatus("approved")}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Approve
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          className="flex-1 min-h-[44px]"
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Reject
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Reject application?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Applicant will be notified. This cannot be undone from the UI.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleFinalStatus("rejected")}
+                          >
+                            Reject
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -250,12 +375,19 @@ const AdminReviewSidebar = ({
       ) : assignments.length > 0 ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
               {applicationId && (
-                <Button variant="outline" size="sm" onClick={openManage}>
-                  {assignments.length < 2 ? "Assign reviewer" : "Reassign"}
-                </Button>
+                <div className="flex gap-2">
+                  {assignments.length >= 2 && assignments.length < MAX_REVIEWERS_PER_APPLICATION && (
+                    <Button variant="outline" size="sm" onClick={openAdd}>
+                      Add reviewer
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={openManage}>
+                    {assignments.length < 2 ? "Assign reviewers" : "Reassign"}
+                  </Button>
+                </div>
               )}
             </div>
           </CardHeader>
@@ -420,6 +552,73 @@ const AdminReviewSidebar = ({
                 disabled={setReviewersMutation.isPending || selectedReviewerIds.length !== 2}
               >
                 {setReviewersMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add reviewer</DialogTitle>
+            <DialogDescription>
+              Adds one eligible reviewer without removing existing assignments (tie-breaker / extra
+              review). Automatic assignment still uses 2 reviewers only.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Select
+              value={addReviewerId}
+              onValueChange={setAddReviewerId}
+              disabled={eligibleLoading || addReviewerMutation.isPending}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose reviewer..." />
+              </SelectTrigger>
+              <SelectContent className="z-[100]" position="popper">
+                {eligibleNotAssigned.map((r) => (
+                  <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
+                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                  </SelectItem>
+                ))}
+                {eligibleNotAssigned.length === 0 && (
+                  <div className="py-2 px-2 text-sm text-muted-foreground">
+                    No more eligible reviewers
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={addReviewerMutation.isPending}>
+                Cancel
+              </Button>
+              <Button
+                disabled={!addReviewerId || addReviewerMutation.isPending}
+                onClick={() => {
+                  if (!applicationId || !addReviewerId) return;
+                  addReviewerMutation.mutate(
+                    { applicationId, reviewerId: addReviewerId },
+                    {
+                      onSuccess: () => {
+                        toast({
+                          title: "Reviewer added",
+                          description: "They can submit an additional review.",
+                        });
+                        setIsAddOpen(false);
+                      },
+                      onError: (e: unknown) => {
+                        toast({
+                          title: "Could not add reviewer",
+                          description: e instanceof Error ? e.message : "Unknown error",
+                          variant: "destructive",
+                        });
+                      },
+                    },
+                  );
+                }}
+              >
+                {addReviewerMutation.isPending ? "Adding…" : "Add reviewer"}
               </Button>
             </div>
           </div>

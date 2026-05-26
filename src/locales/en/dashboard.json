@@ -107,7 +107,7 @@
       "approved": "Congratulations! Your application has been approved",
       "rejected": "Your application was not selected this time",
       "draft": "This application is saved but not yet submitted",
-      "under_review": "Your application is currently under review",
+      "under_review": "Reviewers are scoring your application, or admins are deciding the outcome",
       "default": "Application status"
     },
     "actions": {

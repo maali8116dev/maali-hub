@@ -51,7 +51,8 @@ export function usePublicPartners() {
         .select("*")
         .eq("status", "active")
         .order("display_order", { ascending: true })
-        .order("featured", { ascending: false });
+        .order("featured", { ascending: false })
+        .limit(10);
 
       if (error) throw error;
       return (data || []) as PublicPartner[];

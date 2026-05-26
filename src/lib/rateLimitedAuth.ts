@@ -1,10 +1,9 @@
-﻿/**
+/**
  * Client helper that calls the rate-limited-auth Edge Function
- * instead of hitting supabase.auth directly.
+ * instead of hitting supabase.auth directly for the auth operation.
  *
- * After a successful sign_in / sign_up the caller must still call
- * supabase.auth.setSession() or supabase.auth.signInWithPassword()
- * locally so the browser session is established.
+ * After success, establishes the browser session via setSession only —
+ * never repeats signUp/signIn (avoids Supabase per-IP auth throttling).
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -27,11 +26,42 @@ export interface RateLimitedAuthResult<T = unknown> {
   } | null;
 }
 
+type AuthSessionPayload = {
+  user?: unknown;
+  session?: {
+    access_token: string;
+    refresh_token: string;
+  } | null;
+};
+
+function authError(message: string, code = "AUTH_ERROR"): RateLimitedAuthResult<never>["error"] {
+  return { message, code, isRateLimited: false };
+}
+
+async function establishLocalSession<T extends AuthSessionPayload>(
+  data: T | null,
+): Promise<RateLimitedAuthResult<T>> {
+  if (!data?.session?.access_token || !data.session.refresh_token) {
+    return { data, error: null };
+  }
+
+  const { error } = await supabase.auth.setSession({
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+  });
+
+  if (error) {
+    return { data: null, error: authError(error.message) };
+  }
+
+  return { data, error: null };
+}
+
 /**
  * Call the rate-limited-auth Edge Function.
  *
  * @param operation  One of: sign_in, sign_up, password_reset
- * @param payload    The rest of the fields (email, password, options, -¦)
+ * @param payload    The rest of the fields (email, password, options, …)
  */
 export async function rateLimitedAuth<T = unknown>(
   operation: "sign_in" | "sign_up" | "password_reset",
@@ -75,7 +105,7 @@ export async function rateLimitedAuth<T = unknown>(
       data: null,
       error: {
         message:
-          err instanceof Error ? err.message : "Network error -please try again.",
+          err instanceof Error ? err.message : "Network error - please try again.",
         code: "NETWORK_ERROR",
         isRateLimited: false,
       },
@@ -83,104 +113,32 @@ export async function rateLimitedAuth<T = unknown>(
   }
 }
 
-/**
- * Convenience: calls the Edge Function for sign-in, then establishes
- * the local Supabase session so the rest of the app works normally.
- */
+/** Rate-limited sign-in via Edge Function, then setSession (no second signIn call). */
 export async function rateLimitedSignIn(email: string, password: string) {
-  // 1. Hit the Edge Function (rate-limit check happens server-side)
-  const result = await rateLimitedAuth("sign_in", { email, password });
-
-  if (result.error) return result;
-
-  // 2. Establish local session by signing in directly.
-  //    The rate limit has already been consumed server-side so this
-  //    second call is fine -it won't be double-counted because the
-  //    DB trigger only counts via the Edge Function.
-  const { error } = await supabase.auth.signInWithPassword({
+  const result = await rateLimitedAuth<AuthSessionPayload>("sign_in", {
     email,
     password,
   });
 
-  if (error) {
-    return {
-      data: null,
-      error: {
-        message: error.message,
-        code: "AUTH_ERROR",
-        isRateLimited: false,
-      },
-    };
-  }
-
-  return result;
+  if (result.error) return result;
+  return establishLocalSession(result.data);
 }
 
 /**
- * Convenience: calls the Edge Function for sign-up, then establishes
- * the local Supabase session.
- * 
- * If signUp fails because user already exists (Edge Function created it),
- * we try to sign in instead to establish the session.
+ * Rate-limited sign-up via Edge Function.
+ * User is created server-side once; client only setSession when tokens are returned.
  */
 export async function rateLimitedSignUp(
   email: string,
   password: string,
   options?: Record<string, unknown>,
 ) {
-  const result = await rateLimitedAuth("sign_up", { email, password, options });
-
-  if (result.error) return result;
-
-  // Establish local session
-  const { data: signUpData, error } = await supabase.auth.signUp({
+  const result = await rateLimitedAuth<AuthSessionPayload>("sign_up", {
     email,
     password,
-    options: options as any,
+    options,
   });
 
-  if (error) {
-    // If signUp fails because user already exists (Edge Function created it),
-    // try to sign in instead to establish the session
-    if (error.message.includes("already registered") || error.message.includes("already exists")) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        return {
-          data: null,
-          error: {
-            message: signInError.message,
-            code: "AUTH_ERROR",
-            isRateLimited: false,
-          },
-        };
-      }
-
-      // Return sign-in data in the same format as sign-up
-      return { data: signInData as any, error: null };
-    }
-
-    return {
-      data: null,
-      error: {
-        message: error.message,
-        code: "AUTH_ERROR",
-        isRateLimited: false,
-      },
-    };
-  }
-
-  return { data: signUpData as any, error: null };
+  if (result.error) return result;
+  return establishLocalSession(result.data);
 }
-
-
-
-
-
-
-
-
-

@@ -15,11 +15,10 @@ const PartnerDashboard = () => {
   const { data: partnerOrg, isLoading: isLoadingOrg } = usePartnerOrg();
   const [showWizard, setShowWizard] = useState(false);
 
-  // Show wizard on first login if org profile is incomplete
+  // Show wizard on first login if org profile is incomplete and not yet dismissed
   useEffect(() => {
     if (isLoadingOrg) return;
-    const dismissed = localStorage.getItem("partner-wizard-dismissed") === "true";
-    if (!dismissed && partnerOrg && !partnerOrg.description) {
+    if (partnerOrg && !partnerOrg.onboarding_dismissed_at && !partnerOrg.description) {
       setShowWizard(true);
     }
   }, [partnerOrg, isLoadingOrg]);

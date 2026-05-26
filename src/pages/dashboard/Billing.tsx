@@ -47,10 +47,46 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MembershipProfileSection } from "@/components/profile/MembershipProfileSection";
+import { UpgradeMembershipModal } from "@/components/membership/UpgradeMembershipModal";
+import { useMembership } from "@/hooks/useMembership";
+
+const upgradeCtaClass =
+  "text-primary underline-offset-4 hover:underline font-inherit bg-transparent border-0 p-0 cursor-pointer inline";
+
+type BillingHistoryRow = {
+  id: string;
+  description: string;
+  amount: number;
+  currency: string;
+  status: string;
+  type: string;
+  created_at: string;
+  invoice_number: string | null;
+  invoice_pdf_url: string | null;
+  provider_payment_intent_id?: string | null;
+  stripe_invoice_id?: string | null;
+};
 
 const Billing = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { membership, isPaidMember, loading: membershipLoading } = useMembership();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { data: hasPendingCheckout = false } = useQuery({
+    queryKey: ["user-membership-pending", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("memberships")
+        .select("id")
+        .eq("user_id", user!.id)
+        .eq("status", "pending_payment")
+        .limit(1)
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user && !isPaidMember,
+  });
   const queryClient = useQueryClient();
   const [isDeletingPaymentMethod, setIsDeletingPaymentMethod] = useState<string | null>(null);
   const [showAddCardDialog, setShowAddCardDialog] = useState(false);
@@ -79,17 +115,97 @@ const Billing = () => {
     enabled: !!user,
   });
 
-  // Fetch billing history (transactions) from DB
+  // Billing history: transactions + membership payments missing a transaction row
   const { data: billingHistory = [], isLoading: loadingHistory } = useQuery({
-    queryKey: ["user-transactions", user?.id],
+    queryKey: ["user-billing-history", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
+      const [txRes, mbrRes] = await Promise.all([
+        supabase
+          .from("transactions")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("memberships")
+          .select("id, stripe_payment_intent_id, amount_paid, created_at, status, tier")
+          .eq("user_id", user!.id)
+          .not("stripe_payment_intent_id", "is", null)
+          .order("created_at", { ascending: false }),
+      ]);
+      if (txRes.error) throw txRes.error;
+      if (mbrRes.error) throw mbrRes.error;
+
+      let transactions = txRes.data || [];
+
+      // Backfill missing INV- numbers for completed rows (legacy membership inserts)
+      const needsInvoice = transactions.filter(
+        (t) => t.status === "completed" && !t.invoice_number?.trim(),
+      );
+      if (needsInvoice.length > 0) {
+        const results = await Promise.all(
+          needsInvoice.map((t) =>
+            supabase.rpc("assign_invoice_number_if_missing", { p_transaction_id: t.id }),
+          ),
+        );
+        const invoiceById = new Map<string, string>();
+        needsInvoice.forEach((t, i) => {
+          const { data: inv, error } = results[i];
+          if (error) {
+            console.warn("[Billing] invoice backfill failed:", t.id, error.message);
+            return;
+          }
+          if (inv) invoiceById.set(t.id, inv as string);
+        });
+        if (invoiceById.size > 0) {
+          transactions = transactions.map((t) =>
+            invoiceById.has(t.id) ? { ...t, invoice_number: invoiceById.get(t.id)! } : t,
+          );
+        }
+      }
+
+      const coveredPi = new Set(
+        transactions
+          .map((t) => t.provider_payment_intent_id)
+          .filter((id): id is string => !!id),
+      );
+
+      const fromTx: BillingHistoryRow[] = transactions.map((t) => ({
+        id: t.id,
+        description: t.description,
+        amount: Number(t.amount),
+        currency: t.currency,
+        status: t.status,
+        type: t.type,
+        created_at: t.created_at,
+        invoice_number: t.invoice_number,
+        invoice_pdf_url: t.invoice_pdf_url,
+        provider_payment_intent_id: t.provider_payment_intent_id,
+        stripe_invoice_id: (t as { stripe_invoice_id?: string | null }).stripe_invoice_id ?? null,
+      }));
+
+      const fromMembership: BillingHistoryRow[] = (mbrRes.data || [])
+        .filter(
+          (m) =>
+            m.tier === "member" &&
+            m.stripe_payment_intent_id &&
+            !coveredPi.has(m.stripe_payment_intent_id),
+        )
+        .map((m) => ({
+          id: `membership-${m.id}`,
+          description: "Full Membership — MAALI ($2/month)",
+          amount: (m.amount_paid ?? 200) / 100,
+          currency: "USD",
+          status: m.status === "active" ? "completed" : "pending",
+          type: "subscription",
+          created_at: m.created_at,
+          invoice_number: null,
+          invoice_pdf_url: null,
+          provider_payment_intent_id: m.stripe_payment_intent_id,
+        }));
+
+      return [...fromTx, ...fromMembership].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
     },
     enabled: !!user,
   });
@@ -261,28 +377,20 @@ const Billing = () => {
     setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
   };
 
-  const handleDownloadInvoice = async (
-    transactionId: string,
-    _receiptUrl: string | null,
-    invoicePdfUrl: string | null,
-    forceRegenerate: boolean = false
-  ) => {
-    // Priority 1: Use stored PDF receipt if available (unless forcing regeneration)
-    if (invoicePdfUrl && !forceRegenerate) {
-      try {
-        const response = await fetch(invoicePdfUrl);
-        if (response.ok) {
-          const blob = await response.blob();
-          triggerPdfDownload(blob, `receipt-${transactionId.substring(0, 8)}.pdf`);
-          toast({ title: "Success", description: "Invoice downloaded." });
-          return;
-        }
-      } catch (err) {
-        console.warn("[Invoice] Failed to download stored PDF, falling back:", err);
-      }
+  const handleDownloadInvoice = async (item: BillingHistoryRow) => {
+    const isMembershipPlaceholder = item.id.startsWith("membership-");
+    const canGenerate =
+      !isMembershipPlaceholder || !!item.provider_payment_intent_id;
+
+    if (!canGenerate) {
+      toast({
+        title: "Receipt unavailable",
+        description: "No transaction record found for this payment yet.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Priority 2: Generate PDF on-demand (skip Stripe receipt URL - it's a web page, not a PDF)
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
@@ -292,38 +400,39 @@ const Billing = () => {
       }
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const invoiceUrl = `${supabaseUrl}/functions/v1/generate-invoice?transactionId=${transactionId}`;
-      
-      console.log("[Invoice] Fetching:", invoiceUrl);
-      
-      const res = await fetch(invoiceUrl, {
+      const params = new URLSearchParams();
+      if (item.stripe_invoice_id) {
+        // Subscription renewal — look up by Stripe invoice ID
+        params.set("stripeInvoiceId", item.stripe_invoice_id);
+      } else if (isMembershipPlaceholder && item.provider_payment_intent_id) {
+        // Legacy membership placeholder row
+        params.set("paymentIntentId", item.provider_payment_intent_id);
+      } else {
+        params.set("transactionId", item.id);
+      }
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/generate-invoice?${params}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
       });
 
-      console.log("[Invoice] Response status:", res.status, res.statusText);
-      console.log("[Invoice] Response content-type:", res.headers.get("content-type"));
-
       if (!res.ok) {
         const errorBody = await res.text();
-        console.error("[Invoice] Error body:", errorBody);
+        console.error("[Invoice] Error:", errorBody);
         throw new Error(`Failed to generate invoice: ${res.status}`);
       }
 
       const blob = await res.blob();
-      console.log("[Invoice] PDF blob size:", blob.size, "bytes");
-      console.log("[Invoice] PDF blob type:", blob.type);
-      
-      // Verify it's actually a PDF
       if (!blob.type.includes("pdf") && blob.size < 1000) {
-        console.error("[Invoice] Warning: Response may not be a valid PDF");
-        const text = await blob.text();
-        console.error("[Invoice] Response content:", text.substring(0, 200));
+        throw new Error("Invalid PDF response");
       }
-      triggerPdfDownload(blob, `invoice-${transactionId.substring(0, 8)}.pdf`);
+
+      const fileStem = (item.invoice_number ?? item.id).replace(/[^a-zA-Z0-9-]/g, "");
+      triggerPdfDownload(blob, `invoice-${fileStem}.pdf`);
       toast({ title: "Success", description: "Invoice downloaded." });
+      queryClient.invalidateQueries({ queryKey: ["user-billing-history"] });
     } catch (err) {
       console.error("[Invoice] Download failed:", err);
       toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
@@ -393,9 +502,11 @@ const Billing = () => {
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold">Billing</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Manage your payment methods and view billing history
+          Full Member subscription ($2/month), payment methods, and receipts
         </p>
       </div>
+
+      <MembershipProfileSection />
 
       {/* Payment Methods */}
       <Card>
@@ -407,7 +518,7 @@ const Billing = () => {
                 Payment Methods
               </CardTitle>
               <CardDescription className="mt-1 text-xs sm:text-sm">
-                Manage your payment methods for application fees
+                Cards used for your Full Member subscription
               </CardDescription>
             </div>
           </div>
@@ -422,8 +533,33 @@ const Billing = () => {
             <div className="text-center py-8 text-muted-foreground">
               <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No payment methods on file</p>
-              <p className="text-xs sm:text-sm mt-2">
-                Payment methods are saved automatically when you pay an application fee via Stripe
+              <p className="text-xs sm:text-sm mt-2 max-w-md mx-auto">
+                {membershipLoading ? (
+                  "Loading…"
+                ) : isPaidMember ? (
+                  <>
+                    Your card is saved automatically after membership checkout. If nothing appears,
+                    wait a minute and refresh — or{" "}
+                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
+                      run checkout again
+                    </button>
+                    .
+                  </>
+                ) : hasPendingCheckout ? (
+                  <>
+                    Finish membership payment to save your card.{" "}
+                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
+                      Continue checkout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Cards are saved when you pay for Full Membership.{" "}
+                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
+                      Upgrade & pay
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           ) : (
@@ -495,7 +631,7 @@ const Billing = () => {
             Billing History
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            View your past transactions and invoices
+            Membership payments and other charges
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -509,7 +645,12 @@ const Billing = () => {
             <div className="text-center py-8 text-muted-foreground">
               <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No billing history yet</p>
-              <p className="text-xs sm:text-sm mt-2">Your transactions will appear here</p>
+              <p className="text-xs sm:text-sm mt-2">
+                Full Member payments appear here after checkout.{" "}
+                <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
+                  Upgrade
+                </button>
+              </p>
             </div>
           ) : (
             <>
@@ -527,13 +668,16 @@ const Billing = () => {
                         {formatCurrency(item.amount, item.currency)}
                       </span>
                     </div>
-                    {item.invoice_number && (
-                      <p className="text-xs text-muted-foreground">Invoice: {item.invoice_number}</p>
+                    {item.type === "subscription" && (
+                      <Badge variant="secondary" className="text-xs">Membership</Badge>
                     )}
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Invoice: {item.invoice_number ?? "—"}
+                    </p>
                     <Button
                       variant="outline"
                       size="sm"
-onClick={() => handleDownloadInvoice(item.id, null, item.invoice_pdf_url)}
+                      onClick={() => handleDownloadInvoice(item)}
                       className="w-full min-h-[44px] gap-2 text-primary hover:text-primary"
                     >
                       <Download className="h-4 w-4" />
@@ -565,9 +709,16 @@ onClick={() => handleDownloadInvoice(item.id, null, item.invoice_pdf_url)}
                             {formatDate(item.created_at)}
                           </div>
                         </TableCell>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell className="text-muted-foreground text-xs">
-                          {item.invoice_number || "-"}
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span>{item.description}</span>
+                            {item.type === "subscription" && (
+                              <Badge variant="secondary" className="w-fit text-xs">Membership</Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs font-mono">
+                          {item.invoice_number ?? "—"}
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(item.amount, item.currency)}
@@ -577,7 +728,7 @@ onClick={() => handleDownloadInvoice(item.id, null, item.invoice_pdf_url)}
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadInvoice(item.id, null, item.invoice_pdf_url)}
+                            onClick={() => handleDownloadInvoice(item)}
                             className="min-h-[44px] gap-2 text-primary hover:text-primary"
                           >
                             <Download className="h-4 w-4" />
@@ -754,6 +905,8 @@ onClick={() => handleDownloadInvoice(item.id, null, item.invoice_pdf_url)}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <UpgradeMembershipModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </div>
   );
 };

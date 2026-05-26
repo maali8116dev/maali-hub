@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
 import authLogoIcon from "@/assets/logo_icon.webp";
 import { emailSchema, validateEmail } from "@/lib/emailValidation";
-import { rateLimitedAuth, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
+import { rateLimitedAuth, rateLimitedSignIn, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
+import { isMembershipExemptRole, userNeedsOnboarding } from "@/lib/membershipAccess";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { BackButton } from "@/components/ui/back-button";
 
@@ -59,6 +60,29 @@ const resetPasswordSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+async function getPostAuthPath(fallbackPath: string): Promise<string> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.user?.id) return fallbackPath;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  if (isMembershipExemptRole(profile?.role)) {
+    if (profile?.role === "admin") return "/admin";
+    if (profile?.role === "reviewer") return "/reviewer";
+    if (profile?.role === "partner") return "/partner";
+    return fallbackPath;
+  }
+
+  const needsSetup = await userNeedsOnboarding(session.user.id);
+  return needsSetup ? "/onboarding" : fallbackPath;
+}
 
 function AuthPageLayout({ children }: { children: ReactNode }) {
   return (
@@ -149,8 +173,7 @@ const Auth = () => {
       
       const { data: { session } } = await supabase.auth.getSession();
       if (session && !isPasswordReset) {
-        // If user is already logged in, redirect to return URL or dashboard
-        navigate(getReturnUrl());
+        navigate(await getPostAuthPath(getReturnUrl()));
       }
     };
     checkAuth();
@@ -184,7 +207,7 @@ const Auth = () => {
         return;
       }
 
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      const redirectUrl = `${window.location.origin}/onboarding`;
 
       // Use rateLimitedSignUp which handles rate limiting AND establishes local session
       // This prevents double signup (Edge Function creates user, then we establish session)
@@ -224,112 +247,54 @@ const Auth = () => {
         return;
       }
 
-      // Get signup data from result
-      const signUpData = result.data as { user: any; session: any } | null;
+      const signUpData = result.data as { user?: { id: string }; session?: unknown } | null;
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (signUpData) {
-        // Check if user was automatically signed in (session exists)
-        const hasSession = !!signUpData?.session;
-        const newUser = signUpData?.user;
-        
-        // Ensure profile is created (fallback if trigger hasn't run yet)
-        if (newUser) {
-          try {
-            // Wait a moment for trigger to potentially create profile
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Check if profile exists, if not create it
-            const { data: existingProfile, error: checkError } = await supabase
-              .from("profiles")
-              .select("id")
-              .eq("user_id", newUser.id)
-              .single();
-            
-            if (!existingProfile && checkError?.code === 'PGRST116') {
-              // Profile doesn't exist yet, create it directly
-              const { error: profileError } = await supabase
-                .from("profiles")
-                .insert({
-                  user_id: newUser.id,
-                  first_name: data.firstName,
-                  last_name: data.lastName,
-                });
-              
-              if (profileError) {
-                console.error("Failed to create profile:", profileError);
-                // Continue anyway - trigger might create it later
-              }
-            }
-          } catch (err) {
-            // Profile might already exist or trigger is creating it
-            console.log("Profile creation check:", err);
-          }
-        }
-        
-        // Send welcome email after signup (async, don't block)
-        sendWelcomeEmail(
-          data.email,
-          `${data.firstName} ${data.lastName}`,
-          `${window.location.origin}/projects`
-        ).catch(err => console.error("Failed to send welcome email:", err));
-        
-        if (hasSession) {
-          // User is signed in (email auto-confirmed or confirmation disabled)
-          toast({
-            title: "Account created!",
-            description: "Welcome! You've been signed in.",
-          });
-          signUpForm.reset();
-          
-          // Redirect new users through onboarding to pick membership
-          navigate("/onboarding");
-        } else {
-          // Email confirmation required, but allow access anyway
-          // Sign the user in programmatically if possible
-          // Note: This requires Supabase to be configured to allow unverified sign-ins
-          try {
-            // Try to sign in with the credentials to get a session
-            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-              email: data.email,
-              password: data.password,
-            });
-            
-            if (signInError) {
-              // If sign-in fails, user needs to verify email first
-              toast({
-                title: "Account created!",
-                description: "Please check your email to verify your account. You can access the dashboard after verification.",
-              });
-              signUpForm.reset();
-              navigate("/onboarding");
-            } else {
-              // Successfully signed in (Supabase allows unverified sign-ins)
-              toast({
-                title: "Account created!",
-                description: "Welcome! Please verify your email to submit applications.",
-              });
-              signUpForm.reset();
-              navigate("/onboarding");
-            }
-          } catch (err) {
-            // Fallback: show message but still redirect
-            toast({
-              title: "Account created!",
-              description: "Please check your email to verify your account.",
-            });
-            signUpForm.reset();
-            navigate("/onboarding");
-          }
-        }
-      } else {
-        // No signup data returned - should not happen, but handle gracefully
+      if (!signUpData?.user || !session) {
         toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
+          title: "Account created",
+          description: "Please sign in to continue setting up your profile and membership.",
+          variant: "destructive",
         });
-        signUpForm.reset();
-        navigate("/onboarding");
+        setIsLoading(false);
+        return;
       }
+
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const { data: existingProfile, error: checkError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", signUpData.user.id)
+          .single();
+
+        if (!existingProfile && checkError?.code === "PGRST116") {
+          const { error: profileError } = await supabase.from("profiles").insert({
+            user_id: signUpData.user.id,
+            first_name: data.firstName,
+            last_name: data.lastName,
+          });
+          if (profileError) {
+            console.error("Failed to create profile:", profileError);
+          }
+        }
+      } catch (err) {
+        console.log("Profile creation check:", err);
+      }
+
+      sendWelcomeEmail(
+        data.email,
+        `${data.firstName} ${data.lastName}`,
+        `${window.location.origin}/onboarding`
+      ).catch((err) => console.error("Failed to send welcome email:", err));
+
+      toast({
+        title: "Account created!",
+        description: "Complete your profile and membership to get started.",
+      });
+      signUpForm.reset();
+      navigate("/onboarding");
     } catch (error) {
       toast({
         title: "Error",
@@ -345,10 +310,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const result = await rateLimitedAuth("sign_in", {
-        email: data.email,
-        password: data.password,
-      });
+      const result = await rateLimitedSignIn(data.email, data.password);
 
       if (result.error) {
         if (result.error.isRateLimited) {
@@ -373,25 +335,11 @@ const Auth = () => {
         return;
       }
 
-      // Rate limit passed -establish local session
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
       });
-
-      if (error) {
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
-        navigate(getReturnUrl());
-      }
+      navigate(await getPostAuthPath(getReturnUrl()));
     } catch (error) {
       toast({
         title: "Error",

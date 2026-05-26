@@ -35,6 +35,101 @@ function parseClientIP(req: Request): string | null {
   return null;
 }
 
+type AuthOpResult = {
+  data: { user?: { id: string }; session?: unknown } | null;
+  error: { message: string; status?: number } | null;
+};
+
+function isEmailNotConfirmed(message: string): boolean {
+  const m = message.toLowerCase();
+  return m.includes("email not confirmed") || m.includes("email_not_confirmed");
+}
+
+async function confirmUserEmail(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<void> {
+  const { error } = await adminClient.auth.admin.updateUserById(userId, {
+    email_confirm: true,
+  });
+  if (error) throw error;
+}
+
+async function findUserIdByEmail(
+  adminClient: ReturnType<typeof createClient>,
+  email: string,
+): Promise<string | null> {
+  const normalized = email.trim().toLowerCase();
+  let page = 1;
+  while (page <= 5) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 200 });
+    if (error || !data?.users?.length) return null;
+    const match = data.users.find((u) => u.email?.toLowerCase() === normalized);
+    if (match?.id) return match.id;
+    if (data.users.length < 200) break;
+    page++;
+  }
+  return null;
+}
+
+/** Sign in; auto-confirms email so new users can finish onboarding before verifying inbox. */
+async function signInWithPasswordConfirmed(
+  anonClient: ReturnType<typeof createClient>,
+  adminClient: ReturnType<typeof createClient>,
+  email: string,
+  password: string,
+): Promise<AuthOpResult> {
+  let result = await anonClient.auth.signInWithPassword({ email, password });
+
+  if (!result.error || !isEmailNotConfirmed(result.error.message)) {
+    return result;
+  }
+
+  const userId = await findUserIdByEmail(adminClient, email);
+  if (!userId) return result;
+
+  try {
+    await confirmUserEmail(adminClient, userId);
+  } catch (e) {
+    console.error("confirm email on sign_in failed:", e);
+    return result;
+  }
+
+  return await anonClient.auth.signInWithPassword({ email, password });
+}
+
+/** Sign up then return a session (auto-confirm when project requires email verification). */
+async function signUpWithSession(
+  anonClient: ReturnType<typeof createClient>,
+  adminClient: ReturnType<typeof createClient>,
+  email: string,
+  password: string,
+  options: Record<string, unknown> | undefined,
+): Promise<AuthOpResult> {
+  const result = await anonClient.auth.signUp({
+    email,
+    password,
+    options: options || {},
+  });
+
+  if (result.error || !result.data?.user?.id) return result;
+  if (result.data.session) return result;
+
+  try {
+    await confirmUserEmail(adminClient, result.data.user.id);
+  } catch (e) {
+    console.error("auto-confirm after sign_up failed:", e);
+    return result;
+  }
+
+  const signIn = await anonClient.auth.signInWithPassword({ email, password });
+  if (!signIn.error && signIn.data?.session) {
+    return signIn;
+  }
+
+  return result;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: getCorsHeaders(req) });
@@ -147,7 +242,12 @@ serve(async (req: Request) => {
             { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
           );
         }
-        result = await supabase.auth.signInWithPassword({ email, password });
+        result = await signInWithPasswordConfirmed(
+          supabase,
+          serviceClient,
+          email,
+          password,
+        );
         break;
 
       case "sign_up":
@@ -157,11 +257,13 @@ serve(async (req: Request) => {
             { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
           );
         }
-        result = await supabase.auth.signUp({
+        result = await signUpWithSession(
+          supabase,
+          serviceClient,
           email,
           password,
-          options: options || {},
-        });
+          options,
+        );
         break;
 
       case "password_reset":

@@ -43,7 +43,7 @@ function consumeRateLimit(key: string, maxRequests: number, windowMs: number): {
   return { allowed: true, retryAfterSec: 0 };
 }
 
-type EmailType = 
+type EmailType =
   | "application_submitted"
   | "application_approved"
   | "application_rejected"
@@ -56,7 +56,8 @@ type EmailType =
   | "contact_confirmation"
   | "payment_receipt"
   | "kyc_verified"
-  | "kyc_rejected";
+  | "kyc_rejected"
+  | "partner_invite";
 
 interface SendEmailRequest {
   to: string;
@@ -86,6 +87,9 @@ interface SendEmailRequest {
     invoicePdfUrl?: string | null;
     // KYC fields
     rejectionReason?: string;
+    // Partner invite fields
+    partnerOrgName?: string;
+    inviteUrl?: string;
   };
 }
 
@@ -798,6 +802,32 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
             <p>You can update your documents and resubmit your verification at any time.</p>
             ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Resubmit Verification</a></div>` : ''}
             <p>If you believe this was an error, please contact our support team.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+        attachmentUrl: null,
+      };
+    }
+
+    case "partner_invite": {
+      const partnerOrgName = data.partnerOrgName ? escapeHtml(data.partnerOrgName) : "your organization";
+      const inviteUrl = data.inviteUrl || data.actionUrl;
+      return {
+        subject: `You've been invited to manage ${partnerOrgName} on Maali`,
+        html: emailTemplate(
+          "You're invited to Maali Partner Portal",
+          `
+            <p>Dear ${recipientName},</p>
+            <p>You have been invited to manage <strong>${partnerOrgName}</strong> on the Maali Partner Portal.</p>
+            <p>As a partner, you'll be able to:</p>
+            <ul>
+              <li>Post and manage funding opportunities</li>
+              <li>Review and respond to applicants</li>
+              <li>Track your organization's impact</li>
+            </ul>
+            <p>Click the button below to set up your account and get started. This invitation link expires in 24 hours.</p>
+            ${inviteUrl ? `<div style="text-align: center;"><a href="${inviteUrl}" class="button" style="color:#ffffff;text-decoration:none;">Accept Invitation</a></div>` : ""}
+            <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
