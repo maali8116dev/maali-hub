@@ -357,7 +357,9 @@ describe('useUpdateProfile', () => {
       business_sector: 'Technology',
       country: 'Ghana',
       bio: 'New bio',
-      avatar_url: null, // Supabase returns null instead of undefined for missing fields
+      avatar_url: null,
+      phone_number: null,
+      city_region: null,
     });
 
     // Verify the returned data is transformed correctly
@@ -501,6 +503,8 @@ describe('useUpdateProfile', () => {
       country: 'Kenya',
       bio: 'Entrepreneur',
       avatar_url: 'https://example.com/avatar.jpg',
+      phone_number: null,
+      city_region: null,
     });
 
     expect(result.current.data?.firstName).toBe('Alice');

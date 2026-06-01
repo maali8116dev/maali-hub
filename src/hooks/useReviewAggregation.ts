@@ -135,7 +135,6 @@ export const useReviewAggregation = (applicationId: string, totalAssignedOverrid
       
       return aggregated;
     },
-    enabled: !!applicationId,
   });
 };
 

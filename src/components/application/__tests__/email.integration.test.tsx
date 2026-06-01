@@ -40,16 +40,35 @@ const TEST_EMAIL_RECIPIENT = import.meta.env.VITE_TEST_EMAIL_RECIPIENT || TEST_U
 describe('Email Sending - Real Integration Tests', () => {
   let testUser: { id: string; email: string } | null = null;
 
+  const ensureAuthSession = async (): Promise<boolean> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session) {
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (!refreshError && (await supabase.auth.getSession()).data.session) {
+        return true;
+      }
+      await supabase.auth.signOut();
+    }
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: TEST_USER_EMAIL,
+      password: TEST_USER_PASSWORD,
+    });
+    return !authError && !!authData.session;
+  };
+
+  const isUnauthorized = (error: unknown): boolean =>
+    typeof error === "object" &&
+    error !== null &&
+    "context" in error &&
+    (error as { context?: { status?: number } }).context?.status === 401;
+
   // Helper function to send email using the real Supabase client
-  const sendEmailDirect = async (params: {
-    to: string;
-    type: string;
-    data?: any;
-  }): Promise<{ success: boolean; error?: string }> => {
+  const sendEmailDirect = async (
+    params: { to: string; type: string; data?: any },
+    allowRetry = true
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      if (!sessionData.session) {
+      if (!(await ensureAuthSession())) {
         return { success: false, error: "User not authenticated" };
       }
 
@@ -58,6 +77,10 @@ describe('Email Sending - Real Integration Tests', () => {
       });
 
       if (response.error) {
+        if (allowRetry && isUnauthorized(response.error)) {
+          await supabase.auth.signOut();
+          return sendEmailDirect(params, false);
+        }
         console.error("Email send error:", response.error);
         return { success: false, error: response.error.message };
       }

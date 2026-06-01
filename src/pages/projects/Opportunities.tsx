@@ -180,7 +180,6 @@ const Opportunities = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search opportunities by title, description, location, or tags..."
               placeholder={t("common:opportunitiesPage.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

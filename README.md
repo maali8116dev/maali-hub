@@ -16,7 +16,8 @@ Maali Opportunity Hub is a comprehensive platform that connects African entrepre
 - **User Dashboard**: Track applications, manage profile, and view notifications
 - **Email Notifications**: Automated emails for application status updates, reviewer assignments, and more
 - **Activity Logging**: Complete audit trail of all system actions
-- **Payment Processing**: Stripe integration for application fees (in progress)
+- **Payment Processing**: Stripe for membership subscriptions and legacy application fees
+- **Draft Auto-save**: Form state in localStorage (Zustand persist); explicit saves sync to DB as `applications.is_draft`
 
 ## 🛠️ Tech Stack
 
@@ -99,9 +100,28 @@ npm run supabase:types:remote
 In your Supabase Dashboard, configure the following secrets for Edge Functions:
 
 - `RESEND_API_KEY` - Resend API key for sending emails
-- `STRIPE_SECRET_KEY` - Stripe secret key (if using payments)
-- `STRIPE_WEBHOOK_SECRET` - Stripe webhook secret (if using payments)
+- `STRIPE_SECRET_KEY` - Stripe secret key
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
+- `SITE_URL` - Public app URL (receipt emails, notification links)
+- `INTERNAL_EMAIL_SECRET` - Shared secret for internal `send-email` calls from Edge Functions
 - `FROM_EMAIL` - Custom from email address (optional)
+
+Supabase injects `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` automatically for Edge Functions.
+
+### Google OAuth (hosted Supabase)
+
+Required for **Sign in with Google** on the live site.
+
+1. **Google Cloud Console** → Credentials → OAuth client (Web) → **Authorized redirect URI**:
+   ```
+   https://<project-ref>.supabase.co/auth/v1/callback
+   ```
+2. **Supabase Dashboard** → **Authentication → Providers → Google** → enable, paste Client ID + secret.
+3. **Authentication → URL Configuration**:
+   - **Site URL** — production app URL (Lovable publish URL or custom domain)
+   - **Redirect URLs** — include each app callback, e.g. `https://your-domain.com/auth/callback`, your Lovable URL + `/auth/callback`, and `http://localhost:8080/auth/callback` for local dev
+
+Full steps: [migration-selfhosted-to-lovable.md](./migration-selfhosted-to-lovable.md) (Step 5a). Local Supabase: [docs/LOCAL_DB_SETUP.md](./docs/LOCAL_DB_SETUP.md).
 
 ### 6. Deploy Edge Functions
 
@@ -110,10 +130,13 @@ supabase functions deploy auth-email-hook
 supabase functions deploy send-email
 supabase functions deploy create-payment-intent
 supabase functions deploy stripe-webhook
+supabase functions deploy submit-application
 supabase functions deploy rate-limited-auth
 supabase functions deploy manage-user
 supabase functions deploy generate-invoice
 ```
+
+After deploy, point Stripe webhooks at `https://<project-ref>.supabase.co/functions/v1/stripe-webhook` and subscribe to at least: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled`, `invoice.paid`, `customer.subscription.deleted`, `customer.subscription.updated`.
 
 ### 7. Start Development Server
 
@@ -132,6 +155,7 @@ Guides live in [`docs/`](./docs/):
 - **[REVIEW_SYSTEM.md](./docs/REVIEW_SYSTEM.md)** - Review system
 - **[DATABASE_SETUP.md](./docs/DATABASE_SETUP.md)** - Database setup
 - **[STRIPE_SETUP.md](./docs/STRIPE_SETUP.md)** - Stripe payments and webhooks
+- **[migration-selfhosted-to-lovable.md](./migration-selfhosted-to-lovable.md)** - Client guide: self-hosted → Lovable + Supabase
 - **[SUPABASE_EMAIL_HOOK_SETUP.md](./docs/SUPABASE_EMAIL_HOOK_SETUP.md)** - Email hook
 - **[SEO_GUIDE.md](./docs/SEO_GUIDE.md)** - SEO
 - **[MAINTENANCE_MODE.md](./docs/MAINTENANCE_MODE.md)** - Maintenance mode
@@ -178,6 +202,9 @@ maali-opportunity-hub/
 │   └── types/             # TypeScript types
 ├── supabase/
 │   ├── functions/        # Edge Functions
+│   │   └── stripe-webhook/
+│   │       ├── index.ts  # Signature verify, dedup, event router
+│   │       └── handlers.ts  # Payment + subscription handlers
 │   └── migrations/       # Database migrations
 └── scripts/               # Utility scripts
 ```
@@ -195,19 +222,86 @@ maali-opportunity-hub/
 - `npm run seed:projects` - Seed projects data
 - `npm run seed:users` - Seed users and reviewers
 
+## 💳 Payments & Stripe Webhooks
+
+Frontend is a Vite SPA hosted on **Lovable**. **Payment logic runs on Supabase Edge Functions**, not the Lovable frontend host.
+
+### Flow
+
+1. User pays via Stripe (membership subscription or legacy application fee checkout).
+2. Stripe sends events to `stripe-webhook`.
+3. `index.ts` verifies signature, records the event in `stripe_events`, dispatches to `handlers.ts`.
+4. Handlers update memberships/transactions, generate PDF receipts, send emails, and **assign reviewers** (paid applications only).
+
+`submit-application` does **not** assign reviewers — that happens after payment confirmation in the webhook.
+
+### Idempotency (`stripe_events`)
+
+Migrations: `20260528000000_stripe_events.sql`, `20260528000001_stripe_events_status.sql`
+
+| Column | Purpose |
+|--------|---------|
+| `id` | Stripe event ID (PK) |
+| `type` | Event type |
+| `status` | `processing` → `completed` or `failed` |
+| `attempts` | Retry count when Stripe redelivers after failure |
+| `error` | Last handler error message |
+
+- Duplicate delivery of a **completed** event → 200, skipped.
+- Retry after **failed** handler → re-processed (Stripe gets 500 on failure).
+
+### Stuck events (ops)
+
+```sql
+select id, type, status, attempts, error, received_at
+from stripe_events
+where status = 'failed'
+   or (status = 'processing' and received_at < now() - interval '10 minutes');
+```
+
 ## 🚢 Deployment
 
-### Build for Production
+This project is deployed via **[Lovable](https://lovable.dev)**. The Lovable project hosts the static frontend; Supabase handles auth, database, storage, and Edge Functions.
+
+### Deploy from Lovable
+
+1. Open the project in Lovable.
+2. Use **Share → Publish** (or the project’s publish flow) to ship frontend changes.
+3. Set `VITE_SITE_URL` / Supabase secret `SITE_URL` to your published Lovable URL so emails and Stripe redirects use the correct domain.
+
+### Local production build (optional)
 
 ```bash
 npm run build
 ```
 
-The production build will be in the `dist/` directory.
+Output goes to `dist/` for local preview only (`npm run preview`). Production hosting is managed by Lovable.
 
-### Deploy to Production
+### Supabase (required alongside Lovable)
 
-The project can be deployed to any static hosting service (Vercel, Netlify, etc.) or via Lovable's built-in deployment.
+After schema or Edge Function changes, deploy backend separately:
+
+```bash
+npm run supabase:push          # migrations
+supabase functions deploy ...  # see Edge Functions list above
+```
+
+Configure Stripe webhooks against your **Supabase** function URL, not the Lovable frontend URL.
+
+### Usage at scale (~10k users)
+
+Supabase is usually the binding constraint — not the Lovable frontend:
+
+| Resource | Typical risk at ~10k users |
+|----------|---------------------------|
+| Edge Function invocations | Low (~100k–250k/mo) |
+| DB egress | Medium — unbounded list queries |
+| Auth MAUs | Low |
+| Storage | Low (receipt PDFs) |
+
+Client-side egress guards: notifications capped at 50 rows + separate unread count; billing history capped at 50 transactions with explicit column projection. Admin `useFinancialData` still loads all transactions — paginate or aggregate if admin volume grows.
+
+Receipt PDFs in a public storage bucket: anyone with the URL can download. Consider signed URLs if hot-linking becomes a cost concern.
 
 ## 🔐 Security
 
@@ -222,9 +316,24 @@ The project can be deployed to any static hosting service (Vercel, Netlify, etc.
 
 [Add your license here]
 
-## 🤝 Contributing
+## 🤝 Contributing & AI agent instructions
 
-[Add contribution guidelines here]
+Anyone (or any AI assistant) editing this repo should read these first:
+
+| File | Purpose |
+|------|---------|
+| [`CLAUDE.md`](./CLAUDE.md) | Full coding guidelines, form patterns (`react-hook-form` + Zod + `CustomFormField`) |
+| [`AGENTS.md`](./AGENTS.md) | Short agent instructions for MAALI |
+| [`.cursor/rules/`](./.cursor/rules/) | Cursor-specific rules (DRY, concise output, Karpathy, etc.) |
+
+Karpathy's four rules (summarized):
+
+1. **Think before coding** — State assumptions. If multiple interpretations exist, surface them. Ask when unclear.
+2. **Simplicity first** — Minimum code for the request. No speculative features or abstractions.
+3. **Surgical changes** — Touch only what the task requires. Match existing style. Don't refactor unrelated code.
+4. **Goal-driven execution** — Define verifiable success (tests, repro steps, before/after). Multi-step work: `step → verify: [check]`.
+
+For forms: use **react-hook-form** + **Zod** + **`CustomFormField`** for every editable input (details in `CLAUDE.md`).
 
 ## 📧 Support
 

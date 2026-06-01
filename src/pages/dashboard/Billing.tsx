@@ -122,9 +122,12 @@ const Billing = () => {
       const [txRes, mbrRes] = await Promise.all([
         supabase
           .from("transactions")
-          .select("*")
+          .select(
+            "id, description, amount, currency, status, type, created_at, invoice_number, invoice_pdf_url, provider_payment_intent_id"
+          )
           .eq("user_id", user!.id)
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .limit(50),
         supabase
           .from("memberships")
           .select("id, stripe_payment_intent_id, amount_paid, created_at, status, tier")

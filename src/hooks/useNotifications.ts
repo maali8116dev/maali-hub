@@ -35,7 +35,11 @@ const transformNotification = (dbNotification: any): Notification => ({
   createdAt: dbNotification.created_at,
 });
 
-// Fetch all notifications for the current user
+// Cap to keep dropdown payloads bounded as notifications accumulate over time.
+// Unread count is fetched separately so it stays accurate beyond this window.
+const NOTIFICATIONS_PAGE_SIZE = 50;
+
+// Fetch the most recent notifications for the current user
 const fetchNotifications = async (): Promise<Notification[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
@@ -44,11 +48,27 @@ const fetchNotifications = async (): Promise<Notification[]> => {
     .from("notifications")
     .select("id, user_id, title, message, type, read, link, metadata, created_at")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(NOTIFICATIONS_PAGE_SIZE);
 
   if (error) throw error;
 
   return data.map(transformNotification);
+};
+
+// Fetch unread count via HEAD request — does not transfer rows.
+const fetchUnreadNotificationCount = async (): Promise<number> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("read", false);
+
+  if (error) throw error;
+  return count ?? 0;
 };
 
 // Mark notification as read
@@ -167,6 +187,9 @@ export const useNotifications = () => {
           queryClient.invalidateQueries({
             queryKey: ["notifications", user.id],
           });
+          queryClient.invalidateQueries({
+            queryKey: ["notifications-unread-count", user.id],
+          });
 
           // If a new notification is created for this user, show a toast
           if (payload.eventType === "INSERT" && payload.new) {
@@ -198,10 +221,18 @@ export const useNotifications = () => {
   return query;
 };
 
-// Hook to get unread count
+// Hook to get unread count.
+// Uses a HEAD count query so it stays correct even if the user has more than
+// NOTIFICATIONS_PAGE_SIZE notifications.
 export const useUnreadNotificationCount = () => {
-  const { data: notifications } = useNotifications();
-  return notifications?.filter((n) => !n.read).length || 0;
+  const { user } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["notifications-unread-count", user?.id],
+    queryFn: fetchUnreadNotificationCount,
+    enabled: !!user,
+    refetchOnWindowFocus: false,
+  });
+  return data ?? 0;
 };
 
 // Hook to mark notification as read

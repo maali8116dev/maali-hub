@@ -60,11 +60,6 @@ interface ApplicationDocumentRef {
   application_id: string | null;
 }
 
-interface ReviewerAssignment {
-  reviewer_id: string;
-  assignment_id: string;
-}
-
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
@@ -309,118 +304,10 @@ async function runSideEffects(params: {
     console.error("Notification error:", e);
   }
 
-  // 3. Reviewer assignment
-  try {
-    const notifyAdminsMissingReviewer = async (availableCount: number) => {
-        try {
-          const { data: admins, error: adminsError } = await supabaseAdmin
-            .from("profiles")
-            .select("user_id")
-            .eq("role", "admin");
-
-          if (adminsError) {
-            console.error("Failed to fetch admins for missing reviewer notification:", adminsError);
-            return;
-          }
-
-          const adminIds = (admins || []).map((a: any) => a.user_id).filter(Boolean);
-          if (adminIds.length === 0) return;
-
-          await Promise.allSettled(
-            adminIds.map((adminId: string) =>
-              supabaseAdmin.rpc("create_notification", {
-                p_user_id: adminId,
-                p_title: "Reviewer capacity needed",
-                p_message: `Only ${availableCount} reviewer is available for "${opportunityTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
-                p_type: "review_assignment",
-                p_link: `/admin/applications/${applicationId}`,
-                p_metadata: {
-                  application_id: applicationId,
-                  opportunity_id: opportunityId,
-                  opportunity_title: opportunityTitle,
-                  required_reviewers: 2,
-                  assigned_reviewers: availableCount,
-                },
-              })
-            )
-          );
-        } catch (e) {
-          console.error("Failed to notify admins about missing reviewer:", e);
-        }
-      };
-
-      const PREFERRED_REVIEWERS = 2;
-      let { data: assignments, error: assignError } = await supabaseAdmin.rpc(
-        "assign_reviewers_to_application",
-        { p_application_id: applicationId, p_num_reviewers: PREFERRED_REVIEWERS },
-      );
-
-      if (assignError) {
-        const msg = assignError.message || "";
-        const notEnough = msg.toLowerCase().includes("not enough available reviewers");
-
-        if (notEnough) {
-          const retry = await supabaseAdmin.rpc("assign_reviewers_to_application", {
-            p_application_id: applicationId,
-            p_num_reviewers: 1,
-          });
-          assignments = retry.data;
-          assignError = retry.error;
-
-          if (!assignError && assignments?.length === 1) {
-            console.warn(
-              `Only 1 reviewer assigned to application ${applicationId} due to limited capacity. Admin action required.`,
-            );
-            await notifyAdminsMissingReviewer(1);
-          }
-        }
-
-        console.warn("Reviewer assignment failed:", assignError);
-        await supabaseAdmin.from("activity_logs").insert({
-          user_id: userId,
-          action_type: "error",
-          entity_type: "application",
-          entity_id: applicationId,
-          description: `Failed to assign reviewers: ${assignError?.message ?? 'Unknown error'}`,
-          metadata: { application_id: applicationId, opportunity_id: opportunityId },
-        });
-      } else if (assignments?.length) {
-        await supabaseAdmin.from("activity_logs").insert({
-          user_id: userId,
-          action_type: "assign_reviewers",
-          entity_type: "application",
-          entity_id: applicationId,
-          description: `Assigned ${assignments.length} reviewer(s)`,
-          metadata: {
-            application_id: applicationId,
-            opportunity_id: opportunityId,
-            reviewer_count: assignments.length,
-            reviewer_ids: (assignments as ReviewerAssignment[]).map((a) => a.reviewer_id),
-          },
-        });
-
-        // Notify each reviewer
-        await Promise.allSettled(
-          (assignments as ReviewerAssignment[]).map((a) =>
-            supabaseAdmin
-              .rpc("create_notification", {
-                p_user_id: a.reviewer_id,
-                p_title: "New Application Assigned",
-                p_message: `A new application for "${opportunityTitle}" has been assigned to you for review.`,
-                p_type: "review_assigned",
-                p_link: `/reviewer/applications/${applicationId}`,
-                p_metadata: {
-                  application_id: applicationId,
-                  opportunity_id: opportunityId,
-                  assignment_id: a.assignment_id,
-                },
-              }),
-          ),
-        );
-      }
-  } catch (e) {
-    console.error("Reviewer assignment error:", e);
-  }
+  // Reviewer assignment is handled by the Stripe webhook once payment is
+  // confirmed (see stripe-webhook/handlers.ts: assignReviewersToApplication).
+  // We do NOT assign reviewers here to avoid duplicate assignments on
+  // unpaid/pending_payment applications.
 }
 
 /* ------------------------------------------------------------------ */

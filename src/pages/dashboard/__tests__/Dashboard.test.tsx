@@ -8,6 +8,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useProfileCompletion } from '@/hooks/useProfileCompletion';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserDashboardStats } from '@/hooks/useUserDashboardStats';
+import { useMembership } from '@/hooks/useMembership';
 
 // Mock the hooks
 vi.mock('@/hooks/useApplications');
@@ -15,6 +16,7 @@ vi.mock('@/hooks/useProfile');
 vi.mock('@/hooks/useProfileCompletion');
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/useUserDashboardStats');
+vi.mock('@/hooks/useMembership');
 vi.mock('@/components/ProfileSetupWizard', () => ({
   ProfileSetupWizard: () => <div>Profile Setup Wizard</div>,
 }));
@@ -129,6 +131,16 @@ describe('Dashboard - Data Viewing', () => {
       missingFields: [],
       isLoading: false,
     });
+    (useMembership as any).mockReturnValue({
+      membership: null,
+      loading: false,
+      hasCompletedOnboarding: true,
+      isActiveMember: true,
+      isPaidMember: true,
+      canApplyToOpportunities: true,
+      isMembershipExpired: false,
+      cancelAtPeriodEnd: false,
+    });
   });
 
   it('displays application statistics correctly', async () => {
@@ -228,13 +240,11 @@ describe('Dashboard - Data Viewing', () => {
     );
 
     await waitFor(() => {
-      // Check that stats cards are displayed with zero values
-      expect(screen.getByText('Total Applications')).toBeInTheDocument();
-      expect(screen.getByText('Pending')).toBeInTheDocument();
-      expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Rejected')).toBeInTheDocument();
-      
-      // Verify zero stats are shown (0 appears multiple times, so check context)
+      expect(screen.getByRole('heading', { name: 'Total Applications' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Pending' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Approved' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Rejected' })).toBeInTheDocument();
+
       const zeroElements = screen.getAllByText('0');
       expect(zeroElements.length).toBeGreaterThanOrEqual(4);
     });
