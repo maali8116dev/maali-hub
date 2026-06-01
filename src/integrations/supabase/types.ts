@@ -630,6 +630,7 @@ export type Database = {
       memberships: {
         Row: {
           amount_paid: number | null
+          cancel_at_period_end: boolean
           created_at: string
           expires_at: string | null
           id: string
@@ -637,12 +638,14 @@ export type Database = {
           status: string
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
+          stripe_subscription_id: string | null
           tier: string
           updated_at: string
           user_id: string
         }
         Insert: {
           amount_paid?: number | null
+          cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -650,12 +653,14 @@ export type Database = {
           status?: string
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
           tier: string
           updated_at?: string
           user_id: string
         }
         Update: {
           amount_paid?: number | null
+          cancel_at_period_end?: boolean
           created_at?: string
           expires_at?: string | null
           id?: string
@@ -663,6 +668,7 @@ export type Database = {
           status?: string
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: string
           updated_at?: string
           user_id?: string
@@ -1004,6 +1010,9 @@ export type Database = {
       }
       partners: {
         Row: {
+          contact_country: string | null
+          contact_name: string | null
+          contact_phone: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -1012,6 +1021,7 @@ export type Database = {
           id: number
           logo_url: string | null
           name: string
+          onboarding_dismissed_at: string | null
           sector: string
           status: string
           updated_at: string
@@ -1019,6 +1029,9 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          contact_country?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1027,6 +1040,7 @@ export type Database = {
           id?: number
           logo_url?: string | null
           name: string
+          onboarding_dismissed_at?: string | null
           sector: string
           status?: string
           updated_at?: string
@@ -1034,6 +1048,9 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          contact_country?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1042,6 +1059,7 @@ export type Database = {
           id?: number
           logo_url?: string | null
           name?: string
+          onboarding_dismissed_at?: string | null
           sector?: string
           status?: string
           updated_at?: string
@@ -1617,7 +1635,7 @@ export type Database = {
           invoice_pdf_url: string | null
           invoice_url: string | null
           metadata: Json | null
-          opportunity_id: number
+          opportunity_id: number | null
           payment_method_id: string | null
           provider: string | null
           provider_payment_intent_id: string | null
@@ -1625,6 +1643,7 @@ export type Database = {
           receipt_url: string | null
           refunded_at: string | null
           status: string
+          stripe_invoice_id: string | null
           type: string
           updated_at: string
           user_id: string
@@ -1644,7 +1663,7 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
-          opportunity_id: number
+          opportunity_id?: number | null
           payment_method_id?: string | null
           provider?: string | null
           provider_payment_intent_id?: string | null
@@ -1652,6 +1671,7 @@ export type Database = {
           receipt_url?: string | null
           refunded_at?: string | null
           status?: string
+          stripe_invoice_id?: string | null
           type: string
           updated_at?: string
           user_id: string
@@ -1671,7 +1691,7 @@ export type Database = {
           invoice_pdf_url?: string | null
           invoice_url?: string | null
           metadata?: Json | null
-          opportunity_id?: number
+          opportunity_id?: number | null
           payment_method_id?: string | null
           provider?: string | null
           provider_payment_intent_id?: string | null
@@ -1679,6 +1699,7 @@ export type Database = {
           receipt_url?: string | null
           refunded_at?: string | null
           status?: string
+          stripe_invoice_id?: string | null
           type?: string
           updated_at?: string
           user_id?: string
@@ -1760,9 +1781,25 @@ export type Database = {
       }
     }
     Functions: {
+      admin_add_application_reviewer: {
+        Args: { p_application_id: string; p_reviewer_id: string }
+        Returns: string
+      }
       admin_set_application_reviewers: {
         Args: { p_application_id: string; p_reviewer_ids: string[] }
         Returns: undefined
+      }
+      admin_update_application_status: {
+        Args: {
+          p_application_ids: string[]
+          p_review_notes?: string
+          p_status: string
+        }
+        Returns: Json
+      }
+      assign_invoice_number_if_missing: {
+        Args: { p_transaction_id: string }
+        Returns: string
       }
       assign_reviewer_category: {
         Args: { p_category_name: string; p_reviewer_id: string }
@@ -1798,6 +1835,7 @@ export type Database = {
             Args: { p_rubric_version_id?: string; p_scores: Json }
             Returns: number
           }
+      cancel_membership: { Args: { p_user_id: string }; Returns: Json }
       check_and_increment_rate_limit: {
         Args: {
           p_ip_address: unknown
@@ -1854,6 +1892,10 @@ export type Database = {
       create_rubric_version: {
         Args: { p_notes?: string; p_rubric: Json }
         Returns: string
+      }
+      downgrade_membership_to_community: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       generate_category_slug: {
         Args: { category_name: string }
@@ -2166,6 +2208,7 @@ export type Database = {
         Args: { p_notification_id: string }
         Returns: boolean
       }
+      resume_membership: { Args: { p_user_id: string }; Returns: Json }
       user_can_apply_to_opportunities: {
         Args: { p_user_id: string }
         Returns: boolean
