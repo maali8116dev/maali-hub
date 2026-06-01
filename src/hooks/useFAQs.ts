@@ -119,7 +119,7 @@ export const useCreateFAQ = () => {
         .insert({
           ...row,
           created_by: user?.id,
-        })
+        } as any)
         .select()
         .single() as any);
 
