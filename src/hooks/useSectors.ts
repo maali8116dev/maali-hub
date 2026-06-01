@@ -184,7 +184,7 @@ export function useUpdateSector() {
       id: number;
       data: Partial<SectorFormData>;
     }): Promise<Sector> => {
-      const updateData: SectorFormData = { ...data };
+      const updateData: Partial<SectorFormData> = { ...data };
       if (data.name && !data.slug) {
         updateData.slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       }

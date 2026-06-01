@@ -273,7 +273,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
     testsectorId = catData?.id || 1;
 
     // Project
-    const { data: pj } = await supabaseAdmin.from('opportunities' as any).insert({
+    const { data: pj } = await supabaseAdmin.from('opportunities').insert({
       title: `Test Assign Project ${Date.now()}`, description: 'Test', status: 'open',
       sector_id: testsectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
@@ -310,7 +310,7 @@ describe.skip('assign_reviewers_to_application RPC (Integration)', () => {
       await supabaseAdmin.from('application_assignments').delete().eq('application_id', testApplicationId);
       await supabaseAdmin.from('applications').delete().eq('id', testApplicationId);
     }
-    if (testProjectId) await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
+    if (testProjectId) await supabaseAdmin.from('opportunities').delete().eq('id', testProjectId);
     for (const rid of testReviewerIds) await supabaseAdmin.from('reviewer_sectors').delete().eq('reviewer_id', rid);
     for (const uid of [...testReviewerIds, testApplicantId, adminUserId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }

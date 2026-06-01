@@ -163,7 +163,7 @@ describe('useApplications - Integration Tests', () => {
 
     for (const project of testProjects) {
       const { data: newProject, error: projectError } = await supabaseAdmin
-        .from('opportunities' as any)
+        .from('opportunities')
         .insert(project)
         .select('id')
         .single();
@@ -240,7 +240,7 @@ describe('useApplications - Integration Tests', () => {
     // Clean up test projects
     if (testProjectIds.length > 0) {
       await supabaseAdmin
-        .from('opportunities' as any)
+        .from('opportunities')
         .delete()
         .in('id', testProjectIds);
     }

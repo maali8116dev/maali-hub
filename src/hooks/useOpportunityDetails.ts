@@ -36,7 +36,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       }
 
       const { data, error } = await (supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .select(`
           *,
           sector:sectors(name),
@@ -68,7 +68,7 @@ export function useOpportunityDetails(opportunityId: string | undefined): UseOpp
       if (!data) {
         // Log available opportunities for debugging
         const { data: allOpportunities } = await (supabase
-          .from("opportunities" as any)
+          .from("opportunities")
           .select("id, title")
           .limit(10) as any);
         console.warn("Opportunity not found. Available opportunity IDs:", (allOpportunities as any[])?.map((o: any) => o.id) || []);
