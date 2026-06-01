@@ -250,7 +250,7 @@ export function useCreateProject() {
 
       const { data: result, error } = await supabase
         .from("opportunities")
-        .insert(insertData)
+        .insert(insertData as any)
         .select(`
           *,
           sectors:sector_id(name)
