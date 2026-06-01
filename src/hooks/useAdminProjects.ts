@@ -150,7 +150,7 @@ export function useAdminProjects() {
     queryKey: ["admin-projects"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .select(`
           *,
           sectors:sector_id(name)
@@ -175,7 +175,7 @@ export function useProject(id: number | undefined) {
       if (!id) throw new Error("Opportunity ID is required");
       
       const { data, error } = await supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .select(`
           *,
           sectors:sector_id(name)
@@ -249,7 +249,7 @@ export function useCreateProject() {
       };
 
       const { data: result, error } = await supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .insert(insertData)
         .select(`
           *,
@@ -302,7 +302,7 @@ export function useUpdateProject() {
       const updateData = await toSnakeCase(data as ProjectFormData);
       
       const { data: result, error } = await supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .update(updateData)
         .eq("id", id)
         .select(`
@@ -356,7 +356,7 @@ export function useDeleteProject() {
     mutationFn: async (id: number) => {
       // Fetch opportunity title before deleting for logging
       const { data: project } = await supabase
-        .from("opportunities" as any)
+        .from("opportunities")
         .select("title")
         .eq("id", id)
         .single();

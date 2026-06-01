@@ -274,7 +274,7 @@ export function usePopularTags(limit = 15) {
  */
 async function fetchLocationsDirect(): Promise<string[]> {
   const { data, error } = await (supabase
-    .from("opportunities" as any)
+    .from("opportunities")
     .select("location") as any);
 
   if (error) throw error;
@@ -306,7 +306,7 @@ export function useOpportunityLocations() {
  */
 async function fetchCountriesDirect(): Promise<string[]> {
   const { data, error } = await (supabase
-    .from("opportunities" as any)
+    .from("opportunities")
     .select("country")
     .not("country", "is", null) as any);
 
@@ -339,7 +339,7 @@ export function useOpportunityCountries() {
  */
 async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
   const { data, error } = await (supabase
-    .from("opportunities" as any)
+    .from("opportunities")
     .select(`
       *,
       partner:partners(name),
