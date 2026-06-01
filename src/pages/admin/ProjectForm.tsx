@@ -228,7 +228,7 @@ const ProjectForm = () => {
   return (
     <OpportunityFormContent
       variant="admin"
-      form={form}
+      form={form as any}
       backHref="/admin/opportunities"
       backLabel="Back to Opportunities"
       onBack={() => navigate("/admin/opportunities")}
@@ -249,14 +249,14 @@ const ProjectForm = () => {
       addTag={addTag}
       removeTag={removeTag}
       handleTagKeyDown={handleTagKeyDown}
-      onSubmit={onSubmit}
-      documents={documents}
+      onSubmit={onSubmit as any}
+      documents={documents as any}
       isFilesUploading={isFilesUploading}
-      upload={upload}
-      remove={remove}
+      upload={upload as any}
+      remove={remove as any}
       pendingFiles={pendingFiles}
       setPendingFiles={setPendingFiles}
-      uploadWithId={uploadWithId}
+      uploadWithId={uploadWithId as any}
       showImageSection
       imageUrl={form.watch("imageUrl")}
       onImageChange={(url) => setValue("imageUrl", url || "")}
