@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMembership } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
 import { getProjectDisplayStatus, isProjectOpen } from "@/lib/projectAvailability";
+import { formatDisplayLocation } from "@/lib/formatLocation";
 
 // Props for legacy mock data (used in FeaturedProjects)
 interface LegacyProjectCardProps {
@@ -109,16 +110,16 @@ const ProjectCard = (props: ProjectCardProps) => {
   const needsMembership = !!user && !membershipLoading && !canApplyToOpportunities;
   const applyDisabled = isDisabled || hasSubmittedApplication || needsMembership;
 
-  // Parse location string to handle multiple countries (comma-separated)
   const parseLocations = (locationString: string): string[] => {
     if (!locationString) return [];
     return locationString
-      .split(',')
-      .map(loc => loc.trim())
-      .filter(loc => loc.length > 0);
+      .split(",")
+      .map((loc) => formatDisplayLocation(loc.trim()))
+      .filter((loc) => loc.length > 0);
   };
 
   const locations = parseLocations(country);
+  const formattedCountry = formatDisplayLocation(country);
 
   const plainDescription = description
     ? description.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
@@ -178,7 +179,7 @@ const ProjectCard = (props: ProjectCardProps) => {
                   ))}
                 </div>
               ) : (
-                <span className="break-words">{locations[0] || country}</span>
+                <span className="break-words">{locations[0] || formattedCountry}</span>
               )}
             </div>
           </div>

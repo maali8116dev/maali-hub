@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Home, ArrowLeft, Search, FileQuestion } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/seo/SEO";
 
 const NotFound = () => {
   const location = useLocation();
@@ -19,6 +20,11 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO
+        title="Page Not Found"
+        description="The page you requested does not exist. Browse opportunities or return to the Maali homepage."
+        noindex
+      />
       <Navigation />
       <main className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16">
         <div className="w-full max-w-2xl">
@@ -67,7 +73,7 @@ const NotFound = () => {
                   className="min-h-[44px]"
                 >
                   <Search className="h-4 w-4 mr-2" />
-                  Browse Projects
+                  Browse Opportunities
                 </Button>
               </div>
 
@@ -81,7 +87,7 @@ const NotFound = () => {
                     to="/opportunities"
                     className="text-primary hover:underline transition-colors"
                   >
-                    Projects
+                    Opportunities
                   </Link>
                   <Link
                     to="/dashboard"

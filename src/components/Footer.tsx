@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Loader2 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { pathname } = useLocation();
+  const showNewsletter = pathname !== "/";
   const { t } = useTranslation("landing");
   const [footerEmail, setFooterEmail] = useState("");
   const { subscribe, isSubmitting } = useNewsletterSubscribe();
@@ -58,7 +61,7 @@ const Footer = () => {
                 Maali
               </h3>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Empowering African entrepreneurs through accessible funding opportunities and a supportive ecosystem. Join thousands of innovators building the future of Africa.
+                Empowering African talent through accessible opportunities and a supportive ecosystem. Join thousands building the future of Africa.
               </p>
               
               {/* Contact Info */}
@@ -77,36 +80,38 @@ const Footer = () => {
                 </div>
               </div>
 
-              <form
-                className="space-y-3"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const ok = await subscribe(footerEmail, "footer");
-                  if (ok) setFooterEmail("");
-                }}
-              >
-                <h4 className="font-semibold text-sm">{t("newsletter.title")}</h4>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Input
-                    type="email"
-                    placeholder={t("newsletter.emailPlaceholder")}
-                    value={footerEmail}
-                    onChange={(e) => setFooterEmail(e.target.value)}
-                    className="flex-1 min-h-[44px] sm:min-h-0"
-                    required
-                    disabled={isSubmitting}
-                  />
-                  <Button
-                    type="submit"
-                    variant="hero"
-                    size="sm"
-                    className="min-h-[44px] sm:min-h-0"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("newsletter.subscribe")}
-                  </Button>
-                </div>
-              </form>
+              {showNewsletter && (
+                <form
+                  className="space-y-3"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const ok = await subscribe(footerEmail, "footer");
+                    if (ok) setFooterEmail("");
+                  }}
+                >
+                  <h4 className="font-semibold text-sm">{t("newsletter.title")}</h4>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      type="email"
+                      placeholder={t("newsletter.emailPlaceholder")}
+                      value={footerEmail}
+                      onChange={(e) => setFooterEmail(e.target.value)}
+                      className="flex-1 min-h-[44px] sm:min-h-0"
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      size="sm"
+                      className="min-h-[44px] sm:min-h-0"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("newsletter.subscribe")}
+                    </Button>
+                  </div>
+                </form>
+              )}
 
               {/* Payment Methods */}
               {/* <div className="space-y-3">

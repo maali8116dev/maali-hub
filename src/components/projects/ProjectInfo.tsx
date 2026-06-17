@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase } from "lucide-react";
 import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
+import { formatDisplayLocation } from "@/lib/formatLocation";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 import InfoField from "@/components/application/shared/InfoField";
 
@@ -101,7 +102,7 @@ const formatProjectDate = (dateString: string) => {
           <InfoField 
             icon={MapPin} 
             label="Location" 
-            value={project.location}
+            value={formatDisplayLocation(project.location)}
           />
         
           <InfoField 

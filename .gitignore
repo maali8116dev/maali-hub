@@ -48,3 +48,7 @@ supabase/migrations_backup/**
 scripts/split_migrations.py
 
 images/
+
+maali migration doc.pdf
+maali-migration.pdf
+migration-lovable-to-vercel.html

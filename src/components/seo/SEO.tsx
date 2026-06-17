@@ -11,8 +11,9 @@ export interface SEOProps {
   noindex?: boolean;
 }
 
-const DEFAULT_TITLE = 'Maali - Empowering African Entrepreneurs';
-const DEFAULT_DESCRIPTION = 'Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here.';
+const DEFAULT_TITLE = "Empowering African Talent | Maali Platform";
+const DEFAULT_DESCRIPTION =
+  "Discover grants, jobs, internships, trainings, scholarships, and more. Connect with programs, partners, and reviewers on Africa's opportunity hub.";
 const DEFAULT_IMAGE = '/og-image-default.png';
 const DEFAULT_SITE_NAME = 'Maali Platform';
 

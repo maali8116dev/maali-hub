@@ -70,9 +70,9 @@ function transformOpportunity(data: any): PartnerOpportunity {
 
 export function usePartnerOpportunities() {
   const { user } = useAuth();
-  const { data: partnerOrg } = usePartnerOrg();
+  const { data: partnerOrg, isLoading: isPartnerOrgLoading } = usePartnerOrg();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ["partner-opportunities", user?.id, partnerOrg?.id],
     queryFn: async () => {
       if (!partnerOrg?.id) return [];
@@ -86,8 +86,13 @@ export function usePartnerOpportunities() {
       if (error) throw error;
       return (data || []).map(transformOpportunity);
     },
-    enabled: !!user,
+    enabled: !!user && !isPartnerOrgLoading,
   });
+
+  return {
+    ...query,
+    isLoading: query.isLoading || isPartnerOrgLoading,
+  };
 }
 
 export function usePartnerOpportunity(id?: number) {

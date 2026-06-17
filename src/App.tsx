@@ -15,6 +15,7 @@ import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
 import { RouteSEO } from "@/components/seo/RouteSEO";
+import PageFallback from "@/components/PageFallback";
 
 // Critical path - eagerly loaded
 import Index from "./pages/Index";
@@ -111,11 +112,6 @@ const PartnerNotifications = lazy(() => import("./pages/partner/Notifications"))
 const ErrorTest = lazy(() => import("./tests/ErrorTest"));
 
 const queryClient = new QueryClient();
-
-// Minimal loading fallback - invisible to avoid layout shift
-const PageFallback = () => (
-  <div className="min-h-screen bg-background" />
-);
 
 // Component to initialize tracking after consent
 const TrackingInitializer = () => {

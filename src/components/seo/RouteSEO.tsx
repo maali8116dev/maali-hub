@@ -17,7 +17,7 @@ const META: Record<string, Meta> = {
   "/about": {
     title: "About Maali",
     description:
-      "Learn how Maali empowers African entrepreneurs and talent by connecting them with funding, mentorship, and career-defining opportunities.",
+      "Learn how Maali empowers African talent by connecting them with funding, mentorship, and career-defining opportunities.",
   },
   "/resources": {
     title: "Resources",
@@ -32,7 +32,7 @@ const META: Record<string, Meta> = {
   "/partners": {
     title: "Our Partners",
     description:
-      "Meet the funding, support, and ecosystem partners working with Maali to unlock opportunities for African entrepreneurs and talent.",
+      "Meet the funding, support, and ecosystem partners working with Maali to unlock opportunities for African talent.",
   },
   "/success-stories": {
     title: "Success Stories",
@@ -57,7 +57,7 @@ const META: Record<string, Meta> = {
   "/mentors": {
     title: "Mentors",
     description:
-      "Connect with experienced mentors across industries who guide African entrepreneurs and professionals on their journey.",
+      "Connect with experienced mentors across industries who guide African talent on their journey.",
   },
   "/guide": {
     title: "Getting Started Guide",

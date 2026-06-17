@@ -111,7 +111,13 @@ const PartnerOpportunities = () => {
         </Button>
       </div>
 
-      {opportunities.length === 0 && !isLoading ? (
+      {opportunities.length === 0 && isLoading ? (
+        <Card>
+          <CardContent className="p-0">
+            <TableSkeleton rows={5} columns={6} />
+          </CardContent>
+        </Card>
+      ) : opportunities.length === 0 ? (
         <div className="space-y-4">
           <InAppTip
             id="partner-empty-opportunities"
