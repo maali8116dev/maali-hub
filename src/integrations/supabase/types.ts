@@ -1160,6 +1160,7 @@ export type Database = {
           id: string
           last_name: string | null
           partner_id: number | null
+          partner_role: Database["public"]["Enums"]["partner_org_role"] | null
           phone_number: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -1177,6 +1178,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           partner_id?: number | null
+          partner_role?: Database["public"]["Enums"]["partner_org_role"] | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -1194,6 +1196,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           partner_id?: number | null
+          partner_role?: Database["public"]["Enums"]["partner_org_role"] | null
           phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -2074,6 +2077,20 @@ export type Database = {
           total_reviews: number
         }[]
       }
+      get_partner_team_members: {
+        Args: { p_partner_id: number }
+        Returns: {
+          email: string
+          first_name: string
+          last_name: string
+          partner_role: Database["public"]["Enums"]["partner_org_role"]
+          user_id: string
+        }[]
+      }
+      get_user_partner_org_id: {
+        Args: { user_uuid?: string }
+        Returns: number
+      }
       get_rate_limit_config: {
         Args: { p_operation_type: string }
         Returns: Record<string, unknown>
@@ -2169,17 +2186,44 @@ export type Database = {
       }
       get_user_role: { Args: { user_uuid: string }; Returns: string }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
+      is_partner_org_admin: {
+        Args: { user_uuid?: string }
+        Returns: boolean
+      }
       is_opportunity_open: {
         Args: { p_opportunity_id: number }
         Returns: boolean
       }
       is_project_open: { Args: { p_project_id: number }; Returns: boolean }
+      link_partner_team_member: {
+        Args: {
+          p_partner_id: number
+          p_role?: Database["public"]["Enums"]["partner_org_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       mark_all_notifications_read: {
         Args: { p_user_id: string }
         Returns: number
       }
       mark_notification_read: {
         Args: { p_notification_id: string }
+        Returns: boolean
+      }
+      remove_partner_team_member: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      update_partner_team_member_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["partner_org_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      user_belongs_to_partner_org: {
+        Args: { org_id: number; user_uuid?: string }
         Returns: boolean
       }
       user_can_apply_to_opportunities: {
@@ -2236,6 +2280,7 @@ export type Database = {
         | "scholarship"
         | "training"
       program_format: "online" | "in_person" | "hybrid"
+      partner_org_role: "admin" | "member"
       user_role: "admin" | "reviewer" | "applicant" | "partner"
     }
     CompositeTypes: {
@@ -2402,6 +2447,7 @@ export const Constants = {
         "training",
       ],
       program_format: ["online", "in_person", "hybrid"],
+      partner_org_role: ["admin", "member"],
       user_role: ["admin", "reviewer", "applicant", "partner"],
     },
   },

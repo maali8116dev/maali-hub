@@ -32,12 +32,23 @@ async function canTranslateOpportunity(userId: string, opportunityId: number): P
   if (opportunity.created_by === userId) return true;
 
   const { data: partner } = await supabaseAdmin
+    .from("profiles")
+    .select("partner_id")
+    .eq("user_id", userId)
+    .eq("role", "partner")
+    .maybeSingle();
+
+  if (partner?.partner_id && opportunity.partner_id === partner.partner_id) {
+    return true;
+  }
+
+  const { data: legacyPartner } = await supabaseAdmin
     .from("partners")
     .select("id")
     .eq("user_id", userId)
     .maybeSingle();
 
-  return Boolean(partner?.id && opportunity.partner_id === partner.id);
+  return Boolean(legacyPartner?.id && opportunity.partner_id === legacyPartner.id);
 }
 
 serve(async (req: Request) => {

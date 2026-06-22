@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ImageUpload } from "@/components/ui/image-upload";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { useAuth } from "@/hooks/useAuth";
-import { usePartnerOrg, useUpdatePartnerOrg, usePartnerOrgLinked } from "@/hooks/usePartnerOrg";
+import { usePartnerOrg, useUpdatePartnerOrg, usePartnerOrgLinked, useIsPartnerOrgAdmin } from "@/hooks/usePartnerOrg";
 import { useSectors } from "@/hooks/useSectors";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useToast } from "@/hooks/use-toast";
 import { PartnerOrgRequiredAlert } from "@/components/partner/PartnerOrgRequiredAlert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getLocalizedSectorName } from "@/lib/localizedSector";
 
 type SettingsValues = {
@@ -33,6 +34,7 @@ const PartnerSettings = () => {
   const { t } = useTranslation(["dashboard", "common"]);
   const { data: partnerOrg, isLoading } = usePartnerOrg();
   const { isLinked, isLoading: isLoadingLink } = usePartnerOrgLinked();
+  const canEditOrg = useIsPartnerOrgAdmin();
   const updatePartner = useUpdatePartnerOrg();
   const { toast } = useToast();
   const { data: sectors = [] } = useSectors();
@@ -147,6 +149,13 @@ const PartnerSettings = () => {
           </CardContent>
         </Card>
       ) : !isLinked ? null : (
+        <>
+          {!canEditOrg && (
+            <Alert>
+              <AlertTitle>{t("dashboard:partner.settingsPage.readOnlyTitle")}</AlertTitle>
+              <AlertDescription>{t("dashboard:partner.settingsPage.readOnlyDescription")}</AlertDescription>
+            </Alert>
+          )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Card>
@@ -157,6 +166,7 @@ const PartnerSettings = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <span className="text-sm font-medium">{t("dashboard:partner.settingsPage.orgProfile.logo")}</span>
+                  <div className={!canEditOrg ? "pointer-events-none opacity-60" : undefined}>
                   <ImageUpload
                     value={logoUrl || undefined}
                     onChange={(url) => form.setValue("logo_url", url || "")}
@@ -171,6 +181,7 @@ const PartnerSettings = () => {
                     placeholder={t("dashboard:partner.settingsPage.orgProfile.uploadLogo")}
                     variant="avatar"
                   />
+                  </div>
                 </div>
 
                 <CustomFormField
@@ -179,6 +190,7 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.orgProfile.name")}
                   fieldType={FormFieldType.INPUT}
                   placeholder={t("dashboard:partner.settingsPage.orgProfile.namePlaceholder")}
+                  disabled={!canEditOrg}
                 />
 
                 <CustomFormField
@@ -187,6 +199,7 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.orgProfile.descriptionLabel")}
                   fieldType={FormFieldType.TEXTAREA}
                   placeholder={t("dashboard:partner.settingsPage.orgProfile.descriptionPlaceholder")}
+                  disabled={!canEditOrg}
                 />
 
                 <CustomFormField
@@ -195,6 +208,7 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.orgProfile.website")}
                   fieldType={FormFieldType.INPUT}
                   placeholder={t("dashboard:partner.settingsPage.orgProfile.websitePlaceholder")}
+                  disabled={!canEditOrg}
                 />
 
                 <FormField
@@ -203,7 +217,7 @@ const PartnerSettings = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("dashboard:partner.settingsPage.orgProfile.sector")}</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={!canEditOrg}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={t("dashboard:partner.settingsPage.orgProfile.sectorPlaceholder")} />
@@ -236,6 +250,7 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.contact.name")}
                   fieldType={FormFieldType.INPUT}
                   placeholder={t("dashboard:partner.settingsPage.contact.namePlaceholder")}
+                  disabled={!canEditOrg}
                 />
 
                 <CustomFormField
@@ -244,6 +259,7 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.contact.phone")}
                   fieldType={FormFieldType.INPUT}
                   placeholder={t("dashboard:partner.settingsPage.contact.phonePlaceholder")}
+                  disabled={!canEditOrg}
                 />
 
                 <CustomFormField
@@ -252,17 +268,21 @@ const PartnerSettings = () => {
                   label={t("dashboard:partner.settingsPage.contact.country")}
                   fieldType={FormFieldType.INPUT}
                   placeholder={t("dashboard:partner.settingsPage.contact.countryPlaceholder")}
+                  disabled={!canEditOrg}
                 />
               </CardContent>
             </Card>
 
+            {canEditOrg && (
             <div className="flex justify-end">
               <Button type="submit" disabled={updatePartner.isPending}>
                 {updatePartner.isPending ? t("dashboard:settings.save.saving") : t("dashboard:settings.save.saveChanges")}
               </Button>
             </div>
+            )}
           </form>
         </Form>
+        </>
       )}
     </div>
   );

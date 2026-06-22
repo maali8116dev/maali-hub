@@ -33,6 +33,7 @@ type Partner = {
   created_at: string;
   updated_at: string;
   linkedUser?: string;
+  memberCount?: number;
 };
 
 const AdminPartners = () => {
@@ -57,6 +58,23 @@ const AdminPartners = () => {
       if (error) throw error;
       const partnerList = (data || []) as Partner[];
 
+      const partnerIds = partnerList.map((p) => p.id);
+      let memberCountMap: Record<number, number> = {};
+      if (partnerIds.length > 0) {
+        const { data: members } = await supabase
+          .from("profiles")
+          .select("partner_id")
+          .eq("role", "partner")
+          .in("partner_id", partnerIds);
+        if (members) {
+          members.forEach((m) => {
+            if (m.partner_id != null) {
+              memberCountMap[m.partner_id] = (memberCountMap[m.partner_id] || 0) + 1;
+            }
+          });
+        }
+      }
+
       // Fetch linked user profiles
       const userIds = partnerList.map((p) => p.user_id).filter(Boolean) as string[];
       let profileMap: Record<string, string> = {};
@@ -76,6 +94,7 @@ const AdminPartners = () => {
         partnerList.map((p) => ({
           ...p,
           linkedUser: p.user_id ? profileMap[p.user_id] : undefined,
+          memberCount: memberCountMap[p.id] || 0,
         }))
       );
     } catch (error: any) {
@@ -176,6 +195,16 @@ const AdminPartners = () => {
         if (s === "inactive") return <Badge variant="secondary">Inactive</Badge>;
         return <Badge variant="outline">{s}</Badge>;
       },
+    },
+    {
+      id: "teamSize",
+      header: "Team",
+      accessorKey: "memberCount",
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {row.original.memberCount ?? 0} member{(row.original.memberCount ?? 0) === 1 ? "" : "s"}
+        </span>
+      ),
     },
     {
       id: "linkedUser",

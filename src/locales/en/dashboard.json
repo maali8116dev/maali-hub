@@ -2101,12 +2101,14 @@
       "dashboard": "Dashboard",
       "opportunities": "My Opportunities",
       "notifications": "Notifications",
+      "team": "Team",
       "settings": "Settings"
     },
     "pages": {
       "dashboard": "Partner Dashboard",
       "opportunities": "My Opportunities",
       "notifications": "Notifications",
+      "team": "Team",
       "settings": "Settings",
       "opportunityDetails": "Opportunity Details",
       "qualifiedApplicants": "Qualified Applicants",
@@ -2218,6 +2220,38 @@
         "updatedDesc": "Your organization details have been saved.",
         "failed": "Update failed",
         "failedDesc": "Unable to save partner details."
+      },
+      "readOnlyTitle": "View-only access",
+      "readOnlyDescription": "Only partner organization admins can edit organization settings. Contact your org admin or Maali support for changes."
+    },
+    "teamPage": {
+      "title": "Team members",
+      "subtitle": "Manage who can access your partner organization on Maali.",
+      "description": "People with access to {{name}} on the partner portal.",
+      "loading": "Loading team members...",
+      "empty": "No team members linked yet.",
+      "inviteEmail": "Email address",
+      "inviteEmailPlaceholder": "colleague@organization.org",
+      "invalidEmail": "Enter a valid email address",
+      "inviteRole": "Role",
+      "sendInvite": "Send invite",
+      "inviteSuccess": "Invite sent",
+      "inviteSuccessDescription": "We sent a sign-in link to {{email}}.",
+      "inviteError": "Failed to send invite",
+      "roleUpdated": "Role updated",
+      "roleUpdateError": "Failed to update role",
+      "memberRemoved": "Member removed",
+      "removeError": "Failed to remove member",
+      "remove": "Remove",
+      "removeConfirmTitle": "Remove team member?",
+      "removeConfirmDescription": "They will lose access to this organization's partner portal until invited again.",
+      "cancel": "Cancel",
+      "you": "you",
+      "readOnlyTitle": "Team managed by admins",
+      "readOnlyDescription": "Only organization admins can invite or remove teammates. You can still view who has access.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Member"
       }
     },
     "setupWizard": {
