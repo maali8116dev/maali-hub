@@ -28,9 +28,10 @@ const ProtectedRoute = ({
     return <>{children}</>;
   }
 
-  // Use isPending for profile (true whenever no data yet, regardless of fetch state)
-  // membershipLoading already combines isLoading || isPending in useMembership
-  const isLoading = authLoading || (!!user && (profilePending || membershipLoading));
+  // Only block on profile/membership queries when we actually gate on membership.
+  // Membership-exempt routes (e.g. partner) skip this to avoid a second full-screen spinner.
+  const isLoading =
+    authLoading || (requireMembership && !!user && (profilePending || membershipLoading));
 
   if (isLoading) {
     return (

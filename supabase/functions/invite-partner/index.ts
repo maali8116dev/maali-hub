@@ -20,29 +20,45 @@ serve(async (req) => {
     return jsonResponse(req, 401, { error: auth.error ?? "Unauthorized" });
   }
 
-  // Only admins may invite partners.
   const { data: profile, error: profileError } = await supabaseAdmin
     .from("profiles")
-    .select("role")
+    .select("role, partner_id, partner_role")
     .eq("user_id", auth.user.id)
     .single();
 
-  if (profileError || profile?.role !== "admin") {
-    return jsonResponse(req, 403, { error: "Admin access required" });
+  if (profileError) {
+    return jsonResponse(req, 403, { error: "Profile not found" });
   }
 
-  const { email, partnerOrgName, partnerOrgId } = body as {
+  const { email, partnerOrgName, partnerOrgId, partnerRole } = body as {
     email?: string;
     partnerOrgName?: string;
     partnerOrgId?: number;
+    partnerRole?: "admin" | "member";
   };
 
   if (!email || !partnerOrgName) {
     return jsonResponse(req, 400, { error: "email and partnerOrgName are required" });
   }
 
-  // Generate a magic-link invite. This creates the user if they don't exist
-  // or reuses the existing account, then returns a one-time sign-in link.
+  const isPlatformAdmin = profile?.role === "admin";
+  const isPartnerOrgAdmin =
+    profile?.role === "partner" &&
+    profile?.partner_role === "admin" &&
+    profile?.partner_id != null &&
+    (!partnerOrgId || profile.partner_id === partnerOrgId);
+
+  if (!isPlatformAdmin && !isPartnerOrgAdmin) {
+    return jsonResponse(req, 403, { error: "Admin or partner org admin access required" });
+  }
+
+  if (!isPlatformAdmin && partnerOrgId && profile.partner_id !== partnerOrgId) {
+    return jsonResponse(req, 403, { error: "Cannot invite to another organization" });
+  }
+
+  const resolvedOrgId = partnerOrgId ?? profile.partner_id ?? null;
+  const resolvedRole = partnerRole ?? (resolvedOrgId ? "member" : "admin");
+
   const siteUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
   const redirectTo = `${siteUrl}/partner`;
 
@@ -60,33 +76,64 @@ serve(async (req) => {
   const invitedUser = linkData.user;
   const inviteUrl = linkData.properties?.action_link;
 
-  // Set the user's role to partner in their profile.
-  // upsert handles both new users (no profile yet) and existing ones.
+  const { data: existingProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("role, partner_id")
+    .eq("user_id", invitedUser.id)
+    .maybeSingle();
+
+  if (existingProfile) {
+    if (existingProfile.role === "admin" || existingProfile.role === "reviewer") {
+      return jsonResponse(req, 409, {
+        error: "This user already has an admin or reviewer account and cannot be added to a partner team.",
+      });
+    }
+    if (
+      existingProfile.partner_id != null &&
+      resolvedOrgId != null &&
+      existingProfile.partner_id !== resolvedOrgId
+    ) {
+      return jsonResponse(req, 409, {
+        error: "This user already belongs to another partner organization.",
+      });
+    }
+  }
+
   const { error: profileUpdateError } = await supabaseAdmin
     .from("profiles")
     .upsert(
-      { user_id: invitedUser.id, role: "partner" },
+      {
+        user_id: invitedUser.id,
+        role: "partner",
+        partner_id: resolvedOrgId,
+        partner_role: resolvedOrgId ? resolvedRole : null,
+      },
       { onConflict: "user_id" },
     );
 
   if (profileUpdateError) {
     console.error("[invite-partner] profile upsert error:", profileUpdateError.message);
-    // Non-fatal: link the user anyway, admin can fix the role manually.
   }
 
-  // If a partner org ID was provided, link the user to it immediately.
-  if (partnerOrgId) {
-    const { error: linkOrgError } = await supabaseAdmin
+  if (resolvedOrgId) {
+    const { data: orgRow } = await supabaseAdmin
       .from("partners")
-      .update({ user_id: invitedUser.id })
-      .eq("id", partnerOrgId);
+      .select("user_id")
+      .eq("id", resolvedOrgId)
+      .maybeSingle();
 
-    if (linkOrgError) {
-      console.error("[invite-partner] partner link error:", linkOrgError.message);
+    if (!orgRow?.user_id) {
+      const { error: linkOrgError } = await supabaseAdmin
+        .from("partners")
+        .update({ user_id: invitedUser.id })
+        .eq("id", resolvedOrgId);
+
+      if (linkOrgError) {
+        console.error("[invite-partner] partner link error:", linkOrgError.message);
+      }
     }
   }
 
-  // Send the invite email via the send-email function.
   const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
   const emailResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-email`, {
     method: "POST",
@@ -109,7 +156,6 @@ serve(async (req) => {
 
   if (!emailResp.ok) {
     console.error("[invite-partner] send-email failed:", await emailResp.text());
-    // Still succeed — the user and link are created, admin can resend manually.
   }
 
   return jsonResponse(req, 200, {

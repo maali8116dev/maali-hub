@@ -27,6 +27,9 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import RoleBasedRoute from "@/components/RoleBasedRoute";
+// Partner shell is eager so its sidebar chrome renders immediately on reload
+// instead of flashing the public-site PageFallback skeleton.
+import PartnerLayout from "@/components/partner/PartnerLayout";
 
 // Lazy-loaded public pages
 const Opportunities = lazy(() => import("./pages/projects/Opportunities"));
@@ -105,13 +108,13 @@ const ReviewerSettings = lazy(() => import("./pages/reviewer/Settings"));
 const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"));
 
 // Lazy-loaded partner pages
-const PartnerLayout = lazy(() => import("@/components/partner/PartnerLayout"));
 const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
 const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"));
 const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
 const PartnerOpportunityDetails = lazy(() => import("./pages/partner/OpportunityDetails"));
 const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
+const PartnerTeam = lazy(() => import("./pages/partner/Team"));
 const PartnerNotifications = lazy(() => import("./pages/partner/Notifications"));
 
 // Test page
@@ -679,7 +682,7 @@ const App = () => {
             path="/partner"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerDashboard />
                 </PartnerLayout>
@@ -691,7 +694,7 @@ const App = () => {
             path="/partner/opportunities"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerOpportunities />
                 </PartnerLayout>
@@ -703,7 +706,7 @@ const App = () => {
             path="/partner/opportunities/new"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerOpportunityForm />
                 </PartnerLayout>
@@ -715,7 +718,7 @@ const App = () => {
             path="/partner/opportunities/:id/edit"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerOpportunityForm />
                 </PartnerLayout>
@@ -727,7 +730,7 @@ const App = () => {
             path="/partner/opportunities/:id/applications"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerOpportunityApplications />
                 </PartnerLayout>
@@ -739,9 +742,21 @@ const App = () => {
             path="/partner/opportunities/:id"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerOpportunityDetails />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/team"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
+                <PartnerLayout>
+                  <PartnerTeam />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>
@@ -751,7 +766,7 @@ const App = () => {
             path="/partner/settings"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerSettings />
                 </PartnerLayout>
@@ -763,7 +778,7 @@ const App = () => {
             path="/partner/notifications"
             element={
               <RoleBasedRoute allowedRoles={["partner", "admin"]}>
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
                 <PartnerLayout>
                   <PartnerNotifications />
                 </PartnerLayout>

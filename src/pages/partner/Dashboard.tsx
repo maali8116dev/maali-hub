@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -29,6 +29,8 @@ import { usePartnerOrgLinked } from "@/hooks/usePartnerOrg";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { Button } from "@/components/ui/button";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 
@@ -106,11 +108,14 @@ const PartnerDashboard = () => {
 
 
 
-      <PartnerOrgRequiredAlert />
-
-
-
-      <PartnerOnboardingChecklist />
+      {isLoadingOrg ? (
+        <Skeleton className="h-24 w-full rounded-lg" />
+      ) : (
+        <>
+          <PartnerOrgRequiredAlert />
+          <PartnerOnboardingChecklist />
+        </>
+      )}
 
 
 
