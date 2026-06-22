@@ -1,4 +1,9 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { pickLocalizedField, type OpportunityTranslations } from "@/lib/localizedContent";
+import { ListItemsRenderer } from "@/components/projects/ListItemsRenderer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +56,8 @@ const DocumentUploadSection = ({
   onLibraryDocumentsChange,
   applicantType,
 }: DocumentUploadSectionProps) => {
+  const { t, i18n } = useTranslation("dashboard");
+  const doc = "applications.form.documents";
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<SelectedFile | null>(null);
@@ -65,6 +72,34 @@ const DocumentUploadSection = ({
 
   const { fetchLibraryDocuments, isLoading: isLoadingLibrary } = useDocumentUpload();
   const [libraryDocuments, setLibraryDocuments] = useState<UploadedDocument[]>([]);
+
+  const { data: opportunityDocs } = useQuery({
+    queryKey: ["opportunity-document-requirements", opportunityId, i18n.language],
+    queryFn: async () => {
+      if (!opportunityId) return null;
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select("requirements, translations")
+        .eq("id", opportunityId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        requirements: string | null;
+        translations: OpportunityTranslations | null;
+      } | null;
+    },
+    enabled: !!opportunityId,
+  });
+
+  const localizedRequirements = useMemo(() => {
+    if (!opportunityDocs?.requirements?.trim()) return "";
+    return pickLocalizedField(
+      i18n.language,
+      opportunityDocs.requirements,
+      opportunityDocs.translations,
+      "requirements",
+    );
+  }, [opportunityDocs, i18n.language]);
 
   // Initialize from store on mount and when navigating back (store has files but local state is empty)
   useEffect(() => {
@@ -113,8 +148,8 @@ const DocumentUploadSection = ({
   }, [fetchLibraryDocuments, storeLibraryIds.length]);
 
   const slotLabel = (type: UploadedDocument["documentType"]) => {
-    if (type === "cv") return "CV / Resume";
-    if (type === "cover_letter") return "Cover letter";
+    if (type === "cv") return t(`${doc}.cv`);
+    if (type === "cover_letter") return t(`${doc}.coverLetter`);
     return null;
   };
 
@@ -160,10 +195,10 @@ const DocumentUploadSection = ({
     ];
 
     if (file.size > MAX_FILE_SIZE) {
-      return `File "${file.name}" is too large. Maximum size is 10MB.`;
+      return t(`${doc}.fileTooLarge`, { fileName: file.name });
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.`;
+      return t(`${doc}.invalidFileType`, { fileName: file.name });
     }
     return null;
   };
@@ -195,7 +230,7 @@ const DocumentUploadSection = ({
 
       if (errors.length > 0) {
         toast({
-          title: "Invalid File",
+          title: t(`${doc}.invalidFile`),
           description: errors[0],
           variant: "destructive",
         });
@@ -256,41 +291,56 @@ const DocumentUploadSection = ({
   };
 
   // Define required documents (marked with asterisk)
-  const requiredDocuments = applicantType === "Individual"
-    ? new Set([
-        "Government-issued ID (if requested)",
-        "Project proposal or concept note",
-      ])
-    : new Set([
-        "Registration certificate or legal incorporation document",
-        "Project proposal or concept note",
+  const requiredDocuments = useMemo(() => {
+    if (applicantType === "Individual") {
+      return new Set([
+        t(`${doc}.individualRecommended.id`),
+        t(`${doc}.individualRecommended.proposal`),
       ]);
+    }
+    return new Set([
+      t(`${doc}.organizationRecommended.registration`),
+      t(`${doc}.organizationRecommended.proposal`),
+    ]);
+  }, [applicantType, t, i18n.language]);
 
-  const recommendedDocuments = applicantType === "Individual"
-    ? [
-        "Government-issued ID (if requested)",
-        "Project proposal or concept note",
-        "Budget or simple financial plan",
-        "CV/portfolio or relevant experience documents",
-      ]
-    : [
-        "Registration certificate or legal incorporation document",
-        "Organization profile or mission document",
-        "Project proposal or concept note",
-        "Budget/financial plan (plus statements where available)",
-        "Team CVs and key personnel profiles",
+  const recommendedDocuments = useMemo(() => {
+    if (applicantType === "Individual") {
+      return [
+        t(`${doc}.individualRecommended.id`),
+        t(`${doc}.individualRecommended.proposal`),
+        t(`${doc}.startupRecommended.budget`),
+        t(`${doc}.startupRecommended.cv`),
       ];
+    }
+    return [
+      t(`${doc}.ngoRecommended.registration`),
+      t(`${doc}.ngoRecommended.profile`),
+      t(`${doc}.ngoRecommended.proposal`),
+      t(`${doc}.ngoRecommended.budget`),
+      t(`${doc}.ngoRecommended.team`),
+    ];
+  }, [applicantType, t, i18n.language]);
 
   return (
     <div className="space-y-6">
+      {localizedRequirements && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{t(`${doc}.opportunityRequirementsTitle`)}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ListItemsRenderer items={localizedRequirements} variant="primary" />
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Recommended Supporting Documents</CardTitle>
+          <CardTitle className="text-base">{t(`${doc}.recommendedTitle`)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Upload any documents that strengthen your application. Recommended items:
-          </p>
+          <p className="text-sm text-muted-foreground">{t(`${doc}.recommendedIntro`)}</p>
           <ul className="space-y-1 text-sm">
             {recommendedDocuments.map((item) => (
               <li key={item} className="text-foreground">
@@ -302,7 +352,7 @@ const DocumentUploadSection = ({
             ))}
           </ul>
           <p className="text-xs text-muted-foreground italic">
-            You can upload all files in this one dropzone. Documents marked with <span className="text-destructive">*</span> are required.
+            {t(`${doc}.recommendedRequiredNote`)}
           </p>
         </CardContent>
       </Card>
@@ -313,15 +363,15 @@ const DocumentUploadSection = ({
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Library className="h-4 w-4" />
-              Select from Library
+              {t(`${doc}.selectFromLibraryTitle`)}
               {selectedLibraryDocIds.length > 0 && (
                 <span className="text-muted-foreground font-normal">
-                  ({selectedLibraryDocIds.length} selected)
+                  {t(`${doc}.selectedCount`, { count: selectedLibraryDocIds.length })}
                 </span>
               )}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Choose documents from your library to reuse for this application
+              {t(`${doc}.selectFromLibraryHint`)}
             </p>
           </CardHeader>
           <CardContent>
@@ -334,7 +384,7 @@ const DocumentUploadSection = ({
                 {typedLibraryDocs.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      From your document library
+                      {t(`${doc}.fromLibrarySection`)}
                     </p>
                     {typedLibraryDocs.map((doc) => (
                       <LibraryDocRow
@@ -352,7 +402,7 @@ const DocumentUploadSection = ({
                   <div className="space-y-2">
                     {typedLibraryDocs.length > 0 && (
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Other saved files
+                        {t(`${doc}.otherLibrarySection`)}
                       </p>
                     )}
                     {otherLibraryDocs.map((doc) => (
@@ -376,14 +426,14 @@ const DocumentUploadSection = ({
       {libraryDocuments.length > 0 && (
         <div className="flex items-center gap-4">
           <Separator className="flex-1" />
-          <span className="text-sm text-muted-foreground">OR</span>
+          <span className="text-sm text-muted-foreground">{t(`${doc}.orSeparator`)}</span>
           <Separator className="flex-1" />
         </div>
       )}
 
       {/* Upload New Files Section */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Upload New Documents</h3>
+        <h3 className="text-sm font-medium mb-3">{t(`${doc}.uploadNewDocuments`)}</h3>
         <div
           className={cn(
             "border-2 border-dashed rounded-lg p-6 text-center transition-colors",
@@ -407,14 +457,14 @@ const DocumentUploadSection = ({
                 variant="secondary"
                 onClick={() => fileInputRef.current?.click()}
               >
-                Choose Files
+                {t(`${doc}.chooseFiles`)}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP (max 10MB each)
+              {t(`${doc}.fileTypesHint`)}
             </p>
             <p className="text-xs text-muted-foreground italic">
-              Files will be uploaded when you submit your application
+              {t(`${doc}.uploadOnSubmitHint`)}
             </p>
           </div>
         </div>
@@ -425,7 +475,7 @@ const DocumentUploadSection = ({
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              Files to upload on submit ({selectedFiles.length})
+              {t(`${doc}.filesToUploadTitle`, { count: selectedFiles.length })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -439,7 +489,7 @@ const DocumentUploadSection = ({
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{selectedFile.file.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatFileSize(selectedFile.file.size)} • Ready to upload
+                      {formatFileSize(selectedFile.file.size)} • {t(`${doc}.readyToUpload`)}
                     </p>
                   </div>
                 </div>
@@ -472,15 +522,15 @@ const DocumentUploadSection = ({
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Document</AlertDialogTitle>
+            <AlertDialogTitle>{t(`${doc}.deleteConfirmTitle`)}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove "{deleteConfirm?.file.name}"? You can add it again before submitting.
+              {t(`${doc}.deleteConfirmDescription`, { name: deleteConfirm?.file.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${doc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Remove
+              {t(`${doc}.remove`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

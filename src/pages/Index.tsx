@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustIndicators from "@/components/landing/TrustIndicators";
@@ -14,15 +15,14 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { getSiteUrl } from "@/utils/seo";
 
 const Index = () => {
+  const { t } = useTranslation("landing");
   const siteUrl = getSiteUrl();
 
   return (
     <>
       <SEO
-        title="Empowering African Talent"
-        description="Discover grants, jobs, internships, trainings, scholarships, and more. Apply with confidence and track outcomes on Africa's opportunity hub."
-        // Keywords are optional - modern search engines ignore meta keywords
-        // Focus on quality content, title, and description instead
+        title={t("seo.home.title")}
+        description={t("seo.home.description")}
         url={siteUrl}
         type="website"
       />
@@ -31,7 +31,7 @@ const Index = () => {
         data={{
           name: "Maali Platform",
           url: siteUrl,
-          description: "Empowering African talent through grants, jobs, internships, trainings, scholarships, and career opportunities",
+          description: t("seo.home.orgDescription"),
         }}
         id="organization-schema"
       />
@@ -63,11 +63,3 @@ const Index = () => {
 };
 
 export default Index;
-
-
-
-
-
-
-
-

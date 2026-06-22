@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,17 +38,31 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
-const sectorSchema = z.object({
-  name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
-  slug: z.string().optional(),
-  description: z.string().optional(),
-  is_active: z.boolean().optional(),
-});
-
-type SectorFormValues = z.infer<typeof sectorSchema>;
+type SectorFormValues = {
+  name: string;
+  slug?: string;
+  description?: string;
+  is_active?: boolean;
+};
 
 const Sectors = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const sectorSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(1, t("admin.sectorsPage.form.nameRequired"))
+          .min(2, t("admin.sectorsPage.form.nameMin")),
+        slug: z.string().optional(),
+        description: z.string().optional(),
+        is_active: z.boolean().optional(),
+      }),
+    [t, i18n.language]
+  );
+
   const { data: sectors = [], isLoading } = useAllSectors();
   const createSector = useCreateSector();
   const updateSector = useUpdateSector();
@@ -131,8 +145,8 @@ const Sectors = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">sectors</h1>
-          <p className="text-muted-foreground mt-2">Manage project sectors</p>
+          <h1 className="text-3xl font-bold">{t("admin.sectorsPage.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("admin.sectorsPage.subtitleLoading")}</p>
         </div>
         <div className="grid gap-4">
           {[1, 2, 3].map((i) => (
@@ -147,32 +161,32 @@ const Sectors = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">sectors</h1>
+          <h1 className="text-3xl font-bold">{t("admin.sectorsPage.title")}</h1>
           <p className="text-muted-foreground mt-2">
-            Manage project sectors and their display settings
+            {t("admin.sectorsPage.subtitle")}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Sector
+              {t("admin.sectorsPage.addSector")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Sector</DialogTitle>
+              <DialogTitle>{t("admin.sectorsPage.create.title")}</DialogTitle>
               <DialogDescription>
-                Add a new sector for projects. The slug will be auto-generated if not provided.
+                {t("admin.sectorsPage.create.description")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t("admin.sectorsPage.form.name")} *</Label>
                 <Input
                   id="name"
                   {...form.register("name")}
-                  placeholder="e.g., Technology"
+                  placeholder={t("admin.sectorsPage.form.namePlaceholder")}
                 />
                 {form.formState.errors.name && (
                   <p className="text-sm text-destructive mt-1">
@@ -181,19 +195,19 @@ const Sectors = () => {
                 )}
               </div>
               <div>
-                <Label htmlFor="slug">Slug (optional)</Label>
+                <Label htmlFor="slug">{t("admin.sectorsPage.form.slugOptional")}</Label>
                 <Input
                   id="slug"
                   {...form.register("slug")}
-                  placeholder="e.g., technology (auto-generated if empty)"
+                  placeholder={t("admin.sectorsPage.form.slugPlaceholder")}
                 />
               </div>
               <div>
-                <Label htmlFor="description">Description (optional)</Label>
+                <Label htmlFor="description">{t("admin.sectorsPage.form.descriptionOptional")}</Label>
                 <Textarea
                   id="description"
                   {...form.register("description")}
-                  placeholder="Brief description of this sector"
+                  placeholder={t("admin.sectorsPage.form.descriptionPlaceholder")}
                   rows={3}
                 />
               </div>
@@ -203,7 +217,7 @@ const Sectors = () => {
                   checked={form.watch("is_active") ?? true}
                   onCheckedChange={(checked) => form.setValue("is_active", checked)}
                 />
-                <Label htmlFor="is_active">Active</Label>
+                <Label htmlFor="is_active">{t("admin.sectorsPage.form.active")}</Label>
               </div>
               <div className="flex justify-end gap-2">
                 <Button
@@ -214,10 +228,10 @@ const Sectors = () => {
                     form.reset();
                   }}
                 >
-                  Cancel
+                  {t("admin.sectorsPage.form.cancel")}
                 </Button>
                 <Button type="submit" disabled={createSector.isPending}>
-                  {createSector.isPending ? "Creating..." : "Create"}
+                  {createSector.isPending ? t("admin.sectorsPage.create.creating") : t("admin.sectorsPage.create.submit")}
                 </Button>
               </div>
             </form>
@@ -228,15 +242,15 @@ const Sectors = () => {
       {sectors.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title="No sectors"
-          description="Get started by creating your first sector"
+          title={t("admin.sectorsPage.empty.title")}
+          description={t("admin.sectorsPage.empty.description")}
         />
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>All sectors</CardTitle>
+            <CardTitle>{t("admin.sectorsPage.list.title")}</CardTitle>
             <CardDescription>
-              {sectors.length} sector{sectors.length !== 1 ? "ies" : ""} total
+              {t("admin.sectorsPage.list.count", { count: sectors.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -250,7 +264,7 @@ const Sectors = () => {
                     <div className="flex items-center gap-3">
                       <h3 className="font-semibold">{sector.name}</h3>
                       {!sector.is_active && (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="secondary">{t("admin.sectorsPage.list.inactive")}</Badge>
                       )}
                     </div>
                     {sector.description && (
@@ -259,7 +273,7 @@ const Sectors = () => {
                       </p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>Slug: {sector.slug}</span>
+                      <span>{t("admin.sectorsPage.list.slug", { slug: sector.slug })}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -294,18 +308,18 @@ const Sectors = () => {
         <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Sector</DialogTitle>
+              <DialogTitle>{t("admin.sectorsPage.edit.title")}</DialogTitle>
               <DialogDescription>
-                Update sector details. Changes will affect all projects using this sector.
+                {t("admin.sectorsPage.edit.description")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(handleUpdate)} className="space-y-4">
               <div>
-                <Label htmlFor="edit-name">Name *</Label>
+                <Label htmlFor="edit-name">{t("admin.sectorsPage.form.name")} *</Label>
                 <Input
                   id="edit-name"
                   {...form.register("name")}
-                  placeholder="e.g., Technology"
+                  placeholder={t("admin.sectorsPage.form.namePlaceholder")}
                 />
                 {form.formState.errors.name && (
                   <p className="text-sm text-destructive mt-1">
@@ -314,19 +328,19 @@ const Sectors = () => {
                 )}
               </div>
               <div>
-                <Label htmlFor="edit-slug">Slug</Label>
+                <Label htmlFor="edit-slug">{t("admin.sectorsPage.form.slug")}</Label>
                 <Input
                   id="edit-slug"
                   {...form.register("slug")}
-                  placeholder="e.g., technology"
+                  placeholder={t("admin.sectorsPage.form.slugEditPlaceholder")}
                 />
               </div>
               <div>
-                <Label htmlFor="edit-description">Description</Label>
+                <Label htmlFor="edit-description">{t("admin.sectorsPage.form.description")}</Label>
                 <Textarea
                   id="edit-description"
                   {...form.register("description")}
-                  placeholder="Brief description of this sector"
+                  placeholder={t("admin.sectorsPage.form.descriptionPlaceholder")}
                   rows={3}
                 />
               </div>
@@ -336,7 +350,7 @@ const Sectors = () => {
                   checked={form.watch("is_active") ?? true}
                   onCheckedChange={(checked) => form.setValue("is_active", checked)}
                 />
-                <Label htmlFor="edit-is_active">Active</Label>
+                <Label htmlFor="edit-is_active">{t("admin.sectorsPage.form.active")}</Label>
               </div>
               <div className="flex justify-end gap-2">
                 <Button
@@ -347,10 +361,10 @@ const Sectors = () => {
                     form.reset();
                   }}
                 >
-                  Cancel
+                  {t("admin.sectorsPage.form.cancel")}
                 </Button>
                 <Button type="submit" disabled={updateSector.isPending}>
-                  {updateSector.isPending ? "Saving..." : "Save Changes"}
+                  {updateSector.isPending ? t("admin.sectorsPage.edit.saving") : t("admin.sectorsPage.edit.submit")}
                 </Button>
               </div>
             </form>
@@ -365,19 +379,18 @@ const Sectors = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Sector</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.sectorsPage.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deletingCategory?.name}"? This action cannot be
-              undone. Make sure no projects are using this sector before deleting.
+              {t("admin.sectorsPage.delete.description", { name: deletingCategory?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("admin.sectorsPage.delete.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("admin.sectorsPage.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

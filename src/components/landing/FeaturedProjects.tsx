@@ -1,14 +1,15 @@
-﻿import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import ProjectCard from "./ProjectCard";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFeaturedOpportunities } from "@/hooks/useOpportunities";
+import { localizeOpportunityFields } from "@/lib/localizedContent";
 import { ProjectCardSkeletonGrid } from "@/components/ui/skeletons";
 
 const FeaturedProjects = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('landing');
+  const { t, i18n } = useTranslation('landing');
   const { data: featuredOpportunities, isLoading } = useFeaturedOpportunities();
 
   // Fallback mock data when no featured projects exist
@@ -66,20 +67,23 @@ const FeaturedProjects = () => {
           <ProjectCardSkeletonGrid count={3} />
         ) : hasRealProjects ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredOpportunities.slice(0, 3).map((opportunity) => (
+            {featuredOpportunities.slice(0, 3).map((opportunity) => {
+              const localized = localizeOpportunityFields(opportunity, i18n.language);
+              return (
               <ProjectCard
                 key={opportunity.id}
-                id={opportunity.id}
-                title={opportunity.title}
-                description={opportunity.description}
+                id={localized.id}
+                title={localized.title}
+                description={localized.description}
                 sector={opportunity.tags?.[0]?.name || "Uncategorized"}
                 location={opportunity.location}
                 fundingAmount={opportunity.fundingAmount}
                 deadline={opportunity.deadline}
                 currentApplicants={opportunity.currentApplicants}
-                status={opportunity.status}
+                status={localized.status}
               />
-            ))}
+            );
+            })}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">

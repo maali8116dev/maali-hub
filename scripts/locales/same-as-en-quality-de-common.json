@@ -1,0 +1,20 @@
+{
+  "toasts": {
+    "cms": {
+      "translationNotConfigured": "Google Translate API-Schlüssel auf dem Server nicht konfiguriert.",
+      "translationNotAuthenticated": "Anmeldung erforderlich, um Übersetzungen zu erzeugen."
+    }
+  },
+  "opportunitiesPage": {
+    "filters": {
+      "region": "Region",
+      "partner": "Partner",
+      "status": "Status"
+    }
+  },
+  "onboarding": {
+    "profile": {
+      "optional": "(optional)"
+    }
+  }
+}

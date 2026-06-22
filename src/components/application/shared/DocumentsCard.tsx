@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Download } from "lucide-react";
@@ -27,11 +28,13 @@ interface DocumentsCardProps {
 }
 
 const DocumentsCard = ({ documents, isLoading, downloadingId, onDownload }: DocumentsCardProps) => {
+  const { t } = useTranslation("dashboard");
+
   if (isLoading) {
     return (
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Supporting Documents</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("applications.detail.documents.title")}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="space-y-2">
@@ -49,7 +52,7 @@ const DocumentsCard = ({ documents, isLoading, downloadingId, onDownload }: Docu
   return (
     <Card>
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">Supporting Documents</CardTitle>
+        <CardTitle className="text-base sm:text-lg">{t("applications.detail.documents.title")}</CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="space-y-2">
@@ -75,7 +78,7 @@ const DocumentsCard = ({ documents, isLoading, downloadingId, onDownload }: Docu
                 className="min-h-[44px] sm:min-h-0"
               >
                 <Download className="h-4 w-4 mr-2" />
-                {downloadingId === doc.id ? "Downloading..." : "Download"}
+                {downloadingId === doc.id ? t("applications.detail.documents.downloading") : t("applications.detail.documents.download")}
               </Button>
             </div>
           ))}
@@ -86,12 +89,3 @@ const DocumentsCard = ({ documents, isLoading, downloadingId, onDownload }: Docu
 };
 
 export default DocumentsCard;
-
-
-
-
-
-
-
-
-

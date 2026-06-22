@@ -1,0 +1,67 @@
+{
+  "memberPriceLabel": "2 $ / mois",
+  "steps": {
+    "profile": "Profil",
+    "tier": "Adhésion",
+    "payment": "Paiement"
+  },
+  "profile": {
+    "title": "Parlez-nous de vous",
+    "description": "Cela construit votre profil membre MAALI visible sur le réseau.",
+    "firstName": "Prénom *",
+    "lastName": "Nom *",
+    "businessName": "Entreprise / Organisation *",
+    "businessNamePlaceholder": "Savanna Ventures",
+    "sector": "Secteur *",
+    "sectorPlaceholder": "Sélectionnez un secteur",
+    "country": "Pays *",
+    "countryPlaceholder": "Kenya",
+    "bio": "Courte biographie",
+    "bioPlaceholder": "Dites au réseau MAALI ce que vous construisez…",
+    "continue": "Continuer"
+  },
+  "tier": {
+    "title": "Choisissez votre adhésion",
+    "subtitle": "Vous pouvez passer à un niveau supérieur à tout moment.",
+    "mostPopular": "Le plus populaire",
+    "community": {
+      "name": "Communauté",
+      "price": "Gratuit",
+      "description": "Rejoignez le réseau MAALI et parcourez les opportunités.",
+      "cta": "Rejoindre gratuitement",
+      "features": [
+        "Parcourir toutes les opportunités de financement",
+        "Accéder aux ressources publiques",
+        "Rejoindre le réseau communautaire",
+        "Newsletter mensuelle"
+      ]
+    },
+    "member": {
+      "name": "Membre complet",
+      "price": "2 $ / mois",
+      "description": "Débloquez toute la plateforme MAALI et postulez aux opportunités.",
+      "cta": "Devenir membre",
+      "features": [
+        "Tout ce qui est inclus dans Communauté",
+        "Postuler aux opportunités de financement",
+        "Examen prioritaire des candidatures",
+        "Messagerie directe avec les évaluateurs",
+        "Profil mis en avant sur le réseau",
+        "Événements exclusifs pour les membres"
+      ]
+    }
+  },
+  "noAccount": {
+    "title": "Inscrivez-vous d'abord",
+    "message": "Vous devez avoir un compte avant de rejoindre MAALI.",
+    "cta": "Créer un compte"
+  },
+  "done": {
+    "title": "Bienvenue sur Maali !",
+    "paidDescription": "Votre adhésion complète est active. Vous pouvez maintenant postuler à toutes les opportunités de financement.",
+    "communityDescription": "Vous avez rejoint le réseau communautaire Maali.",
+    "upgradeHint": "Passez à Membre complet à tout moment pour postuler aux financements.",
+    "goHome": "Retour à l'accueil",
+    "browseOpportunities": "Parcourir les opportunités"
+  }
+}

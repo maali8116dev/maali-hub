@@ -7,9 +7,9 @@
   "securePayments": "Paiements sécurisés propulsés par Stripe",
   "platform": "Plateforme",
   "company": "Entreprise",
-  "support": "Support",
+  "support": "Assistance",
   "legal": "Légal",
-  "browseProjects": "Parcourir les projets",
+  "browseOpportunities": "Parcourir les opportunités",
   "submitApplication": "Soumettre une candidature",
   "trackStatus": "Suivre le statut",
   "resources": "Ressources",
@@ -26,6 +26,6 @@
   "cookiePolicy": "Politique des cookies",
   "dataProtection": "Protection des données",
   "allRightsReserved": "Tous droits réservés. Propulsé par TechNuru & GAT.",
+  "copyright": "© {{year}} Maali. {{rights}}",
   "demoApplication": "Application de démonstration • Créée par Dr. Wilfried Zoungrana"
 }
-

@@ -1,0 +1,2520 @@
+{
+  "memberGate": {
+    "title": "Vollmitgliedschaft erforderlich",
+    "description": "Durch die Community-Mitgliedschaft können Sie nach Möglichkeiten suchen. Upgraden Sie auf ein Vollmitglied, um sich zu bewerben, Dokumente hochzuladen und Bewerbungen zu verfolgen.",
+    "menuLocked": "Vollmitgliedsfunktion"
+  },
+  "menu": {
+    "dashboard": "Übersicht",
+    "applications": "Meine Bewerbungen",
+    "documents": "Unterlagen",
+    "notifications": "Benachrichtigungen",
+    "profile": "Profil",
+    "billing": "Abrechnung",
+    "settings": "Einstellungen"
+  },
+  "header": {
+    "signOut": "Abmelden",
+    "signIn": "Anmelden"
+  },
+  "pages": {
+    "dashboard": "Übersicht",
+    "applications": "Meine Bewerbungen",
+    "documents": "Unterlagen",
+    "notifications": "Benachrichtigungen",
+    "profile": "Profil",
+    "billing": "Abrechnung",
+    "settings": "Einstellungen"
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "welcome": "Willkommen zurück! Hier finden Sie eine Übersicht Ihrer Aktivitäten.",
+    "helpTooltip": "Ihr Dashboard zeigt eine Übersicht über Ihre Bewerbungen, den Profilstatus und Schnellaktionen. Verwenden Sie die Statistikkarten, um Ihren Fortschritt zu verfolgen.",
+    "stats": {
+      "totalApplications": "Gesamtzahl der Bewerbungen",
+      "totalApplicationsDesc": "Gesamtzahl der von Ihnen eingereichten Anträge, einschließlich Entwürfe, ausstehende, genehmigte und abgelehnte Anträge.",
+      "allTimeApplications": "Bewerbungen insgesamt",
+      "pending": "Ausstehend",
+      "pendingDesc": "Bewerbungen werden derzeit von unserem Team geprüft. Sie werden benachrichtigt, wenn eine Entscheidung getroffen wurde.",
+      "underReview": "Wird überprüft",
+      "approved": "Genehmigt",
+      "successfullyFunded": "Erfolgreich finanziert",
+      "rejected": "Abgelehnt",
+      "notSelected": "Nicht ausgewählt"
+    },
+    "quickActions": {
+      "title": "Schnelle Aktionen",
+      "startNewApplication": "Neue Bewerbung starten",
+      "browseOpportunities": "Durchsuchen Sie Möglichkeiten",
+      "viewAllApplications": "Alle Bewerbungen anzeigen"
+    },
+    "profileCompletion": {
+      "title": "Profilvervollständigung",
+      "status": "Profilstatus",
+      "complete": "Vollständig",
+      "completeProfile": "Vervollständigen Sie Ihr Profil →",
+      "viewProfile": "Sehen Sie sich Ihr Profil an →"
+    },
+    "recentApplications": {
+      "title": "Aktuelle Bewerbungen",
+      "viewAll": "Alle anzeigen",
+      "submitted": "Eingereicht"
+    },
+    "emptyState": {
+      "noApplications": "Noch keine Bewerbungen",
+      "noApplicationsDesc": "Beginnen Sie mit der Bewerbung, um Ihre Bewerbungen hier zu sehen.",
+      "browseOpportunities": "Durchsuchen Sie Möglichkeiten",
+      "viewGuide": "Anleitung anzeigen",
+      "tips": {
+        "completeProfile": "Vervollständigen Sie Ihr Profil, bevor Sie sich bewerben",
+        "readRequirements": "Lesen Sie die Projektanforderungen sorgfältig durch",
+        "prepareDocuments": "Bereiten Sie alle erforderlichen Dokumente im Voraus vor",
+        "submitBeforeDeadline": "Reichen Sie Bewerbungen fristgerecht ein"
+      }
+    },
+    "profileTip": {
+      "title": "Vervollständigen Sie Ihr Profil",
+      "description": "Ihr Profil ist zu {{percentage}} % vollständig. Ein vollständiges Profil erhöht Ihre Zulassungschancen.",
+      "action": "Vollständiges Profil"
+    }
+  },
+  "applications": {
+    "title": "Meine Bewerbungen",
+    "subtitle": "Verfolgen und verwalten Sie Ihre Bewerbungen",
+    "helpTooltip": "Verfolgen Sie den Status aller Ihrer Bewerbungen. Sie können nach Status filtern, suchen und detaillierte Informationen zu jeder Bewerbung anzeigen.",
+    "firstTimeTip": {
+      "title": "Sind Sie bereit, sich auf Stellen zu bewerben?",
+      "description": "Durchsuchen Sie die verfügbaren Stellen und reichen Sie Ihre erste Bewerbung ein. Stellen Sie sicher, dass Ihr Profil vollständig ist, um Ihre Chancen auf eine Zulassung zu erhöhen.",
+      "action": "Durchsuchen Sie Möglichkeiten"
+    },
+    "filters": {
+      "all": "Alle",
+      "pending": "Ausstehend",
+      "under_review": "Wird überprüft",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "draft": "Entwurf",
+      "drafts": "Entwürfe"
+    },
+    "columns": {
+      "applicant": "Antragstellerin",
+      "project": "Projekt",
+      "sector": "Sektor",
+      "country": "Land",
+      "status": "Status",
+      "submitted": "Eingereicht",
+      "actions": "Aktionen",
+      "email": "E-Mail",
+      "rank": "Rang",
+      "avgScore": "Durchschnittlicher Wert",
+      "reviews": "Rezensionen",
+      "reviewDeadline": "Frist für die Überprüfung",
+      "daysPending": "Tage ausstehend"
+    },
+    "statusDescriptions": {
+      "pending": "Ihre Bewerbung wird von unserem Team geprüft",
+      "approved": "Glückwunsch! Ihr Antrag wurde genehmigt",
+      "rejected": "Ihre Bewerbung wurde dieses Mal nicht ausgewählt",
+      "draft": "Dieser Antrag wurde gespeichert, aber noch nicht eingereicht",
+      "under_review": "Prüfer bewerten Ihre Bewerbung oder Administratoren entscheiden über das Ergebnis",
+      "default": "Bewerbungsstatus"
+    },
+    "actions": {
+      "continueApplication": "Bewerbung fortsetzen",
+      "applicationClosed": "Antrag geschlossen",
+      "viewDetails": "Details anzeigen"
+    },
+    "table": {
+      "allApplications": "Alle Bewerbungen",
+      "pendingApplications": "Ausstehende Bewerbungen",
+      "approvedApplications": "Genehmigte Anträge",
+      "rejectedApplications": "Abgelehnte Bewerbungen",
+      "draftApplications": "Bewerbungsentwürfe",
+      "searchPlaceholder": "Suchen Sie nach Projekttitel, Branche oder Land..."
+    },
+    "emptyState": {
+      "errorTitle": "Fehler beim Laden der Bewerbungen",
+      "errorDesc": "Beim Laden Ihrer Bewerbungen ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.",
+      "noApplications": "Noch keine Bewerbungen",
+      "noApplicationsDesc": "Schauen Sie sich zunächst die verfügbaren Stellen an und reichen Sie Ihre erste Bewerbung ein.",
+      "noFilteredApplications": "NEIN",
+      "noFilteredApplicationsDesc": "Versuchen Sie, Ihre Filterkriterien anzupassen, um weitere Bewerbungen zu finden.",
+      "browseOpportunities": "Durchsuchen Sie Möglichkeiten",
+      "clearFilter": "Filter löschen",
+      "viewGuide": "Anleitung anzeigen",
+      "tips": {
+        "completeProfile": "Vervollständigen Sie Ihr Profil, um die Zulassungschancen zu erhöhen",
+        "readRequirements": "Lesen Sie die Projektanforderungen sorgfältig durch, bevor Sie sich bewerben",
+        "saveDrafts": "Sie können Bewerbungen als Entwürfe speichern und später einreichen",
+        "checkDeadlines": "Überprüfen Sie die Bewerbungsfristen, um Chancen zu vermeiden"
+      }
+    },
+    "detail": {
+      "title": "Bewerbungsdetails",
+      "back": "Zurück",
+      "applicationId": "Kennung: {{id}}",
+      "backToApplications": "Zurück zu Bewerbungen",
+      "notFound": {
+        "title": "Bewerbung nicht gefunden",
+        "description": "Die gesuchte Bewerbung existiert nicht oder Sie haben keinen Zugriff darauf.",
+        "viewAll": "Alle Bewerbungen anzeigen"
+      },
+      "metadata": {
+        "title": "Bewerbungsdetails",
+        "submitted": "Eingereicht:",
+        "status": "Status:"
+      },
+      "applicantInfo": {
+        "title": "Bewerberinformationen",
+        "applicantType": "Bewerbertyp",
+        "fullLegalName": "Vollständiger offizieller Name",
+        "organizationName": "Name der Organisation",
+        "registrationId": "Registrierungs-ID-Nummer",
+        "contactEmail": "Kontakt-E-Mail",
+        "contactPhone": "Kontakttelefon",
+        "countryOfResidence": "Aufenthaltsland",
+        "cityRegion": "Stadt/Region",
+        "applicant": "Antragstellerin"
+      },
+      "organizationalBackground": {
+        "title": "Organisatorischer Hintergrund",
+        "yearEstablished": "Gründungsjahr",
+        "teamSize": "Teamgröße",
+        "teamSizeMembers": "{{count}} Mitglieder",
+        "previousGrants": "Frühere erhaltene Zuschüsse/Fördermittel",
+        "coreMission": "Kernmission/Zweck",
+        "primarySectors": "Primärsektoren",
+        "otherPrimarySector": "Sonstiger Primärsektor",
+        "keyTeamMembers": "Wichtige Teammitglieder und Rollen",
+        "previousGrantsDetails": "Frühere Zuschüsse/Finanzierungsdetails"
+      },
+      "projectDetails": {
+        "title": "Projektdetails",
+        "project": "Projekt",
+        "viewProjectDetails": "Projektdetails anzeigen",
+        "teamSize": "Teamgröße"
+      },
+      "socialLinks": {
+        "title": "Soziale Links und Online-Präsenz",
+        "otherSocialLinks": "Andere soziale Links"
+      },
+      "documents": {
+        "title": "Unterstützende Dokumente",
+        "downloading": "Herunterladen...",
+        "download": "Herunterladen"
+      },
+      "compliance": {
+        "title": "Compliance und Erklärungen",
+        "informationAccurate": "Informationen korrekt bestätigt",
+        "conflictOfInterest": "Interessenkonflikt erklärt",
+        "reportingRequirements": "Meldepflichten vereinbart",
+        "dataProcessing": "Datenverarbeitung eingewilligt",
+        "confirmed": "Bestätigt",
+        "notConfirmed": "Nicht bestätigt",
+        "declared": "Erklärt",
+        "notDeclared": "Nicht deklariert",
+        "agreed": "Vereinbart",
+        "notAgreed": "Nicht vereinbart",
+        "consented": "Zugestimmt",
+        "notConsented": "Nicht eingewilligt",
+        "declarationDate": "Deklarationsdatum: {{date}}"
+      },
+      "values": {
+        "yes": "Ja",
+        "no": "NEIN",
+        "na": "N / A"
+      },
+      "review": {
+        "statusTitle": "Überprüfungsstatus",
+        "reviewersTitle": "Rezensentinnen",
+        "totalReviews": "Gesamtbewertungen:",
+        "pending": "Ausstehend:",
+        "averageScore": "Durchschnittliche Punktzahl:",
+        "scoreOutOf": "{{score}} / 10",
+        "recommendations": "Empfehlungen:",
+        "tieBreakerHint": "Gutachter stimmen in der Nähe der Ablehnungsschwelle nicht überein (~5/10) – fügen Sie einen weiteren Gutachter hinzu, um den Gleichstand zu lösen (bis zu insgesamt {{max}}).",
+        "underReviewProgress": "Bleibt in Prüfung, bis alle zugewiesenen Prüfer eingereicht haben ({{completed}}/{{total}} erledigt).",
+        "allReviewsIn": "Alle Bewertungen in – Genehmigen oder ablehnen, um den Status zu aktualisieren.",
+        "approve": "Genehmigen",
+        "reject": "Ablehnen",
+        "rejectDialogTitle": "Bewerbung ablehnen?",
+        "rejectDialogDescription": "Der Bewerber wird benachrichtigt. Dies kann nicht über die Benutzeroberfläche rückgängig gemacht werden.",
+        "cancel": "Stornieren",
+        "reviewersAssignedNoReviews": "{{count}} Rezensenten zugewiesen, noch keine Bewertungen eingereicht.",
+        "noReviewersAssigned": "Noch keine Gutachter zugewiesen.",
+        "addReviewer": "Rezensent hinzufügen",
+        "assignReviewers": "Weisen Sie Gutachter zu",
+        "reassign": "Neu zuweisen",
+        "needsTwoReviewers": "Für diesen Antrag sind zwei Gutachter erforderlich. Bisher nur {{count}} zugewiesen.",
+        "unknownReviewer": "Unbekannter Rezensent",
+        "assignedDate": "Zugewiesen {{date}}",
+        "score": "Punktzahl:",
+        "recommendation": "Empfehlung:",
+        "assignDialogTitle": "Weisen Sie Gutachter zu",
+        "assignDialogDescription": "Wählen Sie genau 2 berechtigte Gutachter aus. Aus der Dropdown-Liste hinzufügen und mit dem × auf jeder Pille entfernen.",
+        "reviewersLabel": "Rezensentinnen",
+        "addReviewerPlaceholder": "Rezensent hinzufügen...",
+        "noEligibleReviewers": "Keine berechtigten Gutachter mehr",
+        "removeReviewerAria": "{{name}} entfernen",
+        "workload": "Arbeitsbelastung {{count}}",
+        "saving": "Sparen...",
+        "save": "Speichern",
+        "addDialogTitle": "Rezensent hinzufügen",
+        "addDialogDescription": "Fügt einen berechtigten Prüfer hinzu, ohne bestehende Zuweisungen zu entfernen (Tie-Breaker/zusätzliche Prüfung). Bei der automatischen Zuweisung werden weiterhin nur zwei Prüfer verwendet.",
+        "chooseReviewerPlaceholder": "Rezensent auswählen...",
+        "adding": "Hinzufügen…",
+        "toastApproved": "Antrag genehmigt",
+        "toastRejected": "Antrag abgelehnt",
+        "toastStatusError": "Der Status konnte nicht aktualisiert werden",
+        "toastTryAgain": "Versuchen Sie es erneut",
+        "toastReviewersUpdated": "Rezensenten aktualisiert",
+        "toastReviewersUpdatedDesc": "Die Aufgaben wurden erfolgreich aktualisiert.",
+        "toastUpdateFailed": "Update fehlgeschlagen",
+        "toastReviewerAdded": "Rezensent hinzugefügt",
+        "toastReviewerAddedDesc": "Sie können eine zusätzliche Bewertung abgeben.",
+        "toastAddReviewerFailed": "Der Rezensent konnte nicht hinzugefügt werden",
+        "reviewProgressCompleted": "{{completed}}/{{total}} abgeschlossen",
+        "reviewCount_one": "{{count}} Rezension",
+        "reviewCount_other": "{{count}} Bewertungen",
+        "noReviews": "Keine Bewertungen"
+      },
+      "translation": {
+        "translateForMe": "Für mich übersetzen",
+        "viewTranslation": "Übersetzung anzeigen",
+        "viewOriginal": "Original anzeigen",
+        "translating": "Übersetze…",
+        "offer": "Bewerbung eingereicht in {{source}}. Maschinelle Übersetzung verfügbar.",
+        "showingTranslated": "Maschinelle Übersetzung von {{source}} nach {{target}}.",
+        "sameLocale": "Die Bewerbung ist bereits in Ihrer Sprache.",
+        "errorTitle": "Übersetzung fehlgeschlagen",
+        "errorDesc": "Diese Bewerbung konnte nicht übersetzt werden. Bitte später erneut versuchen."
+      }
+    },
+    "form": {
+      "page": {
+        "title": "Bewerbungsformular",
+        "subtitleWithProject": "Füllen Sie das Formular aus, um sich für diese Fördermöglichkeit zu bewerben.",
+        "subtitleGeneric": "Füllen Sie das Formular aus, um Ihre Bewerbung zu starten.",
+        "backToProject": "Zurück zu Projektdetails",
+        "backToProjects": "Zurück zu Projekten",
+        "loading": "Wird geladen...",
+        "closedTitle": "Bewerbungen geschlossen",
+        "closedDescription": "Diese Chance ist geschlossen. Neue Bewerbungen und Bearbeitungen sind deaktiviert.",
+        "backToOpportunity": "Zurück zur Chance",
+        "membershipCta": "Mitgliedschaftsoptionen ansehen"
+      },
+      "steps": {
+        "applicantInfo": "Bewerberinformationen",
+        "organization": "Organisationsdetails (optional)",
+        "projectOverview": "Projektübersicht",
+        "socialLinks": "Soziale Links",
+        "documents": "Dokumente hochladen",
+        "review": "Prüfen",
+        "compliance": "Compliance & Erklärungen",
+        "submit": "Absenden"
+      },
+      "progress": {
+        "stepOf": "Schritt {{current}} von {{total}}",
+        "saveDraft": "Entwurf speichern",
+        "saving": "Speichern...",
+        "lastSaved": "Zuletzt gespeichert: {{time}}",
+        "percentComplete": "{{percent}} % abgeschlossen"
+      },
+      "nav": {
+        "previous": "Zurück",
+        "next": "Weiter",
+        "submit": "Bewerbung absenden",
+        "submitting": "Wird gesendet...",
+        "verifyEmailToSubmit": "E-Mail bestätigen zum Absenden"
+      },
+      "requiredMark": "Mit * markierte Felder sind Pflichtfelder.",
+      "notProvided": "Nicht angegeben",
+      "edit": "Bearbeiten",
+      "yes": "Ja",
+      "location": "Standort",
+      "declarationDate": "Erklärungsdatum:",
+      "step1": {
+        "title": "Bewerberinformationen",
+        "description": "Erzählen Sie uns von sich oder Ihrer Organisation.",
+        "applicantType": "Bewerbertyp",
+        "applicantTypePlaceholder": "Bewerbertyp auswählen",
+        "fullLegalName": "Vollständiger rechtlicher Name",
+        "fullLegalNamePlaceholder": "Vollständigen rechtlichen Namen eingeben",
+        "organizationName": "Organisationsname",
+        "organizationNamePlaceholder": "Organisationsname eingeben",
+        "country": "Wohnsitz- / Registrierungsland",
+        "countryPlaceholder": "Land auswählen",
+        "cityRegion": "Stadt / Region",
+        "cityRegionPlaceholder": "Stadt oder Region eingeben",
+        "email": "E-Mail-Adresse",
+        "emailPlaceholder": "ihre.email@beispiel.de",
+        "phone": "Telefonnummer",
+        "phonePlaceholder": "Telefonnummer eingeben"
+      },
+      "step2": {
+        "individualSkip": "Diese Organisationsangaben sind optional und für Einzelbewerber meist nicht nötig. Sie können mit dem nächsten Schritt fortfahren.",
+        "title": "Organisationsdetails (optional)",
+        "description": "Teilen Sie zusätzliche Informationen über Glaubwürdigkeit und Kapazität Ihrer Organisation. Sie können dies auch in Belegdokumenten angeben.",
+        "yearEstablished": "Gründungsjahr",
+        "yearEstablishedPlaceholder": "2020",
+        "teamMembers": "Anzahl der Teammitglieder",
+        "teamMembersPlaceholder": "10",
+        "coreMission": "Kernmission / Zweck",
+        "coreMissionPlaceholder": "Beschreiben Sie kurz die Kernmission und den Zweck Ihrer Organisation...",
+        "max200Words": "Maximal 200 Wörter",
+        "primarySectors": "Hauptsektor(en)",
+        "otherSector": "Anderer Sektor (bitte angeben)",
+        "otherSectorPlaceholder": "Anderen Sektor eingeben",
+        "keyTeam": "Wichtige Teammitglieder & Rollen",
+        "keyTeamPlaceholder": "Listen Sie wichtige Teammitglieder und ihre Rollen auf...",
+        "previousGrants": "Bereits erhaltene Zuschüsse oder Förderungen",
+        "previousGrantsDetails": "Details zu früheren Zuschüssen / Förderungen",
+        "previousGrantsPlaceholder": "Geben Sie Details zu früheren Zuschüssen oder Förderungen an...",
+        "max400Words": "Maximal 400 Wörter"
+      },
+      "step3": {
+        "grant": {
+          "title": "Projektübersicht",
+          "hint": "Beschreiben Sie, wofür Sie Förderung benötigen.",
+          "titleLabel": "Projekttitel",
+          "titlePlaceholder": "Projekttitel eingeben",
+          "summaryLabel": "Projektzusammenfassung",
+          "summaryPlaceholder": "Geben Sie eine Zusammenfassung Ihres Projekts an (mindestens 30 Wörter)...",
+          "locationLabel": "Geografischer Fokus (optional)",
+          "locationPlaceholder": "Wo wird das Projekt durchgeführt? Leer lassen, um Stadt/Land aus Schritt 1 zu verwenden."
+        },
+        "nonGrant": {
+          "title": "Bewerbungsübersicht",
+          "hint": "Beschreiben Sie Ihre Ziele und warum Sie gut zu dieser Chance passen.",
+          "titleLabel": "Bewerbungstitel",
+          "titlePlaceholder": "Bewerbungstitel eingeben",
+          "summaryLabel": "Motivationsschreiben",
+          "summaryPlaceholder": "Beschreiben Sie kurz Ihre Ziele, Eignung und erwartete Ergebnisse (mindestens 30 Wörter)...",
+          "locationLabel": "Standort / geografischer Fokus",
+          "locationPlaceholder": "Wo sind Sie ansässig oder wo gilt diese Chance?"
+        },
+        "summaryWordLimit": "Muss zwischen 30 und 400 Wörtern liegen"
+      },
+      "step4": {
+        "title": "Soziale Links",
+        "description": "Teilen Sie Ihre beruflichen und Social-Media-Profile (optional). So lernen wir Sie besser kennen.",
+        "linkedin": "LinkedIn-Profil-URL",
+        "linkedinPlaceholder": "https://linkedin.com/in/ihrprofil",
+        "github": "GitHub-Profil-URL",
+        "githubPlaceholder": "https://github.com/ihrbenutzername",
+        "twitter": "Twitter/X-Profil-URL",
+        "twitterPlaceholder": "https://twitter.com/ihrbenutzername",
+        "website": "Website-URL",
+        "websitePlaceholder": "https://ihrewebsite.de",
+        "other": "Weitere soziale Links",
+        "otherPlaceholder": "Weitere relevante Profile oder Links (z. B. Instagram, Facebook, Portfolio usw.)",
+        "max100Words": "Maximal 100 Wörter"
+      },
+      "step5": {
+        "title": "Dokumente hochladen",
+        "description": "Laden Sie unterstützende Dokumente für Ihre Bewerbung hoch (optional)."
+      },
+      "step6": {
+        "title": "Bewerbung prüfen",
+        "description": "Bitte prüfen Sie alle Angaben unten, bevor Sie fortfahren.",
+        "registrationId": "Registrierungs- / ID-Nummer:",
+        "previousGrantsFunding": "Frühere Zuschüsse / Förderungen:",
+        "fromLibrary": "Aus Bibliothek:",
+        "newUploads": "Neue Uploads:",
+        "documentCount": "{{count}} Dokument(e)",
+        "noDocuments": "Keine Dokumente ausgewählt",
+        "documentsOnSubmit": "Dokumente werden beim Absenden verknüpft oder hochgeladen",
+        "linkedin": "LinkedIn:",
+        "github": "GitHub:",
+        "twitter": "Twitter/X:",
+        "website": "Website:"
+      },
+      "step7": {
+        "title": "Compliance & Erklärungen",
+        "description": "Bitte lesen und bestätigen Sie die folgenden Erklärungen. Alle Felder sind aus Governance-Gründen erforderlich.",
+        "informationAccurateLabel": "Bestätigung der Richtigkeit der Angaben",
+        "informationAccurateDesc": "Ich bestätige, dass alle Angaben in dieser Bewerbung nach bestem Wissen korrekt, vollständig und wahrheitsgemäß sind.",
+        "conflictLabel": "Erklärung zu Interessenkonflikten",
+        "conflictDesc": "Ich erkläre, dass ich potenzielle Interessenkonflikte offengelegt habe, die diese Bewerbung oder ihre Bewertung beeinflussen könnten.",
+        "reportingLabel": "Zustimmung zu Berichtspflichten",
+        "reportingDesc": "Ich stimme zu, regelmäßige Fortschrittsberichte, Finanzunterlagen und sonstige vom Fördergeber geforderte Dokumente bereitzustellen.",
+        "dataProcessingLabel": "Einwilligung zur Datenverarbeitung",
+        "dataProcessingDesc": "Ich willige in die Verarbeitung meiner personenbezogenen Daten und Bewerbungsinformationen zum Zweck der Bewertung, Verwaltung und Kommunikation im Zusammenhang mit dieser Bewerbung ein."
+      },
+      "step8": {
+        "title": "Bewerbung absenden",
+        "description": "Lesen Sie den Bestätigungshinweis unten und klicken Sie auf Absenden, um Ihre Bewerbung abzuschließen.",
+        "notice": "Mit dem Absenden bestätigen Sie, dass alle Angaben korrekt und vollständig sind. Ihre Bewerbung wird von unserem Team geprüft; Sie werden per E-Mail über das Ergebnis informiert."
+      },
+      "emailVerification": {
+        "title": "E-Mail-Bestätigung erforderlich",
+        "description": "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie eine Bewerbung absenden. Prüfen Sie Ihren Posteingang oder Ihr Dashboard, um den Link erneut zu senden."
+      },
+      "options": {
+        "applicantTypes": {
+          "Individual": "Einzelperson",
+          "Organization": "Organisation",
+          "Startup / SME": "Startup / KMU",
+          "NGO / Non-profit": "NGO / gemeinnützig",
+          "Research / Academic": "Forschung / Wissenschaft"
+        },
+        "sectors": {
+          "Health": "Gesundheit",
+          "Education": "Bildung",
+          "Technology": "Technologie",
+          "Agriculture": "Landwirtschaft",
+          "Environment": "Umwelt",
+          "Creative": "Kreativ",
+          "Other": "Sonstiges"
+        }
+      },
+      "validation": {
+        "phoneRequired": "Telefonnummer ist erforderlich",
+        "phoneInvalid": "Bitte geben Sie eine gültige internationale Telefonnummer ein",
+        "applicantTypeRequired": "Bitte wählen Sie einen Bewerbertyp",
+        "fullLegalNameRequired": "Vollständiger rechtlicher Name ist erforderlich",
+        "countryRequired": "Wohnsitzland ist erforderlich",
+        "cityRegionRequired": "Stadt/Region ist erforderlich",
+        "yearInvalid": "Bitte geben Sie ein gültiges Jahr ein",
+        "yearFuture": "Das Jahr darf nicht in der Zukunft liegen",
+        "coreMissionMaxWords": "Kernmission / Zweck darf maximal 200 Wörter haben",
+        "teamMembersMin": "Anzahl der Teammitglieder muss mindestens 1 sein",
+        "keyTeamMaxWords": "Teammitglieder & Rollen dürfen maximal 200 Wörter haben",
+        "previousGrantsMaxWords": "Details zu früheren Zuschüssen dürfen maximal 400 Wörter haben",
+        "previousGrantsDetailsRequired": "Bitte geben Sie Details zu früheren Zuschüssen oder Förderungen an",
+        "projectTitleRequired": "Projekttitel ist erforderlich",
+        "projectSummaryRequired": "Projektzusammenfassung ist erforderlich",
+        "projectSummaryMinWords": "Projektzusammenfassung muss mindestens 30 Wörter haben",
+        "projectSummaryMaxWords": "Projektzusammenfassung darf maximal 400 Wörter haben",
+        "informationAccurateRequired": "Sie müssen bestätigen, dass die Angaben korrekt sind",
+        "conflictOfInterestRequired": "Sie müssen Interessenkonflikte erklären",
+        "dataProcessingRequired": "Sie müssen der Datenverarbeitung zustimmen",
+        "reportingRequirementsRequired": "Sie müssen den Berichtspflichten zustimmen",
+        "linkedinUrlInvalid": "Bitte geben Sie eine gültige LinkedIn-URL ein",
+        "githubUrlInvalid": "Bitte geben Sie eine gültige GitHub-URL ein",
+        "twitterUrlInvalid": "Bitte geben Sie eine gültige Twitter/X-URL ein",
+        "websiteUrlInvalid": "Bitte geben Sie eine gültige Website-URL ein",
+        "otherSocialMaxWords": "Weitere soziale Links dürfen maximal 100 Wörter haben"
+      },
+      "toasts": {
+        "draftRestored": {
+          "title": "Entwurf wiederhergestellt",
+          "description": "Ihr zuvor gespeicherter Entwurf wurde geladen."
+        },
+        "validationError": {
+          "title": "Validierungsfehler",
+          "description": "Bitte füllen Sie alle Pflichtfelder korrekt aus."
+        },
+        "emailVerificationRequired": {
+          "title": "E-Mail-Bestätigung erforderlich",
+          "description": "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie eine Bewerbung absenden."
+        },
+        "projectRequired": {
+          "title": "Projekt erforderlich",
+          "description": "Bitte wählen Sie ein Projekt für Ihre Bewerbung."
+        },
+        "missingInformation": {
+          "title": "Fehlende Informationen",
+          "description": "Bitte vervollständigen Sie alle Pflichtfelder vor dem Absenden."
+        },
+        "complianceRequired": {
+          "title": "Compliance erforderlich",
+          "description": "Bitte bestätigen Sie alle Compliance-Erklärungen vor dem Absenden."
+        },
+        "applicationsClosed": {
+          "title": "Bewerbungen geschlossen",
+          "description": "Dieses Projekt ist geschlossen. Sie können keine Bewerbungen mehr einreichen oder bearbeiten."
+        },
+        "membershipRequired": {
+          "title": "Mitgliedschaft erforderlich",
+          "description": "Werden Sie Vollmitglied, um Bewerbungen einzureichen."
+        },
+        "uploadingDocuments": {
+          "title": "Dokumente werden hochgeladen",
+          "description_one": "{{count}} Dokument wird hochgeladen...",
+          "description_other": "{{count}} Dokumente werden hochgeladen..."
+        },
+        "uploadPartialFailure": {
+          "title": "Einige Uploads fehlgeschlagen",
+          "description": "Einige Dokumente konnten nicht hochgeladen werden. Ihre Bewerbung wird trotzdem ohne diese Dateien eingereicht."
+        },
+        "alreadyApplied": {
+          "title": "Bereits beworben",
+          "description": "Sie haben bereits eine Bewerbung für diese Chance eingereicht. Prüfen Sie Ihr Dashboard für den Status."
+        },
+        "opportunityClosed": {
+          "title": "Bewerbungen geschlossen",
+          "description": "Diese Chance nimmt keine Bewerbungen mehr an."
+        },
+        "submitSuccess": {
+          "title": "Bewerbung eingereicht",
+          "description": "Ihre Bewerbung wurde erfolgreich eingereicht!"
+        },
+        "tooManySubmissions": {
+          "title": "Zu viele Einreichungen",
+          "description": "Sie haben kürzlich zu viele Bewerbungen eingereicht. Bitte warten Sie eine Stunde und versuchen Sie es erneut."
+        },
+        "submitFailed": {
+          "title": "Einreichung fehlgeschlagen",
+          "description": "Beim Absenden Ihrer Bewerbung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+        },
+        "errors": {
+          "alreadyApplied": "Sie haben bereits eine Bewerbung für diese Chance eingereicht.",
+          "projectClosed": "Diese Chance nimmt keine Bewerbungen mehr an.",
+          "membershipRequired": "Vollmitgliedschaft ist erforderlich. Werden Sie MAALI-Vollmitglied, um fortzufahren.",
+          "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+          "missingProjectId": "Etwas ist schiefgelaufen. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
+          "validationError": "Wir konnten Ihre Bewerbung nicht validieren. Bitte versuchen Sie es in Kürze erneut.",
+          "invalidBody": "Etwas stimmt mit Ihren Formulardaten nicht. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut.",
+          "internalError": "Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
+          "generic": "Beim Absenden Ihrer Bewerbung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+        }
+      },
+      "documents": {
+        "cv": "Lebenslauf",
+        "coverLetter": "Anschreiben",
+        "invalidFile": "Ungültige Datei",
+        "fromLibrary": "Aus Ihrer Bibliothek",
+        "uploadNew": "Neue Dateien hochladen",
+        "uploadNewDocuments": "Neue Dokumente hochladen",
+        "selectFromLibrary": "Aus Bibliothek auswählen",
+        "noLibraryDocs": "Noch keine Dokumente in Ihrer Bibliothek.",
+        "uploadHint": "Dateien hochladen oder aus Ihrer Dokumentenbibliothek auswählen.",
+        "removeFile": "Datei entfernen",
+        "deleteConfirmTitle": "Datei entfernen?",
+        "deleteConfirmDescription": "«{{name}}» wird aus Ihrer Auswahl entfernt. Die Datei bleibt in Ihrer Bibliothek.",
+        "cancel": "Abbrechen",
+        "remove": "Entfernen",
+        "requiredSlotsTitle": "Erforderliche Dokumente",
+        "requiredSlotsDescription": "Lebenslauf und Anschreiben sind für diesen Chancentyp erforderlich.",
+        "recommendedTitle": "Empfohlene Belegdokumente",
+        "recommendedIntro": "Laden Sie Dokumente hoch, die Ihre Bewerbung stärken. Empfohlene Unterlagen:",
+        "recommendedRequiredNote": "Sie können alle Dateien in dieser Zone hochladen. Mit * markierte Dokumente sind Pflicht.",
+        "selectFromLibraryTitle": "Aus Bibliothek auswählen",
+        "selectFromLibraryHint": "Wählen Sie Dokumente aus Ihrer Bibliothek für diese Bewerbung",
+        "selectedCount": "({{count}} ausgewählt)",
+        "fromLibrarySection": "Aus Ihrer Dokumentenbibliothek",
+        "otherLibrarySection": "Weitere gespeicherte Dateien",
+        "uploadDropzoneTitle": "Dateien hochladen",
+        "fileTypesHint": "PDF, DOC, DOCX und gängige Bildformate — max. 10 MB pro Datei.",
+        "chooseFiles": "Dateien auswählen",
+        "uploadOnSubmitHint": "Dateien werden beim Absenden Ihrer Bewerbung hochgeladen",
+        "filesToUploadTitle": "Dateien zum Hochladen beim Absenden ({{count}})",
+        "readyToUpload": "Bereit zum Hochladen",
+        "orSeparator": "ODER",
+        "opportunityRequirementsTitle": "Erforderliche Dokumente für diese Chance",
+        "fileTooLarge": "Datei \"{{fileName}}\" ist zu groß. Maximale Größe: 10 MB.",
+        "invalidFileType": "Datei \"{{fileName}}\" hat einen ungültigen Typ. Erlaubt: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+        "individualRecommended": {
+          "id": "Amtlicher Ausweis (falls angefordert)",
+          "proposal": "Projektvorschlag oder Konzeptnotiz"
+        },
+        "organizationRecommended": {
+          "registration": "Registrierungszertifikat oder Gründungsdokument",
+          "proposal": "Projektvorschlag oder Konzeptnotiz"
+        },
+        "startupRecommended": {
+          "id": "Amtlicher Ausweis (falls angefordert)",
+          "proposal": "Projektvorschlag oder Konzeptnotiz",
+          "budget": "Budget oder einfacher Finanzplan",
+          "cv": "Lebenslauf/Portfolio oder relevante Erfahrungsunterlagen"
+        },
+        "ngoRecommended": {
+          "registration": "Registrierungszertifikat oder Gründungsdokument",
+          "profile": "Organisationsprofil oder Missionsdokument",
+          "proposal": "Projektvorschlag oder Konzeptnotiz",
+          "budget": "Budget/Finanzplan (ggf. mit Kontoauszügen)",
+          "team": "Team-Lebensläufe und Profile wichtiger Mitarbeitender"
+        }
+      }
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihre Kontoeinstellungen und -präferenzen",
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "description": "Wählen Sie aus, welche Benachrichtigungen Sie erhalten möchten",
+      "emailNotifications": "E-Mail-Benachrichtigungen",
+      "emailNotificationsDesc": "Erhalten Sie E-Mail-Updates zu Ihren Bewerbungen",
+      "applicationUpdates": "Bewerbungsaktualisierungen",
+      "applicationUpdatesDesc": "Lassen Sie sich benachrichtigen, wenn sich Ihr Bewerbungsstatus ändert",
+      "newsletter": "Rundschreiben",
+      "newsletterDesc": "Erhalten Sie unseren monatlichen Newsletter mit neuen Möglichkeiten"
+    },
+    "preferences": {
+      "title": "Präferenzen",
+      "description": "Passen Sie Ihr Erlebnis individuell an",
+      "language": "Sprache",
+      "theme": "Thema",
+      "light": "Licht",
+      "dark": "Dunkel",
+      "system": "Systemstandard"
+    },
+    "security": {
+      "title": "Sicherheit",
+      "description": "Verwalten Sie die Sicherheitseinstellungen Ihres Kontos",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Bestätigen Sie das neue Passwort",
+      "enterCurrentPassword": "Geben Sie das aktuelle Passwort ein",
+      "enterNewPassword": "Geben Sie ein neues Passwort ein",
+      "confirmNewPassword": "Bestätigen Sie das neue Passwort",
+      "updatePassword": "Passwort aktualisieren"
+    },
+    "dangerZone": {
+      "title": "Gefahrenzone",
+      "description": "Irreversible und destruktive Handlungen",
+      "deleteAccount": "Konto löschen",
+      "deleteAccountDesc": "Löschen Sie Ihr Konto und alle damit verbundenen Daten endgültig"
+    },
+    "save": {
+      "saving": "Sparen...",
+      "saveChanges": "Änderungen speichern",
+      "saved": "Einstellungen gespeichert",
+      "savedDesc": "Ihre Einstellungen wurden aktualisiert.",
+      "languageUpdated": "Sprache aktualisiert",
+      "themeUpdated": "Thema aktualisiert"
+    }
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "subtitle": "Bleiben Sie über Ihre Anträge und Kontoaktivitäten auf dem Laufenden",
+    "markAllAsRead": "Alle als gelesen markieren",
+    "marking": "Markierung...",
+    "stats": {
+      "total": "Gesamt",
+      "unread": "Ungelesen",
+      "read": "Lesen"
+    },
+    "sections": {
+      "unread": "Ungelesen",
+      "earlier": "Früher"
+    },
+    "actions": {
+      "viewDetails": "Details anzeigen →"
+    },
+    "emptyState": {
+      "title": "Keine Benachrichtigungen",
+      "description": "Ihr seid alle beschäftigt! Hier werden neue Benachrichtigungen angezeigt."
+    }
+  },
+  "documents": {
+    "title": "Meine Dokumente",
+    "subtitle": "Verwalten Sie Ihre Dokumentenbibliothek und Bewerbungsunterlagen",
+    "subtitleSlots": "Einmal hochladen, bewerbungsübergreifend wiederverwenden. Bewerbungsspezifische Dateien werden auf jeder Bewerbungsdetailseite angezeigt.",
+    "usageCount": "{{count}} von {{max}} Dokumenten verwendet",
+    "fileTypes": {
+      "slots": "Lebenslauf und Anschreiben: Nur PDF, DOC oder DOCX (PDF bevorzugt) – max. 10 MB.",
+      "other": "Zulässig: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP – maximal 10 MB pro Datei."
+    },
+    "uploadToLibrary": "In die Bibliothek hochladen",
+    "uploading": "Hochladen...",
+    "applyForFunding": "Bewerben Sie sich auf Stellenangebote",
+    "searchPlaceholder": "Dokumente durchsuchen...",
+    "tabs": {
+      "library": "Bibliothek",
+      "applications": "Bewerbungen"
+    },
+    "library": {
+      "title": "Dokumentenbibliothek",
+      "description": "Wiederverwendbare Dokumente, die bei der Bewerbung um Stellenausschreibungen ausgewählt werden können"
+    },
+    "applicationDocuments": {
+      "title": "Bewerbungsunterlagen",
+      "description": "Dokumente, die mit bestimmten Bewerbungen verknüpft sind"
+    },
+    "emptyState": {
+      "noLibraryDocuments": "Keine Bibliotheksdokumente",
+      "noLibraryDocumentsDesc": "Laden Sie Dokumente in Ihre Bibliothek hoch, um sie in mehreren Bewerbungen wiederzuverwenden. Klicken Sie oben auf „In die Bibliothek hochladen“, um zu beginnen.",
+      "noLibraryDocumentsSearch": "Versuchen Sie, Ihre Suche anzupassen, um weitere Dokumente zu finden.",
+      "noApplicationDocuments": "Keine Bewerbungsunterlagen",
+      "noApplicationDocumentsDesc": "Hier werden die mit Ihren Bewerbungen hochgeladenen Dokumente angezeigt. Beginnen Sie mit der Bewerbung um die Möglichkeit, Dokumente hochzuladen.",
+      "noApplicationDocumentsSearch": "Versuchen Sie, Ihre Suche anzupassen, um weitere Dokumente zu finden.",
+      "uploadToLibrary": "In die Bibliothek hochladen",
+      "browseOpportunities": "Durchsuchen Sie Möglichkeiten"
+    },
+    "deleteDialog": {
+      "title": "Dokument löschen",
+      "description": "Sind Sie sicher, dass Sie „{{fileName}}“ löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "cancel": "Stornieren",
+      "delete": "Löschen"
+    },
+    "badges": {
+      "application": "Bewerbung",
+      "library": "Bibliothek"
+    },
+    "limitReached": {
+      "title": "Dokumentenlimit erreicht",
+      "description": "Sie können bis zu {{max}} Dokumente speichern. Sie haben noch {{remaining}} Slot(s) übrig."
+    },
+    "slots": {
+      "sectionTitle": "Standarddokumente",
+      "upload": "Hochladen",
+      "replace": "Ersetzen",
+      "cv": {
+        "label": "Lebenslauf / Lebenslauf",
+        "description": "Ihr aktueller Lebenslauf (PDF oder Word). Durch erneutes Hochladen wird die vorherige Datei ersetzt."
+      },
+      "id": {
+        "label": "Personalausweis/Reisepass",
+        "description": "Verifiziert durch Identitätsprüfung in Ihrem Profil.",
+        "verified": "Verifiziert",
+        "viewKyc": "Bestätigung anzeigen",
+        "completeKyc": "Vollständige Überprüfung"
+      },
+      "coverLetter": {
+        "label": "Motivationsschreiben",
+        "description": "Optional. PDF oder Word. Wird bei Ihrer Bewerbung wiederverwendet, es sei denn, Sie laden ein neues hoch."
+      }
+    },
+    "other": {
+      "title": "Andere Dokumente",
+      "description": "Zertifikate, Portfolios oder zusätzliche Dateien (keine typisierten Slots).",
+      "upload": "Dateien hochladen",
+      "empty": "Noch keine weiteren Dokumente."
+    }
+  },
+  "resources": {
+    "hero": {
+      "title": "Ressourcenbibliothek",
+      "description": "Greifen Sie auf Leitfäden, Vorlagen, Tutorials und Tools zu, die Ihnen bei der Umsetzung Ihrer Opportunity-Bewerbungen helfen",
+      "searchPlaceholder": "Ressourcen durchsuchen...",
+      "availableCount": "{{count}} Ressourcen verfügbar"
+    },
+    "tabs": {
+      "all": "Alle",
+      "documents": "Unterlagen",
+      "videos": "Videos",
+      "spreadsheets": "Tabellenkalkulationen",
+      "presentations": "Präsentationen",
+      "links": "Weblinks"
+    },
+    "emptyState": {
+      "noResources": "Keine Ressourcen verfügbar",
+      "noResourcesDesc": "Ressourcen werden hier angezeigt, sobald sie von Administratoren hinzugefügt wurden",
+      "noResults": "Keine Ergebnisse gefunden",
+      "noResultsDesc": "Keine Ressourcen stimmen mit „{{query}}“ überein. Versuchen Sie es mit einem anderen Suchbegriff.",
+      "clearSearch": "Suche löschen",
+      "checkBackLater": "Schauen Sie später noch einmal vorbei, um neue Ressourcen zu erhalten"
+    },
+    "sections": {
+      "browseResources": "Durchsuchen Sie Ressourcen",
+      "searchResults": "Suchergebnisse für „{{query}}“"
+    },
+    "card": {
+      "featured": "Hervorgehoben",
+      "view": "Sicht",
+      "open": "Offen",
+      "download": "Herunterladen",
+      "typeLabels": {
+        "pdfDocument": "PDF-Dokument",
+        "video": "Video",
+        "webinar": "Webinar",
+        "spreadsheet": "Kalkulationstabelle",
+        "presentation": "Präsentation",
+        "document": "Dokumentieren",
+        "externalLink": "Externer Link",
+        "directory": "Verzeichnis",
+        "event": "Ereignis"
+      }
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Übersicht über Plattformaktivitäten und Statistiken",
+    "stats": {
+      "totalUsers": "Gesamtzahl der Benutzer",
+      "registeredUsers": "Registrierte Benutzer",
+      "totalProjects": "Gesamtprojekte",
+      "activeOpportunities": "{{count}} aktive Möglichkeiten",
+      "totalApplications": "Gesamtzahl der Bewerbungen",
+      "allTimeSubmissions": "Alle zeitbezogenen Einreichungen",
+      "pendingReviews": "Ausstehende Bewertungen",
+      "awaitingReview": "Warten auf Rezension",
+      "approved": "Genehmigt",
+      "successfullyApproved": "Erfolgreich genehmigt",
+      "rejected": "Abgelehnt",
+      "notApproved": "Nicht genehmigt"
+    },
+    "quickActions": {
+      "title": "Schnelle Aktionen",
+      "manageProjects": "Projekte verwalten",
+      "reviewApps": "Überprüfen Sie Apps",
+      "manageUsers": "Benutzer verwalten",
+      "activityLogs": "Aktivitätsprotokolle"
+    },
+    "recentActivity": {
+      "title": "Letzte Aktivität",
+      "viewAll": "Alle anzeigen",
+      "emptyTitle": "Keine aktuelle Aktivität",
+      "emptyDescription": "Hier werden Aktivitäten angezeigt, wenn Benutzer mit der Plattform interagieren",
+      "combinedLabel": "Einreichung + Gutachterzuweisung · Bewerbung",
+      "fallbackActor": "Ein Benutzer",
+      "genericAction": "{{actor}} hat {{action}} für {{entity}} ausgeführt.",
+      "actionTypes": {
+        "submit": "Einreichen",
+        "assign_reviewers": "Weisen Sie Gutachter zu",
+        "review": "Rezension",
+        "submission_and_assignment": "Einreichung + Aufgabe"
+      },
+      "entityTypes": {
+        "application": "Bewerbung",
+        "opportunity": "Gelegenheit",
+        "user": "Benutzer"
+      },
+      "descriptions": {
+        "applicationSubmitWithProject": "{{applicantName}} hat einen Antrag für „{{projectTitle}}“ eingereicht.",
+        "applicationSubmitWithApplicant": "{{applicantName}} hat eine Bewerbung eingereicht.",
+        "applicationSubmitGeneric": "{{actor}} hat eine Bewerbung eingereicht.",
+        "reviewersAssigned_one": "{{count}} Prüfer dieser Bewerbung zugewiesen.",
+        "reviewersAssigned_other": "{{count}} Prüfer sind dieser Bewerbung zugewiesen.",
+        "reviewersAssignedGeneric": "Dieser Bewerbung zugewiesene Gutachter.",
+        "reviewSubmitted": "{{reviewerName}} hat eine Bewertung abgegeben.",
+        "reviewSubmittedGeneric": "{{actor}} hat eine Bewertung abgegeben.",
+        "combinedDefault": "Antrag eingereicht und Prüfteam zugewiesen.",
+        "combinedWithProject": "{{applicantName}} hat einen Antrag für „{{projectTitle}}“ eingereicht und {{reviewerPart}}.",
+        "combinedWithApplicant": "{{applicantName}} hat einen Antrag eingereicht und {{reviewerPart}}.",
+        "combinedWithReviewers": "Antrag eingereicht und {{reviewerPart}}.",
+        "reviewerPart_one": "{{count}} Prüfer zugewiesen",
+        "reviewerPart_other": "{{count}} Prüfer zugewiesen",
+        "reviewerPartGeneric": "Gutachter zugewiesen"
+      }
+    }
+  },
+  "opportunities": {
+    "page": {
+      "title": "Meine Möglichkeiten",
+      "subtitle": "Erstellen und verwalten Sie Ihre Fördermöglichkeiten",
+      "create": "Neue Chance",
+      "createFirst": "Schaffen Sie Ihre erste Chance",
+      "emptyDescription": "Sie haben noch keine Opportunities erstellt.",
+      "emptyTipTitle": "Schaffen Sie Ihre erste Chance",
+      "emptyTipDescription": "Durch Chancen gewinnen und sammeln Sie Bewerbungen von qualifizierten Kandidaten. Erstellen Sie eines, um loszulegen!"
+    },
+    "table": {
+      "searchPlaceholder": "Suchmöglichkeiten...",
+      "columns": {
+        "title": "Titel",
+        "status": "Status",
+        "sector": "Sektor",
+        "deadline": "Frist",
+        "applicationWindow": "Bewerbungsfenster",
+        "applicants": "Bewerberinnen",
+        "opportunityType": "Opportunity-Typ",
+        "location": "Standort",
+        "country": "Land",
+        "funding": "Finanzierung",
+        "created": "Erstellt",
+        "featured": "Hervorgehoben",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "viewProject": "Projekt ansehen",
+        "viewOpportunity": "Opportunity ansehen",
+        "viewApplications": "Rangbewertete Bewerbungen anzeigen",
+        "editProject": "Projekt bearbeiten",
+        "deleteProject": "Projekt löschen",
+        "allApplications": "Alle Bewerbungen ({{count}})",
+        "edit": "Bearbeiten"
+      }
+    },
+    "form": {
+      "backAdmin": "Zurück zu Chancen",
+      "backPartner": "Zurück",
+      "titleCreate": "Schaffen Sie neue Möglichkeiten",
+      "titleEdit": "Verkaufschance bearbeiten",
+      "subtitleCreateAdmin": "Geben Sie die Details ein, um eine neue Opportunity zu erstellen",
+      "subtitleEditAdmin": "Opportunity-Details aktualisieren",
+      "subtitleCreatePartner": "Richten Sie eine neue Finanzierungsmöglichkeit ein",
+      "subtitleEditPartner": "Aktualisieren Sie Ihre Opportunity-Details",
+      "loading": "Lademöglichkeit...",
+      "sections": {
+        "information": {
+          "title": "Informationen zu Chancen",
+          "description": "Geben Sie die grundlegenden Informationen für die Verkaufschance ein."
+        },
+        "image": {
+          "title": "Gelegenheitsbild",
+          "description": "Laden Sie ein Bild für diese Gelegenheit hoch (optional)",
+          "uploadPlaceholder": "Laden Sie ein Opportunity-Bild hoch",
+          "dropzoneHint": "Bild per Drag-and-drop ablegen oder zum Durchsuchen klicken",
+          "change": "Ändern",
+          "loading": "Wird geladen...",
+          "formats": "Unterstützte Formate: JPG, PNG, WebP, GIF. Maximale Größe: 5 MB"
+        },
+        "applicationSettings": {
+          "title": "Bewerbungseinstellungen"
+        },
+        "applicationWindow": {
+          "title": "Bewerbungsfensterstatus",
+          "description": "Abgeleitet aus Projektstatus und Termin.",
+          "hint": "Bewerber können sich nur bewerben und Entwürfe bearbeiten, solange dieser geöffnet ist."
+        },
+        "featured": {
+          "title": "Besondere Gelegenheit",
+          "label": "Auf der Homepage anzeigen",
+          "hint": "Auf der Zielseite werden hervorgehobene Möglichkeiten angezeigt"
+        },
+        "attachments": {
+          "title": "Anhänge",
+          "descriptionCreate": "Dateien nach dem Erstellen hinzufügen oder jetzt auswählen — sie werden beim Speichern angehängt.",
+          "descriptionEdit": "PDFs, Dokumente oder Bilder für Bewerber hinzufügen.",
+          "addFile": "Datei hinzufügen",
+          "addFilePending": "Datei hinzufügen (wird beim Speichern hochgeladen)",
+          "uploading": "Wird hochgeladen...",
+          "formats": "PDF, Word, Excel, PowerPoint, Text, Bilder. Max. 10 MB pro Datei.",
+          "removeFile": "{{fileName}} entfernen"
+        }
+      },
+      "fields": {
+        "title": {
+          "label": "Titel",
+          "placeholder": "z. B. African Women Tech Entrepreneurs Grant"
+        },
+        "description": {
+          "label": "Beschreibung",
+          "placeholder": "Geben Sie eine umfassende Beschreibung der Gelegenheit an. Verwenden Sie Formatierungen, um es klar und ansprechend zu gestalten ..."
+        },
+        "opportunityType": {
+          "label": "Opportunity-Typ",
+          "placeholder": "Typ auswählen"
+        },
+        "sector": {
+          "label": "Sektor",
+          "placeholder": "Sektor auswählen"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Status auswählen"
+        },
+        "fundingAmount": {
+          "label": "Förderbetrag",
+          "placeholder": "z. B. bis zu 50.000 US-Dollar"
+        },
+        "currency": {
+          "label": "Währung",
+          "placeholder": "z. B. EUR"
+        },
+        "deadline": {
+          "label": "Frist"
+        },
+        "location": {
+          "label": "Standort",
+          "placeholder": "z. B. Kenia, Nigeria, ganz Afrika"
+        },
+        "country": {
+          "label": "Land",
+          "placeholder": "Land auswählen"
+        },
+        "requirements": {
+          "label": "Anforderungen",
+          "placeholder": "Durch Kommas getrennte Anforderungen (z. B. Geschäftsplan, Pitch Deck, Finanzen)"
+        },
+        "eligibilityCriteria": {
+          "label": "Zulassungskriterien",
+          "placeholder": "Durch Kommas getrennte Berechtigung (z. B. von Frauen geführtes Startup, eingetragenes Unternehmen)"
+        },
+        "tags": {
+          "label": "Schlagworte",
+          "hint": "Wählen Sie vorhandene Tags aus oder geben Sie ein neues ein und drücken Sie die Eingabetaste, um es zu erstellen.",
+          "placeholder": "Geben Sie einen Tag-Namen ein...",
+          "add": "Hinzufügen",
+          "create": "Erstellen Sie „{{tag}}“",
+          "remove": "„{{tag}}“ entfernen"
+        },
+        "maxApplicants": {
+          "label": "Max. Bewerber",
+          "placeholder": "Unbegrenzt",
+          "hint": "Für unbegrenzte Bewerber leer lassen"
+        },
+        "currentApplicants": {
+          "label": "Aktuelle Bewerber",
+          "hint": "Schreibgeschützte Zählung der eingereichten Bewerbungen."
+        }
+      },
+      "types": {
+        "grant": "Gewähren",
+        "fellowship": "Gemeinschaft",
+        "scholarship": "Stipendium",
+        "internship": "Praktikum",
+        "training": "Ausbildung",
+        "competition": "Wettbewerb",
+        "accelerator": "Beschleuniger",
+        "incubator": "Inkubator",
+        "job": "Arbeit"
+      },
+      "statuses": {
+        "new": "Neu",
+        "open": "Offen",
+        "closing-soon": "Bald geschlossen",
+        "closed": "Geschlossen",
+        "archived": "Archiviert"
+      },
+      "validation": {
+        "titleRequired": "Titel ist erforderlich",
+        "titleMin": "Der Titel muss mindestens 5 Zeichen lang sein",
+        "descriptionRequired": "Beschreibung ist erforderlich",
+        "descriptionMin": "Die Beschreibung muss mindestens 50 Zeichen lang sein",
+        "opportunityTypeRequired": "Wählen Sie einen Opportunity-Typ aus",
+        "deadlineFormat": "Die Frist muss im Format JJJJ-MM-TT angegeben werden",
+        "locationRequired": "Der Standort ist erforderlich",
+        "fundingAmountRequired": "Förderbetrag ist erforderlich",
+        "maxApplicantsPositive": "Max. Bewerber muss eine positive Zahl sein",
+        "currentApplicantsMin": "Aktuelle Bewerber können nicht negativ sein",
+        "sectorInvalid": "Ungültiger Sektor"
+      },
+      "actions": {
+        "create": "Chance schaffen",
+        "update": "Update-Gelegenheit",
+        "saving": "Sparen...",
+        "cancel": "Stornieren"
+      },
+      "toast": {
+        "invalidTitle": "Überprüfen Sie das Formular",
+        "invalidDescription": "Korrigieren Sie die hervorgehobenen Felder vor dem Speichern."
+      }
+    }
+  },
+  "admin": {
+    "panel": "Admin-Panel",
+    "roleFallback": "Administrator",
+    "menu": {
+      "dashboard": "Übersicht",
+      "opportunities": "Gelegenheiten",
+      "applications": "Bewerbungen",
+      "notifications": "Benachrichtigungen",
+      "inbound": "Eingehend",
+      "kyc": "KYC-Anfragen",
+      "reviewManagement": "Bewertungsmanagement",
+      "financial": "Finanziell",
+      "sectors": "Sektoren",
+      "resources": "Ressourcen",
+      "blog": "Blog",
+      "partners": "Partner",
+      "successStories": "Erfolgsgeschichten",
+      "faq": "Häufige Fragen",
+      "mentors": "Mentorinnen",
+      "users": "Benutzer",
+      "activityLogs": "Aktivitätsprotokolle",
+      "settings": "Einstellungen"
+    },
+    "pages": {
+      "dashboard": "Admin-Dashboard",
+      "opportunities": "Chancen verwalten",
+      "opportunityApplications": "Opportunity-Bewerbungen",
+      "applications": "Bewerbungen prüfen",
+      "financial": "Finanzmanagement",
+      "kyc": "KYC-Anfragen",
+      "notifications": "Benachrichtigungen",
+      "blog": "Blog verwalten",
+      "partners": "Partner verwalten",
+      "successStories": "Erfolgsgeschichten verwalten",
+      "faq": "FAQs verwalten",
+      "mentors": "Mentoren verwalten",
+      "users": "Benutzer verwalten",
+      "sectors": "Sektoren verwalten",
+      "activityLogs": "Aktivitätsprotokolle",
+      "settings": "Admin-Einstellungen",
+      "inbound": "Eingehend",
+      "resources": "Ressourcen",
+      "reviewManagement": "Bewertungsmanagement",
+      "userDetails": "Benutzerdetails",
+      "opportunityCreate": "Chance schaffen",
+      "opportunityEdit": "Verkaufschance bearbeiten",
+      "opportunityDetails": "Opportunity-Details",
+      "applicationDetails": "Bewerbungsdetails",
+      "reviewerDetails": "Details zum Rezensenten",
+      "resourceEdit": "Ressource bearbeiten"
+    },
+    "opportunitiesPage": {
+      "title": "Chancen verwalten",
+      "subtitle": "Fördermöglichkeiten erstellen, bearbeiten und verwalten",
+      "create": "Chance schaffen",
+      "allOpportunities": "Alle Chancen ({{count}})",
+      "searchPlaceholder": "Suchen Sie nach Titel, Branche oder Standort...",
+      "winnersSelected": "Gewinner ausgewählt",
+      "loadError": "Fehler beim Laden der Möglichkeiten: {{message}}",
+      "empty": {
+        "title": "Keine Möglichkeiten gefunden",
+        "description": "Erstellen Sie zunächst Ihre erste Finanzierungsmöglichkeit."
+      },
+      "columns": {
+        "title": "Titel",
+        "status": "Status",
+        "sector": "Sektor",
+        "deadline": "Frist",
+        "applicationWindow": "Bewerbungsfenster",
+        "applicants": "Bewerberinnen",
+        "opportunityType": "Opportunity-Typ",
+        "location": "Standort",
+        "country": "Land",
+        "funding": "Finanzierung",
+        "created": "Erstellt",
+        "featured": "Hervorgehoben",
+        "actions": "Aktionen"
+      },
+      "actionTitles": {
+        "viewProject": "Projekt ansehen",
+        "viewApplications": "Rangbewertete Bewerbungen anzeigen",
+        "editProject": "Projekt bearbeiten",
+        "deleteProject": "Projekt löschen"
+      },
+      "deleteDialog": {
+        "title": "Bist du sicher?",
+        "description": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch werden die Opportunity und alle damit verbundenen Bewerbungen dauerhaft gelöscht.",
+        "cancel": "Stornieren",
+        "delete": "Löschen",
+        "deleting": "Löschen..."
+      },
+      "translateAll": "Übersetzungen erstellen",
+      "translatingAll": "Übersetzungen werden erstellt...",
+      "translateAllDone": "Übersetzungen generiert",
+      "translateAllDoneDesc": "{{count}} Chancen zwischengespeichert. Wechseln Sie die Sprache, um übersetzte Titel anzuzeigen.",
+      "translateAllPartial": "Einige Übersetzungen sind fehlgeschlagen",
+      "translateAllPartialDesc": "{{failed}} von {{total}} Möglichkeiten konnten nicht übersetzt werden."
+    },
+    "sectorsPage": {
+      "title": "Sektoren",
+      "subtitle": "Verwalten Sie Projektsektoren und deren Anzeigeeinstellungen",
+      "subtitleLoading": "Projektbereiche verwalten",
+      "addSector": "Sektor hinzufügen",
+      "create": {
+        "title": "Sektor erstellen",
+        "description": "Fügen Sie einen neuen Sektor für Projekte hinzu. Der Slug wird automatisch generiert, wenn er nicht bereitgestellt wird.",
+        "submit": "Erstellen",
+        "creating": "Erstellen..."
+      },
+      "edit": {
+        "title": "Sektor bearbeiten",
+        "description": "Sektordetails aktualisieren. Änderungen wirken sich auf alle Projekte aus, die diesen Sektor nutzen.",
+        "submit": "Änderungen speichern",
+        "saving": "Sparen..."
+      },
+      "form": {
+        "name": "Bezeichnung",
+        "nameRequired": "Name ist erforderlich",
+        "nameMin": "Der Name muss mindestens 2 Zeichen lang sein",
+        "namePlaceholder": "z. B. Technologie",
+        "slugOptional": "Schnecke (optional)",
+        "slug": "Schnecke",
+        "slugPlaceholder": "z. B. Technologie (wird automatisch generiert, wenn leer)",
+        "slugEditPlaceholder": "z.B. Technologie",
+        "descriptionOptional": "Beschreibung (optional)",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Kurze Beschreibung dieses Sektors",
+        "active": "Aktiv",
+        "cancel": "Stornieren"
+      },
+      "empty": {
+        "title": "Keine Sektoren",
+        "description": "Beginnen Sie mit der Erstellung Ihres ersten Sektors"
+      },
+      "list": {
+        "title": "Alle Sektoren",
+        "count": "{{count}} Sektor insgesamt",
+        "count_plural": "Insgesamt {{count}} Sektoren",
+        "inactive": "Inaktiv",
+        "slug": "Schnecke: {{slug}}"
+      },
+      "delete": {
+        "title": "Sektor löschen",
+        "description": "Sind Sie sicher, dass Sie „{{name}}“ löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden. Stellen Sie vor dem Löschen sicher, dass dieser Sektor von keinem Projekt verwendet wird.",
+        "cancel": "Stornieren",
+        "confirm": "Löschen"
+      }
+    },
+    "kycPage": {
+      "title": "KYC-Anfragen",
+      "subtitle": "Überprüfen und genehmigen Sie eingereichte Identitätsnachweise.",
+      "allRequests": "Alle Anfragen",
+      "loadError": "KYC-Anfragen konnten nicht geladen werden",
+      "retry": "Wiederholen",
+      "unknown": "Unbekannt",
+      "columns": {
+        "user": "Benutzer",
+        "idType": "ID-Typ",
+        "status": "Status",
+        "submitted": "Eingereicht",
+        "action": "Aktion"
+      },
+      "review": "Rezension",
+      "status": {
+        "pending": "Ausstehend",
+        "verified": "Verifiziert",
+        "rejected": "Abgelehnt",
+        "expired": "Abgelaufen"
+      }
+    },
+    "financialPage": {
+      "title": "Finanzmanagement",
+      "subtitle": "Überblick über alle Finanztransaktionen und Einnahmen",
+      "loadError": "Fehler beim Laden der Finanzdaten: {{message}}",
+      "stats": {
+        "totalRevenue": "Gesamtumsatz",
+        "allTimeRevenue": "Einnahmen aller Zeiten",
+        "thisMonth": "Diesen Monat",
+        "monthlyRevenue": "Monatlicher Umsatz",
+        "revenueGrowthUp": "+{{percent}} % im Vergleich zum Vormonat",
+        "revenueGrowthDown": "{{percent}} % im Vergleich zum letzten Monat",
+        "completed": "Vollendet",
+        "successfulTransactions": "Erfolgreiche Transaktionen",
+        "pending": "Ausstehend",
+        "awaitingProcessing": "Warten auf Bearbeitung",
+        "revenueBreakdown": "Umsatzaufschlüsselung",
+        "applicationFees": "Anmeldegebühren",
+        "subscriptions": "Abonnements",
+        "refunded": "Erstattet",
+        "transactionStatus": "Transaktionsstatus",
+        "total": "Gesamt",
+        "failed": "Fehlgeschlagen",
+        "monthlyComparison": "Monatsvergleich",
+        "lastMonth": "Letzten Monat"
+      },
+      "filters": {
+        "status": "Status",
+        "allStatus": "Alle Status",
+        "type": "Typ",
+        "allTypes": "Alle Typen",
+        "date": "Datum",
+        "allTime": "Alle Zeit",
+        "today": "Heute",
+        "last7Days": "Letzte 7 Tage",
+        "lastMonth": "Letzten Monat",
+        "lastYear": "Letztes Jahr",
+        "completed": "Vollendet",
+        "pending": "Ausstehend",
+        "processing": "Verarbeitung",
+        "failed": "Fehlgeschlagen",
+        "refunded": "Erstattet",
+        "applicationFee": "Anmeldegebühr",
+        "subscription": "Abonnement",
+        "refund": "Erstattung",
+        "other": "Andere"
+      },
+      "transactions": "Transaktionen ({{count}})",
+      "searchPlaceholder": "Suchen Sie nach Benutzer, Beschreibung, Rechnung oder Transaktions-ID ...",
+      "columns": {
+        "amount": "Menge",
+        "user": "Benutzer",
+        "description": "Beschreibung",
+        "type": "Typ",
+        "status": "Status",
+        "date": "Datum",
+        "project": "Projekt",
+        "invoice": "Rechnung",
+        "actions": "Aktionen",
+        "invoiceBtn": "Rechnung",
+        "receiptBtn": "Quittung",
+        "na": "N / A"
+      }
+    },
+    "inboundPage": {
+      "title": "Eingehend",
+      "subtitle": "Kontaktformularnachrichten und Newsletter-Anmeldungen",
+      "tabs": {
+        "contact": "Kontakt",
+        "newsletter": "Rundschreiben"
+      },
+      "contactSearch": "Suchen Sie nach Name, E-Mail, Nachricht...",
+      "newsletterSearch": "E-Mail suchen...",
+      "allStatuses": "Alle Status",
+      "status": "Status",
+      "contactSubmissions": "Kontakteingaben",
+      "newsletterSubscribers": "Newsletter-Abonnenten",
+      "loadContactError": "Kontaktübermittlungen konnten nicht geladen werden",
+      "loadSubscribersError": "Abonnenten konnten nicht geladen werden",
+      "retry": "Wiederholen",
+      "view": "Sicht",
+      "columns": {
+        "name": "Name",
+        "subject": "Thema",
+        "status": "Status",
+        "received": "Erhalten",
+        "email": "E-Mail",
+        "source": "Quelle",
+        "subscribed": "Gezeichnet"
+      },
+      "subjects": {
+        "funding": "Finanzierung",
+        "application": "Bewerbung",
+        "partnership": "Partnerschaft",
+        "technical": "Technisch",
+        "general": "Allgemein"
+      },
+      "statuses": {
+        "new": "Neu",
+        "read": "Lesen",
+        "replied": "Antwortete",
+        "archived": "Archiviert"
+      },
+      "sheet": {
+        "subject": "Thema",
+        "received": "Erhalten",
+        "phone": "Telefon",
+        "country": "Land",
+        "message": "Nachricht",
+        "adminNotes": "Admin-Notizen",
+        "notesPlaceholder": "Interne Notizen...",
+        "saveChanges": "Änderungen speichern"
+      },
+      "toast": {
+        "saved": "Gespeichert",
+        "savedDesc": "Kontaktübermittlung aktualisiert.",
+        "updateFailed": "Update fehlgeschlagen",
+        "updateFailedDesc": "Änderungen konnten nicht gespeichert werden."
+      }
+    },
+    "activityLogsPage": {
+      "title": "Aktivitätsprotokolle",
+      "subtitle": "Verfolgen und überwachen Sie alle Benutzer- und Administratorinteraktionen",
+      "recentActivity": "Letzte Aktivität",
+      "recentActivityDesc": "Sehen Sie sich alle auf der Plattform durchgeführten Aktionen an",
+      "export": "Exportieren",
+      "exportCsv": "Als CSV exportieren",
+      "printPdf": "Drucken / Als PDF speichern",
+      "searchPlaceholder": "Suchaktivitäten...",
+      "actionType": "Aktionstyp",
+      "entityType": "Entitätstyp",
+      "allActions": "Alle Aktionen",
+      "allEntities": "Alle Entitäten",
+      "dateRange": "Datumsbereich:",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "to": "Zu",
+      "clearDates": "Klare Termine",
+      "actions": {
+        "create": "Erstellen",
+        "update": "Aktualisieren",
+        "delete": "Löschen",
+        "view": "Sicht",
+        "login": "Anmeldung",
+        "logout": "Abmelden",
+        "submit": "Einreichen",
+        "approve": "Genehmigen",
+        "reject": "Ablehnen"
+      },
+      "entities": {
+        "project": "Projekte",
+        "application": "Bewerbungen",
+        "user": "Benutzer",
+        "blog_post": "Blogbeiträge",
+        "profile": "Profile",
+        "document": "Unterlagen"
+      },
+      "columns": {
+        "user": "Benutzer",
+        "action": "Aktion",
+        "entity": "Juristische Person",
+        "description": "Beschreibung",
+        "time": "Zeit"
+      },
+      "empty": {
+        "title": "Keine Aktivitätsprotokolle",
+        "description": "Hier werden Aktivitäten angezeigt, wenn Benutzer mit der Plattform interagieren."
+      },
+      "system": "System",
+      "pagination": "Es werden {{from}} bis {{to}} von {{total}} Einträgen angezeigt",
+      "pageOf": "Seite {{current}} von {{total}}",
+      "toast": {
+        "preparingCsv": "CSV-Export wird vorbereitet...",
+        "noLogsExport": "Keine Protokolle zum Exportieren",
+        "exportedCsv": "{{count}}-Protokolle wurden in CSV exportiert",
+        "exportFailed": "Protokolle konnten nicht exportiert werden",
+        "preparingPrint": "Druckansicht wird vorbereitet...",
+        "noLogsPrint": "Keine Protokolle zum Drucken",
+        "printOpened": "Druckansicht geöffnet",
+        "printFailed": "Druckansicht konnte nicht vorbereitet werden"
+      }
+    },
+    "settingsPage": {
+      "title": "Admin-Einstellungen",
+      "subtitle": "Konfigurieren Sie das Admin-Panel und die Systemeinstellungen",
+      "general": {
+        "title": "Allgemeine Einstellungen",
+        "description": "Konfigurieren Sie allgemeine Admin-Panel-Einstellungen",
+        "maintenance": "Wartungsmodus",
+        "maintenanceDesc": "Aktivieren Sie den Wartungsmodus, um den Zugriff einzuschränken"
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfigurieren Sie die Benachrichtigungseinstellungen des Administrators",
+        "email": "E-Mail-Benachrichtigungen",
+        "emailDesc": "Erhalten Sie E-Mail-Benachrichtigungen für wichtige Ereignisse",
+        "applications": "Bewerbungswarnungen",
+        "applicationsDesc": "Lassen Sie sich benachrichtigen, wenn neue Bewerbungen eingereicht werden"
+      },
+      "applicationAccess": {
+        "title": "Bewerbungszugriff",
+        "description": "Die Gebühren pro Antrag werden archiviert. Um sich zu bewerben, benötigen Benutzer ein aktives Vollmitgliedsabonnement.",
+        "body": "Die Mitgliedschaft wird unter /join verwaltet. Der Legacy-Gebührencode befindet sich im Archiv/Legacy-Application-Payment/."
+      },
+      "system": {
+        "title": "Systeminformationen",
+        "description": "Systemstatus und Informationen anzeigen",
+        "databaseStatus": "Datenbankstatus",
+        "apiStatus": "API-Status",
+        "totalUsers": "Gesamtzahl der Benutzer",
+        "totalProjects": "Gesamtprojekte",
+        "connected": "Verbunden",
+        "operational": "Betriebsbereit"
+      },
+      "save": "Einstellungen speichern",
+      "saving": "Sparen...",
+      "toast": {
+        "saved": "Einstellungen gespeichert",
+        "savedDesc": "Die Admin-Einstellungen wurden aktualisiert."
+      }
+    },
+    "reviewManagementPage": {
+      "title": "Bewertungsmanagement",
+      "subtitle": "Verwalten Sie Prüferzuweisungen, Sektoren, Rubriken und Konflikte",
+      "tabs": {
+        "reviewers": "Rezensentinnen",
+        "conflicts": "Konflikte",
+        "settings": "Einstellungen"
+      },
+      "reviewers": {
+        "title": "Rezensentinnen",
+        "description": "Verwalten Sie Prüferbereiche und sehen Sie sich die Arbeitsbelastung an. Gutachter können nur Bewerbungen in den ihnen zugewiesenen Bereichen prüfen.",
+        "addSectorDialog": "Bereich „Rezensent“ hinzufügen",
+        "searchPlaceholder": "Suchen Sie nach dem Namen des Prüfers, dem Sektor oder der Arbeitsbelastung ...",
+        "noSectors": "Keine Sektoren zugewiesen",
+        "addSector": "Sektor hinzufügen",
+        "details": "Einzelheiten",
+        "workload": "{{count}} aktive Zuweisung",
+        "workload_plural": "{{count}} aktive Zuweisungen",
+        "columns": {
+          "reviewer": "Rezensentin",
+          "workload": "Arbeitsbelastung",
+          "sectors": "Sektoren",
+          "actions": "Aktionen"
+        },
+        "toast": {
+          "sectorAdded": "Sektor hinzugefügt",
+          "sectorAddedDesc": "Rezensentensektor erfolgreich hinzugefügt.",
+          "sectorRemoved": "Sektor entfernt",
+          "sectorRemovedDesc": "Der Rezensentensektor wurde entfernt.",
+          "error": "Fehler"
+        }
+      },
+      "addCategoryForm": {
+        "reviewer": "Rezensentin",
+        "selectReviewer": "Wählen Sie den Rezensenten aus",
+        "sector": "Sektor",
+        "selectSector": "Sektor auswählen",
+        "adding": "Hinzufügen...",
+        "addSector": "Sektor hinzufügen"
+      },
+      "conflicts": {
+        "title": "Konflikte zwischen Gutachtern",
+        "searchPlaceholder": "Suchen Sie nach dem Namen des Gutachters oder dem Titel der Bewerbung...",
+        "unknown": "Unbekannt",
+        "columns": {
+          "reviewer": "Rezensentin",
+          "application": "Bewerbung",
+          "reason": "Grund",
+          "declared": "Erklärt"
+        }
+      },
+      "settings": {
+        "title": "Überprüfen Sie die Verwaltungseinstellungen",
+        "description": "Konfigurieren Sie globale Einstellungen für das Bewertungsverwaltungssystem",
+        "numReviewers": "Anzahl der Gutachter pro Aufgabe",
+        "numReviewersDesc": "Alle neuen Prüferzuweisungen verwenden diese Nummer. Dies stellt die Konsistenz über alle Bewerbungen hinweg sicher.",
+        "reviewerPerApp": "Gutachter pro Antrag",
+        "reviewersPerApp": "Gutachter pro Bewerbung",
+        "save": "Einstellungen speichern",
+        "saving": "Sparen...",
+        "toast": {
+          "invalid": "Ungültiger Wert",
+          "invalidDesc": "Die Anzahl der Gutachter muss zwischen 1 und 10 liegen.",
+          "saved": "Einstellungen gespeichert",
+          "savedDesc": "Die Anzahl der Prüfer pro Aufgabe wurde auf {{count}} aktualisiert."
+        }
+      },
+      "rubrics": {
+        "title": "Systemrubrik",
+        "description": "Definieren Sie Bewertungskriterien und Gewichtungen, die für alle Bewerbungen gelten",
+        "edit": "Rubrik bearbeiten",
+        "editTitle": "Systemrubrik bearbeiten",
+        "create": "Erstellen Sie eine Systemrubrik",
+        "createTitle": "Erstellen Sie eine Systemrubrik",
+        "currentCriteria": "Aktuelle Rubrikkriterien",
+        "weight": "Gewicht: {{percent}} % • Max: {{max}}"
+      }
+    },
+    "reviewerDetailsPage": {
+      "back": "Zurück zum Bewertungsmanagement",
+      "notFound": "Rezensent nicht gefunden",
+      "loadError": "Die Prüferdetails konnten nicht geladen werden",
+      "retry": "Wiederholen",
+      "stats": {
+        "workload": "Aktive Arbeitsbelastung",
+        "totalReviews": "Gesamtbewertungen",
+        "avgScore": "Durchschnittliche Punktzahl",
+        "sectors": "Zugewiesene Sektoren"
+      },
+      "sectors": "Sektoren",
+      "noSectors": "Keine Sektoren zugewiesen",
+      "reviews": "Rezensionen und Aufgaben",
+      "columns": {
+        "application": "Bewerbung",
+        "status": "Status",
+        "score": "Punktzahl",
+        "recommendation": "Empfehlung",
+        "submitted": "Eingereicht"
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "in_progress": "Im Gange",
+        "completed": "Vollendet"
+      },
+      "notSubmitted": "Nicht eingereicht",
+      "na": "N / A"
+    },
+    "cmsList": {
+      "common": {
+        "create": "Erstellen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "cancel": "Stornieren",
+        "view": "Sicht",
+        "publish": "Veröffentlichen",
+        "unpublish": "Veröffentlichung aufheben",
+        "published": "Veröffentlicht",
+        "draft": "Entwurf",
+        "archived": "Archiviert",
+        "featured": "Hervorgehoben",
+        "actions": "Aktionen",
+        "status": "Status",
+        "search": "Suchen...",
+        "loadError": "Fehler beim Laden der Daten. Bitte versuchen Sie es erneut.",
+        "confirmDeleteTitle": "Bist du sicher?",
+        "confirmDelete": "Diese Aktion kann nicht rückgängig gemacht werden.",
+        "allCategories": "Alle Kategorien",
+        "filterByCategory": "Nach Kategorie filtern",
+        "allStatus": "Alle Status",
+        "order": "Bestellung: {{order}}"
+      },
+      "blog": {
+        "title": "Blogbeiträge verwalten",
+        "subtitle": "Blogartikel erstellen, bearbeiten und verwalten",
+        "create": "Beitrag erstellen",
+        "allPosts": "Alle Beiträge ({{count}})",
+        "searchPlaceholder": "Suchen Sie Beiträge nach Titel, Autor oder Sektor ...",
+        "views": "{{count}} Aufrufe",
+        "deleteDesc": "Dadurch wird der Blogbeitrag dauerhaft gelöscht."
+      },
+      "faq": {
+        "title": "FAQs verwalten",
+        "subtitle": "Erstellen, bearbeiten und verwalten Sie häufig gestellte Fragen",
+        "create": "FAQ erstellen",
+        "createFirst": "Erstellen Sie die erste FAQ",
+        "searchPlaceholder": "FAQs durchsuchen...",
+        "noResults": "Es wurden keine FAQs gefunden, die Ihrer Suche entsprechen.",
+        "empty": "Noch keine FAQs erstellt.",
+        "deleteDesc": "Dadurch wird die FAQ endgültig gelöscht."
+      },
+      "mentors": {
+        "title": "Mentorenmanagement",
+        "subtitle": "Verwalten Sie Ihr Mentoring-Verzeichnis",
+        "create": "Mentor hinzufügen",
+        "searchPlaceholder": "Mentoren suchen...",
+        "stats": {
+          "total": "Insgesamt Mentoren",
+          "published": "Veröffentlicht",
+          "sectors": "Sektoren"
+        },
+        "columns": {
+          "name": "Name",
+          "sector": "Sektor",
+          "country": "Land",
+          "status": "Status",
+          "order": "Befehl",
+          "actions": "Aktionen"
+        },
+        "deleteDesc": "Dadurch wird der Mentor dauerhaft gelöscht."
+      },
+      "partners": {
+        "title": "Partner verwalten",
+        "subtitle": "Erstellen, bearbeiten und verwalten Sie Partnerorganisationen",
+        "create": "Partner hinzufügen",
+        "searchPlaceholder": "Partner suchen...",
+        "columns": {
+          "name": "Name",
+          "sector": "Sektor",
+          "status": "Status",
+          "featured": "Hervorgehoben",
+          "linkedUser": "Verknüpfter Benutzer",
+          "actions": "Aktionen"
+        },
+        "yes": "Ja",
+        "no": "NEIN",
+        "none": "Keiner",
+        "deleteDesc": "Dadurch wird der Partner dauerhaft gelöscht."
+      },
+      "resources": {
+        "title": "Ressourcen",
+        "subtitle": "Verwalten Sie herunterladbare Ressourcen und Materialien",
+        "create": "Ressource hinzufügen",
+        "searchPlaceholder": "Ressourcen durchsuchen...",
+        "columns": {
+          "title": "Titel",
+          "sector": "Sektor",
+          "type": "Typ",
+          "size": "Größe",
+          "status": "Status",
+          "downloads": "Downloads",
+          "actions": "Aktionen"
+        },
+        "deleteDesc": "Dadurch wird die Ressource dauerhaft gelöscht."
+      },
+      "successStories": {
+        "title": "Erfolgsgeschichten",
+        "subtitle": "Verwalten Sie Erfolgsgeschichten und Testimonials",
+        "create": "Geschichte hinzufügen",
+        "searchPlaceholder": "Geschichten durchsuchen...",
+        "columns": {
+          "name": "Name",
+          "company": "Unternehmen",
+          "sector": "Sektor",
+          "funding": "Finanzierung",
+          "status": "Status",
+          "actions": "Aktionen"
+        },
+        "deleteDesc": "Dadurch wird die Erfolgsgeschichte dauerhaft gelöscht."
+      }
+    },
+    "cmsForm": {
+      "common": {
+        "back": "Zurück",
+        "save": "Speichern",
+        "saving": "Sparen...",
+        "create": "Erstellen",
+        "creating": "Erstellen...",
+        "cancel": "Stornieren",
+        "published": "Veröffentlicht",
+        "draft": "Entwurf"
+      },
+      "validation": {
+        "required": "{{field}} ist erforderlich",
+        "minChars": "{{field}} muss mindestens {{min}} Zeichen umfassen",
+        "validUrl": "Bitte geben Sie eine gültige URL ein",
+        "validEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+        "displayOrderMin": "Die Anzeigereihenfolge muss 0 oder größer sein",
+        "nameMin2": "Der Name muss mindestens 2 Zeichen lang sein"
+      },
+      "faq": {
+        "createTitle": "FAQ erstellen",
+        "editTitle": "FAQ bearbeiten",
+        "createDesc": "Fügen Sie eine neue häufig gestellte Frage hinzu",
+        "editDesc": "FAQ-Details aktualisieren",
+        "question": "Frage",
+        "answer": "Antwort",
+        "sector": "Sektor",
+        "selectSector": "Sektor auswählen",
+        "displayOrder": "Reihenfolge anzeigen",
+        "isPublished": "Veröffentlicht"
+      },
+      "blog": {
+        "createTitle": "Blogbeitrag erstellen",
+        "editTitle": "Blogbeitrag bearbeiten",
+        "title": "Titel",
+        "excerpt": "Auszug",
+        "content": "Inhalt",
+        "author": "Autorin",
+        "sector": "Sektor",
+        "readTime": "Lesen Sie Zeit",
+        "image": "Bild-URL",
+        "featured": "Hervorgehoben",
+        "status": "Status",
+        "tags": "Schlagworte"
+      },
+      "mentor": {
+        "createTitle": "Mentor hinzufügen",
+        "editTitle": "Mentor bearbeiten",
+        "name": "Name",
+        "bio": "Biografie",
+        "sector": "Sektor",
+        "country": "Land",
+        "linkedin": "LinkedIn-URL",
+        "twitter": "Twitter-URL",
+        "website": "Website-URL",
+        "avatar": "Avatar-URL",
+        "displayOrder": "Reihenfolge anzeigen",
+        "isPublished": "Veröffentlicht"
+      },
+      "partner": {
+        "createTitle": "Partner hinzufügen",
+        "editTitle": "Partner bearbeiten",
+        "name": "Name",
+        "description": "Beschreibung",
+        "logo": "Logo-URL",
+        "website": "Website-URL",
+        "sector": "Sektor",
+        "displayOrder": "Reihenfolge anzeigen",
+        "featured": "Hervorgehoben",
+        "status": "Status",
+        "linkedUser": "Verknüpfter Benutzer",
+        "inviteEmail": "Einladung per E-Mail"
+      },
+      "resource": {
+        "createTitle": "Ressource hinzufügen",
+        "editTitle": "Ressource bearbeiten",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "sector": "Sektor",
+        "fileType": "Dateityp",
+        "fileUrl": "Datei-URL",
+        "duration": "Dauer",
+        "isPublished": "Veröffentlicht"
+      },
+      "successStory": {
+        "createTitle": "Erfolgsgeschichte hinzufügen",
+        "editTitle": "Erfolgsgeschichte bearbeiten",
+        "name": "Name",
+        "company": "Unternehmen",
+        "sector": "Sektor",
+        "location": "Standort",
+        "fundingAmount": "Förderbetrag",
+        "fundingDate": "Finanzierungsdatum",
+        "image": "Bild-URL",
+        "description": "Beschreibung",
+        "impactMetrics": "Wirkungsmetriken",
+        "displayOrder": "Reihenfolge anzeigen",
+        "isPublished": "Veröffentlicht"
+      }
+    },
+    "footer": {
+      "userDashboard": "Benutzer-Dashboard",
+      "partnerDashboard": "Partner-Dashboard",
+      "reviewerDashboard": "Gutachter-Dashboard"
+    },
+    "applicationsPage": {
+      "title": "Bewerbungen",
+      "loadingTitle": "Bewerbungen prüfen",
+      "subtitle": "Sehen Sie sich alle eingereichten Bewerbungen an. Um Bewerbungen zu prüfen, nutzen Sie bitte ein Gutachterkonto.",
+      "loadingSubtitle": "Überprüfen und verwalten Sie alle eingereichten Bewerbungen",
+      "banner": {
+        "title": "Richtlinie zur Rollentrennung",
+        "description": "Administratorkonten können Anträge anzeigen, jedoch keine Änderungen genehmigen, ablehnen oder anfordern. Dies gewährleistet eine ordnungsgemäße Trennung der Anliegen, eine klare Verantwortlichkeit und genaue Prüfprotokolle. Um Überprüfungsaktionen durchzuführen, verwenden Sie bitte ein Prüferkonto.",
+        "dismissAria": "Banner schließen"
+      },
+      "filters": {
+        "all": "Alle"
+      },
+      "columns": {
+        "applicant": "Antragstellerin",
+        "project": "Projekt",
+        "status": "Status",
+        "submitted": "Eingereicht",
+        "reviewProgress": "Überprüfen Sie den Fortschritt",
+        "actions": "Aktionen"
+      },
+      "viewDetails": "Details anzeigen",
+      "viewDetailsTitle": "Bewerbungsdetails anzeigen",
+      "tableTitle": "Bewerbungen ({{count}})",
+      "searchPlaceholder": "Suche nach Bewerbername, Projekttitel oder Firma...",
+      "errorTitle": "Fehler beim Laden der Bewerbungen",
+      "retry": "Wiederholen"
+    },
+    "usersPage": {
+      "title": "Benutzer verwalten",
+      "subtitle": "Alle Plattformbenutzer anzeigen und verwalten",
+      "errorTitle": "Fehler",
+      "loadError": "Benutzer konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+      "tableTitle": "Alle Benutzer ({{count}})",
+      "tableTitleLoading": "Alle Benutzer",
+      "emptyTitle": "Noch keine Benutzer",
+      "emptyDescription": "Benutzer werden hier angezeigt, sobald sie sich registriert haben",
+      "searchPlaceholder": "Suche nach Name oder E-Mail...",
+      "columns": {
+        "name": "Name",
+        "role": "Rolle",
+        "status": "Status",
+        "joined": "Beigetreten",
+        "applications": "Bewerbungen",
+        "actions": "Aktionen"
+      },
+      "applicationCount_one": "{{count}} Bewerbung",
+      "applicationCount_other": "{{count}} Bewerbungen",
+      "viewProfile": "Profil anzeigen",
+      "suspend": "Aussetzen",
+      "activate": "Aktivieren",
+      "suspendDialog": {
+        "title": "Benutzer sperren",
+        "description": "Sind Sie sicher, dass Sie {{name}} sperren möchten? Bis zur erneuten Aktivierung können sie nicht auf ihr Konto zugreifen.",
+        "cancel": "Stornieren",
+        "confirm": "Benutzer sperren",
+        "confirming": "Aussetzung..."
+      },
+      "activateDialog": {
+        "title": "Benutzer aktivieren",
+        "description": "Sind Sie sicher, dass Sie {{name}} aktivieren möchten? Sie erhalten wieder Zugriff auf ihr Konto.",
+        "cancel": "Stornieren",
+        "confirm": "Benutzer aktivieren",
+        "confirming": "Aktivieren..."
+      }
+    },
+    "userDetailsPage": {
+      "back": "Zurück zu Benutzer",
+      "notFound": "Benutzer nicht gefunden.",
+      "noBusinessName": "Kein Firmenname",
+      "cards": {
+        "email": "E-Mail",
+        "joined": "Beigetreten",
+        "applications": "Bewerbungen"
+      },
+      "applicationCount_one": "{{count}} Bewerbung",
+      "applicationCount_other": "{{count}} Bewerbungen",
+      "businessDetails": "Geschäftsdetails",
+      "bio": "Biografie",
+      "fields": {
+        "businessName": "Firmenname",
+        "businessSector": "Geschäftsbereich",
+        "country": "Land",
+        "notProvided": "Nicht bereitgestellt",
+        "noBio": "Keine Biografie bereitgestellt"
+      },
+      "roleManagement": {
+        "title": "Rollenmanagement",
+        "currentRole": "Aktuelle Rolle",
+        "description": "Ändern Sie die Rolle des Benutzers, um andere Berechtigungen zu erteilen",
+        "selectRole": "Rolle auswählen",
+        "updating": "Aktualisierung...",
+        "cannotChangeOwnRole": "Sie können Ihre eigene Rolle nicht ändern."
+      },
+      "roleChangeDialog": {
+        "title": "Benutzerrolle ändern",
+        "description": "Sind Sie sicher, dass Sie die Rolle von {{name}} von {{fromRole}} in {{toRole}} ändern möchten? Dies wirkt sich unmittelbar auf ihre Zugriffsberechtigungen aus.",
+        "cancel": "Stornieren",
+        "confirm": "Rolle ändern",
+        "confirming": "Aktualisierung..."
+      }
+    },
+    "kycCard": {
+      "title": "KYC-Verifizierung",
+      "notSubmitted": "Dieser Benutzer hat keine Identitätsbestätigung eingereicht.",
+      "status": {
+        "pendingReview": "Ausstehende Überprüfung"
+      },
+      "fields": {
+        "idType": "ID-Typ",
+        "idNumber": "ID-Nummer",
+        "nameOnId": "Name auf Ausweis",
+        "nameMismatch": "Name weicht vom Profil ab",
+        "idDocument": "Ausweisdokument",
+        "selfie": "Selfie-Aufnahme",
+        "viewFull": "Vollständig anzeigen",
+        "noDocument": "Kein Dokument",
+        "noSelfie": "Kein Selfie"
+      },
+      "idTypes": {
+        "passport": "Reisepass",
+        "national_id": "Nationaler Ausweis",
+        "drivers_license": "Führerschein",
+        "business_registration": "Gewerbeanmeldung"
+      },
+      "adminNotes": "Admin-Notizen (optional)",
+      "adminNotesPlaceholder": "Interne Notizen zu dieser Verifizierung...",
+      "rejectionReason": "Ablehnungsgrund (erforderlich für die Ablehnung)",
+      "rejectionReasonPlaceholder": "Erklären Sie, warum die Verifizierung abgelehnt wird...",
+      "verify": "Verifizieren",
+      "reject": "Ablehnen",
+      "previousAdminNotes": "Administratorhinweise:"
+    },
+    "projectDetailsPage": {
+      "loading": "Projekt wird geladen...",
+      "notFound": "Projekt nicht gefunden oder ein Fehler ist aufgetreten.",
+      "back": "Zurück zu Projekten",
+      "viewPublic": "Öffentliche Seite anzeigen",
+      "edit": "Projekt bearbeiten",
+      "featured": "Empfohlen",
+      "requirementsTitle": "Anforderungen & Zulassung",
+      "requirements": "Anforderungen",
+      "eligibility": "Zulassungskriterien",
+      "sidebarTitle": "Projektdetails",
+      "fundingAmount": "Finanzierungsbetrag",
+      "deadline": "Frist",
+      "location": "Standort",
+      "applicants": "Bewerber",
+      "metadata": "Metadaten",
+      "created": "Erstellt",
+      "updated": "Aktualisiert"
+    }
+  },
+  "profilePage": {
+    "title": "Profil",
+    "subtitle": "Verwalten Sie Ihre Profilinformationen und Präferenzen",
+    "overview": "Profilübersicht",
+    "noOrganization": "Keine Organisation aufgeführt",
+    "noLocation": "Kein Standort",
+    "personalInfo": "Persönliche Informationen",
+    "profilePicture": "Profilbild",
+    "uploadProfilePicture": "Profilbild hochladen",
+    "avatarHint": "Laden Sie ein Profilbild hoch, um Ihr Konto zu personalisieren (JPG, PNG, WebP, GIF bis zu 5 MB)",
+    "emailCannotChange": "Die E-Mail-Adresse kann nicht geändert werden",
+    "cancel": "Stornieren",
+    "saving": "Sparen...",
+    "saveChanges": "Änderungen speichern",
+    "completion": "Profilvervollständigung",
+    "overallProgress": "Gesamtfortschritt",
+    "percentComplete": "{{percentage}}% abgeschlossen",
+    "items": {
+      "basicInfo": "Grundlegende Informationen",
+      "contactDetails": "Kontaktdaten",
+      "bio": "Biografie und Beschreibung",
+      "identity": "Identitätsprüfung"
+    },
+    "status": {
+      "complete": "Vollständig",
+      "pendingReview": "Ausstehende Überprüfung",
+      "incomplete": "Unvollständig"
+    },
+    "fields": {
+      "firstName": "Vorname",
+      "firstNamePlaceholder": "Geben Sie Ihren Vornamen ein",
+      "lastName": "Nachname",
+      "lastNamePlaceholder": "Geben Sie Ihren Nachnamen ein",
+      "email": "E-Mail",
+      "country": "Standort/Land",
+      "countryPlaceholder": "Stadt, Land",
+      "phone": "Telefonnummer",
+      "phonePlaceholder": "Geben Sie die Telefonnummer ein",
+      "businessName": "Organisation, Arbeitgeber oder Schule",
+      "businessNamePlaceholder": "Unternehmen, Universität, NGO oder Arbeitgeber (optional)",
+      "bio": "Biografie",
+      "bioPlaceholder": "Erzählen Sie uns etwas über sich – Ihre Arbeit, Ihr Studium, Ihre Fähigkeiten oder was Sie suchen …",
+      "bioDescription": "Optional. Hilft Prüfern und Programmen, Ihren Hintergrund (Gründer, Fachkraft oder Praktikant) zu verstehen."
+    },
+    "validation": {
+      "firstNameRequired": "Der Vorname ist erforderlich",
+      "lastNameRequired": "Nachname ist erforderlich"
+    },
+    "toasts": {
+      "updated": "Profil aktualisiert",
+      "updatedDesc": "Ihr Profil wurde erfolgreich aktualisiert.",
+      "error": "Fehler",
+      "updateFailed": "Profil konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+      "avatarRemoved": "Profilbild entfernt",
+      "avatarRemovedDesc": "Ihr Profilbild wurde entfernt.",
+      "warning": "Warnung",
+      "avatarDeleteWarning": "Das Bild wurde gelöscht, aber das Profil konnte nicht aktualisiert werden. Bitte speichern Sie Ihre Änderungen."
+    },
+    "errors": {
+      "loadFailed": "Profil konnte nicht geladen werden",
+      "retry": "Wiederholen",
+      "notFound": "Kein Profil gefunden. Bitte erstellen Sie eines."
+    },
+    "defaultUser": "Benutzer"
+  },
+  "billingPage": {
+    "title": "Abrechnung",
+    "subtitle": "Vollmitgliedsabonnement (2 $/Monat), Zahlungsmethoden und Quittungen",
+    "paymentMethods": {
+      "title": "Zahlungsmethoden",
+      "description": "Karten, die für Ihr Vollmitgliedsabonnement verwendet werden",
+      "empty": "Keine Zahlungsmethoden hinterlegt",
+      "loading": "Laden…",
+      "paidMemberHint": "Ihre Karte wird nach dem Auschecken der Mitgliedschaft automatisch gespeichert. Wenn nichts angezeigt wird, warten Sie eine Minute und aktualisieren Sie den Vorgang – oder führen Sie <link>den Checkout erneut aus</link>.",
+      "pendingCheckoutHint": "Schließen Sie die Mitgliedszahlung ab, um Ihre Karte zu speichern. <link>Zur Kasse gehen</link>",
+      "upgradeHint": "Die Karten werden gespeichert, wenn Sie die Vollmitgliedschaft bezahlen. <link>Upgrade & bezahlen</link>",
+      "primary": "Primär",
+      "secondary": "Sekundär",
+      "expires": "Läuft ab {{month}}/{{year}}",
+      "setDefault": "Als Standard festlegen"
+    },
+    "history": {
+      "title": "Abrechnungsverlauf",
+      "description": "Mitgliedsbeiträge und sonstige Gebühren",
+      "empty": "Noch kein Abrechnungsverlauf",
+      "emptyHint": "Die Zahlungen für Vollmitglieder werden hier nach dem Bezahlen angezeigt. <link>Upgrade</link>",
+      "membership": "Mitgliedschaft",
+      "invoice": "Rechnung: {{number}}",
+      "downloadReceipt": "Laden Sie die Quittung herunter",
+      "receipt": "Quittung",
+      "columns": {
+        "date": "Datum",
+        "description": "Beschreibung",
+        "invoice": "Rechnung #",
+        "amount": "Menge",
+        "status": "Status",
+        "actions": "Aktionen"
+      }
+    },
+    "info": {
+      "title": "Abrechnungsdaten",
+      "description": "Aktualisieren Sie Ihre Rechnungsadresse und Steuerinformationen",
+      "billingEmail": "Rechnungs-E-Mail",
+      "taxId": "Steuernummer (optional)",
+      "taxIdPlaceholder": "Geben Sie Ihre Steuernummer ein",
+      "address": "Rechnungsadresse",
+      "addressPlaceholder": "Straßenadresse",
+      "city": "Stadt",
+      "cityPlaceholder": "Stadt",
+      "state": "Staat/Provinz",
+      "statePlaceholder": "Zustand",
+      "zip": "Postleitzahl",
+      "zipPlaceholder": "PLZ",
+      "country": "Land",
+      "countryPlaceholder": "Land",
+      "saving": "Sparen...",
+      "save": "Rechnungsinformationen speichern"
+    },
+    "deleteDialog": {
+      "onlyTitle": "Ihre einzige Zahlungsmethode löschen?",
+      "title": "Zahlungsmethode löschen?",
+      "onlyDesc": "Dies ist Ihre einzige Zahlungsmethode. Wenn Sie es löschen, müssen Sie eine neue Zahlungsmethode hinzufügen, bevor Sie zukünftige Zahlungen leisten können. Sind Sie sicher, dass Sie fortfahren möchten?",
+      "defaultDesc": "Dies ist Ihre Standardzahlungsmethode. Es wird entfernt und eine andere Zahlungsmethode als Standard festgelegt. Sind Sie sicher, dass Sie fortfahren möchten?",
+      "genericDesc": "Möchten Sie diese Zahlungsmethode wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "cancel": "Stornieren",
+      "deleting": "Löschen...",
+      "delete": "Löschen"
+    },
+    "status": {
+      "paid": "Bezahlt",
+      "pending": "Ausstehend",
+      "refunded": "Erstattet",
+      "failed": "Fehlgeschlagen"
+    },
+    "toasts": {
+      "saved": "Rechnungsinformationen gespeichert",
+      "savedDesc": "Ihre Rechnungsadresse wurde aktualisiert.",
+      "error": "Fehler",
+      "removed": "Zahlungsmethode entfernt",
+      "removedOnly": "Ihre Zahlungsmethode wurde entfernt. Für zukünftige Transaktionen müssen Sie eine neue Zahlungsmethode hinzufügen.",
+      "removedWithDefault": "Ihre Zahlungsmethode wurde entfernt. Eine andere Zahlungsmethode wurde als Standard festgelegt.",
+      "removedGeneric": "Ihre Zahlungsmethode wurde entfernt.",
+      "deleteFailed": "Die Zahlungsmethode konnte nicht gelöscht werden",
+      "defaultUpdated": "Standardzahlungsmethode aktualisiert",
+      "receiptUnavailable": "Quittung nicht verfügbar",
+      "receiptUnavailableDesc": "Für diese Zahlung wurde noch kein Transaktionsdatensatz gefunden.",
+      "loginRequired": "Um Rechnungen herunterladen zu können, müssen Sie angemeldet sein.",
+      "invoiceDownloaded": "Rechnung heruntergeladen.",
+      "downloadFailed": "Rechnung konnte nicht heruntergeladen werden."
+    }
+  },
+  "partner": {
+    "portal": "Partnerportal",
+    "roleFallback": "Partner",
+    "menu": {
+      "dashboard": "Übersicht",
+      "opportunities": "Meine Möglichkeiten",
+      "notifications": "Benachrichtigungen",
+      "settings": "Einstellungen"
+    },
+    "pages": {
+      "dashboard": "Partner-Dashboard",
+      "opportunities": "Meine Möglichkeiten",
+      "notifications": "Benachrichtigungen",
+      "settings": "Einstellungen",
+      "opportunityDetails": "Opportunity-Details",
+      "qualifiedApplicants": "Qualifizierte Bewerber",
+      "default": "Partnerportal"
+    },
+    "orgNotLinked": {
+      "title": "Organisation nicht verknüpft",
+      "description": "Ihr Partnerkonto ist noch keiner Organisation zugeordnet. Wenden Sie sich an Ihren Maali-Administrator, bevor Sie Möglichkeiten erstellen.",
+      "createDisabledTooltip": "Verknüpfen Sie Ihre Organisation, bevor Sie Möglichkeiten erstellen. Wenden Sie sich an Ihren Maali-Administrator.",
+      "contactSupport": "Support kontaktieren"
+    },
+    "checklist": {
+      "title": "Einrichtungs-Checkliste",
+      "description": "Schließen Sie diese Schritte ab, um das Partnerportal optimal zu nutzen.",
+      "progress": "Fortschritt",
+      "progressCount": "{{completed}} von {{total}} abgeschlossen",
+      "items": {
+        "orgProfile": {
+          "label": "Organisationsprofil",
+          "description": "Name, Sektor und Beschreibung Ihrer Organisation hinzufügen."
+        },
+        "orgLogo": {
+          "label": "Organisationslogo",
+          "description": "Laden Sie ein Logo hoch, damit Bewerber Ihre Marke erkennen."
+        },
+        "firstOpportunity": {
+          "label": "Erste Möglichkeit",
+          "description": "Veröffentlichen Sie Ihre erste Fördermöglichkeit."
+        },
+        "firstApplication": {
+          "label": "Erste Bewerbung",
+          "description": "Erhalten und prüfen Sie Ihre erste Bewerbung."
+        }
+      },
+      "actions": {
+        "editProfile": "Profil bearbeiten",
+        "uploadLogo": "Logo hochladen",
+        "createOpportunity": "Möglichkeit erstellen",
+        "viewSubmissions": "Einreichungen anzeigen"
+      }
+    },
+    "dashboardPage": {
+      "subtitle": "Verwalten Sie Ihre Chancen und verfolgen Sie Bewerbungen",
+      "zeroStatsTip": {
+        "title": "Ihre Dashboard-Metriken",
+        "description": "Auf diesen Karten werden Ihre Chancen und die Anzahl der Bewerbungen angezeigt, sobald Sie Ihre erste Chance erstellt haben und Bewerbungen erhalten.",
+        "action": "Chance schaffen"
+      },
+      "statsError": {
+        "title": "Dashboard-Statistiken konnten nicht geladen werden",
+        "description": "Ihre Partner-Metriken konnten nicht geladen werden. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen"
+      },
+      "recentOpportunities": {
+        "title": "Aktuelle Möglichkeiten",
+        "description": "Schnellzugriff auf Ihre neuesten Möglichkeiten und Bewerberlisten.",
+        "viewAll": "Alle anzeigen",
+        "viewOpportunity": "Opportunity ansehen",
+        "viewApplicants": "Bewerber ansehen",
+        "applicantCount": "{{count}} Bewerber"
+      },
+      "stats": {
+        "totalOpportunities": "Gesamtchancen",
+        "activeOpportunities": "Aktive Möglichkeiten",
+        "totalApplications": "Gesamtzahl der Bewerbungen",
+        "approved": "Genehmigt"
+      }
+    },
+    "settingsPage": {
+      "subtitle": "Verwalten Sie die Einstellungen Ihres Partnerkontos",
+      "accountInfo": {
+        "title": "Kontoinformationen",
+        "description": "Ihre Kontodaten",
+        "email": "E-Mail",
+        "role": "Rolle"
+      },
+      "loading": "Organisationsdetails werden geladen...",
+      "orgProfile": {
+        "title": "Organisationsprofil",
+        "description": "Aktualisieren Sie Ihre Organisationsinformationen",
+        "logo": "Organisationslogo",
+        "uploadLogo": "Logo hochladen",
+        "name": "Name der Organisation",
+        "namePlaceholder": "Name der Organisation",
+        "descriptionLabel": "Beschreibung",
+        "descriptionPlaceholder": "Kurze Beschreibung Ihrer Organisation",
+        "website": "Webseite",
+        "websitePlaceholder": "https://ihre-website.de",
+        "sector": "Sektor",
+        "sectorPlaceholder": "Sektor auswählen"
+      },
+      "contact": {
+        "title": "Kontaktdaten",
+        "description": "Hauptansprechpartner für Ihre Organisation",
+        "name": "Name des primären Kontakts",
+        "namePlaceholder": "Vollständiger Name",
+        "phone": "Geschäftstelefon (optional)",
+        "phonePlaceholder": "+49 123 456789",
+        "country": "Land/Region (optional)",
+        "countryPlaceholder": "z.B. Kenia"
+      },
+      "validation": {
+        "nameRequired": "Der Name der Organisation ist erforderlich",
+        "validUrl": "Bitte geben Sie eine gültige URL ein",
+        "sectorRequired": "Sektor ist erforderlich"
+      },
+      "toasts": {
+        "updated": "Partnerprofil aktualisiert",
+        "updatedDesc": "Ihre Organisationsdaten wurden gespeichert.",
+        "failed": "Update fehlgeschlagen",
+        "failedDesc": "Partnerdetails können nicht gespeichert werden."
+      }
+    },
+    "qualifiedApplicantsPage": {
+      "title": "Qualifizierte Bewerber",
+      "subtitle": "{{title}} – Geordnet nach Bewertungsergebnissen",
+      "loading": "Laden...",
+      "exportQualified": "Exportqualifiziert ({{count}})",
+      "exportCurrent": "Aktuelle Ansicht exportieren",
+      "allApplications": "Alle Bewerbungen",
+      "stats": {
+        "total": "Gesamtzahl der Bewerbungen",
+        "qualified": "Qualifiziert/Anerkannt",
+        "reviewed": "Bewertet",
+        "pending": "Ausstehend"
+      },
+      "tableTitle": "Bewerbungen nach Rang",
+      "filters": {
+        "all": "Alle Status",
+        "approved": "Nur genehmigt",
+        "pending": "Ausstehend",
+        "rejected": "Abgelehnt",
+        "under_review": "Wird überprüft"
+      },
+      "searchPlaceholder": "Suche nach Bewerbername oder E-Mail..."
+    },
+    "opportunityForm": {
+      "back": "Zurück",
+      "createTitle": "Schaffen Sie neue Möglichkeiten",
+      "editTitle": "Verkaufschance bearbeiten",
+      "createSubtitle": "Richten Sie eine neue Finanzierungsmöglichkeit ein",
+      "editSubtitle": "Aktualisieren Sie Ihre Opportunity-Details"
+    },
+    "opportunityDetailsPage": {
+      "loading": "Opportunity wird geladen...",
+      "notFound": "Opportunity nicht gefunden oder kein Zugriff.",
+      "back": "Zurück zu Möglichkeiten",
+      "viewPublic": "Öffentliche Seite anzeigen",
+      "viewApplications": "Sortierte Bewerbungen anzeigen",
+      "edit": "Opportunity bearbeiten",
+      "requirementsTitle": "Anforderungen & Eignung",
+      "requirements": "Anforderungen",
+      "eligibility": "Eignungskriterien",
+      "sidebarTitle": "Opportunity-Details",
+      "fundingAmount": "Förderbetrag",
+      "deadline": "Frist",
+      "location": "Standort",
+      "applicants": "Bewerber",
+      "metadata": "Metadaten",
+      "opportunityId": "Opportunity-ID",
+      "created": "Erstellt",
+      "uncategorized": "Nicht kategorisiert"
+    },
+    "setupWizard": {
+      "title": "Willkommen im Maali-Partnerportal",
+      "description": "Richten wir Ihr Organisationsprofil ein, damit Bewerber mehr über Sie erfahren.",
+      "stepOf": "Schritt {{current}} von {{total}}",
+      "percentComplete": "{{percent}} % abgeschlossen",
+      "steps": {
+        "organization": "Organisation",
+        "contact": "Kontakt",
+        "firstOpportunity": "Erste Chance"
+      },
+      "logoHint": "Ein Logo hilft Bewerbern, Ihre Organisation zu erkennen",
+      "step3Intro": "Richten Sie optional jetzt Ihre erste Chance ein oder überspringen Sie und erledigen Sie es später im Dashboard.",
+      "fields": {
+        "opportunityTitle": "Titel der Chance",
+        "opportunityTitlePlaceholder": "z. B. Innovationsförderung 2026",
+        "fundingAmount": "Förderbetrag",
+        "fundingAmountPlaceholder": "z. B. 10.000 $ - 50.000 $",
+        "deadline": "Bewerbungsfrist"
+      },
+      "actions": {
+        "skip": "Vorerst überspringen",
+        "back": "Zurück",
+        "next": "Weiter",
+        "saving": "Wird gespeichert…",
+        "complete": "Einrichtung abschließen"
+      },
+      "toasts": {
+        "updated": "Organisationsprofil aktualisiert!",
+        "updatedDesc": "Ihre Partnerorganisation ist jetzt eingerichtet.",
+        "error": "Fehler",
+        "errorDesc": "Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+      },
+      "validation": {
+        "descriptionMin": "Beschreibung muss mindestens 10 Zeichen haben",
+        "contactNameMin": "Kontaktname ist erforderlich",
+        "validUrl": "Bitte geben Sie eine gültige URL ein"
+      }
+    },
+    "rankedApplicationsPage": {
+      "title": "Bewertete Bewerbungen",
+      "subtitle": "{{title}} - Nach Bewertungspunkten sortiert",
+      "loading": "Wird geladen...",
+      "exportRankedCsv": "Sortierte CSV exportieren",
+      "back": "Zurück",
+      "exportTopTitle": "Top exportieren",
+      "exportTop": "Top exportieren",
+      "searchPlaceholder": "Nach Bewerbername oder E-Mail suchen...",
+      "exportOnly": {
+        "title": "Nur Export-Ansicht",
+        "description": "Partner können sortierte Bewerberdaten als CSV exportieren. Genehmigen, Ablehnen oder Nachrichten sind hier nicht möglich."
+      },
+      "reviewComplete": {
+        "title": "Rankings bereit",
+        "description": "Die Maali-Bewertung ist abgeschlossen. Exportieren Sie sortierte Ergebnisse unten.",
+        "fromNotification": "Sie haben dies über eine Benachrichtigung geöffnet. Sortierte Ergebnisse können unten exportiert werden."
+      },
+      "filters": {
+        "status": "Status",
+        "statusAll": "Alle Status",
+        "minScore": "Mindestpunktzahl",
+        "minScorePlaceholder": "z. B. 7,0",
+        "noResults": "Keine Bewerbungen entsprechen Ihren Filtern."
+      },
+      "csv": {
+        "rank": "Rang",
+        "applicantName": "Bewerbername",
+        "organization": "Organisation",
+        "email": "E-Mail",
+        "projectTitle": "Projekttitel",
+        "status": "Status",
+        "avgScore": "Durchschnittspunktzahl",
+        "reviews": "Bewertungen",
+        "submitted": "Eingereicht"
+      },
+      "loadError": {
+        "title": "Bewerbungen konnten nicht geladen werden",
+        "description": "Sortierte Bewerbungen für diese Möglichkeit konnten nicht geladen werden. Bitte erneut versuchen.",
+        "retry": "Erneut versuchen"
+      },
+      "empty": {
+        "noSubmissions": {
+          "title": "Noch keine Bewerbungen",
+          "description": "Sobald Bewerber sich bewerben, erscheinen sie hier nach Bewertungspunkten sortiert."
+        },
+        "reviewPending": {
+          "title": "Bewertungen laufen",
+          "description": "{{count}} Bewerbung(en) eingereicht. Rankings und Exporte sind verfügbar, sobald die Gutachter bewertet haben."
+        }
+      }
+    }
+  },
+  "reviewer": {
+    "panel": "Gutachtergremium",
+    "roleFallback": "Rezensentin",
+    "menu": {
+      "dashboard": "Übersicht",
+      "applications": "Bewerbungen",
+      "notifications": "Benachrichtigungen",
+      "settings": "Einstellungen"
+    },
+    "pages": {
+      "dashboard": "Gutachter-Dashboard",
+      "applications": "Bewerbungen",
+      "notifications": "Benachrichtigungen",
+      "settings": "Reviewer-Einstellungen",
+      "reviewApplication": "Bewerbung prüfen"
+    },
+    "dashboardPage": {
+      "subtitle": "Übersicht über Bewerbungen und Bewertungsstatistiken",
+      "loadError": "Fehler beim Laden der Bewerbungen: {{message}}",
+      "stats": {
+        "pendingReview": "Ausstehende Überprüfung",
+        "pendingDesc": "Bewerbungen warten auf Prüfung",
+        "approved": "Genehmigt",
+        "approvedDesc": "Gesamtzahl der genehmigten Anträge",
+        "rejected": "Abgelehnt",
+        "rejectedDesc": "Gesamtzahl der abgelehnten Bewerbungen",
+        "total": "Gesamt",
+        "totalDesc": "Alle Bewerbungen"
+      },
+      "performance": {
+        "title": "Überprüfen Sie die Leistung",
+        "description": "Ihre Bewertungsstatistik",
+        "totalApplications": "Gesamtzahl der Bewerbungen",
+        "approvalRate": "Zustimmungsrate",
+        "pendingReviews": "Ausstehende Bewertungen"
+      },
+      "recent": {
+        "title": "Aktuelle Bewerbungen",
+        "description": "Neueste Einreichungen, die überprüft werden müssen",
+        "empty": "Derzeit liegen keine Bewerbungen vor.",
+        "submitted": "Eingereicht: {{date}}",
+        "deadline": "Frist: {{date}}",
+        "view": "Sicht",
+        "overdue": "Überfällig",
+        "dueToday": "Heute fällig",
+        "daysLeft": "Noch {{count}} Tage übrig",
+        "daysLeft_plural": "Noch {{count}} Tage übrig"
+      },
+      "deadlineTooltip": "Die Überprüfungsfrist wird von den Administratoren festgelegt. Reichen Sie Ihre Bewertung vor diesem Datum ein."
+    },
+    "applicationsPage": {
+      "subtitle": "Überprüfen und verwalten Sie alle eingereichten Bewerbungen",
+      "subtitleCount": "Überprüfen und verwalten Sie alle eingereichten Bewerbungen ({{count}})",
+      "loadError": "Fehler beim Laden der Bewerbungen: {{message}}",
+      "unknownError": "Unbekannter Fehler",
+      "priorityAlert": {
+        "title": "Bewerbungen sind seit mehr als 5 Tagen ausstehend",
+        "description": "Bitte priorisieren Sie die Prüfung dieser Bewerbungen"
+      },
+      "tableTitles": {
+        "all": "Alle Bewerbungen",
+        "draft": "Entwurfsrezensionen",
+        "pending": "Ausstehende Bewerbungen",
+        "under_review": "Bewerbungen werden geprüft",
+        "approved": "Genehmigte Anträge",
+        "rejected": "Abgelehnte Bewerbungen"
+      },
+      "noDeadline": "Keine Frist",
+      "day": "Tag",
+      "days": "Tage",
+      "statusDescriptions": {
+        "draft": "Sie haben einen Überprüfungsentwurf gespeichert und können dort fortfahren, wo Sie aufgehört haben",
+        "pending": "Der Antrag muss noch von allen zugewiesenen Prüfern geprüft werden",
+        "under_review": "Überprüfung läuft: {{completed}} von {{total}} Rezensenten haben eingereicht",
+        "approved": "Antrag wurde genehmigt",
+        "rejected": "Antrag wurde abgelehnt",
+        "default": "Bewerbungsstatus"
+      },
+      "actions": {
+        "startReview": "Überprüfung starten",
+        "continueReview": "Weiterlesen",
+        "review": "Rezension"
+      },
+      "searchPlaceholder": "Suche nach Bewerbername, Projekttitel oder Firma..."
+    },
+    "settingsPage": {
+      "subtitle": "Verwalten Sie Ihre Prüfereinstellungen und Benachrichtigungen",
+      "notifications": {
+        "title": "Benachrichtigungseinstellungen",
+        "description": "Konfigurieren Sie, wie Sie Benachrichtigungen über neue Bewerbungen erhalten",
+        "email": "E-Mail-Benachrichtigungen",
+        "emailDesc": "Erhalten Sie E-Mail-Benachrichtigungen für neue Bewerbungen",
+        "dailyDigest": "Tägliche Zusammenfassung",
+        "dailyDigestDesc": "Erhalten Sie täglich eine Zusammenfassung der ausstehenden Bewerbungen",
+        "urgent": "Dringende Bewerbungen",
+        "urgentDesc": "Bei Bewerbungen, deren Bearbeitungsfrist mehr als 5 Tage beträgt, werden Sie umgehend benachrichtigt"
+      },
+      "reviewPrefs": {
+        "title": "Überprüfen Sie die Einstellungen",
+        "description": "Legen Sie Ihre Standardeinstellungen für den Überprüfungsworkflow fest",
+        "priority": "Standardmäßige Überprüfungspriorität",
+        "oldestFirst": "Älteste zuerst",
+        "newestFirst": "Das Neueste zuerst",
+        "fundingHighLow": "Finanzierungsbetrag (hoch bis niedrig)",
+        "fundingLowHigh": "Finanzierungsbetrag (niedrig bis hoch)",
+        "autoAssign": "Bewerbungen automatisch zuweisen",
+        "autoAssignDesc": "Weisen Sie neue Bewerbungen automatisch Ihrer Überprüfungswarteschlange zu"
+      },
+      "profile": {
+        "title": "Profilinformationen",
+        "description": "Aktualisieren Sie die Profilinformationen Ihres Prüfers",
+        "fullName": "Vollständiger Name",
+        "fullNamePlaceholder": "Geben Sie Ihren vollständigen Namen ein",
+        "email": "E-Mail",
+        "emailPlaceholder": "ihre.email@beispiel.de",
+        "emailHint": "Die E-Mail-Adresse kann hier nicht geändert werden"
+      },
+      "saving": "Sparen...",
+      "save": "Einstellungen speichern",
+      "toasts": {
+        "saved": "Einstellungen gespeichert",
+        "savedDesc": "Ihre Prüfereinstellungen wurden aktualisiert.",
+        "error": "Fehler",
+        "saveFailed": "Einstellungen konnten nicht gespeichert werden"
+      }
+    },
+    "reviewApplicationPage": {
+      "title": "Bewerbung prüfen",
+      "notAssigned": {
+        "title": "Nicht zugewiesen",
+        "description": "Sie sind nicht mit der Prüfung dieser Bewerbung beauftragt",
+        "body": "Nur zugewiesene Gutachter können Bewertungen für Bewerbungen abgeben. Wenn Sie der Meinung sind, dass Sie zugewiesen werden sollten, wenden Sie sich bitte an einen Administrator."
+      },
+      "submitted": {
+        "title": "Bewertung eingereicht",
+        "description": "Sie haben Ihre Bewertung für diese Bewerbung bereits abgegeben",
+        "overallScore": "Gesamtpunktzahl:",
+        "recommendation": "Empfehlung:",
+        "criterionScores": "Kriteriumswerte:",
+        "yourComments": "Ihre Kommentare:",
+        "submittedAt": "Eingereicht:",
+        "engineNote": "Ihre Bewertung wurde übermittelt. Die Entscheidungsmaschine verarbeitet alle Bewertungen, sobald alle zugewiesenen Prüfer ihre Bewertungen eingereicht haben.",
+        "updateNote": "Sie können Ihre Bewertung aktualisieren, indem Sie sie erneut einreichen. Ihre vorherige Einreichung wird dadurch ersetzt."
+      },
+      "toasts": {
+        "submitted": "Bewertung eingereicht",
+        "submittedDesc": "Ihre Bewertung wurde erfolgreich übermittelt. Die Entscheidungsmaschine verarbeitet alle Bewertungen.",
+        "downloadStarted": "Download gestartet",
+        "downloadStartedDesc": "{{fileName}} wird heruntergeladen...",
+        "downloadFailed": "Download fehlgeschlagen",
+        "downloadFailedDesc": "{{fileName}} konnte nicht heruntergeladen werden. Die Datei existiert möglicherweise nicht oder Sie haben keine Zugriffsberechtigung.",
+        "downloadError": "Download-Fehler",
+        "downloadErrorDesc": "Dokument konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+      }
+    }
+  }
+}

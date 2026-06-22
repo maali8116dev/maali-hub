@@ -17,6 +17,8 @@ export interface PartnerOrg {
   onboarding_dismissed_at: string | null;
 }
 
+export const PARTNER_ORG_NOT_LINKED_ERROR = "Partner organization not linked";
+
 export function usePartnerOrg() {
   const { user } = useAuth();
 
@@ -34,6 +36,16 @@ export function usePartnerOrg() {
     },
     enabled: !!user,
   });
+}
+
+/** True when the signed-in user is linked to a partners row. */
+export function usePartnerOrgLinked() {
+  const query = usePartnerOrg();
+  return {
+    partnerOrg: query.data,
+    isLinked: !!query.data?.id,
+    isLoading: query.isLoading,
+  };
 }
 
 export function useUpdatePartnerOrg() {

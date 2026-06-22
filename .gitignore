@@ -41,6 +41,7 @@ server/drizzle
 .prettierignore
 .editorconfig
 reset_live_db.md
+docs/PARTNER_UX_ROADMAP.md
 
 supabase/migrations_backup/**
 

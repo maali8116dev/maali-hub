@@ -90,7 +90,7 @@ const HeroSection = () => {
                 className="group  text-primary  hover:text-primary transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl hover:scale-105 animate-pulse-slow" 
                 onClick={() => navigate("/opportunities")}
               >
-                {t('hero.browseProjects')}
+                {t('hero.browseOpportunities')}
               </Button>
             </div>
 

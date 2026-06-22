@@ -1,0 +1,330 @@
+{
+  "page": {
+    "title": "Formulário de candidatura",
+    "subtitleWithProject": "Preencha o formulário abaixo para se candidatar a esta oportunidade de financiamento.",
+    "subtitleGeneric": "Preencha o formulário abaixo para iniciar a sua candidatura.",
+    "backToProject": "Voltar aos detalhes do projeto",
+    "backToProjects": "Voltar aos projetos",
+    "loading": "A carregar...",
+    "closedTitle": "Candidaturas encerradas",
+    "closedDescription": "Esta oportunidade está encerrada. Novas candidaturas e edições estão desativadas.",
+    "backToOpportunity": "Voltar à oportunidade",
+    "membershipCta": "Ver opções de adesão"
+  },
+  "steps": {
+    "applicantInfo": "Informações do candidato",
+    "organization": "Detalhes da organização (opcional)",
+    "projectOverview": "Visão geral do projeto",
+    "socialLinks": "Links sociais",
+    "documents": "Carregar documentos",
+    "review": "Revisão",
+    "compliance": "Conformidade e declarações",
+    "submit": "Enviar"
+  },
+  "progress": {
+    "stepOf": "Passo {{current}} de {{total}}",
+    "saveDraft": "Guardar rascunho",
+    "saving": "A guardar...",
+    "lastSaved": "Última gravação: {{time}}",
+    "percentComplete": "{{percent}}% concluído"
+  },
+  "nav": {
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "submit": "Enviar candidatura",
+    "submitting": "A enviar...",
+    "verifyEmailToSubmit": "Verifique o e-mail para enviar"
+  },
+  "requiredMark": "Os campos marcados com * são obrigatórios.",
+  "notProvided": "Não indicado",
+  "edit": "Editar",
+  "yes": "Sim",
+  "location": "Localização",
+  "declarationDate": "Data da declaração:",
+  "step1": {
+    "title": "Informações do candidato",
+    "description": "Fale-nos sobre si ou a sua organização.",
+    "applicantType": "Tipo de candidato",
+    "applicantTypePlaceholder": "Selecione o tipo de candidato",
+    "fullLegalName": "Nome legal completo",
+    "fullLegalNamePlaceholder": "Introduza o nome legal completo",
+    "organizationName": "Nome da organização",
+    "organizationNamePlaceholder": "Introduza o nome da organização",
+    "country": "País de residência / registo",
+    "countryPlaceholder": "Selecione o país",
+    "cityRegion": "Cidade / Região",
+    "cityRegionPlaceholder": "Introduza a cidade ou região",
+    "email": "Endereço de e-mail",
+    "emailPlaceholder": "seu.email@exemplo.com",
+    "phone": "Número de telefone",
+    "phonePlaceholder": "Introduza o número de telefone"
+  },
+  "step2": {
+    "individualSkip": "Estes detalhes da organização são opcionais e normalmente não são necessários para candidatos individuais. Pode avançar para o passo seguinte.",
+    "title": "Detalhes da organização (opcional)",
+    "description": "Partilhe informações adicionais sobre a credibilidade e capacidade da sua organização. Também pode fornecê-las em documentos de apoio.",
+    "yearEstablished": "Ano de fundação",
+    "yearEstablishedPlaceholder": "2020",
+    "teamMembers": "Número de membros da equipa",
+    "teamMembersPlaceholder": "10",
+    "coreMission": "Missão / propósito principal",
+    "coreMissionPlaceholder": "Descreva brevemente a missão e o propósito principal da sua organização...",
+    "max200Words": "Máximo de 200 palavras",
+    "primarySectors": "Setor(es) principal(is)",
+    "otherSector": "Outro setor (especifique)",
+    "otherSectorPlaceholder": "Introduza o outro setor",
+    "keyTeam": "Membros-chave da equipa e funções",
+    "keyTeamPlaceholder": "Liste os membros-chave da equipa e as suas funções...",
+    "previousGrants": "Subvenções ou financiamentos anteriores recebidos",
+    "previousGrantsDetails": "Detalhes de subvenções / financiamentos anteriores",
+    "previousGrantsPlaceholder": "Forneça detalhes sobre subvenções ou financiamentos anteriores...",
+    "max400Words": "Máximo de 400 palavras"
+  },
+  "step3": {
+    "grant": {
+      "title": "Visão geral do projeto",
+      "hint": "Diga-nos para que pretende obter financiamento.",
+      "titleLabel": "Título do projeto",
+      "titlePlaceholder": "Introduza o título do projeto",
+      "summaryLabel": "Resumo do projeto",
+      "summaryPlaceholder": "Forneça um resumo do seu projeto (mínimo de 30 palavras)...",
+      "locationLabel": "Foco geográfico (opcional)",
+      "locationPlaceholder": "Onde o projeto será realizado? Deixe em branco para usar a cidade/país do passo 1."
+    },
+    "nonGrant": {
+      "title": "Visão geral da candidatura",
+      "hint": "Fale-nos dos seus objetivos e porque é um bom candidato para esta oportunidade.",
+      "titleLabel": "Título da candidatura",
+      "titlePlaceholder": "Introduza o título da candidatura",
+      "summaryLabel": "Carta de motivação",
+      "summaryPlaceholder": "Descreva brevemente os seus objetivos, adequação e resultados esperados (mínimo de 30 palavras)...",
+      "locationLabel": "Localização / foco geográfico",
+      "locationPlaceholder": "Onde está sediado ou onde esta oportunidade se aplica?"
+    },
+    "summaryWordLimit": "Deve ter entre 30 e 400 palavras"
+  },
+  "step4": {
+    "title": "Links sociais",
+    "description": "Partilhe os seus perfis profissionais e redes sociais (opcional). Isto ajuda-nos a conhecê-lo melhor.",
+    "linkedin": "URL do perfil LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/in/seuperfil",
+    "github": "URL do perfil GitHub",
+    "githubPlaceholder": "https://github.com/seuusuario",
+    "twitter": "URL do perfil Twitter/X",
+    "twitterPlaceholder": "https://twitter.com/seuusuario",
+    "website": "URL do site",
+    "websitePlaceholder": "https://seusite.com",
+    "other": "Outros links sociais",
+    "otherPlaceholder": "Liste outros perfis ou links relevantes (Instagram, Facebook, portfólio, etc.)",
+    "max100Words": "Máximo de 100 palavras"
+  },
+  "step5": {
+    "title": "Carregar documentos",
+    "description": "Carregue documentos de apoio para a sua candidatura (opcional)."
+  },
+  "step6": {
+    "title": "Reveja a sua candidatura",
+    "description": "Reveja todas as informações abaixo antes de continuar.",
+    "registrationId": "Número de registo / identificação:",
+    "previousGrantsFunding": "Subvenções / financiamentos anteriores:",
+    "fromLibrary": "Da biblioteca:",
+    "newUploads": "Novos carregamentos:",
+    "documentCount": "{{count}} documento(s)",
+    "noDocuments": "Nenhum documento selecionado",
+    "documentsOnSubmit": "Os documentos serão associados ou carregados quando enviar a candidatura",
+    "linkedin": "LinkedIn:",
+    "github": "GitHub:",
+    "twitter": "Twitter/X:",
+    "website": "Site:"
+  },
+  "step7": {
+    "title": "Conformidade e declarações",
+    "description": "Leia e confirme as seguintes declarações. Todos os campos são obrigatórios por motivos de governação.",
+    "informationAccurateLabel": "Confirmação de que as informações são exatas",
+    "informationAccurateDesc": "Confirmo que todas as informações fornecidas nesta candidatura são exatas, completas e verdadeiras, tanto quanto sei.",
+    "conflictLabel": "Declaração de conflito de interesses",
+    "conflictDesc": "Declaro que divulguei quaisquer potenciais conflitos de interesses que possam afetar esta candidatura ou a sua avaliação.",
+    "reportingLabel": "Concordância com requisitos de relatórios",
+    "reportingDesc": "Concordo em fornecer relatórios de progresso regulares, demonstrações financeiras e outra documentação exigida pela entidade financiadora.",
+    "dataProcessingLabel": "Consentimento para tratamento de dados",
+    "dataProcessingDesc": "Consinto o tratamento dos meus dados pessoais e informações da candidatura para fins de avaliação, administração e comunicação relacionados com esta candidatura."
+  },
+  "step8": {
+    "title": "Enviar a sua candidatura",
+    "description": "Reveja o aviso de confirmação abaixo e clique em enviar para finalizar a sua candidatura.",
+    "notice": "Ao enviar esta candidatura, confirma que todas as informações fornecidas são exatas e completas. A sua candidatura será analisada pela nossa equipa e será notificado do resultado por e-mail."
+  },
+  "emailVerification": {
+    "title": "Verificação de e-mail necessária",
+    "description": "Verifique o seu endereço de e-mail antes de enviar uma candidatura. Consulte a sua caixa de entrada ou o painel para reenviar o link."
+  },
+  "options": {
+    "applicantTypes": {
+      "Individual": "Pessoa singular",
+      "Organization": "Organização",
+      "Startup / SME": "Startup / PME",
+      "NGO / Non-profit": "ONG / Sem fins lucrativos",
+      "Research / Academic": "Investigação / Académico"
+    },
+    "sectors": {
+      "Health": "Saúde",
+      "Education": "Educação",
+      "Technology": "Tecnologia",
+      "Agriculture": "Agricultura",
+      "Environment": "Ambiente",
+      "Creative": "Criativo",
+      "Other": "Outro"
+    }
+  },
+  "validation": {
+    "phoneRequired": "O número de telefone é obrigatório",
+    "phoneInvalid": "Introduza um número de telefone internacional válido",
+    "applicantTypeRequired": "Selecione um tipo de candidato",
+    "fullLegalNameRequired": "O nome legal completo é obrigatório",
+    "countryRequired": "O país de residência é obrigatório",
+    "cityRegionRequired": "A cidade/região é obrigatória",
+    "yearInvalid": "Introduza um ano válido",
+    "yearFuture": "O ano não pode estar no futuro",
+    "coreMissionMaxWords": "A missão / propósito principal não pode exceder 200 palavras",
+    "teamMembersMin": "O número de membros da equipa deve ser pelo menos 1",
+    "keyTeamMaxWords": "Membros-chave e funções não podem exceder 200 palavras",
+    "previousGrantsMaxWords": "Detalhes de subvenções anteriores não podem exceder 400 palavras",
+    "previousGrantsDetailsRequired": "Forneça detalhes sobre subvenções ou financiamentos anteriores",
+    "projectTitleRequired": "O título do projeto é obrigatório",
+    "projectSummaryRequired": "O resumo do projeto é obrigatório",
+    "projectSummaryMinWords": "O resumo do projeto deve ter pelo menos 30 palavras",
+    "projectSummaryMaxWords": "O resumo do projeto não pode exceder 400 palavras",
+    "informationAccurateRequired": "Deve confirmar que as informações fornecidas são exatas",
+    "conflictOfInterestRequired": "Deve declarar quaisquer conflitos de interesses",
+    "dataProcessingRequired": "Deve consentir o tratamento de dados",
+    "reportingRequirementsRequired": "Deve concordar com os requisitos de relatórios",
+    "linkedinUrlInvalid": "Introduza um URL LinkedIn válido",
+    "githubUrlInvalid": "Introduza um URL GitHub válido",
+    "twitterUrlInvalid": "Introduza um URL Twitter/X válido",
+    "websiteUrlInvalid": "Introduza um URL de site válido",
+    "otherSocialMaxWords": "Outros links sociais não podem exceder 100 palavras"
+  },
+  "toasts": {
+    "draftRestored": {
+      "title": "Rascunho restaurado",
+      "description": "O seu rascunho guardado anteriormente foi carregado."
+    },
+    "validationError": {
+      "title": "Erro de validação",
+      "description": "Preencha corretamente todos os campos obrigatórios."
+    },
+    "emailVerificationRequired": {
+      "title": "Verificação de e-mail necessária",
+      "description": "Verifique o seu endereço de e-mail antes de enviar uma candidatura."
+    },
+    "projectRequired": {
+      "title": "Projeto obrigatório",
+      "description": "Selecione um projeto para se candidatar."
+    },
+    "missingInformation": {
+      "title": "Informação em falta",
+      "description": "Complete todos os campos obrigatórios antes de enviar."
+    },
+    "complianceRequired": {
+      "title": "Conformidade obrigatória",
+      "description": "Confirme todas as declarações de conformidade antes de enviar."
+    },
+    "applicationsClosed": {
+      "title": "Candidaturas encerradas",
+      "description": "Este projeto está encerrado. Já não pode enviar nem editar candidaturas."
+    },
+    "membershipRequired": {
+      "title": "Adesão necessária",
+      "description": "Torne-se membro completo para enviar candidaturas."
+    },
+    "uploadingDocuments": {
+      "title": "A carregar documentos",
+      "description_one": "A carregar {{count}} documento...",
+      "description_other": "A carregar {{count}} documentos..."
+    },
+    "uploadPartialFailure": {
+      "title": "Alguns carregamentos falharam",
+      "description": "Alguns documentos não foram carregados. A sua candidatura será enviada mesmo assim, sem esses ficheiros."
+    },
+    "alreadyApplied": {
+      "title": "Já se candidatou",
+      "description": "Já enviou uma candidatura para esta oportunidade. Consulte o painel para ver o estado."
+    },
+    "opportunityClosed": {
+      "title": "Candidaturas encerradas",
+      "description": "Esta oportunidade já não aceita candidaturas."
+    },
+    "submitSuccess": {
+      "title": "Candidatura enviada",
+      "description": "A sua candidatura foi enviada com sucesso!"
+    },
+    "tooManySubmissions": {
+      "title": "Demasiados envios",
+      "description": "Enviou demasiadas candidaturas recentemente. Aguarde uma hora e tente novamente."
+    },
+    "submitFailed": {
+      "title": "Falha no envio",
+      "description": "Ocorreu um problema ao enviar a sua candidatura. Tente novamente."
+    },
+    "errors": {
+      "alreadyApplied": "Já enviou uma candidatura para esta oportunidade.",
+      "projectClosed": "Esta oportunidade já não aceita candidaturas.",
+      "membershipRequired": "É necessária adesão completa para candidatar-se. Junte-se à MAALI como membro completo para continuar.",
+      "unauthorized": "A sua sessão expirou. Inicie sessão novamente para continuar.",
+      "missingProjectId": "Algo correu mal. Atualize a página e tente novamente.",
+      "validationError": "Não foi possível validar a sua candidatura. Tente novamente em breve.",
+      "invalidBody": "Algo correu mal com os dados do formulário. Atualize e tente novamente.",
+      "internalError": "Ocorreu um problema do nosso lado. Tente novamente ou contacte o suporte se persistir.",
+      "generic": "Ocorreu um problema ao enviar a sua candidatura. Tente novamente."
+    }
+  },
+  "documents": {
+    "cv": "CV",
+    "coverLetter": "Carta de apresentação",
+    "invalidFile": "Ficheiro inválido",
+    "fromLibrary": "Da sua biblioteca",
+    "uploadNew": "Carregar novos ficheiros",
+    "uploadNewDocuments": "Carregar novos documentos",
+    "selectFromLibrary": "Selecionar da biblioteca",
+    "noLibraryDocs": "Ainda não há documentos na sua biblioteca.",
+    "uploadHint": "Carregue ficheiros ou selecione da sua biblioteca de documentos.",
+    "removeFile": "Remover ficheiro",
+    "deleteConfirmTitle": "Remover ficheiro?",
+    "deleteConfirmDescription": "Isto removerá «{{name}}» da sua seleção. O ficheiro não será eliminado da biblioteca.",
+    "cancel": "Cancelar",
+    "remove": "Remover",
+    "requiredSlotsTitle": "Documentos obrigatórios",
+    "requiredSlotsDescription": "CV e carta de apresentação são obrigatórios para este tipo de oportunidade.",
+    "recommendedTitle": "Documentos de apoio recomendados",
+    "recommendedIntro": "Carregue documentos que reforcem a sua candidatura. Itens recomendados:",
+    "recommendedRequiredNote": "Pode carregar todos os ficheiros nesta zona. Documentos marcados com * são obrigatórios.",
+    "selectFromLibraryTitle": "Selecionar da biblioteca",
+    "selectFromLibraryHint": "Escolha documentos da sua biblioteca para reutilizar nesta candidatura",
+    "selectedCount": "({{count}} selecionado(s))",
+    "fromLibrarySection": "Da sua biblioteca de documentos",
+    "otherLibrarySection": "Outros ficheiros guardados",
+    "uploadDropzoneTitle": "Carregar ficheiros",
+    "fileTypesHint": "PDF, DOC, DOCX e formatos de imagem comuns — máx. 10 MB por ficheiro.",
+    "individualRecommended": {
+      "id": "Documento de identificação oficial (se solicitado)",
+      "proposal": "Proposta de projeto ou nota conceptual"
+    },
+    "organizationRecommended": {
+      "registration": "Certificado de registo ou documento de constituição legal",
+      "proposal": "Proposta de projeto ou nota conceptual"
+    },
+    "startupRecommended": {
+      "id": "Documento de identificação oficial (se solicitado)",
+      "proposal": "Proposta de projeto ou nota conceptual",
+      "budget": "Orçamento ou plano financeiro simples",
+      "cv": "CV/portfólio ou documentos de experiência relevantes"
+    },
+    "ngoRecommended": {
+      "registration": "Certificado de registo ou documento de constituição legal",
+      "profile": "Perfil da organização ou documento de missão",
+      "proposal": "Proposta de projeto ou nota conceptual",
+      "budget": "Orçamento/plano financeiro (e extratos se disponíveis)",
+      "team": "CVs da equipa e perfis do pessoal-chave"
+    }
+  }
+}

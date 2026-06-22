@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
+import { triggerOpportunityTranslation, invalidateOpportunityTranslationQueries, translationFailureMessage } from "@/hooks/useTranslateOpportunity";
+import type { OpportunityTranslations } from "@/lib/localizedContent";
+import i18n from "@/lib/i18n";
 
 export type Project = {
   id: number;
@@ -27,6 +30,7 @@ export type Project = {
   createdAt: string;
   updatedAt: string;
   partnerId?: number | null;
+  translations?: OpportunityTranslations | null;
 };
 
 export type ProjectFormData = {
@@ -77,6 +81,7 @@ function transformProject(data: any): Project {
     partnerId: data.partner_id || null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
+    translations: (data.translations as OpportunityTranslations) ?? null,
   };
 }
 
@@ -275,14 +280,25 @@ export function useCreateProject() {
       });
       
       toast({
-        title: "Opportunity created",
-        description: "The opportunity has been created successfully.",
+        title: i18n.t("toasts.opportunity.created", { ns: "common" }),
+        description: i18n.t("toasts.opportunity.createdDesc", { ns: "common" }),
+      });
+      void triggerOpportunityTranslation(project.id).then((result) => {
+        if (result.ok) {
+          invalidateOpportunityTranslationQueries(queryClient, project.id);
+          return;
+        }
+        toast({
+          title: i18n.t("toasts.opportunity.translationFailed", { ns: "common" }),
+          description: translationFailureMessage(result.reason),
+          variant: "destructive",
+        });
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error creating opportunity",
-        description: error.message || "Failed to create opportunity. Please try again.",
+        title: i18n.t("toasts.opportunity.createError", { ns: "common" }),
+        description: error.message || i18n.t("toasts.genericError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -330,14 +346,25 @@ export function useUpdateProject() {
       });
       
       toast({
-        title: "Opportunity updated",
-        description: "The opportunity has been updated successfully.",
+        title: i18n.t("toasts.opportunity.updated", { ns: "common" }),
+        description: i18n.t("toasts.opportunity.updatedDesc", { ns: "common" }),
+      });
+      void triggerOpportunityTranslation(project.id).then((result) => {
+        if (result.ok) {
+          invalidateOpportunityTranslationQueries(queryClient, project.id);
+          return;
+        }
+        toast({
+          title: i18n.t("toasts.opportunity.translationFailed", { ns: "common" }),
+          description: translationFailureMessage(result.reason),
+          variant: "destructive",
+        });
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error updating opportunity",
-        description: error.message || "Failed to update opportunity. Please try again.",
+        title: i18n.t("toasts.opportunity.updateError", { ns: "common" }),
+        description: error.message || i18n.t("toasts.genericError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -384,14 +411,14 @@ export function useDeleteProject() {
       });
       
       toast({
-        title: "Opportunity deleted",
-        description: "The opportunity has been deleted successfully.",
+        title: i18n.t("toasts.opportunity.deleted", { ns: "common" }),
+        description: i18n.t("toasts.opportunity.deletedDesc", { ns: "common" }),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error deleting opportunity",
-        description: error.message || "Failed to delete opportunity. Please try again.",
+        title: i18n.t("toasts.opportunity.deleteError", { ns: "common" }),
+        description: error.message || i18n.t("toasts.genericError", { ns: "common" }),
         variant: "destructive",
       });
     },

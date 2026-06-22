@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,20 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, HelpCircle } from "lucide-react";
-import { useFAQs, FAQ } from "@/hooks/useFAQs";
+import { Link } from "react-router-dom";
+import { useFAQs, type FAQ } from "@/hooks/useFAQs";
+import { useLocalizedFaqs } from "@/lib/localizedContent";
+
+type GuideStep = { title: string; description: string; tips: string[]; action: string };
+type BestPractice = { title: string; description: string };
 
 const FAQPage = () => {
+  const { t } = useTranslation("landing");
   const [searchQuery, setSearchQuery] = useState("");
   const { data: faqs, isLoading, error, refetch } = useFAQs();
+  const localizedFaqs = useLocalizedFaqs(faqs);
 
-  // Group FAQs by sector
   const faqsectors = useMemo(() => {
-    if (!faqs) return [];
-    
-    const grouped = faqs.reduce((acc, faq) => {
-      if (!acc[faq.sector]) {
-        acc[faq.sector] = [];
-      }
+    if (!localizedFaqs.length) return [];
+
+    const grouped = localizedFaqs.reduce((acc, faq) => {
+      if (!acc[faq.sector]) acc[faq.sector] = [];
       acc[faq.sector].push(faq);
       return acc;
     }, {} as Record<string, FAQ[]>);
@@ -31,28 +36,22 @@ const FAQPage = () => {
         questions: questions.sort((a, b) => a.display_order - b.display_order),
       }))
       .sort((a, b) => a.sector.localeCompare(b.sector));
-  }, [faqs]);
+  }, [localizedFaqs]);
 
-  // Filter FAQs based on search
   const filteredsectors = useMemo(() => {
     if (!searchQuery) return faqsectors;
 
     const searchLower = searchQuery.toLowerCase();
-    const matchingFAQs = faqs?.filter(
+    const matchingFAQs = localizedFaqs.filter(
       (faq) =>
         faq.question.toLowerCase().includes(searchLower) ||
-        faq.answer.toLowerCase().includes(searchLower)
+        faq.answer.toLowerCase().includes(searchLower),
     );
 
-    if (!matchingFAQs || matchingFAQs.length === 0) return [];
+    if (!matchingFAQs.length) return [];
 
-    return [
-      {
-        sector: "Search Results",
-        questions: matchingFAQs,
-      },
-    ];
-  }, [searchQuery, faqs, faqsectors]);
+    return [{ sector: t("faqPage.searchResults"), questions: matchingFAQs }];
+  }, [searchQuery, localizedFaqs, faqsectors, t]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,19 +61,16 @@ const FAQPage = () => {
           <div className="flex justify-center mb-4">
             <HelpCircle className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Find quick answers to the most common questions about using Maali.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("faqPage.title")}</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{t("faqPage.subtitle")}</p>
         </div>
 
-        {/* Search */}
         <div className="mb-8">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search FAQs..."
+              placeholder={t("faqPage.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12"
@@ -82,7 +78,6 @@ const FAQPage = () => {
           </div>
         </div>
 
-        {/* Loading State */}
         {isLoading && (
           <div className="space-y-6 mb-12">
             {[1, 2, 3].map((i) => (
@@ -103,21 +98,17 @@ const FAQPage = () => {
           </div>
         )}
 
-        {/* Error State */}
         {error && (
           <Card className="mb-12">
             <CardContent className="py-12 text-center">
-              <p className="text-destructive mb-4">
-                Failed to load FAQs. Please try again later.
-              </p>
+              <p className="text-destructive mb-4">{t("faqPage.loadError")}</p>
               <Button onClick={() => refetch()} variant="default">
-                Retry
+                {t("faqPage.retry")}
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* FAQ Accordion */}
         {!isLoading && !error && (
           <div className="space-y-6 mb-12">
             {filteredsectors.map((sector, categoryIndex) => (
@@ -127,12 +118,8 @@ const FAQPage = () => {
                   <Accordion type="single" collapsible className="w-full">
                     {sector.questions.map((faq, faqIndex) => (
                       <AccordionItem key={faq.id} value={`item-${categoryIndex}-${faqIndex}`}>
-                        <AccordionTrigger className="text-left">
-                          {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground">
-                          {faq.answer}
-                        </AccordionContent>
+                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
                       </AccordionItem>
                     ))}
                   </Accordion>
@@ -142,46 +129,29 @@ const FAQPage = () => {
           </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && !error && filteredsectors.length === 0 && (
           <Card className="mb-12">
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground mb-4">
-                {searchQuery
-                  ? "No questions found matching your search."
-                  : "No FAQs available at the moment."}
+                {searchQuery ? t("faqPage.emptySearch") : t("faqPage.empty")}
               </p>
               {searchQuery && (
-                <a href="/contact">
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                    Contact Support
-                  </button>
-                </a>
+                <Button asChild>
+                  <Link to="/contact">{t("faqPage.contactSupport")}</Link>
+                </Button>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Still Have Questions */}
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Still Have Questions?</h2>
-              <p className="text-muted-foreground mb-4">
-                Can't find the answer you're looking for? Our support team is here to help.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="/contact" className="w-full sm:w-auto">
-                  <button className="w-full px-6 py-3 min-h-[48px] bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                    Contact Support
-                  </button>
-                </a>
-                <a href="/help" className="w-full sm:w-auto">
-                  <button className="w-full px-6 py-3 min-h-[48px] border border-border rounded-md hover:bg-muted transition-colors">
-                    Visit Help Center
-                  </button>
-                </a>
-              </div>
+              <h2 className="text-2xl font-bold mb-2">{t("faqPage.stillHaveQuestions")}</h2>
+              <p className="text-muted-foreground mb-4">{t("faqPage.stillHaveQuestionsDesc")}</p>
+              <Button asChild>
+                <Link to="/contact">{t("faqPage.contactSupport")}</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -192,11 +162,3 @@ const FAQPage = () => {
 };
 
 export default FAQPage;
-
-
-
-
-
-
-
-

@@ -2,9 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCheck, Check, Bell, Trash2, FileText, Clock, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   useNotifications,
   useMarkNotificationAsRead,
@@ -13,23 +13,42 @@ import {
   useDeleteAllNotifications,
   Notification,
 } from "@/hooks/useNotifications";
+import { useFormattedDistance } from "@/hooks/useFormattedDistance";
 import { Skeleton } from "@/components/ui/skeleton";
+import { resolveNotificationText } from "@/lib/notificationText";
+
+function withPartnerNotificationContext(link: string) {
+  if (/^\/partner\/opportunities\/\d+\/applications$/.test(link)) {
+    return `${link}?from=notification`;
+  }
+  return link;
+}
 
 interface NotificationsPageProps {
   title?: string;
   subtitle?: string;
 }
 
-const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsPageProps) => {
+function NotificationTime({ date }: { date: string }) {
+  const formatted = useFormattedDistance(date);
+  return <p className="text-xs text-muted-foreground">{formatted}</p>;
+}
+
+const NotificationsPage = ({ title, subtitle }: NotificationsPageProps) => {
+  const { t } = useTranslation("common");
   const { data: notifications = [], isLoading } = useNotifications();
   const markAsRead = useMarkNotificationAsRead();
   const markAllAsRead = useMarkAllNotificationsAsRead();
   const deleteNotification = useDeleteNotification();
   const deleteAllNotifications = useDeleteAllNotifications();
 
+  const pageTitle = title ?? t("notifications.title");
   const unreadCount = notifications.filter((n) => !n.read).length;
   const unreadNotifications = notifications.filter((n) => !n.read);
   const readNotifications = notifications.filter((n) => n.read);
+
+  const getTypeLabel = (type: Notification["type"]) =>
+    t(`notifications.types.${type}`, { defaultValue: t("notifications.types.default") });
 
   const handleMarkAsRead = (id: string) => {
     markAsRead.mutate(id);
@@ -80,7 +99,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">{title}</h1>
+          <h1 className="text-3xl font-bold">{pageTitle}</h1>
           {subtitle && (
             <p className="text-muted-foreground mt-2">{subtitle}</p>
           )}
@@ -104,7 +123,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{title}</h1>
+          <h1 className="text-3xl font-bold">{pageTitle}</h1>
           {subtitle && (
             <p className="text-muted-foreground mt-2">{subtitle}</p>
           )}
@@ -118,7 +137,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
               className="min-h-[44px]"
             >
               <CheckCheck className="h-4 w-4 mr-2" />
-              {markAllAsRead.isPending ? "Marking..." : "Mark all as read"}
+              {markAllAsRead.isPending ? t("notifications.marking") : t("notifications.markAllRead")}
             </Button>
           )}
           {notifications.length > 0 && (
@@ -133,7 +152,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
               ) : (
                 <Trash2 className="h-4 w-4 mr-2" />
               )}
-              Clear all
+              {t("notifications.clearAll")}
             </Button>
           )}
         </div>
@@ -142,7 +161,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("notifications.total")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{notifications.length}</div>
@@ -150,7 +169,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Unread</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("notifications.unread")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">{unreadCount}</div>
@@ -158,7 +177,7 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Read</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("notifications.read")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-muted-foreground">
@@ -170,11 +189,13 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
 
       {unreadNotifications.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Unread</h2>
+          <h2 className="text-xl font-semibold">{t("notifications.sections.unread")}</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
-                {unreadNotifications.map((notification) => (
+                {unreadNotifications.map((notification) => {
+                  const text = resolveNotificationText(notification, t);
+                  return (
                   <div
                     key={notification.id}
                     className="relative p-4 hover:bg-muted/50 transition-colors bg-primary/5"
@@ -187,22 +208,18 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold">{notification.title}</h3>
+                              <h3 className="font-semibold">{text.title}</h3>
                               <Badge
                                 variant="outline"
                                 className={cn("text-xs", getNotificationBadge(notification.type))}
                               >
-                                {notification.type.replace("_", " ")}
+                                {getTypeLabel(notification.type)}
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">
-                              {notification.message}
+                              {text.message}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(notification.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </p>
+                            <NotificationTime date={notification.createdAt} />
                           </div>
                           <div className="flex items-center gap-2">
                             <Button
@@ -226,9 +243,9 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
                           </div>
                         </div>
                         {notification.link && (
-                          <Link to={notification.link}>
+                          <Link to={withPartnerNotificationContext(notification.link)}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs">
-                              View details →
+                              {t("notifications.viewDetails")}
                             </Button>
                           </Link>
                         )}
@@ -236,7 +253,8 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
                     </div>
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -245,11 +263,13 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
 
       {readNotifications.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Read</h2>
+          <h2 className="text-xl font-semibold">{t("notifications.sections.earlier")}</h2>
           <Card>
             <CardContent className="p-0">
               <div className="divide-y divide-border">
-                {readNotifications.map((notification) => (
+                {readNotifications.map((notification) => {
+                  const text = resolveNotificationText(notification, t);
+                  return (
                   <div
                     key={notification.id}
                     className="p-4 hover:bg-muted/50 transition-colors"
@@ -262,22 +282,18 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium">{notification.title}</h3>
+                              <h3 className="font-medium">{text.title}</h3>
                               <Badge
                                 variant="outline"
                                 className={cn("text-xs", getNotificationBadge(notification.type))}
                               >
-                                {notification.type.replace("_", " ")}
+                                {getTypeLabel(notification.type)}
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">
-                              {notification.message}
+                              {text.message}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(notification.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </p>
+                            <NotificationTime date={notification.createdAt} />
                           </div>
                           <Button
                             variant="ghost"
@@ -290,16 +306,17 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
                           </Button>
                         </div>
                         {notification.link && (
-                          <Link to={notification.link}>
+                          <Link to={withPartnerNotificationContext(notification.link)}>
                             <Button variant="link" className="p-0 h-auto mt-2 text-xs">
-                              View details →
+                              {t("notifications.viewDetails")}
                             </Button>
                           </Link>
                         )}
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -310,9 +327,9 @@ const NotificationsPage = ({ title = "Notifications", subtitle }: NotificationsP
         <Card>
           <CardContent className="py-12 flex flex-col items-center text-center">
             <Bell className="h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-            <p className="text-sm font-medium">No notifications</p>
+            <p className="text-sm font-medium">{t("notifications.emptyTitle")}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              You're all caught up!
+              {t("notifications.emptyDescription")}
             </p>
           </CardContent>
         </Card>

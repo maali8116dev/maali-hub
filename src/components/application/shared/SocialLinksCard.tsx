@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Globe, Link as LinkIcon } from "lucide-react";
 
@@ -30,6 +31,8 @@ const SocialLinkField = ({ label, url, icon: Icon = LinkIcon }: SocialLinkFieldP
 );
 
 const SocialLinksCard = ({ application }: SocialLinksCardProps) => {
+  const { t } = useTranslation("dashboard");
+
   const hasLinks =
     application.linkedin_url ||
     application.github_url ||
@@ -42,7 +45,7 @@ const SocialLinksCard = ({ application }: SocialLinksCardProps) => {
   return (
     <Card>
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">Social Links & Online Presence</CardTitle>
+        <CardTitle className="text-base sm:text-lg">{t("applications.detail.socialLinks.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -61,7 +64,7 @@ const SocialLinksCard = ({ application }: SocialLinksCardProps) => {
         </div>
         {application.other_social_links && (
           <div>
-            <Label className="text-sm text-muted-foreground">Other Social Links</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.socialLinks.otherSocialLinks")}</Label>
             <p className="mt-1 text-sm break-all">{application.other_social_links}</p>
           </div>
         )}
@@ -71,12 +74,3 @@ const SocialLinksCard = ({ application }: SocialLinksCardProps) => {
 };
 
 export default SocialLinksCard;
-
-
-
-
-
-
-
-
-

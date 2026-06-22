@@ -1,0 +1,12 @@
+{
+  "rankedApplicationsPage": {
+    "title": "Ranked Applications",
+    "subtitle": "{{title}} - Ranked by review scores",
+    "loading": "Loading...",
+    "exportRankedCsv": "Export Ranked CSV",
+    "back": "Back",
+    "exportTopTitle": "Export Top Ranked",
+    "exportTop": "Export Top",
+    "searchPlaceholder": "Search by applicant name or email..."
+  }
+}

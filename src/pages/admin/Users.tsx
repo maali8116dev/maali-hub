@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,15 +19,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "react-i18next";
 
 const AdminUsers = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["dashboard", "common"]);
   const { data: users = [], isLoading, error, refetch, isFetching } = useUsers();
   const suspendUser = useSuspendUser();
   const activateUser = useActivateUser();
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ userId: string; name: string } | null>(null);
+
+  const roleLabel = useCallback(
+    (role: string) => t(`common:status.role.${role}`, { defaultValue: role }),
+    [t],
+  );
+
+  const accountStatusLabel = useCallback(
+    (status: string) => t(`common:status.account.${status}`, { defaultValue: status }),
+    [t],
+  );
 
   const handleSuspendClick = (userId: string, userName: string) => {
     setSelectedUser({ userId, name: userName });
@@ -61,12 +73,11 @@ const AdminUsers = () => {
     }
   };
 
-  // Define columns for the users table
   const userColumns: ColumnDef<any>[] = useMemo(() => [
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Name" />
+        <SortableColumnHeader column={column} title={t("admin.usersPage.columns.name")} />
       ),
       cell: ({ row }) => {
         const user = row.original;
@@ -84,7 +95,7 @@ const AdminUsers = () => {
     {
       accessorKey: 'role',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Role" />
+        <SortableColumnHeader column={column} title={t("admin.usersPage.columns.role")} />
       ),
       cell: ({ row }) => {
         const user = row.original;
@@ -92,27 +103,13 @@ const AdminUsers = () => {
           return (
             <Badge variant="secondary" className="text-xs">
               <Shield className="h-3 w-3 mr-1" />
-              Admin
-            </Badge>
-          );
-        }
-        if (user.role === "reviewer") {
-          return (
-            <Badge variant="outline" className="text-xs">
-              Reviewer
-            </Badge>
-          );
-        }
-        if (user.role === "partner") {
-          return (
-            <Badge variant="outline" className="text-xs">
-              Partner
+              {roleLabel(user.role)}
             </Badge>
           );
         }
         return (
           <Badge variant="outline" className="text-xs">
-            Applicant
+            {roleLabel(user.role)}
           </Badge>
         );
       },
@@ -120,7 +117,7 @@ const AdminUsers = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Status" />
+        <SortableColumnHeader column={column} title={t("admin.usersPage.columns.status")} />
       ),
       cell: ({ row }) => {
         const user = row.original;
@@ -135,7 +132,7 @@ const AdminUsers = () => {
                 : "bg-destructive/10 text-destructive border-destructive/20"
             }`}
           >
-            {user.status}
+            {accountStatusLabel(user.status)}
           </Badge>
         );
       },
@@ -143,7 +140,7 @@ const AdminUsers = () => {
     {
       accessorKey: 'registeredAt',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Joined" />
+        <SortableColumnHeader column={column} title={t("admin.usersPage.columns.joined")} />
       ),
       cell: ({ row }) => {
         return (
@@ -162,21 +159,21 @@ const AdminUsers = () => {
     {
       accessorKey: 'applicationsCount',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Applications" />
+        <SortableColumnHeader column={column} title={t("admin.usersPage.columns.applications")} />
       ),
       cell: ({ row }) => {
         const count = row.original.applicationsCount;
         return (
           <span className="text-sm flex items-center gap-1">
             <FileText className="h-3 w-3" />
-            {count} {count === 1 ? "application" : "applications"}
+            {t("admin.usersPage.applicationCount", { count })}
           </span>
         );
       },
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t("admin.usersPage.columns.actions"),
       cell: ({ row }) => {
         const user = row.original;
         return (
@@ -186,7 +183,7 @@ const AdminUsers = () => {
               size="sm"
               onClick={() => navigate(`/admin/users/${user.userId}`)}
             >
-              View Profile
+              {t("admin.usersPage.viewProfile")}
             </Button>
             {user.role !== "admin" && user.status === "active" && (
               <Button
@@ -196,7 +193,7 @@ const AdminUsers = () => {
                 onClick={() => handleSuspendClick(user.userId, user.name)}
                 disabled={suspendUser.isPending}
               >
-                Suspend
+                {t("admin.usersPage.suspend")}
               </Button>
             )}
             {user.status === "suspended" && (
@@ -207,40 +204,40 @@ const AdminUsers = () => {
                 onClick={() => handleActivateClick(user.userId, user.name)}
                 disabled={activateUser.isPending}
               >
-                Activate
+                {t("admin.usersPage.activate")}
               </Button>
             )}
           </div>
         );
       },
     },
-  ], []);
+  ], [navigate, t, roleLabel, accountStatusLabel, suspendUser.isPending, activateUser.isPending]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Manage Users</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("admin.usersPage.title")}</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          View and manage all platform users
+          {t("admin.usersPage.subtitle")}
         </p>
       </div>
 
-      {/* Error State */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("admin.usersPage.errorTitle")}</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : "Failed to load users. Please try again."}
+            {error instanceof Error ? error.message : t("admin.usersPage.loadError")}
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>
-            All Users {isLoading ? "" : `(${users.length})`}
+            {isLoading
+              ? t("admin.usersPage.tableTitleLoading")
+              : t("admin.usersPage.tableTitle", { count: users.length })}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -252,14 +249,14 @@ const AdminUsers = () => {
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p className="font-medium mb-2">No users yet</p>
-              <p className="text-sm">Users will appear here once they register</p>
+              <p className="font-medium mb-2">{t("admin.usersPage.emptyTitle")}</p>
+              <p className="text-sm">{t("admin.usersPage.emptyDescription")}</p>
             </div>
           ) : (
             <DataTable
               columns={userColumns}
               data={users}
-              searchPlaceholder="Search by name or email..."
+              searchPlaceholder={t("admin.usersPage.searchPlaceholder")}
               pageSize={10}
               enableSorting={true}
               enablePagination={true}
@@ -271,47 +268,47 @@ const AdminUsers = () => {
         </CardContent>
       </Card>
 
-      {/* Suspend Confirmation Dialog */}
       <AlertDialog open={suspendDialogOpen} onOpenChange={setSuspendDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Suspend User</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.usersPage.suspendDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to suspend <strong>{selectedUser?.name}</strong>? 
-              They will not be able to access their account until reactivated.
+              {t("admin.usersPage.suspendDialog.description", { name: selectedUser?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={suspendUser.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={suspendUser.isPending}>
+              {t("admin.usersPage.suspendDialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmSuspend}
               disabled={suspendUser.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {suspendUser.isPending ? "Suspending..." : "Suspend User"}
+              {suspendUser.isPending ? t("admin.usersPage.suspendDialog.confirming") : t("admin.usersPage.suspendDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Activate Confirmation Dialog */}
       <AlertDialog open={activateDialogOpen} onOpenChange={setActivateDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Activate User</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.usersPage.activateDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to activate <strong>{selectedUser?.name}</strong>? 
-              They will regain access to their account.
+              {t("admin.usersPage.activateDialog.description", { name: selectedUser?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={activateUser.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={activateUser.isPending}>
+              {t("admin.usersPage.activateDialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmActivate}
               disabled={activateUser.isPending}
               className="bg-green-600 text-white hover:bg-green-700"
             >
-              {activateUser.isPending ? "Activating..." : "Activate User"}
+              {activateUser.isPending ? t("admin.usersPage.activateDialog.confirming") : t("admin.usersPage.activateDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -321,12 +318,3 @@ const AdminUsers = () => {
 };
 
 export default AdminUsers;
-
-
-
-
-
-
-
-
-

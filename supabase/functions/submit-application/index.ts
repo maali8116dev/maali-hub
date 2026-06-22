@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
+import { buildNotificationMetadata } from "../_shared/notifications.ts";
 
 /* ------------------------------------------------------------------ */
 /*  Shared clients                                                     */
@@ -21,6 +22,7 @@ interface SubmitApplicationRequest {
   token?: string;
   draftId?: string | null;
   opportunityId: number;
+  submittedLocale?: string;
   applicationData: {
     applicant_type: string;
     full_legal_name: string;
@@ -205,6 +207,7 @@ async function linkDocumentsToApplication(params: {
 function buildApplicationRow(
   applicationData: SubmitApplicationRequest["applicationData"],
   initialStatus: string,
+  submittedLocale?: string,
 ) {
   const row: Record<string, unknown> = {
     applicant_type: applicationData.applicant_type,
@@ -232,7 +235,12 @@ function buildApplicationRow(
     is_draft: false,
     application_fee_paid: false,
     stripe_payment_intent_id: null,
+    translations: {},
   };
+
+  if (submittedLocale?.trim()) {
+    row.submitted_locale = submittedLocale.trim().toLowerCase();
+  }
 
   if (applicationData.applicant_type !== "Individual") {
     row.year_established = applicationData.year_established || null;
@@ -294,11 +302,11 @@ async function runSideEffects(params: {
       p_message: notificationMessage,
       p_type: "application",
       p_link: `/dashboard/applications/${applicationId}`,
-      p_metadata: {
+      p_metadata: buildNotificationMetadata("application.submitted", { opportunityTitle }, {
         application_id: applicationId,
         opportunity_id: opportunityId,
         status: initialStatus,
-      },
+      }),
     });
   } catch (e) {
     console.error("Notification error:", e);
@@ -422,7 +430,7 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     // ── 4. Create / update application ────────────────────────────
-    const appRow = buildApplicationRow(applicationData, initialStatus);
+    const appRow = buildApplicationRow(applicationData, initialStatus, body.submittedLocale);
     let application: { id: string } | null = null;
 
     if (draftId) {

@@ -1,9 +1,10 @@
-import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText } from "lucide-react";
+import { useLegalLocale } from "@/hooks/useLegalLocale";
+import { LegalLocalePanel } from "@/components/legal/LegalLocalePanel";
+import { LEGAL_PAGE_META } from "@/components/legal/legalMeta";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <Card className="mb-6">
@@ -15,7 +16,8 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 );
 
 const Terms = () => {
-  const [lang, setLang] = useState("en");
+  const legalLocale = useLegalLocale();
+  const meta = LEGAL_PAGE_META.terms[legalLocale];
 
   return (
   <div className="min-h-screen bg-background">
@@ -25,21 +27,13 @@ const Terms = () => {
         <div className="flex justify-center mb-4">
           <FileText className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          {lang === "de" ? "Impressum" : "Legal Notice"}
-        </h1>
-        <p className="text-muted-foreground">
-          {lang === "de" ? "Stand: April 2026" : "Last updated: April 2026"}
-        </p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">{meta.title}</h1>
+        <p className="text-muted-foreground">{meta.updated}</p>
       </div>
 
-      <Tabs defaultValue="en" onValueChange={setLang}>
-        <TabsList className="mb-8">
-          <TabsTrigger value="en">English</TabsTrigger>
-          <TabsTrigger value="de">Deutsch</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="en">
+      <LegalLocalePanel panels={{
+        en: (
+          <>
           <Section title="Company Information">
             <p>Maali.tech</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
@@ -72,9 +66,82 @@ const Terms = () => {
             <p><a href="https://ec.europa.eu/consumers/odr" className="text-primary underline" target="_blank" rel="noreferrer">https://ec.europa.eu/consumers/odr</a></p>
             <p>We do not participate in dispute resolution.</p>
           </Section>
-        </TabsContent>
-
-        <TabsContent value="de">
+          </>
+        ),
+        fr: (
+          <>
+          <Section title="Informations sur l'entreprise">
+            <p>Maali.tech</p>
+            <p>Techin Global UG (haftungsbeschränkt)</p>
+            <p>Juri-Gagarin-Ring 132/92</p>
+            <p>99084 Erfurt</p>
+            <p>Allemagne</p>
+            <p className="pt-2">Directeur général : Biluge Mushegera</p>
+            <p>Registre du commerce : HRB 521067</p>
+            <p>Tribunal d'enregistrement : Amtsgericht Jena</p>
+            <p>Numéro fiscal : 151 121/24516</p>
+            <p className="pt-2">Téléphone : +49 361 21886352</p>
+            <p>E-mail : <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+          </Section>
+          <Section title="Responsable du contenu">
+            <p>Biluge Mushegera</p>
+            <p>Adresse comme ci-dessus</p>
+          </Section>
+          <Section title="Responsabilité du contenu">
+            <p>Nous sommes responsables de notre propre contenu conformément à la loi applicable.</p>
+            <p>Nous ne sommes pas tenus de surveiller les informations de tiers.</p>
+            <p>Le contenu illicite sera supprimé dès que nous en avons connaissance.</p>
+          </Section>
+          <Section title="Responsabilité des liens">
+            <p>Nous ne sommes pas responsables du contenu des sites web externes.</p>
+          </Section>
+          <Section title="Propriété intellectuelle">
+            <p>Tout le contenu est protégé par le droit d'auteur.</p>
+          </Section>
+          <Section title="Règlement des litiges">
+            <p><a href="https://ec.europa.eu/consumers/odr" className="text-primary underline" target="_blank" rel="noreferrer">https://ec.europa.eu/consumers/odr</a></p>
+            <p>Nous ne participons pas aux procédures de règlement des litiges.</p>
+          </Section>
+          </>
+        ),
+        pt: (
+          <>
+          <Section title="Informações da empresa">
+            <p>Maali.tech</p>
+            <p>Techin Global UG (haftungsbeschränkt)</p>
+            <p>Juri-Gagarin-Ring 132/92</p>
+            <p>99084 Erfurt</p>
+            <p>Alemanha</p>
+            <p className="pt-2">Diretor-gerente: Biluge Mushegera</p>
+            <p>Registo comercial: HRB 521067</p>
+            <p>Tribunal de registo: Amtsgericht Jena</p>
+            <p>NIF: 151 121/24516</p>
+            <p className="pt-2">Telefone: +49 361 21886352</p>
+            <p>E-mail: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+          </Section>
+          <Section title="Responsável pelo conteúdo">
+            <p>Biluge Mushegera</p>
+            <p>Morada como acima</p>
+          </Section>
+          <Section title="Responsabilidade pelo conteúdo">
+            <p>Somos responsáveis pelo nosso próprio conteúdo nos termos da lei aplicável.</p>
+            <p>Não somos obrigados a monitorizar informações de terceiros.</p>
+            <p>O conteúdo será removido quando tomarmos conhecimento de violações.</p>
+          </Section>
+          <Section title="Responsabilidade por ligações">
+            <p>Não somos responsáveis pelo conteúdo de websites externos.</p>
+          </Section>
+          <Section title="Propriedade intelectual">
+            <p>Todo o conteúdo está protegido por direitos de autor.</p>
+          </Section>
+          <Section title="Resolução de litígios">
+            <p><a href="https://ec.europa.eu/consumers/odr" className="text-primary underline" target="_blank" rel="noreferrer">https://ec.europa.eu/consumers/odr</a></p>
+            <p>Não participamos em procedimentos de resolução de litígios.</p>
+          </Section>
+          </>
+        ),
+        de: (
+          <>
           <Section title="Angaben gemäß § 5 DDG">
             <p>Maali.tech</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
@@ -107,8 +174,9 @@ const Terms = () => {
             <p>EU-Plattform: <a href="https://ec.europa.eu/consumers/odr" className="text-primary underline" target="_blank" rel="noreferrer">https://ec.europa.eu/consumers/odr</a></p>
             <p>Wir nehmen nicht an Streitbeilegungsverfahren teil.</p>
           </Section>
-        </TabsContent>
-      </Tabs>
+          </>
+        ),
+      }} />
     </main>
     <Footer />
   </div>

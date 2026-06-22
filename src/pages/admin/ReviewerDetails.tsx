@@ -9,8 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, TrendingUp, FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
+import { useTranslation } from 'react-i18next';
 
 export const ReviewerDetails = () => {
+  const { t } = useTranslation(['dashboard']);
+  const rd = 'admin.reviewerDetailsPage';
   const { reviewerId } = useParams<{ reviewerId: string }>();
   const navigate = useNavigate();
 
@@ -115,7 +118,7 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'application.id',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Application" />
+        <SortableColumnHeader column={column} title={t(`${rd}.columns.application`)} />
       ),
       cell: ({ row }) => {
         const app = row.original.application;
@@ -189,7 +192,7 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'overall_score',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Overall" />
+        <SortableColumnHeader column={column} title={t(`${rd}.columns.score`)} />
       ),
       cell: ({ row }) => {
         const score = row.original.overall_score;
@@ -210,7 +213,7 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Status" />
+        <SortableColumnHeader column={column} title={t(`${rd}.columns.status`)} />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
@@ -227,7 +230,7 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'recommendation',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Recommendation" />
+        <SortableColumnHeader column={column} title={t(`${rd}.columns.recommendation`)} />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
@@ -263,7 +266,7 @@ export const ReviewerDetails = () => {
     {
       accessorKey: 'submitted_at',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Submitted / Assigned" />
+        <SortableColumnHeader column={column} title={t(`${rd}.columns.submitted`)} />
       ),
       cell: ({ row }) => {
         const status = row.original.status;
@@ -282,7 +285,7 @@ export const ReviewerDetails = () => {
                   month: 'short',
                   day: 'numeric',
                 })
-              : 'Not submitted'}
+              : t(`${rd}.notSubmitted`)}
           </span>
         );
       },
@@ -292,7 +295,7 @@ export const ReviewerDetails = () => {
         return dateA - dateB;
       },
     },
-  ], []);
+  ], [t]);
 
   if (isLoadingDetails) {
     return (
@@ -313,14 +316,14 @@ export const ReviewerDetails = () => {
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate('/admin/review-management')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Reviewers
+          {t(`${rd}.back`)}
         </Button>
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground">
               {detailsError 
-                ? `Error loading reviewer: ${detailsError instanceof Error ? detailsError.message : 'Unknown error'}`
-                : 'Reviewer not found'}
+                ? `${t(`${rd}.loadError`)}: ${detailsError instanceof Error ? detailsError.message : 'Unknown error'}`
+                : t(`${rd}.notFound`)}
             </p>
             {reviewerId && (
               <p className="text-xs text-muted-foreground mt-2">
@@ -338,13 +341,13 @@ export const ReviewerDetails = () => {
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate('/admin/review-management')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Reviewers
+          {t(`${rd}.back`)}
         </Button>
         <div>
           <h1 className="text-3xl font-bold">
             {(reviewer as any)?.first_name} {(reviewer as any)?.last_name}
           </h1>
-          <p className="text-muted-foreground">Reviewer Details</p>
+          <p className="text-muted-foreground">{t(`${rd}.reviews`)}</p>
         </div>
       </div>
 
@@ -352,7 +355,7 @@ export const ReviewerDetails = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
+            <CardTitle className="text-sm font-medium">{t(`${rd}.stats.totalReviews`)}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -363,7 +366,7 @@ export const ReviewerDetails = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Workload</CardTitle>
+            <CardTitle className="text-sm font-medium">{t(`${rd}.stats.workload`)}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -374,7 +377,7 @@ export const ReviewerDetails = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+            <CardTitle className="text-sm font-medium">{t(`${rd}.stats.avgScore`)}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -387,7 +390,7 @@ export const ReviewerDetails = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned sectors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t(`${rd}.stats.sectors`)}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -447,7 +450,7 @@ export const ReviewerDetails = () => {
       {/* Reviews Datatable */}
       <Card>
         <CardHeader>
-          <CardTitle>Review History</CardTitle>
+          <CardTitle>{t(`${rd}.reviews`)}</CardTitle>
           <CardDescription>
             All reviews and pending assignments for this reviewer
           </CardDescription>

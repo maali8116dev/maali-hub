@@ -92,7 +92,7 @@
       "partner": "Parceiro",
       "selectPartner": "Selecionar parceiro",
       "allPartners": "Todos os parceiros",
-      "status": "Status",
+      "status": "Estado",
       "selectStatus": "Selecionar status",
       "allStatuses": "Todos os status",
       "open": "Aberto",
@@ -109,6 +109,689 @@
       "withFilters": "Tente ajustar a busca ou os filtros para encontrar mais oportunidades.",
       "default": "Nao ha oportunidades disponiveis no momento. Volte mais tarde."
     }
+  },
+  "status": {
+    "application": {
+      "pending": "Pendente",
+      "pending_payment": "Pagamento pendente",
+      "under_review": "Em analise",
+      "approved": "Aprovada",
+      "rejected": "Rejeitada",
+      "draft": "Rascunho"
+    },
+    "opportunity": {
+      "open": "Aberta",
+      "closingSoon": "Encerrando em breve",
+      "closed": "Fechada",
+      "new": "Nova",
+      "archived": "Arquivada"
+    },
+    "payment": {
+      "completed": "Concluido",
+      "pending": "Pendente",
+      "processing": "Processando",
+      "failed": "Falhou",
+      "cancelled": "Cancelado",
+      "refunded": "Reembolsado"
+    },
+    "kyc": {
+      "pending": "Pendente",
+      "verified": "Verificado",
+      "rejected": "Rejeitado"
+    },
+    "role": {
+      "admin": "Administrador",
+      "reviewer": "Avaliador",
+      "partner": "Parceiro",
+      "applicant": "Candidato"
+    },
+    "account": {
+      "active": "Ativo",
+      "suspended": "Suspenso"
+    },
+    "reviewAssignment": {
+      "completed": "Concluido",
+      "in_progress": "Em andamento",
+      "pending": "Pendente"
+    },
+    "recommendation": {
+      "approve": "Aprovar",
+      "reject": "Rejeitar",
+      "request_info": "Solicitar informacoes"
+    },
+    "published": "Publicado",
+    "draft": "Rascunho"
+  },
+  "applicationWindow": {
+    "open": "Aberto para candidaturas",
+    "closed": "Fechado para candidaturas"
+  },
+  "toasts": {
+    "genericError": "Algo deu errado. Tente novamente.",
+    "opportunity": {
+      "created": "Oportunidade criada",
+      "createdDesc": "A oportunidade foi criada com sucesso.",
+      "updated": "Oportunidade atualizada",
+      "updatedDesc": "A oportunidade foi atualizada com sucesso.",
+      "deleted": "Oportunidade excluida",
+      "deletedDesc": "A oportunidade foi excluida com sucesso.",
+      "createError": "Erro ao criar oportunidade",
+      "updateError": "Erro ao atualizar oportunidade",
+      "deleteError": "Erro ao excluir oportunidade",
+      "translationFailed": "Falha na traducao",
+      "translationNotConfigured": "Chave da API Google Translate nao configurada no servidor.",
+      "translationNotAuthenticated": "E necessario entrar para gerar traducoes."
+    },
+    "sector": {
+      "created": "Setor criado",
+      "createdDesc": "O setor foi criado com sucesso.",
+      "updated": "Setor atualizado",
+      "updatedDesc": "O setor foi atualizado com sucesso.",
+      "deleted": "Setor excluido",
+      "deletedDesc": "O setor foi excluido com sucesso.",
+      "enabled": "Setor ativado",
+      "disabled": "Setor desativado",
+      "enabledDesc": "O setor foi ativado.",
+      "disabledDesc": "O setor foi desativado.",
+      "statusDesc": "O setor foi {{state}}.",
+      "error": "Erro",
+      "createError": "Falha ao criar setor",
+      "updateError": "Falha ao atualizar setor",
+      "deleteError": "Falha ao excluir setor. Verifique se nenhum projeto usa este setor.",
+      "statusError": "Falha ao atualizar status do setor"
+    },
+    "user": {
+      "suspended": "Usuario suspenso",
+      "suspendedDesc": "O usuario foi suspenso com sucesso.",
+      "activated": "Usuario ativado",
+      "activatedDesc": "O usuario foi ativado com sucesso.",
+      "roleUpdated": "Funcao atualizada",
+      "roleUpdatedDesc": "A funcao foi atualizada para {{role}}.",
+      "error": "Erro",
+      "suspendError": "Falha ao suspender usuario",
+      "activateError": "Falha ao ativar usuario",
+      "roleError": "Falha ao atualizar funcao"
+    },
+    "faq": {
+      "created": "FAQ criada com sucesso",
+      "updated": "FAQ atualizada com sucesso",
+      "deleted": "FAQ excluida com sucesso",
+      "published": "FAQ publicada",
+      "unpublished": "FAQ despublicada",
+      "createError": "Falha ao criar FAQ",
+      "updateError": "Falha ao atualizar FAQ",
+      "deleteError": "Falha ao excluir FAQ",
+      "statusError": "Falha ao atualizar status da FAQ"
+    },
+    "mentor": {
+      "created": "Mentor criado com sucesso",
+      "updated": "Mentor atualizado com sucesso",
+      "deleted": "Mentor excluido com sucesso",
+      "published": "Mentor publicado",
+      "unpublished": "Mentor despublicado",
+      "createError": "Falha ao criar mentor",
+      "updateError": "Falha ao atualizar mentor",
+      "deleteError": "Falha ao excluir mentor",
+      "statusError": "Falha ao atualizar mentor"
+    },
+    "resource": {
+      "created": "Recurso criado com sucesso",
+      "updated": "Recurso atualizado com sucesso",
+      "deleted": "Recurso excluido com sucesso",
+      "published": "Recurso publicado",
+      "unpublished": "Recurso despublicado",
+      "createError": "Falha ao criar recurso",
+      "updateError": "Falha ao atualizar recurso",
+      "deleteError": "Falha ao excluir recurso",
+      "statusError": "Falha ao atualizar recurso"
+    },
+    "cms": {
+      "translationNotConfigured": "Chave da API Google Translate não configurada no servidor.",
+      "translationNotAuthenticated": "Início de sessão necessário para gerar traduções."
+    }
+  },
+  "notifications": {
+    "title": "Notificacoes",
+    "markAllRead": "Marcar todas como lidas",
+    "marking": "Marcando...",
+    "clearAll": "Limpar tudo",
+    "deleteAll": "Excluir todas",
+    "total": "No total",
+    "unread": "Nao lidas",
+    "read": "Lidas",
+    "viewDetails": "Ver detalhes →",
+    "emptyTitle": "Nenhuma notificacao",
+    "emptyDescription": "Voce esta em dia! Novas notificacoes aparecerao aqui.",
+    "emptyUnread": "Nenhuma notificacao nao lida",
+    "sections": {
+      "unread": "Nao lidas",
+      "earlier": "Anteriores"
+    },
+    "subtitles": {
+      "admin": "Atualizacoes sobre envios de parceiros e mudancas de status de oportunidades.",
+      "partner": "Atualizacoes quando a avaliacao Maali termina e quando o status da oportunidade muda.",
+      "member": "Fique por dentro das suas candidaturas e atividade da conta",
+      "reviewer": "Fique por dentro das candidaturas atribuidas e atividades de avaliacao"
+    },
+    "types": {
+      "application": "Candidatura",
+      "system": "Sistema",
+      "payment": "Pagamento",
+      "review": "Avaliacao",
+      "new_application": "Nova candidatura",
+      "review_assigned": "Avaliacao atribuida",
+      "deadline_reminder": "Lembrete de prazo",
+      "status_change": "Mudanca de status",
+      "reminder": "Lembrete",
+      "default": "Notificacao",
+      "review_assignment": "Atribuição de avaliador"
+    },
+    "viewAll": "Ver todas as notificações",
+    "messages": {
+      "fallbackOpportunity": "esta oportunidade",
+      "application": {
+        "submitted": {
+          "title": "Candidatura enviada",
+          "message": "A sua candidatura para «{{opportunityTitle}}» foi enviada com sucesso e está em análise."
+        },
+        "approved": {
+          "title": "Candidatura aprovada!",
+          "message": "Parabéns! A sua candidatura para «{{opportunityTitle}}» foi aprovada."
+        },
+        "rejected": {
+          "title": "Estado da candidatura atualizado",
+          "message": "A sua candidatura para «{{opportunityTitle}}» foi analisada. Consulte os detalhes da candidatura para mais informações."
+        },
+        "statusPending": {
+          "title": "Estado da candidatura atualizado",
+          "message": "O estado da sua candidatura para «{{opportunityTitle}}» foi atualizado para análise pendente."
+        }
+      },
+      "payment": {
+        "confirmed": {
+          "title": "Pagamento confirmado",
+          "message": "A taxa de candidatura foi confirmada e a sua candidatura está agora em análise."
+        }
+      },
+      "membership": {
+        "activated": {
+          "title": "Membro completo ativo",
+          "message": "A sua adesão completa de 2 $/mês está agora ativa. Pode candidatar-se a todas as oportunidades de financiamento."
+        },
+        "ended": {
+          "title": "Adesão terminada",
+          "message": "A sua adesão completa terminou. Está agora no plano comunitário gratuito. Faça upgrade a qualquer momento para candidatar-se novamente."
+        }
+      },
+      "review": {
+        "assigned": {
+          "title": "Nova candidatura atribuída",
+          "message": "Uma nova candidatura para «{{opportunityTitle}}» foi-lhe atribuída para análise."
+        },
+        "newApplicationRequiresReview": {
+          "title": "Nova candidatura atribuída",
+          "message": "Uma nova candidatura para «{{opportunityTitle}}» requer a sua análise."
+        }
+      },
+      "admin": {
+        "reviewerCapacityNeeded": {
+          "title": "Capacidade de avaliadores necessária",
+          "message": "Apenas {{availableCount}} avaliador(es) disponível(eis) para «{{opportunityTitle}}». Esta candidatura precisa de {{requiredReviewers}} avaliadores. Atribua um avaliador adicional."
+        }
+      },
+      "partner": {
+        "reviewFinished": {
+          "title": "Avaliacao concluida",
+          "message": "A Maali concluiu a avaliacao das candidaturas para «{{opportunityTitle}}». Os resultados classificados estao prontos para exportar."
+        },
+        "opportunityStatusChanged": {
+          "title": "Estado da oportunidade atualizado",
+          "message": "O estado de «{{opportunityTitle}}» mudou de {{previousStatus}} para {{status}}."
+        }
+      }
+    }
+  },
+  "dataTable": {
+    "search": "Pesquisar...",
+    "clearSearch": "Limpar pesquisa",
+    "refresh": "Atualizar",
+    "refreshData": "Atualizar dados",
+    "export": "Exportar",
+    "columns": "Colunas",
+    "toggleColumns": "Mostrar/ocultar colunas",
+    "csv": "Exportar CSV",
+    "excelSoon": "Excel (em breve)",
+    "pdfSoon": "PDF (em breve)",
+    "noResults": "Nenhum resultado.",
+    "rowsTotal": "{{count}} linha(s) no total.",
+    "rowsPerPage": "Linhas por pagina",
+    "pageOf": "Pagina {{current}} de {{total}}",
+    "firstPage": "Ir para a primeira pagina",
+    "previousPage": "Pagina anterior",
+    "nextPage": "Proxima pagina",
+    "lastPage": "Ir para a ultima pagina"
+  },
+  "auth": {
+    "backToHome": "Voltar ao início",
+    "brandAlt": "Maali",
+    "welcome": {
+      "title": "Bem-vindo",
+      "subtitle": "Junte-se à comunidade de talentos africanos"
+    },
+    "tabs": {
+      "signIn": "Entrar",
+      "signUp": "Registar"
+    },
+    "oauth": {
+      "continueWithGoogle": "Continuar com Google",
+      "orContinueWith": "Ou continuar com"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Introduza a sua palavra-passe",
+      "passwordCreatePlaceholder": "Crie uma palavra-passe segura",
+      "passwordConfirm": "Confirmar palavra-passe",
+      "passwordConfirmPlaceholder": "Introduza novamente a sua palavra-passe",
+      "newPassword": "Nova palavra-passe",
+      "newPasswordPlaceholder": "Introduza a sua nova palavra-passe",
+      "confirmNewPassword": "Confirmar nova palavra-passe",
+      "confirmNewPasswordPlaceholder": "Introduza novamente a sua nova palavra-passe",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "João",
+      "lastName": "Apelido",
+      "lastNamePlaceholder": "Silva",
+      "forgotPassword": "Esqueceu a palavra-passe?"
+    },
+    "reset": {
+      "title": "Definir nova palavra-passe",
+      "description": "Introduza a sua nova palavra-passe abaixo",
+      "verifyingLink": "Aguarde enquanto verificamos o seu link de redefinição…",
+      "backToSignIn": "Voltar ao início de sessão"
+    },
+    "buttons": {
+      "signIn": "Entrar",
+      "signingIn": "A entrar…",
+      "createAccount": "Criar conta",
+      "creatingAccount": "A criar conta…",
+      "updatePassword": "Atualizar palavra-passe",
+      "updatingPassword": "A atualizar palavra-passe…",
+      "verifyingLink": "A verificar link…"
+    },
+    "passwordStrength": {
+      "label": "Força da palavra-passe:",
+      "requirementsTitle": "Requisitos:",
+      "allMet": "Todos os requisitos cumpridos!",
+      "levels": {
+        "weak": "Fraca",
+        "medium": "Média",
+        "strong": "Forte",
+        "veryStrong": "Muito forte"
+      },
+      "requirements": {
+        "minLength": "Pelo menos 8 caracteres",
+        "uppercase": "Contém letra maiúscula",
+        "lowercase": "Contém letra minúscula",
+        "number": "Contém número",
+        "special": "Contém carácter especial (!@#$%^&*)"
+      }
+    },
+    "validation": {
+      "emailInvalid": "Endereço de e-mail inválido",
+      "passwordRequired": "A palavra-passe é obrigatória",
+      "firstNameMin": "O nome deve ter pelo menos 2 caracteres",
+      "lastNameMin": "O apelido deve ter pelo menos 2 caracteres",
+      "minLength": "A palavra-passe deve ter pelo menos 8 caracteres",
+      "uppercase": "A palavra-passe deve conter pelo menos uma letra maiúscula",
+      "lowercase": "A palavra-passe deve conter pelo menos uma letra minúscula",
+      "number": "A palavra-passe deve conter pelo menos um número",
+      "special": "A palavra-passe deve conter pelo menos um carácter especial",
+      "passwordConfirmRequired": "A confirmação da palavra-passe é obrigatória",
+      "passwordMismatch": "As palavras-passe não coincidem"
+    },
+    "toasts": {
+      "invalidEmail": {
+        "title": "E-mail inválido",
+        "description": "Utilize um endereço de e-mail válido."
+      },
+      "tooManyAttempts": {
+        "title": "Demasiadas tentativas"
+      },
+      "accountExists": {
+        "title": "Conta já existe",
+        "description": "Inicie sessão com a sua conta existente ou utilize outro e-mail."
+      },
+      "signUpFailed": {
+        "title": "Registo falhou"
+      },
+      "accountCreatedSignIn": {
+        "title": "Conta criada",
+        "description": "Inicie sessão para continuar a configurar o seu perfil e adesão."
+      },
+      "accountCreated": {
+        "title": "Conta criada!",
+        "description": "Complete o seu perfil e adesão para começar."
+      },
+      "invalidCredentials": {
+        "title": "Credenciais inválidas",
+        "description": "Verifique o e-mail e a palavra-passe e tente novamente."
+      },
+      "signInFailed": {
+        "title": "Início de sessão falhou"
+      },
+      "welcomeBack": {
+        "title": "Bem-vindo de volta!",
+        "description": "Iniciou sessão com sucesso."
+      },
+      "emailRequired": {
+        "title": "E-mail obrigatório",
+        "description": "Introduza primeiro o seu endereço de e-mail."
+      },
+      "passwordResetFailed": {
+        "title": "Redefinição falhou"
+      },
+      "checkEmail": {
+        "title": "Verifique o seu e-mail",
+        "description": "Enviámos um link de redefinição. Verifique a sua caixa de entrada."
+      },
+      "sessionExpired": {
+        "title": "Sessão expirada",
+        "description": "O link de redefinição expirou ou é inválido. Solicite um novo."
+      },
+      "passwordUpdateFailed": {
+        "title": "Atualização falhou"
+      },
+      "passwordUpdated": {
+        "title": "Palavra-passe atualizada!",
+        "description": "A sua palavra-passe foi atualizada. Já pode iniciar sessão."
+      },
+      "googleSignInFailed": {
+        "title": "Início de sessão com Google falhou"
+      },
+      "error": {
+        "title": "Erro",
+        "description": "Ocorreu um erro inesperado. Tente novamente."
+      }
+    },
+    "oauthCallback": {
+      "errorTitle": "Erro de autenticação",
+      "redirecting": "A redirecionar para o início de sessão…",
+      "completing": "A concluir início de sessão…",
+      "pleaseWait": "Aguarde enquanto finalizamos a configuração da sua conta.",
+      "authFailed": "Autenticação falhou",
+      "noEmail": "A sua conta não tem e-mail associado. Utilize o início de sessão por e-mail.",
+      "sessionFailed": "Não foi possível estabelecer a sessão. Tente novamente."
+    }
+  },
+  "onboarding": {
+    "memberPriceLabel": "2 $ / mês",
+    "steps": {
+      "profile": "Perfil",
+      "payment": "Pagamento"
+    },
+    "profile": {
+      "title": "Complete o seu perfil",
+      "description": "Isto constrói o seu perfil Maali — visível para parceiros e ofertantes de oportunidades na rede.",
+      "avatarLabel": "Foto de perfil",
+      "optional": "(opcional)",
+      "avatarPlaceholder": "Carregar foto de perfil",
+      "avatarHint": "JPG, PNG, WebP ou GIF até 5 MB",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Amara",
+      "lastName": "Apelido",
+      "lastNamePlaceholder": "Diallo",
+      "organisation": "Empresa / Organização / Universidade (opcional)",
+      "organisationPlaceholder": "ex. Savanna Ventures, Universidade de Acra, PNUD",
+      "sector": "Setor / Área",
+      "sectorPlaceholder": "Selecione a sua área",
+      "sectorLoading": "A carregar…",
+      "country": "País",
+      "countryPlaceholder": "Selecione o país",
+      "cityRegion": "Cidade / Região",
+      "cityRegionPlaceholder": "ex. Lagos, Nairobi, Grande Acra",
+      "phone": "Número de telefone",
+      "phonePlaceholder": "+234 800 000 0000",
+      "bio": "Breve biografia (opcional)",
+      "bioPlaceholder": "ex. Engenheiro de software à procura de bolsas, empreendedor em agri-tech, recém-licenciado à procura de estágios em finanças…",
+      "saving": "A guardar…",
+      "continue": "Continuar"
+    },
+    "payment": {
+      "title": "Pagamento",
+      "description": "Membro completo — {{price}}. Cancele a qualquer momento.",
+      "billingEmail": "E-mail de faturação para recibos",
+      "billingEmailPlaceholder": "voce@exemplo.com",
+      "billingHint": "Morada e NIF podem ser adicionados mais tarde em Painel → Faturação.",
+      "cardHint": "O seu cartão aparecerá em Painel → Faturação após o pagamento.",
+      "failed": "Pagamento falhou",
+      "initFailed": "Não foi possível iniciar o pagamento: {{message}}",
+      "back": "Voltar",
+      "goBack": "Retroceder",
+      "processing": "A processar…",
+      "payAndJoin": "Pagar 2 $ e aderir",
+      "stripeNote": "Os pagamentos são processados de forma segura pela Stripe. A MAALI nunca armazena os dados do seu cartão.",
+      "skipToCommunity": "Continuar com conta Comunidade gratuita"
+    },
+    "activating": {
+      "title": "A ativar a sua adesão…",
+      "description": "Pagamento recebido. Estamos a confirmar com a Stripe — normalmente demora apenas alguns segundos."
+    },
+    "noAccount": {
+      "message": "Precisa primeiro de uma conta.",
+      "cta": "Criar conta"
+    },
+    "done": {
+      "title": "Bem-vindo à Maali!",
+      "description": "A sua adesão está ativa. Já pode candidatar-se a financiamentos, empregos, estágios, bolsas e muito mais.",
+      "goToDashboard": "Ir para o painel"
+    },
+    "logoAlt": "Maali Opportunity Hub",
+    "validation": {
+      "firstNameRequired": "O nome é obrigatório",
+      "lastNameRequired": "O apelido é obrigatório",
+      "sectorRequired": "O setor é obrigatório",
+      "countryRequired": "O país é obrigatório",
+      "cityRegionRequired": "A cidade / região é obrigatória",
+      "phoneRequired": "O número de telefone é obrigatório",
+      "phoneInvalid": "Introduza um número internacional válido (ex. +234 800 000 0000)"
+    },
+    "toasts": {
+      "profileSaveError": {
+        "title": "Erro ao guardar o perfil"
+      },
+      "error": {
+        "title": "Erro"
+      },
+      "activationPending": {
+        "title": "Pagamento recebido — ativação pendente",
+        "description": "O seu pagamento foi efetuado, mas ainda não recebemos a confirmação da Stripe. Atualize dentro de um minuto ou contacte o suporte se o problema persistir."
+      }
+    }
+  },
+  "join": {
+    "memberPriceLabel": "2 $ / mês",
+    "steps": {
+      "profile": "Perfil",
+      "tier": "Adesão",
+      "payment": "Pagamento"
+    },
+    "profile": {
+      "title": "Fale-nos sobre si",
+      "description": "Isto constrói o seu perfil de membro MAALI visível na rede.",
+      "firstName": "Nome *",
+      "lastName": "Apelido *",
+      "businessName": "Empresa / Organização *",
+      "businessNamePlaceholder": "Savanna Ventures",
+      "sector": "Setor *",
+      "sectorPlaceholder": "Selecione o setor",
+      "country": "País *",
+      "countryPlaceholder": "Quénia",
+      "bio": "Breve biografia",
+      "bioPlaceholder": "Conte à rede MAALI o que está a construir…",
+      "continue": "Continuar"
+    },
+    "tier": {
+      "title": "Escolha a sua adesão",
+      "subtitle": "Pode fazer upgrade a qualquer momento.",
+      "mostPopular": "Mais popular",
+      "community": {
+        "name": "Comunidade",
+        "price": "Grátis",
+        "description": "Junte-se à rede MAALI e explore oportunidades.",
+        "cta": "Aderir grátis",
+        "features": [
+          "Explorar todas as oportunidades de financiamento",
+          "Aceder a recursos públicos",
+          "Juntar-se à rede comunitária",
+          "Newsletter mensal"
+        ]
+      },
+      "member": {
+        "name": "Membro completo",
+        "price": "2 $ / mês",
+        "description": "Desbloqueie a plataforma MAALI completa e candidate-se a oportunidades.",
+        "cta": "Tornar-se membro",
+        "features": [
+          "Tudo na Comunidade",
+          "Candidatar-se a oportunidades de financiamento",
+          "Revisão prioritária de candidaturas",
+          "Mensagens diretas com avaliadores",
+          "Perfil em destaque na rede",
+          "Eventos exclusivos para membros"
+        ]
+      }
+    },
+    "noAccount": {
+      "title": "Registe-se primeiro",
+      "message": "Precisa de uma conta antes de aderir à MAALI.",
+      "cta": "Criar conta"
+    },
+    "done": {
+      "title": "Bem-vindo à Maali!",
+      "paidDescription": "A sua adesão completa está ativa. Já pode candidatar-se a todas as oportunidades de financiamento.",
+      "communityDescription": "Juntou-se à rede comunitária Maali.",
+      "upgradeHint": "Faça upgrade para Membro completo a qualquer momento para se candidatar a financiamentos.",
+      "goHome": "Ir para o início",
+      "browseOpportunities": "Explorar oportunidades"
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "title": "Contacte-nos",
+      "subtitle": "Entre em contacto com a nossa equipa. Estamos aqui para o ajudar a ter sucesso."
+    },
+    "validation": {
+      "firstNameRequired": "O nome é obrigatório",
+      "firstNameTooLong": "O nome é demasiado longo",
+      "lastNameRequired": "O apelido é obrigatório",
+      "lastNameTooLong": "O apelido é demasiado longo",
+      "subjectRequired": "Selecione um assunto",
+      "messageMin": "A mensagem deve ter pelo menos 10 caracteres",
+      "messageTooLong": "A mensagem é demasiado longa"
+    },
+    "toasts": {
+      "submitFailed": "Não foi possível enviar a mensagem. Tente novamente.",
+      "submitSuccess": "A sua mensagem foi enviada com sucesso! Responderemos dentro de 24 horas.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "form": {
+      "title": "Envie-nos uma mensagem",
+      "description": "Preencha o formulário abaixo e responderemos o mais rapidamente possível.",
+      "firstNameLabel": "Nome *",
+      "firstNamePlaceholder": "Introduza o seu nome",
+      "lastNameLabel": "Apelido *",
+      "lastNamePlaceholder": "Introduza o seu apelido",
+      "emailLabel": "E-mail *",
+      "emailPlaceholder": "Introduza o seu endereço de e-mail",
+      "phoneLabel": "Número de telefone",
+      "phonePlaceholder": "Introduza o seu número de telefone",
+      "countryLabel": "País",
+      "countryPlaceholder": "Selecione o seu país",
+      "countryOther": "Outro",
+      "countryNigeria": "Nigéria",
+      "countryKenya": "Quénia",
+      "countrySouthAfrica": "África do Sul",
+      "countryGhana": "Gana",
+      "countryUganda": "Uganda",
+      "countryTanzania": "Tanzânia",
+      "subjectLabel": "Assunto *",
+      "subjectPlaceholder": "Selecione um assunto",
+      "subjectFunding": "Consulta de financiamento",
+      "subjectApplication": "Apoio à candidatura",
+      "subjectPartnership": "Parceria",
+      "subjectTechnical": "Suporte técnico",
+      "subjectGeneral": "Consulta geral",
+      "messageLabel": "Mensagem *",
+      "messagePlaceholder": "Diga-nos como podemos ajudá-lo…",
+      "sending": "A enviar…",
+      "submit": "Enviar mensagem"
+    },
+    "success": {
+      "title": "Mensagem enviada com sucesso!",
+      "description": "Obrigado por nos contactar. Recebemos a sua mensagem e responderemos dentro de 24 horas.",
+      "sendAnother": "Enviar outra mensagem"
+    },
+    "contactInfo": {
+      "title": "Informações de contacto",
+      "emailTitle": "Envie-nos um e-mail",
+      "emailDescription": "Responderemos dentro de 24 horas",
+      "callTitle": "Ligue-nos",
+      "callDescription": "Seg–Sex, 9h–18h WAT",
+      "officeTitle": "Escritório",
+      "officeDescription": "Operações pan-africanas",
+      "responseTimeTitle": "Tempo de resposta",
+      "responseTimeValue": "24 horas",
+      "responseTimeDescription": "Tempo médio de resposta"
+    },
+    "officeLocations": {
+      "title": "Localizações dos escritórios",
+      "description": "Operamos em toda a África com hubs regionais",
+      "offices": [
+        {
+          "city": "Lagos",
+          "country": "Nigéria",
+          "address": "Victoria Island, Lagos State",
+          "role": "Hub da África Ocidental"
+        },
+        {
+          "city": "Nairobi",
+          "country": "Quénia",
+          "address": "Westlands, Nairobi",
+          "role": "Hub da África Oriental"
+        },
+        {
+          "city": "Cape Town",
+          "country": "África do Sul",
+          "address": "Century City, Cape Town",
+          "role": "Hub da África Austral"
+        }
+      ]
+    },
+    "quickSupport": {
+      "title": "Suporte rápido",
+      "description": "Precisa de ajuda imediata? Consulte a nossa FAQ ou agende uma chamada com a nossa equipa.",
+      "viewFaq": "Ver FAQ",
+      "scheduleCall": "Agendar chamada"
+    },
+    "cta": {
+      "title": "Pronto para começar?",
+      "description": "Não espere — explore oportunidades de financiamento disponíveis agora",
+      "browseOpportunities": "Explorar oportunidades",
+      "createAccount": "Criar conta"
+    }
+  },
+  "opportunityDetail": {
+    "uncategorized": "Sem categoria",
+    "location": "Localização",
+    "deadline": "Prazo de candidatura",
+    "sector": "Setor",
+    "fundingAmount": "Montante do financiamento",
+    "opportunityType": "Tipo de oportunidade",
+    "organization": "Organização",
+    "programFormat": "Formato do programa",
+    "experienceLevel": "Nível de experiência",
+    "requirements": "Requisitos",
+    "eligibilityCriteria": "Critérios de elegibilidade"
   }
 }
-

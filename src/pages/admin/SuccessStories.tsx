@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 type SuccessStory = {
   id: number;
@@ -37,6 +38,9 @@ type SuccessStory = {
 };
 
 const AdminSuccessStories = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cf = "admin.cmsList.successStories";
+  const cc = "admin.cmsList.common";
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -137,14 +141,12 @@ const AdminSuccessStories = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Success Stories</h1>
-          <p className="text-muted-foreground mt-2">
-            Create, edit, and manage success stories
-          </p>
+          <h1 className="text-3xl font-bold">{t(`${cf}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${cf}.subtitle`)}</p>
         </div>
         <Button onClick={() => navigate("/admin/success-stories/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Story
+          {t(`${cf}.create`)}
         </Button>
       </div>
 
@@ -188,11 +190,11 @@ const AdminSuccessStories = () => {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
-                          (e.target as HTMLImageElement).parentElement!.innerHTML = "ðŸŒŸ";
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = "Image";
                         }}
                       />
                     ) : (
-                      <span className="text-2xl">ðŸŒŸ</span>
+                      <span className="text-2xl">Image</span>
                     )}
                   </div>
                   <div className="flex-1">
@@ -248,15 +250,13 @@ const AdminSuccessStories = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the success story.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+            <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${cc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+              {t(`${cc}.delete`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

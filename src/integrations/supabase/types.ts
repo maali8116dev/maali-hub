@@ -208,8 +208,10 @@ export type Database = {
           reviewed_by: string | null
           status: string | null
           stripe_payment_intent_id: string | null
+          submitted_locale: string | null
           target_beneficiaries: string | null
           team_size: number | null
+          translations: Json
           twitter_url: string | null
           updated_at: string
           user_id: string | null
@@ -257,8 +259,10 @@ export type Database = {
           reviewed_by?: string | null
           status?: string | null
           stripe_payment_intent_id?: string | null
+          submitted_locale?: string | null
           target_beneficiaries?: string | null
           team_size?: number | null
+          translations?: Json
           twitter_url?: string | null
           updated_at?: string
           user_id?: string | null
@@ -306,8 +310,10 @@ export type Database = {
           reviewed_by?: string | null
           status?: string | null
           stripe_payment_intent_id?: string | null
+          submitted_locale?: string | null
           target_beneficiaries?: string | null
           team_size?: number | null
+          translations?: Json
           twitter_url?: string | null
           updated_at?: string
           user_id?: string | null
@@ -550,6 +556,7 @@ export type Database = {
           is_published: boolean | null
           question: string
           Sector: string
+          translations?: Json
           updated_at: string
         }
         Insert: {
@@ -683,6 +690,7 @@ export type Database = {
           linkedin_url: string | null
           name: string
           sector: string | null
+          translations?: Json
           twitter_url: string | null
           updated_at: string | null
           website_url: string | null
@@ -700,6 +708,7 @@ export type Database = {
           linkedin_url?: string | null
           name: string
           sector?: string | null
+          translations?: Json
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
@@ -717,6 +726,7 @@ export type Database = {
           linkedin_url?: string | null
           name?: string
           sector?: string | null
+          translations?: Json
           twitter_url?: string | null
           updated_at?: string | null
           website_url?: string | null
@@ -818,6 +828,7 @@ export type Database = {
           start_date: string | null
           status: string
           title: string
+          translations: Json
           updated_at: string
         }
         Insert: {
@@ -851,6 +862,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title: string
+          translations?: Json
           updated_at?: string
         }
         Update: {
@@ -884,6 +896,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title?: string
+          translations?: Json
           updated_at?: string
         }
         Relationships: [
@@ -1540,6 +1553,7 @@ export type Database = {
           name: string
           sector: string
           status: string
+          translations?: Json
           updated_at: string
         }
         Insert: {
@@ -1558,6 +1572,7 @@ export type Database = {
           name: string
           sector: string
           status?: string
+          translations?: Json
           updated_at?: string
         }
         Update: {
@@ -1576,6 +1591,7 @@ export type Database = {
           name?: string
           sector?: string
           status?: string
+          translations?: Json
           updated_at?: string
         }
         Relationships: []

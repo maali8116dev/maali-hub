@@ -33,6 +33,7 @@ import { getProjectDisplayStatus } from "@/lib/projectAvailability";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { localizeOpportunityFields } from "@/lib/localizedContent";
 import { useTranslation } from "react-i18next";
 
 // Fallback tags shown when DB has fewer than the limit
@@ -42,7 +43,7 @@ const FALLBACK_TAGS = [
 ];
 
 const Opportunities = () => {
-  const { t } = useTranslation(["common"]);
+  const { t, i18n } = useTranslation(["common"]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedsector, setSelectedsector] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -344,12 +345,14 @@ const Opportunities = () => {
         ) : filteredOpportunities.length > 0 ? (
           <>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {filteredOpportunities.map((opportunity) => (
+              {filteredOpportunities.map((opportunity) => {
+                const localized = localizeOpportunityFields(opportunity, i18n.language);
+                return (
                 <ProjectCard
                   key={opportunity.id}
-                  id={opportunity.id}
-                  title={opportunity.title}
-                  description={opportunity.description}
+                  id={localized.id}
+                  title={localized.title}
+                  description={localized.description}
                   sector={opportunity.sector || opportunity.tags?.[0]?.name || opportunity.opportunityType}
                   location={opportunity.location}
                   fundingAmount={opportunity.fundingAmount}
@@ -360,7 +363,8 @@ const Opportunities = () => {
                   partnerLogoUrl={opportunity.partnerLogoUrl || undefined}
                   hasSubmittedApplication={submittedOpportunityIds.has(opportunity.id)}
                 />
-              ))}
+              );
+              })}
             </div>
 
             {/* Pagination */}

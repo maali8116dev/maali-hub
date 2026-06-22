@@ -2,6 +2,7 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
 import { resolveInvoiceNumber } from "../_shared/invoice-number.ts";
+import { buildNotificationMetadata } from "../_shared/notifications.ts";
 
 export const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2023-10-16",
@@ -202,7 +203,9 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session) 
         p_message: "Your application fee has been confirmed and your application is now under review.",
         p_type: "payment",
         p_link: `/dashboard/applications/${applicationId}`,
-        p_metadata: { application_id: applicationId },
+        p_metadata: buildNotificationMetadata("payment.confirmed", {}, {
+          application_id: applicationId,
+        }),
       });
     } catch (notifErr) {
       console.error("Error creating payment notification:", notifErr);
@@ -466,7 +469,9 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
       p_message: "Your $2/month Full Membership is now active. You can apply to all funding opportunities.",
       p_type: "payment",
       p_link: "/dashboard",
-      p_metadata: { stripe_payment_intent_id: paymentIntentId },
+      p_metadata: buildNotificationMetadata("membership.activated", {}, {
+        stripe_payment_intent_id: paymentIntentId,
+      }),
     });
   } catch (notifErr) {
     console.error("[membership] failed to send notification:", notifErr);
@@ -625,7 +630,9 @@ export async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) 
           p_message: "Your application fee has been confirmed and your application is now under review.",
           p_type: "payment",
           p_link: `/dashboard/applications/${applicationId}`,
-          p_metadata: { application_id: applicationId },
+          p_metadata: buildNotificationMetadata("payment.confirmed", {}, {
+            application_id: applicationId,
+          }),
         });
       } catch (notifErr) {
         console.error("Error creating payment notification:", notifErr);
@@ -917,13 +924,21 @@ async function assignReviewersToApplication(applicationId: string) {
               p_message: `Only ${availableCount} reviewer is available for "${opportunityTitle}". This application needs 2 reviewers. Please assign an additional reviewer.`,
               p_type: "review_assignment",
               p_link: `/admin/applications/${applicationId}`,
-              p_metadata: {
-                application_id: applicationId,
-                opportunity_id: appData?.opportunity_id,
-                opportunity_title: opportunityTitle,
-                required_reviewers: 2,
-                assigned_reviewers: availableCount,
-              },
+              p_metadata: buildNotificationMetadata(
+                "admin.reviewerCapacityNeeded",
+                {
+                  opportunityTitle,
+                  availableCount,
+                  requiredReviewers: 2,
+                },
+                {
+                  application_id: applicationId,
+                  opportunity_id: appData?.opportunity_id,
+                  opportunity_title: opportunityTitle,
+                  required_reviewers: 2,
+                  assigned_reviewers: availableCount,
+                },
+              ),
             })
           )
         );
@@ -984,11 +999,15 @@ async function assignReviewersToApplication(applicationId: string) {
               p_message: `A new application for "${opportunityTitle}" has been assigned to you for review.`,
               p_type: "review_assigned",
               p_link: `/reviewer/applications/${applicationId}`,
-              p_metadata: {
-                application_id: applicationId,
-                opportunity_id: appData?.opportunity_id,
-                assignment_id: assignment.assignment_id,
-              },
+              p_metadata: buildNotificationMetadata(
+                "review.assigned",
+                { opportunityTitle },
+                {
+                  application_id: applicationId,
+                  opportunity_id: appData?.opportunity_id,
+                  assignment_id: assignment.assignment_id,
+                },
+              ),
             });
           } catch (notifError) {
             console.error(`Failed to notify reviewer ${assignment.reviewer_id}:`, notifError);
@@ -1412,7 +1431,9 @@ export async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
       p_message:  "Your Full Membership has ended. You're now on the free Community plan. Upgrade any time to apply again.",
       p_type:     "payment",
       p_link:     "/dashboard/billing",
-      p_metadata: { stripe_subscription_id: sub.id },
+      p_metadata: buildNotificationMetadata("membership.ended", {}, {
+        stripe_subscription_id: sub.id,
+      }),
     });
   } catch { /* non-fatal */ }
 

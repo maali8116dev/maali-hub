@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 
 export type UserManagement = {
   id: string;
@@ -150,14 +151,14 @@ export function useSuspendUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
       toast({
-        title: "User suspended",
-        description: "The user has been suspended successfully.",
+        title: i18n.t("toasts.user.suspended", { ns: "common" }),
+        description: i18n.t("toasts.user.suspendedDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to suspend user",
+        title: i18n.t("toasts.user.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.user.suspendError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -205,14 +206,14 @@ export function useActivateUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users", "admin"] });
       toast({
-        title: "User activated",
-        description: "The user has been activated successfully.",
+        title: i18n.t("toasts.user.activated", { ns: "common" }),
+        description: i18n.t("toasts.user.activatedDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to activate user",
+        title: i18n.t("toasts.user.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.user.activateError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -245,14 +246,14 @@ export function useUpdateUserRole() {
       queryClient.invalidateQueries({ queryKey: ["user-role", data.userId] });
       queryClient.invalidateQueries({ queryKey: ["profile", data.userId] });
       toast({
-        title: "Role updated",
-        description: `User role has been updated to ${data.role}.`,
+        title: i18n.t("toasts.user.roleUpdated", { ns: "common" }),
+        description: i18n.t("toasts.user.roleUpdatedDesc", { ns: "common", role: data.role }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update user role",
+        title: i18n.t("toasts.user.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.user.roleError", { ns: "common" }),
         variant: "destructive",
       });
     },

@@ -1,33 +1,20 @@
-﻿export function Step9Submit() {
+﻿import { useTranslation } from "react-i18next";
+
+export function Step9Submit() {
+  const { t } = useTranslation("dashboard");
+
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">
-          Submit Your Application
-        </h3>
+        <h3 className="text-lg font-semibold mb-2">{t("applications.form.step8.title")}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Review the confirmation notice below and click the submit button to
-          finalize your application.
+          {t("applications.form.step8.description")}
         </p>
       </div>
 
-      {/* Confirmation Notice */}
       <div className="bg-muted/50 border rounded-lg p-4">
-        <p className="text-sm text-muted-foreground">
-          By submitting this application, you confirm that all the information
-          provided is accurate and complete. Your application will be reviewed
-          by our team and you will be notified of the outcome via email.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("applications.form.step8.notice")}</p>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

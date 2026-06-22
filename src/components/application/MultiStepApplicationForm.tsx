@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ApplicationFormValues } from "./form/schemas";
 import { getStepSchema } from "./form/getStepSchema";
 import { getFormDefaults } from "./form/getFormDefaults";
-import { stepTitles } from "./form/constants";
+import { getStepTitles } from "./form/constants";
 import {
   Step1ApplicantInfo,
   Step2OrganizationalBackground,
@@ -44,9 +45,11 @@ import {
 
 
 const MultiStepApplicationForm = () => {
+  const { t } = useTranslation("dashboard");
   const [searchParams] = useSearchParams();
   const isNewApplication = searchParams.get("new") === "true";
   const { toast } = useToast();
+  const stepTitles = useMemo(() => getStepTitles(t), [t]);
   const { user } = useAuth();
   const [draftLoaded, setDraftLoaded] = useState(false);
   const isEmailVerified =
@@ -87,8 +90,8 @@ const MultiStepApplicationForm = () => {
         if (existingData) {
           setFormData({ ...formData, ...existingData } as ApplicationFormData);
           toast({
-            title: "Draft Restored",
-            description: "Your previously saved draft has been loaded.",
+            title: t("applications.form.toasts.draftRestored.title"),
+            description: t("applications.form.toasts.draftRestored.description"),
           });
         }
         setDraftLoaded(true);
@@ -144,7 +147,9 @@ const MultiStepApplicationForm = () => {
 
   // Initialize form with dynamic schema based on current step
   const form = useForm<ApplicationFormValues>({
-    resolver: zodResolver(getStepSchema(currentStep, formData.applicantType, opportunityType)) as any,
+    resolver: zodResolver(
+      getStepSchema(t, currentStep, formData.applicantType, opportunityType),
+    ) as any,
     defaultValues: getFormDefaults(formData),
     mode: "onChange",
   });
@@ -167,8 +172,8 @@ const MultiStepApplicationForm = () => {
       markAsSaved();
     } else {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields correctly.",
+        title: t("applications.form.toasts.validationError.title"),
+        description: t("applications.form.toasts.validationError.description"),
         variant: "destructive",
       });
     }
@@ -193,8 +198,8 @@ const MultiStepApplicationForm = () => {
 
     if (!isEmailVerified) {
       toast({
-        title: "Email Verification Required",
-        description: "Please verify your email address before submitting an application.",
+        title: t("applications.form.toasts.emailVerificationRequired.title"),
+        description: t("applications.form.toasts.emailVerificationRequired.description"),
         variant: "destructive",
       });
       return;
@@ -202,8 +207,8 @@ const MultiStepApplicationForm = () => {
 
     if (!formData.projectId) {
       toast({
-        title: "Project Required",
-        description: "Please select a project to apply for.",
+        title: t("applications.form.toasts.projectRequired.title"),
+        description: t("applications.form.toasts.projectRequired.description"),
         variant: "destructive",
       });
       return;
@@ -220,7 +225,10 @@ const MultiStepApplicationForm = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
-            Step {currentStep} of {totalSteps}
+            {t("applications.form.progress.stepOf", {
+              current: currentStep,
+              total: totalSteps,
+            })}
           </span>
           <div className="flex items-center gap-4">
             {/* Save Draft Button */}
@@ -238,19 +246,26 @@ const MultiStepApplicationForm = () => {
                 ) : (
                   <Save className="h-3 w-3" />
                 )}
-                {isSaving ? "Saving..." : "Save Draft"}
+                {isSaving
+                  ? t("applications.form.progress.saving")
+                  : t("applications.form.progress.saveDraft")}
               </Button>
             )}
             {lastSavedAt && (
               <span className="text-xs text-muted-foreground">
-                Last saved:{" "}
-                {new Date(lastSavedAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
+                {t("applications.form.progress.lastSaved", {
+                  time: new Date(lastSavedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
                 })}
               </span>
             )}
-            <span>{Math.round(progressPercentage)}% Complete</span>
+            <span>
+              {t("applications.form.progress.percentComplete", {
+                percent: Math.round(progressPercentage),
+              })}
+            </span>
           </div>
         </div>
         <Progress value={progressPercentage} className="h-2" />
@@ -314,12 +329,10 @@ const MultiStepApplicationForm = () => {
             <Alert className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
               <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
               <AlertTitle className="text-amber-800 dark:text-amber-200">
-                Email Verification Required
+                {t("applications.form.emailVerification.title")}
               </AlertTitle>
               <AlertDescription className="text-amber-700 dark:text-amber-300">
-                Please verify your email address before submitting an
-                application. Check your inbox for the verification link, or
-                visit your dashboard to resend it.
+                {t("applications.form.emailVerification.description")}
               </AlertDescription>
             </Alert>
           )}
@@ -403,7 +416,7 @@ const MultiStepApplicationForm = () => {
                   className="flex items-center gap-2"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Previous
+                  {t("applications.form.nav.previous")}
                 </Button>
 
                 {currentStep === totalSteps ? (
@@ -417,15 +430,15 @@ const MultiStepApplicationForm = () => {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Submitting...
+                        {t("applications.form.nav.submitting")}
                       </>
                     ) : !isEmailVerified ? (
                       <>
                         <AlertTriangle className="h-4 w-4" />
-                        Verify Email to Submit
+                        {t("applications.form.nav.verifyEmailToSubmit")}
                       </>
                     ) : (
-                      "Submit Application"
+                      t("applications.form.nav.submit")
                     )}
                   </Button>
                 ) : (
@@ -436,7 +449,7 @@ const MultiStepApplicationForm = () => {
                     className="flex items-center gap-2"
                     variant="hero"
                   >
-                    Next
+                    {t("applications.form.nav.next")}
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 )}

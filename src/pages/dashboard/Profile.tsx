@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useKycVerification } from "@/hooks/useKycVerification";
@@ -18,27 +19,30 @@ import CustomFormField, { FormFieldType } from "@/components/form/CustomFormFiel
 import { KycVerificationSection } from "@/components/profile/KycVerificationSection";
 import { MembershipProfileSection } from "@/components/profile/MembershipProfileSection";
 
-const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  country: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  businessName: z.string().optional(),
-  bio: z.string().optional(),
-  avatarUrl: z.string().optional(),
-});
+const profileSchema = (t: (key: string) => string) =>
+  z.object({
+    firstName: z.string().min(1, t("dashboard:profilePage.validation.firstNameRequired")),
+    lastName: z.string().min(1, t("dashboard:profilePage.validation.lastNameRequired")),
+    country: z.string().optional(),
+    phoneNumber: z.string().optional(),
+    businessName: z.string().optional(),
+    bio: z.string().optional(),
+    avatarUrl: z.string().optional(),
+  });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type ProfileFormValues = z.infer<ReturnType<typeof profileSchema>>;
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation(["dashboard", "common"]);
+  const schema = useMemo(() => profileSchema(t), [t]);
   const { data: profile, isLoading, error, refetch } = useProfile();
   const updateProfile = useUpdateProfile();
   const { data: kyc } = useKycVerification();
 
   const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -85,13 +89,13 @@ const Profile = () => {
       });
 
       toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        title: t("dashboard:profilePage.toasts.updated"),
+        description: t("dashboard:profilePage.toasts.updatedDesc"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update profile. Please try again.",
+        title: t("dashboard:profilePage.toasts.error"),
+        description: error.message || t("dashboard:profilePage.toasts.updateFailed"),
         variant: "destructive",
       });
     }
@@ -105,13 +109,13 @@ const Profile = () => {
       try {
         await updateProfile.mutateAsync({ avatarUrl: undefined });
         toast({
-          title: "Profile picture removed",
-          description: "Your profile picture has been removed.",
+          title: t("dashboard:profilePage.toasts.avatarRemoved"),
+          description: t("dashboard:profilePage.toasts.avatarRemovedDesc"),
         });
       } catch (error: any) {
         toast({
-          title: "Warning",
-          description: "Image deleted but failed to update profile. Please save your changes.",
+          title: t("dashboard:profilePage.toasts.warning"),
+          description: t("dashboard:profilePage.toasts.avatarDeleteWarning"),
           variant: "destructive",
         });
       }
@@ -135,9 +139,9 @@ const Profile = () => {
         <CardContent className="pt-6">
           <div className="text-center py-8">
             <p className="text-destructive mb-4">
-              {error instanceof Error ? error.message : "Failed to load profile"}
+              {error instanceof Error ? error.message : t("dashboard:profilePage.errors.loadFailed")}
             </p>
-            <Button onClick={() => refetch()}>Retry</Button>
+            <Button onClick={() => refetch()}>{t("dashboard:profilePage.errors.retry")}</Button>
           </div>
         </CardContent>
       </Card>
@@ -150,7 +154,7 @@ const Profile = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No profile found. Please create one.</p>
+            <p className="text-muted-foreground mb-4">{t("dashboard:profilePage.errors.notFound")}</p>
           </div>
         </CardContent>
       </Card>
@@ -162,27 +166,27 @@ const Profile = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("dashboard:profilePage.title")}</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Manage your profile information and preferences
+          {t("dashboard:profilePage.subtitle")}
         </p>
       </div>
 
       {/* Profile Overview Card */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Profile Overview</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("dashboard:profilePage.overview")}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div>
             <h2 className="text-xl sm:text-2xl font-semibold">
-              {watchedValues.firstName || "User"} {watchedValues.lastName || ""}
+              {watchedValues.firstName || t("dashboard:profilePage.defaultUser")} {watchedValues.lastName || ""}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base">
-              {watchedValues.businessName || "No organization listed"}
+              {watchedValues.businessName || t("dashboard:profilePage.noOrganization")}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {watchedValues.country || "No location"}
+              {watchedValues.country || t("dashboard:profilePage.noLocation")}
             </p>
           </div>
         </CardContent>
@@ -191,7 +195,7 @@ const Profile = () => {
       {/* Personal Information */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Personal Information</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("dashboard:profilePage.personalInfo")}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <Form {...form}>
@@ -199,7 +203,7 @@ const Profile = () => {
 
               {/* Profile Picture — not a CustomFormField, needs special upload handling */}
               <div className="space-y-2">
-                <Label>Profile Picture</Label>
+                <Label>{t("dashboard:profilePage.profilePicture")}</Label>
                 <ImageUpload
                   value={
                     (watchedValues.avatarUrl && watchedValues.avatarUrl.trim()) ||
@@ -211,11 +215,11 @@ const Profile = () => {
                   onDelete={handleImageDelete}
                   isUploading={isUploading}
                   uploadProgress={uploadProgress}
-                  placeholder="Upload Profile Picture"
+                  placeholder={t("dashboard:profilePage.uploadProfilePicture")}
                   variant="avatar"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Upload a profile picture to personalize your account (JPG, PNG, WebP, GIF up to 5MB)
+                  {t("dashboard:profilePage.avatarHint")}
                 </p>
               </div>
 
@@ -223,24 +227,24 @@ const Profile = () => {
                 <CustomFormField
                   control={form.control}
                   name="firstName"
-                  label="First Name"
+                  label={t("dashboard:profilePage.fields.firstName")}
                   fieldType={FormFieldType.INPUT}
-                  placeholder="Enter your first name"
+                  placeholder={t("dashboard:profilePage.fields.firstNamePlaceholder")}
                   required
                 />
                 <CustomFormField
                   control={form.control}
                   name="lastName"
-                  label="Last Name"
+                  label={t("dashboard:profilePage.fields.lastName")}
                   fieldType={FormFieldType.INPUT}
-                  placeholder="Enter your last name"
+                  placeholder={t("dashboard:profilePage.fields.lastNamePlaceholder")}
                   required
                 />
               </div>
 
               {/* Email — read-only, not part of the form schema */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("dashboard:profilePage.fields.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -250,43 +254,43 @@ const Profile = () => {
                     className="pl-10 bg-muted h-11 sm:h-10"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                <p className="text-xs text-muted-foreground">{t("dashboard:profilePage.emailCannotChange")}</p>
               </div>
 
               <CustomFormField
                 control={form.control}
                 name="country"
-                label="Location/Country"
+                label={t("dashboard:profilePage.fields.country")}
                 fieldType={FormFieldType.INPUT}
-                placeholder="City, Country"
+                placeholder={t("dashboard:profilePage.fields.countryPlaceholder")}
                 icon={MapPin}
               />
 
               <CustomFormField
                 control={form.control}
                 name="phoneNumber"
-                label="Phone Number"
+                label={t("dashboard:profilePage.fields.phone")}
                 fieldType={FormFieldType.PHONE_INTERNATIONAL}
-                placeholder="Enter phone number"
+                placeholder={t("dashboard:profilePage.fields.phonePlaceholder")}
               />
 
               <CustomFormField
                 control={form.control}
                 name="businessName"
-                label="Organization, employer, or school"
+                label={t("dashboard:profilePage.fields.businessName")}
                 fieldType={FormFieldType.INPUT}
-                placeholder="Company, university, NGO, or employer (optional)"
+                placeholder={t("dashboard:profilePage.fields.businessNamePlaceholder")}
                 icon={Building}
               />
 
               <CustomFormField
                 control={form.control}
                 name="bio"
-                label="Bio"
+                label={t("dashboard:profilePage.fields.bio")}
                 fieldType={FormFieldType.TEXTAREA}
-                placeholder="Tell us about yourself — your work, studies, skills, or what you're looking for..."
+                placeholder={t("dashboard:profilePage.fields.bioPlaceholder")}
                 rows={4}
-                description="Optional. Helps reviewers and programs understand your background (founder, professional, or intern)."
+                description={t("dashboard:profilePage.fields.bioDescription")}
               />
 
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4">
@@ -306,16 +310,16 @@ const Profile = () => {
                     });
                   }}
                 >
-                  Cancel
+                  {t("dashboard:profilePage.cancel")}
                 </Button>
                 <Button type="submit" disabled={updateProfile.isPending} className="min-h-[44px]">
                   {updateProfile.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      {t("dashboard:profilePage.saving")}
                     </>
                   ) : (
-                    "Save Changes"
+                    t("dashboard:profilePage.saveChanges")
                   )}
                 </Button>
               </div>
@@ -332,20 +336,11 @@ const Profile = () => {
       {/* Profile Completion */}
       {(() => {
         const completionItems = [
+          { label: t("dashboard:profilePage.items.basicInfo"), done: !!(profile.firstName && profile.lastName) },
+          { label: t("dashboard:profilePage.items.contactDetails"), done: !!(profile.phoneNumber && profile.country) },
+          { label: t("dashboard:profilePage.items.bio"), done: !!(profile.bio && profile.bio.trim().length > 0) },
           {
-            label: "Basic Information",
-            done: !!(profile.firstName && profile.lastName),
-          },
-          {
-            label: "Contact Details",
-            done: !!(profile.phoneNumber && profile.country),
-          },
-          {
-            label: "Bio & Description",
-            done: !!(profile.bio && profile.bio.trim().length > 0),
-          },
-          {
-            label: "Identity Verification",
+            label: t("dashboard:profilePage.items.identity"),
             done: kyc?.status === "verified",
             pending: kyc?.status === "pending",
           },
@@ -356,13 +351,13 @@ const Profile = () => {
         return (
           <Card>
             <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-base sm:text-lg">Profile Completion</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t("dashboard:profilePage.completion")}</CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Overall Progress</span>
-                  <span className="font-medium">{percentage}% Complete</span>
+                  <span className="text-muted-foreground">{t("dashboard:profilePage.overallProgress")}</span>
+                  <span className="font-medium">{t("dashboard:profilePage.percentComplete", { percentage })}</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${percentage}%` }} />
@@ -373,15 +368,15 @@ const Profile = () => {
                       <span>{item.label}</span>
                       {item.done ? (
                         <span className="flex items-center gap-1 text-emerald-600">
-                          <CheckCircle2 className="h-4 w-4" /> Complete
+                          <CheckCircle2 className="h-4 w-4" /> {t("dashboard:profilePage.status.complete")}
                         </span>
                       ) : item.pending ? (
                         <span className="flex items-center gap-1 text-amber-600">
-                          <X className="h-4 w-4" /> Pending Review
+                          <X className="h-4 w-4" /> {t("dashboard:profilePage.status.pendingReview")}
                         </span>
                       ) : (
                         <span className="flex items-center gap-1 text-muted-foreground">
-                          <X className="h-4 w-4" /> Incomplete
+                          <X className="h-4 w-4" /> {t("dashboard:profilePage.status.incomplete")}
                         </span>
                       )}
                     </div>

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { useReviewerApplications } from "@/hooks/useReviewerApplications";
@@ -7,12 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatDate, REVIEW_DEADLINE_TOOLTIP } from "@/lib/dateUtils";
+import { formatDate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ReviewerDashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["dashboard", "common"]);
   const { data: applications = [], isLoading, error } = useReviewerApplications();
+  const deadlineTooltip = t("dashboard:reviewer.dashboardPage.deadlineTooltip");
 
   // Calculate stats from real data
   const stats = useMemo(() => {
@@ -81,45 +84,49 @@ const ReviewerDashboard = () => {
       .slice(0, 5);
   }, [applications]);
 
-  const statCards = [
-    {
-      title: "Pending Review",
-      value: stats.pending,
-      icon: Clock,
-      description: "Applications awaiting review",
-      className: "bg-warning/10 text-warning border-warning/20",
-    },
-    {
-      title: "Approved",
-      value: stats.approved,
-      icon: CheckCircle,
-      description: "Total approved applications",
-      className: "bg-success/10 text-success border-success/20",
-    },
-    {
-      title: "Rejected",
-      value: stats.rejected,
-      icon: XCircle,
-      description: "Total rejected applications",
-      className: "bg-destructive/10 text-destructive border-destructive/20",
-    },
-    {
-      title: "Total",
-      value: stats.total,
-      icon: FileText,
-      description: "All applications",
-      className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-    },
-  ];
+  const statCards = useMemo(
+    () => [
+      {
+        title: t("dashboard:reviewer.dashboardPage.stats.pendingReview"),
+        value: stats.pending,
+        icon: Clock,
+        description: t("dashboard:reviewer.dashboardPage.stats.pendingDesc"),
+        className: "bg-warning/10 text-warning border-warning/20",
+      },
+      {
+        title: t("dashboard:reviewer.dashboardPage.stats.approved"),
+        value: stats.approved,
+        icon: CheckCircle,
+        description: t("dashboard:reviewer.dashboardPage.stats.approvedDesc"),
+        className: "bg-success/10 text-success border-success/20",
+      },
+      {
+        title: t("dashboard:reviewer.dashboardPage.stats.rejected"),
+        value: stats.rejected,
+        icon: XCircle,
+        description: t("dashboard:reviewer.dashboardPage.stats.rejectedDesc"),
+        className: "bg-destructive/10 text-destructive border-destructive/20",
+      },
+      {
+        title: t("dashboard:reviewer.dashboardPage.stats.total"),
+        value: stats.total,
+        icon: FileText,
+        description: t("dashboard:reviewer.dashboardPage.stats.totalDesc"),
+        className: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      },
+    ],
+    [stats, t]
+  );
+
+  const pageTitle = t("dashboard:reviewer.pages.dashboard");
+  const pageSubtitle = t("dashboard:reviewer.dashboardPage.subtitle");
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Reviewer Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Overview of applications and review statistics
-          </p>
+          <h1 className="text-3xl font-bold">{pageTitle}</h1>
+          <p className="text-muted-foreground mt-2">{pageSubtitle}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
@@ -171,15 +178,15 @@ const ReviewerDashboard = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Reviewer Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Overview of applications and review statistics
-          </p>
+          <h1 className="text-3xl font-bold">{pageTitle}</h1>
+          <p className="text-muted-foreground mt-2">{pageSubtitle}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-destructive">
-              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
+              {t("dashboard:reviewer.dashboardPage.loadError", {
+                message: error instanceof Error ? error.message : t("dashboard:reviewer.applicationsPage.unknownError"),
+              })}
             </p>
           </CardContent>
         </Card>
@@ -190,10 +197,8 @@ const ReviewerDashboard = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Reviewer Dashboard</h1>
-        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Overview of applications and review statistics
-        </p>
+        <h1 className="text-2xl sm:text-3xl font-bold">{pageTitle}</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{pageSubtitle}</p>
       </div>
 
       {/* Statistics Cards */}
@@ -219,21 +224,21 @@ const ReviewerDashboard = () => {
       <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Review Performance</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Your review statistics</CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t("dashboard:reviewer.dashboardPage.performance.title")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t("dashboard:reviewer.dashboardPage.performance.description")}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between py-1">
-                <span className="text-xs sm:text-sm text-muted-foreground">Total Applications</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t("dashboard:reviewer.dashboardPage.performance.totalApplications")}</span>
                 <span className="text-base sm:text-lg font-semibold">{stats.total}</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-xs sm:text-sm text-muted-foreground">Approval Rate</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t("dashboard:reviewer.dashboardPage.performance.approvalRate")}</span>
                 <span className="text-base sm:text-lg font-semibold">{stats.approvalRate}%</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-xs sm:text-sm text-muted-foreground">Pending Reviews</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t("dashboard:reviewer.dashboardPage.performance.pendingReviews")}</span>
                 <span className="text-base sm:text-lg font-semibold">{stats.pending}</span>
               </div>
             </div>
@@ -242,13 +247,13 @@ const ReviewerDashboard = () => {
 
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Recent Applications</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Latest submissions requiring review</CardDescription>
+            <CardTitle className="text-base sm:text-lg">{t("dashboard:reviewer.dashboardPage.recent.title")}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{t("dashboard:reviewer.dashboardPage.recent.description")}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             {recentApplications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p className="text-sm sm:text-base">No pending applications at this time.</p>
+                <p className="text-sm sm:text-base">{t("dashboard:reviewer.dashboardPage.recent.empty")}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -267,30 +272,36 @@ const ReviewerDashboard = () => {
                           {isOverdue && (
                             <Badge variant="destructive" className="text-xs">
                               <AlertCircle className="h-3 w-3 mr-1" />
-                              Overdue
+                              {t("dashboard:reviewer.dashboardPage.recent.overdue")}
                             </Badge>
                           )}
                           {isApproaching && !isOverdue && (
                             <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
                               <Clock className="h-3 w-3 mr-1" />
-                              {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
+                              {app.daysUntilDeadline === 0
+                                ? t("dashboard:reviewer.dashboardPage.recent.dueToday")
+                                : t("dashboard:reviewer.dashboardPage.recent.daysLeft", { count: app.daysUntilDeadline })}
                             </Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground truncate">{app.projectTitle}</p>
                         <div className="flex items-center gap-3 mt-1">
                           <p className="text-xs text-muted-foreground">
-                            Submitted: {new Date(app.submittedAt).toLocaleDateString()}
+                            {t("dashboard:reviewer.dashboardPage.recent.submitted", {
+                              date: new Date(app.submittedAt).toLocaleDateString(),
+                            })}
                           </p>
                           {app.reviewDeadline && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <p className={`text-xs cursor-help ${isOverdue ? 'text-destructive font-semibold' : isApproaching ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
-                                  Deadline: {formatDate(new Date(app.reviewDeadline))}
+                                  {t("dashboard:reviewer.dashboardPage.recent.deadline", {
+                                    date: formatDate(new Date(app.reviewDeadline)),
+                                  })}
                                 </p>
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                <p>{REVIEW_DEADLINE_TOOLTIP}</p>
+                                <p>{deadlineTooltip}</p>
                               </TooltipContent>
                             </Tooltip>
                           )}
@@ -303,7 +314,7 @@ const ReviewerDashboard = () => {
                         className="min-h-[44px] min-w-[44px] w-full sm:w-auto"
                       >
                         <Eye className="h-4 w-4 sm:mr-0" />
-                        <span className="sm:hidden ml-2">View</span>
+                        <span className="sm:hidden ml-2">{t("dashboard:reviewer.dashboardPage.recent.view")}</span>
                       </Button>
                     </div>
                   );

@@ -1,17 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import headerLogoFallback from "@/assets/logo.webp";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Check, ArrowRight, Loader2 } from "lucide-react";
-import { isValidPhoneNumber } from "libphonenumber-js";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
@@ -27,11 +25,10 @@ import {
   useSyncMembershipAfterOnboarding,
 } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
+import { createOnboardingProfileSchema, type OnboardingProfileFormValues } from "@/lib/schemas/onboardingForm.schema";
 import { getCountryCode } from "@/components/application/form/countries";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
-
-const MEMBER_PRICE_LABEL = "$2 / month";
 const headerLogoPublic = "/images/logo.webp";
 
 const AFRICAN_COUNTRIES = [
@@ -66,41 +63,22 @@ function useSectors() {
   return sectors;
 }
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
-
-const profileSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  organisationName: z.string().optional(),
-  sector: z.string().min(1, "Sector is required"),
-  country: z.string().min(1, "Country is required"),
-  cityRegion: z.string().min(1, "City / region is required"),
-  phoneNumber: z.string().min(1, "Phone number is required").refine(
-    (v) => { try { return isValidPhoneNumber(v); } catch { return false; } },
-    { message: "Enter a valid international number (e.g. +234 800 000 0000)" }
-  ),
-  bio: z.string().optional(),
-  avatarUrl: z.string().optional(),
-});
-
-type ProfileFormValues = z.infer<typeof profileSchema>;
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Step = "profile" | "payment" | "done";
 
 // ─── Progress stepper ────────────────────────────────────────────────────────
 
-const STEP_LABELS: { id: Step; label: string }[] = [
-  { id: "profile", label: "Profile" },
-  { id: "payment", label: "Payment" },
-];
-
 const Stepper = ({ step }: { step: Step }) => {
-  const stepIndex = STEP_LABELS.findIndex((s) => s.id === step);
+  const { t } = useTranslation("common");
+  const stepLabels: { id: Step; label: string }[] = [
+    { id: "profile", label: t("onboarding.steps.profile") },
+    { id: "payment", label: t("onboarding.steps.payment") },
+  ];
+  const stepIndex = stepLabels.findIndex((s) => s.id === step);
   return (
     <div className="flex items-center justify-center mb-10 gap-0">
-      {STEP_LABELS.map((s, i) => (
+      {stepLabels.map((s, i) => (
         <div key={s.id} className="flex items-center">
           <div className="flex flex-col items-center">
             <div
@@ -118,7 +96,7 @@ const Stepper = ({ step }: { step: Step }) => {
               {s.label}
             </span>
           </div>
-          {i < STEP_LABELS.length - 1 && (
+          {i < stepLabels.length - 1 && (
             <div className={`h-0.5 w-16 mx-1 mb-4 transition-colors ${i < stepIndex ? "bg-primary" : "bg-border"}`} />
           )}
         </div>
@@ -135,11 +113,12 @@ const StepProfile = ({
   sectors,
   userId,
 }: {
-  form: ReturnType<typeof useForm<ProfileFormValues>>;
-  onNext: (data: ProfileFormValues) => Promise<void>;
+  form: ReturnType<typeof useForm<OnboardingProfileFormValues>>;
+  onNext: (data: OnboardingProfileFormValues) => Promise<void>;
   sectors: string[];
   userId: string;
 }) => {
+  const { t } = useTranslation("common");
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
     bucket: "user-avatars",
     folder: userId,
@@ -159,14 +138,15 @@ const StepProfile = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onNext)} className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Complete your profile</h2>
-          <p className="text-muted-foreground mt-1">
-            This builds your Maali profile — visible to partners and opportunity providers across the network.
-          </p>
+          <h2 className="text-2xl font-bold text-foreground">{t("onboarding.profile.title")}</h2>
+          <p className="text-muted-foreground mt-1">{t("onboarding.profile.description")}</p>
         </div>
 
         <div className="space-y-2">
-          <Label>Profile Picture <span className="text-muted-foreground font-normal">(optional)</span></Label>
+          <Label>
+            {t("onboarding.profile.avatarLabel")}{" "}
+            <span className="text-muted-foreground font-normal">{t("onboarding.profile.optional")}</span>
+          </Label>
           <ImageUpload
             value={form.watch("avatarUrl") || undefined}
             onChange={(url) => form.setValue("avatarUrl", url || "")}
@@ -174,10 +154,10 @@ const StepProfile = ({
             onDelete={handleImageDelete}
             isUploading={isUploading}
             uploadProgress={uploadProgress}
-            placeholder="Upload Profile Picture"
+            placeholder={t("onboarding.profile.avatarPlaceholder")}
             variant="avatar"
           />
-          <p className="text-xs text-muted-foreground">JPG, PNG, WebP or GIF up to 5MB</p>
+          <p className="text-xs text-muted-foreground">{t("onboarding.profile.avatarHint")}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -185,16 +165,16 @@ const StepProfile = ({
             control={form.control}
             name="firstName"
             fieldType={FormFieldType.INPUT}
-            label="First Name"
-            placeholder="Amara"
+            label={t("onboarding.profile.firstName")}
+            placeholder={t("onboarding.profile.firstNamePlaceholder")}
             required
           />
           <CustomFormField
             control={form.control}
             name="lastName"
             fieldType={FormFieldType.INPUT}
-            label="Last Name"
-            placeholder="Diallo"
+            label={t("onboarding.profile.lastName")}
+            placeholder={t("onboarding.profile.lastNamePlaceholder")}
             required
           />
         </div>
@@ -203,8 +183,8 @@ const StepProfile = ({
           control={form.control}
           name="organisationName"
           fieldType={FormFieldType.INPUT}
-          label="Company / Organisation / University (optional)"
-          placeholder="e.g. Savanna Ventures, University of Accra, UNDP"
+          label={t("onboarding.profile.organisation")}
+          placeholder={t("onboarding.profile.organisationPlaceholder")}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -212,8 +192,8 @@ const StepProfile = ({
             control={form.control}
             name="sector"
             fieldType={FormFieldType.SELECT}
-            label="Sector / Field"
-            placeholder={sectors.length ? "Select your field" : "Loading…"}
+            label={t("onboarding.profile.sector")}
+            placeholder={sectors.length ? t("onboarding.profile.sectorPlaceholder") : t("onboarding.profile.sectorLoading")}
             required
             options={sectors.map((s) => ({ value: s, label: s }))}
           />
@@ -221,8 +201,8 @@ const StepProfile = ({
             control={form.control}
             name="country"
             fieldType={FormFieldType.SELECT}
-            label="Country"
-            placeholder="Select country"
+            label={t("onboarding.profile.country")}
+            placeholder={t("onboarding.profile.countryPlaceholder")}
             required
             options={AFRICAN_COUNTRIES.map((c) => ({ value: c, label: c }))}
           />
@@ -232,8 +212,8 @@ const StepProfile = ({
           control={form.control}
           name="cityRegion"
           fieldType={FormFieldType.INPUT}
-          label="City / Region"
-          placeholder="e.g. Lagos, Nairobi, Greater Accra"
+          label={t("onboarding.profile.cityRegion")}
+          placeholder={t("onboarding.profile.cityRegionPlaceholder")}
           required
         />
 
@@ -242,8 +222,8 @@ const StepProfile = ({
           control={form.control}
           name="phoneNumber"
           fieldType={FormFieldType.PHONE_INTERNATIONAL}
-          label="Phone Number"
-          placeholder="+234 800 000 0000"
+          label={t("onboarding.profile.phone")}
+          placeholder={t("onboarding.profile.phonePlaceholder")}
           country={phoneCountryCode}
           defaultCountry={phoneCountryCode}
           required
@@ -253,8 +233,8 @@ const StepProfile = ({
           control={form.control}
           name="bio"
           fieldType={FormFieldType.TEXTAREA}
-          label="Short Bio (optional)"
-          placeholder="e.g. Software engineer looking for fellowships, entrepreneur in agri-tech, recent grad seeking internships in finance…"
+          label={t("onboarding.profile.bio")}
+          placeholder={t("onboarding.profile.bioPlaceholder")}
           rows={3}
         />
 
@@ -265,8 +245,8 @@ const StepProfile = ({
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting
-            ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>
-            : <>Continue <ArrowRight className="ml-2 h-4 w-4" /></>}
+            ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("onboarding.profile.saving")}</>
+            : <>{t("onboarding.profile.continue")} <ArrowRight className="ml-2 h-4 w-4" /></>}
         </Button>
       </form>
     </Form>
@@ -296,11 +276,13 @@ const PaymentForm = ({
   receiptDetails: PaymentReceiptDetails;
   userId: string;
 }) => {
+  const { t } = useTranslation("common");
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billingEmail, setBillingEmail] = useState(receiptDetails.billingEmail);
+  const memberPrice = t("onboarding.memberPriceLabel");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -310,7 +292,7 @@ const PaymentForm = ({
 
     const { error: submitError } = await elements.submit();
     if (submitError) {
-      setError(submitError.message ?? "Payment failed");
+      setError(submitError.message ?? t("onboarding.payment.failed"));
       setProcessing(false);
       return;
     }
@@ -322,7 +304,7 @@ const PaymentForm = ({
     });
 
     if (confirmError) {
-      setError(confirmError.message ?? "Payment failed");
+      setError(confirmError.message ?? t("onboarding.payment.failed"));
       setProcessing(false);
     } else if (paymentIntent?.status === "succeeded") {
       await seedDefaultBillingAddress({
@@ -340,50 +322,44 @@ const PaymentForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Payment</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("onboarding.payment.title")}</h2>
         <p className="text-muted-foreground mt-1">
-          Full Member — <span className="font-semibold text-foreground">{MEMBER_PRICE_LABEL}</span>. Cancel anytime.
+          {t("onboarding.payment.description", { price: memberPrice })}
         </p>
       </div>
       <div className="rounded-lg border border-border p-4 bg-card space-y-4">
         <div className="space-y-2">
           <Label htmlFor="billingEmail" className="text-sm font-medium">
-            Billing email for receipts
+            {t("onboarding.payment.billingEmail")}
           </Label>
           <Input
             id="billingEmail"
             type="email"
             value={billingEmail}
             onChange={(e) => setBillingEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder={t("onboarding.payment.billingEmailPlaceholder")}
             className="h-11"
           />
-          <p className="text-xs text-muted-foreground">
-            Street address and tax ID can be added later under Dashboard → Billing.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("onboarding.payment.billingHint")}</p>
         </div>
         <PaymentElement />
       </div>
-      <p className="text-xs text-muted-foreground">
-        Your card will appear under Dashboard → Billing after payment.
-      </p>
+      <p className="text-xs text-muted-foreground">{t("onboarding.payment.cardHint")}</p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>Back</Button>
+        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>{t("onboarding.payment.back")}</Button>
         <Button type="submit" variant="hero" className="flex-1" disabled={!stripe || processing}>
-          {processing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing…</> : "Pay $2 & Join"}
+          {processing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("onboarding.payment.processing")}</> : t("onboarding.payment.payAndJoin")}
         </Button>
       </div>
-      <p className="text-xs text-center text-muted-foreground">
-        Payments are processed securely by Stripe. MAALI never stores your card details.
-      </p>
+      <p className="text-xs text-center text-muted-foreground">{t("onboarding.payment.stripeNote")}</p>
       <div className="text-center">
         <button
           type="button"
           onClick={onSkip}
           className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
         >
-          Continue with free Community account
+          {t("onboarding.payment.skipToCommunity")}
         </button>
       </div>
     </form>
@@ -403,6 +379,7 @@ const StepPayment = ({
   receiptDetails: PaymentReceiptDetails;
   userId: string;
 }) => {
+  const { t } = useTranslation("common");
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -411,8 +388,8 @@ const StepPayment = ({
       .then(({ data, error }) => {
         if (error || !data?.clientSecret) {
           const msg =
-            data?.error || parseEdgeFunctionError(error) || error?.message || "Unknown error";
-          setFetchError(`Could not initialise payment: ${msg}`);
+            data?.error || parseEdgeFunctionError(error) || error?.message || t("error");
+          setFetchError(t("onboarding.payment.initFailed", { message: msg }));
         } else {
           setClientSecret(data.clientSecret);
         }
@@ -423,13 +400,13 @@ const StepPayment = ({
     <div className="space-y-4">
       <p className="text-destructive text-sm">{fetchError}</p>
       <div className="flex gap-3">
-        <Button variant="outline" onClick={onBack}>Go back</Button>
+        <Button variant="outline" onClick={onBack}>{t("onboarding.payment.goBack")}</Button>
         <button
           type="button"
           onClick={onSkip}
           className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
         >
-          Continue with free Community account
+          {t("onboarding.payment.skipToCommunity")}
         </button>
       </div>
     </div>
@@ -457,6 +434,7 @@ const StepPayment = ({
 // ─── Main Onboarding page ─────────────────────────────────────────────────────
 
 const Onboarding = () => {
+  const { t } = useTranslation("common");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -470,7 +448,9 @@ const Onboarding = () => {
   const [activating, setActivating] = useState(false);
 
   // Single form instance — survives step transitions (back from payment keeps values)
-  const form = useForm<ProfileFormValues>({
+  const profileSchema = useMemo(() => createOnboardingProfileSchema(t), [t]);
+
+  const form = useForm<OnboardingProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: user?.user_metadata?.first_name ?? (user?.user_metadata?.full_name as string ?? "").split(" ")[0] ?? "",
@@ -495,7 +475,7 @@ const Onboarding = () => {
     if (!current.lastName) form.setValue("lastName", (meta.last_name as string) || fullName.split(" ").slice(1).join(" ") || "");
   }, [user?.id]);
 
-  const saveProfileAndContinue = async (data: ProfileFormValues) => {
+  const saveProfileAndContinue = async (data: OnboardingProfileFormValues) => {
     if (!user) return;
     const { error } = await supabase.from("profiles").upsert(
       {
@@ -513,7 +493,7 @@ const Onboarding = () => {
       { onConflict: "user_id" }
     );
     if (error) {
-      toast({ title: "Error saving profile", description: error.message, variant: "destructive" });
+      toast({ title: t("onboarding.toasts.profileSaveError.title"), description: error.message, variant: "destructive" });
       return;
     }
     setStep("payment");
@@ -538,7 +518,7 @@ const Onboarding = () => {
       .maybeSingle();
 
     if (fetchError) {
-      toast({ title: "Error", description: fetchError.message, variant: "destructive" });
+      toast({ title: t("onboarding.toasts.error.title"), description: fetchError.message, variant: "destructive" });
       return;
     }
 
@@ -573,7 +553,7 @@ const Onboarding = () => {
         });
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t("onboarding.toasts.error.title"), description: error.message, variant: "destructive" });
       return;
     }
 
@@ -603,9 +583,8 @@ const Onboarding = () => {
     }
     setActivating(false);
     toast({
-      title: "Payment received — activation pending",
-      description:
-        "Your payment went through but we haven't received Stripe's confirmation yet. Refresh in a minute, or contact support if this persists.",
+      title: t("onboarding.toasts.activationPending.title"),
+      description: t("onboarding.toasts.activationPending.description"),
     });
   };
 
@@ -633,10 +612,8 @@ const Onboarding = () => {
         <div className="max-w-md w-full text-center space-y-6">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
           <div>
-            <h2 className="text-2xl font-bold mb-2">Activating your membership…</h2>
-            <p className="text-muted-foreground">
-              Payment received. We're confirming with Stripe — this usually takes just a few seconds.
-            </p>
+            <h2 className="text-2xl font-bold mb-2">{t("onboarding.activating.title")}</h2>
+            <p className="text-muted-foreground">{t("onboarding.activating.description")}</p>
           </div>
         </div>
       </div>
@@ -648,8 +625,8 @@ const Onboarding = () => {
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <Card className="w-full max-w-sm">
           <CardContent className="pt-6 text-center space-y-4">
-            <p className="text-muted-foreground">You need an account first.</p>
-            <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>Create Account</Button>
+            <p className="text-muted-foreground">{t("onboarding.noAccount.message")}</p>
+            <Button variant="hero" className="w-full" onClick={() => navigate("/auth")}>{t("onboarding.noAccount.cta")}</Button>
           </CardContent>
         </Card>
       </div>
@@ -664,13 +641,11 @@ const Onboarding = () => {
             <Check className="h-8 w-8 text-success" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">Welcome to Maali!</h2>
-            <p className="text-muted-foreground">
-              Your membership is active. You can now apply to funding opportunities, jobs, internships, fellowships and more.
-            </p>
+            <h2 className="text-3xl font-bold mb-2">{t("onboarding.done.title")}</h2>
+            <p className="text-muted-foreground">{t("onboarding.done.description")}</p>
           </div>
           <Button variant="hero" className="w-full" onClick={() => navigate("/dashboard", { replace: true })}>
-            Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+            {t("onboarding.done.goToDashboard")} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -683,7 +658,7 @@ const Onboarding = () => {
         <Link to="/">
           <img
             src={headerLogoPublic}
-            alt="Maali Opportunity Hub"
+            alt={t("onboarding.logoAlt")}
             className="h-8 w-auto"
             onError={(e) => {
               e.currentTarget.onerror = null;

@@ -1,0 +1,92 @@
+{
+  "contactPage": {
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "Get in touch with our team. We're here to help you succeed."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "firstNameTooLong": "First name is too long",
+      "lastNameRequired": "Last name is required",
+      "lastNameTooLong": "Last name is too long",
+      "subjectRequired": "Please select a subject",
+      "messageMin": "Message must be at least 10 characters",
+      "messageTooLong": "Message is too long"
+    },
+    "toasts": {
+      "submitFailed": "Failed to submit your message. Please try again.",
+      "submitSuccess": "Your message has been sent successfully! We'll get back to you within 24 hours.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "form": {
+      "title": "Send us a Message",
+      "description": "Fill out the form below and we'll get back to you as soon as possible.",
+      "firstNameLabel": "First Name *",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNameLabel": "Last Name *",
+      "lastNamePlaceholder": "Enter your last name",
+      "emailLabel": "Email *",
+      "emailPlaceholder": "Enter your email address",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "Enter your phone number",
+      "countryLabel": "Country",
+      "countryPlaceholder": "Select your country",
+      "countryOther": "Other",
+      "countryNigeria": "Nigeria",
+      "countryKenya": "Kenya",
+      "countrySouthAfrica": "South Africa",
+      "countryGhana": "Ghana",
+      "countryUganda": "Uganda",
+      "countryTanzania": "Tanzania",
+      "subjectLabel": "Subject *",
+      "subjectPlaceholder": "Select a subject",
+      "subjectFunding": "Funding Inquiry",
+      "subjectApplication": "Application Support",
+      "subjectPartnership": "Partnership",
+      "subjectTechnical": "Technical Support",
+      "subjectGeneral": "General Inquiry",
+      "messageLabel": "Message *",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "sending": "Sending...",
+      "submit": "Send Message"
+    },
+    "success": {
+      "title": "Message Sent Successfully!",
+      "description": "Thank you for contacting us. We've received your message and will respond within 24 hours.",
+      "sendAnother": "Send Another Message"
+    },
+    "contactInfo": {
+      "title": "Contact Information",
+      "emailTitle": "Email Us",
+      "emailDescription": "We'll respond within 24 hours",
+      "callTitle": "Call Us",
+      "callDescription": "Mon-Fri, 9AM-6PM WAT",
+      "officeTitle": "Office",
+      "officeDescription": "Pan-African operations",
+      "responseTimeTitle": "Response Time",
+      "responseTimeValue": "24 hours",
+      "responseTimeDescription": "Average response time"
+    },
+    "officeLocations": {
+      "title": "Office Locations",
+      "description": "We operate across Africa with regional hubs",
+      "offices": [
+        { "city": "Lagos", "country": "Nigeria", "address": "Victoria Island, Lagos State", "role": "West Africa Hub" },
+        { "city": "Nairobi", "country": "Kenya", "address": "Westlands, Nairobi", "role": "East Africa Hub" },
+        { "city": "Cape Town", "country": "South Africa", "address": "Century City, Cape Town", "role": "Southern Africa Hub" }
+      ]
+    },
+    "quickSupport": {
+      "title": "Quick Support",
+      "description": "Need immediate assistance? Check our FAQ section or schedule a call with our team.",
+      "viewFaq": "View FAQ",
+      "scheduleCall": "Schedule Call"
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "description": "Don't wait — explore funding opportunities available right now",
+      "browseOpportunities": "Browse Opportunities",
+      "createAccount": "Create Account"
+    }
+  }
+}

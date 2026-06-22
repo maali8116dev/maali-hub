@@ -1,12 +1,11 @@
 import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Users, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import CustomFormField, {
-  FormFieldType,
-} from "@/components/form/CustomFormField";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { ApplicationFormValues } from "../schemas";
-import { PRIMARY_sectorS } from "../constants";
+import { getPrimarySectorOptions } from "../constants";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step2OrganizationalBackgroundProps {
@@ -28,26 +27,24 @@ export function Step2OrganizationalBackground({
   updateFormData,
   isGrantType = true,
 }: Step2OrganizationalBackgroundProps) {
+  const { t } = useTranslation("dashboard");
+  const sectors = getPrimarySectorOptions(t);
+
   return (
     <div className="space-y-4">
       {formData.applicantType === "Individual" ? (
         <Alert className="mb-4 border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
           <Info className="h-4 w-4 text-blue-600 dark:text-blue-500" />
           <AlertDescription className="text-blue-800 dark:text-blue-200">
-            These organization details are optional and usually not needed for
-            individual applicants. You can proceed to the next step.
+            {t("applications.form.step2.individualSkip")}
           </AlertDescription>
         </Alert>
       ) : (
         <>
           <div>
-            <h3 className="text-lg font-semibold mb-2">
-              Organization Details (Optional)
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">{t("applications.form.step2.title")}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Share additional context about your organization's credibility and
-              capacity. You can also provide this information in supporting
-              documents.
+              {t("applications.form.step2.description")}
             </p>
           </div>
 
@@ -56,8 +53,8 @@ export function Step2OrganizationalBackground({
               control={control}
               name="yearEstablished"
               fieldType={FormFieldType.NUMBER}
-              label="Year Established"
-              placeholder="2020"
+              label={t("applications.form.step2.yearEstablished")}
+              placeholder={t("applications.form.step2.yearEstablishedPlaceholder")}
               min={1900}
               max={new Date().getFullYear()}
             />
@@ -65,8 +62,8 @@ export function Step2OrganizationalBackground({
               control={control}
               name="numberOfTeamMembers"
               fieldType={FormFieldType.NUMBER}
-              label="Number of Team Members"
-              placeholder="10"
+              label={t("applications.form.step2.teamMembers")}
+              placeholder={t("applications.form.step2.teamMembersPlaceholder")}
               icon={Users}
               iconPosition="left"
               min={1}
@@ -77,24 +74,20 @@ export function Step2OrganizationalBackground({
             control={control}
             name="coreMissionPurpose"
             fieldType={FormFieldType.TEXTAREA}
-            label="Core Mission / Purpose"
-            placeholder="Briefly describe your organization's core mission and purpose..."
-            description="Maximum 200 words"
+            label={t("applications.form.step2.coreMission")}
+            placeholder={t("applications.form.step2.coreMissionPlaceholder")}
+            description={t("applications.form.step2.max200Words")}
             rows={4}
             maxLength={1200}
           />
 
-          {/* Primary sectors - Checkbox Group */}
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Primary sector(s)
+              {t("applications.form.step2.primarySectors")}
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {PRIMARY_sectorS.map((sector) => (
-                <div
-                  key={sector.value}
-                  className="flex items-center space-x-2"
-                >
+              {sectors.map((sector) => (
+                <div key={sector.value} className="flex items-center space-x-2">
                   <Checkbox
                     id={`sector-${sector.value}`}
                     checked={watch("primarysectors")?.includes(sector.value) || false}
@@ -121,8 +114,8 @@ export function Step2OrganizationalBackground({
                 control={control}
                 name="primarysectorOther"
                 fieldType={FormFieldType.INPUT}
-                label="Other sector (Please specify)"
-                placeholder="Enter other sector"
+                label={t("applications.form.step2.otherSector")}
+                placeholder={t("applications.form.step2.otherSectorPlaceholder")}
                 className="mt-2"
               />
             )}
@@ -137,9 +130,9 @@ export function Step2OrganizationalBackground({
             control={control}
             name="keyTeamMembersRoles"
             fieldType={FormFieldType.TEXTAREA}
-            label="Key Team Members & Roles"
-            placeholder="List key team members and their roles..."
-            description="Maximum 200 words"
+            label={t("applications.form.step2.keyTeam")}
+            placeholder={t("applications.form.step2.keyTeamPlaceholder")}
+            description={t("applications.form.step2.max200Words")}
             rows={4}
             maxLength={1200}
           />
@@ -152,16 +145,14 @@ export function Step2OrganizationalBackground({
                   checked={watch("previousGrantsFundingReceived") || false}
                   onCheckedChange={(checked) => {
                     setValue("previousGrantsFundingReceived", checked as boolean);
-                    updateFormData({
-                      previousGrantsFundingReceived: checked as boolean,
-                    });
+                    updateFormData({ previousGrantsFundingReceived: checked as boolean });
                   }}
                 />
                 <label
                   htmlFor="previousGrants"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  Previous grants or funding received
+                  {t("applications.form.step2.previousGrants")}
                 </label>
               </div>
               {watch("previousGrantsFundingReceived") && (
@@ -169,9 +160,9 @@ export function Step2OrganizationalBackground({
                   control={control}
                   name="previousGrantsFundingDetails"
                   fieldType={FormFieldType.TEXTAREA}
-                  label="Previous Grants / Funding Details"
-                  placeholder="Provide details about previous grants or funding received..."
-                  description="Maximum 400 words"
+                  label={t("applications.form.step2.previousGrantsDetails")}
+                  placeholder={t("applications.form.step2.previousGrantsPlaceholder")}
+                  description={t("applications.form.step2.max400Words")}
                   rows={4}
                   maxLength={2400}
                 />
@@ -183,12 +174,3 @@ export function Step2OrganizationalBackground({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

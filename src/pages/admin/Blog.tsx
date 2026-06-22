@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit, Trash2, Eye, Calendar, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +18,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const AdminBlog = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cf = "admin.cmsList.blog";
+  const cc = "admin.cmsList.common";
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -100,11 +104,11 @@ const AdminBlog = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "published":
-        return <Badge className="bg-success text-success-foreground">Published</Badge>;
+        return <Badge className="bg-success text-success-foreground">{t(`${cc}.published`)}</Badge>;
       case "draft":
-        return <Badge variant="secondary">Draft</Badge>;
+        return <Badge variant="secondary">{t(`${cc}.draft`)}</Badge>;
       case "archived":
-        return <Badge variant="outline">Archived</Badge>;
+        return <Badge variant="outline">{t(`${cc}.archived`)}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -114,14 +118,12 @@ const AdminBlog = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Blog Posts</h1>
-          <p className="text-muted-foreground mt-2">
-            Create, edit, and manage blog articles
-          </p>
+          <h1 className="text-3xl font-bold">{t(`${cf}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${cf}.subtitle`)}</p>
         </div>
         <Button onClick={() => navigate("/admin/blog/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Create Post
+          {t(`${cf}.create`)}
         </Button>
       </div>
 
@@ -131,7 +133,7 @@ const AdminBlog = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search posts by title, author, or sector..."
+              placeholder={t(`${cf}.searchPlaceholder`)}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -143,7 +145,7 @@ const AdminBlog = () => {
       {/* Blog Posts List */}
       <Card>
         <CardHeader>
-          <CardTitle>All Posts ({filteredPosts.length})</CardTitle>
+          <CardTitle>{t(`${cf}.allPosts`, { count: filteredPosts.length })}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -162,7 +164,7 @@ const AdminBlog = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-semibold">{post.title}</h3>
-                    {post.featured && <Badge variant="default">Featured</Badge>}
+                    {post.featured && <Badge variant="default">{t(`${cc}.featured`)}</Badge>}
                     {getStatusBadge(post.status)}
                     <Badge variant="outline">{post.sector}</Badge>
                   </div>
@@ -179,7 +181,7 @@ const AdminBlog = () => {
                       <span>{new Date(post.date).toLocaleDateString()}</span>
                     </div>
                     <span>{post.readTime}</span>
-                    <span>{post.views} views</span>
+                    <span>{t(`${cf}.views`, { count: post.views })}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -214,15 +216,13 @@ const AdminBlog = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the blog post.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+            <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${cc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+              {t(`${cc}.delete`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

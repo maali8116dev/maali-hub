@@ -24,8 +24,13 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminFAQs, useDeleteFAQ, useToggleFAQPublished, FAQ } from "@/hooks/useFAQs";
+import { useTranslation } from "react-i18next";
 
 const AdminFAQ = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cl = "admin.cmsList";
+  const cf = "admin.cmsList.faq";
+  const cc = "admin.cmsList.common";
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -81,7 +86,7 @@ const AdminFAQ = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-destructive">Error loading FAQs. Please try again.</p>
+        <p className="text-destructive">{t(`${cc}.loadError`)}</p>
       </div>
     );
   }
@@ -90,14 +95,12 @@ const AdminFAQ = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage FAQs</h1>
-          <p className="text-muted-foreground mt-2">
-            Create, edit, and manage frequently asked questions
-          </p>
+          <h1 className="text-3xl font-bold">{t(`${cf}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${cf}.subtitle`)}</p>
         </div>
         <Button onClick={() => navigate("/admin/faq/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Create FAQ
+          {t(`${cf}.create`)}
         </Button>
       </div>
 
@@ -108,7 +111,7 @@ const AdminFAQ = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search FAQs..."
+                placeholder={t(`${cf}.searchPlaceholder`)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -116,10 +119,10 @@ const AdminFAQ = () => {
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by category" />
+                <SelectValue placeholder={t(`${cc}.filterByCategory`)} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t(`${cc}.allCategories`)}</SelectItem>
                 {sectors.map((sector) => (
                   <SelectItem key={sector} value={sector}>
                     {sector}
@@ -178,13 +181,13 @@ const AdminFAQ = () => {
                                 </h3>
                                 {faq.is_published ? (
                                   <Badge className="bg-success text-success-foreground">
-                                    Published
+                                    {t(`${cc}.published`)}
                                   </Badge>
                                 ) : (
-                                  <Badge variant="secondary">Draft</Badge>
+                                  <Badge variant="secondary">{t(`${cc}.draft`)}</Badge>
                                 )}
                                 <Badge variant="outline">
-                                  Order: {faq.display_order}
+                                  {t(`${cc}.order`, { order: faq.display_order })}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground line-clamp-2">
@@ -196,9 +199,7 @@ const AdminFAQ = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleTogglePublished(faq)}
-                                title={
-                                  faq.is_published ? "Unpublish" : "Publish"
-                                }
+                                title={faq.is_published ? t(`${cc}.unpublish`) : t(`${cc}.publish`)}
                               >
                                 {faq.is_published ? (
                                   <EyeOff className="h-4 w-4" />
@@ -236,12 +237,12 @@ const AdminFAQ = () => {
                 <HelpCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground mb-4">
                   {searchQuery || categoryFilter !== "all"
-                    ? "No FAQs found matching your search."
-                    : "No FAQs created yet."}
+                    ? t(`${cf}.noResults`)
+                    : t(`${cf}.empty`)}
                 </p>
                 <Button onClick={() => navigate("/admin/faq/new")}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create First FAQ
+                  {t(`${cf}.createFirst`)}
                 </Button>
               </CardContent>
             </Card>
@@ -253,18 +254,16 @@ const AdminFAQ = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the FAQ.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+            <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${cc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground"
             >
-              Delete
+              {t(`${cc}.delete`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

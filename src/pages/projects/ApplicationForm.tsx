@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import { useMembership } from "@/hooks/useMembership";
 import { MembershipRequiredBanner } from "@/components/MembershipRequiredBanner";
 
 const ApplicationFormContent = () => {
+  const { t } = useTranslation("dashboard");
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -47,27 +49,23 @@ const ApplicationFormContent = () => {
     enabled: !!projectId,
   });
 
-  // Scope the form store by project & ?new=true
   useEffect(() => {
     if (!projectId) return;
 
     const currentProjectId = formData.projectId;
 
-    // Explicitly starting a new application for this project
     if (isNewApplication) {
       reset();
       updateFormData({ projectId });
       return;
     }
 
-    // Switching between different projects
     if (currentProjectId && currentProjectId !== projectId) {
       reset();
       updateFormData({ projectId });
       return;
     }
 
-    // First time for this project
     if (!currentProjectId) {
       updateFormData({ projectId });
     }
@@ -77,36 +75,38 @@ const ApplicationFormContent = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate(id ? `/opportunities/${id}` : "/opportunities")}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {id ? "Back to Project Details" : "Back to Projects"}
+          {id
+            ? t("applications.form.page.backToProject")
+            : t("applications.form.page.backToProjects")}
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Application Form</CardTitle>
+            <CardTitle className="text-2xl">{t("applications.form.page.title")}</CardTitle>
             <CardDescription>
-              {id 
-                ? "Complete the form below to apply for this funding opportunity."
-                : "Complete the form below to start your application."
-              }
+              {id
+                ? t("applications.form.page.subtitleWithProject")
+                : t("applications.form.page.subtitleGeneric")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoadingOpportunity ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
+              <p className="text-sm text-muted-foreground">
+                {t("applications.form.page.loading")}
+              </p>
             ) : opportunityState && !isProjectOpen(opportunityState.status, opportunityState.deadline) ? (
               <div className="space-y-4">
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Applications Closed</AlertTitle>
+                  <AlertTitle>{t("applications.form.page.closedTitle")}</AlertTitle>
                   <AlertDescription>
-                    This opportunity is closed. New applications and edits are disabled.
+                    {t("applications.form.page.closedDescription")}
                   </AlertDescription>
                 </Alert>
                 <Button
@@ -114,14 +114,14 @@ const ApplicationFormContent = () => {
                   variant="outline"
                   onClick={() => navigate(`/opportunities/${opportunityState.id}`)}
                 >
-                  Back to Opportunity
+                  {t("applications.form.page.backToOpportunity")}
                 </Button>
               </div>
             ) : !membershipLoading && !canApplyToOpportunities ? (
               <div className="space-y-4">
                 <MembershipRequiredBanner />
                 <Button type="button" variant="outline" onClick={() => navigate("/join")}>
-                  View membership options
+                  {t("applications.form.page.membershipCta")}
                 </Button>
               </div>
             ) : (
@@ -144,12 +144,3 @@ const ApplicationForm = () => {
 };
 
 export default ApplicationForm;
-
-
-
-
-
-
-
-
-

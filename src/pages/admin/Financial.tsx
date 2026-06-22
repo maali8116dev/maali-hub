@@ -18,6 +18,7 @@ import { useTransactions, useFinancialStats, Transaction } from "@/hooks/useFina
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { getPaymentStatusBadge } from "@/lib/statusBadges";
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 
 const AdminFinancial = () => {
+  const { t } = useTranslation(["dashboard", "common"]);
   // application_fee rows are historical; new revenue is membership (see /join)
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -109,7 +111,7 @@ const AdminFinancial = () => {
     {
       accessorKey: 'amount',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Amount" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.amount")} />
       ),
       cell: ({ row }) => {
         const tx = row.original;
@@ -126,7 +128,7 @@ const AdminFinancial = () => {
     {
       accessorKey: 'userName',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="User" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.user")} />
       ),
       cell: ({ row }) => {
         const tx = row.original;
@@ -141,7 +143,7 @@ const AdminFinancial = () => {
     {
       accessorKey: 'description',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Description" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.description")} />
       ),
       cell: ({ row }) => {
         return <span className="text-sm">{row.original.description}</span>;
@@ -150,7 +152,7 @@ const AdminFinancial = () => {
     {
       accessorKey: 'type',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Type" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.type")} />
       ),
       cell: ({ row }) => {
         return getTypeBadge(row.original.type);
@@ -162,10 +164,10 @@ const AdminFinancial = () => {
     {
       accessorKey: 'status',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Status" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.status")} />
       ),
       cell: ({ row }) => {
-        return getPaymentStatusBadge(row.original.status);
+        return getPaymentStatusBadge(row.original.status, t);
       },
       sortingFn: (rowA, rowB) => {
         return rowA.original.status.localeCompare(rowB.original.status);
@@ -174,7 +176,7 @@ const AdminFinancial = () => {
     {
       accessorKey: 'createdAt',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Date" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.date")} />
       ),
       cell: ({ row }) => {
         return (
@@ -192,34 +194,34 @@ const AdminFinancial = () => {
     {
       accessorKey: 'projectTitle',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Project" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.project")} />
       ),
       cell: ({ row }) => {
         const projectTitle = row.original.projectTitle;
         return projectTitle ? (
           <span className="text-sm">{projectTitle}</span>
         ) : (
-          <span className="text-xs text-muted-foreground">N/A</span>
+          <span className="text-xs text-muted-foreground">{t("admin.financialPage.columns.na")}</span>
         );
       },
     },
     {
       accessorKey: 'invoiceNumber',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Invoice" />
+        <SortableColumnHeader column={column} title={t("admin.financialPage.columns.invoice")} />
       ),
       cell: ({ row }) => {
         const invoiceNumber = row.original.invoiceNumber;
         return invoiceNumber ? (
           <span className="text-sm font-mono">{invoiceNumber}</span>
         ) : (
-          <span className="text-xs text-muted-foreground">N/A</span>
+          <span className="text-xs text-muted-foreground">{t("admin.financialPage.columns.na")}</span>
         );
       },
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t("admin.financialPage.columns.actions"),
       cell: ({ row }) => {
         const tx = row.original;
         return (
@@ -228,7 +230,7 @@ const AdminFinancial = () => {
               <Button variant="outline" size="sm" asChild>
                 <a href={tx.invoiceUrl} target="_blank" rel="noopener noreferrer">
                   <FileText className="h-4 w-4 mr-2" />
-                  Invoice
+                  {t("admin.financialPage.columns.invoiceBtn")}
                 </a>
               </Button>
             )}
@@ -240,7 +242,7 @@ const AdminFinancial = () => {
                   rel="noopener noreferrer"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Receipt
+                  {t("admin.financialPage.columns.receiptBtn")}
                 </a>
               </Button>
             )}
@@ -248,14 +250,16 @@ const AdminFinancial = () => {
         );
       },
     },
-  ], []);
+  ], [t]);
+
+  const fp = "admin.financialPage";
 
   if (transactionsLoading || statsLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Financial Management</h1>
-          <p className="text-muted-foreground mt-2">Overview of all financial transactions and revenue</p>
+          <h1 className="text-3xl font-bold">{t(`${fp}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${fp}.subtitle`)}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
@@ -277,18 +281,20 @@ const AdminFinancial = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Financial Management</h1>
-          <p className="text-muted-foreground mt-2">Overview of all financial transactions and revenue</p>
+          <h1 className="text-3xl font-bold">{t(`${fp}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${fp}.subtitle`)}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-destructive">
-              Error loading financial data:{" "}
-              {transactionsError instanceof Error
-                ? transactionsError.message
-                : statsError instanceof Error
-                ? statsError.message
-                : "Unknown error"}
+              {t(`${fp}.loadError`, {
+                message:
+                  transactionsError instanceof Error
+                    ? transactionsError.message
+                    : statsError instanceof Error
+                    ? statsError.message
+                    : "Unknown error",
+              })}
             </p>
           </CardContent>
         </Card>
@@ -299,9 +305,9 @@ const AdminFinancial = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Financial Management</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t(`${fp}.title`)}</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Overview of all financial transactions and revenue
+          {t(`${fp}.subtitle`)}
         </p>
       </div>
 
@@ -309,7 +315,7 @@ const AdminFinancial = () => {
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t(`${fp}.stats.totalRevenue`)}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -317,14 +323,14 @@ const AdminFinancial = () => {
               {formatCurrency(stats?.totalRevenue || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-              All time revenue
+              {t(`${fp}.stats.allTimeRevenue`)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t(`${fp}.stats.thisMonth`)}</CardTitle>
             <TrendingUp className="h-4 w-4 text-success hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -333,11 +339,11 @@ const AdminFinancial = () => {
             </div>
             <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
               {stats?.revenueGrowth !== undefined && stats.revenueGrowth > 0 ? (
-                <span className="text-success">+{stats.revenueGrowth.toFixed(1)}% vs last month</span>
+                <span className="text-success">{t(`${fp}.stats.revenueGrowthUp`, { percent: stats.revenueGrowth.toFixed(1) })}</span>
               ) : stats?.revenueGrowth !== undefined ? (
-                <span className="text-destructive">{stats.revenueGrowth.toFixed(1)}% vs last month</span>
+                <span className="text-destructive">{t(`${fp}.stats.revenueGrowthDown`, { percent: stats.revenueGrowth.toFixed(1) })}</span>
               ) : (
-                "Monthly revenue"
+                t(`${fp}.stats.monthlyRevenue`)
               )}
             </p>
           </CardContent>
@@ -345,26 +351,26 @@ const AdminFinancial = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t(`${fp}.stats.completed`)}</CardTitle>
             <CheckCircle className="h-4 w-4 text-success hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-xl sm:text-2xl font-bold">{stats?.completedTransactions || 0}</div>
             <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-              Successful transactions
+              {t(`${fp}.stats.successfulTransactions`)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t(`${fp}.stats.pending`)}</CardTitle>
             <Clock className="h-4 w-4 text-warning hidden sm:block" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-xl sm:text-2xl font-bold">{stats?.pendingTransactions || 0}</div>
             <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
-              Awaiting processing
+              {t(`${fp}.stats.awaitingProcessing`)}
             </p>
           </CardContent>
         </Card>
@@ -374,24 +380,24 @@ const AdminFinancial = () => {
       <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Revenue Breakdown</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t(`${fp}.stats.revenueBreakdown`)}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Application Fees</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.applicationFees`)}</span>
                 <span className="text-base sm:text-lg font-semibold">
                   {formatCurrency(stats?.applicationFees || 0)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Subscriptions</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.subscriptions`)}</span>
                 <span className="text-base sm:text-lg font-semibold">
                   {formatCurrency(stats?.subscriptions || 0)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Refunded</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.refunded`)}</span>
                 <span className="text-base sm:text-lg font-semibold text-destructive">
                   -{formatCurrency(stats?.refundedAmount || 0)}
                 </span>
@@ -402,18 +408,18 @@ const AdminFinancial = () => {
 
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Transaction Status</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t(`${fp}.stats.transactionStatus`)}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Total</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.total`)}</span>
                 <span className="text-base sm:text-lg font-semibold">
                   {stats?.totalTransactions || 0}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Failed</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.failed`)}</span>
                 <span className="text-base sm:text-lg font-semibold text-destructive">
                   {stats?.failedTransactions || 0}
                 </span>
@@ -424,18 +430,18 @@ const AdminFinancial = () => {
 
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Monthly Comparison</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t(`${fp}.stats.monthlyComparison`)}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">This Month</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.thisMonth`)}</span>
                 <span className="text-base sm:text-lg font-semibold">
                   {formatCurrency(stats?.thisMonthRevenue || 0)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-muted-foreground">Last Month</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">{t(`${fp}.stats.lastMonth`)}</span>
                 <span className="text-base sm:text-lg font-semibold">
                   {formatCurrency(stats?.lastMonthRevenue || 0)}
                 </span>
@@ -453,40 +459,40 @@ const AdminFinancial = () => {
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] sm:min-h-0">
                   <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t(`${fp}.filters.status`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                  <SelectItem value="refunded">Refunded</SelectItem>
+                  <SelectItem value="all">{t(`${fp}.filters.allStatus`)}</SelectItem>
+                  <SelectItem value="completed">{t(`${fp}.filters.completed`)}</SelectItem>
+                  <SelectItem value="pending">{t(`${fp}.filters.pending`)}</SelectItem>
+                  <SelectItem value="processing">{t(`${fp}.filters.processing`)}</SelectItem>
+                  <SelectItem value="failed">{t(`${fp}.filters.failed`)}</SelectItem>
+                  <SelectItem value="refunded">{t(`${fp}.filters.refunded`)}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-full sm:w-[160px] min-h-[44px] sm:min-h-0">
-                  <SelectValue placeholder="Type" />
+                  <SelectValue placeholder={t(`${fp}.filters.type`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="application_fee">Application Fee</SelectItem>
-                  <SelectItem value="subscription">Subscription</SelectItem>
-                  <SelectItem value="refund">Refund</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="all">{t(`${fp}.filters.allTypes`)}</SelectItem>
+                  <SelectItem value="application_fee">{t(`${fp}.filters.applicationFee`)}</SelectItem>
+                  <SelectItem value="subscription">{t(`${fp}.filters.subscription`)}</SelectItem>
+                  <SelectItem value="refund">{t(`${fp}.filters.refund`)}</SelectItem>
+                  <SelectItem value="other">{t(`${fp}.filters.other`)}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={dateRange} onValueChange={setDateRange}>
                 <SelectTrigger className="w-full sm:w-[140px] min-h-[44px] sm:min-h-0">
                   <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Date" />
+                  <SelectValue placeholder={t(`${fp}.filters.date`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">Last 7 Days</SelectItem>
-                  <SelectItem value="month">Last Month</SelectItem>
-                  <SelectItem value="year">Last Year</SelectItem>
+                  <SelectItem value="all">{t(`${fp}.filters.allTime`)}</SelectItem>
+                  <SelectItem value="today">{t(`${fp}.filters.today`)}</SelectItem>
+                  <SelectItem value="week">{t(`${fp}.filters.last7Days`)}</SelectItem>
+                  <SelectItem value="month">{t(`${fp}.filters.lastMonth`)}</SelectItem>
+                  <SelectItem value="year">{t(`${fp}.filters.lastYear`)}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -498,14 +504,14 @@ const AdminFinancial = () => {
       <Card>
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base sm:text-lg">
-            Transactions ({filteredTransactions.length})
+            {t(`${fp}.transactions`, { count: filteredTransactions.length })}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <DataTable
             columns={transactionColumns}
             data={filteredTransactions}
-            searchPlaceholder="Search by user, description, invoice, or transaction ID..."
+            searchPlaceholder={t(`${fp}.searchPlaceholder`)}
             pageSize={10}
             enableSorting={true}
             enablePagination={true}

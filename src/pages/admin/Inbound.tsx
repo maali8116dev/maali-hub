@@ -34,6 +34,7 @@ import {
 } from "@/hooks/useContactSubmissions";
 import { useNewsletterSubscribers } from "@/hooks/useNewsletterSubscribers";
 import { formatDate } from "@/lib/dateUtils";
+import { useTranslation } from "react-i18next";
 
 const CONTACT_STATUS_STYLES: Record<string, string> = {
   new: "bg-primary/10 text-primary border-primary/20",
@@ -42,17 +43,13 @@ const CONTACT_STATUS_STYLES: Record<string, string> = {
   archived: "bg-muted text-muted-foreground",
 };
 
-const SUBJECT_LABELS: Record<string, string> = {
-  funding: "Funding",
-  application: "Application",
-  partnership: "Partnership",
-  technical: "Technical",
-  general: "General",
-};
+const SUBJECT_KEYS = ["funding", "application", "partnership", "technical", "general"] as const;
 
 const STATUS_OPTIONS: ContactSubmissionStatus[] = ["new", "read", "replied", "archived"];
 
 const AdminInbound = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const ip = "admin.inboundPage";
   const { toast } = useToast();
   const [contactSearch, setContactSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -91,10 +88,10 @@ const AdminInbound = () => {
         c.last_name.toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
         c.message.toLowerCase().includes(q) ||
-        (SUBJECT_LABELS[c.subject] ?? c.subject).toLowerCase().includes(q);
+        (t(`${ip}.subjects.${c.subject as (typeof SUBJECT_KEYS)[number]}`, c.subject)).toLowerCase().includes(q);
       return matchesStatus && matchesSearch;
     });
-  }, [contacts, contactSearch, statusFilter]);
+  }, [contacts, contactSearch, statusFilter, t]);
 
   const filteredSubscribers = useMemo(() => {
     const q = newsletterSearch.toLowerCase();
@@ -108,7 +105,7 @@ const AdminInbound = () => {
       {
         id: "name",
         accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-        header: ({ column }) => <SortableColumnHeader column={column} title="Name" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.name`)} />,
         cell: ({ row }) => (
           <div>
             <p className="font-medium">
@@ -120,23 +117,25 @@ const AdminInbound = () => {
       },
       {
         accessorKey: "subject",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Subject" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.subject`)} />,
         cell: ({ row }) => (
-          <span className="text-sm">{SUBJECT_LABELS[row.original.subject] ?? row.original.subject}</span>
+          <span className="text-sm">
+            {t(`${ip}.subjects.${row.original.subject as (typeof SUBJECT_KEYS)[number]}`, row.original.subject)}
+          </span>
         ),
       },
       {
         accessorKey: "status",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Status" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.status`)} />,
         cell: ({ row }) => (
           <Badge variant="outline" className={CONTACT_STATUS_STYLES[row.original.status] ?? ""}>
-            {row.original.status}
+            {t(`${ip}.statuses.${row.original.status as ContactSubmissionStatus}`, row.original.status)}
           </Badge>
         ),
       },
       {
         accessorKey: "created_at",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Received" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.received`)} />,
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">{formatDate(row.original.created_at)}</span>
         ),
@@ -146,34 +145,34 @@ const AdminInbound = () => {
         header: "",
         cell: ({ row }) => (
           <Button variant="outline" size="sm" onClick={() => openContact(row.original)}>
-            View
+            {t(`${ip}.view`)}
           </Button>
         ),
       },
     ],
-    []
+    [t]
   );
 
   const newsletterColumns: ColumnDef<(typeof subscribers)[0]>[] = useMemo(
     () => [
       {
         accessorKey: "email",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Email" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.email`)} />,
       },
       {
         accessorKey: "source",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Source" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.source`)} />,
         cell: ({ row }) => <span className="capitalize text-sm">{row.original.source}</span>,
       },
       {
         accessorKey: "subscribed_at",
-        header: ({ column }) => <SortableColumnHeader column={column} title="Subscribed" />,
+        header: ({ column }) => <SortableColumnHeader column={column} title={t(`${ip}.columns.subscribed`)} />,
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">{formatDate(row.original.subscribed_at)}</span>
         ),
       },
     ],
-    []
+    [t]
   );
 
   const handleSaveContact = async () => {
@@ -184,12 +183,12 @@ const AdminInbound = () => {
         status: editStatus,
         admin_notes: editNotes.trim() || null,
       });
-      toast({ title: "Saved", description: "Contact submission updated." });
+      toast({ title: t(`${ip}.toast.saved`), description: t(`${ip}.toast.savedDesc`) });
       setSelected(null);
     } catch {
       toast({
-        title: "Update failed",
-        description: "Could not save changes.",
+        title: t(`${ip}.toast.updateFailed`),
+        description: t(`${ip}.toast.updateFailedDesc`),
         variant: "destructive",
       });
     }
@@ -198,21 +197,19 @@ const AdminInbound = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Inbound</h1>
-        <p className="text-muted-foreground mt-2">
-          Contact form messages and newsletter signups
-        </p>
+        <h1 className="text-3xl font-bold">{t(`${ip}.title`)}</h1>
+        <p className="text-muted-foreground mt-2">{t(`${ip}.subtitle`)}</p>
       </div>
 
       <Tabs defaultValue="contact">
         <TabsList>
           <TabsTrigger value="contact" className="gap-2">
             <MessageSquare className="h-4 w-4" />
-            Contact ({contacts.length})
+            {t(`${ip}.tabs.contact`)} ({contacts.length})
           </TabsTrigger>
           <TabsTrigger value="newsletter" className="gap-2">
             <Mail className="h-4 w-4" />
-            Newsletter ({subscribers.length})
+            {t(`${ip}.tabs.newsletter`)} ({subscribers.length})
           </TabsTrigger>
         </TabsList>
 
@@ -223,7 +220,7 @@ const AdminInbound = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search name, email, message..."
+                    placeholder={t(`${ip}.contactSearch`)}
                     value={contactSearch}
                     onChange={(e) => setContactSearch(e.target.value)}
                     className="pl-10"
@@ -231,13 +228,13 @@ const AdminInbound = () => {
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder={t(`${ip}.status`)} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="all">{t(`${ip}.allStatuses`)}</SelectItem>
                     {STATUS_OPTIONS.map((s) => (
                       <SelectItem key={s} value={s}>
-                        {s}
+                        {t(`${ip}.statuses.${s}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -248,11 +245,11 @@ const AdminInbound = () => {
 
           {contactsError ? (
             <Alert variant="destructive">
-              <AlertTitle>Failed to load contact submissions</AlertTitle>
+              <AlertTitle>{t(`${ip}.loadContactError`)}</AlertTitle>
               <AlertDescription>
                 {(contactsError as Error).message}
                 <Button variant="outline" size="sm" className="ml-3" onClick={() => refetchContacts()}>
-                  Retry
+                  {t(`${ip}.retry`)}
                 </Button>
               </AlertDescription>
             </Alert>
@@ -261,7 +258,7 @@ const AdminInbound = () => {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Contact submissions</CardTitle>
+                <CardTitle>{t(`${ip}.contactSubmissions`)}</CardTitle>
               </CardHeader>
               <CardContent>
                 <DataTable columns={contactColumns} data={filteredContacts} />
@@ -276,7 +273,7 @@ const AdminInbound = () => {
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search email..."
+                  placeholder={t(`${ip}.newsletterSearch`)}
                   value={newsletterSearch}
                   onChange={(e) => setNewsletterSearch(e.target.value)}
                   className="pl-10"
@@ -287,11 +284,11 @@ const AdminInbound = () => {
 
           {subscribersError ? (
             <Alert variant="destructive">
-              <AlertTitle>Failed to load subscribers</AlertTitle>
+              <AlertTitle>{t(`${ip}.loadSubscribersError`)}</AlertTitle>
               <AlertDescription>
                 {(subscribersError as Error).message}
                 <Button variant="outline" size="sm" className="ml-3" onClick={() => refetchSubscribers()}>
-                  Retry
+                  {t(`${ip}.retry`)}
                 </Button>
               </AlertDescription>
             </Alert>
@@ -300,7 +297,7 @@ const AdminInbound = () => {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Newsletter subscribers</CardTitle>
+                <CardTitle>{t(`${ip}.newsletterSubscribers`)}</CardTitle>
               </CardHeader>
               <CardContent>
                 <DataTable columns={newsletterColumns} data={filteredSubscribers} />
@@ -324,34 +321,36 @@ const AdminInbound = () => {
               <div className="mt-6 space-y-4 text-sm">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-muted-foreground">Subject</p>
-                    <p className="font-medium">{SUBJECT_LABELS[selected.subject] ?? selected.subject}</p>
+                    <p className="text-muted-foreground">{t(`${ip}.sheet.subject`)}</p>
+                    <p className="font-medium">
+                      {t(`${ip}.subjects.${selected.subject as (typeof SUBJECT_KEYS)[number]}`, selected.subject)}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Received</p>
+                    <p className="text-muted-foreground">{t(`${ip}.sheet.received`)}</p>
                     <p className="font-medium">{formatDate(selected.created_at)}</p>
                   </div>
                   {selected.phone && (
                     <div>
-                      <p className="text-muted-foreground">Phone</p>
+                      <p className="text-muted-foreground">{t(`${ip}.sheet.phone`)}</p>
                       <p className="font-medium">{selected.phone}</p>
                     </div>
                   )}
                   {selected.country && (
                     <div>
-                      <p className="text-muted-foreground">Country</p>
+                      <p className="text-muted-foreground">{t(`${ip}.sheet.country`)}</p>
                       <p className="font-medium">{selected.country}</p>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <p className="text-muted-foreground mb-1">Message</p>
+                  <p className="text-muted-foreground mb-1">{t(`${ip}.sheet.message`)}</p>
                   <p className="whitespace-pre-wrap rounded-md border bg-muted/30 p-3">{selected.message}</p>
                 </div>
 
                 <div className="space-y-2 pt-2 border-t">
-                  <Label htmlFor="contact-status">Status</Label>
+                  <Label htmlFor="contact-status">{t(`${ip}.status`)}</Label>
                   <Select
                     value={editStatus}
                     onValueChange={(v) => setEditStatus(v as ContactSubmissionStatus)}
@@ -362,7 +361,7 @@ const AdminInbound = () => {
                     <SelectContent>
                       {STATUS_OPTIONS.map((s) => (
                         <SelectItem key={s} value={s}>
-                          {s}
+                          {t(`${ip}.statuses.${s}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -370,12 +369,12 @@ const AdminInbound = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="admin-notes">Admin notes</Label>
+                  <Label htmlFor="admin-notes">{t(`${ip}.sheet.adminNotes`)}</Label>
                   <Textarea
                     id="admin-notes"
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
-                    placeholder="Internal notes..."
+                    placeholder={t(`${ip}.sheet.notesPlaceholder`)}
                     rows={4}
                   />
                 </div>
@@ -388,7 +387,7 @@ const AdminInbound = () => {
                   {updateContact.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Save changes"
+                    t(`${ip}.sheet.saveChanges`)
                   )}
                 </Button>
               </div>

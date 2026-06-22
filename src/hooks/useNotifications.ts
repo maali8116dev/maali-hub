@@ -9,10 +9,12 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: "application" | "system" | "reminder" | "new_application" | "review_assigned" | "deadline_reminder" | "status_change";
+  type: "application" | "system" | "reminder" | "new_application" | "review_assigned" | "deadline_reminder" | "status_change" | "payment" | "review_assignment";
   read: boolean;
   link?: string;
   metadata?: {
+    template?: string;
+    params?: Record<string, unknown>;
     application_id?: string;
     project_id?: number;
     status?: string;
@@ -226,12 +228,40 @@ export const useNotifications = () => {
 // NOTIFICATIONS_PAGE_SIZE notifications.
 export const useUnreadNotificationCount = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data } = useQuery({
     queryKey: ["notifications-unread-count", user?.id],
     queryFn: fetchUnreadNotificationCount,
     enabled: !!user,
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`notifications-unread:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ["notifications-unread-count", user.id],
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
+
   return data ?? 0;
 };
 

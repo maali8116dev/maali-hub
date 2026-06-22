@@ -37,6 +37,11 @@
     "seed:users:local": "node scripts/seed-users-and-reviewers.js --local",
     "seed:content": "node scripts/seed-content.js",
     "seed:content:local": "node scripts/seed-content.js --local",
+    "i18n:translate-de": "node scripts/translate-static-locale.mjs --locale de",
+    "i18n:apply-patches": "node scripts/apply-locale-patches.mjs",
+    "i18n:check-locale": "node scripts/check-locale-parity.mjs",
+    "i18n:translate-same-as-en": "node scripts/translate-same-as-en.mjs",
+    "validate:i18n": "npm run i18n:check-locale",
     "cleanup:projects": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/scripts/cleanup-projects.sql",
     "cleanup:projects:remote": "echo 'Please run cleanup-projects.sql in Supabase Dashboard SQL Editor'"
   },

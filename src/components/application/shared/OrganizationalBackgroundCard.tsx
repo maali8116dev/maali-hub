@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Calendar, Users, DollarSign } from "lucide-react";
@@ -9,7 +10,8 @@ interface OrganizationalBackgroundCardProps {
 }
 
 const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundCardProps) => {
-  // Only render for non-individual applicants
+  const { t } = useTranslation("dashboard");
+
   if (!application.applicant_type || application.applicant_type === "Individual") {
     return null;
   }
@@ -17,33 +19,37 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
   return (
     <Card>
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">Organizational Background</CardTitle>
+        <CardTitle className="text-base sm:text-lg">{t("applications.detail.organizationalBackground.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {application.year_established && (
-            <InfoField icon={Calendar} label="Year Established" value={application.year_established} />
+            <InfoField icon={Calendar} label={t("applications.detail.organizationalBackground.yearEstablished")} value={application.year_established} />
           )}
           {application.team_size && (
-            <InfoField icon={Users} label="Team Size" value={`${application.team_size} members`} />
+            <InfoField
+              icon={Users}
+              label={t("applications.detail.organizationalBackground.teamSize")}
+              value={t("applications.detail.organizationalBackground.teamSizeMembers", { count: application.team_size })}
+            />
           )}
           {application.previous_grants_funding_received !== undefined && (
             <InfoField
               icon={DollarSign}
-              label="Previous Grants/Funding Received"
-              value={application.previous_grants_funding_received ? "Yes" : "No"}
+              label={t("applications.detail.organizationalBackground.previousGrants")}
+              value={application.previous_grants_funding_received ? t("applications.detail.values.yes") : t("applications.detail.values.no")}
             />
           )}
         </div>
         {application.core_mission_purpose && (
           <div>
-            <Label className="text-sm text-muted-foreground">Core Mission/Purpose</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.organizationalBackground.coreMission")}</Label>
             <p className="mt-1 text-sm whitespace-pre-wrap">{application.core_mission_purpose}</p>
           </div>
         )}
         {application.primary_sectors && (
           <div>
-            <Label className="text-sm text-muted-foreground">Primary sectors</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.organizationalBackground.primarySectors")}</Label>
             <div className="mt-2 flex flex-wrap gap-2">
               {Array.isArray(application.primary_sectors) ? (
                 application.primary_sectors.map((sector: string, idx: number) => (
@@ -70,19 +76,19 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
         )}
         {application.primary_sector_other && (
           <div>
-            <Label className="text-sm text-muted-foreground">Other Primary sector</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.organizationalBackground.otherPrimarySector")}</Label>
             <p className="mt-1 text-sm">{application.primary_sector_other}</p>
           </div>
         )}
         {application.key_team_members_roles && (
           <div>
-            <Label className="text-sm text-muted-foreground">Key Team Members & Roles</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.organizationalBackground.keyTeamMembers")}</Label>
             <p className="mt-1 text-sm whitespace-pre-wrap">{application.key_team_members_roles}</p>
           </div>
         )}
         {application.previous_grants_funding_details && (
           <div>
-            <Label className="text-sm text-muted-foreground">Previous Grants/Funding Details</Label>
+            <Label className="text-sm text-muted-foreground">{t("applications.detail.organizationalBackground.previousGrantsDetails")}</Label>
             <p className="mt-1 text-sm whitespace-pre-wrap">{application.previous_grants_funding_details}</p>
           </div>
         )}
@@ -92,12 +98,3 @@ const OrganizationalBackgroundCard = ({ application }: OrganizationalBackgroundC
 };
 
 export default OrganizationalBackgroundCard;
-
-
-
-
-
-
-
-
-

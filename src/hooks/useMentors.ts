@@ -1,7 +1,14 @@
 ﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import i18n from '@/lib/i18n';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
+import type { ContentTranslations } from '@/lib/localizedContent';
+import {
+  cmsTranslationFailureMessage,
+  invalidateCmsTranslationQueries,
+  triggerMentorTranslation,
+} from '@/hooks/useTranslateCms';
 
 export interface Mentor {
   id: number;
@@ -19,6 +26,7 @@ export interface Mentor {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  translations?: ContentTranslations | null;
 }
 
 export type NewMentor = Omit<Mentor, 'id' | 'created_at' | 'updated_at'>;
@@ -127,10 +135,17 @@ export function useCreateMentor() {
         description: `Created mentor: ${mentor.name}`,
         metadata: { name: mentor.name, sector: mentor.sector },
       });
-      toast.success('Mentor created successfully');
+      toast.success(i18n.t('toasts.mentor.created', { ns: 'common' }));
+      void triggerMentorTranslation(mentor.id).then((result) => {
+        if (!result.ok) {
+          console.warn(cmsTranslationFailureMessage(result.reason));
+        } else {
+          invalidateCmsTranslationQueries(queryClient, 'mentor');
+        }
+      });
     },
     onError: (error) => {
-      toast.error('Failed to create mentor: ' + error.message);
+      toast.error(i18n.t('toasts.mentor.createError', { ns: 'common' }) + (error.message ? `: ${error.message}` : ''));
     },
   });
 }
@@ -161,10 +176,17 @@ export function useUpdateMentor() {
         description: `Updated mentor: ${mentor.name}`,
         metadata: { name: mentor.name },
       });
-      toast.success('Mentor updated successfully');
+      toast.success(i18n.t('toasts.mentor.updated', { ns: 'common' }));
+      void triggerMentorTranslation(mentor.id).then((result) => {
+        if (!result.ok) {
+          console.warn(cmsTranslationFailureMessage(result.reason));
+        } else {
+          invalidateCmsTranslationQueries(queryClient, 'mentor');
+        }
+      });
     },
     onError: (error) => {
-      toast.error('Failed to update mentor: ' + error.message);
+      toast.error(i18n.t('toasts.mentor.updateError', { ns: 'common' }) + (error.message ? `: ${error.message}` : ''));
     },
   });
 }
@@ -196,10 +218,10 @@ export function useDeleteMentor() {
         description: `Deleted mentor: ${data.name}`,
         metadata: { name: data.name },
       });
-      toast.success('Mentor deleted successfully');
+      toast.success(i18n.t('toasts.mentor.deleted', { ns: 'common' }));
     },
     onError: (error) => {
-      toast.error('Failed to delete mentor: ' + error.message);
+      toast.error(i18n.t('toasts.mentor.deleteError', { ns: 'common' }) + (error.message ? `: ${error.message}` : ''));
     },
   });
 }
@@ -222,10 +244,10 @@ export function useToggleMentorPublished() {
     },
     onSuccess: (data: Mentor) => {
       queryClient.invalidateQueries({ queryKey: ['mentors'] });
-      toast.success(data.is_published ? 'Mentor published' : 'Mentor unpublished');
+      toast.success(data.is_published ? i18n.t('toasts.mentor.published', { ns: 'common' }) : i18n.t('toasts.mentor.unpublished', { ns: 'common' }));
     },
     onError: (error: any) => {
-      toast.error('Failed to update mentor: ' + error.message);
+      toast.error(i18n.t('toasts.mentor.updateError', { ns: 'common' }) + (error.message ? `: ${error.message}` : ''));
     },
   });
 }

@@ -1,54 +1,31 @@
 ﻿import { Link } from "react-router-dom";
-import { HelpCircle, Users, MessageCircle, BookOpen } from "lucide-react";
+import { HelpCircle, Users, MessageCircle, BookOpen, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const quickLinks = [
-  {
-    title: "FAQs",
-    description: "Find answers to common questions",
-    icon: HelpCircle,
-    href: "/faq",
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10"
-  },
-  {
-    title: "Mentors",
-    description: "Connect with industry experts",
-    icon: Users,
-    href: "/mentors",
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-500/10"
-  },
-  {
-    title: "Support",
-    description: "Get help from our team",
-    icon: MessageCircle,
-    href: "/contact",
-    color: "text-violet-500",
-    bgColor: "bg-violet-500/10"
-  },
-  {
-    title: "Guide",
-    description: "Step-by-step application guide",
-    icon: BookOpen,
-    href: "/guide",
-    color: "text-amber-500",
-    bgColor: "bg-amber-500/10"
-  }
-];
+const LINK_CONFIG = [
+  { key: "faq", icon: HelpCircle, href: "/faq", color: "text-blue-500", bgColor: "bg-blue-500/10" },
+  { key: "mentors", icon: Users, href: "/mentors", color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
+  { key: "support", icon: MessageCircle, href: "/contact", color: "text-violet-500", bgColor: "bg-violet-500/10" },
+  { key: "guide", icon: BookOpen, href: "/guide", color: "text-amber-500", bgColor: "bg-amber-500/10" },
+] as const;
 
-export function QuickLinks() {
+type QuickLinksProps = {
+  className?: string;
+};
+
+export function QuickLinks({ className }: QuickLinksProps) {
+  const { t } = useTranslation("landing");
+
   return (
-    <section className="mt-12 pt-12 border-t border-border/50">
-      <h2 className="text-xl font-semibold text-foreground mb-6">
-        Need more help?
-      </h2>
-      
+    <section className={cn("mt-12 pt-12 border-t border-border/50", className)}>
+      <h2 className="text-xl font-semibold text-foreground mb-6">{t("helpLinks.title")}</h2>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {quickLinks.map((link) => {
-          const Icon = link.icon;
-          
+        {LINK_CONFIG.map((link) => {
+          const Icon = link.icon as LucideIcon;
+
           return (
             <Link key={link.href} to={link.href}>
               <Card className="h-full transition-all duration-300 hover:shadow-md hover:border-primary/30 group">
@@ -57,11 +34,9 @@ export function QuickLinks() {
                     <Icon className={cn("h-5 w-5", link.color)} />
                   </div>
                   <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
-                    {link.title}
+                    {t(`helpLinks.${link.key}.title`)}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {link.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">{t(`helpLinks.${link.key}.description`)}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -71,11 +46,3 @@ export function QuickLinks() {
     </section>
   );
 }
-
-
-
-
-
-
-
-

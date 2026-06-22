@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,7 @@ type BillingHistoryRow = {
 
 const Billing = () => {
   const { toast } = useToast();
+  const { t } = useTranslation(["dashboard", "common"]);
   const { user } = useAuth();
   const { membership, isPaidMember, loading: membershipLoading } = useMembership();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -272,10 +274,10 @@ const Billing = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user-billing-address"] });
-      toast({ title: "Billing information saved", description: "Your billing address has been updated." });
+      toast({ title: t("dashboard:billingPage.toasts.saved"), description: t("dashboard:billingPage.toasts.savedDesc") });
     },
     onError: (err: Error) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("dashboard:billingPage.toasts.error"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -317,20 +319,20 @@ const Billing = () => {
         .eq("id", id);
 
       if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
+        toast({ title: t("dashboard:billingPage.toasts.error"), description: error.message, variant: "destructive" });
       } else {
         queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
         const message = paymentMethodToDelete.isOnlyOne
-          ? "Your payment method has been removed. You'll need to add a new payment method for future transactions."
+          ? t("dashboard:billingPage.toasts.removedOnly")
           : paymentMethodToDelete.isDefault
-          ? "Your payment method has been removed. Another payment method has been set as default."
-          : "Your payment method has been removed.";
-        toast({ title: "Payment method removed", description: message });
+          ? t("dashboard:billingPage.toasts.removedWithDefault")
+          : t("dashboard:billingPage.toasts.removedGeneric");
+        toast({ title: t("dashboard:billingPage.toasts.removed"), description: message });
       }
     } catch (error) {
       toast({ 
-        title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to delete payment method", 
+        title: t("dashboard:billingPage.toasts.error"), 
+        description: error instanceof Error ? error.message : t("dashboard:billingPage.toasts.deleteFailed"), 
         variant: "destructive" 
       });
     } finally {
@@ -361,10 +363,10 @@ const Billing = () => {
       .eq("id", id);
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t("dashboard:billingPage.toasts.error"), description: error.message, variant: "destructive" });
     } else {
       queryClient.invalidateQueries({ queryKey: ["user-payment-methods"] });
-      toast({ title: "Default payment method updated" });
+      toast({ title: t("dashboard:billingPage.toasts.defaultUpdated") });
     }
   };
 
@@ -387,8 +389,8 @@ const Billing = () => {
 
     if (!canGenerate) {
       toast({
-        title: "Receipt unavailable",
-        description: "No transaction record found for this payment yet.",
+        title: t("dashboard:billingPage.toasts.receiptUnavailable"),
+        description: t("dashboard:billingPage.toasts.receiptUnavailableDesc"),
         variant: "destructive",
       });
       return;
@@ -398,7 +400,7 @@ const Billing = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) {
-        toast({ title: "Error", description: "You must be logged in to download invoices.", variant: "destructive" });
+        toast({ title: t("dashboard:billingPage.toasts.error"), description: t("dashboard:billingPage.toasts.loginRequired"), variant: "destructive" });
         return;
       }
 
@@ -434,11 +436,11 @@ const Billing = () => {
 
       const fileStem = (item.invoice_number ?? item.id).replace(/[^a-zA-Z0-9-]/g, "");
       triggerPdfDownload(blob, `invoice-${fileStem}.pdf`);
-      toast({ title: "Success", description: "Invoice downloaded." });
+      toast({ title: t("dashboard:billingPage.toasts.saved"), description: t("dashboard:billingPage.toasts.invoiceDownloaded") });
       queryClient.invalidateQueries({ queryKey: ["user-billing-history"] });
     } catch (err) {
       console.error("[Invoice] Download failed:", err);
-      toast({ title: "Error", description: "Failed to download invoice.", variant: "destructive" });
+      toast({ title: t("dashboard:billingPage.toasts.error"), description: t("dashboard:billingPage.toasts.downloadFailed"), variant: "destructive" });
     }
   };
 
@@ -477,35 +479,39 @@ const Billing = () => {
       case "completed":
         return (
           <Badge variant="default" className="bg-green-500 text-xs">
-            <CheckCircle2 className="h-3 w-3 mr-1" /> Paid
+            <CheckCircle2 className="h-3 w-3 mr-1" /> {t("dashboard:billingPage.status.paid")}
           </Badge>
         );
       case "pending":
       case "processing":
         return (
           <Badge variant="secondary" className="text-xs">
-            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> Pending
+            <Loader2 className="h-3 w-3 mr-1 animate-spin" /> {t("dashboard:billingPage.status.pending")}
           </Badge>
         );
       case "refunded":
         return (
-          <Badge variant="outline" className="text-xs">Refunded</Badge>
+          <Badge variant="outline" className="text-xs">{t("dashboard:billingPage.status.refunded")}</Badge>
         );
       default:
         return (
           <Badge variant="destructive" className="text-xs">
-            <XCircle className="h-3 w-3 mr-1" /> Failed
+            <XCircle className="h-3 w-3 mr-1" /> {t("dashboard:billingPage.status.failed")}
           </Badge>
         );
     }
   };
 
+  const upgradeLink = (
+    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)} />
+  );
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Billing</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t("dashboard:billingPage.title")}</h1>
         <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Full Member subscription ($2/month), payment methods, and receipts
+          {t("dashboard:billingPage.subtitle")}
         </p>
       </div>
 
@@ -518,10 +524,10 @@ const Billing = () => {
             <div>
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <CreditCard className="h-5 w-5" />
-                Payment Methods
+                {t("dashboard:billingPage.paymentMethods.title")}
               </CardTitle>
               <CardDescription className="mt-1 text-xs sm:text-sm">
-                Cards used for your Full Member subscription
+                {t("dashboard:billingPage.paymentMethods.description")}
               </CardDescription>
             </div>
           </div>
@@ -535,33 +541,25 @@ const Billing = () => {
           ) : paymentMethods.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No payment methods on file</p>
+              <p>{t("dashboard:billingPage.paymentMethods.empty")}</p>
               <p className="text-xs sm:text-sm mt-2 max-w-md mx-auto">
                 {membershipLoading ? (
-                  "Loading…"
+                  t("dashboard:billingPage.paymentMethods.loading")
                 ) : isPaidMember ? (
-                  <>
-                    Your card is saved automatically after membership checkout. If nothing appears,
-                    wait a minute and refresh — or{" "}
-                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
-                      run checkout again
-                    </button>
-                    .
-                  </>
+                  <Trans
+                    i18nKey="dashboard:billingPage.paymentMethods.paidMemberHint"
+                    components={{ link: upgradeLink }}
+                  />
                 ) : hasPendingCheckout ? (
-                  <>
-                    Finish membership payment to save your card.{" "}
-                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
-                      Continue checkout
-                    </button>
-                  </>
+                  <Trans
+                    i18nKey="dashboard:billingPage.paymentMethods.pendingCheckoutHint"
+                    components={{ link: upgradeLink }}
+                  />
                 ) : (
-                  <>
-                    Cards are saved when you pay for Full Membership.{" "}
-                    <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
-                      Upgrade & pay
-                    </button>
-                  </>
+                  <Trans
+                    i18nKey="dashboard:billingPage.paymentMethods.upgradeHint"
+                    components={{ link: upgradeLink }}
+                  />
                 )}
               </p>
             </div>
@@ -582,14 +580,17 @@ const Billing = () => {
                           {method.brand || method.type} •••• {method.last4}
                         </p>
                         {method.method_type === "primary" ? (
-                          <Badge variant="default" className="text-xs">Primary</Badge>
+                          <Badge variant="default" className="text-xs">{t("dashboard:billingPage.paymentMethods.primary")}</Badge>
                         ) : (
-                          <Badge variant="outline" className="text-xs">Secondary</Badge>
+                          <Badge variant="outline" className="text-xs">{t("dashboard:billingPage.paymentMethods.secondary")}</Badge>
                         )}
                       </div>
                       {method.expiry_month && method.expiry_year && (
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          Expires {method.expiry_month}/{method.expiry_year}
+                          {t("dashboard:billingPage.paymentMethods.expires", {
+                            month: method.expiry_month,
+                            year: method.expiry_year,
+                          })}
                         </p>
                       )}
                     </div>
@@ -602,7 +603,7 @@ const Billing = () => {
                         onClick={() => handleSetDefault(method.id)}
                         className="min-h-[44px] text-xs sm:text-sm"
                       >
-                        Set as Default
+                        {t("dashboard:billingPage.paymentMethods.setDefault")}
                       </Button>
                     )}
                     <Button
@@ -631,10 +632,10 @@ const Billing = () => {
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Receipt className="h-5 w-5" />
-            Billing History
+            {t("dashboard:billingPage.history.title")}
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Membership payments and other charges
+            {t("dashboard:billingPage.history.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -647,12 +648,12 @@ const Billing = () => {
           ) : billingHistory.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No billing history yet</p>
+              <p>{t("dashboard:billingPage.history.empty")}</p>
               <p className="text-xs sm:text-sm mt-2">
-                Full Member payments appear here after checkout.{" "}
-                <button type="button" className={upgradeCtaClass} onClick={() => setUpgradeOpen(true)}>
-                  Upgrade
-                </button>
+                <Trans
+                  i18nKey="dashboard:billingPage.history.emptyHint"
+                  components={{ link: upgradeLink }}
+                />
               </p>
             </div>
           ) : (
@@ -672,10 +673,10 @@ const Billing = () => {
                       </span>
                     </div>
                     {item.type === "subscription" && (
-                      <Badge variant="secondary" className="text-xs">Membership</Badge>
+                      <Badge variant="secondary" className="text-xs">{t("dashboard:billingPage.history.membership")}</Badge>
                     )}
                     <p className="text-xs text-muted-foreground font-mono">
-                      Invoice: {item.invoice_number ?? "—"}
+                      {t("dashboard:billingPage.history.invoice", { number: item.invoice_number ?? "—" })}
                     </p>
                     <Button
                       variant="outline"
@@ -684,7 +685,7 @@ const Billing = () => {
                       className="w-full min-h-[44px] gap-2 text-primary hover:text-primary"
                     >
                       <Download className="h-4 w-4" />
-                      Download Receipt
+                      {t("dashboard:billingPage.history.downloadReceipt")}
                     </Button>
                   </div>
                 ))}
@@ -695,12 +696,12 @@ const Billing = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Invoice #</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>{t("dashboard:billingPage.history.columns.date")}</TableHead>
+                      <TableHead>{t("dashboard:billingPage.history.columns.description")}</TableHead>
+                      <TableHead>{t("dashboard:billingPage.history.columns.invoice")}</TableHead>
+                      <TableHead className="text-right">{t("dashboard:billingPage.history.columns.amount")}</TableHead>
+                      <TableHead>{t("dashboard:billingPage.history.columns.status")}</TableHead>
+                      <TableHead className="text-right">{t("dashboard:billingPage.history.columns.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -735,7 +736,7 @@ const Billing = () => {
                             className="min-h-[44px] gap-2 text-primary hover:text-primary"
                           >
                             <Download className="h-4 w-4" />
-                            Receipt
+                            {t("dashboard:billingPage.history.receipt")}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -751,9 +752,9 @@ const Billing = () => {
       {/* Billing Information */}
       <Card>
         <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Billing Information</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("dashboard:billingPage.info.title")}</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Update your billing address and tax information
+            {t("dashboard:billingPage.info.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -767,7 +768,7 @@ const Billing = () => {
             <form onSubmit={handleSaveBillingInfo} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="billingEmail">Billing Email</Label>
+                  <Label htmlFor="billingEmail">{t("dashboard:billingPage.info.billingEmail")}</Label>
                   <Input
                     id="billingEmail"
                     name="billingEmail"
@@ -777,22 +778,22 @@ const Billing = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="taxId">Tax ID (Optional)</Label>
+                  <Label htmlFor="taxId">{t("dashboard:billingPage.info.taxId")}</Label>
                   <Input
                     id="taxId"
                     name="taxId"
-                    placeholder="Enter your tax ID"
+                    placeholder={t("dashboard:billingPage.info.taxIdPlaceholder")}
                     defaultValue={billingAddress?.tax_id || ""}
                     className="h-11 sm:h-10"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="billingAddress">Billing Address</Label>
+                <Label htmlFor="billingAddress">{t("dashboard:billingPage.info.address")}</Label>
                 <Input
                   id="billingAddress"
                   name="billingAddress"
-                  placeholder="Street address"
+                  placeholder={t("dashboard:billingPage.info.addressPlaceholder")}
                   defaultValue={billingAddress?.address_line1 || ""}
                   required
                   className="h-11 sm:h-10"
@@ -800,32 +801,32 @@ const Billing = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">{t("dashboard:billingPage.info.city")}</Label>
                   <Input
                     id="city"
                     name="city"
-                    placeholder="City"
+                    placeholder={t("dashboard:billingPage.info.cityPlaceholder")}
                     defaultValue={billingAddress?.city || ""}
                     required
                     className="h-11 sm:h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state">State/Province</Label>
+                  <Label htmlFor="state">{t("dashboard:billingPage.info.state")}</Label>
                   <Input
                     id="state"
                     name="state"
-                    placeholder="State"
+                    placeholder={t("dashboard:billingPage.info.statePlaceholder")}
                     defaultValue={billingAddress?.state_province || ""}
                     className="h-11 sm:h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                  <Label htmlFor="zipCode">{t("dashboard:billingPage.info.zip")}</Label>
                   <Input
                     id="zipCode"
                     name="zipCode"
-                    placeholder="ZIP Code"
+                    placeholder={t("dashboard:billingPage.info.zipPlaceholder")}
                     defaultValue={billingAddress?.postal_code || ""}
                     required
                     className="h-11 sm:h-10"
@@ -833,11 +834,11 @@ const Billing = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">{t("dashboard:billingPage.info.country")}</Label>
                 <Input
                   id="country"
                   name="country"
-                  placeholder="Country"
+                  placeholder={t("dashboard:billingPage.info.countryPlaceholder")}
                   defaultValue={billingAddress?.country || ""}
                   required
                   className="h-11 sm:h-10"
@@ -851,10 +852,10 @@ const Billing = () => {
                 {saveBillingAddress.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
+                    {t("dashboard:billingPage.info.saving")}
                   </>
                 ) : (
-                  "Save Billing Information"
+                  t("dashboard:billingPage.info.save")
                 )}
               </Button>
             </form>
@@ -868,28 +869,20 @@ const Billing = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {paymentMethodToDelete?.isOnlyOne 
-                ? "Delete Your Only Payment Method?" 
-                : "Delete Payment Method?"}
+                ? t("dashboard:billingPage.deleteDialog.onlyTitle")
+                : t("dashboard:billingPage.deleteDialog.title")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {paymentMethodToDelete?.isOnlyOne ? (
-                <>
-                  This is your only payment method. If you delete it, you'll need to add a new payment method 
-                  before making any future payments. Are you sure you want to continue?
-                </>
-              ) : paymentMethodToDelete?.isDefault ? (
-                <>
-                  This is your default payment method. It will be removed and another payment method will be 
-                  set as default. Are you sure you want to continue?
-                </>
-              ) : (
-                "Are you sure you want to remove this payment method? This action cannot be undone."
-              )}
+              {paymentMethodToDelete?.isOnlyOne
+                ? t("dashboard:billingPage.deleteDialog.onlyDesc")
+                : paymentMethodToDelete?.isDefault
+                ? t("dashboard:billingPage.deleteDialog.defaultDesc")
+                : t("dashboard:billingPage.deleteDialog.genericDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingPaymentMethod !== null}>
-              Cancel
+              {t("dashboard:billingPage.deleteDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => paymentMethodToDelete && handleDeletePaymentMethod(paymentMethodToDelete.id)}
@@ -899,10 +892,10 @@ const Billing = () => {
               {isDeletingPaymentMethod ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  {t("dashboard:billingPage.deleteDialog.deleting")}
                 </>
               ) : (
-                "Delete"
+                t("dashboard:billingPage.deleteDialog.delete")
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { useTranslation } from "react-i18next";
 
 type Partner = {
   id: number;
@@ -35,6 +36,9 @@ type Partner = {
 };
 
 const AdminPartners = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cf = "admin.cmsList.partners";
+  const cc = "admin.cmsList.common";
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -245,12 +249,12 @@ const AdminPartners = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Partners</h1>
-          <p className="text-muted-foreground mt-2">Create, edit, and manage partner organizations</p>
+          <h1 className="text-3xl font-bold">{t(`${cf}.title`)}</h1>
+          <p className="text-muted-foreground mt-2">{t(`${cf}.subtitle`)}</p>
         </div>
         <Button onClick={() => navigate("/admin/partners/new")}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Partner
+          {t(`${cf}.create`)}
         </Button>
       </div>
 
@@ -268,15 +272,13 @@ const AdminPartners = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the partner.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+            <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${cc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+              {t(`${cc}.delete`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

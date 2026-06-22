@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getDocumentDownloadUrl } from "@/hooks/useDocumentUpload";
 import { isProjectOpen } from "@/lib/projectAvailability";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useApplicationTranslation } from "@/hooks/useTranslateApplication";
 import {
   useApplicationAssignments,
   useApplicationReviewScores,
@@ -17,6 +19,7 @@ import {
   ApplicationHeader,
   ApplicationDetailsSkeleton,
   ApplicationNotFound,
+  ApplicationTranslationBar,
   ApplicantInfoCard,
   OrganizationalBackgroundCard,
   ProjectDetailsCard,
@@ -32,6 +35,7 @@ const ApplicationDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: profile } = useProfile();
+  const { toast } = useToast();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const isAdmin = profile?.role === "admin";
@@ -156,6 +160,23 @@ const ApplicationDetails = () => {
     }
   };
 
+  const translation = useApplicationTranslation(application, {
+    enabled: isAdmin && !!application,
+    queryKeys: [["application", id]],
+  });
+
+  const handleTranslate = async () => {
+    try {
+      await translation.translate();
+    } catch (error) {
+      toast({
+        title: translation.t("applications.detail.translation.errorTitle"),
+        description: error instanceof Error ? error.message : translation.t("applications.detail.translation.errorDesc"),
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return <ApplicationDetailsSkeleton />;
   }
@@ -164,22 +185,34 @@ const ApplicationDetails = () => {
     return <ApplicationNotFound backRoute={getBackRoute()} error={error instanceof Error ? error : null} />;
   }
 
+  const app = translation.displayApplication ?? application;
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <ApplicationHeader
-        title="Application Details"
         applicationId={application.id}
         status={application.status || "pending"}
         backRoute={getBackRoute()}
       />
 
+      <ApplicationTranslationBar
+        visible={translation.canOffer}
+        showTranslated={translation.showTranslated}
+        hasCache={translation.hasCache}
+        isTranslating={translation.isTranslating}
+        sourceLocale={translation.sourceLocale}
+        targetLocale={translation.targetLocale}
+        onTranslate={handleTranslate}
+        onShowOriginal={translation.showOriginal}
+      />
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <ApplicantInfoCard application={application} />
-          <OrganizationalBackgroundCard application={application} />
-          <ProjectDetailsCard application={application} showProjectLink />
-          <SocialLinksCard application={application} />
+          <ApplicantInfoCard application={app} />
+          <OrganizationalBackgroundCard application={app} />
+          <ProjectDetailsCard application={app} showProjectLink />
+          <SocialLinksCard application={app} />
           <DocumentsCard
             documents={documents}
             isLoading={documentsLoading}

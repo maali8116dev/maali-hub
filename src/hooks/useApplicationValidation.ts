@@ -1,10 +1,12 @@
 /**
  * Hook for application form validation logic
  */
-import { useToast } from '@/hooks/use-toast';
-import { useApplicationFormStore } from '@/stores/applicationForm';
+import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
+import { useApplicationFormStore } from "@/stores/applicationForm";
 
 export function useApplicationValidation(isGrantType = true) {
+  const { t } = useTranslation("dashboard");
   const { toast } = useToast();
   const { formData } = useApplicationFormStore();
 
@@ -20,8 +22,8 @@ export function useApplicationValidation(isGrantType = true) {
       !formData.projectSummary
     ) {
       toast({
-        title: "Missing Information",
-        description: "Please complete all required fields before submitting.",
+        title: t("applications.form.toasts.missingInformation.title"),
+        description: t("applications.form.toasts.missingInformation.description"),
         variant: "destructive",
       });
       return false;
@@ -37,8 +39,8 @@ export function useApplicationValidation(isGrantType = true) {
       !formData.dataProcessingConsented
     ) {
       toast({
-        title: "Compliance Required",
-        description: "Please confirm all compliance declarations before submitting.",
+        title: t("applications.form.toasts.complianceRequired.title"),
+        description: t("applications.form.toasts.complianceRequired.description"),
         variant: "destructive",
       });
       return false;
@@ -56,12 +58,3 @@ export function useApplicationValidation(isGrantType = true) {
     validateAll,
   };
 }
-
-
-
-
-
-
-
-
-

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFeaturedSuccessStories } from "@/hooks/useSuccessStories";
+import { useLocalizedSuccessStories } from "@/lib/localizedContent";
 
 function StoryImage({ src, alt }: { src?: string | null; alt: string }) {
   const [failed, setFailed] = useState(false);
@@ -32,6 +33,7 @@ const SuccessStoriesSection = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('landing');
   const { data: stories = [], isLoading } = useFeaturedSuccessStories();
+  const localizedStories = useLocalizedSuccessStories(stories);
 
   return (
     <section className="py-16 sm:py-20 md:py-24 bg-background">
@@ -69,7 +71,7 @@ const SuccessStoriesSection = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
-            {stories.map((story) => (
+            {localizedStories.map((story) => (
               <Card key={story.id} className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 border-border">
                 <CardHeader>
                   <div className="mb-4">

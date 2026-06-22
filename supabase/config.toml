@@ -69,3 +69,12 @@ verify_jwt = false
 
 [functions.invite-partner]
 verify_jwt = false
+
+[functions.translate-opportunity]
+verify_jwt = false
+
+[functions.translate-cms]
+verify_jwt = false
+
+[functions.translate-application]
+verify_jwt = false

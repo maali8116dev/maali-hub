@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -15,7 +16,10 @@ import { SEO } from "@/components/seo/SEO";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { getSiteUrl, getImageUrl, truncateDescription } from "@/utils/seo";
 
+import { useLocalizedOpportunity } from "@/lib/localizedContent";
+
 const ProjectDetails = () => {
+  const { t } = useTranslation("landing");
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -28,6 +32,7 @@ const ProjectDetails = () => {
     hasSubmittedApplication,
     hasApprovedApplication,
   } = useOpportunityDetails(id);
+  const localizedOpportunity = useLocalizedOpportunity(opportunity ?? undefined);
 
   if (isLoading) {
     return (
@@ -80,10 +85,8 @@ const ProjectDetails = () => {
         <Navigation />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Opportunity Not Found</h1>
-            <p className="text-muted-foreground mb-4">
-              {error instanceof Error ? error.message : "The opportunity you're looking for doesn't exist."}
-            </p>
+            <h1 className="text-2xl font-bold mb-4">{t("seo.opportunityNotFound.title")}</h1>
+            <p className="text-muted-foreground mb-4">{t("seo.opportunityNotFound.description")}</p>
             {error && (
               <p className="text-sm text-muted-foreground mb-4">
                 ID: {id} | Check the browser console for more details.
@@ -91,7 +94,7 @@ const ProjectDetails = () => {
             )}
             <Button onClick={() => navigate("/opportunities")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Opportunities
+              {t("seo.opportunityNotFound.back")}
             </Button>
           </div>
         </main>
@@ -102,12 +105,12 @@ const ProjectDetails = () => {
 
   const projectUrl = `${getSiteUrl()}/opportunities/${opportunity.id}`;
   const projectImage = opportunity.imageUrl ? getImageUrl(opportunity.imageUrl) : undefined;
-  const projectDescription = truncateDescription(opportunity.description || opportunity.title);
+  const projectDescription = truncateDescription(localizedOpportunity?.description || localizedOpportunity?.title || opportunity.description || opportunity.title);
 
   return (
     <>
       <SEO
-        title={opportunity.title}
+        title={localizedOpportunity?.title || opportunity.title}
         description={projectDescription}
         // Keywords are optional - modern search engines ignore meta keywords
         // The description and structured data provide better SEO value
@@ -143,7 +146,7 @@ const ProjectDetails = () => {
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Opportunities
+          {t("seo.opportunityNotFound.back")}
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">

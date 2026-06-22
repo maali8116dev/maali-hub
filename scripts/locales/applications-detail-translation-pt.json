@@ -1,0 +1,11 @@
+{
+  "translateForMe": "Traduzir para mim",
+  "viewTranslation": "Ver tradução",
+  "viewOriginal": "Ver original",
+  "translating": "A traduzir…",
+  "offer": "Candidatura enviada em {{source}}. Tradução automática disponível.",
+  "showingTranslated": "A mostrar tradução automática de {{source}} para {{target}}.",
+  "sameLocale": "A candidatura já está no seu idioma.",
+  "errorTitle": "Falha na tradução",
+  "errorDesc": "Não foi possível traduzir esta candidatura. Tente novamente mais tarde."
+}

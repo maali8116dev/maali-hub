@@ -2,6 +2,7 @@
  * Hook for handling application submission logic
  */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import { useApplicationFormStore } from "@/stores/applicationForm";
 import { resolveGeographicFocus } from "@/lib/applicationGeography";
 import { isProjectOpen } from "@/lib/projectAvailability";
 import { isRateLimitError } from "@/lib/rateLimits";
+import i18n from "@/lib/i18n";
 
 type UploadedDocForCleanup = {
   id: string;
@@ -30,33 +32,32 @@ type SubmitApplicationResponse = {
 };
 
 /**
- * Maps error codes and raw messages to user-friendly descriptions.
- * Raw errors are logged to the console for debugging.
+ * Maps error codes to user-friendly descriptions.
  */
-function getUserFriendlyError(errorCode?: string, _rawMessage?: string): string {
-  switch (errorCode) {
-    case "ALREADY_APPLIED":
-      return "You've already submitted an application for this opportunity.";
-    case "PROJECT_CLOSED":
-      return "This opportunity is no longer accepting applications.";
-    case "MEMBERSHIP_REQUIRED":
-      return "Full membership is required to apply. Join MAALI as a Full Member to continue.";
-    case "UNAUTHORIZED":
-      return "Your session has expired. Please sign in again to continue.";
-    case "MISSING_PROJECT_ID":
-      return "Something went wrong. Please refresh the page and try again.";
-    case "VALIDATION_ERROR":
-      return "We couldn't validate your application. Please try again shortly.";
-    case "INVALID_BODY":
-      return "Something went wrong with your form data. Please refresh and try again.";
-    case "INTERNAL_ERROR":
-      return "Something went wrong on our end. Please try again or contact support if the issue persists.";
-    default:
-      return "Something went wrong submitting your application. Please try again.";
-  }
+function getUserFriendlyError(
+  t: (key: string) => string,
+  errorCode?: string,
+): string {
+  const keys: Record<string, string> = {
+    ALREADY_APPLIED: "alreadyApplied",
+    PROJECT_CLOSED: "projectClosed",
+    MEMBERSHIP_REQUIRED: "membershipRequired",
+    UNAUTHORIZED: "unauthorized",
+    MISSING_PROJECT_ID: "missingProjectId",
+    VALIDATION_ERROR: "validationError",
+    INVALID_BODY: "invalidBody",
+    INTERNAL_ERROR: "internalError",
+  };
+  const toastKey = errorCode ? keys[errorCode] : undefined;
+  return t(
+    toastKey
+      ? `applications.form.toasts.errors.${toastKey}`
+      : "applications.form.toasts.errors.generic",
+  );
 }
 
 export function useApplicationSubmission() {
+  const { t } = useTranslation("dashboard");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -97,9 +98,8 @@ export function useApplicationSubmission() {
 
     if (!opportunity || !isProjectOpen(opportunity.status, opportunity.deadline)) {
       toast({
-        title: "Applications Closed",
-        description:
-          "This project is closed. You can no longer submit or edit applications.",
+        title: t("applications.form.toasts.applicationsClosed.title"),
+        description: t("applications.form.toasts.applicationsClosed.description"),
         variant: "destructive",
       });
       navigate(opportunityId ? `/opportunities/${opportunityId}` : "/opportunities");
@@ -215,8 +215,8 @@ export function useApplicationSubmission() {
       console.error("Membership check failed:", membershipError);
     } else if (canApply === false) {
       toast({
-        title: "Membership required",
-        description: "Become a Full Member to submit applications.",
+        title: t("applications.form.toasts.membershipRequired.title"),
+        description: t("applications.form.toasts.membershipRequired.description"),
         variant: "destructive",
       });
       navigate("/join");
@@ -233,10 +233,10 @@ export function useApplicationSubmission() {
       if (selectedFiles.length > 0) {
         try {
           toast({
-            title: "Uploading Documents",
-            description: `Uploading ${selectedFiles.length} document${
-              selectedFiles.length > 1 ? "s" : ""
-            }...`,
+            title: t("applications.form.toasts.uploadingDocuments.title"),
+            description: t("applications.form.toasts.uploadingDocuments.description", {
+              count: selectedFiles.length,
+            }),
           });
 
           const uploadedDocs = await uploadDocuments(
@@ -257,9 +257,8 @@ export function useApplicationSubmission() {
           console.error("Error uploading documents:", uploadError);
           // âœ… Don't mark as destructive if you're still submitting
           toast({
-            title: "Some uploads failed",
-            description:
-              "Some documents failed to upload. Your application will still be submitted, but without those files.",
+            title: t("applications.form.toasts.uploadPartialFailure.title"),
+            description: t("applications.form.toasts.uploadPartialFailure.description"),
           });
         }
       }
@@ -309,7 +308,7 @@ export function useApplicationSubmission() {
       // Get session token for authentication (edge function will validate)
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Your session has expired. Please sign in again to continue.");
+        throw new Error(getUserFriendlyError(t, "UNAUTHORIZED"));
       }
 
       const { data, error: edgeError } = await supabase.functions.invoke(
@@ -318,6 +317,7 @@ export function useApplicationSubmission() {
           body: {
             draftId,
             opportunityId: formData.projectId,
+            submittedLocale: i18n.language.split("-")[0].toLowerCase(),
             applicationData,
             libraryDocumentIds: allDocumentIds,
             token: session.access_token,
@@ -340,9 +340,8 @@ export function useApplicationSubmission() {
 
         if (payload?.errorCode === "ALREADY_APPLIED") {
           toast({
-            title: "Already Applied",
-            description:
-              "You've already submitted an application for this opportunity. Check your dashboard to view its status.",
+            title: t("applications.form.toasts.alreadyApplied.title"),
+            description: t("applications.form.toasts.alreadyApplied.description"),
             variant: "destructive",
           });
           navigate(
@@ -355,9 +354,8 @@ export function useApplicationSubmission() {
 
         if (payload?.errorCode === "PROJECT_CLOSED") {
           toast({
-            title: "Applications Closed",
-            description:
-              "This opportunity is no longer accepting applications.",
+            title: t("applications.form.toasts.opportunityClosed.title"),
+            description: t("applications.form.toasts.opportunityClosed.description"),
             variant: "destructive",
           });
           navigate(`/opportunities/${formData.projectId}`);
@@ -366,8 +364,8 @@ export function useApplicationSubmission() {
 
         if (payload?.errorCode === "MEMBERSHIP_REQUIRED") {
           toast({
-            title: "Membership required",
-            description: getUserFriendlyError("MEMBERSHIP_REQUIRED"),
+            title: t("applications.form.toasts.membershipRequired.title"),
+            description: getUserFriendlyError(t, "MEMBERSHIP_REQUIRED"),
             variant: "destructive",
           });
           navigate("/join");
@@ -387,12 +385,12 @@ export function useApplicationSubmission() {
         if (data && typeof data === "object") {
           console.error("Edge function response:", data);
         }
-        throw new Error(getUserFriendlyError(payload?.errorCode, rawError));
+        throw new Error(getUserFriendlyError(t, payload?.errorCode));
       }
 
       toast({
-        title: "Application Submitted",
-        description: "Your application has been submitted successfully!",
+        title: t("applications.form.toasts.submitSuccess.title"),
+        description: t("applications.form.toasts.submitSuccess.description"),
       });
 
       reset();
@@ -413,9 +411,8 @@ export function useApplicationSubmission() {
 
       if (isRateLimitError(rawMessage)) {
         toast({
-          title: "Too Many Submissions",
-          description:
-            "You've submitted too many applications recently. Please wait an hour and try again.",
+          title: t("applications.form.toasts.tooManySubmissions.title"),
+          description: t("applications.form.toasts.tooManySubmissions.description"),
           variant: "destructive",
         });
         return;
@@ -424,10 +421,9 @@ export function useApplicationSubmission() {
       // Show the user-friendly message (the throw above already calls getUserFriendlyError)
       // For unexpected errors, show a generic message
       toast({
-        title: "Submission Failed",
+        title: t("applications.form.toasts.submitFailed.title"),
         description:
-          rawMessage ||
-          "Something went wrong submitting your application. Please try again.",
+          rawMessage || t("applications.form.toasts.submitFailed.description"),
         variant: "destructive",
       });
     } finally {

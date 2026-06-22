@@ -29,24 +29,33 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { SidebarBrand } from "@/components/ui/sidebar-brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useTranslation } from "react-i18next";
 
 interface ReviewerLayoutProps {
   children: React.ReactNode;
 }
+
+const REVIEWER_MENU_ITEMS = [
+  { href: "/reviewer", menuKey: "dashboard", icon: LayoutDashboard },
+  { href: "/reviewer/applications", menuKey: "applications", icon: FileText },
+  { href: "/reviewer/notifications", menuKey: "notifications", icon: Bell },
+  { href: "/reviewer/settings", menuKey: "settings", icon: Settings },
+] as const;
 
 const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const unreadCount = useUnreadNotificationCount();
+  const { t } = useTranslation(["dashboard"]);
 
-  const menuItems = [
-    { href: "/reviewer", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/reviewer/applications", label: "Applications", icon: FileText },
-    { href: "/reviewer/notifications", label: "Notifications", icon: Bell },
-    { href: "/reviewer/settings", label: "Settings", icon: Settings },
-  ];
+  const menuItems = REVIEWER_MENU_ITEMS.map((item) => ({
+    ...item,
+    label: t(`reviewer.menu.${item.menuKey}`),
+  }));
 
   const handleSignOut = async () => {
     await signOut();
@@ -54,11 +63,11 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
   };
 
   const getPageTitle = () => {
-    if (location.pathname === "/reviewer") return "Reviewer Dashboard";
-    if (location.pathname === "/reviewer/applications") return "Applications";
-    if (location.pathname === "/reviewer/notifications") return "Notifications";
-    if (location.pathname === "/reviewer/settings") return "Reviewer Settings";
-    return "Reviewer Dashboard";
+    if (location.pathname === "/reviewer") return t("reviewer.pages.dashboard");
+    if (location.pathname === "/reviewer/applications") return t("reviewer.pages.applications");
+    if (location.pathname === "/reviewer/notifications") return t("reviewer.pages.notifications");
+    if (location.pathname === "/reviewer/settings") return t("reviewer.pages.settings");
+    return t("reviewer.pages.dashboard");
   };
 
   return (
@@ -67,19 +76,7 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild size="lg">
-                <Link to="/">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <ClipboardCheck className="h-5 w-5" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Maali</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Reviewer Panel
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarBrand subtitle={t("reviewer.panel")} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
@@ -126,12 +123,12 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
               {user ? (
                 <SidebarMenuButton onClick={handleSignOut}>
                   <LogOut />
-                  <span>Sign Out</span>
+                  <span>{t("header.signOut")}</span>
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton onClick={() => navigate("/auth")}>
                   <ClipboardCheck />
-                  <span>Sign In</span>
+                  <span>{t("header.signIn")}</span>
                 </SidebarMenuButton>
               )}
             </SidebarMenuItem>
@@ -147,12 +144,13 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
           <SidebarTrigger className="-ml-1" />
           <div className="flex items-center gap-2 flex-1 justify-end">
             <ThemeToggle />
+            <LanguageSwitcher />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <ClipboardCheck className="h-4 w-4 text-primary" />
               </div>
               <span className="text-sm font-medium">
-                {user?.email || "Reviewer"}
+                {user?.email || t("reviewer.roleFallback")}
               </span>
             </div>
           </div>
@@ -166,12 +164,13 @@ const ReviewerLayout = ({ children }: ReviewerLayoutProps) => {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
+            <LanguageSwitcher />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <ClipboardCheck className="h-4 w-4 text-primary" />
               </div>
               <span className="text-sm font-medium">
-                {user?.email || "Reviewer"}
+                {user?.email || t("reviewer.roleFallback")}
               </span>
             </div>
           </div>

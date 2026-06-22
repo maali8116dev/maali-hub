@@ -1,220 +1,37 @@
-import * as z from "zod";
-import { emailSchema } from "@/lib/emailValidation";
-import { isValidPhoneNumber } from "libphonenumber-js";
+export {
+  countWords,
+  APPLICANT_TYPE_VALUES,
+  createApplicationFormSchemas,
+  type ApplicationFormValues,
+  type ApplicantTypeValue,
+} from "@/lib/schemas/applicationForm.schema";
 
-// Helper function to count words in a string
-export const countWords = (text: string): number => {
-  if (!text || !text.trim()) return 0;
-  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-};
+import type { TFunction } from "i18next";
+import enDashboard from "@/locales/en/dashboard.json";
+import { createApplicationFormSchemas } from "@/lib/schemas/applicationForm.schema";
 
-// Phone number validation schema
-export const phoneNumberSchema = z
-  .string()
-  .min(1, "Phone number is required")
-  .refine(
-    (value) => {
-      if (!value) return false;
-      try {
-        return isValidPhoneNumber(value);
-      } catch {
-        return false;
-      }
-    },
-    {
-      message: "Please enter a valid international phone number",
-    }
-  );
+/** English schemas for tests and non-React usage */
+const validationT = ((key: string) => {
+  const shortKey = key.replace("applications.form.validation.", "");
+  const messages = (enDashboard.applications as { form: { validation: Record<string, string> } })
+    .form.validation;
+  return messages[shortKey] ?? key;
+}) as TFunction<"dashboard">;
 
-// Step 1: Applicant Information Schema
-export const step1Schema = z.object({
-  applicantType: z.enum(
-    [
-      "Individual",
-      "Organization",
-      "Startup / SME",
-      "NGO / Non-profit",
-      "Research / Academic",
-    ],
-    {
-      required_error: "Please select an applicant type",
-    }
-  ),
-  fullLegalName: z
-    .string()
-    .min(1, "Full legal name is required"),
-  organizationName: z.string().optional(),
-  
-  countryOfResidence: z.string().min(2, "Country of residence is required"),
-  cityRegion: z.string().min(1, "City/region is required"),
-  emailAddress: emailSchema,
-  phoneNumber: phoneNumberSchema,
-});
+const englishSchemas = createApplicationFormSchemas(validationT);
 
-// Step 2: Organizational Background base schema
-export const step2BaseSchema = z.object({
-    yearEstablished: z.preprocess(
-      (val) => (val === "" || val === undefined ? undefined : Number(val)),
-      z
-        .number()
-        .min(1900, "Please enter a valid year")
-        .max(new Date().getFullYear(), "Year cannot be in the future")
-        .optional()
-    ),
-    coreMissionPurpose: z
-      .string()
-      .optional()
-      .refine((val) => !val || countWords(val) <= 200, {
-        message: "Core mission / purpose must not exceed 200 words",
-      }),
-    primarysectors: z.array(z.string()).optional(),
-    primarysectorOther: z.string().optional(),
-    numberOfTeamMembers: z.preprocess(
-      (val) => (val === "" || val === undefined ? undefined : Number(val)),
-      z.number().min(1, "Number of team members must be at least 1").optional()
-    ),
-    keyTeamMembersRoles: z
-      .string()
-      .optional()
-      .refine((val) => !val || countWords(val) <= 200, {
-        message: "Key team members & roles must not exceed 200 words",
-      }),
-    previousGrantsFundingReceived: z.boolean().default(false),
-    previousGrantsFundingDetails: z
-      .string()
-      .optional()
-      .refine((val) => !val || countWords(val) <= 400, {
-        message: "Previous grants / funding details must not exceed 400 words",
-      }),
-  });
-
-// Step 2 for grant opportunities: includes previous grants conditional validation
-export const step2Schema = step2BaseSchema.refine(
-    (data) => {
-      // If previous grants received is true, details are required
-      if (
-        data.previousGrantsFundingReceived &&
-        !data.previousGrantsFundingDetails
-      ) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Please provide details about previous grants or funding",
-      path: ["previousGrantsFundingDetails"],
-    }
-  );
-
-// Step 3: Project Overview (geographic focus only for grants — optional)
-const step3CoreSchema = z.object({
-  projectTitle: z
-    .string()
-    .min(1, "Project title is required"),
-  projectSummary: z
-    .string()
-    .min(1, "Project summary is required")
-    .refine((val) => countWords(val) >= 30, {
-      message: "Project summary must be at least 30 words",
-    })
-    .refine((val) => countWords(val) <= 400, {
-      message: "Project summary must not exceed 400 words",
-    }),
-});
-
-export const step3GrantSchema = step3CoreSchema.extend({
-  geographicFocus: z.string().optional(),
-});
-
-export const step3NonGrantSchema = step3CoreSchema;
+export const step1Schema = englishSchemas.step1Schema;
+export const step2BaseSchema = englishSchemas.step2BaseSchema;
+export const step2Schema = englishSchemas.step2GrantSchema;
+export const step3GrantSchema = englishSchemas.step3GrantSchema;
+export const step3NonGrantSchema = englishSchemas.step3CoreSchema;
+export const step3Schema = englishSchemas.step3GrantSchema;
+export const step4BaseSchema = englishSchemas.step4BaseSchema;
+export const step4Schema = englishSchemas.step4GrantSchema;
+export const step5Schema = englishSchemas.socialLinksSchema;
+export const step6Schema = englishSchemas.documentsSchema;
+export const applicationSchema = englishSchemas.applicationSchema;
 
 export function getStep3Schema(isGrantType: boolean) {
-  return isGrantType ? step3GrantSchema : step3NonGrantSchema;
+  return englishSchemas.getStep3Schema(isGrantType);
 }
-
-/** @deprecated Use getStep3Schema(isGrantType) — kept for combined schema */
-export const step3Schema = step3GrantSchema;
-
-// Step 4: Compliance & Declarations base schema
-export const step4BaseSchema = z.object({
-  informationAccurateConfirmed: z.boolean().refine((val) => val === true, {
-    message: "You must confirm that the information provided is accurate",
-  }),
-  conflictOfInterestDeclared: z.boolean().refine((val) => val === true, {
-    message: "You must declare any conflicts of interest",
-  }),
-  dataProcessingConsented: z.boolean().refine((val) => val === true, {
-    message: "You must consent to data processing",
-  }),
-  declarationDate: z.date().optional(),
-});
-
-// Grant compliance requires reporting requirements
-export const step4Schema = step4BaseSchema.extend({
-  reportingRequirementsAgreed: z.boolean().refine((val) => val === true, {
-    message: "You must agree to reporting requirements",
-  }),
-});
-
-// Step 5: Social Links Schema (optional)
-export const step5Schema = z.object({
-  linkedinUrl: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val === "" || z.string().url().safeParse(val).success,
-      { message: "Please enter a valid LinkedIn URL" }
-    ),
-  githubUrl: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val === "" || z.string().url().safeParse(val).success,
-      { message: "Please enter a valid GitHub URL" }
-    ),
-  twitterUrl: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val === "" || z.string().url().safeParse(val).success,
-      { message: "Please enter a valid Twitter/X URL" }
-    ),
-  websiteUrl: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val === "" || z.string().url().safeParse(val).success,
-      { message: "Please enter a valid website URL" }
-    ),
-  otherSocialLinks: z
-    .string()
-    .optional()
-    .refine((val) => !val || countWords(val) <= 100, {
-      message: "Other social links must not exceed 100 words",
-    }),
-});
-
-// Step 6: Documents Schema (optional)
-export const step6Schema = z.object({
-  documents: z.array(z.any()).optional(),
-});
-
-// Combined schema for final validation
-// Note: step2Schema uses .refine() which returns ZodEffects, so we use type assertion for merge
-export const applicationSchema = step1Schema
-  .merge(step2Schema as any)
-  .merge(step3Schema)
-  .merge(step4Schema)
-  .merge(step5Schema)
-  .merge(step6Schema);
-
-export type ApplicationFormValues = z.infer<typeof applicationSchema>;
-
-
-
-
-
-
-
-
-

@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
@@ -16,6 +16,11 @@ import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
 import { RouteSEO } from "@/components/seo/RouteSEO";
 import PageFallback from "@/components/PageFallback";
+
+function RedirectProjectToOpportunity() {
+  const { id } = useParams();
+  return <Navigate to={`/opportunities/${id}`} replace />;
+}
 
 // Critical path - eagerly loaded
 import Index from "./pages/Index";
@@ -104,6 +109,7 @@ const PartnerLayout = lazy(() => import("@/components/partner/PartnerLayout"));
 const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
 const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"));
 const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
+const PartnerOpportunityDetails = lazy(() => import("./pages/partner/OpportunityDetails"));
 const PartnerOpportunityApplications = lazy(() => import("./pages/partner/OpportunityApplications"));
 const PartnerSettings = lazy(() => import("./pages/partner/Settings"));
 const PartnerNotifications = lazy(() => import("./pages/partner/Notifications"));
@@ -161,6 +167,8 @@ const App = () => {
               <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/opportunities" element={<Opportunities />} />
+          <Route path="/projects" element={<Navigate to="/opportunities" replace />} />
+          <Route path="/projects/:id" element={<RedirectProjectToOpportunity />} />
           <Route path="/about" element={<About />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/contact" element={<Contact />} />
@@ -666,6 +674,7 @@ const App = () => {
           />
 
           {/* Partner Routes - Protected, requires authentication and partner role */}
+          <Route path="/partner/dashboard" element={<Navigate to="/partner" replace />} />
           <Route
             path="/partner"
             element={
@@ -721,6 +730,18 @@ const App = () => {
               <ProtectedRoute requireAuth={true}>
                 <PartnerLayout>
                   <PartnerOpportunityApplications />
+                </PartnerLayout>
+              </ProtectedRoute>
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/partner/opportunities/:id"
+            element={
+              <RoleBasedRoute allowedRoles={["partner", "admin"]}>
+              <ProtectedRoute requireAuth={true}>
+                <PartnerLayout>
+                  <PartnerOpportunityDetails />
                 </PartnerLayout>
               </ProtectedRoute>
               </RoleBasedRoute>

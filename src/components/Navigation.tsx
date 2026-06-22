@@ -18,7 +18,8 @@ const Navigation = () => {
   const languages = [
     { code: "en", name: "English" },
     { code: "fr", name: "Français" },
-    // { code: 'pt', name: 'Português' }
+    { code: "pt", name: "Português" },
+    { code: "de", name: "Deutsch" },
   ];
 
   const currentLang = i18n.language || "en";

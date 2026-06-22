@@ -1,18 +1,24 @@
-import { RefObject } from "react";
+import { RefObject, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Save, Star, Tag, X } from "lucide-react";
 import { FieldErrors, UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { OpportunityAttachmentsCard } from "@/components/opportunity/OpportunityAttachmentsCard";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
+import { COUNTRIES } from "@/components/application/form/countries";
+import { OPPORTUNITY_TYPE_VALUES } from "@/lib/schemas/opportunityForm.schema";
+import type { OpportunityFormRole } from "@/lib/schemas/opportunityForm.schema";
+import { getLocalizedSectorName } from "@/lib/localizedSector";
 
 /** Minimal form shape shared by admin and partner opportunity forms */
 export type OpportunityFormShape = {
@@ -38,16 +44,13 @@ export type Sector = { id: number; name: string };
 export type TagOption = { id: number; name: string };
 
 export type OpportunityFormContentProps<T extends OpportunityFormShape> = {
-  variant: "admin" | "partner";
+  role: OpportunityFormRole;
   form: UseFormReturn<T>;
   backHref: string;
-  backLabel: string;
   onBack: () => void;
   isEditing: boolean;
   isSubmitting: boolean;
   isLoading?: boolean;
-  title: string;
-  subtitle: string;
   sectors: Sector[];
   allTags: TagOption[];
   selectedTags: string[];
@@ -90,16 +93,13 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
   props: OpportunityFormContentProps<T>
 ) {
   const {
-    variant,
+    role,
     form,
     backHref,
-    backLabel,
     onBack,
     isEditing,
     isSubmitting,
     isLoading = false,
-    title,
-    subtitle,
     sectors,
     allTags,
     selectedTags,
@@ -133,30 +133,68 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
     showFeatured = false,
   } = props;
 
+  const { t, i18n } = useTranslation("dashboard");
   const { toast } = useToast();
-  const { register, watch, setValue, formState, handleSubmit } = form as UseFormReturn<any>;
-  const errors = formState?.errors ?? {};
+  const { watch, setValue, formState, handleSubmit, control } = form as UseFormReturn<any>;
+
+  const pageTitle = isEditing
+    ? t("opportunities.form.titleEdit")
+    : t("opportunities.form.titleCreate");
+  const pageSubtitle = isEditing
+    ? t(role === "admin" ? "opportunities.form.subtitleEditAdmin" : "opportunities.form.subtitleEditPartner")
+    : t(role === "admin" ? "opportunities.form.subtitleCreateAdmin" : "opportunities.form.subtitleCreatePartner");
+  const backLabel = t(role === "admin" ? "opportunities.form.backAdmin" : "opportunities.form.backPartner");
+
+  const typeOptions = useMemo(
+    () =>
+      OPPORTUNITY_TYPE_VALUES.map((value) => ({
+        value,
+        label: t(`opportunities.form.types.${value}`),
+      })),
+    [t],
+  );
+
+  const statusOptions = useMemo(() => {
+    const values = role === "admin"
+      ? (["new", "open", "closing-soon", "closed", "archived"] as const)
+      : (["new", "open", "closing-soon", "closed"] as const);
+    return values.map((value) => ({
+      value,
+      label: t(`opportunities.form.statuses.${value}`),
+    }));
+  }, [role, t]);
+
+  const sectorOptions = useMemo(
+    () =>
+      sectors.map((sector) => ({
+        value: sector.id.toString(),
+        label: getLocalizedSectorName(sector.name, t),
+      })),
+    [sectors, t],
+  );
+
+  const countryOptions = useMemo(
+    () => COUNTRIES.map(({ value, label }) => ({ value, label })),
+    [],
+  );
 
   const onInvalid = (fieldErrors: FieldErrors) => {
     const first = Object.values(fieldErrors).find(
       (e) => e && typeof e === "object" && "message" in e && e.message
     ) as { message?: string } | undefined;
     toast({
-      title: "Check the form",
-      description: first?.message ?? "Fix the highlighted fields before saving.",
+      title: t("opportunities.form.toast.invalidTitle"),
+      description: first?.message ?? t("opportunities.form.toast.invalidDescription"),
       variant: "destructive",
     });
   };
-  const status = watch("status");
-  const sectorId = watch("sectorId");
   const opportunityType = watch("opportunityType");
-  const deadline = watch("deadline");
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-muted-foreground">Loading opportunity...</p>
+          <p className="text-muted-foreground">{t("opportunities.form.loading")}</p>
         </div>
       </div>
     );
@@ -166,8 +204,8 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{subtitle}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{pageTitle}</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{pageSubtitle}</p>
         </div>
         <Button variant="ghost" onClick={onBack} className="w-full sm:w-auto min-h-[44px]">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -175,184 +213,194 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
         </Button>
       </div>
 
+      <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Opportunity Information</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t("opportunities.form.sections.information.title")}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  Enter the basic information for the opportunity.
+                  {t("opportunities.form.sections.information.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    placeholder="e.g., African Women Tech Entrepreneurs Grant"
-                    className={errors.title ? "border-destructive" : ""}
-                  />
-                  {errors.title && <p className="text-sm text-destructive mt-1">{(errors as any).title.message}</p>}
-                </div>
+                <CustomFormField
+                  control={control}
+                  name="title"
+                  label={t("opportunities.form.fields.title.label")}
+                  fieldType={FormFieldType.INPUT}
+                  placeholder={t("opportunities.form.fields.title.placeholder")}
+                  required
+                />
 
-                <div>
-                  <Label htmlFor="description">Description *</Label>
-                  <RichTextEditor
-                    value={watch("description")}
-                    onChange={(value) => setValue("description", value as any, { shouldValidate: true })}
-                    placeholder="Provide a comprehensive description of the opportunity. Use formatting to make it clear and engaging..."
-                    error={!!errors.description}
-                  />
-                  {errors.description && <p className="text-sm text-destructive mt-1">{(errors as any).description.message}</p>}
-                </div>
+                <FormField
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("opportunities.form.fields.description.label")} *</FormLabel>
+                      <FormControl>
+                        <RichTextEditor
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
+                          placeholder={t("opportunities.form.fields.description.placeholder")}
+                          error={!!formState.errors.description}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <Label>Opportunity Type *</Label>
-                    <Select
-                      value={opportunityType ?? ""}
-                      onValueChange={(value) => setValue("opportunityType", value as any, { shouldValidate: true })}
-                    >
-                      <SelectTrigger className={errors.opportunityType ? "border-destructive" : ""}>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="grant">Grant</SelectItem>
-                        <SelectItem value="fellowship">Fellowship</SelectItem>
-                        <SelectItem value="scholarship">Scholarship</SelectItem>
-                        <SelectItem value="internship">Internship</SelectItem>
-                        <SelectItem value="training">Training</SelectItem>
-                        <SelectItem value="competition">Competition</SelectItem>
-                        <SelectItem value="accelerator">Accelerator</SelectItem>
-                        <SelectItem value="incubator">Incubator</SelectItem>
-                        <SelectItem value="job">Job</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.opportunityType && (
-                      <p className="text-sm text-destructive mt-1">{(errors as any).opportunityType.message}</p>
+                  <FormField
+                    control={control}
+                    name="opportunityType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("opportunities.form.fields.opportunityType.label")} *</FormLabel>
+                        <Select
+                          value={field.value ?? ""}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("opportunities.form.fields.opportunityType.placeholder")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {typeOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </div>
-                  <div>
-                    <Label>Sector</Label>
-                    <Select
-                      value={sectorId?.toString() ?? ""}
-                      onValueChange={(value) => setValue("sectorId", value ? parseInt(value, 10) : undefined, { shouldValidate: true })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select sector" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sectors.map((sector) => (
-                          <SelectItem key={sector.id} value={sector.id.toString()}>
-                            {sector.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="status">Status *</Label>
-                    <Select
-                      value={status || "open"}
-                      onValueChange={(value) => setValue("status", value, { shouldValidate: true })}
-                    >
-                      <SelectTrigger id="status">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="open">Open</SelectItem>
-                        <SelectItem value="closing-soon">Closing Soon</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                        {variant === "admin" && <SelectItem value="archived">Archived</SelectItem>}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  />
+                  <FormField
+                    control={control}
+                    name="sectorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("opportunities.form.fields.sector.label")}</FormLabel>
+                        <Select
+                          value={field.value?.toString() ?? ""}
+                          onValueChange={(value) =>
+                            field.onChange(value ? parseInt(value, 10) : undefined)
+                          }
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("opportunities.form.fields.sector.placeholder")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {sectorOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <CustomFormField
+                    control={control}
+                    name="status"
+                    label={t("opportunities.form.fields.status.label")}
+                    fieldType={FormFieldType.SELECT}
+                    placeholder={t("opportunities.form.fields.status.placeholder")}
+                    options={statusOptions}
+                    required
+                  />
                 </div>
 
                 {opportunityType === "grant" && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="fundingAmount">Funding Amount *</Label>
-                      <Input
-                        id="fundingAmount"
-                        {...register("fundingAmount", {
-                          validate: (value: unknown) =>
-                            opportunityType !== "grant" ||
-                            (value && String(value).trim().length > 0) ||
-                            "Funding amount is required",
-                        })}
-                        placeholder="e.g., Up to $50,000"
-                        className={errors.fundingAmount ? "border-destructive" : ""}
-                      />
-                      {errors.fundingAmount && <p className="text-sm text-destructive mt-1">{(errors as any).fundingAmount.message}</p>}
-                    </div>
-                    <div>
-                      <Label htmlFor="currency">Currency</Label>
-                      <Input id="currency" {...register("currency")} placeholder="USD" />
-                    </div>
+                    <CustomFormField
+                      control={control}
+                      name="fundingAmount"
+                      label={t("opportunities.form.fields.fundingAmount.label")}
+                      fieldType={FormFieldType.INPUT}
+                      placeholder={t("opportunities.form.fields.fundingAmount.placeholder")}
+                      required
+                    />
+                    <CustomFormField
+                      control={control}
+                      name="currency"
+                      label={t("opportunities.form.fields.currency.label")}
+                      fieldType={FormFieldType.INPUT}
+                      placeholder={t("opportunities.form.fields.currency.placeholder")}
+                    />
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="deadline">Deadline *</Label>
-                    <Input
-                      id="deadline"
-                      type="date"
-                      {...register("deadline")}
-                      className={errors.deadline ? "border-destructive" : ""}
-                    />
-                    {errors.deadline && <p className="text-sm text-destructive mt-1">{(errors as any).deadline.message}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      {...register("location")}
-                      placeholder="e.g., Kenya, Nigeria, All Africa"
-                      className={errors.location ? "border-destructive" : ""}
-                    />
-                    {errors.location && <p className="text-sm text-destructive mt-1">{(errors as any).location.message}</p>}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input id="country" {...register("country")} placeholder="e.g., Kenya" />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="requirements">Requirements</Label>
-                  <Textarea
-                    id="requirements"
-                    {...register("requirements")}
-                    placeholder="Comma-separated requirements (e.g., Business plan, Pitch deck, Financials)"
-                    rows={4}
+                  <FormField
+                    control={control}
+                    name="deadline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("opportunities.form.fields.deadline.label")} *</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <CustomFormField
+                    control={control}
+                    name="location"
+                    label={t("opportunities.form.fields.location.label")}
+                    fieldType={FormFieldType.INPUT}
+                    placeholder={t("opportunities.form.fields.location.placeholder")}
+                    required
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="eligibilityCriteria">Eligibility Criteria</Label>
-                  <Textarea
-                    id="eligibilityCriteria"
-                    {...register("eligibilityCriteria")}
-                    placeholder="Comma-separated eligibility (e.g., Women-led startup, Registered business)"
-                    rows={4}
-                  />
-                </div>
+                <CustomFormField
+                  control={control}
+                  name="country"
+                  label={t("opportunities.form.fields.country.label")}
+                  fieldType={FormFieldType.SELECT}
+                  placeholder={t("opportunities.form.fields.country.placeholder")}
+                  options={countryOptions}
+                />
+
+                <CustomFormField
+                  key={`requirements-${i18n.language}`}
+                  control={control}
+                  name="requirements"
+                  label={t("opportunities.form.fields.requirements.label")}
+                  fieldType={FormFieldType.TEXTAREA}
+                  placeholder={t("opportunities.form.fields.requirements.placeholder")}
+                  rows={4}
+                />
+
+                <CustomFormField
+                  key={`eligibility-${i18n.language}`}
+                  control={control}
+                  name="eligibilityCriteria"
+                  label={t("opportunities.form.fields.eligibilityCriteria.label")}
+                  fieldType={FormFieldType.TEXTAREA}
+                  placeholder={t("opportunities.form.fields.eligibilityCriteria.placeholder")}
+                  rows={4}
+                />
 
                 <div>
                   <Label className="flex items-center gap-1.5 mb-2">
                     <Tag className="h-3.5 w-3.5" />
-                    Tags
+                    {t("opportunities.form.fields.tags.label")}
                   </Label>
                   <p className="text-xs text-muted-foreground mb-2">
-                    Select existing tags or type a new one and press Enter to create it.
+                    {t("opportunities.form.fields.tags.hint")}
                   </p>
                   {selectedTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-2">
@@ -363,7 +411,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                             type="button"
                             onClick={() => removeTag(tag)}
                             className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
-                            aria-label={`Remove ${tag}`}
+                            aria-label={t("opportunities.form.fields.tags.remove", { tag })}
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -383,7 +431,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                         onKeyDown={handleTagKeyDown}
                         onFocus={() => setShowSuggestions(true)}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                        placeholder="Type a tag name..."
+                        placeholder={t("opportunities.form.fields.tags.placeholder")}
                         className="flex-1"
                       />
                       <Button
@@ -396,7 +444,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                         disabled={!tagInput.trim()}
                       >
                         <Plus className="h-4 w-4 mr-1" />
-                        Add
+                        {t("opportunities.form.fields.tags.add")}
                       </Button>
                     </div>
                     {showSuggestions &&
@@ -420,7 +468,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                             className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors border-t border-border flex items-center gap-2"
                           >
                             <Plus className="h-3.5 w-3.5 text-primary" />
-                            <span>Create &quot;<strong>{tagInput.trim()}</strong>&quot;</span>
+                            <span>{t("opportunities.form.fields.tags.create", { tag: tagInput.trim() })}</span>
                           </button>
                         )}
                       </div>
@@ -435,8 +483,8 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
             {showImageSection && onImageUpload && onImageDelete && onImageChange && (
               <Card>
                 <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-base sm:text-lg">Opportunity Image</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Upload an image for this opportunity (optional)</CardDescription>
+                  <CardTitle className="text-base sm:text-lg">{t("opportunities.form.sections.image.title")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("opportunities.form.sections.image.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                   <ImageUpload
@@ -447,10 +495,13 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                     isUploading={isImageUploading}
                     uploadProgress={imageUploadProgress}
                     variant="banner"
-                    placeholder="Upload Opportunity Image"
+                    placeholder={t("opportunities.form.sections.image.uploadPlaceholder")}
+                    dropzoneHint={t("opportunities.form.sections.image.dropzoneHint")}
+                    formatsHint={t("opportunities.form.sections.image.formats")}
+                    changeLabel={t("opportunities.form.sections.image.change")}
+                    loadingLabel={t("opportunities.form.sections.image.loading")}
                     accept="image/jpeg,image/png,image/webp,image/gif"
                   />
-                  <p className="text-xs text-muted-foreground">Supported formats: JPG, PNG, WebP, GIF. Max size: 5MB</p>
                 </CardContent>
               </Card>
             )}
@@ -467,29 +518,27 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
 
             <Card>
               <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">Application Settings</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t("opportunities.form.sections.applicationSettings.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
-                <div>
-                  <Label htmlFor="maxApplicants">Max Applicants</Label>
-                  <Input
-                    id="maxApplicants"
-                    type="number"
-                    min={1}
-                    {...register("maxApplicants", { valueAsNumber: true })}
-                    placeholder="Unlimited"
-                    className={errors.maxApplicants ? "border-destructive" : ""}
-                  />
-                  {errors.maxApplicants && <p className="text-sm text-destructive mt-1">{(errors as any).maxApplicants?.message}</p>}
-                  <p className="text-xs text-muted-foreground mt-1">Leave empty for unlimited applicants</p>
-                </div>
+                <CustomFormField
+                  control={control}
+                  name="maxApplicants"
+                  label={t("opportunities.form.fields.maxApplicants.label")}
+                  fieldType={FormFieldType.NUMBER}
+                  placeholder={t("opportunities.form.fields.maxApplicants.placeholder")}
+                  min={1}
+                  description={t("opportunities.form.fields.maxApplicants.hint")}
+                />
                 {showCurrentApplicants && (
                   <div>
-                    <Label>Current Applicants</Label>
+                    <Label>{t("opportunities.form.fields.currentApplicants.label")}</Label>
                     <p className="text-sm font-medium mt-1.5" aria-live="polite">
                       {currentApplicantsCount ?? 0}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">Read-only count from submitted applications.</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("opportunities.form.fields.currentApplicants.hint")}
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -498,13 +547,13 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
             {showApplicationState && applicationStateLabel != null && (
               <Card>
                 <CardHeader className="p-4 sm:p-6">
-                  <CardTitle className="text-base sm:text-lg">Application Window State</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Derived from project status and deadline.</CardDescription>
+                  <CardTitle className="text-base sm:text-lg">{t("opportunities.form.sections.applicationWindow.title")}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("opportunities.form.sections.applicationWindow.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <p className="text-sm font-medium">{applicationStateLabel}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Applicants can apply and edit drafts only while this is open.
+                    {t("opportunities.form.sections.applicationWindow.hint")}
                   </p>
                 </CardContent>
               </Card>
@@ -515,14 +564,14 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                 <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
-                    Featured Opportunity
+                    {t("opportunities.form.sections.featured.title")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="featured">Show on Homepage</Label>
-                      <p className="text-xs text-muted-foreground">Featured opportunities appear on the landing page</p>
+                      <Label htmlFor="featured">{t("opportunities.form.sections.featured.label")}</Label>
+                      <p className="text-xs text-muted-foreground">{t("opportunities.form.sections.featured.hint")}</p>
                     </div>
                     <Switch
                       id="featured"
@@ -539,10 +588,14 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
                 <div className="space-y-2">
                   <Button type="submit" className="w-full min-h-[44px]" disabled={isSubmitting}>
                     <Save className="h-4 w-4 mr-2" />
-                    {isSubmitting ? "Saving..." : isEditing ? "Update Opportunity" : "Create Opportunity"}
+                    {isSubmitting
+                      ? t("opportunities.form.actions.saving")
+                      : isEditing
+                        ? t("opportunities.form.actions.update")
+                        : t("opportunities.form.actions.create")}
                   </Button>
                   <Button type="button" variant="outline" className="w-full min-h-[44px]" onClick={onBack}>
-                    Cancel
+                    {t("opportunities.form.actions.cancel")}
                   </Button>
                 </div>
               </CardContent>
@@ -550,6 +603,7 @@ export function OpportunityFormContent<T extends OpportunityFormShape>(
           </div>
         </div>
       </form>
+      </Form>
     </div>
   );
 }
