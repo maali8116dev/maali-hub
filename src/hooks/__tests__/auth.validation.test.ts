@@ -1,34 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
-import * as z from 'zod';
 import { validateEmail, emailSchema } from '@/lib/emailValidation';
+import { createAuthSchemas } from '@/lib/schemas/authForm.schema';
 
-
-// Auth validation schemas (matching Auth.tsx)
-const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const signUpSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: emailSchema,
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Passwords do not match",
-  path: ["passwordConfirmation"],
-});
-
-const resetPasswordSchema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  passwordConfirmation: z.string().min(6, "Password confirmation is required"),
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Passwords do not match",
-  path: ["passwordConfirmation"],
-});
+const t = (key: string) => key;
+const { signInSchema, signUpSchema, resetPasswordSchema } = createAuthSchemas(t as never);
 
 // Use real Supabase client for integration tests
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://alpudhhsmgtpmgpjfuqs.supabase.co";
@@ -127,7 +104,7 @@ describe('Auth Validation - Business Logic', () => {
     it('should validate correct sign in data', () => {
       const validData = {
         email: 'user@example.com',
-        password: 'password123',
+        password: 'Password1!',
       };
 
       expect(() => signInSchema.parse(validData)).not.toThrow();
@@ -136,7 +113,7 @@ describe('Auth Validation - Business Logic', () => {
     it('should reject invalid email format', () => {
       const invalidData = {
         email: 'invalid-email',
-        password: 'password123',
+        password: 'Password1!',
       };
 
       expect(() => signInSchema.parse(invalidData)).toThrow();
@@ -164,8 +141,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@gmail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
 
       expect(() => signUpSchema.parse(validData)).not.toThrow();
@@ -176,8 +153,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'J',
         lastName: 'Doe',
         email: 'john@gmail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
 
       expect(() => signUpSchema.parse(invalidData)).toThrow();
@@ -188,8 +165,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'John',
         lastName: 'D',
         email: 'john@gmail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
 
       expect(() => signUpSchema.parse(invalidData)).toThrow();
@@ -212,7 +189,7 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@gmail.com',
-        password: 'password123',
+        password: 'Password1!',
         passwordConfirmation: 'differentpassword',
       };
 
@@ -220,7 +197,7 @@ describe('Auth Validation - Business Logic', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues.some(issue => 
-          issue.message === 'Passwords do not match'
+          issue.message === 'auth.validation.passwordMismatch'
         )).toBe(true);
       }
     });
@@ -230,8 +207,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
 
       expect(() => signUpSchema.parse(invalidData)).toThrow();
@@ -244,8 +221,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@10minutemail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
 
       // Schema should accept it (format is valid, not in blocklist)
@@ -258,8 +235,8 @@ describe('Auth Validation - Business Logic', () => {
   describe('Password Reset Schema Validation', () => {
     it('should validate correct password reset data', () => {
       const validData = {
-        password: 'newpassword123',
-        passwordConfirmation: 'newpassword123',
+        password: 'Newpass1!',
+        passwordConfirmation: 'Newpass1!',
       };
 
       expect(() => resetPasswordSchema.parse(validData)).not.toThrow();
@@ -276,7 +253,7 @@ describe('Auth Validation - Business Logic', () => {
 
     it('should reject mismatched passwords', () => {
       const invalidData = {
-        password: 'newpassword123',
+        password: 'Newpass1!',
         passwordConfirmation: 'differentpassword',
       };
 
@@ -284,14 +261,14 @@ describe('Auth Validation - Business Logic', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues.some(issue => 
-          issue.message === 'Passwords do not match'
+          issue.message === 'auth.validation.passwordMismatch'
         )).toBe(true);
       }
     });
 
     it('should reject empty password confirmation', () => {
       const invalidData = {
-        password: 'newpassword123',
+        password: 'Newpass1!',
         passwordConfirmation: '',
       };
 
@@ -327,14 +304,12 @@ describe('Auth Validation - Business Logic', () => {
     });
 
     it('should validate minimum password length requirements', () => {
-      // Exactly 6 characters should pass
       const validData = {
-        password: '123456',
-        passwordConfirmation: '123456',
+        password: 'Passw0rd!',
+        passwordConfirmation: 'Passw0rd!',
       };
       expect(() => resetPasswordSchema.parse(validData)).not.toThrow();
 
-      // Less than 6 characters should fail
       const invalidData = {
         password: '12345',
         passwordConfirmation: '12345',
@@ -348,8 +323,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'Jo',
         lastName: 'Do',
         email: 'john@gmail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
       expect(() => signUpSchema.parse(validData)).not.toThrow();
 
@@ -358,8 +333,8 @@ describe('Auth Validation - Business Logic', () => {
         firstName: 'J',
         lastName: 'D',
         email: 'john@gmail.com',
-        password: 'password123',
-        passwordConfirmation: 'password123',
+        password: 'Password1!',
+        passwordConfirmation: 'Password1!',
       };
       expect(() => signUpSchema.parse(invalidData)).toThrow();
     });

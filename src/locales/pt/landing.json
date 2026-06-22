@@ -8,7 +8,7 @@
     "description": "Seja construindo um negócio, crescendo na carreira ou começando como estudante ou estagiário — conecte-se a programas, parceiros e avaliadores numa plataforma confiável.",
     "startApplication": "Começar",
     "viewProjects": "Ver oportunidades",
-    "browseProjects": "Ver oportunidades",
+    "browseOpportunities": "Ver oportunidades",
     "members": "Membros ativos",
     "countries": "Países",
     "totalSupport": "Prémios e apoio",
@@ -35,7 +35,7 @@
     "title": "Junte-se à rede MAALI",
     "subtitle": "Para empreendedores, profissionais, estudantes e estagiários. Navegue grátis ou desbloqueie candidaturas por menos que um café por mês.",
     "community": {
-      "name": "Community",
+      "name": "Comunidade",
       "price": "Grátis",
       "priceNote": "Sem cartão de crédito",
       "cta": "Entrar grátis",
@@ -45,7 +45,7 @@
       "feature4": "Newsletter mensal de oportunidades"
     },
     "member": {
-      "name": "Full Member",
+      "name": "Membro completo",
       "badge": "Mais popular",
       "price": "$2",
       "priceUnit": "/ mês",
@@ -61,7 +61,9 @@
   "trustIndicators": {
     "title": "Confiado pelas principais",
     "titleHighlight": "Organizações",
-    "subtitle": "Nosso foco em honestidade, integridade e competência nos torna a escolha preferida de nossos parceiros e clientes."
+    "subtitle": "Nosso foco em honestidade, integridade e competência nos torna a escolha preferida de nossos parceiros e clientes.",
+    "worldwide": "Mundial",
+    "logoLabel": "Logo {{index}}"
   },
   "howItWorks": {
     "title": "Como",
@@ -182,7 +184,7 @@
     },
     "feature5": {
       "title": "Suporte Multilíngue",
-      "description": "Disponível em inglês, francês e português para talento em toda a África."
+      "description": "Disponível em inglês, francês, português e alemão para talentos na África e além."
     },
     "feature6": {
       "title": "Acompanhamento de Progresso",
@@ -274,6 +276,274 @@
       "subtitle": "Junte-se ao talento africano que constrói negócios e carreiras com subsídios, empregos, estágios, formações, bolsas e mais.",
       "browse": "Ver oportunidades",
       "partner": "Tornar-se parceiro"
+    }
+  },
+  "faqPage": {
+    "title": "Perguntas frequentes",
+    "subtitle": "Respostas rápidas às perguntas mais comuns sobre o Maali.",
+    "searchPlaceholder": "Pesquisar na FAQ…",
+    "loadError": "Não foi possível carregar a FAQ. Tente novamente mais tarde.",
+    "retry": "Tentar novamente",
+    "searchResults": "Resultados da pesquisa",
+    "emptySearch": "Nenhuma pergunta corresponde à sua pesquisa.",
+    "empty": "Nenhuma FAQ disponível de momento.",
+    "contactSupport": "Contactar o suporte",
+    "stillHaveQuestions": "Ainda tem dúvidas?",
+    "stillHaveQuestionsDesc": "Não encontra a resposta? A nossa equipa de suporte está pronta para ajudar."
+  },
+  "mentorsPage": {
+    "badge": "Diretório de mentores",
+    "title": "Conecte-se com mentores especializados",
+    "subtitle": "Aprenda com empreendedores experientes e líderes do setor que ajudam empresas africanas a ter sucesso.",
+    "searchPlaceholder": "Pesquisar por nome, especialidade ou bio…",
+    "allSectors": "Todos os setores",
+    "allCountries": "Todos os países",
+    "loadError": "Não foi possível carregar os mentores. Tente novamente mais tarde.",
+    "emptyTitle": "Nenhum mentor encontrado",
+    "emptyFiltered": "Tente ajustar a pesquisa ou os filtros",
+    "emptyDefault": "Volte em breve para novos mentores",
+    "moreExpertise": "+{{count}} mais",
+    "noLinks": "Nenhum link externo disponível",
+    "ctaTitle": "Quer ser mentor?",
+    "ctaDesc": "Partilhe a sua experiência e ajude a próxima geração de empreendedores africanos. Junte-se à nossa rede de mentores.",
+    "ctaButton": "Contacte-nos"
+  },
+  "guidePage": {
+    "title": "Guia de candidatura",
+    "subtitle": "Guia passo a passo para se candidatar com sucesso a oportunidades de financiamento no Maali.",
+    "introTitle": "Para começar",
+    "introDesc": "Este guia acompanha-o desde a criação da conta até à submissão da candidatura. Siga estes passos para maximizar as suas hipóteses.",
+    "tipsLabel": "Dicas:",
+    "bestPracticesTitle": "Boas práticas",
+    "mistakesTitle": "Erros comuns a evitar",
+    "mistakes": [
+      "Submeter candidatura incompleta ou documentos em falta",
+      "Esperar até ao último minuto para submeter",
+      "Não ler atentamente os requisitos da oportunidade",
+      "Fornecer informações imprecisas ou enganosas",
+      "Não responder a pedidos de informação adicional"
+    ],
+    "resourcesTitle": "Precisa de mais ajuda?",
+    "resourcesDesc": "Explore estes recursos para ter sucesso na sua candidatura.",
+    "resourcesFaq": "Perguntas frequentes",
+    "resourcesContact": "Contactar o suporte",
+    "resourcesSuccessStories": "Histórias de sucesso",
+    "steps": [
+      {
+        "title": "Criar a sua conta",
+        "description": "Comece com uma conta gratuita no Maali. Registo por e-mail ou Google.",
+        "tips": [
+          "Use um endereço de e-mail profissional",
+          "Escolha uma palavra-passe segura",
+          "Verifique o e-mail rapidamente"
+        ],
+        "action": "Registar"
+      },
+      {
+        "title": "Completar o seu perfil",
+        "description": "Preencha informações exatas sobre o seu negócio. Um perfil completo aumenta as suas hipóteses.",
+        "tips": [
+          "Informações detalhadas sobre o negócio",
+          "Logótipo profissional",
+          "Dados de contacto corretos"
+        ],
+        "action": "Ir ao perfil"
+      },
+      {
+        "title": "Explorar oportunidades",
+        "description": "Explore financiamentos disponíveis. Filtre por setor e necessidades.",
+        "tips": [
+          "Leia as descrições com atenção",
+          "Verifique a elegibilidade",
+          "Anote os prazos"
+        ],
+        "action": "Explorar oportunidades"
+      },
+      {
+        "title": "Preparar os documentos",
+        "description": "Reúna todos os documentos necessários antes de começar.",
+        "tips": [
+          "Documentos de registo",
+          "Demonstrações financeiras ou projeções",
+          "Plano de negócios se exigido",
+          "Documentos de identificação",
+          "Certificados específicos do setor"
+        ],
+        "action": "Ver requisitos"
+      },
+      {
+        "title": "Submeter a candidatura",
+        "description": "Preencha o formulário em várias etapas com cuidado e precisão.",
+        "tips": [
+          "Responda em detalhe",
+          "Revise antes de enviar",
+          "Guarde o progresso"
+        ],
+        "action": "Iniciar candidatura"
+      },
+      {
+        "title": "Acompanhar a candidatura",
+        "description": "Acompanhe o estado no seu painel. Notificações por e-mail.",
+        "tips": [
+          "Consulte o painel regularmente",
+          "Responda rapidamente a pedidos",
+          "Seja paciente durante a análise"
+        ],
+        "action": "Ver painel"
+      }
+    ],
+    "bestPractices": [
+      {
+        "title": "Seja honesto e preciso",
+        "description": "Informações verdadeiras evitam rejeição e problemas futuros."
+      },
+      {
+        "title": "Prepare-se com antecedência",
+        "description": "Reúna os documentos antes de começar para evitar atrasos."
+      },
+      {
+        "title": "Siga as instruções",
+        "description": "Cada oportunidade pode ter requisitos específicos."
+      },
+      {
+        "title": "Respeite os prazos",
+        "description": "Submeta bem antes da data limite."
+      }
+    ]
+  },
+  "helpLinks": {
+    "title": "Precisa de mais ajuda?",
+    "faq": {
+      "title": "FAQ",
+      "description": "Respostas a perguntas frequentes"
+    },
+    "mentors": {
+      "title": "Mentores",
+      "description": "Conecte-se com especialistas"
+    },
+    "support": {
+      "title": "Suporte",
+      "description": "Ajuda da nossa equipa"
+    },
+    "guide": {
+      "title": "Guia",
+      "description": "Guia de candidatura passo a passo"
+    }
+  },
+  "successStoriesPage": {
+    "title": "Histórias de sucesso",
+    "subtitle": "Descubra como empreendedores africanos estão a transformar as suas comunidades e a construir negócios de sucesso com financiamento da nossa plataforma.",
+    "loading": "A carregar histórias de sucesso...",
+    "empty": "Nenhuma história de sucesso disponível de momento.",
+    "featured": "Destaque",
+    "funding": "Financiamento: {{amount}}",
+    "funded": "Financiado: {{year}}",
+    "ctaTitle": "Pronto para escrever a sua história de sucesso?",
+    "ctaDesc": "Junte-se a estes empreendedores e comece hoje o seu percurso de financiamento.",
+    "ctaButton": "Iniciar candidatura"
+  },
+  "helpPage": {
+    "title": "Centro de ajuda",
+    "subtitle": "Encontre respostas, guias e apoio para usar o Maali."
+  },
+  "partnersPage": {
+    "title": "Os nossos parceiros",
+    "subtitle": "Trabalhamos com organizações de referência em África e além para apoiar empreendedores e profissionais.",
+    "ctaTitle": "Tornar-se parceiro",
+    "ctaDesc": "Junte-se à nossa rede de parceiros e ajude a desbloquear oportunidades para talentos africanos.",
+    "ctaButton": "Contacte-nos"
+  },
+  "blogPage": {
+    "title": "Blog",
+    "subtitle": "Ideias, dicas e novidades sobre financiamento, carreiras e empreendedorismo em África.",
+    "searchPlaceholder": "Pesquisar artigos...",
+    "featured": "Destaque",
+    "readMore": "Ler mais",
+    "readTime": "{{time}} min de leitura",
+    "empty": "Nenhum artigo encontrado.",
+    "backToBlog": "Voltar ao blog",
+    "shareArticle": "Partilhar artigo",
+    "authorBio": "{{author}} é uma consultora de financiamento experiente com mais de 10 anos a ajudar empreendedores a obter financiamento.",
+    "wantMoreTitle": "Quer ler mais?",
+    "wantMoreDesc": "Explore mais artigos e recursos para ajudá-lo a ter sucesso.",
+    "browseAll": "Ver todos os artigos"
+  },
+  "seo": {
+    "home": {
+      "title": "Capacitar talentos africanos",
+      "description": "Descubra subsídios, empregos, estágios, formações, bolsas e muito mais. Candidate-se com confiança no hub de oportunidades Maali.",
+      "orgDescription": "Capacitar talentos africanos através de subsídios, empregos, estágios, formações, bolsas e oportunidades de carreira"
+    },
+    "routes": {
+      "home": {
+        "title": "Capacitar talentos africanos",
+        "description": "Descubra subsídios, empregos, formações e bolsas em África. Candidate-se com confiança no Maali."
+      },
+      "opportunities": {
+        "title": "Oportunidades",
+        "description": "Explore subsídios, empregos, bolsas e formações para talentos africanos. Filtre por setor, região e parceiro."
+      },
+      "about": {
+        "title": "Sobre o Maali",
+        "description": "Saiba como o Maali liga talentos africanos a financiamento, mentoria e oportunidades de carreira."
+      },
+      "resources": {
+        "title": "Recursos",
+        "description": "Guias, modelos e ferramentas para se candidatar a financiamento, bolsas e empregos em África."
+      },
+      "contact": {
+        "title": "Contacto",
+        "description": "Contacte a equipa Maali para parcerias, ajuda com candidaturas ou suporte da plataforma."
+      },
+      "partners": {
+        "title": "Os nossos parceiros",
+        "description": "Conheça os parceiros que trabalham com o Maali para desbloquear oportunidades para talentos africanos."
+      },
+      "successStories": {
+        "title": "Histórias de sucesso",
+        "description": "Histórias reais de fundadores e profissionais africanos que cresceram com oportunidades no Maali."
+      },
+      "blog": {
+        "title": "Blog",
+        "description": "Ideias e novidades sobre financiamento, carreiras e empreendedorismo em África."
+      },
+      "help": {
+        "title": "Centro de ajuda",
+        "description": "Respostas sobre candidaturas, elegibilidade, pagamentos e gestão de conta no Maali."
+      },
+      "faq": {
+        "title": "Perguntas frequentes",
+        "description": "Respostas a questões comuns sobre o Maali — candidaturas, elegibilidade, taxas e avaliações."
+      },
+      "mentors": {
+        "title": "Mentores",
+        "description": "Ligue-se a mentores experientes que orientam talentos africanos."
+      },
+      "guide": {
+        "title": "Guia de início",
+        "description": "Guia passo a passo para criar o seu perfil Maali e submeter candidaturas sólidas."
+      },
+      "privacy": {
+        "title": "Política de privacidade",
+        "description": "Como o Maali recolhe, utiliza e protege os seus dados pessoais."
+      },
+      "terms": {
+        "title": "Termos de serviço",
+        "description": "Os termos e condições que regem a utilização da plataforma Maali."
+      },
+      "cookies": {
+        "title": "Política de cookies",
+        "description": "Como o Maali utiliza cookies e as opções disponíveis."
+      },
+      "auth": {
+        "title": "Iniciar sessão",
+        "description": "Inicie sessão ou crie uma conta Maali para se candidatar a oportunidades em África."
+      }
+    },
+    "opportunityNotFound": {
+      "title": "Oportunidade não encontrada",
+      "description": "A oportunidade que procura não existe.",
+      "back": "Voltar às oportunidades"
     }
   }
 }

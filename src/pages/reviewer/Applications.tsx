@@ -11,12 +11,15 @@ import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { InAppTip } from "@/components/onboarding/InAppTip";
 import { getApplicationStatusBadge } from "@/lib/statusBadges";
-import { formatDate, REVIEW_DEADLINE_TOOLTIP } from "@/lib/dateUtils";
+import { formatDate } from "@/lib/dateUtils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useApplicationFilters } from "@/hooks/useApplicationFilters";
+import { useTranslation } from "react-i18next";
 
 const ReviewerApplications = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["dashboard", "common"]);
+  const deadlineTooltip = t("dashboard:reviewer.dashboardPage.deadlineTooltip");
   const { data: applications = [], isLoading, error, refetch, isRefetching } = useReviewerApplications();
 
   const {
@@ -79,7 +82,7 @@ const ReviewerApplications = () => {
       {
         accessorKey: 'applicantName',
         header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Applicant" />
+          <SortableColumnHeader column={column} title={t("dashboard:applications.columns.applicant")} />
         ),
         cell: ({ row }) => {
           return <span className="font-medium">{row.original.applicantName}</span>;
@@ -88,7 +91,7 @@ const ReviewerApplications = () => {
       {
         accessorKey: 'projectTitle',
         header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Project" />
+          <SortableColumnHeader column={column} title={t("dashboard:applications.columns.project")} />
         ),
         cell: ({ row }) => {
           return <span className="text-sm">{row.original.projectTitle}</span>;
@@ -98,14 +101,14 @@ const ReviewerApplications = () => {
         accessorKey: 'reviewDeadline',
         header: ({ column }) => (
           <div className="flex items-center gap-1">
-            <SortableColumnHeader column={column} title="Review Deadline" />
-            <HelpTooltip content={REVIEW_DEADLINE_TOOLTIP} />
+            <SortableColumnHeader column={column} title={t("dashboard:applications.columns.reviewDeadline")} />
+            <HelpTooltip content={deadlineTooltip} />
           </div>
         ),
         cell: ({ row }) => {
           const app = row.original;
           if (!app.reviewDeadline) {
-            return <span className="text-sm text-muted-foreground">No deadline</span>;
+            return <span className="text-sm text-muted-foreground">{t("dashboard:reviewer.applicationsPage.noDeadline")}</span>;
           }
           
           const deadlineDate = new Date(app.reviewDeadline);
@@ -122,19 +125,21 @@ const ReviewerApplications = () => {
                   {isOverdue && (
                     <Badge variant="destructive" className="text-xs">
                       <AlertCircle className="h-3 w-3 mr-1" />
-                      Overdue
+                      {t("dashboard:reviewer.dashboardPage.recent.overdue")}
                     </Badge>
                   )}
                   {isApproaching && !isOverdue && (
                     <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
                       <Clock className="h-3 w-3 mr-1" />
-                      {app.daysUntilDeadline === 0 ? 'Due today' : `${app.daysUntilDeadline} day${app.daysUntilDeadline === 1 ? '' : 's'} left`}
+                      {app.daysUntilDeadline === 0
+                        ? t("dashboard:reviewer.dashboardPage.recent.dueToday")
+                        : t("dashboard:reviewer.dashboardPage.recent.daysLeft", { count: app.daysUntilDeadline })}
                     </Badge>
                   )}
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>{REVIEW_DEADLINE_TOOLTIP}</p>
+                <p>{deadlineTooltip}</p>
               </TooltipContent>
             </Tooltip>
           );
@@ -152,7 +157,7 @@ const ReviewerApplications = () => {
       baseColumns.push({
         accessorKey: 'daysPending',
         header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Days Pending" />
+          <SortableColumnHeader column={column} title={t("dashboard:applications.columns.daysPending")} />
         ),
         cell: ({ row }) => {
           const daysPending = row.original.daysPending;
@@ -161,7 +166,7 @@ const ReviewerApplications = () => {
               className={daysPending >= 5 ? "bg-warning/10 text-warning border-warning/20" : "bg-secondary"}
             >
               <Clock className="h-3 w-3 mr-1" />
-              {daysPending} {daysPending === 1 ? "day" : "days"}
+              {daysPending} {daysPending === 1 ? t("dashboard:reviewer.applicationsPage.day") : t("dashboard:reviewer.applicationsPage.days")}
             </Badge>
           );
         },
@@ -175,7 +180,7 @@ const ReviewerApplications = () => {
     baseColumns.push({
       accessorKey: 'status',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Status" />
+        <SortableColumnHeader column={column} title={t("dashboard:applications.columns.status")} />
       ),
       cell: ({ row }) => {
         const app = row.original;
@@ -183,18 +188,21 @@ const ReviewerApplications = () => {
         const reviewProgress = app.reviewProgress;
         
         const statusDescriptions: Record<string, string> = {
-          draft: "You saved a draft review and can continue from where you left off",
-          pending: "Application is pending review by all assigned reviewers",
-          under_review: `Review in progress: ${reviewProgress?.completed || 0} of ${reviewProgress?.total || 0} reviewers have submitted`,
-          approved: "Application has been approved",
-          rejected: "Application has been rejected",
+          draft: t("dashboard:reviewer.applicationsPage.statusDescriptions.draft"),
+          pending: t("dashboard:reviewer.applicationsPage.statusDescriptions.pending"),
+          under_review: t("dashboard:reviewer.applicationsPage.statusDescriptions.under_review", {
+            completed: reviewProgress?.completed || 0,
+            total: reviewProgress?.total || 0,
+          }),
+          approved: t("dashboard:reviewer.applicationsPage.statusDescriptions.approved"),
+          rejected: t("dashboard:reviewer.applicationsPage.statusDescriptions.rejected"),
         };
         
         return (
           <div className="flex items-center gap-2">
-            {getApplicationStatusBadge(status, reviewProgress)}
+            {getApplicationStatusBadge(status, reviewProgress, t)}
             <HelpTooltip 
-              content={statusDescriptions[status] || "Application status"}
+              content={statusDescriptions[status] || t("dashboard:reviewer.applicationsPage.statusDescriptions.default")}
               side="top"
             />
           </div>
@@ -210,7 +218,7 @@ const ReviewerApplications = () => {
       {
         accessorKey: 'submittedAt',
         header: ({ column }) => (
-          <SortableColumnHeader column={column} title="Submitted" />
+          <SortableColumnHeader column={column} title={t("dashboard:applications.columns.submitted")} />
         ),
         cell: ({ row }) => {
         return (
@@ -227,7 +235,7 @@ const ReviewerApplications = () => {
       },
       {
         id: 'actions',
-        header: 'Actions',
+        header: t("dashboard:applications.columns.actions"),
         cell: ({ row }) => {
           const app = row.original;
           return (
@@ -238,10 +246,10 @@ const ReviewerApplications = () => {
             >
               <Eye className="h-4 w-4 mr-2" />
               {statusFilter === "pending"
-                ? "Start Review"
+                ? t("dashboard:reviewer.applicationsPage.actions.startReview")
                 : statusFilter === "draft"
-                  ? "Continue Review"
-                  : "Review"}
+                  ? t("dashboard:reviewer.applicationsPage.actions.continueReview")
+                  : t("dashboard:reviewer.applicationsPage.actions.review")}
             </Button>
           );
         },
@@ -249,16 +257,41 @@ const ReviewerApplications = () => {
     );
 
     return baseColumns;
-  }, [statusFilter, navigate]);
+  }, [statusFilter, navigate, t, deadlineTooltip]);
+
+  const pageTitle = t("dashboard:reviewer.pages.applications");
+  const pageSubtitle = t("dashboard:reviewer.applicationsPage.subtitle");
+  const pageSubtitleCount = t("dashboard:reviewer.applicationsPage.subtitleCount", {
+    count: processedApplications.length,
+  });
+
+  const filterOptions = [
+    { value: "all", label: t("dashboard:applications.filters.all") },
+    { value: "draft", label: t("dashboard:applications.filters.drafts") },
+    { value: "pending", label: t("dashboard:applications.filters.pending") },
+    { value: "under_review", label: t("dashboard:applications.filters.under_review") },
+    { value: "approved", label: t("dashboard:applications.filters.approved") },
+    { value: "rejected", label: t("dashboard:applications.filters.rejected") },
+  ] as const;
+
+  const tableTitleKey = statusFilter === "all"
+    ? "all"
+    : statusFilter === "draft"
+      ? "draft"
+      : statusFilter === "pending"
+        ? "pending"
+        : statusFilter === "under_review"
+          ? "under_review"
+          : statusFilter === "approved"
+            ? "approved"
+            : "rejected";
 
   if (isLoading) {
     return (
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Review and manage all submitted applications
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{pageTitle}</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{pageSubtitle}</p>
         </div>
         <Card>
           <CardHeader>
@@ -280,15 +313,15 @@ const ReviewerApplications = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Review and manage all submitted applications
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{pageTitle}</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{pageSubtitle}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
             <p className="text-center text-destructive">
-              Error loading applications: {error instanceof Error ? error.message : "Unknown error"}
+              {t("dashboard:reviewer.applicationsPage.loadError", {
+                message: error instanceof Error ? error.message : t("dashboard:reviewer.applicationsPage.unknownError"),
+              })}
             </p>
           </CardContent>
         </Card>
@@ -299,24 +332,15 @@ const ReviewerApplications = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Applications</h1>
-        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-          Review and manage all submitted applications ({processedApplications.length})
-        </p>
+        <h1 className="text-2xl sm:text-3xl font-bold">{pageTitle}</h1>
+        <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">{pageSubtitleCount}</p>
       </div>
 
       {/* Status Filter */}
       <Card>
         <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
           <div className="flex gap-2 flex-wrap">
-            {[
-              { value: "all", label: "All" },
-              { value: "draft", label: "Drafts" },
-              { value: "pending", label: "Pending" },
-              { value: "under_review", label: "Under Review" },
-              { value: "approved", label: "Approved" },
-              { value: "rejected", label: "Rejected" },
-            ].map((filter) => (
+            {filterOptions.map((filter) => (
               <Button
                 key={filter.value}
                 variant={statusFilter === filter.value ? "default" : "outline"}
@@ -338,9 +362,9 @@ const ReviewerApplications = () => {
             <div className="flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-warning" />
               <div>
-                <p className="font-medium">Applications pending for 5+ days</p>
+                <p className="font-medium">{t("dashboard:reviewer.applicationsPage.priorityAlert.title")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Please prioritize reviewing these applications
+                  {t("dashboard:reviewer.applicationsPage.priorityAlert.description")}
                 </p>
               </div>
             </div>
@@ -352,24 +376,14 @@ const ReviewerApplications = () => {
       <Card>
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base sm:text-lg">
-            {statusFilter === "all" 
-              ? "All Applications" 
-              : statusFilter === "draft"
-              ? "Draft Reviews"
-              : statusFilter === "pending"
-              ? "Pending Applications"
-              : statusFilter === "under_review"
-              ? "Under Review Applications"
-              : statusFilter === "approved"
-              ? "Approved Applications"
-              : "Rejected Applications"} ({processedApplications.length})
+            {t(`dashboard:reviewer.applicationsPage.tableTitles.${tableTitleKey}`)} ({processedApplications.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <DataTable
             columns={applicationColumns}
             data={processedApplications}
-            searchPlaceholder="Search by applicant name, project title, or company..."
+            searchPlaceholder={t("dashboard:reviewer.applicationsPage.searchPlaceholder")}
             pageSize={10}
             enableSorting={true}
             enablePagination={true}

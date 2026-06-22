@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { userNeedsOnboarding } from '@/lib/membershipAccess';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
-/**
- * Ensure a profile row exists for the current user.
- * Returns true if the profile was newly created (i.e. first OAuth login),
- * false if it already existed.
- */
 async function ensureProfileForUser(
   userId: string,
   userMetadata: Record<string, unknown> | null,
@@ -20,7 +17,7 @@ async function ensureProfileForUser(
     .eq('user_id', userId)
     .single();
 
-  if (existing) return false; // returning user
+  if (existing) return false;
 
   const meta = userMetadata ?? {};
   let firstName: string | null = (meta.first_name as string) ?? null;
@@ -38,11 +35,12 @@ async function ensureProfileForUser(
     last_name: lastName || null,
   });
 
-  return true; // new user
+  return true;
 }
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,7 +53,7 @@ const OAuthCallback = () => {
           msg ? decodeURIComponent(msg.replace(/\+/g, ' ')) : null;
 
         if (errorParam) {
-          setError(decodeAuthMessage(errorDescription) || errorParam || 'Authentication failed');
+          setError(decodeAuthMessage(errorDescription) || errorParam || t('auth.oauthCallback.authFailed'));
           setTimeout(() => {
             navigate('/auth', { replace: true });
           }, 3000);
@@ -92,7 +90,7 @@ const OAuthCallback = () => {
           const userEmail = session.user.email;
           if (!userEmail) {
             await supabase.auth.signOut();
-            setError('Your account has no email on file. Please use email sign-in.');
+            setError(t('auth.oauthCallback.noEmail'));
             setTimeout(() => {
               navigate('/auth', { replace: true });
             }, 3000);
@@ -115,7 +113,7 @@ const OAuthCallback = () => {
           }, 100);
         } else {
           setError(
-            exchangeErrorMessage || 'Failed to establish session. Please try again.',
+            exchangeErrorMessage || t('auth.oauthCallback.sessionFailed'),
           );
           setTimeout(() => {
             navigate('/auth', { replace: true });
@@ -123,7 +121,7 @@ const OAuthCallback = () => {
         }
       } catch (err) {
         console.error('OAuth callback error:', err);
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+        setError(err instanceof Error ? err.message : t('auth.toasts.error.description'));
         setTimeout(() => {
           navigate('/auth', { replace: true });
         }, 3000);
@@ -131,23 +129,26 @@ const OAuthCallback = () => {
     };
 
     handleCallback();
-  }, [navigate]);
+  }, [navigate, t]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="relative flex items-center justify-center min-h-screen bg-background">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           {error ? (
             <div className="text-center space-y-4">
-              <div className="text-destructive font-semibold">Authentication Error</div>
+              <div className="text-destructive font-semibold">{t('auth.oauthCallback.errorTitle')}</div>
               <p className="text-sm text-muted-foreground">{error}</p>
-              <p className="text-xs text-muted-foreground">Redirecting to sign in...</p>
+              <p className="text-xs text-muted-foreground">{t('auth.oauthCallback.redirecting')}</p>
             </div>
           ) : (
             <div className="text-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <div className="font-semibold">Completing sign in...</div>
-              <p className="text-sm text-muted-foreground">Please wait while we finish setting up your account.</p>
+              <div className="font-semibold">{t('auth.oauthCallback.completing')}</div>
+              <p className="text-sm text-muted-foreground">{t('auth.oauthCallback.pleaseWait')}</p>
             </div>
           )}
         </CardContent>
@@ -157,12 +158,3 @@ const OAuthCallback = () => {
 };
 
 export default OAuthCallback;
-
-
-
-
-
-
-
-
-

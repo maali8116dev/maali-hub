@@ -17,6 +17,7 @@ import {
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
 import { TrendingUp, Plus, X, Eye } from 'lucide-react';
 import { AddCategoryForm } from './AddCategoryForm';
+import { useTranslation } from 'react-i18next';
 
 interface ReviewersectorsTabProps {
   reviewers: any[];
@@ -27,6 +28,8 @@ export const ReviewersectorsTab = ({
   reviewers,
   sectors,
 }: ReviewersectorsTabProps) => {
+  const { t } = useTranslation(['dashboard']);
+  const rp = 'admin.reviewManagementPage.reviewers';
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -121,11 +124,11 @@ export const ReviewersectorsTab = ({
       // Also explicitly refetch to ensure UI updates
       await refetchsectors();
       
-      toast({ title: 'sector Added', description: 'Reviewer sector added successfully.' });
+      toast({ title: t(`${rp}.toast.sectorAdded`), description: t(`${rp}.toast.sectorAddedDesc`) });
     },
     onError: (error: Error) => {
       toast({ 
-        title: 'Error', 
+        title: t(`${rp}.toast.error`), 
         description: error.message || 'Failed to add sector assignment.',
         variant: 'destructive',
       });
@@ -146,7 +149,7 @@ export const ReviewersectorsTab = ({
       await queryClient.invalidateQueries({ queryKey: ['all-reviewers-with-details'] });
       // Explicitly refetch to ensure UI updates
       await refetchsectors();
-      toast({ title: 'sector Removed', description: 'Reviewer sector removed.' });
+      toast({ title: t(`${rp}.toast.sectorRemoved`), description: t(`${rp}.toast.sectorRemovedDesc`) });
     },
   });
 
@@ -155,7 +158,7 @@ export const ReviewersectorsTab = ({
     {
       accessorKey: 'name',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Reviewer" />
+        <SortableColumnHeader column={column} title={t(`${rp}.columns.reviewer`)} />
       ),
       cell: ({ row }) => {
         const reviewer = row.original;
@@ -182,7 +185,7 @@ export const ReviewersectorsTab = ({
     {
       accessorKey: 'workload',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Workload" />
+        <SortableColumnHeader column={column} title={t(`${rp}.columns.workload`)} />
       ),
       cell: ({ row }) => {
         const workload = row.original.workload || 0;
@@ -192,14 +195,14 @@ export const ReviewersectorsTab = ({
             className="flex items-center gap-1 w-fit"
           >
             <TrendingUp className="h-3 w-3" />
-            {workload} active assignment{workload !== 1 ? 's' : ''}
+            {workload} {t(`${rp}.workload`, { count: workload })}
           </Badge>
         );
       },
     },
     {
       accessorKey: 'sectors',
-      header: 'sectors',
+      header: t(`${rp}.columns.sectors`),
       cell: ({ row }) => {
         const sectors = row.original.sectors || [];
         return (
@@ -219,7 +222,7 @@ export const ReviewersectorsTab = ({
                 </Badge>
               ))
             ) : (
-              <span className="text-sm text-muted-foreground">No sectors assigned</span>
+              <span className="text-sm text-muted-foreground">{t(`${rp}.noSectors`)}</span>
             )}
           </div>
         );
@@ -227,7 +230,7 @@ export const ReviewersectorsTab = ({
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t(`${rp}.columns.actions`),
       cell: ({ row }) => {
         const reviewer = row.original;
         return (
@@ -238,7 +241,7 @@ export const ReviewersectorsTab = ({
               onClick={() => navigate(`/admin/reviewers/${reviewer.user_id}`)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              Details
+              {t(`${rp}.details`)}
             </Button>
             <Button
               variant="outline"
@@ -250,22 +253,20 @@ export const ReviewersectorsTab = ({
               disabled={addCategory.isPending || removeCategory.isPending}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add sector
+              {t(`${rp}.addSector`)}
             </Button>
           </div>
         );
       },
     },
-  ], [navigate, removeCategory, addCategory, setSelectedReviewer, setDialogOpen]);
+  ], [navigate, removeCategory, addCategory, setSelectedReviewer, setDialogOpen, t]);
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Reviewers</CardTitle>
-          <CardDescription>
-            Manage reviewer sectors and view workload. Reviewers can only review applications in their assigned sectors.
-          </CardDescription>
+          <CardTitle>{t(`${rp}.title`)}</CardTitle>
+          <CardDescription>{t(`${rp}.description`)}</CardDescription>
         </CardHeader>
         <CardContent>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
@@ -284,7 +285,7 @@ export const ReviewersectorsTab = ({
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Reviewer sector</DialogTitle>
+                <DialogTitle>{t('admin.reviewManagementPage.reviewers.addSectorDialog')}</DialogTitle>
               </DialogHeader>
               <AddCategoryForm
                 key={formKey}
@@ -304,7 +305,7 @@ export const ReviewersectorsTab = ({
             <DataTable
               columns={reviewerColumns}
               data={reviewersTableData}
-              searchPlaceholder="Search by reviewer name, sector, or workload..."
+              searchPlaceholder={t(`${rp}.searchPlaceholder`)}
               pageSize={10}
               enableSorting={true}
               enablePagination={true}

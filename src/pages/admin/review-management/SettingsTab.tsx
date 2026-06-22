@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RubricsTab } from './RubricsTab';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsTabProps {
   sectors: string[];
 }
 
 export const SettingsTab = ({ sectors }: SettingsTabProps) => {
+  const { t } = useTranslation(['dashboard']);
+  const sp = 'admin.reviewManagementPage.settings';
   const { toast } = useToast();
   const { numReviewers, updateNumReviewers } = useReviewersPerAssignment();
   const [localNumReviewers, setLocalNumReviewers] = useState(numReviewers);
@@ -20,8 +23,8 @@ export const SettingsTab = ({ sectors }: SettingsTabProps) => {
   const handleSave = () => {
     if (localNumReviewers < 1 || localNumReviewers > 10) {
       toast({
-        title: 'Invalid Value',
-        description: 'Number of reviewers must be between 1 and 10.',
+        title: t(`${sp}.toast.invalid`),
+        description: t(`${sp}.toast.invalidDesc`),
         variant: 'destructive',
       });
       return;
@@ -29,8 +32,8 @@ export const SettingsTab = ({ sectors }: SettingsTabProps) => {
     setIsSaving(true);
     updateNumReviewers(localNumReviewers);
     toast({
-      title: 'Settings Saved',
-      description: `Number of reviewers per assignment updated to ${localNumReviewers}.`,
+      title: t(`${sp}.toast.saved`),
+      description: t(`${sp}.toast.savedDesc`, { count: localNumReviewers }),
     });
     // Reset loading state after a brief delay
     setTimeout(() => setIsSaving(false), 500);
@@ -41,18 +44,14 @@ export const SettingsTab = ({ sectors }: SettingsTabProps) => {
       {/* Review Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Review Management Settings</CardTitle>
-          <CardDescription>
-            Configure global settings for the review management system
-          </CardDescription>
+          <CardTitle>{t(`${sp}.title`)}</CardTitle>
+          <CardDescription>{t(`${sp}.description`)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="num-reviewers">Number of Reviewers per Assignment</Label>
-              <p className="text-sm text-muted-foreground">
-                All new reviewer assignments will use this number. This ensures consistency across all applications.
-              </p>
+              <Label htmlFor="num-reviewers">{t(`${sp}.numReviewers`)}</Label>
+              <p className="text-sm text-muted-foreground">{t(`${sp}.numReviewersDesc`)}</p>
               <div className="flex items-center gap-4">
                 <Input
                   id="num-reviewers"
@@ -64,12 +63,12 @@ export const SettingsTab = ({ sectors }: SettingsTabProps) => {
                   className="w-32"
                 />
                 <span className="text-sm text-muted-foreground">
-                  reviewer{localNumReviewers !== 1 ? 's' : ''} per application
+                  {localNumReviewers !== 1 ? t(`${sp}.reviewersPerApp`) : t(`${sp}.reviewerPerApp`)}
                 </span>
               </div>
             </div>
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Saving...' : 'Save Settings'}
+              {isSaving ? t(`${sp}.saving`) : t(`${sp}.save`)}
             </Button>
           </div>
         </CardContent>

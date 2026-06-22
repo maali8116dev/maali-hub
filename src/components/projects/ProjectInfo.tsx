@@ -1,10 +1,12 @@
 import DOMPurify from "dompurify";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Calendar, Tag, Building2, Users, Clock, GraduationCap, Briefcase } from "lucide-react";
-import { getProjectDisplayStatus } from "@/lib/projectAvailability";
+import { getProjectDisplayStatus, getProjectDisplayStatusKey, type ProjectDisplayStatusKey } from "@/lib/projectAvailability";
 import { formatDate } from "@/lib/dateUtils";
 import { formatDisplayLocation } from "@/lib/formatLocation";
+import { useLocalizedOpportunity } from "@/lib/localizedContent";
 import type { OpportunityWithTags } from "@/hooks/useOpportunityDetails";
 import InfoField from "@/components/application/shared/InfoField";
 
@@ -12,17 +14,17 @@ interface ProjectInfoProps {
   project: OpportunityWithTags;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "New":
+const getStatusColor = (key: ProjectDisplayStatusKey) => {
+  switch (key) {
+    case "new":
       return "bg-blue-500 text-white";
-    case "Closing Soon":
+    case "closingSoon":
       return "bg-warning text-warning-foreground";
-    case "Open":
+    case "open":
       return "bg-success text-success-foreground";
-    case "Closed":
+    case "closed":
       return "bg-muted text-muted-foreground";
-    case "Archived":
+    case "archived":
       return "bg-slate-500 text-white";
     default:
       return "bg-muted text-muted-foreground";
@@ -33,10 +35,18 @@ const getStatusColor = (status: string) => {
  * Component for displaying project information
  */
 export function ProjectInfo({ project }: ProjectInfoProps) {
+  const { t, i18n } = useTranslation("common");
+  const localizedProject = useLocalizedOpportunity(project) ?? project;
+  const statusKey = getProjectDisplayStatusKey(
+    localizedProject.status,
+    localizedProject.deadline,
+    localizedProject.createdAt,
+  );
   const displayStatus = getProjectDisplayStatus(
-    project.status,
-    project.deadline,
-    project.createdAt,
+    localizedProject.status,
+    localizedProject.deadline,
+    localizedProject.createdAt,
+    t,
   );
 
 const formatOpportunityType = (type: string) => {
@@ -60,7 +70,7 @@ const formatCurrency = (amount: string, currency: string) => {
 
 const formatProjectDate = (dateString: string) => {
   try {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(i18n.language, {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -74,12 +84,14 @@ const formatProjectDate = (dateString: string) => {
     <Card>
       <CardHeader>
         <div className="flex justify-between items-start mb-4">
-          <Badge variant="secondary">{project.sector || project.tags?.[0]?.name || "Uncategorized"}</Badge>
-          <Badge className={getStatusColor(displayStatus)}>
+          <Badge variant="secondary">
+            {localizedProject.sector || localizedProject.tags?.[0]?.name || t("opportunityDetail.uncategorized")}
+          </Badge>
+          <Badge className={getStatusColor(statusKey)}>
             {displayStatus}
           </Badge>
         </div>
-        <CardTitle className="text-2xl">{project.title}</CardTitle>
+        <CardTitle className="text-2xl">{localizedProject.title}</CardTitle>
       </CardHeader>
       <CardContent>
         {/* Project Image */}
@@ -87,68 +99,56 @@ const formatProjectDate = (dateString: string) => {
           <div className="mb-6">
             <img
               src={project.imageUrl}
-              alt={project.title}
+              alt={localizedProject.title}
               className="w-full h-[400px] object-cover rounded-lg"
             />
           </div>
         )}
         <div 
           className="text-muted-foreground mb-6"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(project.description || "") }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(localizedProject.description || "") }}
         />
 
         {/* Basic Information Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <InfoField 
-            icon={MapPin} 
-            label="Location" 
-            value={formatDisplayLocation(project.location)}
+          <InfoField icon={MapPin} label={t("opportunityDetail.location")} value={formatDisplayLocation(localizedProject.location)} />
+          <InfoField icon={Calendar} label={t("opportunityDetail.deadline")} value={formatProjectDate(localizedProject.deadline)} />
+          <InfoField
+            icon={Tag}
+            label={t("opportunityDetail.sector")}
+            value={localizedProject.sector || localizedProject.tags?.[0]?.name || t("opportunityDetail.uncategorized")}
           />
-        
-          <InfoField 
-            icon={Calendar} 
-            label="Application Deadline" 
-            value={formatProjectDate(project.deadline)}
-          />
-          <InfoField 
-            icon={Tag} 
-            label="Sector" 
-            value={project.sector || project.tags?.[0]?.name || "Uncategorized"}
-          />
-          { project.fundingAmount && (
-            <InfoField 
-            icon={DollarSign} 
-            label="Funding Amount" 
-            value={formatCurrency(project.fundingAmount, project.currency)}
-          />)}
+          {localizedProject.fundingAmount && (
+            <InfoField
+              icon={DollarSign}
+              label={t("opportunityDetail.fundingAmount")}
+              value={formatCurrency(localizedProject.fundingAmount, localizedProject.currency)}
+            />
+          )}
         </div>
 
         {/* Opportunity Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <InfoField 
-            icon={Briefcase} 
-            label="Opportunity Type" 
-            value={formatOpportunityType(project.opportunityType)}
+          <InfoField
+            icon={Briefcase}
+            label={t("opportunityDetail.opportunityType")}
+            value={formatOpportunityType(localizedProject.opportunityType)}
           />
-          {project.organizationName && (
-            <InfoField 
-              icon={Building2} 
-              label="Organization" 
-              value={project.organizationName}
+          {localizedProject.organizationName && (
+            <InfoField icon={Building2} label={t("opportunityDetail.organization")} value={localizedProject.organizationName} />
+          )}
+          {localizedProject.programFormat && (
+            <InfoField
+              icon={Clock}
+              label={t("opportunityDetail.programFormat")}
+              value={formatOpportunityType(localizedProject.programFormat)}
             />
           )}
-          {project.programFormat && (
-            <InfoField 
-              icon={Clock} 
-              label="Program Format" 
-              value={formatOpportunityType(project.programFormat)}
-            />
-          )}
-          {project.experienceLevel && (
-            <InfoField 
-              icon={GraduationCap} 
-              label="Experience Level" 
-              value={formatOpportunityType(project.experienceLevel)}
+          {localizedProject.experienceLevel && (
+            <InfoField
+              icon={GraduationCap}
+              label={t("opportunityDetail.experienceLevel")}
+              value={formatOpportunityType(localizedProject.experienceLevel)}
             />
           )}
         </div>

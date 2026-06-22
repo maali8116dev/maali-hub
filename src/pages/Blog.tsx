@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Search, Calendar, User, ArrowRight, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Blog = () => {
+  const { t } = useTranslation("landing");
   const [searchQuery, setSearchQuery] = useState("");
 
   const blogPosts = [
@@ -97,10 +99,8 @@ const Blog = () => {
       <Navigation />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Insights, tips, and stories to help you succeed as an African entrepreneur.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("blogPage.title")}</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{t("blogPage.subtitle")}</p>
         </div>
 
         {/* Search */}
@@ -109,7 +109,7 @@ const Blog = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search articles..."
+              placeholder={t("blogPage.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-12"
@@ -127,7 +127,7 @@ const Blog = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-4 left-4 flex items-center gap-2">
-                <Badge variant="default">Featured</Badge>
+                <Badge variant="default">{t("blogPage.featured")}</Badge>
                 <Badge variant="outline">{featuredPost.sector}</Badge>
               </div>
             </div>
@@ -150,7 +150,7 @@ const Blog = () => {
                 </div>
                 <Link to={`/blog/${featuredPost.id}`}>
                   <Button variant="outline">
-                    Read More
+                    {t("blogPage.readMore")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -206,7 +206,7 @@ const Blog = () => {
                   <span className="text-sm text-muted-foreground">{post.readTime}</span>
                   <Link to={`/blog/${post.id}`}>
                     <Button variant="ghost" size="sm">
-                      Read More
+                      {t("blogPage.readMore")}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>

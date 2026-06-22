@@ -1,9 +1,10 @@
+import { useTranslation } from "react-i18next";
 import DocumentUploadSection from "@/components/application/DocumentUploadSection";
 import type { ApplicationFormData } from "@/stores/applicationForm";
 
 interface Step5DocumentsProps {
   opportunityId?: number;
-  applicantType?: "Individual" | "Organization" | "Startup / SME" | "NGO / Non-profit" | "Research / Academic";
+  applicantType?: ApplicationFormData["applicantType"];
   onFilesChange: (files: File[]) => void;
   onLibraryDocumentsChange: (documentIds: string[]) => void;
 }
@@ -14,12 +15,14 @@ export function Step5Documents({
   onFilesChange,
   onLibraryDocumentsChange,
 }: Step5DocumentsProps) {
+  const { t } = useTranslation("dashboard");
+
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("applications.form.step5.title")}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Upload supporting documents for your application (optional).
+          {t("applications.form.step5.description")}
         </p>
       </div>
 
@@ -32,12 +35,3 @@ export function Step5Documents({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

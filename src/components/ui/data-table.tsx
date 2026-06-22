@@ -9,8 +9,9 @@ import {
   useReactTable,
   ColumnFiltersState,
   getFilteredRowModel,
+  VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X, Download, RotateCw } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, X, Download, RotateCw, Columns3 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -25,8 +26,11 @@ import {
 } from "@/components/ui/table"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -36,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useTranslation } from "react-i18next"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -50,13 +55,17 @@ interface DataTableProps<TData, TValue> {
   className?: string
   onRefresh?: () => void | Promise<void>
   isRefreshing?: boolean
+  enableColumnVisibility?: boolean
+  initialColumnVisibility?: VisibilityState
+  /** Use inside Card — single outer border, no nested table box */
+  embedded?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   pageSize = 10,
   enableSorting = true,
   enablePagination = true,
@@ -65,9 +74,17 @@ export function DataTable<TData, TValue>({
   className,
   onRefresh,
   isRefreshing = false,
+  enableColumnVisibility = false,
+  initialColumnVisibility,
+  embedded = false,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation("common")
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t("dataTable.search")
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(
+    initialColumnVisibility ?? {},
+  )
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -85,6 +102,7 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onPaginationChange: enablePagination ? setPagination : undefined,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnVisibilityChange: enableColumnVisibility ? setColumnVisibility : undefined,
     globalFilterFn: (row, columnId, filterValue) => {
       if (!filterValue) return true;
       
@@ -151,6 +169,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       globalFilter,
       pagination: enablePagination ? pagination : undefined,
+      columnVisibility: enableColumnVisibility ? columnVisibility : undefined,
     },
     manualPagination: false,
   })
@@ -165,55 +184,31 @@ export function DataTable<TData, TValue>({
         return;
       }
 
-      // Extract headers from column definitions
+      // Extract headers from visible column definitions
       const headers: string[] = [];
-      columns.forEach((column) => {
-        // Skip action columns
-        if ((column as any).id === 'actions') return;
-        
-        // Get header text
-        const header = column.header;
-        let headerText = '';
-        
-        if (typeof header === 'string') {
-          headerText = header;
-        } else if (typeof header === 'function') {
-          // For function headers (like SortableColumnHeader), try to extract title
-          // We'll use the accessorKey as fallback
-          const accessorKey = (column as any).accessorKey || (column as any).id;
-          // Try to get a readable name from the accessorKey
-          if (accessorKey) {
-            headerText = String(accessorKey)
-              .replace(/([A-Z])/g, ' $1')
-              .replace(/^./, str => str.toUpperCase())
-              .trim();
-          } else {
-            headerText = 'Column';
-          }
-        } else {
-          // For React elements or other types, use accessorKey
-          const accessorKey = (column as any).accessorKey || (column as any).id;
-          if (accessorKey) {
-            headerText = String(accessorKey)
-              .replace(/([A-Z])/g, ' $1')
-              .replace(/^./, str => str.toUpperCase())
-              .trim();
-          } else {
-            headerText = 'Column';
-          }
+      const exportColumns = table.getVisibleLeafColumns().filter((column) => column.id !== "actions");
+
+      exportColumns.forEach((column) => {
+        const meta = column.columnDef.meta as { label?: string } | undefined;
+        if (meta?.label) {
+          headers.push(meta.label);
+          return;
         }
-        
-        headers.push(headerText);
+
+        const accessorKey = column.id;
+        headers.push(
+          String(accessorKey)
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .trim(),
+        );
       });
 
       // Extract row data
       const rows = filteredRows.map((row) => {
-        return columns.map((column) => {
-          // Skip action columns
-          if ((column as any).id === 'actions') return '';
-          
-          const accessorKey = (column as any).accessorKey || (column as any).id;
-          if (!accessorKey) return '';
+        return exportColumns.map((column) => {
+          const accessorKey = column.id;
+          if (!accessorKey) return "";
           
           // Get the raw value from the row
           let value: any;
@@ -306,7 +301,7 @@ export function DataTable<TData, TValue>({
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={searchPlaceholder}
+            placeholder={resolvedSearchPlaceholder}
             value={globalFilter}
             onChange={(e) => {
               setGlobalFilter(e.target.value);
@@ -326,7 +321,7 @@ export function DataTable<TData, TValue>({
               }}
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Clear search</span>
+              <span className="sr-only">{t("dataTable.clearSearch")}</span>
             </Button>
           )}
         </div>
@@ -337,10 +332,10 @@ export function DataTable<TData, TValue>({
             onClick={() => onRefresh()}
             disabled={isRefreshing}
             className="h-9 w-9"
-            title="Refresh data"
+            title={t("dataTable.refreshData")}
           >
             <RotateCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="sr-only">Refresh</span>
+            <span className="sr-only">{t("dataTable.refresh")}</span>
           </Button>
         )}
         {enableExport && (
@@ -352,24 +347,53 @@ export function DataTable<TData, TValue>({
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export
+                {t("dataTable.export")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={exportToCSV}>
-                CSV
+                {t("dataTable.csv")}
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
-                Excel (coming soon)
+                {t("dataTable.excelSoon")}
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
-                PDF (coming soon)
+                {t("dataTable.pdfSoon")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        {enableColumnVisibility && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Columns3 className="h-4 w-4" />
+                {t("dataTable.columns")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel>{t("dataTable.toggleColumns")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  const meta = column.columnDef.meta as { label?: string } | undefined;
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {meta?.label ?? column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
-      <div className="rounded-md border">
+      <div className={cn(embedded ? "border-t" : "rounded-md border")}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -409,10 +433,10 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length || columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {t("dataTable.noResults")}
                 </TableCell>
               </TableRow>
             )}
@@ -422,11 +446,11 @@ export function DataTable<TData, TValue>({
       {enablePagination && (
         <div className="flex items-center justify-between px-2">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredRowModel().rows.length} row(s) total.
+            {t("dataTable.rowsTotal", { count: table.getFilteredRowModel().rows.length })}
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium">Rows per page</p>
+              <p className="text-sm font-medium">{t("dataTable.rowsPerPage")}</p>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
                 onValueChange={(value) => {
@@ -446,8 +470,10 @@ export function DataTable<TData, TValue>({
               </Select>
             </div>
             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
+              {t("dataTable.pageOf", {
+                current: table.getState().pagination.pageIndex + 1,
+                total: table.getPageCount(),
+              })}
             </div>
             <div className="flex items-center space-x-2">
               <Button
@@ -456,7 +482,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">Go to first page</span>
+                <span className="sr-only">{t("dataTable.firstPage")}</span>
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
               <Button
@@ -465,7 +491,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
-                <span className="sr-only">Go to previous page</span>
+                <span className="sr-only">{t("dataTable.previousPage")}</span>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button
@@ -474,7 +500,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">Go to next page</span>
+                <span className="sr-only">{t("dataTable.nextPage")}</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button
@@ -483,7 +509,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                 disabled={!table.getCanNextPage()}
               >
-                <span className="sr-only">Go to last page</span>
+                <span className="sr-only">{t("dataTable.lastPage")}</span>
                 <ChevronsRight className="h-4 w-4" />
               </Button>
             </div>

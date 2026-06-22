@@ -1,8 +1,7 @@
 import { Control } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
-import CustomFormField, {
-  FormFieldType,
-} from "@/components/form/CustomFormField";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { ApplicationFormValues } from "../schemas";
 import { getProjectOverviewCopy } from "../constants";
 
@@ -15,6 +14,7 @@ export function Step3ProjectOverview({
   control,
   isGrantType = true,
 }: Step3ProjectOverviewProps) {
+  const { t } = useTranslation("dashboard");
   const {
     sectionTitle,
     sectionHint,
@@ -24,18 +24,16 @@ export function Step3ProjectOverview({
     summaryPlaceholder,
     locationLabel,
     locationPlaceholder,
-  } = getProjectOverviewCopy(isGrantType);
+  } = getProjectOverviewCopy(t, isGrantType);
 
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-lg font-semibold mb-2">
-          {sectionTitle}{" "}
-          <span className="text-destructive">*</span>
+          {sectionTitle} <span className="text-destructive">*</span>
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          {sectionHint}{" "}
-          <span className="text-destructive">*</span> are required.
+          {sectionHint} {t("applications.form.requiredMark")}
         </p>
       </div>
 
@@ -54,7 +52,7 @@ export function Step3ProjectOverview({
         fieldType={FormFieldType.TEXTAREA}
         label={summaryLabel}
         placeholder={summaryPlaceholder}
-        description="Must be between 30 and 400 words"
+        description={t("applications.form.step3.summaryWordLimit")}
         rows={6}
         required
       />
@@ -73,12 +71,3 @@ export function Step3ProjectOverview({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

@@ -1,5 +1,6 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { ContentTranslations } from "@/lib/localizedContent";
 
 export type SuccessStory = {
   id: number;
@@ -15,6 +16,7 @@ export type SuccessStory = {
   featured: boolean;
   display_order: number;
   status: string;
+  translations?: ContentTranslations | null;
 };
 
 /**

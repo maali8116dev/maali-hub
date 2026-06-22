@@ -1,0 +1,15 @@
+{
+  "opportunityDetail": {
+    "uncategorized": "Non classé",
+    "location": "Lieu",
+    "deadline": "Date limite de candidature",
+    "sector": "Secteur",
+    "fundingAmount": "Montant du financement",
+    "opportunityType": "Type d'opportunité",
+    "organization": "Organisation",
+    "programFormat": "Format du programme",
+    "experienceLevel": "Niveau d'expérience",
+    "requirements": "Exigences",
+    "eligibilityCriteria": "Critères d'éligibilité"
+  }
+}

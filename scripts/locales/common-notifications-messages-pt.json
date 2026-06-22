@@ -1,0 +1,59 @@
+{
+  "viewAll": "Ver todas as notificações",
+  "types": {
+    "review_assignment": "Atribuição de avaliador"
+  },
+  "messages": {
+    "fallbackOpportunity": "esta oportunidade",
+    "application": {
+      "submitted": {
+        "title": "Candidatura enviada",
+        "message": "A sua candidatura para «{{opportunityTitle}}» foi enviada com sucesso e está em análise."
+      },
+      "approved": {
+        "title": "Candidatura aprovada!",
+        "message": "Parabéns! A sua candidatura para «{{opportunityTitle}}» foi aprovada."
+      },
+      "rejected": {
+        "title": "Estado da candidatura atualizado",
+        "message": "A sua candidatura para «{{opportunityTitle}}» foi analisada. Consulte os detalhes da candidatura para mais informações."
+      },
+      "statusPending": {
+        "title": "Estado da candidatura atualizado",
+        "message": "O estado da sua candidatura para «{{opportunityTitle}}» foi atualizado para análise pendente."
+      }
+    },
+    "payment": {
+      "confirmed": {
+        "title": "Pagamento confirmado",
+        "message": "A taxa de candidatura foi confirmada e a sua candidatura está agora em análise."
+      }
+    },
+    "membership": {
+      "activated": {
+        "title": "Membro completo ativo",
+        "message": "A sua adesão completa de 2 $/mês está agora ativa. Pode candidatar-se a todas as oportunidades de financiamento."
+      },
+      "ended": {
+        "title": "Adesão terminada",
+        "message": "A sua adesão completa terminou. Está agora no plano comunitário gratuito. Faça upgrade a qualquer momento para candidatar-se novamente."
+      }
+    },
+    "review": {
+      "assigned": {
+        "title": "Nova candidatura atribuída",
+        "message": "Uma nova candidatura para «{{opportunityTitle}}» foi-lhe atribuída para análise."
+      },
+      "newApplicationRequiresReview": {
+        "title": "Nova candidatura atribuída",
+        "message": "Uma nova candidatura para «{{opportunityTitle}}» requer a sua análise."
+      }
+    },
+    "admin": {
+      "reviewerCapacityNeeded": {
+        "title": "Capacidade de avaliadores necessária",
+        "message": "Apenas {{availableCount}} avaliador(es) disponível(eis) para «{{opportunityTitle}}». Esta candidatura precisa de {{requiredReviewers}} avaliadores. Atribua um avaliador adicional."
+      }
+    }
+  }
+}

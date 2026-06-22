@@ -1,50 +1,41 @@
-/**
- * Helper to get the appropriate schema for each step
- */
+import type { TFunction } from "i18next";
 import * as z from "zod";
-import {
-  step1Schema,
-  step2Schema,
-  step2BaseSchema,
-  getStep3Schema,
-  step5Schema,
-  step4BaseSchema,
-  step4Schema as grantComplianceSchema,
-} from "./schemas";
+import { createApplicationFormSchemas } from "@/lib/schemas/applicationForm.schema";
 
 export function getStepSchema(
+  t: TFunction<"dashboard">,
   currentStep: number,
   applicantType?: string,
-  opportunityType?: string | null
+  opportunityType?: string | null,
 ): z.ZodSchema {
   const isGrantType = opportunityType === "grant";
+  const {
+    step1Schema,
+    step2BaseSchema,
+    step2GrantSchema,
+    socialLinksSchema,
+    step4BaseSchema,
+    step4GrantSchema,
+    getStep3Schema,
+  } = createApplicationFormSchemas(t);
+
   switch (currentStep) {
     case 1:
       return step1Schema;
     case 2:
-      // Step 2 is only required for non-Individual applicants
       if (applicantType === "Individual") return z.object({});
-      return isGrantType ? step2Schema : step2BaseSchema;
+      return isGrantType ? step2GrantSchema : step2BaseSchema;
     case 3:
       return getStep3Schema(isGrantType);
     case 4:
-      return step5Schema; // Social Links
+      return socialLinksSchema;
     case 5:
-      return z.object({}); // Documents (no schema validation)
+      return z.object({});
     case 6:
-      return z.object({}); // Review (no schema)
+      return z.object({});
     case 7:
-      return isGrantType ? grantComplianceSchema : step4BaseSchema; // Compliance & Declarations
+      return isGrantType ? step4GrantSchema : step4BaseSchema;
     default:
-      return z.object({}); // Submit or other steps
+      return z.object({});
   }
 }
-
-
-
-
-
-
-
-
-

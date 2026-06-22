@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 
 interface AddCategoryFormProps {
   reviewers: any[];
@@ -26,6 +27,8 @@ export const AddCategoryForm = ({
   isSubmitting,
   onDialogClose,
 }: AddCategoryFormProps) => {
+  const { t } = useTranslation(['dashboard']);
+  const af = 'admin.reviewManagementPage.addCategoryForm';
   const [reviewerId, setReviewerId] = useState(selectedReviewerId || '');
   const [sector, setCategory] = useState('');
 
@@ -55,7 +58,7 @@ export const AddCategoryForm = ({
       {selectedReviewerId ? (
         // Show reviewer name if pre-selected
         <div className="space-y-2">
-          <Label>Reviewer</Label>
+          <Label>{t(`${af}.reviewer`)}</Label>
           <div className="px-3 py-2 border rounded-md bg-muted/50">
             <p className="text-sm font-medium">
               {selectedReviewer ? `${selectedReviewer.first_name} ${selectedReviewer.last_name}` : 'Selected Reviewer'}
@@ -65,10 +68,10 @@ export const AddCategoryForm = ({
       ) : (
         // Show reviewer selector if not pre-selected
         <div className="space-y-2">
-          <Label>Reviewer</Label>
+          <Label>{t(`${af}.reviewer`)}</Label>
           <Select value={reviewerId} onValueChange={setReviewerId}>
             <SelectTrigger>
-              <SelectValue placeholder="Select reviewer" />
+              <SelectValue placeholder={t(`${af}.selectReviewer`)} />
             </SelectTrigger>
             <SelectContent>
               {reviewers.map((reviewer) => (
@@ -81,10 +84,10 @@ export const AddCategoryForm = ({
         </div>
       )}
       <div className="space-y-2">
-        <Label>Sector</Label>
+        <Label>{t(`${af}.sector`)}</Label>
         <Select value={sector} onValueChange={setCategory}>
           <SelectTrigger>
-            <SelectValue placeholder="Select sector" />
+            <SelectValue placeholder={t(`${af}.selectSector`)} />
           </SelectTrigger>
           <SelectContent>
             {sectors.map((cat) => (
@@ -96,7 +99,7 @@ export const AddCategoryForm = ({
         </Select>
       </div>
       <Button type="submit" className="w-full" disabled={!reviewerId || !sector || isSubmitting}>
-        {isSubmitting ? 'Adding...' : 'Add sector'}
+        {isSubmitting ? t(`${af}.adding`) : t(`${af}.addSector`)}
       </Button>
     </form>
   );

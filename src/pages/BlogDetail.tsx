@@ -1,4 +1,5 @@
 ﻿import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -9,6 +10,7 @@ import { ArrowLeft, Calendar, User, Clock, Share2, Tag } from "lucide-react";
 
 const BlogDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation("landing");
 
   // Mock data - replace with API call when backend is ready
   const blogPost = {
@@ -57,7 +59,7 @@ const BlogDetail = () => {
     sector: "Applications",
     readTime: "5 min read",
     featured: true,
-    emoji: "ðŸ“",
+    emoji: "📝",
     tags: ["Funding", "Applications", "Business Tips", "Entrepreneurship"]
   };
 
@@ -65,22 +67,19 @@ const BlogDetail = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Back Button */}
         <Link to="/blog">
           <Button variant="ghost" className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Blog
+            {t("blogPage.backToBlog")}
           </Button>
         </Link>
 
-        {/* Article Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-6">
-            {blogPost.featured && <Badge variant="default">Featured</Badge>}
+            {blogPost.featured && <Badge variant="default">{t("blogPage.featured")}</Badge>}
             <Badge variant="outline">{blogPost.sector}</Badge>
           </div>
-          
-          {/* Featured Image */}
+
           <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden mb-6">
             <img
               src={blogPost.featuredImage}
@@ -88,10 +87,10 @@ const BlogDetail = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          
+
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{blogPost.title}</h1>
           <p className="text-xl text-muted-foreground mb-6">{blogPost.excerpt}</p>
-          
+
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -110,7 +109,6 @@ const BlogDetail = () => {
             </div>
           </div>
 
-          {/* Tags */}
           {blogPost.tags && blogPost.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {blogPost.tags.map((tag, index) => (
@@ -122,24 +120,21 @@ const BlogDetail = () => {
             </div>
           )}
 
-          {/* Share Button */}
           <Button variant="outline" size="sm">
             <Share2 className="h-4 w-4 mr-2" />
-            Share Article
+            {t("blogPage.shareArticle")}
           </Button>
         </div>
 
-        {/* Article Content */}
         <Card>
           <CardContent className="pt-6">
-            <div 
+            <div
               className="prose prose-sm dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blogPost.content) }}
             />
           </CardContent>
         </Card>
 
-        {/* Author Info */}
         <Card className="mt-8">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
@@ -152,23 +147,19 @@ const BlogDetail = () => {
                   <p className="text-sm text-muted-foreground mb-2">{blogPost.authorRole}</p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  {blogPost.author} is an experienced funding advisor with over 10 years of experience 
-                  helping entrepreneurs secure funding for their businesses.
+                  {t("blogPage.authorBio", { author: blogPost.author })}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Related Articles CTA */}
         <Card className="mt-8 bg-primary/5 border-primary/20">
           <CardContent className="pt-6 text-center">
-            <h3 className="text-2xl font-bold mb-2">Want to Read More?</h3>
-            <p className="text-muted-foreground mb-4">
-              Explore more articles and resources to help you succeed.
-            </p>
+            <h3 className="text-2xl font-bold mb-2">{t("blogPage.wantMoreTitle")}</h3>
+            <p className="text-muted-foreground mb-4">{t("blogPage.wantMoreDesc")}</p>
             <Link to="/blog">
-              <Button variant="hero">Browse All Articles</Button>
+              <Button variant="hero">{t("blogPage.browseAll")}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -179,12 +170,3 @@ const BlogDetail = () => {
 };
 
 export default BlogDetail;
-
-
-
-
-
-
-
-
-

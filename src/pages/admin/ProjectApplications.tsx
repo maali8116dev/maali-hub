@@ -18,6 +18,8 @@ import {
   RankedApplication,
   useProjectApplicationsRanked,
 } from "@/hooks/useProjectApplicationsRanked";
+import { useTranslation } from "react-i18next";
+import { pickLocalizedField } from "@/lib/localizedContent";
 
 const scoreBadgeClass = (score: number | null) => {
   if (score === null || Number.isNaN(score)) {
@@ -40,6 +42,7 @@ const varianceLabel = (variance: number | null) => {
 const ProjectApplications = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { i18n } = useTranslation(["dashboard", "common"]);
   const initialProjectId = id ? Number(id) : undefined;
   const [projectId, setProjectId] = useState<number | undefined>(initialProjectId);
   const [scoreModalApp, setScoreModalApp] = useState<RankedApplication | null>(null);
@@ -55,9 +58,9 @@ const ProjectApplications = () => {
   const projectOptions = useMemo(() => {
     return projects.map((project) => ({
       id: project.id,
-      title: project.title,
+      title: pickLocalizedField(i18n.language, project.title, project.translations, "title"),
     }));
-  }, [projects]);
+  }, [projects, i18n.language]);
 
   const currentProject = useMemo(() => {
     return projects.find((project) => project.id === projectId);

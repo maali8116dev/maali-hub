@@ -2,6 +2,14 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
+import {
+  CONTACT_SUBJECT_LABELS,
+  getEmailLabels,
+  getEmailTypeCopy,
+  pickLocale,
+  resolveEmailLocale,
+  type EmailLocale,
+} from "../_shared/email-i18n.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -90,12 +98,16 @@ interface SendEmailRequest {
     // Partner invite fields
     partnerOrgName?: string;
     inviteUrl?: string;
+    locale?: string;
   };
 }
 
 const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { subject: string; html: string; attachmentUrl?: string | null } => {
+  const locale: EmailLocale = resolveEmailLocale(data.locale);
+  const L = getEmailLabels(locale);
+  const typeCopy = getEmailTypeCopy(type, locale);
   // M1 FIX: HTML-escape all user-provided data to prevent HTML injection in emails
-  const recipientName = escapeHtml(data.recipientName || data.firstName || "Applicant");
+  const recipientName = escapeHtml(data.recipientName || data.firstName || L.applicant);
   const projectTitle = data.projectTitle ? escapeHtml(data.projectTitle) : undefined;
   const applicationId = data.applicationId ? escapeHtml(data.applicationId) : undefined;
   const statusMessage = data.statusMessage ? escapeHtml(data.statusMessage) : undefined;
@@ -469,25 +481,45 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
   switch (type) {
     case "application_submitted":
       return {
-        subject: `Application Submitted - ${projectTitle || "Maali"}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Application Submitted",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>Thanks for submitting your application. We want to make sure we have everything we need.</p>
-            <p>Your application for <strong>${projectTitle}</strong> has been successfully submitted.</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: "Thanks for submitting your application. We want to make sure we have everything we need.",
+              fr: "Merci d'avoir soumis votre candidature. Nous voulons nous assurer d'avoir tout ce dont nous avons besoin.",
+              pt: "Obrigado por submeter a sua candidatura. Queremos garantir que temos tudo o que precisamos.",
+              de: "Vielen Dank für die Einreichung Ihrer Bewerbung. Wir möchten sicherstellen, dass uns alle erforderlichen Informationen vorliegen.",
+            })}</p>
+            <p>${pickLocale(locale, {
+              en: `Your application for <strong>${projectTitle}</strong> has been successfully submitted.`,
+              fr: `Votre candidature pour <strong>${projectTitle}</strong> a été soumise avec succès.`,
+              pt: `A sua candidatura para <strong>${projectTitle}</strong> foi submetida com sucesso.`,
+              de: `Ihre Bewerbung für <strong>${projectTitle}</strong> wurde erfolgreich eingereicht.`,
+            })}</p>
             ${buildSummarySection(
               [
-                { label: "Project", value: projectTitle },
-                { label: "Application ID", value: applicationId, monospace: true },
-                { label: "Status", value: "Submitted" },
+                { label: L.project, value: projectTitle },
+                { label: L.applicationId, value: applicationId, monospace: true },
+                { label: L.status, value: L.submitted },
               ],
-              "Application summary"
+              L.applicationSummary
             )}
-            <p>Our team will review your application and get back to you within 5-7 business days.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application Status</a></div>` : ''}
-            <p>If you have any questions, please don't hesitate to contact us.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "Our team will review your application and get back to you within 5-7 business days.",
+              fr: "Notre équipe examinera votre candidature et vous répondra sous 5 à 7 jours ouvrables.",
+              pt: "A nossa equipa irá analisar a sua candidatura e responder-lhe em 5 a 7 dias úteis.",
+              de: "Unser Team prüft Ihre Bewerbung und meldet sich innerhalb von 5–7 Werktagen bei Ihnen.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.viewApplicationStatus}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "If you have any questions, please don't hesitate to contact us.",
+              fr: "Si vous avez des questions, n'hésitez pas à nous contacter.",
+              pt: "Se tiver alguma dúvida, não hesite em contactar-nos.",
+              de: "Bei Fragen können Sie sich jederzeit an uns wenden.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -495,24 +527,24 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "application_approved":
       return {
-        subject: `Congratulations! Your Application Has Been Approved - ${projectTitle}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Application Approved",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
+            <p>${L.dear} ${recipientName},</p>
             <p>We are delighted to inform you that your application for <strong>${projectTitle}</strong> has been <span class="status-badge status-approved">Approved</span>!</p>
             ${buildSummarySection(
               [
-                { label: "Project", value: projectTitle },
-                { label: "Application ID", value: applicationId, monospace: true },
-                { label: "Status", value: "Approved" },
+                { label: L.project, value: projectTitle },
+                { label: L.applicationId, value: applicationId, monospace: true },
+                { label: L.status, value: L.approved },
               ],
-              "Application summary"
+              L.applicationSummary
             )}
             ${statusMessage ? `<p>${statusMessage}</p>` : '<p>Our team will be in touch shortly with the next steps.</p>'}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.viewDetails}</a></div>` : ''}
             <p>Congratulations once again!</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -520,25 +552,25 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "application_rejected":
       return {
-        subject: `Application Update - ${projectTitle}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Application Update",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
+            <p>${L.dear} ${recipientName},</p>
             <p>Thank you for your interest in <strong>${projectTitle}</strong>.</p>
             <p>After careful consideration, we regret to inform you that your application has not been successful at this time.</p>
             ${buildSummarySection(
               [
-                { label: "Project", value: projectTitle },
-                { label: "Application ID", value: applicationId, monospace: true },
-                { label: "Status", value: "Rejected" },
+                { label: L.project, value: projectTitle },
+                { label: L.applicationId, value: applicationId, monospace: true },
+                { label: L.status, value: L.rejected },
               ],
-              "Application summary"
+              L.applicationSummary
             )}
-            ${statusMessage ? `<p><strong>Feedback:</strong> ${statusMessage}</p>` : ''}
+            ${statusMessage ? `<p><strong>${L.feedback}:</strong> ${statusMessage}</p>` : ''}
             <p>We encourage you to explore other opportunities on our platform and apply again in the future.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Browse Opportunities</a></div>` : ''}
-            <p>Best regards,<br>The Maali Team</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.browseOpportunities}</a></div>` : ''}
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -546,24 +578,39 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "application_under_review":
       return {
-        subject: `Your Application is Under Review - ${projectTitle}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Application Under Review",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>Your application for <strong>${projectTitle}</strong> is now <span class="status-badge status-review">Under Review</span>.</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: `Your application for <strong>${projectTitle}</strong> is now <span class="status-badge status-review">Under Review</span>.`,
+              fr: `Votre candidature pour <strong>${projectTitle}</strong> est <span class="status-badge status-review">en cours d'examen</span>.`,
+              pt: `A sua candidatura para <strong>${projectTitle}</strong> está <span class="status-badge status-review">em análise</span>.`,
+              de: `Ihre Bewerbung für <strong>${projectTitle}</strong> wird <span class="status-badge status-review">geprüft</span>.`,
+            })}</p>
             ${buildSummarySection(
               [
-                { label: "Project", value: projectTitle },
-                { label: "Application ID", value: applicationId, monospace: true },
-                { label: "Status", value: "Under review" },
+                { label: L.project, value: projectTitle },
+                { label: L.applicationId, value: applicationId, monospace: true },
+                { label: L.status, value: L.underReview },
               ],
-              "Application summary"
+              L.applicationSummary
             )}
-            <p>Our team is carefully evaluating your submission. You will receive an update once a decision has been made.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Track Application</a></div>` : ''}
-            <p>Thank you for your patience.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "Our team is carefully evaluating your submission. You will receive an update once a decision has been made.",
+              fr: "Notre équipe évalue attentivement votre dossier. Vous recevrez une mise à jour dès qu'une décision sera prise.",
+              pt: "A nossa equipa está a avaliar cuidadosamente a sua submissão. Receberá uma atualização assim que houver uma decisão.",
+              de: "Unser Team prüft Ihre Einreichung sorgfältig. Sie erhalten eine Benachrichtigung, sobald eine Entscheidung getroffen wurde.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.trackApplication}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "Thank you for your patience.",
+              fr: "Merci pour votre patience.",
+              pt: "Obrigado pela sua paciência.",
+              de: "Vielen Dank für Ihre Geduld.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -571,22 +618,27 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "status_update":
       return {
-        subject: `Application Status Update - ${projectTitle || "Maali"}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Status Update",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>There has been an update to your application${projectTitle ? ` for <strong>${projectTitle}</strong>` : ''}.</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: `There has been an update to your application${projectTitle ? ` for <strong>${projectTitle}</strong>` : ''}.`,
+              fr: `Il y a une mise à jour concernant votre candidature${projectTitle ? ` pour <strong>${projectTitle}</strong>` : ''}.`,
+              pt: `Há uma atualização na sua candidatura${projectTitle ? ` para <strong>${projectTitle}</strong>` : ''}.`,
+              de: `Es gibt ein Update zu Ihrer Bewerbung${projectTitle ? ` für <strong>${projectTitle}</strong>` : ''}.`,
+            })}</p>
             ${buildSummarySection(
               [
-                { label: "Project", value: projectTitle },
-                { label: "Application ID", value: applicationId, monospace: true },
+                { label: L.project, value: projectTitle },
+                { label: L.applicationId, value: applicationId, monospace: true },
               ],
-              "Application summary"
+              L.applicationSummary
             )}
             ${statusMessage ? `<p>${statusMessage}</p>` : ''}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
-            <p>Best regards,<br>The Maali Team</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.viewDetails}</a></div>` : ''}
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -594,22 +646,37 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "welcome":
       return {
-        subject: "Welcome to Maali! 🌱",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Welcome to Maali",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>Welcome to Maali – your gateway to funding opportunities across Africa!</p>
-            <p>With your new account, you can:</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: "Welcome to Maali – your gateway to funding opportunities across Africa!",
+              fr: "Bienvenue sur Maali – votre passerelle vers les opportunités de financement en Afrique !",
+              pt: "Bem-vindo à Maali – a sua porta de entrada para oportunidades de financiamento em África!",
+              de: "Willkommen bei Maali – Ihr Zugang zu Finanzierungsmöglichkeiten in ganz Afrika!",
+            })}</p>
+            <p>${pickLocale(locale, {
+              en: "With your new account, you can:",
+              fr: "Avec votre nouveau compte, vous pouvez :",
+              pt: "Com a sua nova conta, pode:",
+              de: "Mit Ihrem neuen Konto können Sie:",
+            })}</p>
             <ul>
-              <li>Browse funding opportunities tailored to your needs</li>
-              <li>Submit applications with ease</li>
-              <li>Track your application status in real-time</li>
-              <li>Receive notifications on new opportunities</li>
+              <li>${pickLocale(locale, { en: "Browse funding opportunities tailored to your needs", fr: "Parcourir des opportunités de financement adaptées à vos besoins", pt: "Explorar oportunidades de financiamento adaptadas às suas necessidades", de: "Finanzierungsmöglichkeiten finden, die zu Ihnen passen" })}</li>
+              <li>${pickLocale(locale, { en: "Submit applications with ease", fr: "Soumettre des candidatures facilement", pt: "Submeter candidaturas com facilidade", de: "Bewerbungen einfach einreichen" })}</li>
+              <li>${pickLocale(locale, { en: "Track your application status in real-time", fr: "Suivre le statut de vos candidatures en temps réel", pt: "Acompanhar o estado das candidaturas em tempo real", de: "Den Status Ihrer Bewerbungen in Echtzeit verfolgen" })}</li>
+              <li>${pickLocale(locale, { en: "Receive notifications on new opportunities", fr: "Recevoir des notifications sur les nouvelles opportunités", pt: "Receber notificações sobre novas oportunidades", de: "Benachrichtigungen über neue Opportunities erhalten" })}</li>
             </ul>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Explore Opportunities</a></div>` : ''}
-            <p>If you have any questions, our support team is here to help.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.exploreOpportunities}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "If you have any questions, our support team is here to help.",
+              fr: "Si vous avez des questions, notre équipe d'assistance est là pour vous aider.",
+              pt: "Se tiver dúvidas, a nossa equipa de apoio está disponível para ajudar.",
+              de: "Bei Fragen steht Ihnen unser Support-Team gerne zur Verfügung.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -617,14 +684,24 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "email_verification":
       return {
-        subject: "Verify Your Email - Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Verify your email address",
+          typeCopy.title,
           `
-            <p>Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Verify Email Address</a></div>` : ''}
-            <p>This verification link will expire in 24 hours.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.",
+              fr: "Merci d'avoir commencé la création de votre compte Maali. Cliquez sur le bouton ci-dessous pour vérifier votre adresse e-mail. Si vous ne souhaitez pas créer de compte, ignorez ce message.",
+              pt: "Obrigado por iniciar a criação da sua conta Maali. Clique no botão abaixo para verificar o seu e-mail. Se não pretende criar uma conta, ignore esta mensagem.",
+              de: "Vielen Dank für die Registrierung bei Maali. Bitte klicken Sie auf die Schaltfläche unten, um Ihre E-Mail-Adresse zu bestätigen. Wenn Sie kein Konto erstellen möchten, ignorieren Sie diese Nachricht.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.verifyEmail}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "This verification link will expire in 24 hours.",
+              fr: "Ce lien de vérification expirera dans 24 heures.",
+              pt: "Este link de verificação expira em 24 horas.",
+              de: "Dieser Bestätigungslink läuft in 24 Stunden ab.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -632,15 +709,30 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "password_reset":
       return {
-        subject: "Reset Your Password - Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Reset your password",
+          typeCopy.title,
           `
-            <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
-            <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button button-warning" style="color:#ffffff;text-decoration:none;">Reset Password</a></div>` : ''}
-            <p>This link will expire in 1 hour for security reasons.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "We received a request to reset your password for your Maali account. We want to make sure it's really you.",
+              fr: "Nous avons reçu une demande de réinitialisation du mot de passe de votre compte Maali.",
+              pt: "Recebemos um pedido para redefinir a palavra-passe da sua conta Maali.",
+              de: "Wir haben eine Anfrage zum Zurücksetzen des Passworts für Ihr Maali-Konto erhalten.",
+            })}</p>
+            <p>${pickLocale(locale, {
+              en: "Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.",
+              fr: "Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe. Si vous n'avez pas demandé de réinitialisation, ignorez ce message.",
+              pt: "Clique no botão abaixo para criar uma nova palavra-passe. Se não solicitou a redefinição, ignore esta mensagem.",
+              de: "Klicken Sie auf die Schaltfläche unten, um ein neues Passwort zu erstellen. Wenn Sie keine Zurücksetzung angefordert haben, ignorieren Sie diese Nachricht.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button button-warning" style="color:#ffffff;text-decoration:none;">${L.resetPassword}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "This link will expire in 1 hour for security reasons.",
+              fr: "Ce lien expirera dans 1 heure pour des raisons de sécurité.",
+              pt: "Este link expira em 1 hora por motivos de segurança.",
+              de: "Dieser Link läuft aus Sicherheitsgründen in 1 Stunde ab.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -648,17 +740,27 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "contact_confirmation":
       return {
-        subject: "Thank You for Contacting Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Message Received",
+          typeCopy.title,
           `
-            <p>Dear ${firstName || recipientName},</p>
-            <p>Thank you for reaching out to Maali! We have received your message and our team will get back to you within 24 hours.</p>
-            <p><strong>Your Message:</strong></p>
-            <p style="background-color: #f9fafb; padding: 15px; border-radius: 4px; margin: 15px 0;">${message || 'No message provided'}</p>
-            ${submissionId ? `<p>Reference ID: <strong>${submissionId}</strong></p>` : ''}
-            <p>If you have any urgent questions, please don't hesitate to contact us directly at support@maali.africa.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${L.dear} ${firstName || recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: "Thank you for reaching out to Maali! We have received your message and our team will get back to you within 24 hours.",
+              fr: "Merci d'avoir contacté Maali ! Nous avons reçu votre message et notre équipe vous répondra sous 24 heures.",
+              pt: "Obrigado por contactar a Maali! Recebemos a sua mensagem e a nossa equipa responderá em 24 horas.",
+              de: "Vielen Dank für Ihre Nachricht an Maali! Wir haben Ihre Anfrage erhalten und melden uns innerhalb von 24 Stunden.",
+            })}</p>
+            <p><strong>${L.yourMessage}:</strong></p>
+            <p style="background-color: #f9fafb; padding: 15px; border-radius: 4px; margin: 15px 0;">${message || L.noMessage}</p>
+            ${submissionId ? `<p>${L.referenceId}: <strong>${submissionId}</strong></p>` : ''}
+            <p>${pickLocale(locale, {
+              en: "If you have any urgent questions, please don't hesitate to contact us directly at support@maali.africa.",
+              fr: "Pour toute question urgente, contactez-nous directement à support@maali.africa.",
+              pt: "Para questões urgentes, contacte-nos diretamente em support@maali.africa.",
+              de: "Bei dringenden Fragen erreichen Sie uns unter support@maali.africa.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -674,59 +776,69 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
       const invoicePdfUrl = data.invoicePdfUrl || null;
 
       return {
-        subject: `Payment Receipt - ${projectTitle || "Maali"}`,
+        subject: typeCopy.subject({ projectTitle }),
         html: emailTemplate(
-          "Payment Receipt",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>Thank you for your payment. Here is your receipt:</p>
-            ${invoicePdfUrl ? `<p>A PDF copy of your receipt is attached to this email.</p>` : ''}
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: "Thank you for your payment. Here is your receipt:",
+              fr: "Merci pour votre paiement. Voici votre reçu :",
+              pt: "Obrigado pelo seu pagamento. Aqui está o seu recibo:",
+              de: "Vielen Dank für Ihre Zahlung. Hier ist Ihre Quittung:",
+            })}</p>
+            ${invoicePdfUrl ? `<p>${L.pdfAttached}</p>` : ''}
             <div style="background-color:#f9fafb;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #e5e7eb;">
               <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#111827;">
                 ${projectTitle ? `
                   <tr>
-                    <td style="padding:4px 0;color:#6b7280;">Project</td>
+                    <td style="padding:4px 0;color:#6b7280;">${L.project}</td>
                     <td style="padding:4px 0;text-align:right;font-weight:500;">${projectTitle}</td>
                   </tr>
                 ` : ''}
                 ${applicationId ? `
                   <tr>
-                    <td style="padding:4px 0;color:#6b7280;">Application ID</td>
+                    <td style="padding:4px 0;color:#6b7280;">${L.applicationId}</td>
                     <td style="padding:4px 0;text-align:right;font-family:monospace;">${applicationId}</td>
                   </tr>
                 ` : ''}
                 <tr>
-                  <td style="padding:4px 0;color:#6b7280;">Amount</td>
+                  <td style="padding:4px 0;color:#6b7280;">${L.amount}</td>
                   <td style="padding:4px 0;text-align:right;font-weight:600;">${currency} ${amount}</td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 0;color:#6b7280;">Date</td>
+                  <td style="padding:4px 0;color:#6b7280;">${L.date}</td>
                   <td style="padding:4px 0;text-align:right;">${paymentDate}</td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 0;color:#6b7280;">Status</td>
+                  <td style="padding:4px 0;color:#6b7280;">${L.status}</td>
                   <td style="padding:4px 0;text-align:right;">
-                    <span class="status-badge status-approved">Paid</span>
+                    <span class="status-badge status-approved">${L.paid}</span>
                   </td>
                 </tr>
                 ${invoiceNum ? `
                   <tr>
-                    <td style="padding:4px 0;color:#6b7280;">Invoice #</td>
+                    <td style="padding:4px 0;color:#6b7280;">${L.invoiceNum}</td>
                     <td style="padding:4px 0;text-align:right;">${invoiceNum}</td>
                   </tr>
                 ` : ''}
                 ${transactionIdVal ? `
                   <tr>
-                    <td style="padding:4px 0;color:#6b7280;">Transaction ID</td>
+                    <td style="padding:4px 0;color:#6b7280;">${L.transactionId}</td>
                     <td style="padding:4px 0;text-align:right;font-family:monospace;">${transactionIdVal}</td>
                   </tr>
                 ` : ''}
               </table>
             </div>
-            <p>Your application fee has been confirmed and your application is now under review.</p>
-            ${actionUrl ? `<div style="text-align:center;margin:16px 0;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Application</a></div>` : ''}
-            <p>Please keep this email for your records. If you have any questions about this payment, please contact our support team.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "Your application fee has been confirmed and your application is now under review.",
+              fr: "Vos frais de candidature ont été confirmés et votre dossier est en cours d'examen.",
+              pt: "A taxa de candidatura foi confirmada e a sua candidatura está em análise.",
+              de: "Ihre Bewerbungsgebühr wurde bestätigt und Ihre Bewerbung wird nun geprüft.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align:center;margin:16px 0;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.viewApplicationStatus}</a></div>` : ''}
+            <p>${L.keepRecords} ${L.paymentQuestions}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: invoicePdfUrl,
@@ -734,33 +846,32 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
     }
 
     case "contact_submission": {
-      const subjectLabels: Record<string, string> = {
-        funding: "Funding Inquiry",
-        application: "Application Support",
-        partnership: "Partnership",
-        technical: "Technical Support",
-        general: "General Inquiry"
-      };
-      const subjectLabel = subjectLabels[subject || 'general'] || subject || 'General Inquiry';
-      
+      const subjectLabels = CONTACT_SUBJECT_LABELS[locale];
+      const subjectLabel = subjectLabels[subject || "general"] || subject || subjectLabels.general;
+
       return {
-        subject: `New Contact Form Submission: ${subjectLabel}`,
+        subject: typeCopy.subject({ subjectLabel }),
         html: emailTemplate(
-          "New Contact Form Submission",
+          typeCopy.title,
           `
-            <p>A new contact form submission has been received:</p>
+            <p>${pickLocale(locale, {
+              en: "A new contact form submission has been received:",
+              fr: "Une nouvelle soumission du formulaire de contact a été reçue :",
+              pt: "Foi recebida uma nova submissão do formulário de contacto:",
+              de: "Eine neue Kontaktformular-Einreichung ist eingegangen:",
+            })}</p>
             <div style="background-color: #f9fafb; padding: 20px; border-radius: 4px; margin: 20px 0;">
-              <p><strong>Name:</strong> ${firstName || ''} ${lastName || ''}</p>
-              <p><strong>Email:</strong> ${email || 'N/A'}</p>
-              ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
-              ${country ? `<p><strong>Country:</strong> ${country}</p>` : ''}
-              <p><strong>Subject:</strong> ${subjectLabel}</p>
-              <p><strong>Message:</strong></p>
-              <p style="white-space: pre-wrap; margin-top: 10px;">${message || 'No message provided'}</p>
+              <p><strong>${L.name}:</strong> ${firstName || ''} ${lastName || ''}</p>
+              <p><strong>${L.email}:</strong> ${email || L.na}</p>
+              ${phone ? `<p><strong>${L.phone}:</strong> ${phone}</p>` : ''}
+              ${country ? `<p><strong>${L.country}:</strong> ${country}</p>` : ''}
+              <p><strong>${L.subject}:</strong> ${subjectLabel}</p>
+              <p><strong>${L.message}:</strong></p>
+              <p style="white-space: pre-wrap; margin-top: 10px;">${message || L.noMessage}</p>
             </div>
-            ${submissionId ? `<p>Submission ID: <strong>${submissionId}</strong></p>` : ''}
-            <p>Please respond to this inquiry within 24 hours.</p>
-            <p>Best regards,<br>Maali Contact System</p>
+            ${submissionId ? `<p>${L.submissionId}: <strong>${submissionId}</strong></p>` : ''}
+            <p>${L.respondWithin24h}</p>
+            <p>${L.bestRegards}<br>${L.contactSystem}</p>
           `
         ),
         attachmentUrl: null,
@@ -769,16 +880,31 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     case "kyc_verified":
       return {
-        subject: "Identity Verification Approved - Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Identity Verification Approved",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>We are pleased to inform you that your identity verification (KYC) has been <span class="status-badge status-approved">Verified</span>.</p>
-            <p>Your account is now fully verified and you can access all features of the platform.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Go to Dashboard</a></div>` : ''}
-            <p>Thank you for completing the verification process.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: 'We are pleased to inform you that your identity verification (KYC) has been <span class="status-badge status-approved">Verified</span>.',
+              fr: 'Nous avons le plaisir de vous informer que votre vérification d\'identité (KYC) a été <span class="status-badge status-approved">approuvée</span>.',
+              pt: 'Temos o prazer de informar que a sua verificação de identidade (KYC) foi <span class="status-badge status-approved">aprovada</span>.',
+              de: 'Wir freuen uns, Ihnen mitteilen zu können, dass Ihre Identitätsprüfung (KYC) <span class="status-badge status-approved">genehmigt</span> wurde.',
+            })}</p>
+            <p>${pickLocale(locale, {
+              en: "Your account is now fully verified and you can access all features of the platform.",
+              fr: "Votre compte est entièrement vérifié et vous pouvez accéder à toutes les fonctionnalités.",
+              pt: "A sua conta está totalmente verificada e pode aceder a todas as funcionalidades.",
+              de: "Ihr Konto ist nun vollständig verifiziert und Sie können alle Funktionen nutzen.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.goToDashboard}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "Thank you for completing the verification process.",
+              fr: "Merci d'avoir terminé le processus de vérification.",
+              pt: "Obrigado por concluir o processo de verificação.",
+              de: "Vielen Dank für den Abschluss des Verifizierungsprozesses.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -787,22 +913,37 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
     case "kyc_rejected": {
       const rejectionReason = data.rejectionReason ? escapeHtml(data.rejectionReason) : undefined;
       return {
-        subject: "Identity Verification Update - Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Identity Verification Not Approved",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>Unfortunately, your identity verification (KYC) has been <span class="status-badge status-rejected">Rejected</span>.</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: 'Unfortunately, your identity verification (KYC) has been <span class="status-badge status-rejected">Rejected</span>.',
+              fr: 'Malheureusement, votre vérification d\'identité (KYC) a été <span class="status-badge status-rejected">refusée</span>.',
+              pt: 'Infelizmente, a sua verificação de identidade (KYC) foi <span class="status-badge status-rejected">rejeitada</span>.',
+              de: 'Leider wurde Ihre Identitätsprüfung (KYC) <span class="status-badge status-rejected">abgelehnt</span>.',
+            })}</p>
             ${rejectionReason ? `
               <div style="background-color:#fef2f2;padding:16px 20px;border-radius:6px;margin:20px 0;border:1px solid #fecaca;">
-                <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#991b1b;">Reason for rejection:</p>
+                <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#991b1b;">${L.reasonForRejection}:</p>
                 <p style="margin:0;font-size:14px;color:#7f1d1d;">${rejectionReason}</p>
               </div>
             ` : ''}
-            <p>You can update your documents and resubmit your verification at any time.</p>
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">Resubmit Verification</a></div>` : ''}
-            <p>If you believe this was an error, please contact our support team.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "You can update your documents and resubmit your verification at any time.",
+              fr: "Vous pouvez mettre à jour vos documents et resoumettre votre vérification à tout moment.",
+              pt: "Pode atualizar os seus documentos e reenviar a verificação a qualquer momento.",
+              de: "Sie können Ihre Dokumente jederzeit aktualisieren und die Verifizierung erneut einreichen.",
+            })}</p>
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.resubmitVerification}</a></div>` : ''}
+            <p>${pickLocale(locale, {
+              en: "If you believe this was an error, please contact our support team.",
+              fr: "Si vous pensez qu'il s'agit d'une erreur, contactez notre équipe d'assistance.",
+              pt: "Se acredita que isto foi um erro, contacte a nossa equipa de apoio.",
+              de: "Wenn Sie glauben, dass dies ein Fehler ist, wenden Sie sich an unser Support-Team.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -810,25 +951,50 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
     }
 
     case "partner_invite": {
-      const partnerOrgName = data.partnerOrgName ? escapeHtml(data.partnerOrgName) : "your organization";
+      const partnerOrgName = data.partnerOrgName ? escapeHtml(data.partnerOrgName) : pickLocale(locale, {
+        en: "your organization",
+        fr: "votre organisation",
+        pt: "a sua organização",
+        de: "Ihrer Organisation",
+      });
       const inviteUrl = data.inviteUrl || data.actionUrl;
       return {
-        subject: `You've been invited to manage ${partnerOrgName} on Maali`,
+        subject: typeCopy.subject({ partnerOrgName }),
         html: emailTemplate(
-          "You're invited to Maali Partner Portal",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            <p>You have been invited to manage <strong>${partnerOrgName}</strong> on the Maali Partner Portal.</p>
-            <p>As a partner, you'll be able to:</p>
+            <p>${L.dear} ${recipientName},</p>
+            <p>${pickLocale(locale, {
+              en: `You have been invited to manage <strong>${partnerOrgName}</strong> on the Maali Partner Portal.`,
+              fr: `Vous avez été invité à gérer <strong>${partnerOrgName}</strong> sur le portail partenaire Maali.`,
+              pt: `Foi convidado a gerir <strong>${partnerOrgName}</strong> no portal de parceiros Maali.`,
+              de: `Sie wurden eingeladen, <strong>${partnerOrgName}</strong> im Maali-Partnerportal zu verwalten.`,
+            })}</p>
+            <p>${pickLocale(locale, {
+              en: "As a partner, you'll be able to:",
+              fr: "En tant que partenaire, vous pourrez :",
+              pt: "Como parceiro, poderá:",
+              de: "Als Partner können Sie:",
+            })}</p>
             <ul>
-              <li>Post and manage funding opportunities</li>
-              <li>Review and respond to applicants</li>
-              <li>Track your organization's impact</li>
+              <li>${pickLocale(locale, { en: "Post and manage funding opportunities", fr: "Publier et gérer des opportunités de financement", pt: "Publicar e gerir oportunidades de financiamento", de: "Finanzierungsmöglichkeiten veröffentlichen und verwalten" })}</li>
+              <li>${pickLocale(locale, { en: "Review and respond to applicants", fr: "Examiner et répondre aux candidats", pt: "Analisar e responder a candidatos", de: "Bewerber prüfen und antworten" })}</li>
+              <li>${pickLocale(locale, { en: "Track your organization's impact", fr: "Suivre l'impact de votre organisation", pt: "Acompanhar o impacto da sua organização", de: "Den Impact Ihrer Organisation verfolgen" })}</li>
             </ul>
-            <p>Click the button below to set up your account and get started. This invitation link expires in 24 hours.</p>
-            ${inviteUrl ? `<div style="text-align: center;"><a href="${inviteUrl}" class="button" style="color:#ffffff;text-decoration:none;">Accept Invitation</a></div>` : ""}
-            <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${pickLocale(locale, {
+              en: "Click the button below to set up your account and get started. This invitation link expires in 24 hours.",
+              fr: "Cliquez sur le bouton ci-dessous pour configurer votre compte. Ce lien expire dans 24 heures.",
+              pt: "Clique no botão abaixo para configurar a sua conta. Este convite expira em 24 horas.",
+              de: "Klicken Sie auf die Schaltfläche unten, um Ihr Konto einzurichten. Dieser Einladungslink läuft in 24 Stunden ab.",
+            })}</p>
+            ${inviteUrl ? `<div style="text-align: center;"><a href="${inviteUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.acceptInvitation}</a></div>` : ""}
+            <p>${pickLocale(locale, {
+              en: "If you weren't expecting this invitation, you can safely ignore this email.",
+              fr: "Si vous n'attendiez pas cette invitation, ignorez cet e-mail.",
+              pt: "Se não esperava este convite, pode ignorar este e-mail.",
+              de: "Wenn Sie diese Einladung nicht erwartet haben, ignorieren Sie diese E-Mail.",
+            })}</p>
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,
@@ -837,14 +1003,14 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
 
     default:
       return {
-        subject: "Notification from Maali",
+        subject: typeCopy.subject({}),
         html: emailTemplate(
-          "Maali Notification",
+          typeCopy.title,
           `
-            <p>Dear ${recipientName},</p>
-            ${statusMessage ? `<p>${statusMessage}</p>` : '<p>You have a new notification from Maali.</p>'}
-            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
-            <p>Best regards,<br>The Maali Team</p>
+            <p>${L.dear} ${recipientName},</p>
+            ${statusMessage ? `<p>${statusMessage}</p>` : `<p>${L.newNotification}</p>`}
+            ${actionUrl ? `<div style="text-align: center;"><a href="${actionUrl}" class="button" style="color:#ffffff;text-decoration:none;">${L.viewDetails}</a></div>` : ''}
+            <p>${L.bestRegards}<br>${L.team}</p>
           `
         ),
         attachmentUrl: null,

@@ -1,5 +1,6 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDateForLanguage } from "@/hooks/useFormattedDistance";
 
 export type PartnerRankedApplication = {
   application_id: string;
@@ -37,20 +38,35 @@ export function usePartnerApplicationsRanked(opportunityId?: number) {
   });
 }
 
+export type PartnerRankedCsvLabels = {
+  rank: string;
+  applicantName: string;
+  organization: string;
+  email: string;
+  projectTitle: string;
+  status: string;
+  avgScore: string;
+  reviews: string;
+  submitted: string;
+  na: string;
+};
+
 export function downloadQualifiedApplicantsCSV(
   applications: PartnerRankedApplication[],
-  filename = "qualified-applicants.csv"
+  filename: string,
+  labels: PartnerRankedCsvLabels,
+  locale: string,
 ) {
   const headers = [
-    "Rank",
-    "Applicant Name",
-    "Organization",
-    "Email",
-    "Project Title",
-    "Status",
-    "Avg Score",
-    "Reviews",
-    "Submitted",
+    labels.rank,
+    labels.applicantName,
+    labels.organization,
+    labels.email,
+    labels.projectTitle,
+    labels.status,
+    labels.avgScore,
+    labels.reviews,
+    labels.submitted,
   ];
   const rows = applications.map((a) => [
     a.rank_position,
@@ -59,9 +75,9 @@ export function downloadQualifiedApplicantsCSV(
     a.applicant_email,
     a.project_title || "",
     a.status || "",
-    a.average_score?.toFixed(1) ?? "N/A",
+    a.average_score?.toFixed(1) ?? labels.na,
     a.total_reviews,
-    new Date(a.submitted_at).toLocaleDateString(),
+    formatDateForLanguage(a.submitted_at, locale),
   ]);
 
   const csvContent = [headers, ...rows]

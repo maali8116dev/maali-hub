@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+import type { OpportunityTranslations } from "@/lib/localizedContent";
+
 export type OpportunityType = 
   | 'grant'
   | 'fellowship'
@@ -68,6 +70,7 @@ export type Opportunity = {
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;
+  translations: OpportunityTranslations | null;
 };
 
 // Transform Supabase snake_case to camelCase
@@ -107,6 +110,7 @@ export function transformOpportunity(data: any): Opportunity {
     createdBy: data.created_by || data.createdBy,
     createdAt: data.created_at || data.createdAt,
     updatedAt: data.updated_at || data.updatedAt,
+    translations: (data.translations as OpportunityTranslations) ?? null,
   };
 }
 

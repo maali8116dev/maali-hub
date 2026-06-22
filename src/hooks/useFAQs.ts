@@ -1,7 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import i18n from "@/lib/i18n";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
+import type { ContentTranslations } from "@/lib/localizedContent";
+import {
+  cmsTranslationFailureMessage,
+  invalidateCmsTranslationQueries,
+  triggerFaqTranslation,
+} from "@/hooks/useTranslateCms";
 
 export interface FAQ {
   id: number;
@@ -13,6 +20,7 @@ export interface FAQ {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  translations?: ContentTranslations | null;
 }
 
 export interface FAQFormData {
@@ -60,6 +68,7 @@ function normalizeFaqRow(row: Record<string, unknown>): FAQ {
     created_at: r.created_at as string,
     updated_at: r.updated_at as string,
     created_by: r.created_by as string | null,
+    translations: (r.translations as ContentTranslations | null) ?? null,
   };
 }
 
@@ -135,11 +144,18 @@ export const useCreateFAQ = () => {
         description: `Created FAQ: ${faq.question.substring(0, 50)}...`,
         metadata: { sector: faq.sector },
       });
-      toast.success("FAQ created successfully");
+      toast.success(i18n.t("toasts.faq.created", { ns: "common" }));
+      void triggerFaqTranslation(faq.id).then((result) => {
+        if (!result.ok) {
+          console.warn(cmsTranslationFailureMessage(result.reason));
+        } else {
+          invalidateCmsTranslationQueries(queryClient, "faq");
+        }
+      });
     },
     onError: (error) => {
       console.error("Error creating FAQ:", error);
-      toast.error("Failed to create FAQ");
+      toast.error(i18n.t("toasts.faq.createError", { ns: "common" }));
     },
   });
 };
@@ -172,11 +188,18 @@ export const useUpdateFAQ = () => {
         description: `Updated FAQ: ${faq.question.substring(0, 50)}...`,
         metadata: { sector: faq.sector },
       });
-      toast.success("FAQ updated successfully");
+      toast.success(i18n.t("toasts.faq.updated", { ns: "common" }));
+      void triggerFaqTranslation(faq.id).then((result) => {
+        if (!result.ok) {
+          console.warn(cmsTranslationFailureMessage(result.reason));
+        } else {
+          invalidateCmsTranslationQueries(queryClient, "faq");
+        }
+      });
     },
     onError: (error) => {
       console.error("Error updating FAQ:", error);
-      toast.error("Failed to update FAQ");
+      toast.error(i18n.t("toasts.faq.updateError", { ns: "common" }));
     },
   });
 };
@@ -208,11 +231,11 @@ export const useDeleteFAQ = () => {
         entityId: String(data.id),
         description: `Deleted FAQ: ${data.question.substring(0, 50)}...`,
       });
-      toast.success("FAQ deleted successfully");
+      toast.success(i18n.t("toasts.faq.deleted", { ns: "common" }));
     },
     onError: (error) => {
       console.error("Error deleting FAQ:", error);
-      toast.error("Failed to delete FAQ");
+      toast.error(i18n.t("toasts.faq.deleteError", { ns: "common" }));
     },
   });
 };
@@ -235,11 +258,15 @@ export const useToggleFAQPublished = () => {
     },
     onSuccess: (data: FAQ) => {
       queryClient.invalidateQueries({ queryKey: ["faqs"] });
-      toast.success(data.is_published ? "FAQ published" : "FAQ unpublished");
+      toast.success(
+        data.is_published
+          ? i18n.t("toasts.faq.published", { ns: "common" })
+          : i18n.t("toasts.faq.unpublished", { ns: "common" }),
+      );
     },
     onError: (error) => {
       console.error("Error toggling FAQ status:", error);
-      toast.error("Failed to update FAQ status");
+      toast.error(i18n.t("toasts.faq.statusError", { ns: "common" }));
     },
   });
 };

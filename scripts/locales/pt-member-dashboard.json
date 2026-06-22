@@ -1,0 +1,52 @@
+{
+  "title": "Painel",
+  "welcome": "Bem-vindo de volta! Aqui está uma visão geral da sua atividade.",
+  "helpTooltip": "O seu painel mostra uma visão geral das suas candidaturas, estado do perfil e ações rápidas. Use os cartões de estatísticas para acompanhar o progresso.",
+  "stats": {
+    "totalApplications": "Total de candidaturas",
+    "totalApplicationsDesc": "Número total de candidaturas que enviou, incluindo rascunhos, pendentes, aprovadas e rejeitadas.",
+    "allTimeApplications": "Candidaturas de sempre",
+    "pending": "Pendente",
+    "pendingDesc": "Candidaturas atualmente em análise pela nossa equipa. Será notificado quando houver uma decisão.",
+    "underReview": "Em análise",
+    "approved": "Aprovada",
+    "successfullyFunded": "Financiada com sucesso",
+    "rejected": "Rejeitada",
+    "notSelected": "Não selecionada"
+  },
+  "quickActions": {
+    "title": "Ações rápidas",
+    "startNewApplication": "Iniciar nova candidatura",
+    "browseOpportunities": "Explorar oportunidades",
+    "viewAllApplications": "Ver todas as candidaturas"
+  },
+  "profileCompletion": {
+    "title": "Conclusão do perfil",
+    "status": "Estado do perfil",
+    "complete": "Completo",
+    "completeProfile": "Complete o seu perfil →",
+    "viewProfile": "Ver o seu perfil →"
+  },
+  "recentApplications": {
+    "title": "Candidaturas recentes",
+    "viewAll": "Ver tudo",
+    "submitted": "Enviada"
+  },
+  "emptyState": {
+    "noApplications": "Ainda sem candidaturas",
+    "noApplicationsDesc": "Comece a candidatar-se a oportunidades para ver as suas candidaturas aqui.",
+    "browseOpportunities": "Explorar oportunidades",
+    "viewGuide": "Ver guia",
+    "tips": {
+      "completeProfile": "Complete o seu perfil antes de se candidatar",
+      "readRequirements": "Leia atentamente os requisitos do projeto",
+      "prepareDocuments": "Prepare todos os documentos necessários com antecedência",
+      "submitBeforeDeadline": "Envie as candidaturas antes dos prazos"
+    }
+  },
+  "profileTip": {
+    "title": "Complete o seu perfil",
+    "description": "O seu perfil está {{percentage}}% completo. Um perfil completo aumenta as hipóteses de aprovação.",
+    "action": "Completar perfil"
+  }
+}

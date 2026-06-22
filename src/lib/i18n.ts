@@ -21,17 +21,32 @@ import ptLanding from '../locales/pt/landing.json';
 import ptFooter from '../locales/pt/footer.json';
 import ptDashboard from '../locales/pt/dashboard.json';
 
+import deCommon from '../locales/de/common.json';
+import deNavigation from '../locales/de/navigation.json';
+import deLanding from '../locales/de/landing.json';
+import deFooter from '../locales/de/footer.json';
+import deDashboard from '../locales/de/dashboard.json';
+
+const enBundle = {
+  common: enCommon,
+  navigation: enNavigation,
+  landing: enLanding,
+  footer: enFooter,
+  dashboard: enDashboard,
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      en: {
-        common: enCommon,
-        navigation: enNavigation,
-        landing: enLanding,
-        footer: enFooter,
-        dashboard: enDashboard,
+      en: enBundle,
+      de: {
+        common: deCommon,
+        navigation: deNavigation,
+        landing: deLanding,
+        footer: deFooter,
+        dashboard: deDashboard,
       },
       fr: {
         common: frCommon,
@@ -49,6 +64,7 @@ i18n
       },
     },
     fallbackLng: 'en',
+    supportedLngs: ['en', 'fr', 'pt', 'de'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false, // React already escapes values
@@ -75,6 +91,10 @@ i18n
           'pt': 'pt',      // Portuguese (any variant)
           'pt-BR': 'pt',   // Portuguese (Brazil)
           'pt-PT': 'pt',   // Portuguese (Portugal)
+          'de': 'de',
+          'de-DE': 'de',
+          'de-AT': 'de',
+          'de-CH': 'de',
           'en': 'en',      // English (any variant)
           'en-US': 'en',   // English (US)
           'en-GB': 'en',   // English (UK)
@@ -89,10 +109,17 @@ i18n
         const baseLang = lng.split('-')[0];
         
         // Return base language if supported, otherwise fallback to 'en'
-        return ['en', 'fr', 'pt'].includes(baseLang) ? baseLang : 'en';
+        return ['en', 'fr', 'pt', 'de'].includes(baseLang) ? baseLang : 'en';
       },
     },
   });
+
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = i18n.language?.split('-')[0] || 'en';
+  i18n.on('languageChanged', (lng) => {
+    document.documentElement.lang = lng.split('-')[0];
+  });
+}
 
 export default i18n;
 

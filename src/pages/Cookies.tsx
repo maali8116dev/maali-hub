@@ -1,12 +1,14 @@
-import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Cookie } from "lucide-react";
+import { useLegalLocale } from "@/hooks/useLegalLocale";
+import { LegalLocalePanel } from "@/components/legal/LegalLocalePanel";
+import { LEGAL_PAGE_META } from "@/components/legal/legalMeta";
 
 const Cookies = () => {
-  const [lang, setLang] = useState("en");
+  const legalLocale = useLegalLocale();
+  const meta = LEGAL_PAGE_META.cookies[legalLocale];
 
   return (
   <div className="min-h-screen bg-background">
@@ -16,21 +18,13 @@ const Cookies = () => {
         <div className="flex justify-center mb-4">
           <Cookie className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          {lang === "de" ? "Cookie-Richtlinie" : "Cookie Policy"}
-        </h1>
-        <p className="text-muted-foreground">
-          {lang === "de" ? "Stand: April 2026" : "Last updated: April 2026"}
-        </p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">{meta.title}</h1>
+        <p className="text-muted-foreground">{meta.updated}</p>
       </div>
 
-      <Tabs defaultValue="en" onValueChange={setLang}>
-        <TabsList className="mb-8">
-          <TabsTrigger value="en">English</TabsTrigger>
-          <TabsTrigger value="de">Deutsch</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="en">
+      <LegalLocalePanel panels={{
+        en: (
+          <>
           <Card className="mb-6">
             <CardContent className="pt-6">
               <h2 className="text-xl font-bold mb-3">Necessary Cookies</h2>
@@ -54,9 +48,64 @@ const Cookies = () => {
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="de">
+          </>
+        ),
+        fr: (
+          <>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold mb-3">Cookies nécessaires</h2>
+              <p className="text-sm text-muted-foreground">
+                Fondés sur l'intérêt légitime (art. 6 par. 1 lit. f RGPD). Indispensables au fonctionnement de la plateforme et non désactivables.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold mb-3">Cookies optionnels</h2>
+              <p className="text-sm text-muted-foreground">
+                Les cookies optionnels nécessitent votre consentement, que vous pouvez retirer à tout moment.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                Pour plus de détails, consultez notre <a href="/privacy" className="text-primary underline">politique de confidentialité</a>.
+              </p>
+            </CardContent>
+          </Card>
+          </>
+        ),
+        pt: (
+          <>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold mb-3">Cookies necessários</h2>
+              <p className="text-sm text-muted-foreground">
+                Com base no interesse legítimo (art. 6.º, n.º 1, al. f) RGPD). Necessários para o funcionamento da plataforma e não podem ser desativados.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold mb-3">Cookies opcionais</h2>
+              <p className="text-sm text-muted-foreground">
+                Os cookies opcionais requerem o seu consentimento, que pode ser retirado a qualquer momento.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                Para mais detalhes, consulte a nossa <a href="/privacy" className="text-primary underline">política de privacidade</a>.
+              </p>
+            </CardContent>
+          </Card>
+          </>
+        ),
+        de: (
+          <>
           <Card className="mb-6">
             <CardContent className="pt-6">
               <h2 className="text-xl font-bold mb-3">Notwendige Cookies</h2>
@@ -80,8 +129,9 @@ const Cookies = () => {
               </p>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+          </>
+        ),
+      }} />
     </main>
     <Footer />
   </div>

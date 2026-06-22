@@ -1,10 +1,11 @@
 ﻿import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ApplicationStatusBadge from "./ApplicationStatusBadge";
 
 interface ApplicationHeaderProps {
-  title: string;
+  title?: string;
   applicationId: string;
   status: string;
   backRoute: string;
@@ -12,18 +13,19 @@ interface ApplicationHeaderProps {
 
 const ApplicationHeader = ({ title, applicationId, status, backRoute }: ApplicationHeaderProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["dashboard", "common"]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(backRoute)} className="w-fit min-h-[44px]">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          {t("applications.detail.back")}
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{title ?? t("applications.detail.title")}</h1>
           <p className="text-muted-foreground mt-1 text-sm sm:text-base break-all">
-            ID: {applicationId}
+            {t("applications.detail.applicationId", { id: applicationId })}
           </p>
         </div>
       </div>
@@ -33,12 +35,3 @@ const ApplicationHeader = ({ title, applicationId, status, backRoute }: Applicat
 };
 
 export default ApplicationHeader;
-
-
-
-
-
-
-
-
-

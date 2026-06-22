@@ -1,0 +1,184 @@
+{
+  "settings": {
+    "notifications": {
+      "newsletter": "Boletim informativo"
+    }
+  },
+  "notifications": {
+    "stats": {
+      "total": "No total"
+    }
+  },
+  "resources": {
+    "tabs": {
+      "links": "Ligações"
+    }
+  },
+  "applications": {
+    "detail": {
+      "applicationId": "Identificação: {{id}}",
+      "metadata": {
+        "status": "Estado:"
+      }
+    }
+  },
+  "adminDashboard": {
+    "recentActivity": {
+      "genericAction": "{{actor}} efectuou {{action}} em {{entity}}."
+    }
+  },
+  "opportunities": {
+    "table": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "form": {
+      "fields": {
+        "status": {
+          "label": "Estado"
+        },
+        "currency": {
+          "placeholder": "ex.: EUR"
+        },
+        "tags": {
+          "label": "Etiquetas"
+        }
+      },
+      "types": {
+        "fellowship": "Bolsa de estudos"
+      }
+    }
+  },
+  "admin": {
+    "roleFallback": "Administrador",
+    "menu": {
+      "blog": "Blogue",
+      "faq": "Perguntas frequentes"
+    },
+    "opportunitiesPage": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "sectorsPage": {
+      "form": {
+        "slug": "Identificador"
+      },
+      "list": {
+        "slug": "Identificador"
+      }
+    },
+    "kycPage": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "financialPage": {
+      "stats": {
+        "total": "No total"
+      },
+      "filters": {
+        "status": "Estado"
+      },
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "inboundPage": {
+      "tabs": {
+        "newsletter": "Boletim informativo"
+      },
+      "status": "Estado",
+      "columns": {
+        "status": "Estado",
+        "email": "E-mail"
+      }
+    },
+    "activityLogsPage": {
+      "actions": {
+        "login": "Início de sessão",
+        "logout": "Fim de sessão"
+      }
+    },
+    "reviewerDetailsPage": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "cmsList": {
+      "common": {
+        "status": "Estado"
+      },
+      "mentors": {
+        "columns": {
+          "status": "Estado"
+        }
+      },
+      "partners": {
+        "columns": {
+          "status": "Estado"
+        }
+      },
+      "resources": {
+        "columns": {
+          "status": "Estado"
+        }
+      },
+      "successStories": {
+        "columns": {
+          "status": "Estado"
+        }
+      }
+    },
+    "cmsForm": {
+      "blog": {
+        "status": "Estado",
+        "tags": "Etiquetas"
+      },
+      "mentor": {
+        "bio": "Biografia"
+      },
+      "partner": {
+        "status": "Estado"
+      }
+    },
+    "applicationsPage": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "usersPage": {
+      "columns": {
+        "status": "Estado"
+      }
+    },
+    "userDetailsPage": {
+      "bio": "Biografia"
+    },
+    "kycCard": {
+      "fields": {
+        "selfie": "Fotografia"
+      }
+    }
+  },
+  "profilePage": {
+    "fields": {
+      "bio": "Biografia"
+    }
+  },
+  "billingPage": {
+    "history": {
+      "columns": {
+        "status": "Estado"
+      }
+    }
+  },
+  "reviewer": {
+    "dashboardPage": {
+      "stats": {
+        "total": "No total"
+      }
+    }
+  }
+}

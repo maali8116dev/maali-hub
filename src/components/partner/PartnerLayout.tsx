@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { usePartnerOrg } from "@/hooks/usePartnerOrg";
+import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -25,23 +28,34 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { SidebarBrand } from "@/components/ui/sidebar-brand";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { useTranslation } from "react-i18next";
 
 interface PartnerLayoutProps {
   children: React.ReactNode;
 }
 
-const menuItems = [
-  { href: "/partner", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/partner/opportunities", label: "My Opportunities", icon: FolderKanban },
-  { href: "/partner/notifications", label: "Notifications", icon: Bell },
-  { href: "/partner/settings", label: "Settings", icon: Settings },
-];
+const PARTNER_MENU_ITEMS = [
+  { href: "/partner", menuKey: "dashboard", icon: LayoutDashboard },
+  { href: "/partner/opportunities", menuKey: "opportunities", icon: FolderKanban },
+  { href: "/partner/notifications", menuKey: "notifications", icon: Bell },
+  { href: "/partner/settings", menuKey: "settings", icon: Settings },
+] as const;
 
 const PartnerLayout = ({ children }: PartnerLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { data: partnerOrg } = usePartnerOrg();
+  const unreadCount = useUnreadNotificationCount();
+  const { t } = useTranslation(["dashboard"]);
+
+  const menuItems = PARTNER_MENU_ITEMS.map((item) => ({
+    ...item,
+    label: t(`partner.menu.${item.menuKey}`),
+  }));
 
   const handleSignOut = async () => {
     await signOut();
@@ -49,11 +63,14 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
   };
 
   const getPageTitle = () => {
-    if (location.pathname === "/partner") return "Partner Dashboard";
-    if (location.pathname.startsWith("/partner/opportunities")) return "My Opportunities";
-    if (location.pathname === "/partner/notifications") return "Notifications";
-    if (location.pathname === "/partner/settings") return "Settings";
-    return "Partner Portal";
+    if (location.pathname === "/partner") return t("partner.pages.dashboard");
+    if (/^\/partner\/opportunities\/\d+$/.test(location.pathname)) {
+      return t("partner.pages.opportunityDetails");
+    }
+    if (location.pathname.startsWith("/partner/opportunities")) return t("partner.pages.opportunities");
+    if (location.pathname === "/partner/notifications") return t("partner.pages.notifications");
+    if (location.pathname === "/partner/settings") return t("partner.pages.settings");
+    return t("partner.pages.default");
   };
 
   return (
@@ -63,17 +80,7 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
           <SidebarHeader>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild size="lg">
-                  <Link to="/">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <Handshake className="h-5 w-5" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">Maali</span>
-                      <span className="truncate text-xs text-muted-foreground">Partner Portal</span>
-                    </div>
-                  </Link>
-                </SidebarMenuButton>
+                <SidebarBrand subtitle={t("partner.portal")} />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarHeader>
@@ -86,12 +93,21 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.href ||
                       (item.href !== "/partner" && location.pathname.startsWith(item.href));
+                    const isNotifications = item.href === "/partner/notifications";
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
-                          <Link to={item.href}>
+                          <Link to={item.href} className="relative">
                             <Icon />
                             <span>{item.label}</span>
+                            {isNotifications && unreadCount > 0 && (
+                              <Badge
+                                variant="destructive"
+                                className="ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs"
+                              >
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                              </Badge>
+                            )}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -108,12 +124,12 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
                 {user ? (
                   <SidebarMenuButton onClick={handleSignOut}>
                     <LogOut />
-                    <span>Sign Out</span>
+                    <span>{t("header.signOut")}</span>
                   </SidebarMenuButton>
                 ) : (
                   <SidebarMenuButton onClick={() => navigate("/auth")}>
                     <Handshake />
-                    <span>Sign In</span>
+                    <span>{t("header.signIn")}</span>
                   </SidebarMenuButton>
                 )}
               </SidebarMenuItem>
@@ -131,13 +147,27 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Handshake className="h-4 w-4 text-primary" />
+              <LanguageSwitcher />
+              <div className="flex items-center gap-2 min-w-0">
+                {partnerOrg?.logo_url ? (
+                  <img
+                    src={partnerOrg.logo_url}
+                    alt={partnerOrg.name}
+                    className="w-8 h-8 rounded-md object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                    <Handshake className="h-4 w-4 text-primary" />
+                  </div>
+                )}
+                <div className="hidden sm:block min-w-0">
+                  <span className="text-sm font-medium block truncate">
+                    {partnerOrg?.name || user?.email || t("partner.roleFallback")}
+                  </span>
+                  {partnerOrg?.name && user?.email ? (
+                    <span className="text-xs text-muted-foreground block truncate">{user.email}</span>
+                  ) : null}
                 </div>
-                <span className="text-sm font-medium hidden sm:inline">
-                  {user?.email || "Partner"}
-                </span>
               </div>
             </div>
           </header>

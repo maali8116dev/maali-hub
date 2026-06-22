@@ -44,7 +44,7 @@ serve(async (req) => {
   // Generate a magic-link invite. This creates the user if they don't exist
   // or reuses the existing account, then returns a one-time sign-in link.
   const siteUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
-  const redirectTo = `${siteUrl}/partner/dashboard`;
+  const redirectTo = `${siteUrl}/partner`;
 
   const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
     type: "magiclink",

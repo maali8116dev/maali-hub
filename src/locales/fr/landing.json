@@ -8,7 +8,7 @@
     "description": "Que vous lanciez une entreprise, fassiez évoluer votre carrière ou débutiez comme étudiant ou stagiaire — connectez-vous aux programmes, partenaires et évaluateurs sur une plateforme de confiance.",
     "startApplication": "Commencer",
     "viewProjects": "Parcourir les opportunités",
-    "browseProjects": "Parcourir les opportunités",
+    "browseOpportunities": "Parcourir les opportunités",
     "members": "Membres actifs",
     "countries": "Pays",
     "totalSupport": "Prix et soutien",
@@ -184,7 +184,7 @@
     },
     "feature5": {
       "title": "Support Multilingue",
-      "description": "Disponible en anglais, français et portugais pour tous les talents en Afrique."
+      "description": "Disponible en anglais, français, portugais et allemand pour les talents en Afrique et au-delà."
     },
     "feature6": {
       "title": "Suivi des Progrès",
@@ -276,6 +276,274 @@
       "subtitle": "Rejoignez les talents africains qui construisent projets et carrières via subventions, emplois, stages, formations, bourses et plus.",
       "browse": "Parcourir les opportunités",
       "partner": "Devenir partenaire"
+    }
+  },
+  "faqPage": {
+    "title": "Foire aux questions",
+    "subtitle": "Réponses rapides aux questions les plus fréquentes sur Maali.",
+    "searchPlaceholder": "Rechercher dans la FAQ…",
+    "loadError": "Impossible de charger la FAQ. Réessayez plus tard.",
+    "retry": "Réessayer",
+    "searchResults": "Résultats de recherche",
+    "emptySearch": "Aucune question ne correspond à votre recherche.",
+    "empty": "Aucune FAQ disponible pour le moment.",
+    "contactSupport": "Contacter le support",
+    "stillHaveQuestions": "Encore des questions ?",
+    "stillHaveQuestionsDesc": "Vous ne trouvez pas la réponse ? Notre équipe support est là pour vous aider."
+  },
+  "mentorsPage": {
+    "badge": "Annuaire des mentors",
+    "title": "Connectez-vous avec des mentors experts",
+    "subtitle": "Apprenez auprès d'entrepreneurs expérimentés et de leaders du secteur qui aident les entreprises africaines à réussir.",
+    "searchPlaceholder": "Rechercher par nom, expertise ou bio…",
+    "allSectors": "Tous les secteurs",
+    "allCountries": "Tous les pays",
+    "loadError": "Impossible de charger les mentors. Réessayez plus tard.",
+    "emptyTitle": "Aucun mentor trouvé",
+    "emptyFiltered": "Essayez d'ajuster votre recherche ou vos filtres",
+    "emptyDefault": "Revenez bientôt pour de nouveaux mentors",
+    "moreExpertise": "+{{count}} de plus",
+    "noLinks": "Aucun lien externe disponible",
+    "ctaTitle": "Devenir mentor ?",
+    "ctaDesc": "Partagez votre expertise et aidez la prochaine génération d'entrepreneurs africains. Rejoignez notre réseau de mentors.",
+    "ctaButton": "Nous contacter"
+  },
+  "guidePage": {
+    "title": "Guide de candidature",
+    "subtitle": "Guide étape par étape pour postuler avec succès aux opportunités de financement sur Maali.",
+    "introTitle": "Pour commencer",
+    "introDesc": "Ce guide vous accompagne de la création de compte à la soumission de candidature. Suivez ces étapes pour maximiser vos chances.",
+    "tipsLabel": "Conseils :",
+    "bestPracticesTitle": "Bonnes pratiques",
+    "mistakesTitle": "Erreurs courantes à éviter",
+    "mistakes": [
+      "Soumettre une candidature incomplète ou des documents manquants",
+      "Attendre la dernière minute pour soumettre",
+      "Ne pas lire attentivement les exigences de l'opportunité",
+      "Fournir des informations inexactes ou trompeuses",
+      "Ne pas répondre aux demandes d'informations complémentaires"
+    ],
+    "resourcesTitle": "Besoin d'aide supplémentaire ?",
+    "resourcesDesc": "Explorez ces ressources pour réussir votre candidature.",
+    "resourcesFaq": "Foire aux questions",
+    "resourcesContact": "Contacter le support",
+    "resourcesSuccessStories": "Histoires de réussite",
+    "steps": [
+      {
+        "title": "Créer votre compte",
+        "description": "Commencez par un compte gratuit sur Maali. Inscription par e-mail ou Google.",
+        "tips": [
+          "Utilisez une adresse e-mail professionnelle",
+          "Choisissez un mot de passe sécurisé",
+          "Vérifiez votre e-mail rapidement"
+        ],
+        "action": "S'inscrire"
+      },
+      {
+        "title": "Compléter votre profil",
+        "description": "Renseignez des informations exactes sur votre activité. Un profil complet augmente vos chances.",
+        "tips": [
+          "Informations détaillées sur votre activité",
+          "Logo professionnel",
+          "Coordonnées exactes"
+        ],
+        "action": "Aller au profil"
+      },
+      {
+        "title": "Parcourir les opportunités",
+        "description": "Explorez les financements disponibles. Filtrez par secteur et besoins.",
+        "tips": [
+          "Lisez les descriptions attentivement",
+          "Vérifiez l'éligibilité",
+          "Notez les dates limites"
+        ],
+        "action": "Parcourir les opportunités"
+      },
+      {
+        "title": "Préparer vos documents",
+        "description": "Rassemblez tous les documents requis avant de commencer.",
+        "tips": [
+          "Documents d'enregistrement",
+          "États financiers ou projections",
+          "Business plan si requis",
+          "Pièces d'identité",
+          "Certificats sectoriels"
+        ],
+        "action": "Voir les exigences"
+      },
+      {
+        "title": "Soumettre votre candidature",
+        "description": "Complétez le formulaire multi-étapes avec soin et précision.",
+        "tips": [
+          "Répondez en détail",
+          "Relisez avant envoi",
+          "Sauvegardez votre progression"
+        ],
+        "action": "Commencer la candidature"
+      },
+      {
+        "title": "Suivre votre candidature",
+        "description": "Suivez le statut depuis votre tableau de bord. Notifications par e-mail.",
+        "tips": [
+          "Consultez régulièrement le tableau de bord",
+          "Répondez vite aux demandes",
+          "Soyez patient pendant l'examen"
+        ],
+        "action": "Voir le tableau de bord"
+      }
+    ],
+    "bestPractices": [
+      {
+        "title": "Soyez honnête et précis",
+        "description": "Des informations véridiques évitent le rejet et les problèmes futurs."
+      },
+      {
+        "title": "Préparez-vous à l'avance",
+        "description": "Rassemblez les documents avant de commencer pour éviter les retards."
+      },
+      {
+        "title": "Suivez les instructions",
+        "description": "Chaque opportunité peut avoir des exigences spécifiques."
+      },
+      {
+        "title": "Respectez les délais",
+        "description": "Soumettez bien avant la date limite."
+      }
+    ]
+  },
+  "helpLinks": {
+    "title": "Besoin d'aide ?",
+    "faq": {
+      "title": "FAQ",
+      "description": "Réponses aux questions fréquentes"
+    },
+    "mentors": {
+      "title": "Mentors",
+      "description": "Connectez-vous avec des experts"
+    },
+    "support": {
+      "title": "Assistance",
+      "description": "Aide de notre équipe"
+    },
+    "guide": {
+      "title": "Guide de démarrage",
+      "description": "Guide de candidature étape par étape"
+    }
+  },
+  "successStoriesPage": {
+    "title": "Histoires de réussite",
+    "subtitle": "Découvrez comment les entrepreneurs africains transforment leurs communautés et développent des entreprises prospères grâce au financement sur notre plateforme.",
+    "loading": "Chargement des histoires de réussite...",
+    "empty": "Aucune histoire de réussite disponible pour le moment.",
+    "featured": "À la une",
+    "funding": "Financement : {{amount}}",
+    "funded": "Financé : {{year}}",
+    "ctaTitle": "Prêt à écrire votre histoire de réussite ?",
+    "ctaDesc": "Rejoignez ces entrepreneurs et commencez votre parcours de financement dès aujourd'hui.",
+    "ctaButton": "Commencer votre candidature"
+  },
+  "helpPage": {
+    "title": "Centre d'aide",
+    "subtitle": "Trouvez des réponses, des guides et de l'assistance pour utiliser Maali."
+  },
+  "partnersPage": {
+    "title": "Nos partenaires",
+    "subtitle": "Nous collaborons avec des organisations de premier plan en Afrique et au-delà pour soutenir les entrepreneurs et les professionnels.",
+    "ctaTitle": "Devenir partenaire",
+    "ctaDesc": "Rejoignez notre réseau de partenaires et aidez à débloquer des opportunités pour les talents africains.",
+    "ctaButton": "Nous contacter"
+  },
+  "blogPage": {
+    "title": "Blog",
+    "subtitle": "Conseils, analyses et actualités sur le financement, les carrières et l'entrepreneuriat en Afrique.",
+    "searchPlaceholder": "Rechercher des articles...",
+    "featured": "À la une",
+    "readMore": "Lire la suite",
+    "readTime": "{{time}} min de lecture",
+    "empty": "Aucun article trouvé.",
+    "backToBlog": "Retour au blog",
+    "shareArticle": "Partager l'article",
+    "authorBio": "{{author}} est une conseillère en financement expérimentée avec plus de 10 ans d'expérience à aider les entrepreneurs à obtenir des financements.",
+    "wantMoreTitle": "Envie de lire davantage ?",
+    "wantMoreDesc": "Explorez d'autres articles et ressources pour vous aider à réussir.",
+    "browseAll": "Parcourir tous les articles"
+  },
+  "seo": {
+    "home": {
+      "title": "Valoriser les talents africains",
+      "description": "Découvrez subventions, emplois, stages, formations, bourses et plus encore. Postulez en toute confiance sur la plateforme d'opportunités Maali.",
+      "orgDescription": "Valoriser les talents africains grâce aux subventions, emplois, stages, formations, bourses et opportunités de carrière"
+    },
+    "routes": {
+      "home": {
+        "title": "Valoriser les talents africains",
+        "description": "Découvrez subventions, emplois, stages, formations et bourses en Afrique. Postulez en toute confiance sur Maali."
+      },
+      "opportunities": {
+        "title": "Opportunités",
+        "description": "Parcourez subventions, emplois, bourses et formations pour les talents africains. Filtrez par secteur, région et partenaire."
+      },
+      "about": {
+        "title": "À propos de Maali",
+        "description": "Découvrez comment Maali connecte les talents africains au financement, au mentorat et aux opportunités de carrière."
+      },
+      "resources": {
+        "title": "Ressources",
+        "description": "Guides, modèles et outils pour postuler au financement, aux bourses et aux emplois en Afrique."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Contactez l'équipe Maali pour un partenariat, de l'aide aux candidatures ou le support plateforme."
+      },
+      "partners": {
+        "title": "Nos partenaires",
+        "description": "Découvrez les partenaires qui collaborent avec Maali pour débloquer des opportunités pour les talents africains."
+      },
+      "successStories": {
+        "title": "Histoires de réussite",
+        "description": "Témoignages de fondateurs et professionnels africains ayant grandi grâce aux opportunités sur Maali."
+      },
+      "blog": {
+        "title": "Blog",
+        "description": "Conseils et actualités sur le financement, les carrières et l'entrepreneuriat en Afrique."
+      },
+      "help": {
+        "title": "Centre d'aide",
+        "description": "Réponses sur les candidatures, l'éligibilité, les paiements et la gestion de compte sur Maali."
+      },
+      "faq": {
+        "title": "Questions fréquentes",
+        "description": "Réponses aux questions courantes sur Maali — candidatures, éligibilité, frais et évaluations."
+      },
+      "mentors": {
+        "title": "Mentors",
+        "description": "Connectez-vous avec des mentors expérimentés qui accompagnent les talents africains."
+      },
+      "guide": {
+        "title": "Guide de démarrage",
+        "description": "Guide étape par étape pour créer votre profil Maali et soumettre des candidatures solides."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité",
+        "description": "Comment Maali collecte, utilise et protège vos données personnelles."
+      },
+      "terms": {
+        "title": "Conditions d'utilisation",
+        "description": "Les conditions qui régissent votre utilisation de la plateforme Maali."
+      },
+      "cookies": {
+        "title": "Politique de cookies",
+        "description": "Comment Maali utilise les cookies et les choix qui s'offrent à vous."
+      },
+      "auth": {
+        "title": "Connexion",
+        "description": "Connectez-vous ou créez un compte Maali pour postuler aux opportunités en Afrique."
+      }
+    },
+    "opportunityNotFound": {
+      "title": "Opportunité introuvable",
+      "description": "L'opportunité que vous recherchez n'existe pas.",
+      "back": "Retour aux opportunités"
     }
   }
 }

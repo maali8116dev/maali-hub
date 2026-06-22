@@ -1,42 +1,26 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { useToast } from "@/hooks/use-toast";
 import { usePartnerOrg, useUpdatePartnerOrg } from "@/hooks/usePartnerOrg";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Building, Globe, Rocket, CheckCircle2, Circle, ChevronRight } from "lucide-react";
+import { Building, Globe, Rocket, CheckCircle2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const step1Schema = z.object({
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  website_url: z.string().url("Please enter a valid URL").or(z.literal("")).optional(),
-});
-
-const step2Schema = z.object({
-  contactName: z.string().min(2, "Contact name is required"),
-  contactPhone: z.string().optional(),
-  country: z.string().optional(),
-});
-
-const step3Schema = z.object({
-  opportunityTitle: z.string().optional(),
-  fundingAmount: z.string().optional(),
-  deadline: z.string().optional(),
-});
-
-type Step1Values = z.infer<typeof step1Schema>;
-type Step2Values = z.infer<typeof step2Schema>;
-type Step3Values = z.infer<typeof step3Schema>;
+import {
+  createPartnerSetupSchemas,
+  type Step1Values,
+  type Step2Values,
+  type Step3Values,
+} from "@/lib/schemas/partnerSetupWizard.schema";
 
 interface PartnerSetupWizardProps {
   open: boolean;
@@ -44,13 +28,8 @@ interface PartnerSetupWizardProps {
   onComplete?: () => void;
 }
 
-const steps = [
-  { label: "Organization", icon: Building },
-  { label: "Contact", icon: Globe },
-  { label: "First Opportunity", icon: Rocket },
-];
-
 export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSetupWizardProps) {
+  const { t } = useTranslation("dashboard");
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,18 +39,29 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
   const updateOrg = useUpdatePartnerOrg();
   const [logoUrl, setLogoUrl] = useState<string>("");
 
+  const { step1Schema, step2Schema, step3Schema } = useMemo(
+    () => createPartnerSetupSchemas(t),
+    [t],
+  );
+
+  const steps = useMemo(
+    () => [
+      { label: t("partner.setupWizard.steps.organization"), icon: Building },
+      { label: t("partner.setupWizard.steps.contact"), icon: Globe },
+      { label: t("partner.setupWizard.steps.firstOpportunity"), icon: Rocket },
+    ],
+    [t],
+  );
+
   const { uploadImage, deleteImage, isUploading, uploadProgress } = useImageUpload({
-    bucket: "project-images",
+    bucket: "partner-logos",
     folder: `partner-logos/${user?.id || ""}`,
     maxSizeMB: 5,
   });
 
   const step1Form = useForm<Step1Values>({
     resolver: zodResolver(step1Schema),
-    defaultValues: {
-      description: "",
-      website_url: "",
-    },
+    defaultValues: { description: "", website_url: "" },
   });
 
   const step2Form = useForm<Step2Values>({
@@ -134,23 +124,31 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
       });
 
       toast({
-        title: "Organization profile updated!",
-        description: "Your partner organization is now set up.",
+        title: t("partner.setupWizard.toasts.updated"),
+        description: t("partner.setupWizard.toasts.updatedDesc"),
       });
 
       const step3Data = step3Form.getValues();
       onComplete?.();
       onOpenChange(false);
       setCurrentStep(1);
-      if (step3Data.opportunityTitle) {
-        navigate("/partner/opportunities/new");
+      if (step3Data.opportunityTitle && partnerOrg?.id) {
+        navigate("/partner/opportunities/new", {
+          state: {
+            prefill: {
+              title: step3Data.opportunityTitle,
+              fundingAmount: step3Data.fundingAmount,
+              deadline: step3Data.deadline,
+            },
+          },
+        });
       }
     } catch (error) {
       console.error("Failed to save partner org:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save organization profile. Please try again.",
+        title: t("partner.setupWizard.toasts.error"),
+        description: t("partner.setupWizard.toasts.errorDesc"),
       });
     }
   };
@@ -161,17 +159,14 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Welcome to Maali Partner Portal</DialogTitle>
-          <DialogDescription>
-            Let's set up your organization profile so applicants can learn about you.
-          </DialogDescription>
+          <DialogTitle className="text-2xl">{t("partner.setupWizard.title")}</DialogTitle>
+          <DialogDescription>{t("partner.setupWizard.description")}</DialogDescription>
         </DialogHeader>
 
-        {/* Progress */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Step {currentStep} of {totalSteps}</span>
-            <span>{Math.round(progressPercentage)}% complete</span>
+            <span>{t("partner.setupWizard.stepOf", { current: currentStep, total: totalSteps })}</span>
+            <span>{t("partner.setupWizard.percentComplete", { percent: Math.round(progressPercentage) })}</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
 
@@ -190,16 +185,18 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
                         "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
                         isCompleted && "bg-primary text-primary-foreground border-primary",
                         isCurrent && "bg-primary/10 text-primary border-primary",
-                        !isCompleted && !isCurrent && "bg-muted text-muted-foreground border-muted"
+                        !isCompleted && !isCurrent && "bg-muted text-muted-foreground border-muted",
                       )}
                     >
                       {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                     </div>
-                    <span className={cn(
-                      "text-xs mt-2",
-                      isCurrent && "font-medium text-primary",
-                      !isCurrent && "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-xs mt-2",
+                        isCurrent && "font-medium text-primary",
+                        !isCurrent && "text-muted-foreground",
+                      )}
+                    >
                       {step.label}
                     </span>
                   </div>
@@ -210,20 +207,21 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
           </div>
         </div>
 
-        {/* Step Content */}
         <div className="py-6">
           {currentStep === 1 && (
             <Form {...step1Form}>
               <form className="space-y-4">
                 {partnerOrg?.name && (
                   <div className="p-3 rounded-lg bg-muted/50 border">
-                    <span className="text-sm text-muted-foreground">Organization Name</span>
+                    <span className="text-sm text-muted-foreground">
+                      {t("partner.settingsPage.orgProfile.name")}
+                    </span>
                     <p className="font-medium">{partnerOrg.name}</p>
                   </div>
                 )}
 
                 <FormItem>
-                  <FormLabel>Organization Logo</FormLabel>
+                  <FormLabel>{t("partner.settingsPage.orgProfile.logo")}</FormLabel>
                   <FormControl>
                     <ImageUpload
                       value={logoUrl || undefined}
@@ -232,38 +230,26 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
                       onDelete={deleteImage}
                       isUploading={isUploading}
                       uploadProgress={uploadProgress}
-                      placeholder="Upload Logo"
+                      placeholder={t("partner.settingsPage.orgProfile.uploadLogo")}
                     />
                   </FormControl>
-                  <p className="text-xs text-muted-foreground">A logo helps applicants recognize your organization</p>
+                  <p className="text-xs text-muted-foreground">{t("partner.setupWizard.logoHint")}</p>
                 </FormItem>
 
-                <FormField
+                <CustomFormField
                   control={step1Form.control}
                   name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Tell applicants about your organization..." className="min-h-[100px]" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.settingsPage.orgProfile.descriptionLabel")}
+                  fieldType={FormFieldType.TEXTAREA}
+                  placeholder={t("partner.settingsPage.orgProfile.descriptionPlaceholder")}
                 />
 
-                <FormField
+                <CustomFormField
                   control={step1Form.control}
                   name="website_url"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://your-organization.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.settingsPage.orgProfile.website")}
+                  fieldType={FormFieldType.URL}
+                  placeholder={t("partner.settingsPage.orgProfile.websitePlaceholder")}
                 />
               </form>
             </Form>
@@ -272,44 +258,26 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
           {currentStep === 2 && (
             <Form {...step2Form}>
               <form className="space-y-4">
-                <FormField
+                <CustomFormField
                   control={step2Form.control}
                   name="contactName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary Contact Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.settingsPage.contact.name")}
+                  fieldType={FormFieldType.INPUT}
+                  placeholder={t("partner.settingsPage.contact.namePlaceholder")}
                 />
-                <FormField
+                <CustomFormField
                   control={step2Form.control}
                   name="contactPhone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Phone (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+1 234 567 890" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.settingsPage.contact.phone")}
+                  fieldType={FormFieldType.TEL}
+                  placeholder={t("partner.settingsPage.contact.phonePlaceholder")}
                 />
-                <FormField
+                <CustomFormField
                   control={step2Form.control}
                   name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country / Region (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Kenya" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.settingsPage.contact.country")}
+                  fieldType={FormFieldType.INPUT}
+                  placeholder={t("partner.settingsPage.contact.countryPlaceholder")}
                 />
               </form>
             </Form>
@@ -318,41 +286,27 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
           {currentStep === 3 && (
             <Form {...step3Form}>
               <form className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Optionally set up your first opportunity now, or skip and do it later from the dashboard.
-                </p>
-                <FormField
+                <p className="text-sm text-muted-foreground">{t("partner.setupWizard.step3Intro")}</p>
+                <CustomFormField
                   control={step3Form.control}
                   name="opportunityTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Opportunity Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. 2026 Innovation Grant" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.setupWizard.fields.opportunityTitle")}
+                  fieldType={FormFieldType.INPUT}
+                  placeholder={t("partner.setupWizard.fields.opportunityTitlePlaceholder")}
                 />
-                <FormField
+                <CustomFormField
                   control={step3Form.control}
                   name="fundingAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Funding Amount</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. $10,000 - $50,000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label={t("partner.setupWizard.fields.fundingAmount")}
+                  fieldType={FormFieldType.INPUT}
+                  placeholder={t("partner.setupWizard.fields.fundingAmountPlaceholder")}
                 />
                 <FormField
                   control={step3Form.control}
                   name="deadline"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Application Deadline</FormLabel>
+                      <FormLabel>{t("partner.setupWizard.fields.deadline")}</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -365,24 +319,25 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
           )}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t">
           <Button type="button" variant="ghost" onClick={handleSkip}>
-            Skip for now
+            {t("partner.setupWizard.actions.skip")}
           </Button>
           <div className="flex gap-2">
             {currentStep > 1 && (
               <Button type="button" variant="outline" onClick={handlePrevious}>
-                Back
+                {t("partner.setupWizard.actions.back")}
               </Button>
             )}
             {currentStep < totalSteps ? (
               <Button type="button" onClick={handleNext}>
-                Next
+                {t("partner.setupWizard.actions.next")}
               </Button>
             ) : (
               <Button type="button" onClick={handleComplete} disabled={updateOrg.isPending}>
-                {updateOrg.isPending ? "Saving..." : "Complete Setup"}
+                {updateOrg.isPending
+                  ? t("partner.setupWizard.actions.saving")
+                  : t("partner.setupWizard.actions.complete")}
               </Button>
             )}
           </div>
@@ -391,11 +346,3 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
     </Dialog>
   );
 }
-
-
-
-
-
-
-
-

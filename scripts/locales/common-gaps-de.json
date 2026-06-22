@@ -1,0 +1,23 @@
+{
+  "opportunitiesPage": {
+    "filters": {
+      "region": "Region",
+      "partner": "Partner",
+      "status": "Status"
+    }
+  },
+  "status": {
+    "role": {
+      "admin": "Administrator",
+      "partner": "Partner"
+    }
+  },
+  "notifications": {
+    "types": {
+      "system": "Systemmeldung"
+    }
+  },
+  "dataTable": {
+    "csv": "CSV exportieren"
+  }
+}

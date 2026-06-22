@@ -2,7 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { usePartnerOrg } from "@/hooks/usePartnerOrg";
+import { PARTNER_ORG_NOT_LINKED_ERROR, usePartnerOrg } from "@/hooks/usePartnerOrg";
+import { triggerOpportunityTranslation, invalidateOpportunityTranslationQueries, translationFailureMessage } from "@/hooks/useTranslateOpportunity";
+import i18n from "@/lib/i18n";
+import type { OpportunityTranslations } from "@/lib/localizedContent";
 
 export type PartnerOpportunity = {
   id: number;
@@ -24,6 +27,7 @@ export type PartnerOpportunity = {
   country: string | null;
   sectorId: number | null;
   createdAt: string;
+  translations?: OpportunityTranslations | null;
 };
 
 export type PartnerOpportunityFormData = {
@@ -65,6 +69,7 @@ function transformOpportunity(data: any): PartnerOpportunity {
     country: data.country,
     sectorId: data.sector_id,
     createdAt: data.created_at,
+    translations: (data.translations as OpportunityTranslations) ?? null,
   };
 }
 
@@ -165,6 +170,10 @@ export function useCreatePartnerOpportunity() {
 
   return useMutation({
     mutationFn: async (formData: PartnerOpportunityFormData) => {
+      if (!partnerOrg?.id) {
+        throw new Error(PARTNER_ORG_NOT_LINKED_ERROR);
+      }
+
       const { data, error } = await supabase
         .from("opportunities")
         .insert({
@@ -184,8 +193,7 @@ export function useCreatePartnerOpportunity() {
           country: formData.country || null,
           sector_id: formData.sectorId || null,
           created_by: user!.id,
-          // Link opportunity to the partner organization, if one is associated
-          partner_id: partnerOrg?.id ?? null,
+          partner_id: partnerOrg.id,
         })
         .select()
         .single();
@@ -194,14 +202,29 @@ export function useCreatePartnerOpportunity() {
       if (formData.tags?.length) await syncOpportunityTags(data.id, formData.tags);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["opportunity-tags"] });
       queryClient.invalidateQueries({ queryKey: ["opportunity-tags-popular"] });
-      toast({ title: "Opportunity created successfully" });
+      toast({ title: i18n.t("toasts.opportunity.created", { ns: "common" }), description: i18n.t("toasts.opportunity.createdDesc", { ns: "common" }) });
+      void triggerOpportunityTranslation(data.id).then((result) => {
+        if (result.ok) {
+          invalidateOpportunityTranslationQueries(queryClient, data.id);
+          return;
+        }
+        toast({
+          title: i18n.t("toasts.opportunity.translationFailed", { ns: "common" }),
+          description: translationFailureMessage(result.reason),
+          variant: "destructive",
+        });
+      });
     },
     onError: (error: any) => {
-      toast({ title: "Error creating opportunity", description: error.message, variant: "destructive" });
+      toast({
+        title: i18n.t("toasts.opportunity.createError", { ns: "common" }),
+        description: error.message || i18n.t("toasts.genericError", { ns: "common" }),
+        variant: "destructive",
+      });
     },
   });
 }
@@ -243,15 +266,31 @@ export function useUpdatePartnerOpportunity() {
       if (formData.tags !== undefined) await syncOpportunityTags(id, formData.tags);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["partner-opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["partner-opportunity"] });
       queryClient.invalidateQueries({ queryKey: ["opportunity-tags"] });
       queryClient.invalidateQueries({ queryKey: ["opportunity-tags-popular"] });
-      toast({ title: "Opportunity updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["opportunity", String(data.id)] });
+      toast({ title: i18n.t("toasts.opportunity.updated", { ns: "common" }), description: i18n.t("toasts.opportunity.updatedDesc", { ns: "common" }) });
+      void triggerOpportunityTranslation(data.id).then((result) => {
+        if (result.ok) {
+          invalidateOpportunityTranslationQueries(queryClient, data.id);
+          return;
+        }
+        toast({
+          title: i18n.t("toasts.opportunity.translationFailed", { ns: "common" }),
+          description: translationFailureMessage(result.reason),
+          variant: "destructive",
+        });
+      });
     },
     onError: (error: any) => {
-      toast({ title: "Error updating opportunity", description: error.message, variant: "destructive" });
+      toast({
+        title: i18n.t("toasts.opportunity.updateError", { ns: "common" }),
+        description: error.message || i18n.t("toasts.genericError", { ns: "common" }),
+        variant: "destructive",
+      });
     },
   });
 }

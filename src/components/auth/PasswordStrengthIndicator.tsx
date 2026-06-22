@@ -1,58 +1,36 @@
 ﻿import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createPasswordRequirements } from "@/lib/schemas/authForm.schema";
 
-export interface PasswordRequirement {
-  label: string;
-  test: (password: string) => boolean;
-}
-
-const defaultRequirements: PasswordRequirement[] = [
-  {
-    label: "At least 8 characters",
-    test: (pwd) => pwd.length >= 8,
-  },
-  {
-    label: "Contains uppercase letter",
-    test: (pwd) => /[A-Z]/.test(pwd),
-  },
-  {
-    label: "Contains lowercase letter",
-    test: (pwd) => /[a-z]/.test(pwd),
-  },
-  {
-    label: "Contains number",
-    test: (pwd) => /[0-9]/.test(pwd),
-  },
-  {
-    label: "Contains special character (!@#$%^&*)",
-    test: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
-  },
-];
+export type { PasswordRequirement } from "@/lib/schemas/authForm.schema";
 
 export type PasswordStrength = "weak" | "medium" | "strong" | "very-strong";
 
 export function calculatePasswordStrength(password: string): PasswordStrength {
   if (!password) return "weak";
-  
+
   let strength = 0;
-  
-  // Length checks
+
   if (password.length >= 8) strength += 1;
   if (password.length >= 12) strength += 1;
   if (password.length >= 16) strength += 1;
-  
-  // Character variety checks
   if (/[a-z]/.test(password)) strength += 1;
   if (/[A-Z]/.test(password)) strength += 1;
   if (/[0-9]/.test(password)) strength += 1;
   if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
-  
-  // Bonus for complexity
-  if (password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^a-zA-Z0-9]/.test(password)) {
+
+  if (
+    password.length >= 8 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^a-zA-Z0-9]/.test(password)
+  ) {
     strength += 1;
   }
-  
+
   if (strength <= 2) return "weak";
   if (strength <= 4) return "medium";
   if (strength <= 6) return "strong";
@@ -61,23 +39,23 @@ export function calculatePasswordStrength(password: string): PasswordStrength {
 
 interface PasswordStrengthIndicatorProps {
   password: string;
-  requirements?: PasswordRequirement[];
   showStrengthBar?: boolean;
   className?: string;
 }
 
 export function PasswordStrengthIndicator({
   password,
-  requirements = defaultRequirements,
   showStrengthBar = true,
   className,
 }: PasswordStrengthIndicatorProps) {
+  const { t } = useTranslation("common");
+  const requirements = useMemo(() => createPasswordRequirements(t), [t]);
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
   const metRequirements = useMemo(
     () => requirements.map((req) => ({ ...req, met: req.test(password) })),
-    [password, requirements]
+    [password, requirements],
   );
-  
+
   const allMet = metRequirements.every((req) => req.met);
   const strengthColors = {
     weak: "bg-destructive",
@@ -85,14 +63,14 @@ export function PasswordStrengthIndicator({
     strong: "bg-yellow-500",
     "very-strong": "bg-green-500",
   };
-  
+
   const strengthLabels = {
-    weak: "Weak",
-    medium: "Medium",
-    strong: "Strong",
-    "very-strong": "Very Strong",
+    weak: t("auth.passwordStrength.levels.weak"),
+    medium: t("auth.passwordStrength.levels.medium"),
+    strong: t("auth.passwordStrength.levels.strong"),
+    "very-strong": t("auth.passwordStrength.levels.veryStrong"),
   };
-  
+
   const strengthWidths = {
     weak: "25%",
     medium: "50%",
@@ -107,14 +85,14 @@ export function PasswordStrengthIndicator({
       {showStrengthBar && (
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Password strength:</span>
+            <span className="text-muted-foreground">{t("auth.passwordStrength.label")}</span>
             <span
               className={cn(
                 "font-medium",
                 strength === "weak" && "text-destructive",
                 strength === "medium" && "text-orange-500",
                 strength === "strong" && "text-yellow-600",
-                strength === "very-strong" && "text-green-600"
+                strength === "very-strong" && "text-green-600",
               )}
             >
               {strengthLabels[strength]}
@@ -124,16 +102,18 @@ export function PasswordStrengthIndicator({
             <div
               className={cn(
                 "h-full transition-all duration-300 ease-out",
-                strengthColors[strength]
+                strengthColors[strength],
               )}
               style={{ width: strengthWidths[strength] }}
             />
           </div>
         </div>
       )}
-      
+
       <div className="space-y-1.5">
-        <p className="text-xs font-medium text-muted-foreground">Requirements:</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("auth.passwordStrength.requirementsTitle")}
+        </p>
         <ul className="space-y-1">
           {metRequirements.map((req, index) => (
             <li key={index} className="flex items-center gap-2 text-xs">
@@ -144,7 +124,7 @@ export function PasswordStrengthIndicator({
               )}
               <span
                 className={cn(
-                  req.met ? "text-green-700 dark:text-green-400" : "text-muted-foreground"
+                  req.met ? "text-green-700 dark:text-green-400" : "text-muted-foreground",
                 )}
               >
                 {req.label}
@@ -153,22 +133,13 @@ export function PasswordStrengthIndicator({
           ))}
         </ul>
       </div>
-      
+
       {allMet && (
         <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 pt-1">
           <AlertCircle className="h-3.5 w-3.5" />
-          <span className="font-medium">All requirements met!</span>
+          <span className="font-medium">{t("auth.passwordStrength.allMet")}</span>
         </div>
       )}
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

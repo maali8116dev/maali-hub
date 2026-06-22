@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { ActivityLog } from "@/hooks/useActivityLogs";
+import { useTranslation } from "react-i18next";
 
 const actionTypeColors: Record<string, string> = {
   create: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
@@ -41,6 +42,8 @@ const entityTypeIcons: Record<string, React.ReactNode> = {
 const PAGE_SIZE = 15;
 
 export default function ActivityLogs() {
+  const { t } = useTranslation(["dashboard"]);
+  const ap = "admin.activityLogsPage";
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
@@ -138,7 +141,7 @@ export default function ActivityLogs() {
 
   const exportToCSV = async () => {
     try {
-      toast.loading("Preparing CSV export...");
+      toast.loading(t(`${ap}.toast.preparingCsv`));
       const allLogs = await fetchAllLogsForExport();
       
       // Filter by search query if present
@@ -148,7 +151,7 @@ export default function ActivityLogs() {
 
       if (logsToExport.length === 0) {
         toast.dismiss();
-        toast.error("No logs to export");
+        toast.error(t(`${ap}.toast.noLogsExport`));
         return;
       }
 
@@ -180,17 +183,17 @@ export default function ActivityLogs() {
       URL.revokeObjectURL(url);
 
       toast.dismiss();
-      toast.success(`Exported ${logsToExport.length} logs to CSV`);
+      toast.success(t(`${ap}.toast.exportedCsv`, { count: logsToExport.length }));
     } catch (error) {
       toast.dismiss();
-      toast.error("Failed to export logs");
+      toast.error(t(`${ap}.toast.exportFailed`));
       console.error("Export error:", error);
     }
   };
 
   const printLogs = async () => {
     try {
-      toast.loading("Preparing print view...");
+      toast.loading(t(`${ap}.toast.preparingPrint`));
       const allLogs = await fetchAllLogsForExport();
       
       // Filter by search query if present
@@ -200,7 +203,7 @@ export default function ActivityLogs() {
 
       if (logsToExport.length === 0) {
         toast.dismiss();
-        toast.error("No logs to print");
+        toast.error(t(`${ap}.toast.noLogsPrint`));
         return;
       }
 
@@ -273,10 +276,10 @@ export default function ActivityLogs() {
       }
 
       toast.dismiss();
-      toast.success("Print view opened");
+      toast.success(t(`${ap}.toast.printOpened`));
     } catch (error) {
       toast.dismiss();
-      toast.error("Failed to prepare print view");
+      toast.error(t(`${ap}.toast.printFailed`));
       console.error("Print error:", error);
     }
   };
@@ -284,10 +287,8 @@ export default function ActivityLogs() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Activity Logs</h1>
-        <p className="text-muted-foreground">
-          Track and monitor all user and admin interactions
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t(`${ap}.title`)}</h1>
+        <p className="text-muted-foreground">{t(`${ap}.subtitle`)}</p>
       </div>
 
       <Card>
@@ -296,27 +297,25 @@ export default function ActivityLogs() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
-                Recent Activity
+                {t(`${ap}.recentActivity`)}
               </CardTitle>
-              <CardDescription>
-                View all actions performed across the platform
-              </CardDescription>
+              <CardDescription>{t(`${ap}.recentActivityDesc`)}</CardDescription>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
-                  Export
+                  {t(`${ap}.export`)}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={exportToCSV}>
                   <FileSpreadsheet className="h-4 w-4 mr-2" />
-                  Export to CSV
+                  {t(`${ap}.exportCsv`)}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={printLogs}>
                   <Printer className="h-4 w-4 mr-2" />
-                  Print / Save as PDF
+                  {t(`${ap}.printPdf`)}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -329,7 +328,7 @@ export default function ActivityLogs() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search activities..."
+                  placeholder={t(`${ap}.searchPlaceholder`)}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -337,40 +336,31 @@ export default function ActivityLogs() {
               </div>
               <Select value={actionFilter} onValueChange={handleActionFilterChange}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Action Type" />
+                  <SelectValue placeholder={t(`${ap}.actionType`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  <SelectItem value="create">Create</SelectItem>
-                  <SelectItem value="update">Update</SelectItem>
-                  <SelectItem value="delete">Delete</SelectItem>
-                  <SelectItem value="view">View</SelectItem>
-                  <SelectItem value="login">Login</SelectItem>
-                  <SelectItem value="logout">Logout</SelectItem>
-                  <SelectItem value="submit">Submit</SelectItem>
-                  <SelectItem value="approve">Approve</SelectItem>
-                  <SelectItem value="reject">Reject</SelectItem>
+                  <SelectItem value="all">{t(`${ap}.allActions`)}</SelectItem>
+                  {(["create", "update", "delete", "view", "login", "logout", "submit", "approve", "reject"] as const).map((action) => (
+                    <SelectItem key={action} value={action}>{t(`${ap}.actions.${action}`)}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={entityFilter} onValueChange={handleEntityFilterChange}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Entity Type" />
+                  <SelectValue placeholder={t(`${ap}.entityType`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Entities</SelectItem>
-                  <SelectItem value="project">Projects</SelectItem>
-                  <SelectItem value="application">Applications</SelectItem>
-                  <SelectItem value="user">Users</SelectItem>
-                  <SelectItem value="blog_post">Blog Posts</SelectItem>
-                  <SelectItem value="profile">Profiles</SelectItem>
-                  <SelectItem value="document">Documents</SelectItem>
+                  <SelectItem value="all">{t(`${ap}.allEntities`)}</SelectItem>
+                  {(["project", "application", "user", "blog_post", "profile", "document"] as const).map((entity) => (
+                    <SelectItem key={entity} value={entity}>{t(`${ap}.entities.${entity}`)}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date range filters row */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <span className="text-sm text-muted-foreground">Date range:</span>
+              <span className="text-sm text-muted-foreground">{t(`${ap}.dateRange`)}</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -381,7 +371,7 @@ export default function ActivityLogs() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "MMM d, yyyy") : "Start date"}
+                    {startDate ? format(startDate, "MMM d, yyyy") : t(`${ap}.startDate`)}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -395,7 +385,7 @@ export default function ActivityLogs() {
                   />
                 </PopoverContent>
               </Popover>
-              <span className="text-sm text-muted-foreground hidden sm:inline">to</span>
+              <span className="text-sm text-muted-foreground hidden sm:inline">{t(`${ap}.to`)}</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -406,7 +396,7 @@ export default function ActivityLogs() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "MMM d, yyyy") : "End date"}
+                    {endDate ? format(endDate, "MMM d, yyyy") : t(`${ap}.endDate`)}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -428,7 +418,7 @@ export default function ActivityLogs() {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4 mr-1" />
-                  Clear dates
+                  {t(`${ap}.clearDates`)}
                 </Button>
               )}
             </div>
@@ -449,21 +439,19 @@ export default function ActivityLogs() {
           ) : filteredLogs.length === 0 ? (
             <div className="text-center py-12">
               <Activity className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <h3 className="mt-4 text-lg font-semibold">No activity logs</h3>
-              <p className="text-muted-foreground">
-                Activity will appear here as users interact with the platform.
-              </p>
+              <h3 className="mt-4 text-lg font-semibold">{t(`${ap}.empty.title`)}</h3>
+              <p className="text-muted-foreground">{t(`${ap}.empty.description`)}</p>
             </div>
           ) : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Entity</TableHead>
-                    <TableHead className="hidden md:table-cell">Description</TableHead>
-                    <TableHead className="hidden lg:table-cell">Time</TableHead>
+                    <TableHead>{t(`${ap}.columns.user`)}</TableHead>
+                    <TableHead>{t(`${ap}.columns.action`)}</TableHead>
+                    <TableHead>{t(`${ap}.columns.entity`)}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t(`${ap}.columns.description`)}</TableHead>
+                    <TableHead className="hidden lg:table-cell">{t(`${ap}.columns.time`)}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -476,7 +464,7 @@ export default function ActivityLogs() {
                             {log.userName || 
                              (log.metadata?.reviewer_name as string) ||
                              (log.metadata?.admin_name as string) ||
-                             (log.userId ? `User ${log.userId.substring(0, 8)}...` : 'System')}
+                             (log.userId ? `User ${log.userId.substring(0, 8)}...` : t(`${ap}.system`))}
                           </span>
                         </div>
                       </TableCell>
@@ -485,7 +473,7 @@ export default function ActivityLogs() {
                           variant="secondary"
                           className={actionTypeColors[log.actionType] || ""}
                         >
-                          {log.actionType}
+                          {t(`${ap}.actions.${log.actionType as "create"}`, log.actionType)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -516,7 +504,11 @@ export default function ActivityLogs() {
           {!isLoading && totalCount > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
               <p className="text-sm text-muted-foreground">
-                Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, totalCount)} of {totalCount} entries
+                {t(`${ap}.pagination`, {
+                  from: ((currentPage - 1) * PAGE_SIZE) + 1,
+                  to: Math.min(currentPage * PAGE_SIZE, totalCount),
+                  total: totalCount,
+                })}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -536,7 +528,7 @@ export default function ActivityLogs() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm px-2">
-                  Page {currentPage} of {totalPages}
+                  {t(`${ap}.pageOf`, { current: currentPage, total: totalPages })}
                 </span>
                 <Button
                   variant="outline"

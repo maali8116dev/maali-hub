@@ -35,6 +35,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { SidebarBrand } from "@/components/ui/sidebar-brand";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -99,19 +100,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild size="lg">
-                <Link to="/">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <span className="text-lg font-bold">M</span>
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Maali</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Opportunity Hub
-                    </span>
-                  </div>
-                </Link>
-              </SidebarMenuButton>
+              <SidebarBrand subtitle="Opportunity Hub" />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>

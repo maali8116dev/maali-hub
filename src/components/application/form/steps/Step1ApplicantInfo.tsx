@@ -1,10 +1,9 @@
 import { Control, useWatch } from "react-hook-form";
-import { Building2, Mail, Phone, MapPin } from "lucide-react";
-import CustomFormField, {
-  FormFieldType,
-} from "@/components/form/CustomFormField";
+import { useTranslation } from "react-i18next";
+import { Building2, Mail, Phone } from "lucide-react";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { ApplicationFormValues } from "../schemas";
-import { APPLICANT_TYPES } from "../constants";
+import { getApplicantTypeOptions } from "../constants";
 import { COUNTRIES, getCountryCode } from "../countries";
 
 interface Step1ApplicantInfoProps {
@@ -12,10 +11,15 @@ interface Step1ApplicantInfoProps {
   applicantType?: string;
 }
 
-export function Step1ApplicantInfo({
-  control,
-  applicantType,
-}: Step1ApplicantInfoProps) {
+const ORG_TYPES = new Set([
+  "Organization",
+  "Startup / SME",
+  "NGO / Non-profit",
+  "Research / Academic",
+]);
+
+export function Step1ApplicantInfo({ control, applicantType }: Step1ApplicantInfoProps) {
+  const { t } = useTranslation("dashboard");
   const selectedCountry = useWatch({ control, name: "countryOfResidence" });
   const phoneCountryCode = getCountryCode(selectedCountry) || "US";
 
@@ -23,12 +27,11 @@ export function Step1ApplicantInfo({
     <div className="space-y-4">
       <div>
         <h3 className="text-lg font-semibold mb-2">
-          Applicant Information{" "}
+          {t("applications.form.step1.title")}{" "}
           <span className="text-destructive">*</span>
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Tell us about yourself or your organization. All fields marked with{" "}
-          <span className="text-destructive">*</span> are required.
+          {t("applications.form.step1.description")} {t("applications.form.requiredMark")}
         </p>
       </div>
 
@@ -36,13 +39,10 @@ export function Step1ApplicantInfo({
         control={control}
         name="applicantType"
         fieldType={FormFieldType.SELECT}
-        label="Applicant Type"
-        placeholder="Select applicant type"
+        label={t("applications.form.step1.applicantType")}
+        placeholder={t("applications.form.step1.applicantTypePlaceholder")}
         required
-        options={APPLICANT_TYPES.map((type) => ({
-          value: type.value,
-          label: type.label,
-        }))}
+        options={getApplicantTypeOptions(t)}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -50,31 +50,27 @@ export function Step1ApplicantInfo({
           control={control}
           name="fullLegalName"
           fieldType={FormFieldType.INPUT}
-          label="Full Legal Name"
-          placeholder="Enter full legal name"
+          label={t("applications.form.step1.fullLegalName")}
+          placeholder={t("applications.form.step1.fullLegalNamePlaceholder")}
           required
         />
-        {applicantType &&
-          (applicantType === "Organization" ||
-            applicantType === "Startup / SME" ||
-            applicantType === "NGO / Non-profit" ||
-            applicantType === "Research / Academic") && (
-            <CustomFormField
-              control={control}
-              name="organizationName"
-              fieldType={FormFieldType.INPUT}
-              label="Organization Name"
-              placeholder="Enter organization name"
-              icon={Building2}
-              iconPosition="left"
-            />
-          )}
+        {applicantType && ORG_TYPES.has(applicantType) && (
+          <CustomFormField
+            control={control}
+            name="organizationName"
+            fieldType={FormFieldType.INPUT}
+            label={t("applications.form.step1.organizationName")}
+            placeholder={t("applications.form.step1.organizationNamePlaceholder")}
+            icon={Building2}
+            iconPosition="left"
+          />
+        )}
         <CustomFormField
           control={control}
           name="countryOfResidence"
           fieldType={FormFieldType.SELECT}
-          label="Country of Residence / Registration"
-          placeholder="Select country"
+          label={t("applications.form.step1.country")}
+          placeholder={t("applications.form.step1.countryPlaceholder")}
           required
           options={COUNTRIES}
         />
@@ -82,16 +78,16 @@ export function Step1ApplicantInfo({
           control={control}
           name="cityRegion"
           fieldType={FormFieldType.INPUT}
-          label="City / Region"
-          placeholder="Enter city or region"
+          label={t("applications.form.step1.cityRegion")}
+          placeholder={t("applications.form.step1.cityRegionPlaceholder")}
           required
         />
         <CustomFormField
           control={control}
           name="emailAddress"
           fieldType={FormFieldType.EMAIL}
-          label="Email Address"
-          placeholder="your.email@example.com"
+          label={t("applications.form.step1.email")}
+          placeholder={t("applications.form.step1.emailPlaceholder")}
           icon={Mail}
           iconPosition="left"
           required
@@ -101,8 +97,8 @@ export function Step1ApplicantInfo({
           control={control}
           name="phoneNumber"
           fieldType={FormFieldType.PHONE_INTERNATIONAL}
-          label="Phone Number"
-          placeholder="Enter phone number"
+          label={t("applications.form.step1.phone")}
+          placeholder={t("applications.form.step1.phonePlaceholder")}
           icon={Phone}
           iconPosition="left"
           country={phoneCountryCode}
@@ -113,11 +109,3 @@ export function Step1ApplicantInfo({
     </div>
   );
 }
-
-
-
-
-
-
-
-

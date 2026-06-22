@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 
 interface ComplianceCardProps {
@@ -29,6 +30,8 @@ const ComplianceItem = ({ label, confirmed, confirmedText, notConfirmedText }: C
 );
 
 const ComplianceCard = ({ application }: ComplianceCardProps) => {
+  const { t } = useTranslation("dashboard");
+
   const hasCompliance =
     application.information_accurate_confirmed !== undefined ||
     application.conflict_of_interest_declared !== undefined ||
@@ -40,47 +43,49 @@ const ComplianceCard = ({ application }: ComplianceCardProps) => {
   return (
     <Card>
       <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-base sm:text-lg">Compliance & Declarations</CardTitle>
+        <CardTitle className="text-base sm:text-lg">{t("applications.detail.compliance.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="space-y-2">
           {application.information_accurate_confirmed !== undefined && (
             <ComplianceItem
-              label="Information Accurate Confirmed"
+              label={t("applications.detail.compliance.informationAccurate")}
               confirmed={application.information_accurate_confirmed}
-              confirmedText="Confirmed"
-              notConfirmedText="Not confirmed"
+              confirmedText={t("applications.detail.compliance.confirmed")}
+              notConfirmedText={t("applications.detail.compliance.notConfirmed")}
             />
           )}
           {application.conflict_of_interest_declared !== undefined && (
             <ComplianceItem
-              label="Conflict of Interest Declared"
+              label={t("applications.detail.compliance.conflictOfInterest")}
               confirmed={application.conflict_of_interest_declared}
-              confirmedText="Declared"
-              notConfirmedText="Not declared"
+              confirmedText={t("applications.detail.compliance.declared")}
+              notConfirmedText={t("applications.detail.compliance.notDeclared")}
             />
           )}
           {application.reporting_requirements_agreed !== undefined && (
             <ComplianceItem
-              label="Reporting Requirements Agreed"
+              label={t("applications.detail.compliance.reportingRequirements")}
               confirmed={application.reporting_requirements_agreed}
-              confirmedText="Agreed"
-              notConfirmedText="Not agreed"
+              confirmedText={t("applications.detail.compliance.agreed")}
+              notConfirmedText={t("applications.detail.compliance.notAgreed")}
             />
           )}
           {application.data_processing_consented !== undefined && (
             <ComplianceItem
-              label="Data Processing Consented"
+              label={t("applications.detail.compliance.dataProcessing")}
               confirmed={application.data_processing_consented}
-              confirmedText="Consented"
-              notConfirmedText="Not consented"
+              confirmedText={t("applications.detail.compliance.consented")}
+              notConfirmedText={t("applications.detail.compliance.notConsented")}
             />
           )}
         </div>
         {application.declaration_date && (
           <div className="pt-2 border-t">
             <p className="text-xs text-muted-foreground">
-              Declaration Date: {new Date(application.declaration_date).toLocaleDateString()}
+              {t("applications.detail.compliance.declarationDate", {
+                date: new Date(application.declaration_date).toLocaleDateString(),
+              })}
             </p>
           </div>
         )}
@@ -90,12 +95,3 @@ const ComplianceCard = ({ application }: ComplianceCardProps) => {
 };
 
 export default ComplianceCard;
-
-
-
-
-
-
-
-
-

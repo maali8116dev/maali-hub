@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 
 export interface Sector {
   id: number;
@@ -155,14 +156,14 @@ export function useCreateSector() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sectors"] });
       toast({
-        title: "Sector Created",
-        description: "The sector has been created successfully.",
+        title: i18n.t("toasts.sector.created", { ns: "common" }),
+        description: i18n.t("toasts.sector.createdDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create sector",
+        title: i18n.t("toasts.sector.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.sector.createError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -202,14 +203,14 @@ export function useUpdateSector() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sectors"] });
       toast({
-        title: "Sector Updated",
-        description: "The sector has been updated successfully.",
+        title: i18n.t("toasts.sector.updated", { ns: "common" }),
+        description: i18n.t("toasts.sector.updatedDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update sector",
+        title: i18n.t("toasts.sector.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.sector.updateError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -231,14 +232,14 @@ export function useDeleteSector() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sectors"] });
       toast({
-        title: "Sector Deleted",
-        description: "The sector has been deleted successfully.",
+        title: i18n.t("toasts.sector.deleted", { ns: "common" }),
+        description: i18n.t("toasts.sector.deletedDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete sector. Make sure no projects are using this sector.",
+        title: i18n.t("toasts.sector.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.sector.deleteError", { ns: "common" }),
         variant: "destructive",
       });
     },
@@ -273,14 +274,14 @@ export function useToggleSectorStatus() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["sectors"] });
       toast({
-        title: variables.isActive ? "Sector Enabled" : "Sector Disabled",
-        description: `The sector has been ${variables.isActive ? "enabled" : "disabled"}.`,
+        title: i18n.t(variables.isActive ? "toasts.sector.enabled" : "toasts.sector.disabled", { ns: "common" }),
+        description: i18n.t(variables.isActive ? "toasts.sector.enabledDesc" : "toasts.sector.disabledDesc", { ns: "common" }),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update sector status",
+        title: i18n.t("toasts.sector.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.sector.statusError", { ns: "common" }),
         variant: "destructive",
       });
     },

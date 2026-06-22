@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,23 +13,56 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAllSectors } from "@/hooks/useSectors";
 import { BackButton } from "@/components/ui/back-button";
+import { useTranslation } from "react-i18next";
 
-const blogPostSchema = z.object({
-  title: z.string().min(1, "Title is required").min(10, "Title must be at least 10 characters"),
-  excerpt: z.string().min(1, "Excerpt is required").min(50, "Excerpt must be at least 50 characters"),
-  content: z.string().min(1, "Content is required").min(100, "Content must be at least 100 characters"),
-  author: z.string().min(1, "Author is required"),
-  sector: z.string().min(1, "Sector is required"),
-  readTime: z.string().min(1, "Read time is required"),
-  image: z.string().min(1, "Image URL is required").url("Please enter a valid URL"),
-  featured: z.boolean(),
-  status: z.enum(["draft", "published", "archived"]),
-  tags: z.string().optional(),
-});
-
-type BlogPostFormValues = z.infer<typeof blogPostSchema>;
+type BlogPostFormValues = {
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  sector: string;
+  readTime: string;
+  image: string;
+  featured: boolean;
+  status: "draft" | "published" | "archived";
+  tags?: string;
+};
 
 const BlogForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.blog";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const blogPostSchema = useMemo(
+    () =>
+      z.object({
+        title: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.title`) }))
+          .min(10, t(`${fv}.minChars`, { field: t(`${ff}.title`), min: 10 })),
+        excerpt: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.excerpt`) }))
+          .min(50, t(`${fv}.minChars`, { field: t(`${ff}.excerpt`), min: 50 })),
+        content: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.content`) }))
+          .min(100, t(`${fv}.minChars`, { field: t(`${ff}.content`), min: 100 })),
+        author: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.author`) })),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        readTime: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.readTime`) })),
+        image: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.image`) }))
+          .url(t(`${fv}.validUrl`)),
+        featured: z.boolean(),
+        status: z.enum(["draft", "published", "archived"]),
+        tags: z.string().optional(),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -103,13 +136,13 @@ const BlogForm = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditing ? "Edit Blog Post" : "Create New Blog Post"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {isEditing ? "Update blog post details" : "Fill in the details to create a new blog post"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </p>
         </div>
-        <BackButton label="Back to Blog" link="/admin/blog" />
+        <BackButton label={t(`${fc}.back`)} link="/admin/blog" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -316,7 +349,7 @@ const BlogForm = () => {
                 <div className="space-y-2">
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     <Save className="h-4 w-4 mr-2" />
-                    {isSubmitting ? "Saving..." : isEditing ? "Update Post" : "Publish Post"}
+                    {isSubmitting ? t(`${fc}.saving`) : isEditing ? t(`${fc}.save`) : t(`${fc}.create`)}
                   </Button>
                   <Button
                     type="button"
@@ -324,7 +357,7 @@ const BlogForm = () => {
                     className="w-full"
                     onClick={() => navigate("/admin/blog")}
                   >
-                    Cancel
+                    {t(`${fc}.cancel`)}
                   </Button>
                 </div>
               </CardContent>

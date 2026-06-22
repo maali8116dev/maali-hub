@@ -136,7 +136,9 @@ const Settings = () => {
                 i18n.changeLanguage(value);
                 toast({
                   title: t('dashboard:settings.save.languageUpdated'),
-                  description: `${t('dashboard:settings.preferences.language')} ${value === 'en' ? 'English' : value === 'fr' ? 'Français' : 'Português'}`,
+                  description: `${t('dashboard:settings.preferences.language')} ${
+                    value === 'en' ? 'English' : value === 'fr' ? 'Français' : value === 'pt' ? 'Português' : 'Deutsch'
+                  }`,
                 });
               }}
             >
@@ -146,7 +148,8 @@ const Settings = () => {
               <SelectContent>
                 <SelectItem value="en">English</SelectItem>
                 <SelectItem value="fr">Français</SelectItem>
-                {/* <SelectItem value="pt">Português</SelectItem> */}
+                <SelectItem value="pt">Português</SelectItem>
+                <SelectItem value="de">Deutsch</SelectItem>
               </SelectContent>
             </Select>
           </div>

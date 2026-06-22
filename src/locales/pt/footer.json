@@ -8,8 +8,8 @@
   "platform": "Plataforma",
   "company": "Empresa",
   "support": "Suporte",
-  "legal": "Legal",
-  "browseProjects": "Navegar projetos",
+  "legal": "Informação legal",
+  "browseOpportunities": "Explorar oportunidades",
   "submitApplication": "Enviar candidatura",
   "trackStatus": "Acompanhar status",
   "resources": "Recursos",
@@ -26,6 +26,6 @@
   "cookiePolicy": "Política de cookies",
   "dataProtection": "Proteção de dados",
   "allRightsReserved": "Todos os direitos reservados. Fornecido por TechNuru & GAT.",
+  "copyright": "© {{year}} Maali. {{rights}}",
   "demoApplication": "Aplicativo de demonstração • Criado por Dr. Wilfried Zoungrana"
 }
-

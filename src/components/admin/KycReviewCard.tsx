@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,34 +24,8 @@ import {
   useAdminKycForUser,
   useAdminUpdateKyc,
   useKycFileUpload,
-  type KycStatus,
 } from "@/hooks/useKycVerification";
 import { useAuth } from "@/hooks/useAuth";
-
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
-  pending: {
-    label: "Pending Review",
-    icon: <Clock className="h-3 w-3" />,
-    className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  },
-  verified: {
-    label: "Verified",
-    icon: <ShieldCheck className="h-3 w-3" />,
-    className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  },
-  rejected: {
-    label: "Rejected",
-    icon: <ShieldAlert className="h-3 w-3" />,
-    className: "bg-destructive/10 text-destructive border-destructive/20",
-  },
-};
-
-const ID_TYPE_LABELS: Record<string, string> = {
-  passport: "Passport",
-  national_id: "National ID",
-  drivers_license: "Driver's License",
-  business_registration: "Business Registration",
-};
 
 interface KycReviewCardProps {
   userId: string;
@@ -58,6 +33,7 @@ interface KycReviewCardProps {
 }
 
 export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
+  const { t } = useTranslation(["dashboard", "common"]);
   const { user: currentAdmin } = useAuth();
   const { data: kyc, isLoading } = useAdminKycForUser(userId);
   const updateKyc = useAdminUpdateKyc();
@@ -72,6 +48,30 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
     url: string;
   } | null>(null);
 
+  const statusConfig = useMemo(() => ({
+    pending: {
+      label: t("admin.kycCard.status.pendingReview"),
+      icon: <Clock className="h-3 w-3" />,
+      className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    },
+    verified: {
+      label: t("common:status.kyc.verified"),
+      icon: <ShieldCheck className="h-3 w-3" />,
+      className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    },
+    rejected: {
+      label: t("common:status.kyc.rejected"),
+      icon: <ShieldAlert className="h-3 w-3" />,
+      className: "bg-destructive/10 text-destructive border-destructive/20",
+    },
+  }), [t]);
+
+  const idTypeLabel = useMemo(
+    () => (idType: string) =>
+      t(`admin.kycCard.idTypes.${idType}`, { defaultValue: idType }),
+    [t],
+  );
+
   useEffect(() => {
     if (kyc?.id_document_url) {
       getSignedUrl(kyc.id_document_url).then(setIdDocUrl);
@@ -80,7 +80,7 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
       getSignedUrl(kyc.selfie_url).then(setSelfieUrl);
     }
     if (kyc?.admin_notes) setAdminNotes(kyc.admin_notes);
-  }, [kyc]);
+  }, [kyc, getSignedUrl]);
 
   if (isLoading) {
     return (
@@ -101,12 +101,12 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
         <CardHeader>
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" />
-            KYC Verification
+            {t("admin.kycCard.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            This user has not submitted identity verification.
+            {t("admin.kycCard.notSubmitted")}
           </p>
         </CardContent>
       </Card>
@@ -118,9 +118,8 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
       ? "*".repeat(kyc.id_number.length - 4) + kyc.id_number.slice(-4)
       : kyc.id_number;
 
-  const statusConfig = STATUS_CONFIG[kyc.status] || STATUS_CONFIG.pending;
+  const currentStatusConfig = statusConfig[kyc.status as keyof typeof statusConfig] || statusConfig.pending;
 
-  // Name mismatch detection
   const nameMismatch =
     profileName &&
     kyc.full_name_on_id &&
@@ -153,51 +152,49 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" />
-            KYC Verification
+            {t("admin.kycCard.title")}
           </CardTitle>
-          <Badge variant="outline" className={statusConfig.className}>
-            {statusConfig.icon}
-            <span className="ml-1">{statusConfig.label}</span>
+          <Badge variant="outline" className={currentStatusConfig.className}>
+            {currentStatusConfig.icon}
+            <span className="ml-1">{currentStatusConfig.label}</span>
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* ID Details */}
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <span className="text-muted-foreground">ID Type</span>
-            <p className="font-medium">{ID_TYPE_LABELS[kyc.id_type] || kyc.id_type}</p>
+            <span className="text-muted-foreground">{t("admin.kycCard.fields.idType")}</span>
+            <p className="font-medium">{idTypeLabel(kyc.id_type)}</p>
           </div>
           <div>
-            <span className="text-muted-foreground">ID Number</span>
+            <span className="text-muted-foreground">{t("admin.kycCard.fields.idNumber")}</span>
             <p className="font-medium font-mono">{maskedIdNumber}</p>
           </div>
           <div className="col-span-2">
-            <span className="text-muted-foreground">Name on ID</span>
+            <span className="text-muted-foreground">{t("admin.kycCard.fields.nameOnId")}</span>
             <div className="flex items-center gap-2">
               <p className="font-medium">{kyc.full_name_on_id}</p>
               {nameMismatch && (
                 <span className="inline-flex items-center gap-1 text-xs text-amber-600">
                   <AlertTriangle className="h-3 w-3" />
-                  Name differs from profile
+                  {t("admin.kycCard.fields.nameMismatch")}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Side-by-side images */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">ID Document</Label>
+              <Label className="text-xs text-muted-foreground">{t("admin.kycCard.fields.idDocument")}</Label>
               {idDocUrl && (
                 <button
                   type="button"
-                  onClick={() => setActivePreview({ label: "ID Document", url: idDocUrl })}
+                  onClick={() => setActivePreview({ label: t("admin.kycCard.fields.idDocument"), url: idDocUrl })}
                   className="text-xs text-primary hover:underline"
                 >
-                  View full
+                  {t("admin.kycCard.fields.viewFull")}
                 </button>
               )}
             </div>
@@ -205,27 +202,27 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
               <div className="group relative overflow-hidden rounded-lg border border-border bg-muted/40">
                 <img
                   src={idDocUrl}
-                  alt="ID Document"
+                  alt={t("admin.kycCard.fields.idDocument")}
                   className="h-96 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
               </div>
             ) : (
               <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
-                No document
+                {t("admin.kycCard.fields.noDocument")}
               </div>
             )}
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">Selfie</Label>
+              <Label className="text-xs text-muted-foreground">{t("admin.kycCard.fields.selfie")}</Label>
               {selfieUrl && (
                 <button
                   type="button"
-                  onClick={() => setActivePreview({ label: "Selfie", url: selfieUrl })}
+                  onClick={() => setActivePreview({ label: t("admin.kycCard.fields.selfie"), url: selfieUrl })}
                   className="text-xs text-primary hover:underline"
                 >
-                  View full
+                  {t("admin.kycCard.fields.viewFull")}
                 </button>
               )}
             </div>
@@ -233,20 +230,19 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
               <div className="group relative overflow-hidden rounded-lg border border-border bg-muted/40">
                 <img
                   src={selfieUrl}
-                  alt="Selfie"
+                  alt={t("admin.kycCard.fields.selfie")}
                   className="h-96 w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
               </div>
             ) : (
               <div className="w-full h-96 bg-muted rounded-lg flex items-center justify-center text-sm text-muted-foreground">
-                No selfie
+                {t("admin.kycCard.fields.noSelfie")}
               </div>
             )}
           </div>
         </div>
 
-        {/* Preview dialog */}
         <Dialog open={!!activePreview} onOpenChange={(open) => !open && setActivePreview(null)}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
@@ -264,25 +260,24 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
           </DialogContent>
         </Dialog>
 
-        {/* Admin actions */}
         {kyc.status === "pending" && (
           <div className="space-y-3 border-t border-border pt-4">
             <div className="space-y-2">
-              <Label>Admin Notes (optional)</Label>
+              <Label>{t("admin.kycCard.adminNotes")}</Label>
               <Textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Internal notes about this verification..."
+                placeholder={t("admin.kycCard.adminNotesPlaceholder")}
                 className="min-h-[60px]"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Rejection Reason (required to reject)</Label>
+              <Label>{t("admin.kycCard.rejectionReason")}</Label>
               <Textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Explain why the verification is being rejected..."
+                placeholder={t("admin.kycCard.rejectionReasonPlaceholder")}
                 className="min-h-[60px]"
               />
             </div>
@@ -294,7 +289,7 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Verify
+                {t("admin.kycCard.verify")}
               </Button>
               <Button
                 variant="destructive"
@@ -302,16 +297,15 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
                 disabled={updateKyc.isPending || !rejectionReason.trim()}
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Reject
+                {t("admin.kycCard.reject")}
               </Button>
             </div>
           </div>
         )}
 
-        {/* Show previous admin notes for non-pending */}
         {kyc.status !== "pending" && kyc.admin_notes && (
           <div className="border-t border-border pt-3 text-sm">
-            <span className="text-muted-foreground">Admin Notes:</span>
+            <span className="text-muted-foreground">{t("admin.kycCard.previousAdminNotes")}</span>
             <p className="mt-1">{kyc.admin_notes}</p>
           </div>
         )}
@@ -319,11 +313,3 @@ export const KycReviewCard = ({ userId, profileName }: KycReviewCardProps) => {
     </Card>
   );
 };
-
-
-
-
-
-
-
-

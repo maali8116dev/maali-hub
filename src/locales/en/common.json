@@ -109,6 +109,689 @@
       "withFilters": "Try adjusting your search terms or filters to find more opportunities.",
       "default": "There are no opportunities available at the moment. Check back later for new opportunities."
     }
+  },
+  "status": {
+    "application": {
+      "pending": "Pending",
+      "pending_payment": "Payment Pending",
+      "under_review": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "draft": "Draft"
+    },
+    "opportunity": {
+      "open": "Open",
+      "closingSoon": "Closing Soon",
+      "closed": "Closed",
+      "new": "New",
+      "archived": "Archived"
+    },
+    "payment": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "processing": "Processing",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "kyc": {
+      "pending": "Pending",
+      "verified": "Verified",
+      "rejected": "Rejected"
+    },
+    "role": {
+      "admin": "Admin",
+      "reviewer": "Reviewer",
+      "partner": "Partner",
+      "applicant": "Applicant"
+    },
+    "account": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "reviewAssignment": {
+      "completed": "Completed",
+      "in_progress": "In Progress",
+      "pending": "Pending"
+    },
+    "recommendation": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "request_info": "Request Info"
+    },
+    "published": "Published",
+    "draft": "Draft"
+  },
+  "applicationWindow": {
+    "open": "Open for applications",
+    "closed": "Closed for applications"
+  },
+  "toasts": {
+    "genericError": "Something went wrong. Please try again.",
+    "opportunity": {
+      "created": "Opportunity created",
+      "createdDesc": "The opportunity has been created successfully.",
+      "updated": "Opportunity updated",
+      "updatedDesc": "The opportunity has been updated successfully.",
+      "deleted": "Opportunity deleted",
+      "deletedDesc": "The opportunity has been deleted successfully.",
+      "createError": "Error creating opportunity",
+      "updateError": "Error updating opportunity",
+      "deleteError": "Error deleting opportunity",
+      "translationFailed": "Translation failed",
+      "translationNotConfigured": "Google Translate API key not configured on the server.",
+      "translationNotAuthenticated": "Sign in required to generate translations."
+    },
+    "cms": {
+      "translationNotConfigured": "Google Translate API key not configured on the server.",
+      "translationNotAuthenticated": "Sign in required to generate translations."
+    },
+    "sector": {
+      "created": "Sector created",
+      "createdDesc": "The sector has been created successfully.",
+      "updated": "Sector updated",
+      "updatedDesc": "The sector has been updated successfully.",
+      "deleted": "Sector deleted",
+      "deletedDesc": "The sector has been deleted successfully.",
+      "enabled": "Sector enabled",
+      "disabled": "Sector disabled",
+      "enabledDesc": "The sector has been enabled.",
+      "disabledDesc": "The sector has been disabled.",
+      "statusDesc": "The sector has been {{state}}.",
+      "error": "Error",
+      "createError": "Failed to create sector",
+      "updateError": "Failed to update sector",
+      "deleteError": "Failed to delete sector. Make sure no projects are using this sector.",
+      "statusError": "Failed to update sector status"
+    },
+    "user": {
+      "suspended": "User suspended",
+      "suspendedDesc": "The user has been suspended successfully.",
+      "activated": "User activated",
+      "activatedDesc": "The user has been activated successfully.",
+      "roleUpdated": "Role updated",
+      "roleUpdatedDesc": "User role has been updated to {{role}}.",
+      "error": "Error",
+      "suspendError": "Failed to suspend user",
+      "activateError": "Failed to activate user",
+      "roleError": "Failed to update user role"
+    },
+    "faq": {
+      "created": "FAQ created successfully",
+      "updated": "FAQ updated successfully",
+      "deleted": "FAQ deleted successfully",
+      "published": "FAQ published",
+      "unpublished": "FAQ unpublished",
+      "createError": "Failed to create FAQ",
+      "updateError": "Failed to update FAQ",
+      "deleteError": "Failed to delete FAQ",
+      "statusError": "Failed to update FAQ status"
+    },
+    "mentor": {
+      "created": "Mentor created successfully",
+      "updated": "Mentor updated successfully",
+      "deleted": "Mentor deleted successfully",
+      "published": "Mentor published",
+      "unpublished": "Mentor unpublished",
+      "createError": "Failed to create mentor",
+      "updateError": "Failed to update mentor",
+      "deleteError": "Failed to delete mentor",
+      "statusError": "Failed to update mentor"
+    },
+    "resource": {
+      "created": "Resource created successfully",
+      "updated": "Resource updated successfully",
+      "deleted": "Resource deleted successfully",
+      "published": "Resource published",
+      "unpublished": "Resource unpublished",
+      "createError": "Failed to create resource",
+      "updateError": "Failed to update resource",
+      "deleteError": "Failed to delete resource",
+      "statusError": "Failed to update resource"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "marking": "Marking...",
+    "clearAll": "Clear all",
+    "deleteAll": "Delete all",
+    "total": "Total",
+    "unread": "Unread",
+    "read": "Read",
+    "viewDetails": "View details →",
+    "viewAll": "View all notifications",
+    "emptyTitle": "No notifications",
+    "emptyDescription": "You're all caught up! New notifications will appear here.",
+    "emptyUnread": "No unread notifications",
+    "sections": {
+      "unread": "Unread",
+      "earlier": "Earlier"
+    },
+    "subtitles": {
+      "admin": "Updates about partner submissions and opportunity status changes.",
+      "partner": "Updates when Maali review scoring is complete and when your opportunity status changes.",
+      "member": "Stay updated on your applications and account activity",
+      "reviewer": "Stay updated on assigned applications and review activities"
+    },
+    "types": {
+      "application": "Application",
+      "system": "System",
+      "payment": "Payment",
+      "review": "Review",
+      "new_application": "New application",
+      "review_assigned": "Review assigned",
+      "review_assignment": "Review assignment",
+      "deadline_reminder": "Deadline reminder",
+      "status_change": "Status change",
+      "reminder": "Reminder",
+      "default": "Notification"
+    },
+    "messages": {
+      "fallbackOpportunity": "this opportunity",
+      "application": {
+        "submitted": {
+          "title": "Application Submitted",
+          "message": "Your application for \"{{opportunityTitle}}\" has been successfully submitted and is now under review."
+        },
+        "approved": {
+          "title": "Application Approved!",
+          "message": "Congratulations! Your application for \"{{opportunityTitle}}\" has been approved."
+        },
+        "rejected": {
+          "title": "Application Status Updated",
+          "message": "Your application for \"{{opportunityTitle}}\" has been reviewed. Please check your application details for more information."
+        },
+        "statusPending": {
+          "title": "Application Status Updated",
+          "message": "Your application for \"{{opportunityTitle}}\" status has been updated to pending review."
+        }
+      },
+      "payment": {
+        "confirmed": {
+          "title": "Payment Confirmed",
+          "message": "Your application fee has been confirmed and your application is now under review."
+        }
+      },
+      "membership": {
+        "activated": {
+          "title": "Full Membership Active",
+          "message": "Your $2/month Full Membership is now active. You can apply to all funding opportunities."
+        },
+        "ended": {
+          "title": "Membership ended",
+          "message": "Your Full Membership has ended. You're now on the free Community plan. Upgrade any time to apply again."
+        }
+      },
+      "review": {
+        "assigned": {
+          "title": "New Application Assigned",
+          "message": "A new application for \"{{opportunityTitle}}\" has been assigned to you for review."
+        },
+        "newApplicationRequiresReview": {
+          "title": "New Application Assigned",
+          "message": "A new application for \"{{opportunityTitle}}\" requires your review."
+        }
+      },
+      "admin": {
+        "reviewerCapacityNeeded": {
+          "title": "Reviewer capacity needed",
+          "message": "Only {{availableCount}} reviewer(s) available for \"{{opportunityTitle}}\". This application needs {{requiredReviewers}} reviewers. Please assign an additional reviewer."
+        }
+      },
+      "partner": {
+        "reviewFinished": {
+          "title": "Review complete",
+          "message": "Maali has finished reviewing applications for \"{{opportunityTitle}}\". Ranked results are ready to export."
+        },
+        "opportunityStatusChanged": {
+          "title": "Opportunity status updated",
+          "message": "\"{{opportunityTitle}}\" status changed from {{previousStatus}} to {{status}}."
+        }
+      }
+    }
+  },
+  "dataTable": {
+    "search": "Search...",
+    "clearSearch": "Clear search",
+    "refresh": "Refresh",
+    "refreshData": "Refresh data",
+    "export": "Export",
+    "columns": "Columns",
+    "toggleColumns": "Toggle columns",
+    "csv": "CSV",
+    "excelSoon": "Excel (coming soon)",
+    "pdfSoon": "PDF (coming soon)",
+    "noResults": "No results.",
+    "rowsTotal": "{{count}} row(s) total.",
+    "rowsPerPage": "Rows per page",
+    "pageOf": "Page {{current}} of {{total}}",
+    "firstPage": "Go to first page",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "lastPage": "Go to last page"
+  },
+  "auth": {
+    "backToHome": "Back to Home",
+    "brandAlt": "Maali",
+    "welcome": {
+      "title": "Welcome",
+      "subtitle": "Join the community of African Talent"
+    },
+    "tabs": {
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "oauth": {
+      "continueWithGoogle": "Continue with Google",
+      "orContinueWith": "Or continue with"
+    },
+    "fields": {
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "passwordCreatePlaceholder": "Create a strong password",
+      "passwordConfirm": "Confirm Password",
+      "passwordConfirmPlaceholder": "Re-enter your password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmNewPassword": "Confirm New Password",
+      "confirmNewPasswordPlaceholder": "Re-enter your new password",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "forgotPassword": "Forgot password?"
+    },
+    "reset": {
+      "title": "Set New Password",
+      "description": "Enter your new password below",
+      "verifyingLink": "Please wait while we verify your password reset link...",
+      "backToSignIn": "Back to Sign In"
+    },
+    "buttons": {
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account...",
+      "updatePassword": "Update Password",
+      "updatingPassword": "Updating password...",
+      "verifyingLink": "Verifying link..."
+    },
+    "passwordStrength": {
+      "label": "Password strength:",
+      "requirementsTitle": "Requirements:",
+      "allMet": "All requirements met!",
+      "levels": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong",
+        "veryStrong": "Very Strong"
+      },
+      "requirements": {
+        "minLength": "At least 8 characters",
+        "uppercase": "Contains uppercase letter",
+        "lowercase": "Contains lowercase letter",
+        "number": "Contains number",
+        "special": "Contains special character (!@#$%^&*)"
+      }
+    },
+    "validation": {
+      "emailInvalid": "Invalid email address",
+      "passwordRequired": "Password is required",
+      "firstNameMin": "First name must be at least 2 characters",
+      "lastNameMin": "Last name must be at least 2 characters",
+      "minLength": "Password must be at least 8 characters",
+      "uppercase": "Password must contain at least one uppercase letter",
+      "lowercase": "Password must contain at least one lowercase letter",
+      "number": "Password must contain at least one number",
+      "special": "Password must contain at least one special character",
+      "passwordConfirmRequired": "Password confirmation is required",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "toasts": {
+      "invalidEmail": {
+        "title": "Invalid email",
+        "description": "Please use a valid email address."
+      },
+      "tooManyAttempts": {
+        "title": "Too many attempts"
+      },
+      "accountExists": {
+        "title": "Account already exists",
+        "description": "Please sign in with your existing account or use a different email."
+      },
+      "signUpFailed": {
+        "title": "Sign up failed"
+      },
+      "accountCreatedSignIn": {
+        "title": "Account created",
+        "description": "Please sign in to continue setting up your profile and membership."
+      },
+      "accountCreated": {
+        "title": "Account created!",
+        "description": "Complete your profile and membership to get started."
+      },
+      "invalidCredentials": {
+        "title": "Invalid credentials",
+        "description": "Please check your email and password and try again."
+      },
+      "signInFailed": {
+        "title": "Sign in failed"
+      },
+      "welcomeBack": {
+        "title": "Welcome back!",
+        "description": "You have successfully signed in."
+      },
+      "emailRequired": {
+        "title": "Email required",
+        "description": "Please enter your email address first."
+      },
+      "passwordResetFailed": {
+        "title": "Password reset failed"
+      },
+      "checkEmail": {
+        "title": "Check your email",
+        "description": "We've sent you a password reset link. Please check your inbox."
+      },
+      "sessionExpired": {
+        "title": "Session expired",
+        "description": "The password reset link has expired or is invalid. Please request a new one."
+      },
+      "passwordUpdateFailed": {
+        "title": "Password update failed"
+      },
+      "passwordUpdated": {
+        "title": "Password updated!",
+        "description": "Your password has been successfully updated. You can now sign in."
+      },
+      "googleSignInFailed": {
+        "title": "Google sign in failed"
+      },
+      "error": {
+        "title": "Error",
+        "description": "An unexpected error occurred. Please try again."
+      }
+    },
+    "oauthCallback": {
+      "errorTitle": "Authentication Error",
+      "redirecting": "Redirecting to sign in...",
+      "completing": "Completing sign in...",
+      "pleaseWait": "Please wait while we finish setting up your account.",
+      "authFailed": "Authentication failed",
+      "noEmail": "Your account has no email on file. Please use email sign-in.",
+      "sessionFailed": "Failed to establish session. Please try again."
+    }
+  },
+  "onboarding": {
+    "memberPriceLabel": "$2 / month",
+    "steps": {
+      "profile": "Profile",
+      "payment": "Payment"
+    },
+    "profile": {
+      "title": "Complete your profile",
+      "description": "This builds your Maali profile — visible to partners and opportunity providers across the network.",
+      "avatarLabel": "Profile Picture",
+      "optional": "(optional)",
+      "avatarPlaceholder": "Upload Profile Picture",
+      "avatarHint": "JPG, PNG, WebP or GIF up to 5MB",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Amara",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Diallo",
+      "organisation": "Company / Organisation / University (optional)",
+      "organisationPlaceholder": "e.g. Savanna Ventures, University of Accra, UNDP",
+      "sector": "Sector / Field",
+      "sectorPlaceholder": "Select your field",
+      "sectorLoading": "Loading…",
+      "country": "Country",
+      "countryPlaceholder": "Select country",
+      "cityRegion": "City / Region",
+      "cityRegionPlaceholder": "e.g. Lagos, Nairobi, Greater Accra",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+234 800 000 0000",
+      "bio": "Short Bio (optional)",
+      "bioPlaceholder": "e.g. Software engineer looking for fellowships, entrepreneur in agri-tech, recent grad seeking internships in finance…",
+      "saving": "Saving…",
+      "continue": "Continue"
+    },
+    "payment": {
+      "title": "Payment",
+      "description": "Full Member — {{price}}. Cancel anytime.",
+      "billingEmail": "Billing email for receipts",
+      "billingEmailPlaceholder": "you@example.com",
+      "billingHint": "Street address and tax ID can be added later under Dashboard → Billing.",
+      "cardHint": "Your card will appear under Dashboard → Billing after payment.",
+      "failed": "Payment failed",
+      "initFailed": "Could not initialise payment: {{message}}",
+      "back": "Back",
+      "goBack": "Go back",
+      "processing": "Processing…",
+      "payAndJoin": "Pay $2 & Join",
+      "stripeNote": "Payments are processed securely by Stripe. MAALI never stores your card details.",
+      "skipToCommunity": "Continue with free Community account"
+    },
+    "activating": {
+      "title": "Activating your membership…",
+      "description": "Payment received. We're confirming with Stripe — this usually takes just a few seconds."
+    },
+    "noAccount": {
+      "message": "You need an account first.",
+      "cta": "Create Account"
+    },
+    "done": {
+      "title": "Welcome to Maali!",
+      "description": "Your membership is active. You can now apply to funding opportunities, jobs, internships, fellowships and more.",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "logoAlt": "Maali Opportunity Hub",
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "sectorRequired": "Sector is required",
+      "countryRequired": "Country is required",
+      "cityRegionRequired": "City / region is required",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Enter a valid international number (e.g. +234 800 000 0000)"
+    },
+    "toasts": {
+      "profileSaveError": {
+        "title": "Error saving profile"
+      },
+      "error": {
+        "title": "Error"
+      },
+      "activationPending": {
+        "title": "Payment received — activation pending",
+        "description": "Your payment went through but we haven't received Stripe's confirmation yet. Refresh in a minute, or contact support if this persists."
+      }
+    }
+  },
+  "join": {
+    "memberPriceLabel": "$2 / month",
+    "steps": {
+      "profile": "Profile",
+      "tier": "Membership",
+      "payment": "Payment"
+    },
+    "profile": {
+      "title": "Tell us about yourself",
+      "description": "This builds your MAALI member profile visible to the network.",
+      "firstName": "First Name *",
+      "lastName": "Last Name *",
+      "businessName": "Business / Organisation Name *",
+      "businessNamePlaceholder": "Savanna Ventures",
+      "sector": "Sector *",
+      "sectorPlaceholder": "Select sector",
+      "country": "Country *",
+      "countryPlaceholder": "Kenya",
+      "bio": "Short Bio",
+      "bioPlaceholder": "Tell the MAALI network what you're building…",
+      "continue": "Continue"
+    },
+    "tier": {
+      "title": "Choose your membership",
+      "subtitle": "You can upgrade at any time.",
+      "mostPopular": "Most Popular",
+      "community": {
+        "name": "Community",
+        "price": "Free",
+        "description": "Join the MAALI network and browse opportunities.",
+        "cta": "Join Free",
+        "features": [
+          "Browse all funding opportunities",
+          "Access public resources",
+          "Join the community network",
+          "Monthly newsletter"
+        ]
+      },
+      "member": {
+        "name": "Full Member",
+        "price": "$2 / month",
+        "description": "Unlock the full MAALI platform and apply to opportunities.",
+        "cta": "Become a Member",
+        "features": [
+          "Everything in Community",
+          "Apply to funding opportunities",
+          "Priority application review",
+          "Direct messaging with reviewers",
+          "Featured profile in network",
+          "Exclusive member events"
+        ]
+      }
+    },
+    "noAccount": {
+      "title": "Sign up first",
+      "message": "You need an account before joining MAALI.",
+      "cta": "Create Account"
+    },
+    "done": {
+      "title": "Welcome to Maali!",
+      "paidDescription": "Your Full Membership is active. You can now apply to all funding opportunities.",
+      "communityDescription": "You've joined the Maali community network.",
+      "upgradeHint": "Upgrade to Full Member anytime to apply for funding.",
+      "goHome": "Go to Home",
+      "browseOpportunities": "Browse Opportunities"
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "Get in touch with our team. We're here to help you succeed."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "firstNameTooLong": "First name is too long",
+      "lastNameRequired": "Last name is required",
+      "lastNameTooLong": "Last name is too long",
+      "subjectRequired": "Please select a subject",
+      "messageMin": "Message must be at least 10 characters",
+      "messageTooLong": "Message is too long"
+    },
+    "toasts": {
+      "submitFailed": "Failed to submit your message. Please try again.",
+      "submitSuccess": "Your message has been sent successfully! We'll get back to you within 24 hours.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "form": {
+      "title": "Send us a Message",
+      "description": "Fill out the form below and we'll get back to you as soon as possible.",
+      "firstNameLabel": "First Name *",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastNameLabel": "Last Name *",
+      "lastNamePlaceholder": "Enter your last name",
+      "emailLabel": "Email *",
+      "emailPlaceholder": "Enter your email address",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "Enter your phone number",
+      "countryLabel": "Country",
+      "countryPlaceholder": "Select your country",
+      "countryOther": "Other",
+      "countryNigeria": "Nigeria",
+      "countryKenya": "Kenya",
+      "countrySouthAfrica": "South Africa",
+      "countryGhana": "Ghana",
+      "countryUganda": "Uganda",
+      "countryTanzania": "Tanzania",
+      "subjectLabel": "Subject *",
+      "subjectPlaceholder": "Select a subject",
+      "subjectFunding": "Funding Inquiry",
+      "subjectApplication": "Application Support",
+      "subjectPartnership": "Partnership",
+      "subjectTechnical": "Technical Support",
+      "subjectGeneral": "General Inquiry",
+      "messageLabel": "Message *",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "sending": "Sending...",
+      "submit": "Send Message"
+    },
+    "success": {
+      "title": "Message Sent Successfully!",
+      "description": "Thank you for contacting us. We've received your message and will respond within 24 hours.",
+      "sendAnother": "Send Another Message"
+    },
+    "contactInfo": {
+      "title": "Contact Information",
+      "emailTitle": "Email Us",
+      "emailDescription": "We'll respond within 24 hours",
+      "callTitle": "Call Us",
+      "callDescription": "Mon-Fri, 9AM-6PM WAT",
+      "officeTitle": "Office",
+      "officeDescription": "Pan-African operations",
+      "responseTimeTitle": "Response Time",
+      "responseTimeValue": "24 hours",
+      "responseTimeDescription": "Average response time"
+    },
+    "officeLocations": {
+      "title": "Office Locations",
+      "description": "We operate across Africa with regional hubs",
+      "offices": [
+        {
+          "city": "Lagos",
+          "country": "Nigeria",
+          "address": "Victoria Island, Lagos State",
+          "role": "West Africa Hub"
+        },
+        {
+          "city": "Nairobi",
+          "country": "Kenya",
+          "address": "Westlands, Nairobi",
+          "role": "East Africa Hub"
+        },
+        {
+          "city": "Cape Town",
+          "country": "South Africa",
+          "address": "Century City, Cape Town",
+          "role": "Southern Africa Hub"
+        }
+      ]
+    },
+    "quickSupport": {
+      "title": "Quick Support",
+      "description": "Need immediate assistance? Check our FAQ section or schedule a call with our team.",
+      "viewFaq": "View FAQ",
+      "scheduleCall": "Schedule Call"
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "description": "Don't wait — explore funding opportunities available right now",
+      "browseOpportunities": "Browse Opportunities",
+      "createAccount": "Create Account"
+    }
+  },
+  "opportunityDetail": {
+    "uncategorized": "Uncategorized",
+    "location": "Location",
+    "deadline": "Application Deadline",
+    "sector": "Sector",
+    "fundingAmount": "Funding Amount",
+    "opportunityType": "Opportunity Type",
+    "organization": "Organization",
+    "programFormat": "Program Format",
+    "experienceLevel": "Experience Level",
+    "requirements": "Requirements",
+    "eligibilityCriteria": "Eligibility Criteria"
   }
 }
-

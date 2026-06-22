@@ -5,7 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Database, Bell, CreditCard } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 const AdminSettings = () => {
+  const { t } = useTranslation(["dashboard"]);
   const { toast } = useToast();
 
   const [settings, setSettings] = useState({
@@ -18,11 +21,10 @@ const AdminSettings = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
     setTimeout(() => {
       toast({
-        title: "Settings saved",
-        description: "Admin settings have been updated.",
+        title: t("admin.settingsPage.toast.saved"),
+        description: t("admin.settingsPage.toast.savedDesc"),
       });
       setSaving(false);
     }, 1000);
@@ -31,29 +33,24 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Admin Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Configure admin panel and system settings
-        </p>
+        <h1 className="text-3xl font-bold">{t("admin.settingsPage.title")}</h1>
+        <p className="text-muted-foreground mt-2">{t("admin.settingsPage.subtitle")}</p>
       </div>
 
-      {/* General Settings */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            General Settings
+            {t("admin.settingsPage.general.title")}
           </CardTitle>
-          <CardDescription>
-            Configure general admin panel settings
-          </CardDescription>
+          <CardDescription>{t("admin.settingsPage.general.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="maintenance">Maintenance Mode</Label>
+              <Label htmlFor="maintenance">{t("admin.settingsPage.general.maintenance")}</Label>
               <p className="text-sm text-muted-foreground">
-                Enable maintenance mode to restrict access
+                {t("admin.settingsPage.general.maintenanceDesc")}
               </p>
             </div>
             <Switch
@@ -67,23 +64,22 @@ const AdminSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Notifications */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            Notifications
+            {t("admin.settingsPage.notifications.title")}
           </CardTitle>
-          <CardDescription>
-            Configure admin notification preferences
-          </CardDescription>
+          <CardDescription>{t("admin.settingsPage.notifications.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="email-notifications">Email Notifications</Label>
+              <Label htmlFor="email-notifications">
+                {t("admin.settingsPage.notifications.email")}
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Receive email alerts for important events
+                {t("admin.settingsPage.notifications.emailDesc")}
               </p>
             </div>
             <Switch
@@ -96,9 +92,11 @@ const AdminSettings = () => {
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="application-alerts">Application Alerts</Label>
+              <Label htmlFor="application-alerts">
+                {t("admin.settingsPage.notifications.applications")}
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Get notified when new applications are submitted
+                {t("admin.settingsPage.notifications.applicationsDesc")}
               </p>
             </div>
             <Switch
@@ -116,47 +114,45 @@ const AdminSettings = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Application access
+            {t("admin.settingsPage.applicationAccess.title")}
           </CardTitle>
-          <CardDescription>
-            Per-application fees are archived. Users need an active Full Member subscription to apply.
-          </CardDescription>
+          <CardDescription>{t("admin.settingsPage.applicationAccess.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Membership is managed at <code className="text-xs">/join</code>. Legacy fee code is in{" "}
-            <code className="text-xs">archive/legacy-application-payment/</code>.
+            {t("admin.settingsPage.applicationAccess.body")}
           </p>
         </CardContent>
       </Card>
 
-      {/* System Information */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5" />
-            System Information
+            {t("admin.settingsPage.system.title")}
           </CardTitle>
-          <CardDescription>
-            View system status and information
-          </CardDescription>
+          <CardDescription>{t("admin.settingsPage.system.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Database Status</Label>
-              <p className="text-sm text-muted-foreground">Connected</p>
+              <Label>{t("admin.settingsPage.system.databaseStatus")}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t("admin.settingsPage.system.connected")}
+              </p>
             </div>
             <div>
-              <Label>API Status</Label>
-              <p className="text-sm text-muted-foreground">Operational</p>
+              <Label>{t("admin.settingsPage.system.apiStatus")}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t("admin.settingsPage.system.operational")}
+              </p>
             </div>
             <div>
-              <Label>Total Users</Label>
+              <Label>{t("admin.settingsPage.system.totalUsers")}</Label>
               <p className="text-sm text-muted-foreground">1,247</p>
             </div>
             <div>
-              <Label>Total Projects</Label>
+              <Label>{t("admin.settingsPage.system.totalProjects")}</Label>
               <p className="text-sm text-muted-foreground">45</p>
             </div>
           </div>
@@ -165,7 +161,7 @@ const AdminSettings = () => {
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Settings"}
+          {saving ? t("admin.settingsPage.saving") : t("admin.settingsPage.save")}
         </Button>
       </div>
     </div>
@@ -173,12 +169,3 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
-
-
-
-
-
-
-
-
-

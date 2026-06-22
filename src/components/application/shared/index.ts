@@ -11,6 +11,7 @@ export { default as ApplicationMetadataCard } from "./ApplicationMetadataCard";
 export { default as ApplicationDetailsSkeleton } from "./ApplicationDetailsSkeleton";
 export { default as ApplicationNotFound } from "./ApplicationNotFound";
 export { default as ApplicationHeader } from "./ApplicationHeader";
+export { default as ApplicationTranslationBar } from "./ApplicationTranslationBar";
 export { default as AdminReviewSidebar } from "./AdminReviewSidebar";
 
 

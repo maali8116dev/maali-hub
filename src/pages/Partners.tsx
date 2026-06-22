@@ -1,10 +1,12 @@
-﻿import Navigation from "@/components/Navigation";
+﻿import { useTranslation } from "react-i18next";
+import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Handshake, Heart, Globe } from "lucide-react";
 
 const Partners = () => {
+  const { t } = useTranslation("landing");
   const partnersectors = [
     {
       title: "Funding Partners",
@@ -55,11 +57,8 @@ const Partners = () => {
       <Navigation />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Partners</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We work with leading organizations across Africa and beyond to provide comprehensive support
-            to entrepreneurs. Together, we're building a stronger ecosystem for African innovation.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("partnersPage.title")}</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{t("partnersPage.subtitle")}</p>
         </div>
 
         {partnersectors.map((sector, categoryIndex) => {
@@ -94,19 +93,13 @@ const Partners = () => {
         {/* Become a Partner Section */}
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle>Interested in Partnering with Us?</CardTitle>
-            <CardDescription>
-              Join our network of partners and help empower African entrepreneurs.
-            </CardDescription>
+            <CardTitle>{t("partnersPage.ctaTitle")}</CardTitle>
+            <CardDescription>{t("partnersPage.ctaDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">
-              We're always looking for organizations that share our mission of supporting African entrepreneurs.
-              Whether you're a funder, accelerator, or support organization, we'd love to explore partnership opportunities.
-            </p>
             <a href="/contact">
               <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-                Contact Us
+                {t("partnersPage.ctaButton")}
               </button>
             </a>
           </CardContent>

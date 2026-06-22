@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,27 +15,65 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAllSectors } from "@/hooks/useSectors";
+import { useTranslation } from "react-i18next";
+import {
+  cmsTranslationFailureMessage,
+  invalidateCmsTranslationQueries,
+  triggerSuccessStoryTranslation,
+} from "@/hooks/useTranslateCms";
 
-const successStorySchema = z.object({
-  name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
-  company: z.string().min(1, "Company is required").min(2, "Company must be at least 2 characters"),
-  sector: z.string().min(1, "Sector is required"),
-  location: z.string().min(1, "Location is required"),
-  funding_amount: z.string().min(1, "Funding amount is required"),
-  funding_date: z.string().min(1, "Funding date is required"),
-  image_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  description: z.string().min(1, "Description is required").min(50, "Description must be at least 50 characters"),
-  impact_metrics: z.string().optional(),
-  featured: z.boolean(),
-  display_order: z.number().int().min(0),
-  status: z.enum(["draft", "published", "archived"]),
-});
-
-type SuccessStoryFormValues = z.infer<typeof successStorySchema>;
+type SuccessStoryFormValues = {
+  name: string;
+  company: string;
+  sector: string;
+  location: string;
+  funding_amount: string;
+  funding_date: string;
+  image_url?: string;
+  description: string;
+  impact_metrics?: string;
+  featured: boolean;
+  display_order: number;
+  status: "draft" | "published" | "archived";
+};
 
 const SuccessStoryForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.successStory";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const successStorySchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.name`) }))
+          .min(2, t(`${fv}.nameMin2`)),
+        company: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.company`) }))
+          .min(2, t(`${fv}.nameMin2`)),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        location: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.location`) })),
+        funding_amount: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.fundingAmount`) })),
+        funding_date: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.fundingDate`) })),
+        image_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        description: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.description`) }))
+          .min(50, t(`${fv}.minChars`, { field: t(`${ff}.description`), min: 50 })),
+        impact_metrics: z.string().optional(),
+        featured: z.boolean(),
+        display_order: z.number().int().min(0),
+        status: z.enum(["draft", "published", "archived"]),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const isEditing = !!id;
   const [isLoading, setIsLoading] = useState(false);
@@ -125,30 +164,46 @@ const SuccessStoryForm = () => {
         status: data.status,
       };
 
+      let storyId: number;
+
       if (isEditing && id) {
-        const { error } = await supabase
+        const { data: updated, error } = await supabase
           .from("success_stories")
           .update(storyData)
-          .eq("id", parseInt(id));
+          .eq("id", parseInt(id))
+          .select()
+          .single();
 
         if (error) throw error;
+        storyId = updated.id;
 
         toast({
           title: "Success",
           description: "Success story updated successfully",
         });
       } else {
-        const { error } = await supabase
+        const { data: created, error } = await supabase
           .from("success_stories")
-          .insert([storyData]);
+          .insert([storyData])
+          .select()
+          .single();
 
         if (error) throw error;
+        storyId = created.id;
 
         toast({
           title: "Success",
           description: "Success story created successfully",
         });
       }
+
+      void triggerSuccessStoryTranslation(storyId).then((result) => {
+        if (!result.ok) {
+          console.warn(cmsTranslationFailureMessage(result.reason));
+        } else {
+          invalidateCmsTranslationQueries(queryClient, "success_story");
+        }
+      });
 
       navigate("/admin/success-stories");
     } catch (error: any) {
@@ -181,7 +236,7 @@ const SuccessStoryForm = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditing ? "Edit Success Story" : "Add New Success Story"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </h1>
           <p className="text-muted-foreground mt-2">
             {isEditing ? "Update success story details" : "Fill in the details to add a new success story"}

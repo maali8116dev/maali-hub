@@ -1,4 +1,15 @@
-﻿import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/i18n", () => ({
+  default: {
+    t: (key: string) => {
+      if (key === "applicationWindow.closed") return "Closed for applications";
+      if (key === "applicationWindow.open") return "Open for applications";
+      return key;
+    },
+  },
+}));
+
 import { getProjectApplicationStateLabel, isProjectOpen } from "@/lib/projectAvailability";
 
 function formatDate(date: Date): string {

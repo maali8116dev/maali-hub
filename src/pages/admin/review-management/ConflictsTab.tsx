@@ -5,8 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table';
+import { useTranslation } from 'react-i18next';
 
 export const ConflictsTab = () => {
+  const { t } = useTranslation(['dashboard']);
+  const cp = 'admin.reviewManagementPage.conflicts';
   const { data: conflicts = [], refetch, isFetching } = useQuery({
     queryKey: ['all-conflicts'],
     queryFn: async () => {
@@ -28,7 +31,7 @@ export const ConflictsTab = () => {
     {
       accessorKey: 'reviewer',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Reviewer" />
+        <SortableColumnHeader column={column} title={t(`${cp}.columns.reviewer`)} />
       ),
       cell: ({ row }) => {
         const conflict = row.original;
@@ -38,7 +41,7 @@ export const ConflictsTab = () => {
             {reviewer.first_name} {reviewer.last_name}
           </span>
         ) : (
-          <span className="text-sm text-muted-foreground">Unknown</span>
+          <span className="text-sm text-muted-foreground">{t(`${cp}.unknown`)}</span>
         );
       },
       sortingFn: (rowA, rowB) => {
@@ -50,7 +53,7 @@ export const ConflictsTab = () => {
     {
       accessorKey: 'application',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Application" />
+        <SortableColumnHeader column={column} title={t(`${cp}.columns.application`)} />
       ),
       cell: ({ row }) => {
         const conflict = row.original;
@@ -58,7 +61,7 @@ export const ConflictsTab = () => {
         return application?.project_title ? (
           <span className="text-sm">{application.project_title}</span>
         ) : (
-          <span className="text-xs text-muted-foreground">N/A</span>
+          <span className="text-xs text-muted-foreground">{t('admin.financialPage.columns.na')}</span>
         );
       },
       sortingFn: (rowA, rowB) => {
@@ -70,7 +73,7 @@ export const ConflictsTab = () => {
     {
       accessorKey: 'conflict_reason',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Reason" />
+        <SortableColumnHeader column={column} title={t(`${cp}.columns.reason`)} />
       ),
       cell: ({ row }) => {
         return (
@@ -83,7 +86,7 @@ export const ConflictsTab = () => {
     {
       accessorKey: 'created_at',
       header: ({ column }) => (
-        <SortableColumnHeader column={column} title="Declared" />
+        <SortableColumnHeader column={column} title={t(`${cp}.columns.declared`)} />
       ),
       cell: ({ row }) => {
         const createdAt = row.original.created_at;
@@ -92,7 +95,7 @@ export const ConflictsTab = () => {
             {new Date(createdAt).toLocaleDateString()}
           </span>
         ) : (
-          <span className="text-xs text-muted-foreground">N/A</span>
+          <span className="text-xs text-muted-foreground">{t('admin.financialPage.columns.na')}</span>
         );
       },
       sortingFn: (rowA, rowB) => {
@@ -101,18 +104,18 @@ export const ConflictsTab = () => {
         return dateA - dateB;
       },
     },
-  ], []);
+  ], [t]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reviewer Conflicts</CardTitle>
+        <CardTitle>{t(`${cp}.title`)}</CardTitle>
       </CardHeader>
       <CardContent>
         <DataTable
           columns={conflictColumns}
           data={conflicts}
-          searchPlaceholder="Search by reviewer name or application title..."
+          searchPlaceholder={t(`${cp}.searchPlaceholder`)}
           pageSize={10}
           enableSorting={true}
           enablePagination={true}

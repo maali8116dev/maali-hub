@@ -114,11 +114,11 @@ export function OnboardingChecklist({
     {
       id: 'browse-opportunities',
       label: 'Browse funding opportunities',
-      description: 'Explore available projects that match your business',
+      description: 'Explore available opportunities that match your business',
       completed: hasApplications,
       action: hasApplications ? undefined : {
-        label: 'Browse Projects',
-        href: '/projects'
+        label: 'Browse Opportunities',
+        href: '/opportunities'
       }
     },
     ...(canApplyToOpportunities

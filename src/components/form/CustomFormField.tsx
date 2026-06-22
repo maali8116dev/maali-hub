@@ -312,7 +312,7 @@ const FieldRenderer = <TFieldValues extends FieldValues = FieldValues>({
         <FormControl>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value || undefined}
             disabled={disabled}
           >
             <SelectTrigger className={props.className}>

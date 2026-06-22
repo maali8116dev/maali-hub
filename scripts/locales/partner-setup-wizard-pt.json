@@ -1,0 +1,38 @@
+{
+  "title": "Bem-vindo ao Portal de Parceiros Maali",
+  "description": "Vamos configurar o perfil da sua organização para que os candidatos saibam mais sobre si.",
+  "stepOf": "Passo {{current}} de {{total}}",
+  "percentComplete": "{{percent}}% concluído",
+  "steps": {
+    "organization": "Organização",
+    "contact": "Contacto",
+    "firstOpportunity": "Primeira oportunidade"
+  },
+  "logoHint": "Um logótipo ajuda os candidatos a reconhecer a sua organização",
+  "step3Intro": "Configure opcionalmente a sua primeira oportunidade agora, ou ignore e faça-o mais tarde no painel.",
+  "fields": {
+    "opportunityTitle": "Título da oportunidade",
+    "opportunityTitlePlaceholder": "ex. Bolsa de Inovação 2026",
+    "fundingAmount": "Montante do financiamento",
+    "fundingAmountPlaceholder": "ex. $10.000 - $50.000",
+    "deadline": "Prazo de candidatura"
+  },
+  "actions": {
+    "skip": "Ignorar por agora",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "saving": "A guardar…",
+    "complete": "Concluir configuração"
+  },
+  "toasts": {
+    "updated": "Perfil da organização atualizado!",
+    "updatedDesc": "A sua organização parceira está configurada.",
+    "error": "Erro",
+    "errorDesc": "Falha ao guardar o perfil. Tente novamente."
+  },
+  "validation": {
+    "descriptionMin": "A descrição deve ter pelo menos 10 caracteres",
+    "contactNameMin": "O nome do contacto é obrigatório",
+    "validUrl": "Introduza um URL válido"
+  }
+}

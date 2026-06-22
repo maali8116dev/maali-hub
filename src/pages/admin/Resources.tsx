@@ -32,6 +32,7 @@ import {
   RESOURCE_sectors,
   type Resource,
 } from "@/hooks/useResources";
+import { useTranslation } from "react-i18next";
 
 const getFileIcon = (fileType: string) => {
   switch (fileType) {
@@ -63,6 +64,9 @@ const formatFileSize = (bytes: number | null): string => {
 };
 
 const Resources = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cf = "admin.cmsList.resources";
+  const cc = "admin.cmsList.common";
   const navigate = useNavigate();
   const { data: resources = [], isLoading, refetch, isFetching } = useAdminResources();
   const deleteResource = useDeleteResource();
@@ -232,13 +236,11 @@ const Resources = () => {
     <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">
-            Manage downloadable materials and resources
-          </p>
+          <p className="text-muted-foreground">{t(`${cf}.subtitle`)}</p>
           <Button asChild>
             <Link to="/admin/resources/new">
               <Plus className="mr-2 h-4 w-4" />
-              Add Resource
+              {t(`${cf}.create`)}
             </Link>
           </Button>
         </div>
@@ -267,7 +269,7 @@ const Resources = () => {
         {/* Resources Table */}
         <Card>
           <CardHeader>
-            <CardTitle>All Resources ({filteredResources.length})</CardTitle>
+            <CardTitle>{t(`${cf}.title`)} ({filteredResources.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -301,15 +303,13 @@ const Resources = () => {
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Resource</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{deleteConfirm?.title}"? This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+            <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t(`${cc}.cancel`)}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+              {t(`${cc}.delete`)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

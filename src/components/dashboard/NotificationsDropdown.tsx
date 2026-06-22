@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Bell, Check, CheckCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,16 +10,18 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { resolveNotificationText } from "@/lib/notificationText";
+import { useFormattedDistance } from "@/hooks/useFormattedDistance";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: "application" | "system" | "reminder" | "new_application" | "review_assigned" | "deadline_reminder" | "status_change";
+  type: "application" | "system" | "reminder" | "new_application" | "review_assigned" | "deadline_reminder" | "status_change" | "payment" | "review_assignment";
   read: boolean;
   createdAt: string;
   link?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface NotificationsDropdownProps {
@@ -26,6 +29,12 @@ interface NotificationsDropdownProps {
   unreadCount: number;
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
+  notificationsLink?: string;
+}
+
+function NotificationDropdownTime({ date }: { date: string }) {
+  const formatted = useFormattedDistance(date);
+  return <p className="text-xs text-muted-foreground mt-1">{formatted}</p>;
 }
 
 const NotificationsDropdown = ({
@@ -33,8 +42,10 @@ const NotificationsDropdown = ({
   unreadCount,
   onMarkAsRead,
   onMarkAllAsRead,
+  notificationsLink = "/dashboard/notifications",
 }: NotificationsDropdownProps) => {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation("common");
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -77,7 +88,7 @@ const NotificationsDropdown = ({
           variant="ghost"
           size="icon"
           className="relative"
-          aria-label="Notifications"
+          aria-label={t("notifications.title")}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -90,7 +101,7 @@ const NotificationsDropdown = ({
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold">Notifications</h3>
+            <h3 className="font-semibold">{t("notifications.title")}</h3>
             {unreadCount > 0 && (
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 {unreadCount}
@@ -105,7 +116,7 @@ const NotificationsDropdown = ({
               className="h-8 text-xs"
             >
               <CheckCheck className="h-3 w-3 mr-1" />
-              Mark all read
+              {t("notifications.markAllRead")}
             </Button>
           )}
         </div>
@@ -113,7 +124,9 @@ const NotificationsDropdown = ({
         <ScrollArea className="h-[400px]">
           {notifications.length > 0 ? (
             <div className="divide-y divide-border">
-              {notifications.map((notification) => (
+              {notifications.map((notification) => {
+                const text = resolveNotificationText(notification, t);
+                return (
                 <div
                   key={notification.id}
                   className={cn(
@@ -134,16 +147,12 @@ const NotificationsDropdown = ({
                               !notification.read && "font-semibold"
                             )}
                           >
-                            {notification.title}
+                            {text.title}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {notification.message}
+                            {text.message}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatDistanceToNow(new Date(notification.createdAt), {
-                              addSuffix: true,
-                            })}
-                          </p>
+                          <NotificationDropdownTime date={notification.createdAt} />
                         </div>
                         {!notification.read && (
                           <Button
@@ -162,14 +171,15 @@ const NotificationsDropdown = ({
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Bell className="h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-              <p className="text-sm font-medium">No notifications</p>
+              <p className="text-sm font-medium">{t("notifications.emptyTitle")}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                You're all caught up!
+                {t("notifications.emptyDescription")}
               </p>
             </div>
           )}
@@ -177,9 +187,9 @@ const NotificationsDropdown = ({
         </ScrollArea>
 
         <div className="border-t border-border px-4 py-3">
-          <Link to="/dashboard/notifications" onClick={() => setOpen(false)}>
+          <Link to={notificationsLink} onClick={() => setOpen(false)}>
             <Button variant="ghost" className="w-full justify-center text-sm">
-              View all notifications
+              {t("notifications.viewAll")}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>

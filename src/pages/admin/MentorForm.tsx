@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,21 +16,20 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { useMentor, useCreateMentor, useUpdateMentor, useAdminMentors } from "@/hooks/useMentors";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { ArrowLeft, X, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const mentorSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  bio: z.string().optional(),
-  sector: z.string().optional(),
-  country: z.string().optional(),
-  linkedin_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  twitter_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  website_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  avatar_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  display_order: z.number().min(0),
-  is_published: z.boolean(),
-});
-
-type MentorFormValues = z.infer<typeof mentorSchema>;
+type MentorFormValues = {
+  name: string;
+  bio?: string;
+  sector?: string;
+  country?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  website_url?: string;
+  avatar_url?: string;
+  display_order: number;
+  is_published: boolean;
+};
 
 const PREDEFINED_sectorS = [
   "Agriculture",
@@ -62,6 +61,28 @@ const PREDEFINED_COUNTRIES = [
 ];
 
 const AdminMentorForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.mentor";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const mentorSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, t(`${fv}.nameMin2`)),
+        bio: z.string().optional(),
+        sector: z.string().optional(),
+        country: z.string().optional(),
+        linkedin_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        twitter_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        website_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        avatar_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        display_order: z.number().min(0),
+        is_published: z.boolean(),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -185,7 +206,7 @@ const AdminMentorForm = () => {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">
-            {isEditing ? "Edit Mentor" : "Add New Mentor"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </h1>
           <p className="text-muted-foreground">
             {isEditing ? "Update mentor information" : "Add a new mentor to the directory"}

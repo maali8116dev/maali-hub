@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CheckCircle,
   XCircle,
@@ -72,6 +73,7 @@ const AdminReviewSidebar = ({
   applicationStatus,
 }: AdminReviewSidebarProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation(["dashboard", "common"]);
   const queryClient = useQueryClient();
   const [isManageOpen, setIsManageOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -119,12 +121,12 @@ const AdminReviewSidebar = ({
         status,
       });
       toast({
-        title: status === "approved" ? "Application approved" : "Application rejected",
+        title: status === "approved" ? t("applications.detail.review.toastApproved") : t("applications.detail.review.toastRejected"),
       });
     } catch (err) {
       toast({
-        title: "Could not update status",
-        description: err instanceof Error ? err.message : "Try again",
+        title: t("applications.detail.review.toastStatusError"),
+        description: err instanceof Error ? err.message : t("applications.detail.review.toastTryAgain"),
         variant: "destructive",
       });
     }
@@ -134,10 +136,10 @@ const AdminReviewSidebar = ({
     mutationFn: async () => {
       if (!applicationId) throw new Error("Missing application id");
       if (selectedReviewerIds.length < 2) {
-        throw new Error("Select 2 reviewers");
+        throw new Error(t("applications.detail.review.errors.selectTwoReviewers"));
       }
       const unique = [...new Set(selectedReviewerIds)];
-      if (unique.length < 2) throw new Error("Reviewers must be different");
+      if (unique.length < 2) throw new Error(t("applications.detail.review.errors.reviewersMustDiffer"));
       const { error } = await supabase.rpc("admin_set_application_reviewers" as any, {
         p_application_id: applicationId,
         p_reviewer_ids: selectedReviewerIds.slice(0, 2),
@@ -150,15 +152,15 @@ const AdminReviewSidebar = ({
         queryClient.invalidateQueries({ queryKey: ["review-aggregation", applicationId] });
       }
       toast({
-        title: "Reviewers updated",
-        description: "Assignments were updated successfully.",
+        title: t("applications.detail.review.toastReviewersUpdated"),
+        description: t("applications.detail.review.toastReviewersUpdatedDesc"),
       });
       setIsManageOpen(false);
     },
     onError: (e: unknown) => {
       toast({
-        title: "Update failed",
-        description: e instanceof Error ? e.message : "Could not update reviewers.",
+        title: t("applications.detail.review.toastUpdateFailed"),
+        description: e instanceof Error ? e.message : t("applications.detail.review.toastTryAgain"),
         variant: "destructive",
       });
     },
@@ -201,7 +203,7 @@ const AdminReviewSidebar = ({
       {aggregationLoading ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Review Status</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.statusTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-2">
@@ -214,19 +216,19 @@ const AdminReviewSidebar = ({
       ) : reviewAggregation ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Review Status</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.statusTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Reviews:</span>
+                <span className="text-sm text-muted-foreground">{t("applications.detail.review.totalReviews")}</span>
                 <Badge variant="outline">
                   {reviewAggregation.total_reviews} / {assignments.length}
                 </Badge>
               </div>
               {reviewAggregation.pending_reviewers > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Pending:</span>
+                  <span className="text-sm text-muted-foreground">{t("applications.detail.review.pending")}</span>
                   <Badge className="bg-warning/10 text-warning border-warning/20">
                     <Clock className="h-3 w-3 mr-1" />
                     {reviewAggregation.pending_reviewers}
@@ -235,24 +237,24 @@ const AdminReviewSidebar = ({
               )}
               {reviewAggregation.average_score > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Average Score:</span>
+                  <span className="text-sm text-muted-foreground">{t("applications.detail.review.averageScore")}</span>
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                     <span className="font-medium">
-                      {reviewAggregation.average_score.toFixed(1)} / 10
+                      {t("applications.detail.review.scoreOutOf", { score: reviewAggregation.average_score.toFixed(1) })}
                     </span>
                   </div>
                 </div>
               )}
               {reviewAggregation.recommendations && (
                 <div className="pt-2 border-t space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Recommendations:</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">{t("applications.detail.review.recommendations")}</p>
                   <div className="space-y-1.5">
                     {reviewAggregation.recommendations.approve > 0 && (
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <CheckCircle className="h-3 w-3 text-success" />
-                          Approve
+                          {t("common:status.recommendation.approve")}
                         </span>
                         <Badge className="bg-success/10 text-success border-success/20 text-xs">
                           {reviewAggregation.recommendations.approve}
@@ -263,7 +265,7 @@ const AdminReviewSidebar = ({
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <XCircle className="h-3 w-3 text-destructive" />
-                          Reject
+                          {t("common:status.recommendation.reject")}
                         </span>
                         <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-xs">
                           {reviewAggregation.recommendations.reject}
@@ -274,7 +276,7 @@ const AdminReviewSidebar = ({
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <AlertCircle className="h-3 w-3 text-warning" />
-                          Request Info
+                          {t("common:status.recommendation.request_info")}
                         </span>
                         <Badge className="bg-warning/10 text-warning border-warning/20 text-xs">
                           {reviewAggregation.recommendations.request_info}
@@ -286,21 +288,22 @@ const AdminReviewSidebar = ({
               )}
               {showTieBreakerHint && assignments.length < MAX_REVIEWERS_PER_APPLICATION && (
                 <p className="text-xs text-warning pt-2 border-t">
-                  Reviewers disagree near the reject threshold (~5/10) — add another reviewer to
-                  break the tie (up to {MAX_REVIEWERS_PER_APPLICATION} total).
+                  {t("applications.detail.review.tieBreakerHint", { max: MAX_REVIEWERS_PER_APPLICATION })}
                 </p>
               )}
               {applicationStatus === "under_review" &&
                 reviewAggregation.pending_reviewers > 0 && (
                   <p className="text-xs text-muted-foreground pt-2 border-t">
-                    Stays under review until all assigned reviewers submit (
-                    {reviewAggregation.total_reviews}/{assignments.length} done).
+                    {t("applications.detail.review.underReviewProgress", {
+                      completed: reviewAggregation.total_reviews,
+                      total: assignments.length,
+                    })}
                   </p>
                 )}
               {canSetFinalStatus && (
                 <div className="pt-3 border-t space-y-2">
                   <p className="text-xs text-muted-foreground">
-                    All reviews in — approve or reject to update status.
+                    {t("applications.detail.review.allReviewsIn")}
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
@@ -309,7 +312,7 @@ const AdminReviewSidebar = ({
                       onClick={() => handleFinalStatus("approved")}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Approve
+                      {t("applications.detail.review.approve")}
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -319,22 +322,22 @@ const AdminReviewSidebar = ({
                           disabled={updateStatusMutation.isPending}
                         >
                           <XCircle className="h-4 w-4 mr-2" />
-                          Reject
+                          {t("applications.detail.review.reject")}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Reject application?</AlertDialogTitle>
+                          <AlertDialogTitle>{t("applications.detail.review.rejectDialogTitle")}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Applicant will be notified. This cannot be undone from the UI.
+                            {t("applications.detail.review.rejectDialogDescription")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t("applications.detail.review.cancel")}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleFinalStatus("rejected")}
                           >
-                            Reject
+                            {t("applications.detail.review.reject")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -348,11 +351,11 @@ const AdminReviewSidebar = ({
       ) : assignments.length > 0 ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Review Status</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.statusTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="text-sm text-muted-foreground">
-              {assignments.length} reviewer(s) assigned, no reviews submitted yet.
+              {t("applications.detail.review.reviewersAssignedNoReviews", { count: assignments.length })}
             </div>
           </CardContent>
         </Card>
@@ -362,7 +365,7 @@ const AdminReviewSidebar = ({
       {assignmentsLoading || scoresLoading ? (
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+            <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.reviewersTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="space-y-2">
@@ -376,16 +379,16 @@ const AdminReviewSidebar = ({
         <Card>
           <CardHeader className="p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.reviewersTitle")}</CardTitle>
               {applicationId && (
                 <div className="flex gap-2">
                   {assignments.length >= 2 && assignments.length < MAX_REVIEWERS_PER_APPLICATION && (
                     <Button variant="outline" size="sm" onClick={openAdd}>
-                      Add reviewer
+                      {t("applications.detail.review.addReviewer")}
                     </Button>
                   )}
                   <Button variant="outline" size="sm" onClick={openManage}>
-                    {assignments.length < 2 ? "Assign reviewers" : "Reassign"}
+                    {assignments.length < 2 ? t("applications.detail.review.assignReviewers") : t("applications.detail.review.reassign")}
                   </Button>
                 </div>
               )}
@@ -394,13 +397,13 @@ const AdminReviewSidebar = ({
           <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
             {assignments.length < 2 && (
               <div className="text-xs text-warning">
-                This application needs 2 reviewers. Only {assignments.length} assigned so far.
+                {t("applications.detail.review.needsTwoReviewers", { count: assignments.length })}
               </div>
             )}
             {assignments.map((assignment) => {
-              const reviewerName = assignment.reviewer
-                ? `${assignment.reviewer.first_name} ${assignment.reviewer.last_name}`.trim() || "Unknown Reviewer"
-                : "Unknown Reviewer";
+              const displayReviewerName = assignment.reviewer
+                ? `${assignment.reviewer.first_name} ${assignment.reviewer.last_name}`.trim() || t("applications.detail.review.unknownReviewer")
+                : t("applications.detail.review.unknownReviewer");
               const reviewScore = reviewScores.find((rs) => rs.reviewer_id === assignment.reviewer_id);
               const isCompleted = assignment.status === "completed" || !!reviewScore;
 
@@ -408,20 +411,22 @@ const AdminReviewSidebar = ({
                 <div key={assignment.id} className="p-3 border rounded-lg space-y-2">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{reviewerName}</p>
+                      <p className="font-medium text-sm">{displayReviewerName}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Assigned {new Date(assignment.assigned_at).toLocaleDateString()}
+                        {t("applications.detail.review.assignedDate", {
+                          date: new Date(assignment.assigned_at).toLocaleDateString(),
+                        })}
                       </p>
                     </div>
                     {isCompleted ? (
                       <Badge className="bg-success/10 text-success border-success/20">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Completed
+                        {t("common:status.reviewAssignment.completed")}
                       </Badge>
                     ) : (
                       <Badge className="bg-warning/10 text-warning border-warning/20">
                         <Clock className="h-3 w-3 mr-1" />
-                        {assignment.status === "in_progress" ? "In Progress" : "Pending"}
+                        {t(`common:status.reviewAssignment.${assignment.status === "in_progress" ? "in_progress" : "pending"}`)}
                       </Badge>
                     )}
                   </div>
@@ -429,18 +434,18 @@ const AdminReviewSidebar = ({
                     <div className="pt-2 border-t space-y-1.5">
                       {reviewScore.overall_score && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-muted-foreground">Score:</span>
+                          <span className="text-xs text-muted-foreground">{t("applications.detail.review.score")}</span>
                           <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                             <span className="text-xs font-medium">
-                              {reviewScore.overall_score.toFixed(1)} / 10
+                              {t("applications.detail.review.scoreOutOf", { score: reviewScore.overall_score.toFixed(1) })}
                             </span>
                           </div>
                         </div>
                       )}
                       {reviewScore.recommendation && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-muted-foreground">Recommendation:</span>
+                          <span className="text-xs text-muted-foreground">{t("applications.detail.review.recommendation")}</span>
                           <Badge
                             variant="outline"
                             className={
@@ -454,7 +459,7 @@ const AdminReviewSidebar = ({
                             {reviewScore.recommendation === "approve" && <CheckCircle className="h-3 w-3 mr-1" />}
                             {reviewScore.recommendation === "reject" && <XCircle className="h-3 w-3 mr-1" />}
                             {reviewScore.recommendation === "request_info" && <AlertCircle className="h-3 w-3 mr-1" />}
-                            {reviewScore.recommendation.replace("_", " ")}
+                            {t(`common:status.recommendation.${reviewScore.recommendation}`)}
                           </Badge>
                         </div>
                       )}
@@ -476,17 +481,17 @@ const AdminReviewSidebar = ({
         <Card>
           <CardHeader className="p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-base sm:text-lg">Reviewers</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t("applications.detail.review.reviewersTitle")}</CardTitle>
               {applicationId && (
                 <Button variant="outline" size="sm" onClick={openManage}>
-                  Assign reviewers
+                  {t("applications.detail.review.assignReviewers")}
                 </Button>
               )}
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <div className="text-sm text-muted-foreground">
-              No reviewers assigned yet.
+              {t("applications.detail.review.noReviewersAssigned")}
             </div>
           </CardContent>
         </Card>
@@ -495,15 +500,15 @@ const AdminReviewSidebar = ({
       <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Assign reviewers</DialogTitle>
+            <DialogTitle>{t("applications.detail.review.assignDialogTitle")}</DialogTitle>
             <DialogDescription>
-              Select exactly 2 eligible reviewers. Add from the dropdown and remove with the × on each pill.
+              {t("applications.detail.review.assignDialogDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Reviewers</label>
+              <label className="text-sm font-medium">{t("applications.detail.review.reviewersLabel")}</label>
               <div className="flex flex-wrap gap-2 min-h-9 p-2 border rounded-md bg-muted/30">
                 {selectedReviewerIds.map((id) => (
                   <Badge key={id} variant="secondary" className="flex items-center gap-1">
@@ -511,7 +516,7 @@ const AdminReviewSidebar = ({
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-destructive"
                       onClick={() => removeReviewer(id)}
-                      aria-label={`Remove ${reviewerName(id)}`}
+                      aria-label={t("applications.detail.review.removeReviewerAria", { name: reviewerName(id) })}
                     />
                   </Badge>
                 ))}
@@ -522,16 +527,16 @@ const AdminReviewSidebar = ({
                     disabled={eligibleLoading || setReviewersMutation.isPending}
                   >
                     <SelectTrigger className="w-[180px] border-0 bg-transparent shadow-none focus:ring-0 h-8">
-                      <SelectValue placeholder="Add reviewer..." />
+                      <SelectValue placeholder={t("applications.detail.review.addReviewerPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent className="z-[100]" position="popper">
                       {availableToAdd.map((r) => (
                         <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
-                          {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                          {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} ({t("applications.detail.review.workload", { count: r.workload })})
                         </SelectItem>
                       ))}
                       {availableToAdd.length === 0 && (
-                        <div className="py-2 px-2 text-sm text-muted-foreground">No more eligible reviewers</div>
+                        <div className="py-2 px-2 text-sm text-muted-foreground">{t("applications.detail.review.noEligibleReviewers")}</div>
                       )}
                     </SelectContent>
                   </Select>
@@ -545,13 +550,13 @@ const AdminReviewSidebar = ({
                 onClick={() => setIsManageOpen(false)}
                 disabled={setReviewersMutation.isPending}
               >
-                Cancel
+                {t("applications.detail.review.cancel")}
               </Button>
               <Button
                 onClick={() => setReviewersMutation.mutate()}
                 disabled={setReviewersMutation.isPending || selectedReviewerIds.length !== 2}
               >
-                {setReviewersMutation.isPending ? "Saving..." : "Save"}
+                {setReviewersMutation.isPending ? t("applications.detail.review.saving") : t("applications.detail.review.save")}
               </Button>
             </div>
           </div>
@@ -561,10 +566,9 @@ const AdminReviewSidebar = ({
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add reviewer</DialogTitle>
+            <DialogTitle>{t("applications.detail.review.addDialogTitle")}</DialogTitle>
             <DialogDescription>
-              Adds one eligible reviewer without removing existing assignments (tie-breaker / extra
-              review). Automatic assignment still uses 2 reviewers only.
+              {t("applications.detail.review.addDialogDescription")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -574,12 +578,12 @@ const AdminReviewSidebar = ({
               disabled={eligibleLoading || addReviewerMutation.isPending}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose reviewer..." />
+                <SelectValue placeholder={t("applications.detail.review.chooseReviewerPlaceholder")} />
               </SelectTrigger>
               <SelectContent className="z-[100]" position="popper">
                 {eligibleNotAssigned.map((r) => (
                   <SelectItem key={r.reviewer_id} value={r.reviewer_id}>
-                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} (workload {r.workload})
+                    {`${r.first_name} ${r.last_name}`.trim() || r.reviewer_id} ({t("applications.detail.review.workload", { count: r.workload })})
                   </SelectItem>
                 ))}
                 {eligibleNotAssigned.length === 0 && (
@@ -591,7 +595,7 @@ const AdminReviewSidebar = ({
             </Select>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={addReviewerMutation.isPending}>
-                Cancel
+                {t("applications.detail.review.cancel")}
               </Button>
               <Button
                 disabled={!addReviewerId || addReviewerMutation.isPending}
@@ -602,15 +606,15 @@ const AdminReviewSidebar = ({
                     {
                       onSuccess: () => {
                         toast({
-                          title: "Reviewer added",
-                          description: "They can submit an additional review.",
+                          title: t("applications.detail.review.toastReviewerAdded"),
+                          description: t("applications.detail.review.toastReviewerAddedDesc"),
                         });
                         setIsAddOpen(false);
                       },
                       onError: (e: unknown) => {
                         toast({
-                          title: "Could not add reviewer",
-                          description: e instanceof Error ? e.message : "Unknown error",
+                          title: t("applications.detail.review.toastAddReviewerFailed"),
+                          description: e instanceof Error ? e.message : t("applications.detail.review.toastTryAgain"),
                           variant: "destructive",
                         });
                       },
@@ -618,7 +622,7 @@ const AdminReviewSidebar = ({
                   );
                 }}
               >
-                {addReviewerMutation.isPending ? "Adding…" : "Add reviewer"}
+                {addReviewerMutation.isPending ? t("applications.detail.review.adding") : t("applications.detail.review.addReviewer")}
               </Button>
             </div>
           </div>

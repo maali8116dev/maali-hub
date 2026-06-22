@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,23 +19,47 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import { PartnerLinkedUserCombobox, type PartnerLinkedUser } from "@/components/admin/PartnerLinkedUserCombobox";
 import { BackButton } from "@/components/ui/back-button";
 import { invokeWithAuth } from "@/lib/invokeWithAuth";
+import { useTranslation } from "react-i18next";
 
-const partnerSchema = z.object({
-  name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-  logo_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  website_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  sector: z.string().min(1, "Sector is required"),
-  display_order: z.number().int().min(0),
-  featured: z.boolean(),
-  status: z.enum(["active", "inactive"]),
-  user_id: z.string().optional().or(z.literal("")),
-  invite_email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
-});
-
-type PartnerFormValues = z.infer<typeof partnerSchema>;
+type PartnerFormValues = {
+  name: string;
+  description?: string;
+  logo_url?: string;
+  website_url?: string;
+  sector: string;
+  display_order: number;
+  featured: boolean;
+  status: "active" | "inactive";
+  user_id?: string;
+  invite_email?: string;
+};
 
 const PartnerForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.partner";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const partnerSchema = useMemo(
+    () =>
+      z.object({
+        name: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.name`) }))
+          .min(2, t(`${fv}.nameMin2`)),
+        description: z.string().optional(),
+        logo_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        website_url: z.string().url(t(`${fv}.validUrl`)).optional().or(z.literal("")),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        display_order: z.number().int().min(0),
+        featured: z.boolean(),
+        status: z.enum(["active", "inactive"]),
+        user_id: z.string().optional().or(z.literal("")),
+        invite_email: z.string().email(t(`${fv}.validEmail`)).optional().or(z.literal("")),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -218,13 +242,13 @@ const PartnerForm = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditing ? "Edit Partner" : "Add New Partner"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {isEditing ? "Update partner details" : "Fill in the details to add a new partner"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </p>
         </div>
-        <BackButton label="Back to Partners" link="/admin/partners" />
+        <BackButton label={t(`${fc}.back`)} link="/admin/partners" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>

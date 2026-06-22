@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,20 +36,41 @@ import {
   type ResourceFormData,
 } from "@/hooks/useResources";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
-const resourceSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  sector: z.string().min(1, "Sector is required"),
-  file_type: z.string().min(1, "File type is required"),
-  file_url: z.string().optional(),
-  file_size: z.number().optional(),
-  duration: z.string().optional(),
-  is_featured: z.boolean().default(false),
-  is_published: z.boolean().default(true),
-});
+type ResourceFormSchemaValues = {
+  title: string;
+  description?: string;
+  sector: string;
+  file_type: string;
+  file_url?: string;
+  file_size?: number;
+  duration?: string;
+  is_featured: boolean;
+  is_published: boolean;
+};
 
 const ResourceForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.resource";
+  const fv = "admin.cmsForm.validation";
+
+  const resourceSchema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.title`) })),
+        description: z.string().optional(),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        file_type: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.fileType`) })),
+        file_url: z.string().optional(),
+        file_size: z.number().optional(),
+        duration: z.string().optional(),
+        is_featured: z.boolean().default(false),
+        is_published: z.boolean().default(true),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;

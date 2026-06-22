@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,15 @@ import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFAQ, useCreateFAQ, useUpdateFAQ, useAdminFAQs } from "@/hooks/useFAQs";
 import { BackButton } from "@/components/ui/back-button";
+import { useTranslation } from "react-i18next";
 
-const faqSchema = z.object({
-  question: z.string().min(1, "Question is required").min(10, "Question must be at least 10 characters"),
-  answer: z.string().min(1, "Answer is required").min(20, "Answer must be at least 20 characters"),
-  sector: z.string().min(1, "Sector is required"),
-  display_order: z.number().min(0, "Display order must be 0 or greater"),
-  is_published: z.boolean(),
-});
-
-type FAQFormValues = z.infer<typeof faqSchema>;
+type FAQFormValues = {
+  question: string;
+  answer: string;
+  sector: string;
+  display_order: number;
+  is_published: boolean;
+};
 
 const DEFAULT_sectors = [
   "General",
@@ -35,6 +34,29 @@ const DEFAULT_sectors = [
 ];
 
 const FAQForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.faq";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const faqSchema = useMemo(
+    () =>
+      z.object({
+        question: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.question`) }))
+          .min(10, t(`${fv}.minChars`, { field: t(`${ff}.question`), min: 10 })),
+        answer: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.answer`) }))
+          .min(20, t(`${fv}.minChars`, { field: t(`${ff}.answer`), min: 20 })),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        display_order: z.number().min(0, t(`${fv}.displayOrderMin`)),
+        is_published: z.boolean(),
+      }),
+    [t, i18n.language]
+  );
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -127,13 +149,13 @@ const FAQForm = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditing ? "Edit FAQ" : "Create New FAQ"}
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {isEditing ? "Update FAQ details" : "Fill in the details to create a new FAQ"}
+            {isEditing ? t(`${ff}.editDesc`) : t(`${ff}.createDesc`)}
           </p>
         </div>
-        <BackButton label="Back to FAQs" link="/admin/faq" />
+        <BackButton label={t(`${fc}.back`)} link="/admin/faq" />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -147,7 +169,7 @@ const FAQForm = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="question">Question *</Label>
+                  <Label htmlFor="question">{t(`${ff}.question`)} *</Label>
                   <Input
                     id="question"
                     {...register("question")}
@@ -160,7 +182,7 @@ const FAQForm = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="answer">Answer *</Label>
+                  <Label htmlFor="answer">{t(`${ff}.answer`)} *</Label>
                   <Textarea
                     id="answer"
                     {...register("answer")}
@@ -189,7 +211,7 @@ const FAQForm = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="is_published">Published</Label>
+                    <Label htmlFor="is_published">{t(`${ff}.isPublished`)}</Label>
                     <p className="text-xs text-muted-foreground">Make this FAQ visible to users</p>
                   </div>
                   <Switch
@@ -208,13 +230,13 @@ const FAQForm = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="sector">Sector *</Label>
+                  <Label htmlFor="sector">{t(`${ff}.sector`)} *</Label>
                   <Select
                     value={selectedCategory}
                     onValueChange={(value) => setValue("sector", value)}
                   >
                     <SelectTrigger id="sector" className={errors.sector ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Select Sector" />
+                      <SelectValue placeholder={t(`${ff}.selectSector`)} />
                     </SelectTrigger>
                     <SelectContent>
                       {sectors.map((cat) => (
@@ -230,7 +252,7 @@ const FAQForm = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="display_order">Display Order</Label>
+                  <Label htmlFor="display_order">{t(`${ff}.displayOrder`)}</Label>
                   <Input
                     id="display_order"
                     type="number"
@@ -260,10 +282,10 @@ const FAQForm = () => {
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {isSubmitting || createFAQ.isPending || updateFAQ.isPending
-                      ? "Saving..."
+                      ? t(`${fc}.saving`)
                       : isEditing
-                      ? "Update FAQ"
-                      : "Create FAQ"}
+                      ? t(`${fc}.save`)
+                      : t(`${fc}.create`)}
                   </Button>
                   <Button
                     type="button"
@@ -271,7 +293,7 @@ const FAQForm = () => {
                     className="w-full"
                     onClick={() => navigate("/admin/faq")}
                   >
-                    Cancel
+                    {t(`${fc}.cancel`)}
                   </Button>
                 </div>
               </CardContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import {
   ApplicationHeader,
   ApplicationDetailsSkeleton,
   ApplicationNotFound,
+  ApplicationTranslationBar,
   ApplicantInfoCard,
   OrganizationalBackgroundCard,
   ProjectDetailsCard,
@@ -23,6 +25,7 @@ import {
   ApplicationMetadataCard,
 } from "@/components/application/shared";
 import type { DocumentItem } from "@/components/application/shared";
+import { useApplicationTranslation } from "@/hooks/useTranslateApplication";
 // Email integration - uncomment to enable status update emails
 // import { 
 //   sendApplicationApprovedEmail, 
@@ -35,6 +38,7 @@ const ReviewApplication = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation(["dashboard", "common"]);
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
@@ -164,8 +168,8 @@ const ReviewApplication = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
     
     toast({
-      title: "Review Submitted",
-      description: "Your review has been submitted successfully. The decision engine will process all reviews.",
+      title: t("dashboard:reviewer.reviewApplicationPage.toasts.submitted"),
+      description: t("dashboard:reviewer.reviewApplicationPage.toasts.submittedDesc"),
     });
     
     // Optionally navigate back, or stay on page to see updated status
@@ -179,13 +183,13 @@ const ReviewApplication = () => {
       if (url) {
         window.open(url, "_blank");
         toast({
-          title: "Download Started",
-          description: `Downloading ${doc.fileName}...`,
+          title: t("dashboard:reviewer.reviewApplicationPage.toasts.downloadStarted"),
+          description: t("dashboard:reviewer.reviewApplicationPage.toasts.downloadStartedDesc", { fileName: doc.fileName }),
         });
       } else {
         toast({
-          title: "Download Failed",
-          description: `Unable to download ${doc.fileName}. The file may not exist or you may not have permission to access it.`,
+          title: t("dashboard:reviewer.reviewApplicationPage.toasts.downloadFailed"),
+          description: t("dashboard:reviewer.reviewApplicationPage.toasts.downloadFailedDesc", { fileName: doc.fileName }),
           variant: "destructive",
         });
       }
@@ -193,14 +197,31 @@ const ReviewApplication = () => {
       console.error("Error downloading document:", error);
       const errorMessage = error instanceof Error
         ? error.message
-        : "Failed to download document. Please try again.";
+        : t("dashboard:reviewer.reviewApplicationPage.toasts.downloadErrorDesc");
       toast({
-        title: "Download Error",
+        title: t("dashboard:reviewer.reviewApplicationPage.toasts.downloadError"),
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  const translation = useApplicationTranslation(application, {
+    enabled: (isAdmin || Boolean(reviewerAssignment)) && !!application,
+    queryKeys: [["review-application", id]],
+  });
+
+  const handleTranslate = async () => {
+    try {
+      await translation.translate();
+    } catch (error) {
+      toast({
+        title: translation.t("applications.detail.translation.errorTitle"),
+        description: error instanceof Error ? error.message : translation.t("applications.detail.translation.errorDesc"),
+        variant: "destructive",
+      });
     }
   };
 
@@ -212,22 +233,35 @@ const ReviewApplication = () => {
     return <ApplicationNotFound backRoute={getBackRoute()} error={error instanceof Error ? error : null} />;
   }
 
+  const app = translation.displayApplication ?? application;
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <ApplicationHeader
-        title="Review Application"
+        title={t("dashboard:reviewer.reviewApplicationPage.title")}
         applicationId={application.id}
         status={application.status || "pending"}
         backRoute={getBackRoute()}
       />
 
+      <ApplicationTranslationBar
+        visible={translation.canOffer}
+        showTranslated={translation.showTranslated}
+        hasCache={translation.hasCache}
+        isTranslating={translation.isTranslating}
+        sourceLocale={translation.sourceLocale}
+        targetLocale={translation.targetLocale}
+        onTranslate={handleTranslate}
+        onShowOriginal={translation.showOriginal}
+      />
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <ApplicantInfoCard application={application} />
-          <OrganizationalBackgroundCard application={application} />
-          <ProjectDetailsCard application={application} />
-          <SocialLinksCard application={application} />
+          <ApplicantInfoCard application={app} />
+          <OrganizationalBackgroundCard application={app} />
+          <ProjectDetailsCard application={app} />
+          <SocialLinksCard application={app} />
           <DocumentsCard
             documents={documents}
             isLoading={documentsLoading}
@@ -245,16 +279,15 @@ const ReviewApplication = () => {
                   <CardHeader className="p-4 sm:p-6">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
-                      Not Assigned
+                      {t("dashboard:reviewer.reviewApplicationPage.notAssigned.title")}
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
-                      You are not assigned to review this application
+                      {t("dashboard:reviewer.reviewApplicationPage.notAssigned.description")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                     <p className="text-sm text-muted-foreground">
-                      Only assigned reviewers can submit reviews for applications. 
-                      If you believe you should be assigned, please contact an administrator.
+                      {t("dashboard:reviewer.reviewApplicationPage.notAssigned.body")}
                     </p>
                   </CardContent>
                 </Card>
@@ -263,25 +296,25 @@ const ReviewApplication = () => {
                   <CardHeader className="p-4 sm:p-6">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
-                      Review Submitted
+                      {t("dashboard:reviewer.reviewApplicationPage.submitted.title")}
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
-                      You have already submitted your review for this application
+                      {t("dashboard:reviewer.reviewApplicationPage.submitted.description")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                     <div className="space-y-3">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Overall Score:</span>
+                        <span className="text-muted-foreground">{t("dashboard:reviewer.reviewApplicationPage.submitted.overallScore")}</span>
                         <span className="font-medium">{existingReview.overall_score?.toFixed(2) || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Recommendation:</span>
+                        <span className="text-muted-foreground">{t("dashboard:reviewer.reviewApplicationPage.submitted.recommendation")}</span>
                         <span className="font-medium capitalize">{existingReview.recommendation?.replace('_', ' ')}</span>
                       </div>
                       {existingReview.scores && Object.keys(existingReview.scores).length > 0 && (
                         <div className="mt-3 space-y-2">
-                          <p className="text-sm font-medium">Criterion Scores:</p>
+                          <p className="text-sm font-medium">{t("dashboard:reviewer.reviewApplicationPage.submitted.criterionScores")}</p>
                           <div className="space-y-1">
                             {Object.entries(existingReview.scores).map(([criterion, score]) => (
                               <div key={criterion} className="flex justify-between text-sm">
@@ -294,7 +327,7 @@ const ReviewApplication = () => {
                       )}
                       {existingReview.comments && (
                         <div className="mt-3">
-                          <p className="text-sm font-medium mb-1">Your Comments:</p>
+                          <p className="text-sm font-medium mb-1">{t("dashboard:reviewer.reviewApplicationPage.submitted.yourComments")}</p>
                           <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
                             {existingReview.comments}
                           </p>
@@ -302,16 +335,16 @@ const ReviewApplication = () => {
                       )}
                       {existingReview.submitted_at && (
                         <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t">
-                          <span>Submitted:</span>
+                          <span>{t("dashboard:reviewer.reviewApplicationPage.submitted.submittedAt")}</span>
                           <span>{new Date(existingReview.submitted_at).toLocaleString()}</span>
                         </div>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-4 bg-muted p-3 rounded-md">
-                      Your review has been submitted. The decision engine will process all reviews once all assigned reviewers have submitted their reviews.
+                      {t("dashboard:reviewer.reviewApplicationPage.submitted.engineNote")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      You can update your review by submitting again - it will replace your previous submission.
+                      {t("dashboard:reviewer.reviewApplicationPage.submitted.updateNote")}
                     </p>
                     <ReviewScoringForm
                       applicationId={id!}

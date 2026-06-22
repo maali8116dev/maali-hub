@@ -1,0 +1,22 @@
+{
+  "title": "Notificações",
+  "subtitle": "Mantenha-se atualizado sobre as suas candidaturas e atividade da conta",
+  "markAllAsRead": "Marcar tudo como lido",
+  "marking": "A marcar...",
+  "stats": {
+    "total": "Total",
+    "unread": "Não lidas",
+    "read": "Lidas"
+  },
+  "sections": {
+    "unread": "Não lidas",
+    "earlier": "Anteriores"
+  },
+  "actions": {
+    "viewDetails": "Ver detalhes →"
+  },
+  "emptyState": {
+    "title": "Sem notificações",
+    "description": "Está em dia! Novas notificações aparecerão aqui."
+  }
+}

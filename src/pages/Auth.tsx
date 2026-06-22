@@ -1,8 +1,8 @@
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useMemo, type ReactNode } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,52 +14,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { sendWelcomeEmail } from "@/lib/email";
 import authLogoIcon from "@/assets/logo_icon.webp";
-import { emailSchema, validateEmail } from "@/lib/emailValidation";
+import { validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignIn, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
 import { isMembershipExemptRole, userNeedsOnboarding } from "@/lib/membershipAccess";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { BackButton } from "@/components/ui/back-button";
-
-// Form schemas
-const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const signUpSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: emailSchema,
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character"),
-  passwordConfirmation: z.string().min(8, "Password confirmation is required"),
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Passwords do not match",
-  path: ["passwordConfirmation"],
-});
-
-const resetPasswordSchema = z.object({
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character"),
-  passwordConfirmation: z.string().min(8, "Password confirmation is required"),
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Passwords do not match",
-  path: ["passwordConfirmation"],
-});
-
-type SignInFormValues = z.infer<typeof signInSchema>;
-type SignUpFormValues = z.infer<typeof signUpSchema>;
-type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import {
+  createAuthSchemas,
+  type ResetPasswordFormValues,
+  type SignInFormValues,
+  type SignUpFormValues,
+} from "@/lib/schemas/authForm.schema";
 
 async function getPostAuthPath(fallbackPath: string): Promise<string> {
   const {
@@ -85,10 +51,14 @@ async function getPostAuthPath(fallbackPath: string): Promise<string> {
 }
 
 function AuthPageLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("common");
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-subtle px-4">
       <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
-        <BackButton label="Back to Home" link="/" />
+        <BackButton label={t("auth.backToHome")} link="/" />
+      </div>
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <LanguageSwitcher />
       </div>
       {children}
     </div>
@@ -96,6 +66,11 @@ function AuthPageLayout({ children }: { children: ReactNode }) {
 }
 
 const Auth = () => {
+  const { t } = useTranslation("common");
+  const { signInSchema, signUpSchema, resetPasswordSchema } = useMemo(
+    () => createAuthSchemas(t),
+    [t],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
@@ -199,8 +174,8 @@ const Auth = () => {
       const emailValidation = await validateEmail(data.email);
       if (!emailValidation.valid) {
         toast({
-          title: "Invalid email",
-          description: emailValidation.message || "Please use a valid email address.",
+          title: t("auth.toasts.invalidEmail.title"),
+          description: emailValidation.message || t("auth.toasts.invalidEmail.description"),
           variant: "destructive",
         });
         setIsLoading(false);
@@ -226,19 +201,19 @@ const Auth = () => {
       if (result.error) {
         if (result.error.isRateLimited) {
           toast({
-            title: "Too many attempts",
+            title: t("auth.toasts.tooManyAttempts.title"),
             description: result.error.message,
             variant: "destructive",
           });
         } else if (result.error.message.includes("already registered") || result.error.message.includes("already exists")) {
           toast({
-            title: "Account already exists",
-            description: "Please sign in with your existing account or use a different email.",
+            title: t("auth.toasts.accountExists.title"),
+            description: t("auth.toasts.accountExists.description"),
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Sign up failed",
+            title: t("auth.toasts.signUpFailed.title"),
             description: result.error.message,
             variant: "destructive",
           });
@@ -252,8 +227,8 @@ const Auth = () => {
 
       if (!signUpData?.user || !session) {
         toast({
-          title: "Account created",
-          description: "Please sign in to continue setting up your profile and membership.",
+          title: t("auth.toasts.accountCreatedSignIn.title"),
+          description: t("auth.toasts.accountCreatedSignIn.description"),
           variant: "destructive",
         });
         setIsLoading(false);
@@ -290,15 +265,15 @@ const Auth = () => {
       ).catch((err) => console.error("Failed to send welcome email:", err));
 
       toast({
-        title: "Account created!",
-        description: "Complete your profile and membership to get started.",
+        title: t("auth.toasts.accountCreated.title"),
+        description: t("auth.toasts.accountCreated.description"),
       });
       signUpForm.reset();
       navigate("/onboarding");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("auth.toasts.error.title"),
+        description: t("auth.toasts.error.description"),
         variant: "destructive",
       });
     } finally {
@@ -315,19 +290,19 @@ const Auth = () => {
       if (result.error) {
         if (result.error.isRateLimited) {
           toast({
-            title: "Too many attempts",
+            title: t("auth.toasts.tooManyAttempts.title"),
             description: result.error.message,
             variant: "destructive",
           });
         } else if (result.error.message.includes("Invalid login credentials")) {
           toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password and try again.",
+            title: t("auth.toasts.invalidCredentials.title"),
+            description: t("auth.toasts.invalidCredentials.description"),
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Sign in failed",
+            title: t("auth.toasts.signInFailed.title"),
             description: result.error.message,
             variant: "destructive",
           });
@@ -336,14 +311,14 @@ const Auth = () => {
       }
 
       toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
+        title: t("auth.toasts.welcomeBack.title"),
+        description: t("auth.toasts.welcomeBack.description"),
       });
       navigate(await getPostAuthPath(getReturnUrl()));
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("auth.toasts.error.title"),
+        description: t("auth.toasts.error.description"),
         variant: "destructive",
       });
     } finally {
@@ -357,8 +332,8 @@ const Auth = () => {
     
     if (!email) {
       toast({
-        title: "Email required",
-        description: "Please enter your email address first.",
+        title: t("auth.toasts.emailRequired.title"),
+        description: t("auth.toasts.emailRequired.description"),
         variant: "destructive",
       });
       return;
@@ -377,13 +352,13 @@ const Auth = () => {
       if (rlResult.error) {
         if (rlResult.error.isRateLimited) {
           toast({
-            title: "Too many attempts",
+            title: t("auth.toasts.tooManyAttempts.title"),
             description: rlResult.error.message,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Password reset failed",
+            title: t("auth.toasts.passwordResetFailed.title"),
             description: rlResult.error.message,
             variant: "destructive",
           });
@@ -392,13 +367,13 @@ const Auth = () => {
       }
 
       toast({
-        title: "Check your email",
-        description: "We've sent you a password reset link. Please check your inbox.",
+        title: t("auth.toasts.checkEmail.title"),
+        description: t("auth.toasts.checkEmail.description"),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("auth.toasts.error.title"),
+        description: t("auth.toasts.error.description"),
         variant: "destructive",
       });
     } finally {
@@ -419,8 +394,8 @@ const Auth = () => {
         
         if (!retrySession) {
           toast({
-            title: "Session expired",
-            description: "The password reset link has expired or is invalid. Please request a new one.",
+            title: t("auth.toasts.sessionExpired.title"),
+            description: t("auth.toasts.sessionExpired.description"),
             variant: "destructive",
           });
           setIsPasswordReset(false);
@@ -436,14 +411,14 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Password update failed",
+          title: t("auth.toasts.passwordUpdateFailed.title"),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Password updated!",
-          description: "Your password has been successfully updated. You can now sign in.",
+          title: t("auth.toasts.passwordUpdated.title"),
+          description: t("auth.toasts.passwordUpdated.description"),
         });
         setIsPasswordReset(false);
         // Clear the hash from URL
@@ -452,8 +427,8 @@ const Auth = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+        title: t("auth.toasts.error.title"),
+        description: error instanceof Error ? error.message : t("auth.toasts.error.description"),
         variant: "destructive",
       });
     } finally {
@@ -474,7 +449,7 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Google sign in failed",
+          title: t("auth.toasts.googleSignInFailed.title"),
           description: error.message,
           variant: "destructive",
         });
@@ -484,8 +459,8 @@ const Auth = () => {
       // and then back to the app, so we don't need to navigate here
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("auth.toasts.error.title"),
+        description: t("auth.toasts.error.description"),
         variant: "destructive",
       });
       setIsLoading(false);
@@ -499,11 +474,11 @@ const Auth = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
-              <img src={authLogoIcon} alt="Maali" className="w-16 h-16 object-contain" />
+              <img src={authLogoIcon} alt={t("auth.brandAlt")} className="w-16 h-16 object-contain" />
             </div>
-            <CardTitle className="text-2xl text-center">Set New Password</CardTitle>
+            <CardTitle className="text-2xl text-center">{t("auth.reset.title")}</CardTitle>
             <CardDescription className="text-center">
-              Enter your new password below
+              {t("auth.reset.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -513,8 +488,8 @@ const Auth = () => {
                   control={resetPasswordForm.control}
                   name="password"
                   fieldType={FormFieldType.PASSWORD}
-                  label="New Password"
-                  placeholder="Enter your new password"
+                  label={t("auth.fields.newPassword")}
+                  placeholder={t("auth.fields.newPasswordPlaceholder")}
                   icon={Lock}
                   iconPosition="left"
                   required
@@ -526,18 +501,18 @@ const Auth = () => {
                   control={resetPasswordForm.control}
                   name="passwordConfirmation"
                   fieldType={FormFieldType.PASSWORD}
-                  label="Confirm New Password"
-                  placeholder="Re-enter your new password"
+                  label={t("auth.fields.confirmNewPassword")}
+                  placeholder={t("auth.fields.confirmNewPasswordPlaceholder")}
                   icon={Lock}
                   iconPosition="left"
                   required
                 />
                 <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading || !isSessionReady}>
-                  {isLoading ? "Updating password..." : !isSessionReady ? "Verifying link..." : "Update Password"}
+                  {isLoading ? t("auth.buttons.updatingPassword") : !isSessionReady ? t("auth.buttons.verifyingLink") : t("auth.buttons.updatePassword")}
                 </Button>
                 {!isSessionReady && (
                   <p className="text-sm text-muted-foreground text-center">
-                    Please wait while we verify your password reset link...
+                    {t("auth.reset.verifyingLink")}
                   </p>
                 )}
               </form>
@@ -551,7 +526,7 @@ const Auth = () => {
                 }}
                 className="text-sm text-primary hover:underline"
               >
-                Back to Sign In
+                {t("auth.reset.backToSignIn")}
               </button>
             </div>
           </CardContent>
@@ -566,18 +541,18 @@ const Auth = () => {
         <CardHeader className="space-y-1">
           {/* Logo */}
           <div className="flex justify-center mb-4">
-            <img src={authLogoIcon} alt="Maali" className="w-16 h-16 object-contain" />
+            <img src={authLogoIcon} alt={t("auth.brandAlt")} className="w-16 h-16 object-contain" />
           </div>
-          <CardTitle className="text-2xl text-center">Welcome</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("auth.welcome.title")}</CardTitle>
           <CardDescription className="text-center">
-            Join the community of African Talent
+            {t("auth.welcome.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t("auth.tabs.signIn")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.tabs.signUp")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
@@ -608,7 +583,7 @@ const Auth = () => {
                       fill="#EA4335"
                     />
                   </svg>
-                  Continue with Google
+                  {t("auth.oauth.continueWithGoogle")}
                 </Button>
               </div>
 
@@ -617,7 +592,7 @@ const Auth = () => {
                   <Separator />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">{t("auth.oauth.orContinueWith")}</span>
                 </div>
               </div>
 
@@ -627,8 +602,8 @@ const Auth = () => {
                     control={signInForm.control}
                     name="email"
                     fieldType={FormFieldType.EMAIL}
-                    label="Email"
-                    placeholder="your@email.com"
+                    label={t("auth.fields.email")}
+                    placeholder={t("auth.fields.emailPlaceholder")}
                     icon={Mail}
                     iconPosition="left"
                     required
@@ -637,8 +612,8 @@ const Auth = () => {
                     control={signInForm.control}
                     name="password"
                     fieldType={FormFieldType.PASSWORD}
-                    label="Password"
-                    placeholder="Enter your password"
+                    label={t("auth.fields.password")}
+                    placeholder={t("auth.fields.passwordPlaceholder")}
                     icon={Lock}
                     iconPosition="left"
                     required
@@ -650,11 +625,11 @@ const Auth = () => {
                       disabled={isLoading}
                       className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Forgot password?
+                      {t("auth.fields.forgotPassword")}
                     </button>
                   </div>
                   <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ? t("auth.buttons.signingIn") : t("auth.buttons.signIn")}
                   </Button>
                 </form>
               </Form>
@@ -688,7 +663,7 @@ const Auth = () => {
                       fill="#EA4335"
                     />
                   </svg>
-                  Continue with Google
+                  {t("auth.oauth.continueWithGoogle")}
                 </Button>
               </div>
 
@@ -697,7 +672,7 @@ const Auth = () => {
                   <Separator />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">{t("auth.oauth.orContinueWith")}</span>
                 </div>
               </div>
 
@@ -708,8 +683,8 @@ const Auth = () => {
                       control={signUpForm.control}
                       name="firstName"
                       fieldType={FormFieldType.INPUT}
-                      label="First Name"
-                      placeholder="John"
+                      label={t("auth.fields.firstName")}
+                      placeholder={t("auth.fields.firstNamePlaceholder")}
                       icon={User}
                       iconPosition="left"
                       required
@@ -718,8 +693,8 @@ const Auth = () => {
                       control={signUpForm.control}
                       name="lastName"
                       fieldType={FormFieldType.INPUT}
-                      label="Last Name"
-                      placeholder="Doe"
+                      label={t("auth.fields.lastName")}
+                      placeholder={t("auth.fields.lastNamePlaceholder")}
                       icon={User}
                       iconPosition="left"
                       required
@@ -729,8 +704,8 @@ const Auth = () => {
                     control={signUpForm.control}
                     name="email"
                     fieldType={FormFieldType.EMAIL}
-                    label="Email"
-                    placeholder="your@email.com"
+                    label={t("auth.fields.email")}
+                    placeholder={t("auth.fields.emailPlaceholder")}
                     icon={Mail}
                     iconPosition="left"
                     required
@@ -739,8 +714,8 @@ const Auth = () => {
                     control={signUpForm.control}
                     name="password"
                     fieldType={FormFieldType.PASSWORD}
-                    label="Password"
-                    placeholder="Create a strong password"
+                    label={t("auth.fields.password")}
+                    placeholder={t("auth.fields.passwordCreatePlaceholder")}
                     icon={Lock}
                     iconPosition="left"
                     required
@@ -752,14 +727,14 @@ const Auth = () => {
                     control={signUpForm.control}
                     name="passwordConfirmation"
                     fieldType={FormFieldType.PASSWORD}
-                    label="Confirm Password"
-                    placeholder="Re-enter your password"
+                    label={t("auth.fields.passwordConfirm")}
+                    placeholder={t("auth.fields.passwordConfirmPlaceholder")}
                     icon={Lock}
                     iconPosition="left"
                     required
                   />
                 <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
+                  {isLoading ? t("auth.buttons.creatingAccount") : t("auth.buttons.createAccount")}
                 </Button>
               </form>
               </Form>

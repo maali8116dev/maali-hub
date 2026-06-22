@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteFileByUrl, uploadFileToBucket } from "@/lib/storageUploads";
 import { toast } from "sonner";
+import i18n from "@/lib/i18n";
 import { useActivityLogger } from "@/hooks/useActivityLogger";
 
 export interface Resource {
@@ -206,10 +207,10 @@ export const useCreateResource = () => {
         description: `Created resource: ${resource.title}`,
         metadata: { title: resource.title, sector: resource.sector },
       });
-      toast.success("Resource created successfully");
+      toast.success(i18n.t("toasts.resource.created", { ns: "common" }));
     },
     onError: (error) => {
-      toast.error("Failed to create resource: " + error.message);
+      toast.error(i18n.t("toasts.resource.createError", { ns: "common" }) + (error.message ? `: ${error.message}` : ""));
     },
   });
 };
@@ -240,10 +241,10 @@ export const useUpdateResource = () => {
         description: `Updated resource: ${resource.title}`,
         metadata: { title: resource.title },
       });
-      toast.success("Resource updated successfully");
+      toast.success(i18n.t("toasts.resource.updated", { ns: "common" }));
     },
     onError: (error) => {
-      toast.error("Failed to update resource: " + error.message);
+      toast.error(i18n.t("toasts.resource.updateError", { ns: "common" }) + (error.message ? `: ${error.message}` : ""));
     },
   });
 };
@@ -279,10 +280,10 @@ export const useDeleteResource = () => {
         description: `Deleted resource: ${data.title}`,
         metadata: { title: data.title },
       });
-      toast.success("Resource deleted successfully");
+      toast.success(i18n.t("toasts.resource.deleted", { ns: "common" }));
     },
     onError: (error) => {
-      toast.error("Failed to delete resource: " + error.message);
+      toast.error(i18n.t("toasts.resource.deleteError", { ns: "common" }) + (error.message ? `: ${error.message}` : ""));
     },
   });
 };
@@ -302,10 +303,10 @@ export const useToggleResourcePublished = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
-      toast.success(variables.is_published ? "Resource published" : "Resource unpublished");
+      toast.success(variables.is_published ? i18n.t("toasts.resource.published", { ns: "common" }) : i18n.t("toasts.resource.unpublished", { ns: "common" }));
     },
     onError: (error) => {
-      toast.error("Failed to update resource: " + error.message);
+      toast.error(i18n.t("toasts.resource.updateError", { ns: "common" }) + (error.message ? `: ${error.message}` : ""));
     },
   });
 };

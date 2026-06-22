@@ -1,34 +1,42 @@
-export const stepTitles = [
-  "Applicant Information",
-  "Organization Details (Optional)",
-  "Project Overview",
-  "Social Links",
-  "Upload Documents",
-  "Review",
-  "Compliance & Declarations",
-  "Submit",
-];
+import type { TFunction } from "i18next";
+import { APPLICANT_TYPE_VALUES } from "@/lib/schemas/applicationForm.schema";
 
-export const PRIMARY_sectorS = [
-  { value: "Health", label: "Health" },
-  { value: "Education", label: "Education" },
-  { value: "Technology", label: "Technology" },
-  { value: "Agriculture", label: "Agriculture" },
-  { value: "Environment", label: "Environment" },
-  { value: "Creative", label: "Creative" },
-  { value: "Other", label: "Other" },
-];
-
-export const APPLICANT_TYPES = [
-  { value: "Individual", label: "Individual" },
-  { value: "Organization", label: "Organization" },
-  { value: "Startup / SME", label: "Startup / SME" },
-  { value: "NGO / Non-profit", label: "NGO / Non-profit" },
-  {
-    value: "Research / Academic",
-    label: "Research / Academic",
-  },
+const SECTOR_VALUES = [
+  "Health",
+  "Education",
+  "Technology",
+  "Agriculture",
+  "Environment",
+  "Creative",
+  "Other",
 ] as const;
+
+export function getStepTitles(t: TFunction<"dashboard">): string[] {
+  return [
+    t("applications.form.steps.applicantInfo"),
+    t("applications.form.steps.organization"),
+    t("applications.form.steps.projectOverview"),
+    t("applications.form.steps.socialLinks"),
+    t("applications.form.steps.documents"),
+    t("applications.form.steps.review"),
+    t("applications.form.steps.compliance"),
+    t("applications.form.steps.submit"),
+  ];
+}
+
+export function getApplicantTypeOptions(t: TFunction<"dashboard">) {
+  return APPLICANT_TYPE_VALUES.map((value) => ({
+    value,
+    label: t(`applications.form.options.applicantTypes.${value}`),
+  }));
+}
+
+export function getPrimarySectorOptions(t: TFunction<"dashboard">) {
+  return SECTOR_VALUES.map((value) => ({
+    value,
+    label: t(`applications.form.options.sectors.${value}`),
+  }));
+}
 
 export interface ProjectOverviewCopy {
   sectionTitle: string;
@@ -41,28 +49,40 @@ export interface ProjectOverviewCopy {
   locationPlaceholder: string;
 }
 
-export const getProjectOverviewCopy = (isGrantType = true): ProjectOverviewCopy => ({
-  sectionTitle: isGrantType ? "Project Overview" : "Application Overview",
-  sectionHint: isGrantType
-    ? "Tell us what you want funding for. All fields marked with"
-    : "Tell us about your goals and why you're a strong fit for this opportunity. All fields marked with",
-  titleLabel: isGrantType ? "Project Title" : "Application Title",
-  titlePlaceholder: isGrantType ? "Enter project title" : "Enter application title",
-  summaryLabel: isGrantType ? "Project Summary" : "Statement of Purpose",
-  summaryPlaceholder: isGrantType
-    ? "Provide a summary of your project (minimum 30 words)..."
-    : "Briefly describe your goals, fit, and expected outcomes (minimum 30 words)...",
-  locationLabel: isGrantType ? "Geographic focus (optional)" : "Location / Geographic Focus",
-  locationPlaceholder: isGrantType
-    ? "Where will the project run? Leave blank to use your city/country from step 1."
-    : "Where are you based or where will this opportunity apply?",
-});
+export function getProjectOverviewCopy(
+  t: TFunction<"dashboard">,
+  isGrantType = true,
+): ProjectOverviewCopy {
+  const prefix = isGrantType ? "applications.form.step3.grant" : "applications.form.step3.nonGrant";
+  return {
+    sectionTitle: t(`${prefix}.title`),
+    sectionHint: t(`${prefix}.hint`),
+    titleLabel: t(`${prefix}.titleLabel`),
+    titlePlaceholder: t(`${prefix}.titlePlaceholder`),
+    summaryLabel: t(`${prefix}.summaryLabel`),
+    summaryPlaceholder: t(`${prefix}.summaryPlaceholder`),
+    locationLabel: t(`${prefix}.locationLabel`),
+    locationPlaceholder: t(`${prefix}.locationPlaceholder`),
+  };
+}
 
+/** @deprecated Use getApplicantTypeOptions(t) */
+export const APPLICANT_TYPES = APPLICANT_TYPE_VALUES.map((value) => ({
+  value,
+  label: value,
+}));
 
+/** @deprecated Use getPrimarySectorOptions(t) */
+export const PRIMARY_sectorS = SECTOR_VALUES.map((value) => ({ value, label: value }));
 
-
-
-
-
-
-
+/** @deprecated Use getStepTitles(t) */
+export const stepTitles = [
+  "Applicant Information",
+  "Organization Details (Optional)",
+  "Project Overview",
+  "Social Links",
+  "Upload Documents",
+  "Review",
+  "Compliance & Declarations",
+  "Submit",
+];

@@ -9,7 +9,7 @@
   "company": "Company",
   "support": "Support",
   "legal": "Legal",
-  "browseProjects": "Browse Projects",
+  "browseOpportunities": "Browse Opportunities",
   "submitApplication": "Submit Application",
   "trackStatus": "Track Status",
   "resources": "Resources",
@@ -26,6 +26,7 @@
   "cookiePolicy": "Cookie Policy",
   "dataProtection": "Data Protection",
   "allRightsReserved": "All rights reserved. Powered by TechNuru & GAT.",
+  "copyright": "© {{year}} Maali. {{rights}}",
   "demoApplication": "Demo Application • Created by Dr. Wilfried Zoungrana"
 }
 

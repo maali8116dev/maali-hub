@@ -10,8 +10,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAdminMentors, useDeleteMentor, useToggleMentorPublished } from "@/hooks/useMentors";
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, Users, MapPin, Briefcase } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const AdminMentors = () => {
+  const { t } = useTranslation(["dashboard"]);
+  const cf = "admin.cmsList.mentors";
+  const cc = "admin.cmsList.common";
   const { data: mentors, isLoading } = useAdminMentors();
   const deleteMentor = useDeleteMentor();
   const togglePublished = useToggleMentorPublished();
@@ -49,13 +53,13 @@ const AdminMentors = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Mentor Management</h1>
-          <p className="text-muted-foreground">Manage your mentorship directory</p>
+          <h1 className="text-2xl font-bold">{t(`${cf}.title`)}</h1>
+          <p className="text-muted-foreground">{t(`${cf}.subtitle`)}</p>
         </div>
         <Button asChild>
           <Link to="/admin/mentors/new">
             <Plus className="h-4 w-4 mr-2" />
-            Add Mentor
+            {t(`${cf}.create`)}
           </Link>
         </Button>
       </div>
@@ -75,7 +79,7 @@ const AdminMentors = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Published</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t(`${cf}.stats.published`)}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -102,7 +106,7 @@ const AdminMentors = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, sector, or country..."
+            placeholder={t(`${cf}.searchPlaceholder`)}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -114,8 +118,8 @@ const AdminMentors = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="published">{t(`${cc}.published`)}</SelectItem>
+            <SelectItem value="draft">{t(`${cc}.draft`)}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -216,7 +220,7 @@ const AdminMentors = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant={mentor.is_published ? "default" : "secondary"}>
-                        {mentor.is_published ? "Published" : "Draft"}
+                        {mentor.is_published ? t(`${cc}.published`) : t(`${cc}.draft`)}
                       </Badge>
                     </TableCell>
                     <TableCell>{mentor.display_order}</TableCell>
@@ -247,10 +251,8 @@ const AdminMentors = () => {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Mentor</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{mentor.name}"? This action cannot be undone.
-                              </AlertDialogDescription>
+                              <AlertDialogTitle>{t(`${cc}.confirmDeleteTitle`)}</AlertDialogTitle>
+                              <AlertDialogDescription>{t(`${cf}.deleteDesc`)}</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -258,7 +260,7 @@ const AdminMentors = () => {
                                 onClick={() => handleDelete(mentor.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                Delete
+                                {t(`${cc}.delete`)}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

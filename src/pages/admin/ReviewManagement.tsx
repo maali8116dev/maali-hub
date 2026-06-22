@@ -10,8 +10,11 @@ import { ReviewersectorsTab } from './review-management/ReviewerCategoriesTab';
 import { ConflictsTab } from './review-management/ConflictsTab';
 import { SettingsTab } from './review-management/SettingsTab';
 import { useSectors } from '@/hooks/useSectors';
+import { useTranslation } from 'react-i18next';
 
 const ReviewManagement = () => {
+  const { t } = useTranslation(['dashboard']);
+  const rp = 'admin.reviewManagementPage';
 
   // Get all reviewers with details (sectors, workload, stats) in a single RPC call
   const { data: reviewers = [] } = useQuery({
@@ -45,25 +48,23 @@ const ReviewManagement = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Review Management</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage reviewer assignments, sectors, rubrics, and conflicts
-        </p>
+        <h1 className="text-3xl font-bold">{t(`${rp}.title`)}</h1>
+        <p className="text-muted-foreground mt-2">{t(`${rp}.subtitle`)}</p>
       </div>
 
       <Tabs defaultValue="reviewers" className="space-y-4">
         <TabsList>
           <TabsTrigger value="reviewers">
             <Users className="h-4 w-4 mr-2" />
-            Reviewers
+            {t(`${rp}.tabs.reviewers`)}
           </TabsTrigger>
           <TabsTrigger value="conflicts">
             <AlertTriangle className="h-4 w-4 mr-2" />
-            Conflicts
+            {t(`${rp}.tabs.conflicts`)}
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
-            Settings
+            {t(`${rp}.tabs.settings`)}
           </TabsTrigger>
         </TabsList>
 

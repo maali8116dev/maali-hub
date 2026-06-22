@@ -1,0 +1,67 @@
+{
+  "memberPriceLabel": "2 $ / Monat",
+  "steps": {
+    "profile": "Profil",
+    "tier": "Mitgliedschaft",
+    "payment": "Zahlung"
+  },
+  "profile": {
+    "title": "Erzählen Sie uns von sich",
+    "description": "So erstellen Sie Ihr MAALI-Mitgliederprofil, das im Netzwerk sichtbar ist.",
+    "firstName": "Vorname *",
+    "lastName": "Nachname *",
+    "businessName": "Unternehmen / Organisation *",
+    "businessNamePlaceholder": "Savanna Ventures",
+    "sector": "Sektor *",
+    "sectorPlaceholder": "Sektor auswählen",
+    "country": "Land *",
+    "countryPlaceholder": "Kenia",
+    "bio": "Kurze Biografie",
+    "bioPlaceholder": "Erzählen Sie dem MAALI-Netzwerk, was Sie aufbauen…",
+    "continue": "Weiter"
+  },
+  "tier": {
+    "title": "Wählen Sie Ihre Mitgliedschaft",
+    "subtitle": "Sie können jederzeit upgraden.",
+    "mostPopular": "Am beliebtesten",
+    "community": {
+      "name": "Community",
+      "price": "Kostenlos",
+      "description": "Werden Sie Teil des MAALI-Netzwerks und durchsuchen Sie Chancen.",
+      "cta": "Kostenlos beitreten",
+      "features": [
+        "Alle Förderchancen durchsuchen",
+        "Öffentliche Ressourcen nutzen",
+        "Dem Community-Netzwerk beitreten",
+        "Monatlicher Newsletter"
+      ]
+    },
+    "member": {
+      "name": "Vollmitglied",
+      "price": "2 $ / Monat",
+      "description": "Schalten Sie die volle MAALI-Plattform frei und bewerben Sie sich auf Chancen.",
+      "cta": "Mitglied werden",
+      "features": [
+        "Alles aus Community",
+        "Auf Förderchancen bewerben",
+        "Priorisierte Bewertung der Bewerbungen",
+        "Direktnachrichten mit Prüfern",
+        "Hervorgehobenes Profil im Netzwerk",
+        "Exklusive Mitglieder-Events"
+      ]
+    }
+  },
+  "noAccount": {
+    "title": "Zuerst registrieren",
+    "message": "Sie benötigen ein Konto, bevor Sie MAALI beitreten können.",
+    "cta": "Konto erstellen"
+  },
+  "done": {
+    "title": "Willkommen bei Maali!",
+    "paidDescription": "Ihre Vollmitgliedschaft ist aktiv. Sie können sich jetzt auf alle Förderchancen bewerben.",
+    "communityDescription": "Sie sind dem Maali-Community-Netzwerk beigetreten.",
+    "upgradeHint": "Upgraden Sie jederzeit auf Vollmitglied, um sich auf Förderungen zu bewerben.",
+    "goHome": "Zur Startseite",
+    "browseOpportunities": "Chancen durchsuchen"
+  }
+}

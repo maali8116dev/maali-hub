@@ -14,6 +14,10 @@ interface ImageUploadProps {
   uploadProgress?: number;
   className?: string;
   placeholder?: string;
+  dropzoneHint?: string;
+  formatsHint?: string;
+  changeLabel?: string;
+  loadingLabel?: string;
   accept?: string;
   variant?: "avatar" | "banner";
 }
@@ -27,6 +31,10 @@ export const ImageUpload = ({
   uploadProgress = 0,
   className,
   placeholder = "Upload Image",
+  dropzoneHint = "Drag and drop an image, or click to browse",
+  formatsHint = "JPG, PNG, WebP, GIF up to 5MB",
+  changeLabel = "Change",
+  loadingLabel = "Loading...",
   accept = "image/jpeg,image/png,image/webp,image/gif",
   variant = "avatar",
 }: ImageUploadProps) => {
@@ -101,7 +109,7 @@ export const ImageUpload = ({
           {isUploading ? (
             <div className="w-32">
               <Progress value={uploadProgress} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">Loading...</p>
+              <p className="text-xs text-muted-foreground mt-1">{loadingLabel}</p>
             </div>
           ) : (
             <div className="flex gap-2">
@@ -112,7 +120,7 @@ export const ImageUpload = ({
                 onClick={() => inputRef.current?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {value ? "Change" : placeholder}
+                {value ? changeLabel : placeholder}
               </Button>
               
               {value && (
@@ -169,7 +177,7 @@ export const ImageUpload = ({
               onClick={() => inputRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
-              Change
+              {changeLabel}
             </Button>
             <Button
               type="button"
@@ -184,7 +192,7 @@ export const ImageUpload = ({
       ) : isUploading ? (
         <div className="p-8 text-center">
           <Progress value={uploadProgress} className="h-2 mb-2" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-sm text-muted-foreground">{loadingLabel}</p>
         </div>
       ) : (
         <button
@@ -193,12 +201,8 @@ export const ImageUpload = ({
           className="w-full p-8 text-center cursor-pointer"
         >
           <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground">
-            Drag and drop an image, or click to browse
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            JPG, PNG, WebP, GIF up to 5MB
-          </p>
+          <p className="text-sm text-muted-foreground">{dropzoneHint}</p>
+          <p className="text-xs text-muted-foreground mt-1">{formatsHint}</p>
         </button>
       )}
     </div>

@@ -28,6 +28,7 @@ interface EmailData {
   subject?: string;
   message?: string;
   submissionId?: string;
+  locale?: string;
 }
 
 interface SendEmailParams {
@@ -253,7 +254,8 @@ export async function sendContactConfirmationEmail(
   to: string,
   firstName: string,
   message: string,
-  submissionId?: string
+  submissionId?: string,
+  locale?: string,
 ) {
   return sendEmail({
     to,
@@ -263,8 +265,9 @@ export async function sendContactConfirmationEmail(
       firstName,
       message,
       submissionId,
+      locale,
     },
-  }, true); // Allow public (no auth required)
+  }, true);
 }
 
 /**
@@ -279,7 +282,8 @@ export async function sendContactSubmissionEmail(
   country: string | null,
   subject: string,
   message: string,
-  submissionId?: string
+  submissionId?: string,
+  locale?: string,
 ) {
   return sendEmail({
     to,
@@ -293,8 +297,9 @@ export async function sendContactSubmissionEmail(
       subject,
       message,
       submissionId,
+      locale,
     },
-  }, true); // Allow public (no auth required)
+  }, true);
 }
 
 

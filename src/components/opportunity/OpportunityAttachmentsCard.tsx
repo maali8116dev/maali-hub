@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,6 @@ import { FilePlus, Plus, Trash2 } from "lucide-react";
 import type { OpportunityDocument } from "@/hooks/useOpportunityFiles";
 
 const FILE_ACCEPT = ".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*";
-const HELP_TEXT = "PDF, Word, Excel, PowerPoint, text, images. Max 10MB each.";
 
 export interface OpportunityAttachmentsCardProps {
   isEditing: boolean;
@@ -31,20 +31,19 @@ export function OpportunityAttachmentsCard({
   setPendingFiles,
   className,
 }: OpportunityAttachmentsCardProps) {
+  const { t } = useTranslation("dashboard");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const descriptionCreate = "Add files after creating the opportunity, or select files now to attach once saved.";
-  const descriptionEdit = "Add PDFs, documents, or images for applicants to view.";
+  const section = "opportunities.form.sections.attachments";
 
   return (
     <Card className={className}>
       <CardHeader className="p-4 sm:p-6">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <FilePlus className="h-4 w-4" />
-          Attachments
+          {t(`${section}.title`)}
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          {isEditing ? descriptionEdit : descriptionCreate}
+          {t(isEditing ? `${section}.descriptionEdit` : `${section}.descriptionCreate`)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
@@ -61,7 +60,7 @@ export function OpportunityAttachmentsCard({
                       size="icon"
                       className="h-8 w-8 shrink-0"
                       onClick={() => remove(doc)}
-                      aria-label={`Remove ${doc.fileName}`}
+                      aria-label={t(`${section}.removeFile`, { fileName: doc.fileName })}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -90,7 +89,7 @@ export function OpportunityAttachmentsCard({
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {isUploading ? "Uploading..." : "Add file"}
+                {isUploading ? t(`${section}.uploading`) : t(`${section}.addFile`)}
               </Button>
             </div>
           </>
@@ -107,7 +106,7 @@ export function OpportunityAttachmentsCard({
                       size="icon"
                       className="h-8 w-8 shrink-0"
                       onClick={() => setPendingFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                      aria-label={`Remove ${f.name}`}
+                      aria-label={t(`${section}.removeFile`, { fileName: f.name })}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -135,12 +134,12 @@ export function OpportunityAttachmentsCard({
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add file (uploaded when saved)
+                {t(`${section}.addFilePending`)}
               </Button>
             </div>
           </>
         )}
-        <p className="text-xs text-muted-foreground">{HELP_TEXT}</p>
+        <p className="text-xs text-muted-foreground">{t(`${section}.formats`)}</p>
       </CardContent>
     </Card>
   );

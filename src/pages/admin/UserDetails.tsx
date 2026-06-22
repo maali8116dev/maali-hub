@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Calendar, FileText, Shield, AlertCircle } from "lucide-react";
 import { useUsers, useUpdateUserRole } from "@/hooks/useUsers";
@@ -26,15 +26,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "react-i18next";
+
+const ROLE_OPTIONS = ["applicant", "reviewer", "partner", "admin"] as const;
 
 const AdminUserDetails = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation(["dashboard", "common"]);
   const { data: users = [], isLoading, error } = useUsers();
   const updateUserRole = useUpdateUserRole();
   const [roleChangeDialogOpen, setRoleChangeDialogOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"admin" | "reviewer" | "applicant" | "partner" | null>(null);
+
+  const roleLabel = useCallback(
+    (role: string) => t(`common:status.role.${role}`, { defaultValue: role }),
+    [t],
+  );
+
+  const accountStatusLabel = useCallback(
+    (status: string) => t(`common:status.account.${status}`, { defaultValue: status }),
+    [t],
+  );
 
   const user = useMemo(() => {
     if (!userId) return null;
@@ -43,7 +57,6 @@ const AdminUserDetails = () => {
 
   const handleRoleChange = (newRole: "admin" | "reviewer" | "applicant" | "partner") => {
     if (!user) return;
-    // Only show dialog if role is actually changing
     if (newRole === user.role) return;
     setSelectedRole(newRole);
     setRoleChangeDialogOpen(true);
@@ -51,11 +64,7 @@ const AdminUserDetails = () => {
 
   const handleConfirmRoleChange = () => {
     if (!user || !selectedRole) return;
-    
-    // Prevent changing own role
-    if (user.userId === currentUser?.id) {
-      return;
-    }
+    if (user.userId === currentUser?.id) return;
 
     updateUserRole.mutate(
       { userId: user.userId, role: selectedRole },
@@ -66,6 +75,13 @@ const AdminUserDetails = () => {
         },
       }
     );
+  };
+
+  const renderRoleBadge = (role: string) => {
+    if (role === "admin") {
+      return <Badge variant="secondary">{roleLabel(role)}</Badge>;
+    }
+    return <Badge variant="outline">{roleLabel(role)}</Badge>;
   };
 
   if (isLoading) {
@@ -86,16 +102,14 @@ const AdminUserDetails = () => {
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate("/admin/users")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Users
+          {t("admin.userDetailsPage.back")}
         </Button>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
               <AlertCircle className="h-4 w-4" />
               <span>
-                {error instanceof Error
-                  ? error.message
-                  : "User not found."}
+                {error instanceof Error ? error.message : t("admin.userDetailsPage.notFound")}
               </span>
             </div>
           </CardContent>
@@ -109,7 +123,7 @@ const AdminUserDetails = () => {
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={() => navigate("/admin/users")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Users
+          {t("admin.userDetailsPage.back")}
         </Button>
       </div>
 
@@ -131,20 +145,12 @@ const AdminUserDetails = () => {
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold">{user.name}</h1>
                 <p className="text-muted-foreground">
-                  {user.businessName || "No business name"}
+                  {user.businessName || t("admin.userDetailsPage.noBusinessName")}
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {user.role === "admin" ? (
-                <Badge variant="secondary">Admin</Badge>
-              ) : user.role === "reviewer" ? (
-                <Badge variant="outline">Reviewer</Badge>
-              ) : user.role === "partner" ? (
-                <Badge variant="outline">Partner</Badge>
-              ) : (
-                <Badge variant="outline">Applicant</Badge>
-              )}
+              {renderRoleBadge(user.role)}
               <Badge
                 variant="outline"
                 className={`text-xs ${
@@ -155,7 +161,7 @@ const AdminUserDetails = () => {
                     : "bg-destructive/10 text-destructive border-destructive/20"
                 }`}
               >
-                {user.status}
+                {accountStatusLabel(user.status)}
               </Badge>
             </div>
           </div>
@@ -165,7 +171,7 @@ const AdminUserDetails = () => {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Email</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.userDetailsPage.cards.email")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-muted-foreground" />
@@ -175,7 +181,7 @@ const AdminUserDetails = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Joined</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.userDetailsPage.cards.joined")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -185,14 +191,11 @@ const AdminUserDetails = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Applications</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.userDetailsPage.cards.applications")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>
-              {user.applicationsCount}{" "}
-              {user.applicationsCount === 1 ? "application" : "applications"}
-            </span>
+            <span>{t("admin.userDetailsPage.applicationCount", { count: user.applicationsCount })}</span>
           </CardContent>
         </Card>
       </div>
@@ -200,65 +203,55 @@ const AdminUserDetails = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Business Details</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.userDetailsPage.businessDetails")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Business Name</span>
-              <span>{user.businessName || "Not provided"}</span>
+              <span className="text-muted-foreground">{t("admin.userDetailsPage.fields.businessName")}</span>
+              <span>{user.businessName || t("admin.userDetailsPage.fields.notProvided")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Business sector</span>
-              <span>{user.businesssector || "Not provided"}</span>
+              <span className="text-muted-foreground">{t("admin.userDetailsPage.fields.businessSector")}</span>
+              <span>{user.businesssector || t("admin.userDetailsPage.fields.notProvided")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Country</span>
-              <span>{user.country || "Not provided"}</span>
+              <span className="text-muted-foreground">{t("admin.userDetailsPage.fields.country")}</span>
+              <span>{user.country || t("admin.userDetailsPage.fields.notProvided")}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Bio</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("admin.userDetailsPage.bio")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              {user.bio || "No bio provided"}
+              {user.bio || t("admin.userDetailsPage.fields.noBio")}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* KYC Verification Card */}
       <KycReviewCard userId={user.userId} profileName={user.name} />
 
-      {/* Role Management Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            Role Management
+            {t("admin.userDetailsPage.roleManagement.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Current Role</p>
+              <p className="text-sm font-medium">{t("admin.userDetailsPage.roleManagement.currentRole")}</p>
               <p className="text-xs text-muted-foreground">
-                Change the user's role to grant different permissions
+                {t("admin.userDetailsPage.roleManagement.description")}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {user.role === "admin" ? (
-                <Badge variant="secondary">Admin</Badge>
-              ) : user.role === "reviewer" ? (
-                <Badge variant="outline">Reviewer</Badge>
-              ) : user.role === "partner" ? (
-                <Badge variant="outline">Partner</Badge>
-              ) : (
-                <Badge variant="outline">Applicant</Badge>
-              )}
+              {renderRoleBadge(user.role)}
             </div>
           </div>
           {user.userId !== currentUser?.id ? (
@@ -271,47 +264,51 @@ const AdminUserDetails = () => {
                 disabled={updateUserRole.isPending}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder={t("admin.userDetailsPage.roleManagement.selectRole")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="applicant">Applicant</SelectItem>
-                  <SelectItem value="reviewer">Reviewer</SelectItem>
-                  <SelectItem value="partner">Partner</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {ROLE_OPTIONS.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {roleLabel(role)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {updateUserRole.isPending && (
-                <span className="text-sm text-muted-foreground">Updating...</span>
+                <span className="text-sm text-muted-foreground">{t("admin.userDetailsPage.roleManagement.updating")}</span>
               )}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              You cannot change your own role.
+              {t("admin.userDetailsPage.roleManagement.cannotChangeOwnRole")}
             </p>
           )}
         </CardContent>
       </Card>
 
-      {/* Role Change Confirmation Dialog */}
       <AlertDialog open={roleChangeDialogOpen} onOpenChange={setRoleChangeDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Change User Role</AlertDialogTitle>
+            <AlertDialogTitle>{t("admin.userDetailsPage.roleChangeDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change <strong>{user.name}</strong>'s role from{" "}
-              <strong>{user.role}</strong> to <strong>{selectedRole}</strong>? This will
-              immediately affect their access permissions.
+              {t("admin.userDetailsPage.roleChangeDialog.description", {
+                name: user.name,
+                fromRole: roleLabel(user.role),
+                toRole: selectedRole ? roleLabel(selectedRole) : "",
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={updateUserRole.isPending}>
-              Cancel
+              {t("admin.userDetailsPage.roleChangeDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRoleChange}
               disabled={updateUserRole.isPending}
             >
-              {updateUserRole.isPending ? "Updating..." : "Change Role"}
+              {updateUserRole.isPending
+                ? t("admin.userDetailsPage.roleChangeDialog.confirming")
+                : t("admin.userDetailsPage.roleChangeDialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -321,12 +318,3 @@ const AdminUserDetails = () => {
 };
 
 export default AdminUserDetails;
-
-
-
-
-
-
-
-
-

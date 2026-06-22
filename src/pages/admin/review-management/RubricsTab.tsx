@@ -12,12 +12,15 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Edit } from 'lucide-react';
 import { RubricForm } from './RubricForm';
+import { useTranslation } from 'react-i18next';
 
 interface RubricsTabProps {
   sectors?: string[]; // Kept for backward compatibility but not used
 }
 
 export const RubricsTab = ({ sectors }: RubricsTabProps) => {
+  const { t } = useTranslation(['dashboard']);
+  const rb = 'admin.reviewManagementPage.rubrics';
   const { data: rubric } = useQuery({
     queryKey: ['system-rubric'],
     queryFn: async () => {
@@ -37,10 +40,8 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>System Rubric</CardTitle>
-        <CardDescription>
-          Define scoring criteria and weights that apply to all applications
-        </CardDescription>
+        <CardTitle>{t(`${rb}.title`)}</CardTitle>
+        <CardDescription>{t(`${rb}.description`)}</CardDescription>
       </CardHeader>
       <CardContent>
         {rubric ? (
@@ -49,12 +50,12 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
               <DialogTrigger asChild>
                 <Button>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit Rubric
+                  {t(`${rb}.edit`)}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
-                  <DialogTitle>Edit System Rubric</DialogTitle>
+                  <DialogTitle>{t(`${rb}.editTitle`)}</DialogTitle>
                 </DialogHeader>
                 <div className="overflow-y-auto flex-1 pr-2 -mr-2">
                   <RubricForm 
@@ -68,7 +69,7 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
             <div className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Current Rubric Criteria</CardTitle>
+                  <CardTitle>{t(`${rb}.currentCriteria`)}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -83,7 +84,7 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
                           )}
                         </div>
                         <div className="text-sm">
-                          Weight: {(criterion.weight * 100).toFixed(0)}% • Max: {criterion.max_score}
+                          {t(`${rb}.weight`, { percent: (criterion.weight * 100).toFixed(0), max: criterion.max_score })}
                         </div>
                       </div>
                     ))}
@@ -97,12 +98,12 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Create System Rubric
+                {t(`${rb}.create`)}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
               <DialogHeader>
-                <DialogTitle>Create System Rubric</DialogTitle>
+                <DialogTitle>{t(`${rb}.createTitle`)}</DialogTitle>
               </DialogHeader>
               <div className="overflow-y-auto flex-1 pr-2 -mr-2">
                 <RubricForm />

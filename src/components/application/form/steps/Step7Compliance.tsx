@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Control, UseFormWatch, UseFormSetValue, UseFormStateReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ApplicationFormValues } from "../schemas";
 import type { ApplicationFormData } from "@/stores/applicationForm";
@@ -14,32 +15,33 @@ interface Step7ComplianceProps {
 }
 
 export function Step7Compliance({
-  control,
   watch,
   setValue,
   formState,
   updateFormData,
   isGrantType = true,
 }: Step7ComplianceProps) {
+  const { t, i18n } = useTranslation("dashboard");
+  const f = "applications.form.step7";
+
   useEffect(() => {
-    // Non-grant flows do not show reporting requirements.
-    // Set this to true so shared step validation does not block progression.
     if (!isGrantType && !watch("reportingRequirementsAgreed")) {
       setValue("reportingRequirementsAgreed", true);
       updateFormData({ reportingRequirementsAgreed: true });
     }
   }, [isGrantType, setValue, updateFormData, watch]);
 
+  const declarationDate = new Date().toLocaleDateString(i18n.language, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold mb-2">
-          Compliance & Declarations
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Please read and confirm the following declarations. All fields are
-          required for governance purposes.
-        </p>
+        <h3 className="text-lg font-semibold mb-2">{t(`${f}.title`)}</h3>
+        <p className="text-sm text-muted-foreground mb-4">{t(`${f}.description`)}</p>
       </div>
 
       <div className="space-y-4">
@@ -50,9 +52,7 @@ export function Step7Compliance({
               checked={!!watch("informationAccurateConfirmed")}
               onCheckedChange={(checked) => {
                 setValue("informationAccurateConfirmed", !!checked);
-                updateFormData({
-                  informationAccurateConfirmed: !!checked,
-                });
+                updateFormData({ informationAccurateConfirmed: !!checked });
               }}
               className="mt-1"
             />
@@ -61,12 +61,11 @@ export function Step7Compliance({
                 htmlFor="informationAccurate"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Confirmation that information is accurate{" "}
+                {t(`${f}.informationAccurateLabel`)}{" "}
                 <span className="text-destructive">*</span>
               </label>
               <p className="text-sm text-muted-foreground mt-1">
-                I confirm that all information provided in this application is
-                accurate, complete, and truthful to the best of my knowledge.
+                {t(`${f}.informationAccurateDesc`)}
               </p>
             </div>
           </div>
@@ -84,9 +83,7 @@ export function Step7Compliance({
               checked={!!watch("conflictOfInterestDeclared")}
               onCheckedChange={(checked) => {
                 setValue("conflictOfInterestDeclared", !!checked);
-                updateFormData({
-                  conflictOfInterestDeclared: !!checked,
-                });
+                updateFormData({ conflictOfInterestDeclared: !!checked });
               }}
               className="mt-1"
             />
@@ -95,13 +92,10 @@ export function Step7Compliance({
                 htmlFor="conflictOfInterest"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Conflict of interest declaration{" "}
+                {t(`${f}.conflictLabel`)}{" "}
                 <span className="text-destructive">*</span>
               </label>
-              <p className="text-sm text-muted-foreground mt-1">
-                I declare that I have disclosed any potential conflicts of
-                interest that may affect this application or its evaluation.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{t(`${f}.conflictDesc`)}</p>
             </div>
           </div>
           {formState.errors.conflictOfInterestDeclared && (
@@ -119,9 +113,7 @@ export function Step7Compliance({
                 checked={!!watch("reportingRequirementsAgreed")}
                 onCheckedChange={(checked) => {
                   setValue("reportingRequirementsAgreed", !!checked);
-                  updateFormData({
-                    reportingRequirementsAgreed: !!checked,
-                  });
+                  updateFormData({ reportingRequirementsAgreed: !!checked });
                 }}
                 className="mt-1"
               />
@@ -130,14 +122,10 @@ export function Step7Compliance({
                   htmlFor="reportingRequirements"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  Agreement to reporting requirements{" "}
+                  {t(`${f}.reportingLabel`)}{" "}
                   <span className="text-destructive">*</span>
                 </label>
-                <p className="text-sm text-muted-foreground mt-1">
-                  I agree to provide regular progress reports, financial
-                  statements, and other documentation as required by the funding
-                  organization.
-                </p>
+                <p className="text-sm text-muted-foreground mt-1">{t(`${f}.reportingDesc`)}</p>
               </div>
             </div>
             {formState.errors.reportingRequirementsAgreed && (
@@ -155,9 +143,7 @@ export function Step7Compliance({
               checked={!!watch("dataProcessingConsented")}
               onCheckedChange={(checked) => {
                 setValue("dataProcessingConsented", !!checked);
-                updateFormData({
-                  dataProcessingConsented: !!checked,
-                });
+                updateFormData({ dataProcessingConsented: !!checked });
               }}
               className="mt-1"
             />
@@ -166,14 +152,10 @@ export function Step7Compliance({
                 htmlFor="dataProcessing"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
               >
-                Consent to data processing{" "}
+                {t(`${f}.dataProcessingLabel`)}{" "}
                 <span className="text-destructive">*</span>
               </label>
-              <p className="text-sm text-muted-foreground mt-1">
-                I consent to the processing of my personal data and application
-                information for the purposes of evaluation, administration, and
-                communication related to this application.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{t(`${f}.dataProcessingDesc`)}</p>
             </div>
           </div>
           {formState.errors.dataProcessingConsented && (
@@ -185,24 +167,10 @@ export function Step7Compliance({
 
         <div className="bg-muted/50 border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">
-            <strong>Declaration Date:</strong>{" "}
-            {new Date().toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            <strong>{t("applications.form.declarationDate")}</strong> {declarationDate}
           </p>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

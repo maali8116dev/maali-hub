@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,6 +18,7 @@ import { sendContactConfirmationEmail, sendContactSubmissionEmail } from "@/lib/
 import { useAuth } from "@/hooks/useAuth";
 import { emailSchema } from "@/lib/emailValidation";
 import { useTranslation } from "react-i18next";
+import { LEGAL_CONTACT } from "@/components/legal/legalContact";
 
 const SUBJECT_OPTIONS = ["funding", "application", "partnership", "technical", "general"] as const;
 type ContactFormData = {
@@ -33,29 +34,28 @@ type ContactFormData = {
 const Contact = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useTranslation(["common"]);
+  const { t, i18n } = useTranslation("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const contactFormSchema = z.object({
-    firstName: z
-      .string()
-      .min(1, t("common:contactPage.validation.firstNameRequired", { defaultValue: "First name is required" }))
-      .max(100, t("common:contactPage.validation.firstNameTooLong", { defaultValue: "First name is too long" })),
-    lastName: z
-      .string()
-      .min(1, t("common:contactPage.validation.lastNameRequired", { defaultValue: "Last name is required" }))
-      .max(100, t("common:contactPage.validation.lastNameTooLong", { defaultValue: "Last name is too long" })),
-    email: emailSchema,
-    phone: z.string().optional(),
-    country: z.string().optional(),
-    subject: z.enum(SUBJECT_OPTIONS, {
-      required_error: t("common:contactPage.validation.subjectRequired", { defaultValue: "Please select a subject" }),
-    }),
-    message: z
-      .string()
-      .min(10, t("common:contactPage.validation.messageMin", { defaultValue: "Message must be at least 10 characters" }))
-      .max(5000, t("common:contactPage.validation.messageTooLong", { defaultValue: "Message is too long" })),
-  });
+
+  const contactFormSchema = useMemo(
+    () =>
+      z.object({
+        firstName: z.string().min(1, t("contactPage.validation.firstNameRequired")).max(100, t("contactPage.validation.firstNameTooLong")),
+        lastName: z.string().min(1, t("contactPage.validation.lastNameRequired")).max(100, t("contactPage.validation.lastNameTooLong")),
+        email: emailSchema,
+        phone: z.string().optional(),
+        country: z.string().optional(),
+        subject: z.enum(SUBJECT_OPTIONS, {
+          required_error: t("contactPage.validation.subjectRequired"),
+        }),
+        message: z
+          .string()
+          .min(10, t("contactPage.validation.messageMin"))
+          .max(5000, t("contactPage.validation.messageTooLong")),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -102,21 +102,19 @@ const Contact = () => {
 
       if (dbError) {
         console.error("Database error:", dbError);
-        toast.error(
-          t("common:contactPage.toasts.submitFailed", {
-            defaultValue: "Failed to submit your message. Please try again.",
-          })
-        );
+        toast.error(t("contactPage.toasts.submitFailed"));
         setIsSubmitting(false);
         return;
       }
 
       // Send confirmation email to user
+      const emailLocale = i18n.language?.split("-")[0];
       const confirmationResult = await sendContactConfirmationEmail(
         data.email,
         data.firstName,
         data.message,
-        submission.id
+        submission.id,
+        emailLocale,
       );
 
       if (!confirmationResult.success) {
@@ -125,7 +123,7 @@ const Contact = () => {
       }
 
       // Send notification email to admin
-      const adminEmail = "support@maali.africa"; // TODO: Make this configurable
+      const adminEmail = LEGAL_CONTACT.email;
       const adminResult = await sendContactSubmissionEmail(
         adminEmail,
         data.firstName,
@@ -135,7 +133,8 @@ const Contact = () => {
         data.country || null,
         data.subject,
         data.message,
-        submission.id
+        submission.id,
+        emailLocale,
       );
 
       if (!adminResult.success) {
@@ -144,11 +143,7 @@ const Contact = () => {
       }
 
       setSubmitSuccess(true);
-      toast.success(
-        t("common:contactPage.toasts.submitSuccess", {
-          defaultValue: "Your message has been sent successfully! We'll get back to you within 24 hours.",
-        })
-      );
+      toast.success(t("contactPage.toasts.submitSuccess"));
 
       // Reset form after 3 seconds
       setTimeout(() => {
@@ -164,11 +159,7 @@ const Contact = () => {
       }, 3000);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(
-        t("common:contactPage.toasts.unexpectedError", {
-          defaultValue: "An unexpected error occurred. Please try again.",
-        })
-      );
+      toast.error(t("contactPage.toasts.unexpectedError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -177,50 +168,41 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: Mail,
-      title: t("common:contactPage.contactInfo.emailTitle", { defaultValue: "Email Us" }),
-      content: "support@maali.africa",
-      description: t("common:contactPage.contactInfo.emailDescription", { defaultValue: "We'll respond within 24 hours" })
+      title: t("contactPage.contactInfo.emailTitle"),
+      content: LEGAL_CONTACT.email,
+      description: t("contactPage.contactInfo.emailDescription"),
     },
     {
       icon: Phone,
-      title: t("common:contactPage.contactInfo.callTitle", { defaultValue: "Call Us" }),
-      content: "+234 123 456 7890",
-      description: t("common:contactPage.contactInfo.callDescription", { defaultValue: "Mon-Fri, 9AM-6PM WAT" })
+      title: t("contactPage.contactInfo.callTitle"),
+      content: LEGAL_CONTACT.phone,
+      description: t("contactPage.contactInfo.callDescription"),
     },
     {
       icon: MapPin,
-      title: t("common:contactPage.contactInfo.officeTitle", { defaultValue: "Office" }),
-      content: "Lagos, Nigeria",
-      description: t("common:contactPage.contactInfo.officeDescription", { defaultValue: "Pan-African operations" })
+      title: t("contactPage.contactInfo.officeTitle"),
+      content: LEGAL_CONTACT.addressDisplay,
+      description: t("contactPage.contactInfo.officeDescription"),
     },
     {
       icon: Clock,
-      title: t("common:contactPage.contactInfo.responseTimeTitle", { defaultValue: "Response Time" }),
-      content: t("common:contactPage.contactInfo.responseTimeValue", { defaultValue: "24 hours" }),
-      description: t("common:contactPage.contactInfo.responseTimeDescription", { defaultValue: "Average response time" })
-    }
+      title: t("contactPage.contactInfo.responseTimeTitle"),
+      content: t("contactPage.contactInfo.responseTimeValue"),
+      description: t("contactPage.contactInfo.responseTimeDescription"),
+    },
   ];
 
-  const officeLocations = [
-    {
-      city: "Lagos",
-      country: "Nigeria",
-      address: "Victoria Island, Lagos State",
-      role: "West Africa Hub"
-    },
-    {
-      city: "Nairobi",
-      country: "Kenya",
-      address: "Westlands, Nairobi",
-      role: "East Africa Hub"
-    },
-    {
-      city: "Cape Town",
-      country: "South Africa",
-      address: "Century City, Cape Town",
-      role: "Southern Africa Hub"
-    }
-  ];
+  // Legal notice lists one registered address only — no regional office directory yet.
+  // const officeLocations = useMemo(
+  //   () =>
+  //     t("contactPage.officeLocations.offices", { returnObjects: true }) as Array<{
+  //       city: string;
+  //       country: string;
+  //       address: string;
+  //       role: string;
+  //     }>,
+  //   [t],
+  // );
 
   return (
     <div className="min-h-screen bg-background">
@@ -229,12 +211,10 @@ const Contact = () => {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            {t("common:contactPage.hero.title", { defaultValue: "Contact Us" })}
+            {t("contactPage.hero.title")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t("common:contactPage.hero.subtitle", {
-              defaultValue: "Get in touch with our team. We're here to help you succeed.",
-            })}
+            {t("contactPage.hero.subtitle")}
           </p>
         </div>
 
@@ -245,12 +225,10 @@ const Contact = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-primary" />
-                  {t("common:contactPage.form.title", { defaultValue: "Send us a Message" })}
+                  {t("contactPage.form.title")}
                 </CardTitle>
                 <CardDescription>
-                  {t("common:contactPage.form.description", {
-                    defaultValue: "Fill out the form below and we'll get back to you as soon as possible.",
-                  })}
+                  {t("contactPage.form.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -258,25 +236,23 @@ const Contact = () => {
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <CheckCircle2 className="h-16 w-16 text-success mb-4" />
                     <h3 className="text-xl font-semibold mb-2">
-                      {t("common:contactPage.success.title", { defaultValue: "Message Sent Successfully!" })}
+                      {t("contactPage.success.title")}
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      {t("common:contactPage.success.description", {
-                        defaultValue: "Thank you for contacting us. We've received your message and will respond within 24 hours.",
-                      })}
+                      {t("contactPage.success.description")}
                     </p>
                     <Button onClick={() => setSubmitSuccess(false)} variant="outline">
-                      {t("common:contactPage.success.sendAnother", { defaultValue: "Send Another Message" })}
+                      {t("contactPage.success.sendAnother")}
                     </Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName">{t("common:contactPage.form.firstNameLabel", { defaultValue: "First Name *" })}</Label>
+                        <Label htmlFor="firstName">{t("contactPage.form.firstNameLabel")}</Label>
                         <Input
                           id="firstName"
-                          placeholder={t("common:contactPage.form.firstNamePlaceholder", { defaultValue: "Enter your first name" })}
+                          placeholder={t("contactPage.form.firstNamePlaceholder")}
                           className="h-12 sm:h-10"
                           {...register("firstName")}
                         />
@@ -288,10 +264,10 @@ const Contact = () => {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="lastName">{t("common:contactPage.form.lastNameLabel", { defaultValue: "Last Name *" })}</Label>
+                        <Label htmlFor="lastName">{t("contactPage.form.lastNameLabel")}</Label>
                         <Input
                           id="lastName"
-                          placeholder={t("common:contactPage.form.lastNamePlaceholder", { defaultValue: "Enter your last name" })}
+                          placeholder={t("contactPage.form.lastNamePlaceholder")}
                           className="h-12 sm:h-10"
                           {...register("lastName")}
                         />
@@ -305,11 +281,11 @@ const Contact = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">{t("common:contactPage.form.emailLabel", { defaultValue: "Email *" })}</Label>
+                      <Label htmlFor="email">{t("contactPage.form.emailLabel")}</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder={t("common:contactPage.form.emailPlaceholder", { defaultValue: "Enter your email address" })}
+                        placeholder={t("contactPage.form.emailPlaceholder")}
                         className="h-12 sm:h-10"
                         {...register("email")}
                       />
@@ -322,11 +298,11 @@ const Contact = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone">{t("common:contactPage.form.phoneLabel", { defaultValue: "Phone Number" })}</Label>
+                      <Label htmlFor="phone">{t("contactPage.form.phoneLabel")}</Label>
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder={t("common:contactPage.form.phonePlaceholder", { defaultValue: "Enter your phone number" })}
+                        placeholder={t("contactPage.form.phonePlaceholder")}
                         className="h-12 sm:h-10"
                         {...register("phone")}
                       />
@@ -339,22 +315,22 @@ const Contact = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="country">{t("common:contactPage.form.countryLabel", { defaultValue: "Country" })}</Label>
+                      <Label htmlFor="country">{t("contactPage.form.countryLabel")}</Label>
                       <Select
                         value={selectedCountry}
                         onValueChange={(value) => setValue("country", value)}
                       >
                         <SelectTrigger className="h-12 sm:h-10">
-                          <SelectValue placeholder={t("common:contactPage.form.countryPlaceholder", { defaultValue: "Select your country" })} />
+                          <SelectValue placeholder={t("contactPage.form.countryPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="nigeria">Nigeria</SelectItem>
-                          <SelectItem value="kenya">Kenya</SelectItem>
-                          <SelectItem value="south-africa">South Africa</SelectItem>
-                          <SelectItem value="ghana">Ghana</SelectItem>
-                          <SelectItem value="uganda">Uganda</SelectItem>
-                          <SelectItem value="tanzania">Tanzania</SelectItem>
-                          <SelectItem value="other">{t("common:contactPage.form.countryOther", { defaultValue: "Other" })}</SelectItem>
+                          <SelectItem value="nigeria">{t("contactPage.form.countryNigeria")}</SelectItem>
+                          <SelectItem value="kenya">{t("contactPage.form.countryKenya")}</SelectItem>
+                          <SelectItem value="south-africa">{t("contactPage.form.countrySouthAfrica")}</SelectItem>
+                          <SelectItem value="ghana">{t("contactPage.form.countryGhana")}</SelectItem>
+                          <SelectItem value="uganda">{t("contactPage.form.countryUganda")}</SelectItem>
+                          <SelectItem value="tanzania">{t("contactPage.form.countryTanzania")}</SelectItem>
+                          <SelectItem value="other">{t("contactPage.form.countryOther")}</SelectItem>
                         </SelectContent>
                       </Select>
                       {errors.country && (
@@ -366,20 +342,20 @@ const Contact = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="subject">{t("common:contactPage.form.subjectLabel", { defaultValue: "Subject *" })}</Label>
+                      <Label htmlFor="subject">{t("contactPage.form.subjectLabel")}</Label>
                       <Select
                         value={selectedSubject}
                         onValueChange={(value) => setValue("subject", value as ContactFormData["subject"])}
                       >
                         <SelectTrigger className="h-12 sm:h-10">
-                          <SelectValue placeholder={t("common:contactPage.form.subjectPlaceholder", { defaultValue: "Select a subject" })} />
+                          <SelectValue placeholder={t("contactPage.form.subjectPlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="funding">{t("common:contactPage.form.subjectFunding", { defaultValue: "Funding Inquiry" })}</SelectItem>
-                          <SelectItem value="application">{t("common:contactPage.form.subjectApplication", { defaultValue: "Application Support" })}</SelectItem>
-                          <SelectItem value="partnership">{t("common:contactPage.form.subjectPartnership", { defaultValue: "Partnership" })}</SelectItem>
-                          <SelectItem value="technical">{t("common:contactPage.form.subjectTechnical", { defaultValue: "Technical Support" })}</SelectItem>
-                          <SelectItem value="general">{t("common:contactPage.form.subjectGeneral", { defaultValue: "General Inquiry" })}</SelectItem>
+                          <SelectItem value="funding">{t("contactPage.form.subjectFunding")}</SelectItem>
+                          <SelectItem value="application">{t("contactPage.form.subjectApplication")}</SelectItem>
+                          <SelectItem value="partnership">{t("contactPage.form.subjectPartnership")}</SelectItem>
+                          <SelectItem value="technical">{t("contactPage.form.subjectTechnical")}</SelectItem>
+                          <SelectItem value="general">{t("contactPage.form.subjectGeneral")}</SelectItem>
                         </SelectContent>
                       </Select>
                       {errors.subject && (
@@ -391,10 +367,10 @@ const Contact = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message">{t("common:contactPage.form.messageLabel", { defaultValue: "Message *" })}</Label>
+                      <Label htmlFor="message">{t("contactPage.form.messageLabel")}</Label>
                       <Textarea
                         id="message"
-                        placeholder={t("common:contactPage.form.messagePlaceholder", { defaultValue: "Tell us how we can help you..." })}
+                        placeholder={t("contactPage.form.messagePlaceholder")}
                         className="min-h-[120px]"
                         {...register("message")}
                       />
@@ -416,10 +392,10 @@ const Contact = () => {
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t("common:contactPage.form.sending", { defaultValue: "Sending..." })}
+                          {t("contactPage.form.sending")}
                         </>
                       ) : (
-                        t("common:contactPage.form.submit", { defaultValue: "Send Message" })
+                        t("contactPage.form.submit")
                       )}
                     </Button>
                   </form>
@@ -434,7 +410,7 @@ const Contact = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary" />
-                  {t("common:contactPage.contactInfo.title", { defaultValue: "Contact Information" })}
+                  {t("contactPage.contactInfo.title")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -453,13 +429,12 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* Office locations hidden — legal notice has registered address only (see LEGAL_CONTACT). */}
+            {/* <Card>
               <CardHeader>
-                <CardTitle>{t("common:contactPage.officeLocations.title", { defaultValue: "Office Locations" })}</CardTitle>
+                <CardTitle>{t("contactPage.officeLocations.title")}</CardTitle>
                 <CardDescription>
-                  {t("common:contactPage.officeLocations.description", {
-                    defaultValue: "We operate across Africa with regional hubs",
-                  })}
+                  {t("contactPage.officeLocations.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -471,22 +446,20 @@ const Contact = () => {
                   </div>
                 ))}
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card className="bg-gradient-primary text-white">
               <CardContent className="p-6 text-center">
-                <h3 className="font-bold text-lg mb-2">{t("common:contactPage.quickSupport.title", { defaultValue: "Quick Support" })}</h3>
+                <h3 className="font-bold text-lg mb-2">{t("contactPage.quickSupport.title")}</h3>
                 <p className="text-sm opacity-90 mb-4">
-                  {t("common:contactPage.quickSupport.description", {
-                    defaultValue: "Need immediate assistance? Check our FAQ section or schedule a call with our team.",
-                  })}
+                  {t("contactPage.quickSupport.description")}
                 </p>
                 <div className="space-y-2">
                   <Button variant="secondary" size="sm" className="w-full" asChild>
-                    <Link to="/faq">{t("common:contactPage.quickSupport.viewFaq", { defaultValue: "View FAQ" })}</Link>
+                    <Link to="/faq">{t("contactPage.quickSupport.viewFaq")}</Link>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20">
-                    {t("common:contactPage.quickSupport.scheduleCall", { defaultValue: "Schedule Call" })}
+                    {t("contactPage.quickSupport.scheduleCall")}
                   </Button>
                 </div>
               </CardContent>
@@ -497,19 +470,17 @@ const Contact = () => {
         {/* CTA Section */}
         <div className="mt-16 text-center bg-gradient-subtle rounded-2xl p-8 md:p-12">
           <h2 className="text-3xl font-bold text-foreground mb-4">
-            {t("common:contactPage.cta.title", { defaultValue: "Ready to Get Started?" })}
+            {t("contactPage.cta.title")}
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            {t("common:contactPage.cta.description", {
-              defaultValue: "Don't wait -explore funding opportunities available right now",
-            })}
+            {t("contactPage.cta.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" asChild>
-              <Link to="/projects">{t("common:contactPage.cta.browseProjects", { defaultValue: "Browse Projects" })}</Link>
+              <Link to="/opportunities">{t("contactPage.cta.browseOpportunities")}</Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link to="/auth">{t("common:contactPage.cta.createAccount", { defaultValue: "Create Account" })}</Link>
+              <Link to="/auth">{t("contactPage.cta.createAccount")}</Link>
             </Button>
           </div>
         </div>
