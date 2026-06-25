@@ -42,7 +42,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             <div className="flex-shrink-0">
               <Link to="/">
                 <img
@@ -54,9 +54,9 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+          {/* Desktop Navigation — lg+ only; md–lg uses mobile menu (6 links + i18n + auth overflow) */}
+          <div className="hidden lg:block">
+            <div className="ml-10 flex items-baseline space-x-2 xl:space-x-4">
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
@@ -75,7 +75,7 @@ const Navigation = () => {
           </div>
 
           {/* Language Selector, Theme Toggle & CTA */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-2 xl:space-x-4 shrink-0">
             <ThemeToggle />
             <div className="relative group">
               <Button variant="ghost" size="sm" className="flex items-center gap-2">
@@ -119,7 +119,7 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button - larger touch target */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-2 shrink-0">
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -134,7 +134,7 @@ const Navigation = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-card border-t border-border max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="lg:hidden bg-card border-t border-border max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="px-3 pt-3 pb-4 space-y-1">
             {navigationItems.map((item) => (
               <Link
