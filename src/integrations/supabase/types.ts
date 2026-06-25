@@ -637,39 +637,63 @@ export type Database = {
       memberships: {
         Row: {
           amount_paid: number | null
+          billing_currency: string | null
+          cancel_at_period_end: boolean | null
           created_at: string
           expires_at: string | null
           id: string
+          payment_provider: "stripe" | "paystack" | null
+          paystack_email_token: string | null
+          provider_customer_id: string | null
+          provider_payment_ref: string | null
+          provider_subscription_id: string | null
           starts_at: string
           status: string
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
+          stripe_subscription_id: string | null
           tier: string
           updated_at: string
           user_id: string
         }
         Insert: {
           amount_paid?: number | null
+          billing_currency?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_provider?: "stripe" | "paystack" | null
+          paystack_email_token?: string | null
+          provider_customer_id?: string | null
+          provider_payment_ref?: string | null
+          provider_subscription_id?: string | null
           starts_at?: string
           status?: string
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
           tier: string
           updated_at?: string
           user_id: string
         }
         Update: {
           amount_paid?: number | null
+          billing_currency?: string | null
+          cancel_at_period_end?: boolean | null
           created_at?: string
           expires_at?: string | null
           id?: string
+          payment_provider?: "stripe" | "paystack" | null
+          paystack_email_token?: string | null
+          provider_customer_id?: string | null
+          provider_payment_ref?: string | null
+          provider_subscription_id?: string | null
           starts_at?: string
           status?: string
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
           tier?: string
           updated_at?: string
           user_id?: string

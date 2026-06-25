@@ -2,6 +2,7 @@ import Stripe from "https://esm.sh/stripe@14?target=deno";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
+import { paystackRequest } from "../_shared/paystackApi.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2024-06-20",
@@ -27,7 +28,6 @@ serve(async (req) => {
 
   const userId = auth.user.id;
 
-  // The RPC returns { mode, stripe_subscription_id } so we know which path was taken.
   const { data: rpcResult, error: rpcError } = await supabaseAdmin.rpc("cancel_membership", {
     p_user_id: userId,
   });
@@ -37,21 +37,50 @@ serve(async (req) => {
     return jsonResponse(req, 400, { error: rpcError.message });
   }
 
-  const mode          = (rpcResult as { mode: string })?.mode;
-  const subscriptionId = (rpcResult as { stripe_subscription_id?: string })?.stripe_subscription_id;
+  const mode = (rpcResult as { mode: string })?.mode;
+  const provider = (rpcResult as { payment_provider?: string })?.payment_provider ?? "stripe";
+  const subscriptionId =
+    (rpcResult as { provider_subscription_id?: string })?.provider_subscription_id ??
+    (rpcResult as { stripe_subscription_id?: string })?.stripe_subscription_id;
 
   if (mode === "scheduled" && subscriptionId) {
-    // Tell Stripe to cancel at period end — user keeps access until then.
-    try {
-      await stripe.subscriptions.update(subscriptionId, {
-        cancel_at_period_end: true,
-      });
-      console.log(`[cancel-membership] Stripe subscription ${subscriptionId} set to cancel at period end`);
-    } catch (stripeErr) {
-      // Log but don't fail — DB is already updated. Stripe will eventually sync via webhook.
-      console.error("[cancel-membership] Stripe update failed (non-fatal):", (stripeErr as Error).message);
+    if (provider === "paystack") {
+      const { data: membership } = await supabaseAdmin
+        .from("memberships")
+        .select("paystack_email_token")
+        .eq("user_id", userId)
+        .eq("provider_subscription_id", subscriptionId)
+        .maybeSingle();
+
+      const token = membership?.paystack_email_token;
+      if (token) {
+        try {
+          const res = await paystackRequest("/subscription/disable", {
+            method: "POST",
+            body: JSON.stringify({ code: subscriptionId, token }),
+          });
+          if (!res.ok) {
+            console.error("[cancel-membership] Paystack disable failed:", res.raw);
+          } else {
+            console.log(`[cancel-membership] Paystack subscription ${subscriptionId} disabled`);
+          }
+        } catch (stripeErr) {
+          console.error("[cancel-membership] Paystack update failed (non-fatal):", (stripeErr as Error).message);
+        }
+      } else {
+        console.warn("[cancel-membership] missing paystack_email_token — DB cancel_at_period_end only");
+      }
+    } else {
+      try {
+        await stripe.subscriptions.update(subscriptionId, {
+          cancel_at_period_end: true,
+        });
+        console.log(`[cancel-membership] Stripe subscription ${subscriptionId} set to cancel at period end`);
+      } catch (stripeErr) {
+        console.error("[cancel-membership] Stripe update failed (non-fatal):", (stripeErr as Error).message);
+      }
     }
   }
 
-  return jsonResponse(req, 200, { success: true, mode });
+  return jsonResponse(req, 200, { success: true, mode, payment_provider: provider });
 });

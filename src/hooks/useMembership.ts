@@ -13,6 +13,12 @@ export interface Membership {
   stripe_customer_id: string | null;
   stripe_payment_intent_id: string | null;
   stripe_subscription_id: string | null;
+  payment_provider: "stripe" | "paystack" | null;
+  provider_customer_id: string | null;
+  provider_subscription_id: string | null;
+  provider_payment_ref: string | null;
+  paystack_email_token: string | null;
+  billing_currency: string | null;
   cancel_at_period_end: boolean;
   amount_paid: number | null;
   starts_at: string;

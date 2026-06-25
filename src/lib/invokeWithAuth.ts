@@ -25,8 +25,20 @@ export async function invokeWithAuth<T = Record<string, unknown>>(
   });
 }
 
-export function parseEdgeFunctionError(error: unknown): string | null {
-  const rawBody = (error as { context?: { body?: unknown } } | undefined)?.context?.body;
+export async function parseEdgeFunctionError(error: unknown): Promise<string | null> {
+  if (!error || typeof error !== "object") return null;
+
+  const ctx = (error as { context?: Response }).context;
+  if (ctx && typeof ctx.json === "function") {
+    try {
+      const parsed = (await ctx.clone().json()) as { error?: string };
+      if (typeof parsed?.error === "string") return parsed.error;
+    } catch {
+      /* fall through */
+    }
+  }
+
+  const rawBody = (error as { context?: { body?: unknown } }).context?.body;
   if (!rawBody) return null;
   try {
     const parsed =

@@ -166,6 +166,29 @@
     "open": "Open for applications",
     "closed": "Closed for applications"
   },
+  "payment": {
+    "provider": {
+      "chooseLabel": "How would you like to pay?",
+      "chooseHint": "Your choice is saved for this membership. You can switch providers only before completing checkout.",
+      "currencyLabel": "Billing currency",
+      "completeChoice": "Select a payment method and currency (if Paystack) to continue.",
+      "continueToPayment": "Continue to payment",
+      "locked": "Checkout locked to {{provider}} for this membership.",
+      "payWithPaystack": "Pay with Paystack",
+      "paystackAmount": "You will be charged {{amount}} / month ({{currency}}).",
+      "paystackFooter": "Paystack supports card, mobile money, and bank transfer in supported countries.",
+      "paystackNotConfigured": "Paystack is not configured. Contact support or pay with card (Stripe).",
+      "stripeFooter": "International cards via Stripe. Billed in USD.",
+      "stripe": {
+        "label": "Card (international)",
+        "description": "Visa, Mastercard, Amex — billed in USD ($2/mo)"
+      },
+      "paystack": {
+        "label": "Paystack",
+        "description": "Card, mobile money, or bank — NGN, GHS, KES, ZAR"
+      }
+    }
+  },
   "toasts": {
     "genericError": "Something went wrong. Please try again.",
     "opportunity": {
