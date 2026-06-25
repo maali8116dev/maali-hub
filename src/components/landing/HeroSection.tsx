@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 
-const heroImage = "/images/hero-agriculture.webp";
+const heroImage = "/images/hero-agriculture.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();

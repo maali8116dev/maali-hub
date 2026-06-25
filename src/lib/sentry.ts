@@ -114,13 +114,13 @@ export const captureError = (
 // Add breadcrumb for better error context
 export const addBreadcrumb = (
   message: string,
-  sector: string,
+  category: string,
   data?: Record<string, unknown>
 ) => {
   if (!isInitialized) return;
   Sentry.addBreadcrumb({
     message,
-    sector,
+    category,
     data,
     level: "info",
   });

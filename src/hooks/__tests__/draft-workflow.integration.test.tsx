@@ -110,7 +110,7 @@ describe('Draft Workflow - Integration Tests', () => {
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
-      .from('opportunities' as any)
+      .from('opportunities')
       .insert({
         title: `IntTest Draft Project ${testTimestamp}`,
         description: 'Integration test project for draft workflow',
@@ -185,7 +185,7 @@ describe('Draft Workflow - Integration Tests', () => {
     // Clean up test project
     if (testProjectId) {
       await supabaseAdmin
-        .from('opportunities' as any)
+        .from('opportunities')
         .delete()
         .eq('id', testProjectId);
     }
@@ -459,7 +459,7 @@ describe('Draft Workflow - Integration Tests', () => {
     itIf('should handle draft load when no draft exists', async () => {
       // Create a different project for this test to avoid conflicts
       const { data: newProjectData, error: newProjectError } = await supabaseAdmin!
-        .from('opportunities' as any)
+        .from('opportunities')
         .insert({
           title: `IntTest Draft Project No Draft ${testTimestamp}`,
           description: 'Integration test project for no draft test',
@@ -508,7 +508,7 @@ describe('Draft Workflow - Integration Tests', () => {
       } finally {
         // Clean up the test project
         await supabaseAdmin!
-          .from('opportunities' as any)
+          .from('opportunities')
           .delete()
           .eq('id', newProjectId);
       }

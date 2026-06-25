@@ -209,7 +209,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
     const { data: catData } = await supabaseAdmin.from('sectors').select('id').eq('name', 'Technology').single();
     const sectorId = catData?.id || 1;
 
-    const { data: projectData, error: projectError } = await supabaseAdmin.from('opportunities' as any).insert({
+    const { data: projectData, error: projectError } = await supabaseAdmin.from('opportunities').insert({
       title: `Test Project ${Date.now()}`, description: 'Test', status: 'open',
       sector_id: sectorId, application_fee: 10000, funding_amount: '$50,000',
       location: 'Ghana', deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
@@ -242,7 +242,7 @@ describe.skip('get_admin_applications RPC (Integration)', () => {
   afterAll(async () => {
     if (!supabaseAdmin) return;
     if (testApplicationIds.length) await supabaseAdmin.from('applications').delete().in('id', testApplicationIds);
-    if (testProjectId) await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
+    if (testProjectId) await supabaseAdmin.from('opportunities').delete().eq('id', testProjectId);
     for (const id of [...testUserIds, adminUserId]) {
       try { await supabaseAdmin.auth.admin.deleteUser(id); } catch { /* */ }
     }

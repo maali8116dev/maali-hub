@@ -106,7 +106,7 @@ beforeAll(async () => {
     .single();
   const sectorId = catData?.id || 1;
 
-  const { data: pj, error: pe } = await supabaseAdmin.from('opportunities' as any).insert({
+  const { data: pj, error: pe } = await supabaseAdmin.from('opportunities').insert({
     title: `IntTest Project ${Date.now()}`,
     description: 'Integration test project',
     status: 'open',
@@ -151,7 +151,7 @@ afterAll(async () => {
     await supabaseAdmin.from('applications').delete().in('id', testApplicationIds);
   }
   if (testProjectId) {
-    await supabaseAdmin.from('opportunities' as any).delete().eq('id', testProjectId);
+    await supabaseAdmin.from('opportunities').delete().eq('id', testProjectId);
   }
   for (const uid of [...testUserIds, adminUserId]) {
     try { await supabaseAdmin.auth.admin.deleteUser(uid); } catch { /* */ }

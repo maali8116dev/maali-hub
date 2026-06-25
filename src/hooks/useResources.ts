@@ -191,7 +191,7 @@ export const useCreateResource = () => {
         .insert({
           ...resourceFormToDb(data),
           created_by: user.user?.id,
-        })
+        } as any)
         .select()
         .single();
 

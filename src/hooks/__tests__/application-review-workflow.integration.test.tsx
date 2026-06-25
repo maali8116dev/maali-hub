@@ -106,7 +106,7 @@ describe('Application Review Workflow - Integration Tests', () => {
 
     // 2. Create test project
     const { data: projectData, error: projectError } = await supabaseAdmin
-      .from('opportunities' as any)
+      .from('opportunities')
       .insert({
         title: `IntTest Review Workflow Project ${testTimestamp}`,
         description: 'Integration test project for review workflow',
@@ -277,7 +277,7 @@ describe('Application Review Workflow - Integration Tests', () => {
     // Clean up project
     if (testProjectId) {
       await supabaseAdmin
-        .from('opportunities' as any)
+        .from('opportunities')
         .delete()
         .eq('id', testProjectId);
     }
