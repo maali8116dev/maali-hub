@@ -142,8 +142,8 @@ const PartnerForm = () => {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch partner",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.partner.fetchError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {
@@ -185,7 +185,7 @@ const PartnerForm = () => {
           if (linkError) throw linkError;
         }
 
-        toast({ title: "Success", description: "Partner updated successfully" });
+        toast({ title: i18n.t("toasts.success", { ns: "common" }), description: i18n.t("toasts.partner.updated", { ns: "common" }) });
       } else {
         const { data: inserted, error } = await supabase
           .from("partners")
@@ -214,18 +214,18 @@ const PartnerForm = () => {
         }
 
         toast({
-          title: "Partner created",
+          title: i18n.t("toasts.partner.created", { ns: "common" }),
           description: data.invite_email
-            ? `Partner created and invite sent to ${data.invite_email}.`
-            : "Partner created successfully.",
+            ? i18n.t("toasts.partner.createdInviteDesc", { ns: "common", email: data.invite_email })
+            : i18n.t("toasts.partner.createdDesc", { ns: "common" }),
         });
       }
 
       navigate("/admin/partners");
     } catch (error: unknown) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${isEditing ? "update" : "create"} partner`,
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error instanceof Error ? error.message : i18n.t(isEditing ? "toasts.partner.updateError" : "toasts.partner.createError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {

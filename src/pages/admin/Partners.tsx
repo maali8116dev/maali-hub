@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 type Partner = {
   id: number;
@@ -98,7 +99,7 @@ const AdminPartners = () => {
         }))
       );
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to fetch partners", variant: "destructive" });
+      toast({ title: i18n.t("toasts.error", { ns: "common" }), description: error.message || i18n.t("toasts.partner.fetchListError", { ns: "common" }), variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -118,12 +119,12 @@ const AdminPartners = () => {
     try {
       const { error } = await supabase.from("partners").delete().eq("id", partnerToDelete);
       if (error) throw error;
-      toast({ title: "Success", description: "Partner deleted successfully" });
+      toast({ title: i18n.t("toasts.success", { ns: "common" }), description: i18n.t("toasts.partner.deleted", { ns: "common" }) });
       setPartners((prev) => prev.filter((p) => p.id !== partnerToDelete));
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to delete partner", variant: "destructive" });
+      toast({ title: i18n.t("toasts.error", { ns: "common" }), description: error.message || i18n.t("toasts.partner.deleteError", { ns: "common" }), variant: "destructive" });
     }
   };
 

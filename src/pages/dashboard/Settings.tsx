@@ -136,9 +136,7 @@ const Settings = () => {
                 i18n.changeLanguage(value);
                 toast({
                   title: t('dashboard:settings.save.languageUpdated'),
-                  description: `${t('dashboard:settings.preferences.language')} ${
-                    value === 'en' ? 'English' : value === 'fr' ? 'Français' : value === 'pt' ? 'Português' : 'Deutsch'
-                  }`,
+                  description: `${t('dashboard:settings.preferences.language')} ${t(`languages.${value}`, { ns: 'common' })}`,
                 });
               }}
             >

@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useMembership } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import { getProjectDisplayStatus, isProjectOpen } from "@/lib/projectAvailability";
 import { formatDisplayLocation } from "@/lib/formatLocation";
 
@@ -213,16 +214,16 @@ const ProjectCard = (props: ProjectCardProps) => {
               if (applyDisabled) return;
               if (hasSubmittedApplication) {
                 toast({
-                  title: "Already Applied",
-                  description: "You already submitted an application for this opportunity. You can view it from your dashboard.",
+                  title: i18n.t("toasts.landing.alreadyApplied", { ns: "common" }),
+                  description: i18n.t("toasts.landing.alreadyAppliedDesc", { ns: "common" }),
                   variant: "default",
                 });
                 return;
               }
               if (!user) {
                 toast({
-                  title: "Login Required",
-                  description: "Please log in or create an account to apply for this opportunity.",
+                  title: i18n.t("toasts.landing.loginRequired", { ns: "common" }),
+                  description: i18n.t("toasts.landing.loginRequiredDesc", { ns: "common" }),
                   variant: "default",
                 });
                 navigate("/auth", { state: { from: { pathname: `/opportunities/${id}/apply` } } });

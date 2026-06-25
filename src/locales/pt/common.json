@@ -2,6 +2,12 @@
   "loading": "Carregando...",
   "error": "Ocorreu um erro",
   "tryAgain": "Tentar novamente",
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "pt": "Português",
+    "de": "Deutsch"
+  },
   "cookieConsent": {
     "title": "Valorizamos sua privacidade",
     "description": "Usamos cookies para melhorar sua experiência de navegação, analisar o tráfego do site e personalizar o conteúdo. Ao clicar em \"Aceitar Tudo\", você consente com o uso de cookies. Leia nossa <privacyLink>Política de Privacidade</privacyLink> e <cookieLink>Política de Cookies</cookieLink> para mais informações.",
@@ -180,7 +186,134 @@
       "deleteError": "Erro ao excluir oportunidade",
       "translationFailed": "Falha na traducao",
       "translationNotConfigured": "Chave da API Google Translate nao configurada no servidor.",
-      "translationNotAuthenticated": "E necessario entrar para gerar traducoes."
+      "translationNotAuthenticated": "E necessario entrar para gerar traducoes.",
+      "translationInvokeFailed": "Nao foi possivel contactar o servico de traducao.",
+      "translationUnknownResponse": "Resposta inesperada do servico de traducao."
+    },
+    "opportunityFiles": {
+      "fileTooLarge": "Ficheiro demasiado grande",
+      "fileTooLargeDesc": "Tamanho maximo: {{maxSizeMB}} MB.",
+      "fileTypeNotAllowed": "Tipo de ficheiro nao permitido",
+      "fileTypeNotAllowedDesc": "Permitidos: PDF, Word, Excel, PowerPoint, texto, imagens.",
+      "fileAdded": "Ficheiro adicionado",
+      "uploadFailed": "Falha no carregamento",
+      "uploadFailedDesc": "Nao foi possivel carregar o ficheiro.",
+      "fileRemoved": "Ficheiro removido",
+      "removeFailed": "Falha ao remover",
+      "removeFailedDesc": "Nao foi possivel remover o ficheiro."
+    },
+    "error": "Erro",
+    "success": "Sucesso",
+    "documents": {
+      "uploadError": "Erro de carregamento",
+      "authError": "Erro de autenticacao",
+      "authErrorDesc": "Tem de iniciar sessao para carregar documentos.",
+      "membershipRequired": "Adesao necessaria",
+      "membershipUploadDesc": "Torne-se membro completo para carregar documentos.",
+      "membershipAttachDesc": "Torne-se membro completo para anexar documentos as candidaturas.",
+      "limitReached": "Limite de documentos atingido",
+      "limitReachedDesc": "Pode armazenar ate {{max}} documentos. Elimine um para carregar mais.",
+      "uploadFailed": "Falha no carregamento",
+      "uploadFailedDesc": "Falha ao carregar \"{{fileName}}\". Tente novamente.",
+      "fileTooLarge": "O ficheiro \"{{fileName}}\" e demasiado grande. Tamanho maximo: 10 MB.",
+      "invalidFileType": "O ficheiro \"{{fileName}}\" tem um tipo invalido. Permitidos: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+      "slotInvalidType": "O ficheiro \"{{fileName}}\" deve ser PDF, DOC ou DOCX.",
+      "uploadComplete": "Carregamento concluido",
+      "uploadCompleteDesc": "{{count}} ficheiro(s) carregado(s) com sucesso.",
+      "documentDeleted": "Documento eliminado",
+      "documentDeletedDesc": "\"{{fileName}}\" foi eliminado.",
+      "deleteFailed": "Falha ao eliminar",
+      "deleteFailedDesc": "Falha ao eliminar \"{{fileName}}\". Tente novamente.",
+      "loadFailed": "Falha ao carregar documentos. Tente novamente.",
+      "loadLibraryFailed": "Falha ao carregar biblioteca. Tente novamente.",
+      "documentLinked": "Documento associado",
+      "documentLinkedDesc": "\"{{fileName}}\" foi adicionado a sua candidatura.",
+      "linkFailed": "Falha na associacao",
+      "linkFailedDesc": "Nao foi possivel associar o documento a candidatura. Tente novamente.",
+      "noOpportunity": "Nenhuma oportunidade encontrada. Tente novamente mais tarde."
+    },
+    "membership": {
+      "resumed": "Adesao retomada",
+      "resumedDesc": "O seu cancelamento foi anulado. A adesao continuara a renovar-se automaticamente.",
+      "cancellationScheduled": "Cancelamento de adesao agendado",
+      "cancellationScheduledDesc": "O acesso de membro completo continua ate {{endsOn}}. Depois passara ao plano Comunidade.",
+      "cancellationScheduledFallback": "O cancelamento foi agendado. Mantem acesso de membro completo ate ao fim do periodo de faturacao."
+    },
+    "draft": {
+      "cannotSave": "Nao e possivel guardar rascunho",
+      "selectProjectFirst": "Selecione primeiro um projeto",
+      "saved": "Rascunho guardado",
+      "savedDesc": "O rascunho da candidatura foi guardado",
+      "saveFailed": "Falha ao guardar",
+      "saveFailedDesc": "Nao foi possivel guardar o rascunho. Tente novamente."
+    },
+    "autofill": {
+      "filled": "Dados do candidato preenchidos",
+      "filledDesc": "Campos vazios foram preenchidos com o seu perfil e candidaturas anteriores."
+    },
+    "landing": {
+      "alreadyApplied": "Ja candidatou",
+      "alreadyAppliedDesc": "Ja submeteu uma candidatura para esta oportunidade. Veja no seu painel.",
+      "loginRequired": "Inicio de sessao necessario",
+      "loginRequiredDesc": "Inicie sessao ou crie uma conta para se candidatar."
+    },
+    "partner": {
+      "fetchError": "Falha ao carregar parceiro",
+      "fetchListError": "Falha ao carregar parceiros",
+      "updated": "Parceiro atualizado com sucesso",
+      "created": "Parceiro criado",
+      "createdDesc": "Parceiro criado com sucesso.",
+      "createdInviteDesc": "Parceiro criado e convite enviado para {{email}}.",
+      "updateError": "Falha ao atualizar parceiro",
+      "createError": "Falha ao criar parceiro",
+      "deleted": "Parceiro eliminado com sucesso",
+      "deleteError": "Falha ao eliminar parceiro"
+    },
+    "successStory": {
+      "fetchError": "Falha ao carregar historias de sucesso",
+      "fetchOneError": "Falha ao carregar historia de sucesso",
+      "deleted": "Historia de sucesso eliminada com sucesso",
+      "deleteError": "Falha ao eliminar historia de sucesso",
+      "created": "Historia de sucesso criada com sucesso",
+      "updated": "Historia de sucesso atualizada com sucesso",
+      "createError": "Falha ao criar historia de sucesso",
+      "updateError": "Falha ao atualizar historia de sucesso"
+    },
+    "rubric": {
+      "updated": "Grelha atualizada",
+      "updatedDesc": "A grelha foi atualizada. Todas as novas avaliacoes usarao esta grelha.",
+      "saveError": "Erro ao guardar",
+      "saveErrorDesc": "Falha ao guardar a grelha. Tente novamente.",
+      "validationError": "Erro de validacao",
+      "validationErrorDesc": "Certifique-se de que todos os criterios tem nome antes de guardar."
+    },
+    "review": {
+      "submitted": "Avaliacao submetida",
+      "submittedDesc": "A sua avaliacao foi submetida com sucesso.",
+      "submitFailed": "Falha na submissao",
+      "submitFailedDesc": "Falha ao submeter avaliacao. Tente novamente.",
+      "draftSaved": "Rascunho guardado",
+      "draftSavedDesc": "O rascunho da avaliacao foi guardado. Pode continuar mais tarde.",
+      "saveFailed": "Falha ao guardar",
+      "saveFailedDesc": "Falha ao guardar rascunho. Tente novamente.",
+      "sectorAddFailed": "Falha ao adicionar atribuicao de setor."
+    },
+    "emailVerification": {
+      "resendFailed": "Falha ao reenviar",
+      "sent": "E-mail de verificacao enviado",
+      "sentDesc": "Verifique a caixa de entrada e o spam.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "notifications": {
+      "fallbackTitle": "Nova notificacao"
+    },
+    "profileSetup": {
+      "validationError": "Erro de validacao",
+      "step1Incomplete": "Preencha todos os campos obrigatorios do passo 1.",
+      "incomplete": "Preencha todos os campos obrigatorios antes de submeter.",
+      "updated": "Perfil atualizado",
+      "updatedDesc": "O seu perfil foi atualizado com sucesso!",
+      "saveFailed": "Falha ao guardar perfil. Tente novamente."
     },
     "sector": {
       "created": "Setor criado",

@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 
 const BUCKET = "opportunity-files";
 const MAX_SIZE_MB = 10;
@@ -82,13 +83,17 @@ export function useOpportunityFiles(opportunityId: number | undefined) {
   const uploadWithId = useCallback(
     async (oppId: number, file: File): Promise<OpportunityDocument | null> => {
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        toast({ title: "File too large", description: `Maximum size is ${MAX_SIZE_MB}MB.`, variant: "destructive" });
+        toast({
+          title: i18n.t("toasts.opportunityFiles.fileTooLarge", { ns: "common" }),
+          description: i18n.t("toasts.opportunityFiles.fileTooLargeDesc", { ns: "common", maxSizeMB: MAX_SIZE_MB }),
+          variant: "destructive",
+        });
         return null;
       }
       if (ALLOWED_TYPES.length && !ALLOWED_TYPES.includes(file.type)) {
         toast({
-          title: "File type not allowed",
-          description: "Allowed: PDF, Word, Excel, PowerPoint, text, images.",
+          title: i18n.t("toasts.opportunityFiles.fileTypeNotAllowed", { ns: "common" }),
+          description: i18n.t("toasts.opportunityFiles.fileTypeNotAllowedDesc", { ns: "common" }),
           variant: "destructive",
         });
         return null;
@@ -118,13 +123,13 @@ export function useOpportunityFiles(opportunityId: number | undefined) {
         if (oppId === opportunityId) {
           queryClient.setQueryData(queryKey, (old: OpportunityDocument[] = []) => [...old, toDocument(row)]);
         }
-        toast({ title: "File added", description: file.name });
+        toast({ title: i18n.t("toasts.opportunityFiles.fileAdded", { ns: "common" }), description: file.name });
         return toDocument(row);
       } catch (e) {
         console.error(e);
         toast({
-          title: "Upload failed",
-          description: e instanceof Error ? e.message : "Could not upload file.",
+          title: i18n.t("toasts.opportunityFiles.uploadFailed", { ns: "common" }),
+          description: e instanceof Error ? e.message : i18n.t("toasts.opportunityFiles.uploadFailedDesc", { ns: "common" }),
           variant: "destructive",
         });
         return null;
@@ -142,11 +147,15 @@ export function useOpportunityFiles(opportunityId: number | undefined) {
         const { error } = await supabase.from("opportunity_documents").delete().eq("id", doc.id);
         if (error) throw error;
         queryClient.setQueryData(queryKey, (old: OpportunityDocument[] = []) => old.filter((d) => d.id !== doc.id));
-        toast({ title: "File removed", description: doc.fileName });
+        toast({ title: i18n.t("toasts.opportunityFiles.fileRemoved", { ns: "common" }), description: doc.fileName });
         return true;
       } catch (e) {
         console.error(e);
-        toast({ title: "Remove failed", description: e instanceof Error ? e.message : "Could not remove file.", variant: "destructive" });
+        toast({
+          title: i18n.t("toasts.opportunityFiles.removeFailed", { ns: "common" }),
+          description: e instanceof Error ? e.message : i18n.t("toasts.opportunityFiles.removeFailedDesc", { ns: "common" }),
+          variant: "destructive",
+        });
         return false;
       }
     },

@@ -88,6 +88,10 @@ export function translationFailureMessage(reason: string): string {
       return i18n.t("toasts.opportunity.translationNotConfigured", { ns: "common" });
     case "not_authenticated":
       return i18n.t("toasts.opportunity.translationNotAuthenticated", { ns: "common" });
+    case "invoke_failed":
+      return i18n.t("toasts.opportunity.translationInvokeFailed", { ns: "common" });
+    case "unknown_response":
+      return i18n.t("toasts.opportunity.translationUnknownResponse", { ns: "common" });
     default:
       return reason;
   }

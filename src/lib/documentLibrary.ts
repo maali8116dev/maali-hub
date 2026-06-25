@@ -17,11 +17,8 @@ export const SLOT_FILE_ACCEPT = ".pdf,.doc,.docx";
 
 const SLOT_MIME_SET = new Set<string>(SLOT_MIME_TYPES);
 
-export function validateSlotFile(file: File): string | null {
-  if (!SLOT_MIME_SET.has(file.type)) {
-    return `File "${file.name}" must be PDF, DOC, or DOCX.`;
-  }
-  return null;
+export function validateSlotFile(file: File): boolean {
+  return SLOT_MIME_SET.has(file.type);
 }
 
 export interface DocumentSlotConfig {

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import {
   MAX_LIBRARY_DOCUMENTS,
   REPLACEABLE_SLOT_TYPES,
@@ -105,15 +106,15 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       return anyOpportunity.id;
     }
 
-    throw new Error("No opportunity found to associate document with. Please try again after opportunities are available.");
+    throw new Error(i18n.t("toasts.documents.noOpportunity", { ns: "common" }));
   }, []);
 
-  const validateFile = useCallback((file: File): string | null => {
+  const validateFile = useCallback((file: File): "tooLarge" | "invalidType" | null => {
     if (file.size > MAX_FILE_SIZE) {
-      return `File "${file.name}" is too large. Maximum size is 10MB.`;
+      return "tooLarge";
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return `File "${file.name}" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.`;
+      return "invalidType";
     }
     return null;
   }, []);
@@ -129,8 +130,11 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     const validationError = validateFile(file);
     if (validationError) {
       toast({
-        title: "Upload Error",
-        description: validationError,
+        title: i18n.t("toasts.documents.uploadError", { ns: "common" }),
+        description: i18n.t(
+          validationError === "tooLarge" ? "toasts.documents.fileTooLarge" : "toasts.documents.invalidFileType",
+          { ns: "common", fileName: file.name },
+        ),
         variant: "destructive",
       });
       return null;
@@ -141,11 +145,10 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       documentType &&
       REPLACEABLE_SLOT_TYPES.includes(documentType as NamedSlotType)
     ) {
-      const slotError = validateSlotFile(file);
-      if (slotError) {
+      if (!validateSlotFile(file)) {
         toast({
-          title: "Upload Error",
-          description: slotError,
+          title: i18n.t("toasts.documents.uploadError", { ns: "common" }),
+          description: i18n.t("toasts.documents.slotInvalidType", { ns: "common", fileName: file.name }),
           variant: "destructive",
         });
         return null;
@@ -156,8 +159,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
-        title: "Authentication Error",
-        description: "You must be logged in to upload documents.",
+        title: i18n.t("toasts.documents.authError", { ns: "common" }),
+        description: i18n.t("toasts.documents.authErrorDesc", { ns: "common" }),
         variant: "destructive",
       });
       return null;
@@ -171,8 +174,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       console.error("Membership check failed:", membershipError);
     } else if (canApply === false) {
       toast({
-        title: "Membership required",
-        description: "Become a Full Member to upload documents.",
+        title: i18n.t("toasts.documents.membershipRequired", { ns: "common" }),
+        description: i18n.t("toasts.documents.membershipUploadDesc", { ns: "common" }),
         variant: "destructive",
       });
       return null;
@@ -201,8 +204,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       const libraryCount = count ?? rows.length;
       if (!isReplaceableSlot && libraryCount >= MAX_LIBRARY_DOCUMENTS) {
         toast({
-          title: "Document limit reached",
-          description: `You can store up to ${MAX_LIBRARY_DOCUMENTS} documents in your library. Delete one to upload more.`,
+          title: i18n.t("toasts.documents.limitReached", { ns: "common" }),
+          description: i18n.t("toasts.documents.limitReachedDesc", { ns: "common", max: MAX_LIBRARY_DOCUMENTS }),
           variant: "destructive",
         });
         return null;
@@ -314,10 +317,10 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       );
       
       // Show more specific error message
-      const errorMessage = error?.message || error?.error_description || `Failed to upload "${file.name}". Please try again.`;
+      const errorMessage = error?.message || error?.error_description || i18n.t("toasts.documents.uploadFailedDesc", { ns: "common", fileName: file.name });
       
       toast({
-        title: "Upload Failed",
+        title: i18n.t("toasts.documents.uploadFailed", { ns: "common" }),
         description: errorMessage,
         variant: "destructive",
       });
@@ -350,8 +353,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
 
     if (results.length > 0) {
       toast({
-        title: "Upload Complete",
-        description: `${results.length} file(s) uploaded successfully.`,
+        title: i18n.t("toasts.documents.uploadComplete", { ns: "common" }),
+        description: i18n.t("toasts.documents.uploadCompleteDesc", { ns: "common", count: results.length }),
       });
     }
 
@@ -397,16 +400,16 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       setDocuments((prev) => prev.filter((d) => d.id !== document.id));
 
       toast({
-        title: "Document Deleted",
-        description: `"${document.fileName}" has been deleted.`,
+        title: i18n.t("toasts.documents.documentDeleted", { ns: "common" }),
+        description: i18n.t("toasts.documents.documentDeletedDesc", { ns: "common", fileName: document.fileName }),
       });
 
       return true;
     } catch (error) {
       console.error("Delete error:", error);
       toast({
-        title: "Delete Failed",
-        description: `Failed to delete "${document.fileName}". Please try again.`,
+        title: i18n.t("toasts.documents.deleteFailed", { ns: "common" }),
+        description: i18n.t("toasts.documents.deleteFailedDesc", { ns: "common", fileName: document.fileName }),
         variant: "destructive",
       });
       return false;
@@ -449,8 +452,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     } catch (error) {
       console.error("Fetch documents error:", error);
       toast({
-        title: "Error",
-        description: "Failed to load documents. Please try again.",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: i18n.t("toasts.documents.loadFailed", { ns: "common" }),
         variant: "destructive",
       });
       return [];
@@ -520,8 +523,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       );
       if (canApply === false) {
         toast({
-          title: "Membership required",
-          description: "Become a Full Member to attach documents to applications.",
+          title: i18n.t("toasts.documents.membershipRequired", { ns: "common" }),
+          description: i18n.t("toasts.documents.membershipAttachDesc", { ns: "common" }),
           variant: "destructive",
         });
         return null;
@@ -574,16 +577,16 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
       };
 
       toast({
-        title: "Document Linked",
-        description: `"${libraryDoc.file_name}" has been added to your application.`,
+        title: i18n.t("toasts.documents.documentLinked", { ns: "common" }),
+        description: i18n.t("toasts.documents.documentLinkedDesc", { ns: "common", fileName: libraryDoc.file_name }),
       });
 
       return linkedDoc;
     } catch (error: any) {
       console.error("Link library document error:", error);
       toast({
-        title: "Link Failed",
-        description: error?.message || "Failed to link document to application. Please try again.",
+        title: i18n.t("toasts.documents.linkFailed", { ns: "common" }),
+        description: error?.message || i18n.t("toasts.documents.linkFailedDesc", { ns: "common" }),
         variant: "destructive",
       });
       return null;
@@ -629,8 +632,8 @@ export function useDocumentUpload(): UseDocumentUploadReturn {
     } catch (error) {
       console.error("Fetch library documents error:", error);
       toast({
-        title: "Error",
-        description: "Failed to load library documents. Please try again.",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: i18n.t("toasts.documents.loadLibraryFailed", { ns: "common" }),
         variant: "destructive",
       });
       return [];

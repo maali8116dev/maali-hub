@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import {
   useApplicationFormStore,
   type ApplicationFormData,
@@ -50,8 +51,8 @@ export function useApplicantAutofill({
       form.reset(getFormDefaults(merged) as ApplicationFormValues);
 
       toast({
-        title: "Applicant details filled",
-        description: "Empty fields were filled from your profile and past applications.",
+        title: i18n.t("toasts.autofill.filled", { ns: "common" }),
+        description: i18n.t("toasts.autofill.filledDesc", { ns: "common" }),
       });
     };
 

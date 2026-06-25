@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAllSectors } from "@/hooks/useSectors";
 import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 import {
   cmsTranslationFailureMessage,
   invalidateCmsTranslationQueries,
@@ -136,8 +137,8 @@ const SuccessStoryForm = () => {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch success story",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.successStory.fetchOneError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {
@@ -178,8 +179,8 @@ const SuccessStoryForm = () => {
         storyId = updated.id;
 
         toast({
-          title: "Success",
-          description: "Success story updated successfully",
+          title: i18n.t("toasts.success", { ns: "common" }),
+          description: i18n.t("toasts.successStory.updated", { ns: "common" }),
         });
       } else {
         const { data: created, error } = await supabase
@@ -192,8 +193,8 @@ const SuccessStoryForm = () => {
         storyId = created.id;
 
         toast({
-          title: "Success",
-          description: "Success story created successfully",
+          title: i18n.t("toasts.success", { ns: "common" }),
+          description: i18n.t("toasts.successStory.created", { ns: "common" }),
         });
       }
 
@@ -208,8 +209,8 @@ const SuccessStoryForm = () => {
       navigate("/admin/success-stories");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || `Failed to ${isEditing ? "update" : "create"} success story`,
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error.message || i18n.t(isEditing ? "toasts.successStory.updateError" : "toasts.successStory.createError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {

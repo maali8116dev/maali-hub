@@ -2,6 +2,12 @@
   "loading": "Loading...",
   "error": "An error occurred",
   "tryAgain": "Try again",
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "pt": "Português",
+    "de": "Deutsch"
+  },
   "cookieConsent": {
     "title": "We value your privacy",
     "description": "We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking \"Accept All\", you consent to our use of cookies. Read our <privacyLink>Privacy Policy</privacyLink> and <cookieLink>Cookie Policy</cookieLink> for more information.",
@@ -203,7 +209,134 @@
       "deleteError": "Error deleting opportunity",
       "translationFailed": "Translation failed",
       "translationNotConfigured": "Google Translate API key not configured on the server.",
-      "translationNotAuthenticated": "Sign in required to generate translations."
+      "translationNotAuthenticated": "Sign in required to generate translations.",
+      "translationInvokeFailed": "Could not reach the translation service.",
+      "translationUnknownResponse": "Unexpected response from translation service."
+    },
+    "opportunityFiles": {
+      "fileTooLarge": "File too large",
+      "fileTooLargeDesc": "Maximum size is {{maxSizeMB}}MB.",
+      "fileTypeNotAllowed": "File type not allowed",
+      "fileTypeNotAllowedDesc": "Allowed: PDF, Word, Excel, PowerPoint, text, images.",
+      "fileAdded": "File added",
+      "uploadFailed": "Upload failed",
+      "uploadFailedDesc": "Could not upload file.",
+      "fileRemoved": "File removed",
+      "removeFailed": "Remove failed",
+      "removeFailedDesc": "Could not remove file."
+    },
+    "error": "Error",
+    "success": "Success",
+    "documents": {
+      "uploadError": "Upload Error",
+      "authError": "Authentication Error",
+      "authErrorDesc": "You must be logged in to upload documents.",
+      "membershipRequired": "Membership required",
+      "membershipUploadDesc": "Become a Full Member to upload documents.",
+      "membershipAttachDesc": "Become a Full Member to attach documents to applications.",
+      "limitReached": "Document limit reached",
+      "limitReachedDesc": "You can store up to {{max}} documents in your library. Delete one to upload more.",
+      "uploadFailed": "Upload Failed",
+      "uploadFailedDesc": "Failed to upload \"{{fileName}}\". Please try again.",
+      "fileTooLarge": "File \"{{fileName}}\" is too large. Maximum size is 10MB.",
+      "invalidFileType": "File \"{{fileName}}\" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+      "slotInvalidType": "File \"{{fileName}}\" must be PDF, DOC, or DOCX.",
+      "uploadComplete": "Upload Complete",
+      "uploadCompleteDesc": "{{count}} file(s) uploaded successfully.",
+      "documentDeleted": "Document Deleted",
+      "documentDeletedDesc": "\"{{fileName}}\" has been deleted.",
+      "deleteFailed": "Delete Failed",
+      "deleteFailedDesc": "Failed to delete \"{{fileName}}\". Please try again.",
+      "loadFailed": "Failed to load documents. Please try again.",
+      "loadLibraryFailed": "Failed to load library documents. Please try again.",
+      "documentLinked": "Document Linked",
+      "documentLinkedDesc": "\"{{fileName}}\" has been added to your application.",
+      "linkFailed": "Link Failed",
+      "linkFailedDesc": "Failed to link document to application. Please try again.",
+      "noOpportunity": "No opportunity found to associate document with. Please try again after opportunities are available."
+    },
+    "membership": {
+      "resumed": "Membership resumed",
+      "resumedDesc": "Your cancellation has been undone. Your membership will continue to renew automatically.",
+      "cancellationScheduled": "Membership cancellation scheduled",
+      "cancellationScheduledDesc": "Your Full Member access continues until {{endsOn}}. After that you'll be on the Community plan.",
+      "cancellationScheduledFallback": "Your cancellation has been scheduled. You'll keep Full Member access until your billing period ends."
+    },
+    "draft": {
+      "cannotSave": "Cannot save draft",
+      "selectProjectFirst": "Please select a project first",
+      "saved": "Draft saved",
+      "savedDesc": "Your application draft has been saved",
+      "saveFailed": "Failed to save",
+      "saveFailedDesc": "Could not save your draft. Please try again."
+    },
+    "autofill": {
+      "filled": "Applicant details filled",
+      "filledDesc": "Empty fields were filled from your profile and past applications."
+    },
+    "landing": {
+      "alreadyApplied": "Already Applied",
+      "alreadyAppliedDesc": "You already submitted an application for this opportunity. You can view it from your dashboard.",
+      "loginRequired": "Login Required",
+      "loginRequiredDesc": "Please log in or create an account to apply for this opportunity."
+    },
+    "partner": {
+      "fetchError": "Failed to fetch partner",
+      "fetchListError": "Failed to fetch partners",
+      "updated": "Partner updated successfully",
+      "created": "Partner created",
+      "createdDesc": "Partner created successfully.",
+      "createdInviteDesc": "Partner created and invite sent to {{email}}.",
+      "updateError": "Failed to update partner",
+      "createError": "Failed to create partner",
+      "deleted": "Partner deleted successfully",
+      "deleteError": "Failed to delete partner"
+    },
+    "successStory": {
+      "fetchError": "Failed to fetch success stories",
+      "fetchOneError": "Failed to fetch success story",
+      "deleted": "Success story deleted successfully",
+      "deleteError": "Failed to delete success story",
+      "created": "Success story created successfully",
+      "updated": "Success story updated successfully",
+      "createError": "Failed to create success story",
+      "updateError": "Failed to update success story"
+    },
+    "rubric": {
+      "updated": "Rubric Updated",
+      "updatedDesc": "The rubric has been updated successfully. All new reviews will use this rubric.",
+      "saveError": "Error Saving Rubric",
+      "saveErrorDesc": "Failed to save rubric. Please try again.",
+      "validationError": "Validation Error",
+      "validationErrorDesc": "Please ensure all criteria have names before saving."
+    },
+    "review": {
+      "submitted": "Review Submitted",
+      "submittedDesc": "Your review has been submitted successfully.",
+      "submitFailed": "Submission Failed",
+      "submitFailedDesc": "Failed to submit review. Please try again.",
+      "draftSaved": "Draft Saved",
+      "draftSavedDesc": "Your review draft has been saved. You can continue later.",
+      "saveFailed": "Save Failed",
+      "saveFailedDesc": "Failed to save draft. Please try again.",
+      "sectorAddFailed": "Failed to add sector assignment."
+    },
+    "emailVerification": {
+      "resendFailed": "Failed to resend",
+      "sent": "Verification email sent",
+      "sentDesc": "Please check your inbox and spam folder.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "notifications": {
+      "fallbackTitle": "New notification"
+    },
+    "profileSetup": {
+      "validationError": "Validation Error",
+      "step1Incomplete": "Please complete all required fields in Step 1 before continuing.",
+      "incomplete": "Please complete all required fields before submitting.",
+      "updated": "Profile Updated",
+      "updatedDesc": "Your profile has been successfully updated!",
+      "saveFailed": "Failed to save profile. Please try again."
     },
     "cms": {
       "translationNotConfigured": "Google Translate API key not configured on the server.",

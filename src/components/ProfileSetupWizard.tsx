@@ -152,14 +152,14 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
         setCurrentStep(1);
         toast({
           variant: "destructive",
-          title: "Validation Error",
-          description: "Please complete all required fields in Step 1 before continuing.",
+          title: t("toasts.profileSetup.validationError"),
+          description: t("toasts.profileSetup.step1Incomplete"),
         });
       } else {
         toast({
           variant: "destructive",
-          title: "Validation Error",
-          description: "Please complete all required fields before submitting.",
+          title: t("toasts.profileSetup.validationError"),
+          description: t("toasts.profileSetup.incomplete"),
         });
       }
       return;
@@ -181,8 +181,8 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
 
       // Show success message
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated!",
+        title: t("toasts.profileSetup.updated"),
+        description: t("toasts.profileSetup.updatedDesc"),
       });
 
       // Call onComplete callback and close dialog
@@ -195,10 +195,10 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
       console.error("Failed to save profile:", error);
       toast({
         variant: "destructive",
-        title: "Error",
+        title: t("toasts.error"),
         description: error instanceof Error 
           ? error.message 
-          : "Failed to save profile. Please try again.",
+          : t("toasts.profileSetup.saveFailed"),
       });
     }
   };

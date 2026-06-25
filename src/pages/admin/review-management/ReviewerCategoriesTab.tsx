@@ -129,7 +129,7 @@ export const ReviewersectorsTab = ({
     onError: (error: Error) => {
       toast({ 
         title: t(`${rp}.toast.error`), 
-        description: error.message || 'Failed to add sector assignment.',
+        description: error.message || t('toasts.review.sectorAddFailed', { ns: 'common' }),
         variant: 'destructive',
       });
     },

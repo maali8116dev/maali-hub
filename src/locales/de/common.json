@@ -2,6 +2,12 @@
   "loading": "Wird geladen...",
   "error": "Ein Fehler ist aufgetreten",
   "tryAgain": "Erneut versuchen",
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "pt": "Português",
+    "de": "Deutsch"
+  },
   "cookieConsent": {
     "title": "Wir schätzen Ihre Privatsphäre",
     "description": "Wir verwenden Cookies, um Ihr Surferlebnis zu verbessern, den Datenverkehr zu analysieren und Inhalte zu personalisieren. Mit „Alle akzeptieren“ stimmen Sie der Verwendung von Cookies zu. Lesen Sie unsere <privacyLink>Datenschutzerklärung</privacyLink> und <cookieLink>Cookie-Richtlinie</cookieLink> für weitere Informationen.",
@@ -180,7 +186,134 @@
       "deleteError": "Fehler beim Löschen",
       "translationFailed": "Übersetzung fehlgeschlagen",
       "translationNotConfigured": "Google Translate API-Schlüssel auf dem Server nicht konfiguriert.",
-      "translationNotAuthenticated": "Anmeldung erforderlich für Übersetzungen."
+      "translationNotAuthenticated": "Anmeldung erforderlich für Übersetzungen.",
+      "translationInvokeFailed": "Übersetzungsdienst nicht erreichbar.",
+      "translationUnknownResponse": "Unerwartete Antwort vom Übersetzungsdienst."
+    },
+    "opportunityFiles": {
+      "fileTooLarge": "Datei zu groß",
+      "fileTooLargeDesc": "Maximale Größe: {{maxSizeMB}} MB.",
+      "fileTypeNotAllowed": "Dateityp nicht erlaubt",
+      "fileTypeNotAllowedDesc": "Erlaubt: PDF, Word, Excel, PowerPoint, Text, Bilder.",
+      "fileAdded": "Datei hinzugefügt",
+      "uploadFailed": "Upload fehlgeschlagen",
+      "uploadFailedDesc": "Datei konnte nicht hochgeladen werden.",
+      "fileRemoved": "Datei entfernt",
+      "removeFailed": "Entfernen fehlgeschlagen",
+      "removeFailedDesc": "Datei konnte nicht entfernt werden."
+    },
+    "error": "Fehler",
+    "success": "Erfolg",
+    "documents": {
+      "uploadError": "Upload-Fehler",
+      "authError": "Authentifizierungsfehler",
+      "authErrorDesc": "Sie müssen angemeldet sein, um Dokumente hochzuladen.",
+      "membershipRequired": "Mitgliedschaft erforderlich",
+      "membershipUploadDesc": "Werden Sie Vollmitglied, um Dokumente hochzuladen.",
+      "membershipAttachDesc": "Werden Sie Vollmitglied, um Dokumente an Bewerbungen anzuhängen.",
+      "limitReached": "Dokumentlimit erreicht",
+      "limitReachedDesc": "Sie können bis zu {{max}} Dokumente speichern. Löschen Sie eines, um mehr hochzuladen.",
+      "uploadFailed": "Upload fehlgeschlagen",
+      "uploadFailedDesc": "Upload von \"{{fileName}}\" fehlgeschlagen. Bitte erneut versuchen.",
+      "fileTooLarge": "Datei \"{{fileName}}\" ist zu groß. Maximale Größe: 10 MB.",
+      "invalidFileType": "Datei \"{{fileName}}\" hat einen ungültigen Typ. Erlaubt: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+      "slotInvalidType": "Datei \"{{fileName}}\" muss PDF, DOC oder DOCX sein.",
+      "uploadComplete": "Upload abgeschlossen",
+      "uploadCompleteDesc": "{{count}} Datei(en) erfolgreich hochgeladen.",
+      "documentDeleted": "Dokument gelöscht",
+      "documentDeletedDesc": "\"{{fileName}}\" wurde gelöscht.",
+      "deleteFailed": "Löschen fehlgeschlagen",
+      "deleteFailedDesc": "Löschen von \"{{fileName}}\" fehlgeschlagen. Bitte erneut versuchen.",
+      "loadFailed": "Dokumente konnten nicht geladen werden. Bitte erneut versuchen.",
+      "loadLibraryFailed": "Bibliothek konnte nicht geladen werden. Bitte erneut versuchen.",
+      "documentLinked": "Dokument verknüpft",
+      "documentLinkedDesc": "\"{{fileName}}\" wurde Ihrer Bewerbung hinzugefügt.",
+      "linkFailed": "Verknüpfung fehlgeschlagen",
+      "linkFailedDesc": "Dokument konnte nicht mit der Bewerbung verknüpft werden. Bitte erneut versuchen.",
+      "noOpportunity": "Keine Chance zum Verknüpfen gefunden. Bitte später erneut versuchen."
+    },
+    "membership": {
+      "resumed": "Mitgliedschaft fortgesetzt",
+      "resumedDesc": "Ihre Kündigung wurde rückgängig gemacht. Ihre Mitgliedschaft verlängert sich automatisch.",
+      "cancellationScheduled": "Kündigung geplant",
+      "cancellationScheduledDesc": "Ihr Vollmitglied-Zugang läuft bis {{endsOn}}. Danach wechseln Sie zum Community-Plan.",
+      "cancellationScheduledFallback": "Ihre Kündigung ist geplant. Vollmitglied-Zugang bis zum Ende des Abrechnungszeitraums."
+    },
+    "draft": {
+      "cannotSave": "Entwurf kann nicht gespeichert werden",
+      "selectProjectFirst": "Bitte wählen Sie zuerst ein Projekt",
+      "saved": "Entwurf gespeichert",
+      "savedDesc": "Ihr Bewerbungsentwurf wurde gespeichert",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "saveFailedDesc": "Entwurf konnte nicht gespeichert werden. Bitte erneut versuchen."
+    },
+    "autofill": {
+      "filled": "Bewerberdaten ausgefüllt",
+      "filledDesc": "Leere Felder wurden aus Profil und früheren Bewerbungen übernommen."
+    },
+    "landing": {
+      "alreadyApplied": "Bereits beworben",
+      "alreadyAppliedDesc": "Sie haben bereits eine Bewerbung eingereicht. Sehen Sie im Dashboard nach.",
+      "loginRequired": "Anmeldung erforderlich",
+      "loginRequiredDesc": "Melden Sie sich an oder erstellen Sie ein Konto, um sich zu bewerben."
+    },
+    "partner": {
+      "fetchError": "Partner konnte nicht geladen werden",
+      "fetchListError": "Partner konnten nicht geladen werden",
+      "updated": "Partner erfolgreich aktualisiert",
+      "created": "Partner erstellt",
+      "createdDesc": "Partner erfolgreich erstellt.",
+      "createdInviteDesc": "Partner erstellt und Einladung an {{email}} gesendet.",
+      "updateError": "Partner konnte nicht aktualisiert werden",
+      "createError": "Partner konnte nicht erstellt werden",
+      "deleted": "Partner erfolgreich gelöscht",
+      "deleteError": "Partner konnte nicht gelöscht werden"
+    },
+    "successStory": {
+      "fetchError": "Erfolgsgeschichten konnten nicht geladen werden",
+      "fetchOneError": "Erfolgsgeschichte konnte nicht geladen werden",
+      "deleted": "Erfolgsgeschichte erfolgreich gelöscht",
+      "deleteError": "Erfolgsgeschichte konnte nicht gelöscht werden",
+      "created": "Erfolgsgeschichte erfolgreich erstellt",
+      "updated": "Erfolgsgeschichte erfolgreich aktualisiert",
+      "createError": "Erfolgsgeschichte konnte nicht erstellt werden",
+      "updateError": "Erfolgsgeschichte konnte nicht aktualisiert werden"
+    },
+    "rubric": {
+      "updated": "Rubrik aktualisiert",
+      "updatedDesc": "Die Rubrik wurde aktualisiert. Alle neuen Bewertungen nutzen diese Rubrik.",
+      "saveError": "Fehler beim Speichern",
+      "saveErrorDesc": "Rubrik konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "validationError": "Validierungsfehler",
+      "validationErrorDesc": "Stellen Sie sicher, dass alle Kriterien einen Namen haben."
+    },
+    "review": {
+      "submitted": "Bewertung eingereicht",
+      "submittedDesc": "Ihre Bewertung wurde erfolgreich eingereicht.",
+      "submitFailed": "Einreichung fehlgeschlagen",
+      "submitFailedDesc": "Bewertung konnte nicht eingereicht werden. Bitte erneut versuchen.",
+      "draftSaved": "Entwurf gespeichert",
+      "draftSavedDesc": "Ihr Bewertungsentwurf wurde gespeichert. Sie können später fortfahren.",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "saveFailedDesc": "Entwurf konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "sectorAddFailed": "Sektorzuweisung konnte nicht hinzugefügt werden."
+    },
+    "emailVerification": {
+      "resendFailed": "Erneutes Senden fehlgeschlagen",
+      "sent": "Bestätigungs-E-Mail gesendet",
+      "sentDesc": "Prüfen Sie Posteingang und Spam-Ordner.",
+      "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen."
+    },
+    "notifications": {
+      "fallbackTitle": "Neue Benachrichtigung"
+    },
+    "profileSetup": {
+      "validationError": "Validierungsfehler",
+      "step1Incomplete": "Bitte füllen Sie alle Pflichtfelder in Schritt 1 aus.",
+      "incomplete": "Bitte füllen Sie alle Pflichtfelder vor dem Absenden aus.",
+      "updated": "Profil aktualisiert",
+      "updatedDesc": "Ihr Profil wurde erfolgreich aktualisiert!",
+      "saveFailed": "Profil konnte nicht gespeichert werden. Bitte erneut versuchen."
     },
     "sector": {
       "created": "Sektor erstellt",

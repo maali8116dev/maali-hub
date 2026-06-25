@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import i18n from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -100,15 +101,15 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-rubric'] });
       toast({ 
-        title: 'Rubric Updated', 
-        description: 'The rubric has been updated successfully. All new reviews will use this rubric.' 
+        title: i18n.t('toasts.rubric.updated', { ns: 'common' }), 
+        description: i18n.t('toasts.rubric.updatedDesc', { ns: 'common' }),
       });
       onSuccess?.();
     },
     onError: (error: Error) => {
       toast({ 
-        title: 'Error Saving Rubric', 
-        description: error.message || 'Failed to save rubric. Please try again.',
+        title: i18n.t('toasts.rubric.saveError', { ns: 'common' }), 
+        description: error.message || i18n.t('toasts.rubric.saveErrorDesc', { ns: 'common' }),
         variant: 'destructive'
       });
     },
@@ -124,8 +125,8 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
           saveRubric.mutate();
         } else {
           toast({ 
-            title: 'Validation Error', 
-            description: 'Please ensure all criteria have names before saving.',
+            title: i18n.t('toasts.rubric.validationError', { ns: 'common' }), 
+            description: i18n.t('toasts.rubric.validationErrorDesc', { ns: 'common' }),
             variant: 'destructive'
           });
         }

@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 type SuccessStory = {
   id: number;
@@ -66,8 +67,8 @@ const AdminSuccessStories = () => {
       setStories(data || []);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch success stories",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.successStory.fetchError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {
@@ -98,8 +99,8 @@ const AdminSuccessStories = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Success story deleted successfully",
+        title: i18n.t("toasts.success", { ns: "common" }),
+        description: i18n.t("toasts.successStory.deleted", { ns: "common" }),
       });
 
       setStories(stories.filter((s) => s.id !== storyToDelete));
@@ -107,8 +108,8 @@ const AdminSuccessStories = () => {
       setStoryToDelete(null);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete success story",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: error.message || i18n.t("toasts.successStory.deleteError", { ns: "common" }),
         variant: "destructive",
       });
     }

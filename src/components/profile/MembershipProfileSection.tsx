@@ -16,6 +16,7 @@ import {
 import { useMembership, useInvalidateMembership } from "@/hooks/useMembership";
 import { formatDate } from "@/lib/dateUtils";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import { invokeWithAuth } from "@/lib/invokeWithAuth";
 import { PAYSTACK_CURRENCIES } from "@/lib/paymentProvider";
 import { Zap, Users, Loader2, Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
@@ -129,12 +130,12 @@ export function MembershipProfileSection() {
     const { error } = await invokeWithAuth("resume-membership");
     setResuming(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: i18n.t("toasts.error", { ns: "common" }), description: error.message, variant: "destructive" });
     } else {
       invalidateMembership();
       toast({
-        title: "Membership resumed",
-        description: "Your cancellation has been undone. Your membership will continue to renew automatically.",
+        title: i18n.t("toasts.membership.resumed", { ns: "common" }),
+        description: i18n.t("toasts.membership.resumedDesc", { ns: "common" }),
       });
     }
   };
@@ -145,17 +146,17 @@ export function MembershipProfileSection() {
     setCancelling(false);
     setShowCancelDialog(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: i18n.t("toasts.error", { ns: "common" }), description: error.message, variant: "destructive" });
     } else {
       invalidateMembership();
       const endsOn = membership?.expires_at
         ? formatDate(membership.expires_at, "short")
         : null;
       toast({
-        title: "Membership cancellation scheduled",
+        title: i18n.t("toasts.membership.cancellationScheduled", { ns: "common" }),
         description: endsOn
-          ? `Your Full Member access continues until ${endsOn}. After that you'll be on the Community plan.`
-          : "Your cancellation has been scheduled. You'll keep Full Member access until your billing period ends.",
+          ? i18n.t("toasts.membership.cancellationScheduledDesc", { ns: "common", endsOn })
+          : i18n.t("toasts.membership.cancellationScheduledFallback", { ns: "common" }),
       });
     }
   };

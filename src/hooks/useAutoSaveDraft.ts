@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import { ApplicationFormData } from "@/stores/applicationForm";
 
 interface UseAutoSaveDraftOptions {
@@ -31,8 +32,8 @@ export const useAutoSaveDraft = ({
     // Don't save if no project is selected or no meaningful data
     if (!formData.projectId) {
       toast({
-        title: "Cannot save draft",
-        description: "Please select a project first",
+        title: i18n.t("toasts.draft.cannotSave", { ns: "common" }),
+        description: i18n.t("toasts.draft.selectProjectFirst", { ns: "common" }),
         variant: "destructive",
       });
       return;
@@ -159,8 +160,8 @@ export const useAutoSaveDraft = ({
       onSaved();
       
       toast({
-        title: "Draft saved",
-        description: "Your application draft has been saved",
+        title: i18n.t("toasts.draft.saved", { ns: "common" }),
+        description: i18n.t("toasts.draft.savedDesc", { ns: "common" }),
       });
       
     } catch (error) {
@@ -171,8 +172,8 @@ export const useAutoSaveDraft = ({
         error: "Failed to save draft",
       }));
       toast({
-        title: "Failed to save",
-        description: "Could not save your draft. Please try again.",
+        title: i18n.t("toasts.draft.saveFailed", { ns: "common" }),
+        description: i18n.t("toasts.draft.saveFailedDesc", { ns: "common" }),
         variant: "destructive",
       });
     }

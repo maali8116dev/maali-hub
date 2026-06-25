@@ -3,6 +3,7 @@ import { AlertTriangle, X, Mail, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 
 interface EmailVerificationBannerProps {
   email: string;
@@ -27,20 +28,20 @@ const EmailVerificationBanner = ({ email, onDismiss }: EmailVerificationBannerPr
 
       if (error) {
         toast({
-          title: "Failed to resend",
+          title: i18n.t("toasts.emailVerification.resendFailed", { ns: "common" }),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Verification email sent",
-          description: "Please check your inbox and spam folder.",
+          title: i18n.t("toasts.emailVerification.sent", { ns: "common" }),
+          description: i18n.t("toasts.emailVerification.sentDesc", { ns: "common" }),
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: i18n.t("toasts.error", { ns: "common" }),
+        description: i18n.t("toasts.emailVerification.unexpectedError", { ns: "common" }),
         variant: "destructive",
       });
     } finally {

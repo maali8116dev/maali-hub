@@ -2,6 +2,12 @@
   "loading": "Chargement...",
   "error": "Une erreur s'est produite",
   "tryAgain": "Réessayer",
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "pt": "Português",
+    "de": "Deutsch"
+  },
   "cookieConsent": {
     "title": "Nous respectons votre vie privée",
     "description": "Nous utilisons des cookies pour améliorer votre expérience de navigation, analyser le trafic du site et personnaliser le contenu. En cliquant sur \"Tout accepter\", vous acceptez notre utilisation des cookies. Lisez notre <privacyLink>Politique de confidentialité</privacyLink> et <cookieLink>Politique des cookies</cookieLink> pour plus d'informations.",
@@ -285,7 +291,134 @@
       "deleteError": "Erreur lors de la suppression",
       "translationFailed": "Échec de la traduction",
       "translationNotConfigured": "Clé API Google Translate non configurée sur le serveur.",
-      "translationNotAuthenticated": "Connexion requise pour générer les traductions."
+      "translationNotAuthenticated": "Connexion requise pour générer les traductions.",
+      "translationInvokeFailed": "Impossible de joindre le service de traduction.",
+      "translationUnknownResponse": "Réponse inattendue du service de traduction."
+    },
+    "opportunityFiles": {
+      "fileTooLarge": "Fichier trop volumineux",
+      "fileTooLargeDesc": "Taille maximale : {{maxSizeMB}} Mo.",
+      "fileTypeNotAllowed": "Type de fichier non autorisé",
+      "fileTypeNotAllowedDesc": "Autorisés : PDF, Word, Excel, PowerPoint, texte, images.",
+      "fileAdded": "Fichier ajouté",
+      "uploadFailed": "Échec du téléversement",
+      "uploadFailedDesc": "Impossible de téléverser le fichier.",
+      "fileRemoved": "Fichier supprimé",
+      "removeFailed": "Échec de la suppression",
+      "removeFailedDesc": "Impossible de supprimer le fichier."
+    },
+    "error": "Erreur",
+    "success": "Succès",
+    "documents": {
+      "uploadError": "Erreur de téléversement",
+      "authError": "Erreur d'authentification",
+      "authErrorDesc": "Vous devez être connecté pour téléverser des documents.",
+      "membershipRequired": "Adhésion requise",
+      "membershipUploadDesc": "Devenez membre complet pour téléverser des documents.",
+      "membershipAttachDesc": "Devenez membre complet pour joindre des documents aux candidatures.",
+      "limitReached": "Limite de documents atteinte",
+      "limitReachedDesc": "Vous pouvez stocker jusqu'à {{max}} documents. Supprimez-en un pour en ajouter.",
+      "uploadFailed": "Échec du téléversement",
+      "uploadFailedDesc": "Échec du téléversement de « {{fileName}} ». Veuillez réessayer.",
+      "fileTooLarge": "Le fichier « {{fileName}} » est trop volumineux. Taille maximale : 10 Mo.",
+      "invalidFileType": "Le fichier « {{fileName}} » a un type non valide. Types autorisés : PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+      "slotInvalidType": "Le fichier « {{fileName}} » doit être au format PDF, DOC ou DOCX.",
+      "uploadComplete": "Téléversement terminé",
+      "uploadCompleteDesc": "{{count}} fichier(s) téléversé(s) avec succès.",
+      "documentDeleted": "Document supprimé",
+      "documentDeletedDesc": "« {{fileName}} » a été supprimé.",
+      "deleteFailed": "Échec de la suppression",
+      "deleteFailedDesc": "Échec de la suppression de « {{fileName}} ». Veuillez réessayer.",
+      "loadFailed": "Échec du chargement des documents. Veuillez réessayer.",
+      "loadLibraryFailed": "Échec du chargement de la bibliothèque. Veuillez réessayer.",
+      "documentLinked": "Document lié",
+      "documentLinkedDesc": "« {{fileName}} » a été ajouté à votre candidature.",
+      "linkFailed": "Échec de la liaison",
+      "linkFailedDesc": "Impossible de lier le document à la candidature. Veuillez réessayer.",
+      "noOpportunity": "Aucune opportunité trouvée pour associer le document. Réessayez plus tard."
+    },
+    "membership": {
+      "resumed": "Adhésion reprise",
+      "resumedDesc": "Votre annulation a été annulée. Votre adhésion continuera à se renouveler automatiquement.",
+      "cancellationScheduled": "Annulation d'adhésion programmée",
+      "cancellationScheduledDesc": "Votre accès membre complet continue jusqu'au {{endsOn}}. Ensuite, vous passerez au plan Communauté.",
+      "cancellationScheduledFallback": "Votre annulation est programmée. Vous conservez l'accès membre complet jusqu'à la fin de la période de facturation."
+    },
+    "draft": {
+      "cannotSave": "Impossible d'enregistrer le brouillon",
+      "selectProjectFirst": "Veuillez d'abord sélectionner un projet",
+      "saved": "Brouillon enregistré",
+      "savedDesc": "Votre brouillon de candidature a été enregistré",
+      "saveFailed": "Échec de l'enregistrement",
+      "saveFailedDesc": "Impossible d'enregistrer votre brouillon. Veuillez réessayer."
+    },
+    "autofill": {
+      "filled": "Détails du candidat remplis",
+      "filledDesc": "Les champs vides ont été remplis à partir de votre profil et de vos candidatures passées."
+    },
+    "landing": {
+      "alreadyApplied": "Déjà candidaté",
+      "alreadyAppliedDesc": "Vous avez déjà soumis une candidature pour cette opportunité. Consultez votre tableau de bord.",
+      "loginRequired": "Connexion requise",
+      "loginRequiredDesc": "Connectez-vous ou créez un compte pour postuler à cette opportunité."
+    },
+    "partner": {
+      "fetchError": "Échec du chargement du partenaire",
+      "fetchListError": "Échec du chargement des partenaires",
+      "updated": "Partenaire mis à jour avec succès",
+      "created": "Partenaire créé",
+      "createdDesc": "Partenaire créé avec succès.",
+      "createdInviteDesc": "Partenaire créé et invitation envoyée à {{email}}.",
+      "updateError": "Échec de la mise à jour du partenaire",
+      "createError": "Échec de la création du partenaire",
+      "deleted": "Partenaire supprimé avec succès",
+      "deleteError": "Échec de la suppression du partenaire"
+    },
+    "successStory": {
+      "fetchError": "Échec du chargement des success stories",
+      "fetchOneError": "Échec du chargement de la success story",
+      "deleted": "Success story supprimée avec succès",
+      "deleteError": "Échec de la suppression de la success story",
+      "created": "Success story créée avec succès",
+      "updated": "Success story mise à jour avec succès",
+      "createError": "Échec de la création de la success story",
+      "updateError": "Échec de la mise à jour de la success story"
+    },
+    "rubric": {
+      "updated": "Grille mise à jour",
+      "updatedDesc": "La grille a été mise à jour. Toutes les nouvelles évaluations utiliseront cette grille.",
+      "saveError": "Erreur lors de l'enregistrement",
+      "saveErrorDesc": "Échec de l'enregistrement de la grille. Veuillez réessayer.",
+      "validationError": "Erreur de validation",
+      "validationErrorDesc": "Assurez-vous que tous les critères ont un nom avant d'enregistrer."
+    },
+    "review": {
+      "submitted": "Évaluation soumise",
+      "submittedDesc": "Votre évaluation a été soumise avec succès.",
+      "submitFailed": "Échec de la soumission",
+      "submitFailedDesc": "Échec de la soumission de l'évaluation. Veuillez réessayer.",
+      "draftSaved": "Brouillon enregistré",
+      "draftSavedDesc": "Votre brouillon d'évaluation a été enregistré. Vous pouvez continuer plus tard.",
+      "saveFailed": "Échec de l'enregistrement",
+      "saveFailedDesc": "Échec de l'enregistrement du brouillon. Veuillez réessayer.",
+      "sectorAddFailed": "Échec de l'ajout du secteur."
+    },
+    "emailVerification": {
+      "resendFailed": "Échec du renvoi",
+      "sent": "E-mail de vérification envoyé",
+      "sentDesc": "Vérifiez votre boîte de réception et vos spams.",
+      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer."
+    },
+    "notifications": {
+      "fallbackTitle": "Nouvelle notification"
+    },
+    "profileSetup": {
+      "validationError": "Erreur de validation",
+      "step1Incomplete": "Veuillez remplir tous les champs obligatoires de l'étape 1.",
+      "incomplete": "Veuillez remplir tous les champs obligatoires avant de soumettre.",
+      "updated": "Profil mis à jour",
+      "updatedDesc": "Votre profil a été mis à jour avec succès !",
+      "saveFailed": "Échec de l'enregistrement du profil. Veuillez réessayer."
     },
     "sector": {
       "created": "Secteur créé",

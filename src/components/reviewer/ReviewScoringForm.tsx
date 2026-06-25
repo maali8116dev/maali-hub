@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { useSaveReviewDraft, useSubmitReview, useSystemRubric } from '@/hooks/useReviewerAssignment';
 import { useToast } from '@/hooks/use-toast';
+import i18n from '@/lib/i18n';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
@@ -181,8 +182,8 @@ const ReviewScoringForm = ({
           await queryClient.invalidateQueries({ queryKey: ['review-score', applicationId, reviewerId] });
           
           toast({
-            title: 'Review Submitted',
-            description: 'Your review has been submitted successfully.',
+            title: i18n.t('toasts.review.submitted', { ns: 'common' }),
+            description: i18n.t('toasts.review.submittedDesc', { ns: 'common' }),
           });
           onSuccess?.();
         },
@@ -190,8 +191,8 @@ const ReviewScoringForm = ({
           // Reset submitted state on error
           setIsSubmitted(false);
           toast({
-            title: 'Submission Failed',
-            description: error.message || 'Failed to submit review. Please try again.',
+            title: i18n.t('toasts.review.submitFailed', { ns: 'common' }),
+            description: error.message || i18n.t('toasts.review.submitFailedDesc', { ns: 'common' }),
             variant: 'destructive',
           });
         },
@@ -219,14 +220,14 @@ const ReviewScoringForm = ({
           queryClient.setQueryData(['review-score', applicationId, reviewerId], savedDraft);
           await queryClient.invalidateQueries({ queryKey: ['review-score', applicationId, reviewerId] });
           toast({
-            title: 'Draft Saved',
-            description: 'Your review draft has been saved. You can continue later.',
+            title: i18n.t('toasts.review.draftSaved', { ns: 'common' }),
+            description: i18n.t('toasts.review.draftSavedDesc', { ns: 'common' }),
           });
         },
         onError: (error: any) => {
           toast({
-            title: 'Save Failed',
-            description: error.message || 'Failed to save draft. Please try again.',
+            title: i18n.t('toasts.review.saveFailed', { ns: 'common' }),
+            description: error.message || i18n.t('toasts.review.saveFailedDesc', { ns: 'common' }),
             variant: 'destructive',
           });
         },

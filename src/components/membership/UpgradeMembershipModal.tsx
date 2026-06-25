@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useInvalidateMembership } from "@/hooks/useMembership";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 import { MembershipPaymentStep } from "@/components/membership/MembershipPaymentStep";
 import {
   getDefaultPaystackCurrency,
@@ -94,9 +95,8 @@ export function UpgradeMembershipModal({
     setActivating(false);
     invalidateMembership();
     toast({
-      title: "Payment received — activation pending",
-      description:
-        "Your payment went through but confirmation is still processing. Refresh in a minute, or contact support if this persists.",
+      title: i18n.t("onboarding.toasts.activationPending.title", { ns: "common" }),
+      description: i18n.t("onboarding.toasts.activationPending.description", { ns: "common" }),
     });
     onClose();
   };

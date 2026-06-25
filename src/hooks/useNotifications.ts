@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "@/hooks/use-toast";
+import i18n from "@/lib/i18n";
 
 export interface Notification {
   id: string;
@@ -198,7 +199,7 @@ export const useNotifications = () => {
             const newNotification: any = payload.new;
 
             toast({
-              title: newNotification.title || "New notification",
+              title: newNotification.title || i18n.t("toasts.notifications.fallbackTitle", { ns: "common" }),
               description: newNotification.message,
             });
           }
