@@ -12,15 +12,21 @@ for (const name of fs.readdirSync(src)) {
 
 const heroSrc = path.join(root, "src", "assets", "hero-agriculture.webp");
 const heroDestDir = path.join(root, "public", "images");
-const heroDest = path.join(heroDestDir, "hero-agriculture.webp");
+  const heroDest = path.join(heroDestDir, "hero-agriculture.webp");
 if (fs.existsSync(heroSrc)) {
   fs.mkdirSync(heroDestDir, { recursive: true });
   fs.copyFileSync(heroSrc, heroDest);
 }
 
 const logoSrc = path.join(root, "src", "assets", "logo.webp");
-const logoDest = path.join(heroDestDir, "logo.webp");
+const logoWebpDest = path.join(heroDestDir, "logo.webp");
+const logoPngDest = path.join(heroDestDir, "logo.png");
+const emailPngSrc = path.join(root, "supabase", "functions", "_shared", "assets", "email-logo.png");
 if (fs.existsSync(logoSrc)) {
   fs.mkdirSync(heroDestDir, { recursive: true });
-  fs.copyFileSync(logoSrc, logoDest);
+  fs.copyFileSync(logoSrc, logoWebpDest);
+}
+if (fs.existsSync(emailPngSrc)) {
+  fs.mkdirSync(heroDestDir, { recursive: true });
+  fs.copyFileSync(emailPngSrc, logoPngDest);
 }

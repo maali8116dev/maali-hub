@@ -48,7 +48,7 @@ supabase/migrations_backup/**
 # Scripts (utility scripts, not part of the codebase)
 scripts/split_migrations.py
 
-images/
+/images/
 
 maali migration doc.pdf
 maali-migration.pdf

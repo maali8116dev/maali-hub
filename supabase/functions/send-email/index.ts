@@ -10,6 +10,7 @@ import {
   resolveEmailLocale,
   type EmailLocale,
 } from "../_shared/email-i18n.ts";
+import { EMAIL_LOGO_ATTACHMENT, EMAIL_LOGO_IMG_HTML, getSiteBaseUrl } from "../_shared/emailBrand.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -124,8 +125,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
   const submissionId = data.submissionId ? escapeHtml(data.submissionId) : undefined;
   
   // Base URL for logo and links
-  const baseUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
-  const logoUrl = `${baseUrl}/static/maali-logo.png`; // Update with your actual logo path
+  const baseUrl = getSiteBaseUrl();
   
   // Primary gradient colors (Terra Cotta to Golden Orange)
   // hsl(15 75% 45%) = #C85A2E, hsl(35 85% 55%) = #F5A623
@@ -406,7 +406,7 @@ const getEmailContent = (type: EmailType, data: SendEmailRequest["data"]): { sub
       <div class="container">
         <div class="email-section">
           <div class="header">
-            <img src="${logoUrl}" alt="Maali Logo" width="75" height="45" />
+            ${EMAIL_LOGO_IMG_HTML}
           </div>
           <div class="content">
             <h1>${title}</h1>
@@ -1174,6 +1174,7 @@ const handler = async (req: Request): Promise<Response> => {
       to: [recipientEmail],
       subject,
       html,
+      attachments: [EMAIL_LOGO_ATTACHMENT],
     };
 
     // Add PDF attachment if available
@@ -1224,13 +1225,11 @@ const handler = async (req: Request): Promise<Response> => {
             // Extract filename from path
             const fileName = filePath.split('/').pop() || `receipt-${emailData.transactionId || 'receipt'}.pdf`;
             
-            emailPayload.attachments = [
-              {
-                filename: fileName,
-                content: pdfBase64,
-                content_type: "application/pdf",
-              },
-            ];
+            emailPayload.attachments.push({
+              filename: fileName,
+              content: pdfBase64,
+              content_type: "application/pdf",
+            });
             
             console.log(`[send-email] PDF attachment added successfully: ${fileName} (${pdfArrayBuffer.byteLength} bytes)`);
           } else {

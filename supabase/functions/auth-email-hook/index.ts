@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
+import { EMAIL_LOGO_ATTACHMENT, EMAIL_LOGO_IMG_HTML, getSiteBaseUrl } from "../_shared/emailBrand.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -25,8 +26,7 @@ interface AuthHookPayload {
 }
 
 // Base URL for logo and links
-const baseUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
-const logoUrl = `${baseUrl}/static/maali-logo.png`; // Update with your actual logo path
+const baseUrl = getSiteBaseUrl();
 
 // Primary gradient colors (Terra Cotta to Golden Orange)
 // hsl(15 75% 45%) = #C85A2E, hsl(35 85% 55%) = #F5A623
@@ -131,7 +131,7 @@ const emailTemplate = (title: string, content: string) => `
     <div class="container">
       <div class="email-section">
         <div class="header">
-          <img src="${logoUrl}" alt="Maali Logo" width="75" height="45" />
+          ${EMAIL_LOGO_IMG_HTML}
         </div>
         <div class="content">
           <h1>${title}</h1>
@@ -368,6 +368,7 @@ const handler = async (req: Request): Promise<Response> => {
       to: [sanitizedEmail], // Use sanitized email
       subject,
       html,
+      attachments: [EMAIL_LOGO_ATTACHMENT],
     });
 
     console.log(`Email sent successfully for ${email_action_type}:`, emailResponse);

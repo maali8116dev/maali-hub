@@ -198,7 +198,7 @@ function getDesignSystemColors() {
 async function tryEmbedLogo(pdfDoc: PDFDocument) {
   const explicitLogoUrl = Deno.env.get("RECEIPT_LOGO_URL");
   const siteUrl = (Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app").replace(/\/+$/, "");
-  const publicLogoPath = Deno.env.get("RECEIPT_LOGO_PATH") || "/maali-logo.png";
+  const publicLogoPath = Deno.env.get("RECEIPT_LOGO_PATH") || "/images/logo.png";
   const logoUrl = explicitLogoUrl || `${siteUrl}${publicLogoPath.startsWith("/") ? "" : "/"}${publicLogoPath}`;
 
   if (!logoUrl) return null;
