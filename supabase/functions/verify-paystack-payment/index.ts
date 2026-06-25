@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest, getCorsHeaders, jsonResponse } from "../_shared/auth.ts";
-import { paystackRequest } from "../_shared/paystackApi.ts";
+import { resolvePaystackSubscription, paystackRequest } from "../_shared/paystackApi.ts";
+import { getPaystackPlanCode } from "../_shared/paymentProvider.ts";
 import { activateMembership, supabaseAdmin } from "../_shared/activateMembership.ts";
 
 type PaystackVerifyResponse = {
@@ -15,6 +16,7 @@ type PaystackVerifyResponse = {
     metadata?: { userId?: string };
     plan_object?: { plan_code?: string };
     subscription_code?: string;
+    subscription?: { subscription_code?: string };
   };
 };
 
@@ -71,13 +73,31 @@ serve(async (req) => {
       return jsonResponse(req, 403, { error: "Reference does not belong to this account." });
     }
 
+    const customerCode = tx.customer?.customer_code ?? null;
+    const currency = (tx.currency ?? "NGN").toUpperCase();
+    const planCode = getPaystackPlanCode(currency as "NGN" | "GHS" | "KES" | "ZAR");
+    let subscriptionCode =
+      tx.subscription_code ?? tx.subscription?.subscription_code ?? null;
+    let emailToken: string | null = null;
+    if (!subscriptionCode) {
+      const resolved = await resolvePaystackSubscription({
+        customerCode,
+        email: auth.user.email ?? null,
+        paymentRef: tx.reference,
+        planCode,
+      });
+      subscriptionCode = resolved.subscriptionCode;
+      emailToken = resolved.emailToken;
+    }
+
     const activated = await activateMembership({
       userId: auth.user.id,
       provider: "paystack",
       providerPaymentRef: tx.reference,
-      providerCustomerId: tx.customer?.customer_code ?? null,
-      providerSubscriptionId: tx.subscription_code ?? null,
-      billingCurrency: (tx.currency ?? "NGN").toUpperCase(),
+      providerCustomerId: customerCode,
+      providerSubscriptionId: subscriptionCode,
+      paystackEmailToken: emailToken,
+      billingCurrency: currency,
       amountMajor: Number(tx.amount ?? 0) / 100,
       amountSubunits: Number(tx.amount ?? 0),
     });

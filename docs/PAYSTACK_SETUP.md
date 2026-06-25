@@ -45,5 +45,5 @@ Applies `20260622100000_payment_provider_paystack.sql`.
 
 - Join/Onboarding/Upgrade → pick Paystack + NGN → popup → `payment_provider = paystack`
 - Pick Stripe → Elements → `payment_provider = stripe`
-- Billing shows locked provider; Paystack members get manage link
+- Billing shows locked provider; cancel/resume in-app for Paystack
 - Existing Stripe rows backfilled via migration

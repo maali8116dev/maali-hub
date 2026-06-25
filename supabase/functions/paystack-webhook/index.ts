@@ -165,8 +165,6 @@ async function handleSubscriptionCreate(data: Record<string, unknown>) {
     .maybeSingle();
 
   if (!membership) {
-    // charge.success (which sets provider_customer_id) may not have landed yet.
-    // Throw so the event is marked failed and Paystack re-delivers it.
     throw new Error(`subscription.create — no membership for sub ${subCode} yet; will retry`);
   }
 

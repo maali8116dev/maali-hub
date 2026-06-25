@@ -114,7 +114,6 @@ export function MembershipProfileSection() {
   const [cancelling, setCancelling] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [openingManage, setOpeningManage] = useState(false);
 
   const paymentProvider = membership?.payment_provider ?? null;
   const billingCurrency = membership?.billing_currency ?? "USD";
@@ -138,23 +137,6 @@ export function MembershipProfileSection() {
         description: "Your cancellation has been undone. Your membership will continue to renew automatically.",
       });
     }
-  };
-
-  const handleManagePaystack = async () => {
-    setOpeningManage(true);
-    const { data, error } = await invokeWithAuth<{ url?: string; error?: string }>(
-      "create-paystack-manage-link",
-    );
-    setOpeningManage(false);
-    if (error || !data?.url) {
-      toast({
-        title: "Error",
-        description: data?.error ?? error?.message ?? "Could not open Paystack manage link.",
-        variant: "destructive",
-      });
-      return;
-    }
-    window.open(data.url, "_blank", "noopener,noreferrer");
   };
 
   const handleCancelMembership = async () => {
@@ -295,15 +277,6 @@ export function MembershipProfileSection() {
                 : status === "pending_payment"
                   ? "Complete payment"
                   : "Upgrade to Full Member"}
-            </Button>
-          )}
-          {isPaidMember && paymentProvider === "paystack" && (
-            <Button variant="outline" onClick={handleManagePaystack} disabled={openingManage}>
-              {openingManage ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening…</>
-              ) : (
-                "Manage Paystack billing"
-              )}
             </Button>
           )}
           {isPaidMember && !cancelAtPeriodEnd && (

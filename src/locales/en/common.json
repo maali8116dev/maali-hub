@@ -166,7 +166,6 @@
     "open": "Open for applications",
     "closed": "Closed for applications"
   },
-  },
   "payment": {
     "provider": {
       "chooseLabel": "How would you like to pay?",

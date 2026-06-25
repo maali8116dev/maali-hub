@@ -76,13 +76,31 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
   let existing = membershipId
     ? await supabaseAdmin
         .from("memberships")
-        .select("id, status, tier")
+        .select(
+          "id, status, tier, provider_customer_id, provider_subscription_id, paystack_email_token",
+        )
         .eq("id", membershipId)
         .maybeSingle()
         .then((r) => r.data)
     : await findMembershipByPaymentRef(providerPaymentRef, userId);
 
   if (existing?.status === "active" && existing.tier === "member") {
+    if (provider === "paystack") {
+      const backfill: Record<string, string> = {};
+      if (providerCustomerId && !existing.provider_customer_id) {
+        backfill.provider_customer_id = providerCustomerId;
+      }
+      if (providerSubscriptionId && !existing.provider_subscription_id) {
+        backfill.provider_subscription_id = providerSubscriptionId;
+      }
+      if (paystackEmailToken && !existing.paystack_email_token) {
+        backfill.paystack_email_token = paystackEmailToken;
+      }
+      if (Object.keys(backfill).length > 0) {
+        backfill.updated_at = new Date().toISOString();
+        await supabaseAdmin.from("memberships").update(backfill).eq("id", existing.id);
+      }
+    }
     console.log(`[activateMembership] already active for ${providerPaymentRef}`);
     return true;
   }

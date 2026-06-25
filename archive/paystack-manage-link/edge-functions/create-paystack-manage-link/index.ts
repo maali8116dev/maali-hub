@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
-import { paystackRequest } from "../_shared/paystackApi.ts";
+import { resolvePaystackSubscription, paystackRequest } from "../_shared/paystackApi.ts";
+import { getPaystackPlanCode, parsePaystackCurrency } from "../_shared/paymentProvider.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -33,7 +34,9 @@ serve(async (req) => {
 
   const { data: membership } = await supabaseAdmin
     .from("memberships")
-    .select("provider_subscription_id, payment_provider")
+    .select(
+      "id, provider_subscription_id, provider_customer_id, provider_payment_ref, billing_currency, payment_provider, paystack_email_token",
+    )
     .eq("user_id", auth.user.id)
     .eq("tier", "member")
     .in("status", ["active", "pending_payment"])
@@ -41,13 +44,51 @@ serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  if (membership?.payment_provider !== "paystack" || !membership.provider_subscription_id) {
+  if (membership?.payment_provider !== "paystack") {
     return jsonResponse(req, 400, { error: "No Paystack subscription found for this account." });
   }
 
-  const subCode = membership.provider_subscription_id;
+  const currency = parsePaystackCurrency(membership.billing_currency);
+  const planCode = currency ? getPaystackPlanCode(currency) : null;
+
+  let subCode = membership.provider_subscription_id?.startsWith("SUB_")
+    ? membership.provider_subscription_id
+    : null;
+
+  if (!subCode) {
+    const resolved = await resolvePaystackSubscription({
+      customerCode: membership.provider_customer_id,
+      email: auth.user.email ?? null,
+      paymentRef: membership.provider_payment_ref,
+      planCode,
+    });
+    subCode = resolved.subscriptionCode;
+
+    if (membership.id && (subCode || resolved.customerCode || resolved.emailToken)) {
+      await supabaseAdmin
+        .from("memberships")
+        .update({
+          ...(subCode ? { provider_subscription_id: subCode } : {}),
+          ...(resolved.customerCode && !membership.provider_customer_id
+            ? { provider_customer_id: resolved.customerCode }
+            : {}),
+          ...(resolved.emailToken && !membership.paystack_email_token
+            ? { paystack_email_token: resolved.emailToken }
+            : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", membership.id);
+    }
+  }
+
+  if (!subCode) {
+    return jsonResponse(req, 400, {
+      error: "Could not find your Paystack subscription. Contact support if this persists.",
+    });
+  }
+
   const res = await paystackRequest<ManageLinkResponse>(
-    `/subscription/${encodeURIComponent(subCode)}/manage/link`,
+    `/subscription/${encodeURIComponent(subCode)}/manage/link/`,
     { method: "GET" },
   );
 

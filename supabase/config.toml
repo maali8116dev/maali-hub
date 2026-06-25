@@ -76,9 +76,6 @@ verify_jwt = false
 [functions.verify-paystack-payment]
 verify_jwt = false
 
-[functions.create-paystack-manage-link]
-verify_jwt = false
-
 [functions.paystack-webhook]
 verify_jwt = false
 
