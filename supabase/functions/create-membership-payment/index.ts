@@ -5,6 +5,7 @@ import Stripe from "https://esm.sh/stripe@14?target=deno";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { authenticateRequest, getCorsHeaders, jsonResponse } from "../_shared/auth.ts";
+import { activateMembership as activateMembershipShared } from "../_shared/activateMembership.ts";
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // Set STRIPE_MEMBER_PRICE_ID in Supabase secrets to your recurring $2/month
@@ -50,6 +51,10 @@ serve(async (req) => {
     return jsonResponse(req, 401, { error: auth.error ?? "Unauthorized" });
   }
 
+  if (body.provider && body.provider !== "stripe") {
+    return jsonResponse(req, 400, { error: "Use create-paystack-membership-payment for Paystack checkout." });
+  }
+
   const userId    = auth.user.id;
   const userEmail = auth.user.email as string | undefined;
 
@@ -57,7 +62,7 @@ serve(async (req) => {
     // Look up any existing membership row (active community or pending_payment).
     const { data: existingMembership } = await supabaseAdmin
       .from("memberships")
-      .select("id, tier, status, stripe_subscription_id, stripe_customer_id, stripe_payment_intent_id")
+      .select("id, tier, status, stripe_subscription_id, stripe_customer_id, stripe_payment_intent_id, payment_provider")
       .eq("user_id", userId)
       .in("status", ["active", "pending_payment"])
       .order("created_at", { ascending: false })
@@ -68,6 +73,15 @@ serve(async (req) => {
       return jsonResponse(req, 409, { error: "You already have an active Full Membership." });
     }
 
+    if (
+      existingMembership?.payment_provider &&
+      existingMembership.payment_provider !== "stripe"
+    ) {
+      return jsonResponse(req, 409, {
+        error: "Your membership checkout is locked to Paystack. Use Paystack to continue.",
+      });
+    }
+
     // Recover: paid in Stripe but webhook never flipped pending_payment → active
     if (
       existingMembership?.status === "pending_payment" &&
@@ -75,13 +89,17 @@ serve(async (req) => {
     ) {
       const sub = await stripe.subscriptions.retrieve(existingMembership.stripe_subscription_id);
       if (sub.status === "active" || sub.status === "trialing") {
-        await activateMembership(
+        await activateMembershipShared({
           userId,
-          (sub.customer as string) ?? existingMembership.stripe_customer_id ?? "",
-          sub.id,
-          existingMembership.stripe_payment_intent_id,
-          existingMembership.id,
-        );
+          provider: "stripe",
+          providerPaymentRef: existingMembership.stripe_payment_intent_id ?? sub.id,
+          providerCustomerId: (sub.customer as string) ?? existingMembership.stripe_customer_id ?? "",
+          providerSubscriptionId: sub.id,
+          billingCurrency: "USD",
+          amountMajor: 2,
+          amountSubunits: 200,
+          existingMembershipId: existingMembership.id,
+        });
         const periodEnd = new Date(sub.current_period_end * 1000).toISOString();
         await supabaseAdmin
           .from("memberships")
@@ -141,7 +159,17 @@ serve(async (req) => {
 
     if (!paymentIntent?.client_secret) {
       // Already active (e.g. $0 coupon) — activate directly.
-      await activateMembership(userId, stripeCustomerId, subscription.id, paymentIntent?.id ?? null, existingMembership?.id ?? null);
+      await activateMembershipShared({
+        userId,
+        provider: "stripe",
+        providerPaymentRef: paymentIntent?.id ?? subscription.id,
+        providerCustomerId: stripeCustomerId,
+        providerSubscriptionId: subscription.id,
+        billingCurrency: "USD",
+        amountMajor: 2,
+        amountSubunits: 200,
+        existingMembershipId: existingMembership?.id ?? null,
+      });
       return jsonResponse(req, 200, { alreadyActive: true });
     }
 
@@ -155,6 +183,11 @@ serve(async (req) => {
         .update({
           tier:                     "member",
           status:                   "pending_payment",
+          // Provider intentionally NOT set here — locked only on payment success.
+          provider_customer_id:     stripeCustomerId,
+          provider_subscription_id: subscription.id,
+          provider_payment_ref:     paymentIntent.id,
+          billing_currency:         "USD",
           stripe_customer_id:       stripeCustomerId,
           stripe_subscription_id:   subscription.id,
           stripe_payment_intent_id: paymentIntent.id,
@@ -169,6 +202,11 @@ serve(async (req) => {
         user_id:                  userId,
         tier:                     "member",
         status:                   "pending_payment",
+        // Provider intentionally NOT set here — locked only on payment success.
+        provider_customer_id:     stripeCustomerId,
+        provider_subscription_id: subscription.id,
+        provider_payment_ref:     paymentIntent.id,
+        billing_currency:         "USD",
         stripe_customer_id:       stripeCustomerId,
         stripe_subscription_id:   subscription.id,
         stripe_payment_intent_id: paymentIntent.id,
@@ -181,44 +219,9 @@ serve(async (req) => {
       }
     }
 
-    return jsonResponse(req, 200, { clientSecret: paymentIntent.client_secret });
+    return jsonResponse(req, 200, { clientSecret: paymentIntent.client_secret, provider: "stripe" });
   } catch (err) {
     console.error("[create-membership-payment]", err);
     return jsonResponse(req, 500, { error: (err as Error).message });
   }
 });
-
-// Used when the initial invoice is already paid (edge case: $0 coupon, etc.)
-async function activateMembership(
-  userId: string,
-  stripeCustomerId: string,
-  subscriptionId: string,
-  paymentIntentId: string | null,
-  existingMembershipId: string | null,
-) {
-  if (existingMembershipId) {
-    await supabaseAdmin
-      .from("memberships")
-      .update({
-        tier:                     "member",
-        status:                   "active",
-        stripe_customer_id:       stripeCustomerId,
-        stripe_subscription_id:   subscriptionId,
-        stripe_payment_intent_id: paymentIntentId,
-        amount_paid:              200,
-        updated_at:               new Date().toISOString(),
-      })
-      .eq("id", existingMembershipId);
-  } else {
-    await supabaseAdmin.from("memberships").insert({
-      user_id:                  userId,
-      tier:                     "member",
-      status:                   "active",
-      stripe_customer_id:       stripeCustomerId,
-      stripe_subscription_id:   subscriptionId,
-      stripe_payment_intent_id: paymentIntentId,
-      amount_paid:              200,
-      starts_at:                new Date().toISOString(),
-    });
-  }
-}

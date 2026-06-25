@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
 import { resolveInvoiceNumber } from "../_shared/invoice-number.ts";
 import { buildNotificationMetadata } from "../_shared/notifications.ts";
+import { activateMembership as activateMembershipShared } from "../_shared/activateMembership.ts";
 
 export const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2023-10-16",
@@ -218,7 +219,7 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
 
   const { data: existing } = await supabaseAdmin
     .from("memberships")
-    .select("id, user_id, status, tier, stripe_subscription_id")
+    .select("id, user_id, status, tier, stripe_subscription_id, provider_subscription_id")
     .eq("stripe_payment_intent_id", paymentIntentId)
     .maybeSingle();
 
@@ -235,45 +236,29 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
   }
 
   let periodEnd: string | null = null;
-  if (existing?.stripe_subscription_id) {
+  const subId = existing?.provider_subscription_id ?? existing?.stripe_subscription_id;
+  if (subId) {
     try {
-      const sub = await stripe.subscriptions.retrieve(existing.stripe_subscription_id);
+      const sub = await stripe.subscriptions.retrieve(subId);
       periodEnd = new Date(sub.current_period_end * 1000).toISOString();
     } catch { /* non-fatal */ }
   }
 
-  if (existing) {
-    const { error } = await supabaseAdmin
-      .from("memberships")
-      .update({
-        tier: "member",
-        status: "active",
-        ...(periodEnd ? { expires_at: periodEnd } : {}),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existing.id);
+  const activated = await activateMembershipShared({
+    userId,
+    provider: "stripe",
+    providerPaymentRef: paymentIntentId,
+    providerSubscriptionId: subId,
+    billingCurrency: "USD",
+    amountMajor: 2,
+    amountSubunits: 200,
+    expiresAt: periodEnd,
+    existingMembershipId: existing?.id ?? null,
+  });
 
-    if (error) {
-      console.error("[membership] failed to activate membership:", error);
-      return;
-    }
-    console.log(`[membership] activated membership ${existing.id} for user ${userId}`);
-  } else {
-    const { error } = await supabaseAdmin.from("memberships").insert({
-      user_id: userId,
-      tier: "member",
-      status: "active",
-      stripe_payment_intent_id: paymentIntentId,
-      amount_paid: 200,
-      starts_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    });
-
-    if (error) {
-      console.error("[membership] failed to insert membership on fallback:", error);
-      return;
-    }
-    console.log(`[membership] inserted active membership (fallback) for user ${userId}`);
+  if (!activated) {
+    console.error("[membership] activateMembership failed for", paymentIntentId);
+    return;
   }
 
   let transactionId: string | null = null;

@@ -194,7 +194,9 @@ serve(async (req: Request) => {
     }
 
     let paymentMethodLast4: string | null = null;
-    if (tx.provider_payment_intent_id && Deno.env.get("STRIPE_SECRET_KEY")) {
+    // Only call Stripe for Stripe transactions — Paystack has no server-side card PM lookup.
+    const isStripeTx = !tx.provider || tx.provider === "stripe";
+    if (isStripeTx && tx.provider_payment_intent_id && Deno.env.get("STRIPE_SECRET_KEY")) {
       try {
         const paymentIntent = await stripe.paymentIntents.retrieve(tx.provider_payment_intent_id);
         if (paymentIntent.payment_method && typeof paymentIntent.payment_method === "string") {

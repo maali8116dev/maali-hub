@@ -17,15 +17,26 @@ import { useMembership, useInvalidateMembership } from "@/hooks/useMembership";
 import { formatDate } from "@/lib/dateUtils";
 import { useToast } from "@/hooks/use-toast";
 import { invokeWithAuth } from "@/lib/invokeWithAuth";
+import { PAYSTACK_CURRENCIES } from "@/lib/paymentProvider";
 import { Zap, Users, Loader2, Calendar, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
 function formatTierLabel(tier: string) {
   return tier === "member" ? "Full Member" : "Community";
 }
 
-function formatAmountCents(cents: number | null) {
+function formatAmountCents(cents: number | null, currency = "USD") {
   if (cents == null) return "—";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+}
+
+function providerLabel(provider: string | null | undefined, billingCurrency: string | null | undefined) {
+  if (provider === "paystack") {
+    const cur = billingCurrency ?? "GHS";
+    const display = PAYSTACK_CURRENCIES[cur as keyof typeof PAYSTACK_CURRENCIES]?.displayAmount;
+    return display ? `Paystack (${cur} — ${display}/mo)` : `Paystack (${cur})`;
+  }
+  if (provider === "stripe") return "Stripe (USD)";
+  return null;
 }
 
 const MembershipStatusBadge = ({
@@ -103,6 +114,10 @@ export function MembershipProfileSection() {
   const [cancelling, setCancelling] = useState(false);
   const [resuming, setResuming] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [openingManage, setOpeningManage] = useState(false);
+
+  const paymentProvider = membership?.payment_provider ?? null;
+  const billingCurrency = membership?.billing_currency ?? "USD";
 
   const tier = membership?.tier ?? "community";
   const status = membership?.status ?? "inactive";
@@ -123,6 +138,23 @@ export function MembershipProfileSection() {
         description: "Your cancellation has been undone. Your membership will continue to renew automatically.",
       });
     }
+  };
+
+  const handleManagePaystack = async () => {
+    setOpeningManage(true);
+    const { data, error } = await invokeWithAuth<{ url?: string; error?: string }>(
+      "create-paystack-manage-link",
+    );
+    setOpeningManage(false);
+    if (error || !data?.url) {
+      toast({
+        title: "Error",
+        description: data?.error ?? error?.message ?? "Could not open Paystack manage link.",
+        variant: "destructive",
+      });
+      return;
+    }
+    window.open(data.url, "_blank", "noopener,noreferrer");
   };
 
   const handleCancelMembership = async () => {
@@ -213,7 +245,18 @@ export function MembershipProfileSection() {
               {membership.amount_paid != null && membership.tier === "member" && (
                 <div>
                   <dt className="text-muted-foreground">Last payment</dt>
-                  <dd className="font-medium mt-0.5">{formatAmountCents(membership.amount_paid)}</dd>
+                  <dd className="font-medium mt-0.5">
+                    {formatAmountCents(
+                      membership.amount_paid,
+                      paymentProvider === "paystack" ? billingCurrency : "USD",
+                    )}
+                  </dd>
+                </div>
+              )}
+              {isPaidMember && providerLabel(paymentProvider, billingCurrency) && (
+                <div>
+                  <dt className="text-muted-foreground">Paid via</dt>
+                  <dd className="font-medium mt-0.5">{providerLabel(paymentProvider, billingCurrency)}</dd>
                 </div>
               )}
               <div>
@@ -252,6 +295,15 @@ export function MembershipProfileSection() {
                 : status === "pending_payment"
                   ? "Complete payment"
                   : "Upgrade to Full Member"}
+            </Button>
+          )}
+          {isPaidMember && paymentProvider === "paystack" && (
+            <Button variant="outline" onClick={handleManagePaystack} disabled={openingManage}>
+              {openingManage ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening…</>
+              ) : (
+                "Manage Paystack billing"
+              )}
             </Button>
           )}
           {isPaidMember && !cancelAtPeriodEnd && (

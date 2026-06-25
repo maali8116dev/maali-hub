@@ -2,6 +2,7 @@ import Stripe from "https://esm.sh/stripe@14?target=deno";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
+import { paystackRequest } from "../_shared/paystackApi.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2024-06-20",
@@ -36,19 +37,47 @@ serve(async (req) => {
     return jsonResponse(req, 400, { error: rpcError.message });
   }
 
-  const subscriptionId = (rpcResult as { stripe_subscription_id?: string })?.stripe_subscription_id;
+  const provider = (rpcResult as { payment_provider?: string })?.payment_provider ?? "stripe";
+  const subscriptionId =
+    (rpcResult as { provider_subscription_id?: string })?.provider_subscription_id ??
+    (rpcResult as { stripe_subscription_id?: string })?.stripe_subscription_id;
 
   if (subscriptionId) {
-    try {
-      await stripe.subscriptions.update(subscriptionId, {
-        cancel_at_period_end: false,
-      });
-      console.log(`[resume-membership] Stripe subscription ${subscriptionId} cancellation reversed`);
-    } catch (stripeErr) {
-      // Log but don't fail — DB is already updated.
-      console.error("[resume-membership] Stripe update failed (non-fatal):", (stripeErr as Error).message);
+    if (provider === "paystack") {
+      const { data: membership } = await supabaseAdmin
+        .from("memberships")
+        .select("paystack_email_token")
+        .eq("user_id", userId)
+        .eq("provider_subscription_id", subscriptionId)
+        .maybeSingle();
+
+      const token = membership?.paystack_email_token;
+      if (token) {
+        try {
+          const res = await paystackRequest("/subscription/enable", {
+            method: "POST",
+            body: JSON.stringify({ code: subscriptionId, token }),
+          });
+          if (!res.ok) {
+            console.error("[resume-membership] Paystack enable failed:", res.raw);
+          } else {
+            console.log(`[resume-membership] Paystack subscription ${subscriptionId} re-enabled`);
+          }
+        } catch (err) {
+          console.error("[resume-membership] Paystack update failed (non-fatal):", (err as Error).message);
+        }
+      }
+    } else {
+      try {
+        await stripe.subscriptions.update(subscriptionId, {
+          cancel_at_period_end: false,
+        });
+        console.log(`[resume-membership] Stripe subscription ${subscriptionId} cancellation reversed`);
+      } catch (stripeErr) {
+        console.error("[resume-membership] Stripe update failed (non-fatal):", (stripeErr as Error).message);
+      }
     }
   }
 
-  return jsonResponse(req, 200, { success: true });
+  return jsonResponse(req, 200, { success: true, payment_provider: provider });
 });

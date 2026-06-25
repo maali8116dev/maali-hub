@@ -1,28 +1,23 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Users, Zap, ArrowRight, Loader2 } from "lucide-react";
+import { Check, Users, Zap, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useSectors } from "@/hooks/useSectors";
 import Navigation from "@/components/Navigation";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
+import { MembershipPaymentStep } from "@/components/membership/MembershipPaymentStep";
+import {
+  getDefaultPaystackCurrency,
+  type PaymentProviderChoice,
+} from "@/lib/paymentProvider";
 
 interface ProfileData {
   firstName: string;
@@ -213,132 +208,38 @@ const StepTier = ({
   );
 };
 
-const PaymentForm = ({
-  onSuccess,
-  onBack,
-}: {
-  onSuccess: () => void;
-  onBack: () => void;
-}) => {
-  const { t } = useTranslation("common");
-  const stripe = useStripe();
-  const elements = useElements();
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const priceLabel = t("join.memberPriceLabel");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    setProcessing(true);
-    setError(null);
-
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setError(submitError.message ?? t("onboarding.payment.failed"));
-      setProcessing(false);
-      return;
-    }
-
-    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: `${window.location.origin}/join/success` },
-      redirect: "if_required",
-    });
-
-    if (confirmError) {
-      setError(confirmError.message ?? t("onboarding.payment.failed"));
-      setProcessing(false);
-    } else if (paymentIntent?.status === "succeeded") {
-      onSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">{t("onboarding.payment.title")}</h2>
-        <p className="text-muted-foreground mt-1">
-          {t("onboarding.payment.description", { price: priceLabel })}
-        </p>
-      </div>
-
-      <div className="rounded-lg border border-border p-4 bg-card">
-        <PaymentElement />
-      </div>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-
-      <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>
-          {t("onboarding.payment.back")}
-        </Button>
-        <Button type="submit" variant="hero" className="flex-1" disabled={!stripe || processing}>
-          {processing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("onboarding.payment.processing")}
-            </>
-          ) : (
-            t("onboarding.payment.payAndJoin")
-          )}
-        </Button>
-      </div>
-
-      <p className="text-xs text-center text-muted-foreground">{t("onboarding.payment.stripeNote")}</p>
-    </form>
-  );
-};
-
 const StepPayment = ({
+  userId,
+  billingEmail,
+  countryHint,
   onSuccess,
   onBack,
 }: {
+  userId: string;
+  billingEmail: string;
+  countryHint: string;
   onSuccess: () => void;
   onBack: () => void;
 }) => {
   const { t } = useTranslation("common");
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    invokeWithAuth<{ clientSecret?: string; error?: string }>("create-membership-payment")
-      .then(({ data, error }) => {
-        if (error || !data?.clientSecret) {
-          const msg =
-            data?.error || parseEdgeFunctionError(error) || error?.message;
-          setFetchError(
-            msg
-              ? t("onboarding.payment.initFailed", { message: msg })
-              : t("onboarding.payment.initFailed", { message: t("error") }),
-          );
-        } else {
-          setClientSecret(data.clientSecret);
-        }
-      });
-  }, [t]);
-
-  if (fetchError) {
-    return (
-      <div className="space-y-4">
-        <p className="text-destructive text-sm">{fetchError}</p>
-        <Button variant="outline" onClick={onBack}>{t("onboarding.payment.goBack")}</Button>
-      </div>
-    );
-  }
-
-  if (!clientSecret) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const [choice, setChoice] = useState<PaymentProviderChoice>({
+    provider: "stripe",
+    currency: getDefaultPaystackCurrency(countryHint),
+  });
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <PaymentForm onSuccess={onSuccess} onBack={onBack} />
-    </Elements>
+    <MembershipPaymentStep
+      userId={userId}
+      billingEmail={billingEmail}
+      choice={choice}
+      onChoiceChange={setChoice}
+      onSuccess={onSuccess}
+      onBack={onBack}
+      defaultPaystackCurrency={getDefaultPaystackCurrency(countryHint)}
+      title={t("onboarding.payment.title")}
+      description={t("onboarding.payment.description", { price: t("join.memberPriceLabel") })}
+      showBillingEmail={false}
+    />
   );
 };
 
@@ -494,6 +395,9 @@ const Join = () => {
             {step === "tier" && <StepTier onNext={handleTierSelect} />}
             {step === "payment" && (
               <StepPayment
+                userId={user.id}
+                billingEmail={user.email ?? ""}
+                countryHint={profile.country}
                 onSuccess={handlePaymentSuccess}
                 onBack={() => setStep("tier")}
               />

@@ -1,24 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import headerLogoFallback from "@/assets/logo.webp";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { Check, ArrowRight, Loader2 } from "lucide-react";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { seedDefaultBillingAddress } from "@/lib/seedBillingAddress";
 import { supabase } from "@/integrations/supabase/client";
-import { invokeWithAuth, parseEdgeFunctionError } from "@/lib/invokeWithAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { MembershipPaymentStep } from "@/components/membership/MembershipPaymentStep";
+import {
+  getDefaultPaystackCurrency,
+  type PaymentProviderChoice,
+} from "@/lib/paymentProvider";
 import {
   useMembership,
   useInvalidateMembership,
@@ -28,7 +29,6 @@ import { useToast } from "@/hooks/use-toast";
 import { createOnboardingProfileSchema, type OnboardingProfileFormValues } from "@/lib/schemas/onboardingForm.schema";
 import { getCountryCode } from "@/components/application/form/countries";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "");
 const headerLogoPublic = "/images/logo.webp";
 
 const AFRICAN_COUNTRIES = [
@@ -253,7 +253,7 @@ const StepProfile = ({
   );
 };
 
-// ─── Step 2: Stripe payment form ─────────────────────────────────────────────
+// ─── Step 2: Membership payment ──────────────────────────────────────────────
 
 type PaymentReceiptDetails = {
   billingEmail: string;
@@ -261,109 +261,6 @@ type PaymentReceiptDetails = {
   cityRegion: string;
   fullName: string;
   companyName?: string;
-};
-
-const PaymentForm = ({
-  onSuccess,
-  onBack,
-  onSkip,
-  receiptDetails,
-  userId,
-}: {
-  onSuccess: () => void;
-  onBack: () => void;
-  onSkip: () => void;
-  receiptDetails: PaymentReceiptDetails;
-  userId: string;
-}) => {
-  const { t } = useTranslation("common");
-  const stripe = useStripe();
-  const elements = useElements();
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [billingEmail, setBillingEmail] = useState(receiptDetails.billingEmail);
-  const memberPrice = t("onboarding.memberPriceLabel");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    setProcessing(true);
-    setError(null);
-
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setError(submitError.message ?? t("onboarding.payment.failed"));
-      setProcessing(false);
-      return;
-    }
-
-    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: { return_url: `${window.location.origin}/onboarding?awaiting=1` },
-      redirect: "if_required",
-    });
-
-    if (confirmError) {
-      setError(confirmError.message ?? t("onboarding.payment.failed"));
-      setProcessing(false);
-    } else if (paymentIntent?.status === "succeeded") {
-      await seedDefaultBillingAddress({
-        userId,
-        billingEmail,
-        country: receiptDetails.country,
-        city: receiptDetails.cityRegion,
-        fullName: receiptDetails.fullName,
-        companyName: receiptDetails.companyName,
-      });
-      onSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">{t("onboarding.payment.title")}</h2>
-        <p className="text-muted-foreground mt-1">
-          {t("onboarding.payment.description", { price: memberPrice })}
-        </p>
-      </div>
-      <div className="rounded-lg border border-border p-4 bg-card space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="billingEmail" className="text-sm font-medium">
-            {t("onboarding.payment.billingEmail")}
-          </Label>
-          <Input
-            id="billingEmail"
-            type="email"
-            value={billingEmail}
-            onChange={(e) => setBillingEmail(e.target.value)}
-            placeholder={t("onboarding.payment.billingEmailPlaceholder")}
-            className="h-11"
-          />
-          <p className="text-xs text-muted-foreground">{t("onboarding.payment.billingHint")}</p>
-        </div>
-        <PaymentElement />
-      </div>
-      <p className="text-xs text-muted-foreground">{t("onboarding.payment.cardHint")}</p>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack} disabled={processing}>{t("onboarding.payment.back")}</Button>
-        <Button type="submit" variant="hero" className="flex-1" disabled={!stripe || processing}>
-          {processing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("onboarding.payment.processing")}</> : t("onboarding.payment.payAndJoin")}
-        </Button>
-      </div>
-      <p className="text-xs text-center text-muted-foreground">{t("onboarding.payment.stripeNote")}</p>
-      <div className="text-center">
-        <button
-          type="button"
-          onClick={onSkip}
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline hover:text-foreground transition-colors"
-        >
-          {t("onboarding.payment.skipToCommunity")}
-        </button>
-      </div>
-    </form>
-  );
 };
 
 const StepPayment = ({
@@ -380,27 +277,39 @@ const StepPayment = ({
   userId: string;
 }) => {
   const { t } = useTranslation("common");
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [billingEmail, setBillingEmail] = useState(receiptDetails.billingEmail);
+  const [choice, setChoice] = useState<PaymentProviderChoice>({
+    provider: "stripe",
+    currency: getDefaultPaystackCurrency(receiptDetails.country),
+  });
 
-  useEffect(() => {
-    invokeWithAuth<{ clientSecret?: string; error?: string }>("create-membership-payment")
-      .then(({ data, error }) => {
-        if (error || !data?.clientSecret) {
-          const msg =
-            data?.error || parseEdgeFunctionError(error) || error?.message || t("error");
-          setFetchError(t("onboarding.payment.initFailed", { message: msg }));
-        } else {
-          setClientSecret(data.clientSecret);
-        }
-      });
-  }, []);
+  const handleSuccess = async () => {
+    await seedDefaultBillingAddress({
+      userId,
+      billingEmail,
+      country: receiptDetails.country,
+      city: receiptDetails.cityRegion,
+      fullName: receiptDetails.fullName,
+      companyName: receiptDetails.companyName,
+    });
+    onSuccess();
+  };
 
-  if (fetchError) return (
+  return (
     <div className="space-y-4">
-      <p className="text-destructive text-sm">{fetchError}</p>
-      <div className="flex gap-3">
-        <Button variant="outline" onClick={onBack}>{t("onboarding.payment.goBack")}</Button>
+      <MembershipPaymentStep
+        userId={userId}
+        billingEmail={billingEmail}
+        onBillingEmailChange={setBillingEmail}
+        choice={choice}
+        onChoiceChange={setChoice}
+        onSuccess={handleSuccess}
+        onBack={onBack}
+        defaultPaystackCurrency={getDefaultPaystackCurrency(receiptDetails.country)}
+        title={t("onboarding.payment.title")}
+        description={t("onboarding.payment.description", { price: t("onboarding.memberPriceLabel") })}
+      />
+      <div className="text-center">
         <button
           type="button"
           onClick={onSkip}
@@ -410,24 +319,6 @@ const StepPayment = ({
         </button>
       </div>
     </div>
-  );
-
-  if (!clientSecret) return (
-    <div className="flex items-center justify-center py-12">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-    </div>
-  );
-
-  return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <PaymentForm
-        onSuccess={onSuccess}
-        onBack={onBack}
-        onSkip={onSkip}
-        receiptDetails={receiptDetails}
-        userId={userId}
-      />
-    </Elements>
   );
 };
 
@@ -440,7 +331,7 @@ const Onboarding = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const sectors = useSectors();
-  const { isActiveMember, isPaidMember, loading: membershipLoading } = useMembership();
+  const { membership, isActiveMember, isPaidMember, loading: membershipLoading } = useMembership();
   const invalidateMembership = useInvalidateMembership();
   const syncMembership = useSyncMembershipAfterOnboarding();
 
@@ -498,13 +389,6 @@ const Onboarding = () => {
     }
     setStep("payment");
   };
-
-  // Bounce anyone who already has an active membership — they belong in the dashboard
-  useEffect(() => {
-    if (!membershipLoading && isActiveMember && step !== "done" && !activating) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [membershipLoading, isActiveMember, step, navigate, activating]);
 
   const skipToFreePlan = async () => {
     if (!user) return;
@@ -597,6 +481,16 @@ const Onboarding = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, searchParams]);
+
+  const shouldLeaveOnboarding =
+    !membershipLoading &&
+    !activating &&
+    step !== "done" &&
+    (isPaidMember || (isActiveMember && membership?.tier === "community"));
+
+  if (shouldLeaveOnboarding) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (membershipLoading) {
     return (
