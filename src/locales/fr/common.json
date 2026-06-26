@@ -277,6 +277,29 @@
     "open": "Ouvert aux candidatures",
     "closed": "Fermé aux candidatures"
   },
+  "payment": {
+    "provider": {
+      "chooseLabel": "Comment souhaitez-vous payer ?",
+      "chooseHint": "Votre choix est enregistré pour cette adhésion. Vous ne pouvez changer de fournisseur qu'avant de finaliser le paiement.",
+      "currencyLabel": "Devise de facturation",
+      "completeChoice": "Sélectionnez un mode de paiement et une devise (si Paystack) pour continuer.",
+      "continueToPayment": "Continuer vers le paiement",
+      "locked": "Paiement verrouillé sur {{provider}} pour cette adhésion.",
+      "payWithPaystack": "Payer avec Paystack",
+      "paystackAmount": "Vous serez facturé {{amount}} / mois ({{currency}}).",
+      "paystackFooter": "Paystack prend en charge carte, mobile money et virement dans les pays pris en charge.",
+      "paystackNotConfigured": "Paystack n'est pas configuré. Contactez le support ou payez par carte (Stripe).",
+      "stripeFooter": "Cartes internationales via Stripe. Facturation en USD.",
+      "stripe": {
+        "label": "Carte (international)",
+        "description": "Visa, Mastercard, Amex — facturation en USD (2 $/mois)"
+      },
+      "paystack": {
+        "label": "Paystack",
+        "description": "Carte, mobile money ou banque — NGN, GHS, KES, ZAR"
+      }
+    }
+  },
   "toasts": {
     "genericError": "Une erreur est survenue. Veuillez réessayer.",
     "opportunity": {

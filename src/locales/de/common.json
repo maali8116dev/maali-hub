@@ -172,6 +172,29 @@
     "open": "Bewerbungen offen",
     "closed": "Bewerbungen geschlossen"
   },
+  "payment": {
+    "provider": {
+      "chooseLabel": "Wie möchten Sie bezahlen?",
+      "chooseHint": "Ihre Wahl gilt für diese Mitgliedschaft. Anbieterwechsel nur vor Abschluss des Checkouts möglich.",
+      "currencyLabel": "Abrechnungswährung",
+      "completeChoice": "Wählen Sie Zahlungsmethode und Währung (bei Paystack), um fortzufahren.",
+      "continueToPayment": "Weiter zur Zahlung",
+      "locked": "Checkout ist für diese Mitgliedschaft auf {{provider}} festgelegt.",
+      "payWithPaystack": "Mit Paystack bezahlen",
+      "paystackAmount": "Es werden {{amount}} / Monat ({{currency}}) berechnet.",
+      "paystackFooter": "Paystack unterstützt Karte, Mobile Money und Banküberweisung in unterstützten Ländern.",
+      "paystackNotConfigured": "Paystack ist nicht konfiguriert. Support kontaktieren oder per Karte (Stripe) zahlen.",
+      "stripeFooter": "Internationale Karten über Stripe. Abrechnung in USD.",
+      "stripe": {
+        "label": "Karte (international)",
+        "description": "Visa, Mastercard, Amex — Abrechnung in USD (2 $/Monat)"
+      },
+      "paystack": {
+        "label": "Paystack",
+        "description": "Karte, Mobile Money oder Bank — NGN, GHS, KES, ZAR"
+      }
+    }
+  },
   "toasts": {
     "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "opportunity": {

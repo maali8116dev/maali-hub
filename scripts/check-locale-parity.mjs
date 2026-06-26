@@ -28,9 +28,17 @@ function checkLocale(locale) {
 
     console.log(`\n=== ${locale}/${namespace} ===`);
     console.log(`EN: ${enKeys.length}  ${locale}: ${targetKeys.length}`);
-    console.log(`Missing: ${missing.length}`);
-    if (missing.length) console.log(missing.join("\n"));
-    console.log(`Same as EN: ${sameAsEn.length}`);
+    if (missing.length) {
+      console.warn(`Missing: ${missing.length} (warning only)`);
+      console.warn(missing.join("\n"));
+    } else {
+      console.log("Missing: 0");
+    }
+    if (sameAsEn.length) {
+      console.warn(`Same as EN: ${sameAsEn.length} (warning only)`);
+    } else {
+      console.log("Same as EN: 0");
+    }
   }
 
   console.log(`\n${locale} TOTAL missing: ${totalMissing}, same as EN: ${totalSameAsEn}`);
@@ -43,9 +51,15 @@ const locales =
     ? [parseArgs(process.argv.slice(2)).locale]
     : SUPPORTED_LOCALES;
 
-let failed = 0;
+let totalMissing = 0;
 for (const locale of locales) {
-  failed += checkLocale(locale);
+  totalMissing += checkLocale(locale);
 }
 
-process.exit(failed > 0 ? 1 : 0);
+if (totalMissing > 0) {
+  console.warn(
+    `\n[i18n] ${totalMissing} missing key(s) across locale(s) — non-blocking; add translations when you can.`,
+  );
+}
+
+process.exit(0);

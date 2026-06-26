@@ -2101,12 +2101,14 @@
       "dashboard": "Tableau de bord",
       "opportunities": "Mes opportunités",
       "notifications": "Mes notifications",
+      "team": "Équipe",
       "settings": "Paramètres"
     },
     "pages": {
       "dashboard": "Tableau de bord partenaire",
       "opportunities": "Mes opportunités",
       "notifications": "Mes notifications",
+      "team": "Équipe",
       "settings": "Paramètres",
       "opportunityDetails": "Détails de l'opportunité",
       "qualifiedApplicants": "Candidats qualifiés",
@@ -2218,6 +2220,38 @@
         "updatedDesc": "Les informations de votre organisation ont été enregistrées.",
         "failed": "Échec de la mise à jour",
         "failedDesc": "Impossible d'enregistrer les détails du partenaire."
+      },
+      "readOnlyTitle": "Accès en lecture seule",
+      "readOnlyDescription": "Seuls les administrateurs de l'organisation partenaire peuvent modifier les paramètres. Contactez votre admin ou le support Maali."
+    },
+    "teamPage": {
+      "title": "Membres de l'équipe",
+      "subtitle": "Gérez qui peut accéder à votre organisation partenaire sur Maali.",
+      "description": "Personnes ayant accès à {{name}} sur le portail partenaire.",
+      "loading": "Chargement des membres…",
+      "empty": "Aucun membre lié pour l'instant.",
+      "inviteEmail": "Adresse e-mail",
+      "inviteEmailPlaceholder": "collegue@organisation.org",
+      "invalidEmail": "Entrez une adresse e-mail valide",
+      "inviteRole": "Rôle",
+      "sendInvite": "Envoyer l'invitation",
+      "inviteSuccess": "Invitation envoyée",
+      "inviteSuccessDescription": "Nous avons envoyé un lien de connexion à {{email}}.",
+      "inviteError": "Échec de l'envoi de l'invitation",
+      "roleUpdated": "Rôle mis à jour",
+      "roleUpdateError": "Échec de la mise à jour du rôle",
+      "memberRemoved": "Membre retiré",
+      "removeError": "Échec du retrait du membre",
+      "remove": "Retirer",
+      "removeConfirmTitle": "Retirer ce membre ?",
+      "removeConfirmDescription": "Il perdra l'accès au portail partenaire de cette organisation jusqu'à une nouvelle invitation.",
+      "cancel": "Annuler",
+      "you": "vous",
+      "readOnlyTitle": "Équipe gérée par les admins",
+      "readOnlyDescription": "Seuls les administrateurs peuvent inviter ou retirer des membres. Vous pouvez toujours voir qui a accès.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Membre"
       }
     },
     "qualifiedApplicantsPage": {

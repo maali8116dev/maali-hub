@@ -1906,12 +1906,14 @@
       "dashboard": "Painel",
       "opportunities": "Minhas oportunidades",
       "notifications": "Notificacoes",
+      "team": "Equipa",
       "settings": "Configuracoes"
     },
     "pages": {
       "dashboard": "Painel do parceiro",
       "opportunities": "Minhas oportunidades",
       "notifications": "Notificacoes",
+      "team": "Equipa",
       "settings": "Configuracoes",
       "opportunityDetails": "Detalhes da oportunidade",
       "qualifiedApplicants": "Candidatos qualificados",
@@ -2023,6 +2025,38 @@
         "updatedDesc": "Os detalhes da sua organização foram salvos.",
         "failed": "Falha na atualização",
         "failedDesc": "Não foi possível salvar os detalhes do parceiro."
+      },
+      "readOnlyTitle": "Acesso só de leitura",
+      "readOnlyDescription": "Apenas administradores da organização parceira podem editar as configurações. Contacte o seu admin ou o suporte Maali."
+    },
+    "teamPage": {
+      "title": "Membros da equipa",
+      "subtitle": "Gerir quem pode aceder à sua organização parceira na Maali.",
+      "description": "Pessoas com acesso a {{name}} no portal do parceiro.",
+      "loading": "A carregar membros da equipa…",
+      "empty": "Ainda não há membros associados.",
+      "inviteEmail": "Endereço de e-mail",
+      "inviteEmailPlaceholder": "colega@organizacao.org",
+      "invalidEmail": "Introduza um endereço de e-mail válido",
+      "inviteRole": "Função",
+      "sendInvite": "Enviar convite",
+      "inviteSuccess": "Convite enviado",
+      "inviteSuccessDescription": "Enviámos um link de início de sessão para {{email}}.",
+      "inviteError": "Falha ao enviar convite",
+      "roleUpdated": "Função atualizada",
+      "roleUpdateError": "Falha ao atualizar função",
+      "memberRemoved": "Membro removido",
+      "removeError": "Falha ao remover membro",
+      "remove": "Remover",
+      "removeConfirmTitle": "Remover membro da equipa?",
+      "removeConfirmDescription": "Perderá o acesso ao portal do parceiro desta organização até ser convidado novamente.",
+      "cancel": "Cancelar",
+      "you": "você",
+      "readOnlyTitle": "Equipa gerida por administradores",
+      "readOnlyDescription": "Apenas administradores da organização podem convidar ou remover membros. Ainda pode ver quem tem acesso.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Membro"
       }
     },
     "qualifiedApplicantsPage": {

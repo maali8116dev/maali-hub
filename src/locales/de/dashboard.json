@@ -2101,12 +2101,14 @@
       "dashboard": "Übersicht",
       "opportunities": "Meine Möglichkeiten",
       "notifications": "Benachrichtigungen",
+      "team": "Team",
       "settings": "Einstellungen"
     },
     "pages": {
       "dashboard": "Partner-Dashboard",
       "opportunities": "Meine Möglichkeiten",
       "notifications": "Benachrichtigungen",
+      "team": "Team",
       "settings": "Einstellungen",
       "opportunityDetails": "Opportunity-Details",
       "qualifiedApplicants": "Qualifizierte Bewerber",
@@ -2218,6 +2220,38 @@
         "updatedDesc": "Ihre Organisationsdaten wurden gespeichert.",
         "failed": "Update fehlgeschlagen",
         "failedDesc": "Partnerdetails können nicht gespeichert werden."
+      },
+      "readOnlyTitle": "Nur-Lese-Zugriff",
+      "readOnlyDescription": "Nur Partner-Organisationsadmins können Organisationseinstellungen bearbeiten. Wenden Sie sich an Ihren Admin oder Maali-Support."
+    },
+    "teamPage": {
+      "title": "Teammitglieder",
+      "subtitle": "Verwalten Sie, wer auf Ihre Partnerorganisation bei Maali zugreifen kann.",
+      "description": "Personen mit Zugriff auf {{name}} im Partnerportal.",
+      "loading": "Teammitglieder werden geladen…",
+      "empty": "Noch keine Teammitglieder verknüpft.",
+      "inviteEmail": "E-Mail-Adresse",
+      "inviteEmailPlaceholder": "kollege@organisation.org",
+      "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein",
+      "inviteRole": "Rolle",
+      "sendInvite": "Einladung senden",
+      "inviteSuccess": "Einladung gesendet",
+      "inviteSuccessDescription": "Wir haben einen Anmeldelink an {{email}} gesendet.",
+      "inviteError": "Einladung konnte nicht gesendet werden",
+      "roleUpdated": "Rolle aktualisiert",
+      "roleUpdateError": "Rolle konnte nicht aktualisiert werden",
+      "memberRemoved": "Mitglied entfernt",
+      "removeError": "Mitglied konnte nicht entfernt werden",
+      "remove": "Entfernen",
+      "removeConfirmTitle": "Teammitglied entfernen?",
+      "removeConfirmDescription": "Die Person verliert den Zugriff auf das Partnerportal dieser Organisation, bis sie erneut eingeladen wird.",
+      "cancel": "Abbrechen",
+      "you": "Sie",
+      "readOnlyTitle": "Team von Admins verwaltet",
+      "readOnlyDescription": "Nur Organisationsadmins können Teammitglieder einladen oder entfernen. Sie können weiterhin sehen, wer Zugriff hat.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Mitglied"
       }
     },
     "qualifiedApplicantsPage": {
