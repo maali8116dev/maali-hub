@@ -2100,6 +2100,7 @@
     "menu": {
       "dashboard": "Tableau de bord",
       "opportunities": "Mes opportunités",
+      "api": "API",
       "notifications": "Mes notifications",
       "team": "Équipe",
       "settings": "Paramètres"
@@ -2107,12 +2108,94 @@
     "pages": {
       "dashboard": "Tableau de bord partenaire",
       "opportunities": "Mes opportunités",
+      "api": "API partenaire",
+      "apiDocs": "Documentation API",
       "notifications": "Mes notifications",
       "team": "Équipe",
       "settings": "Paramètres",
       "opportunityDetails": "Détails de l'opportunité",
       "qualifiedApplicants": "Candidats qualifiés",
       "default": "Portail partenaire"
+    },
+    "apiPage": {
+      "loading": "Chargement…",
+      "subtitle": "Gérez les clés API et les webhooks pour l'intégration programmatique.",
+      "readOnlyTitle": "Lecture seule",
+      "readOnlyDescription": "Seuls les administrateurs de l'organisation peuvent créer ou révoquer des clés API et gérer les webhooks.",
+      "copy": "Copier",
+      "copied": "{{label}} copié",
+      "copyFailed": "Impossible de copier dans le presse-papiers",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "overview": {
+        "title": "URL de base de l'API",
+        "description": "Utilisez cette URL de base avec votre clé API pour toutes les requêtes REST.",
+        "baseUrl": "URL de base",
+        "authHint": "Envoyez votre clé secrète dans l'en-tête X-API-Key à chaque requête."
+      },
+      "keys": {
+        "title": "Clés API",
+        "description": "Créez des clés test et production séparées. Le secret complet n'est affiché qu'une fois à la création.",
+        "create": "Créer une clé",
+        "createTitle": "Créer une clé API",
+        "createDescription": "Choisissez l'environnement et les permissions. Conservez le secret en lieu sûr — il ne peut pas être récupéré plus tard.",
+        "created": "Clé API créée",
+        "createFailed": "Échec de la création de la clé API",
+        "revoke": "Révoquer",
+        "revokeTitle": "Révoquer la clé API ?",
+        "revokeDescription": "Cette clé cesse de fonctionner immédiatement. Les intégrations devront utiliser une nouvelle clé.",
+        "revoked": "Clé API révoquée",
+        "revokeFailed": "Échec de la révocation de la clé API",
+        "empty": "Aucune clé API active pour le moment.",
+        "revealTitle": "Enregistrez cette clé API maintenant",
+        "revealDescription": "C'est la seule fois où le secret complet est affiché.",
+        "environment": "Environnement",
+        "envTest": "Test (lecture seule)",
+        "envLive": "Production",
+        "expiryDays": "Expire dans (jours)",
+        "scopes": "Permissions",
+        "expires": "Expire le {{date}}",
+        "lastUsed": "Dernière utilisation {{date}}",
+        "testKeyLimitationsTitle": "Les clés test sont en lecture seule",
+        "testKeyLimitationsDescription": "Les clés test ne peuvent pas écrire ni accéder aux PII des candidats. Utilisez une clé production pour l'intégration.",
+        "scopeLabels": {
+          "opportunities:read": "Lire les opportunités",
+          "opportunities:write": "Écrire les opportunités",
+          "applications:read": "Lire les candidatures",
+          "applications:read_pii": "Lire les PII candidats",
+          "webhooks:manage": "Gérer les webhooks"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "MAALI envoie des requêtes POST signées à votre point de terminaison HTTPS lors d'événements.",
+        "endpoint": "URL du point de terminaison",
+        "events": "Événements abonnés",
+        "save": "Enregistrer le webhook",
+        "saved": "Paramètres webhook enregistrés",
+        "saveFailed": "Échec de l'enregistrement du webhook",
+        "rotate": "Rotation du secret",
+        "rotated": "Secret de signature webhook rotaté",
+        "rotateFailed": "Échec de la rotation du secret",
+        "revealTitle": "Enregistrez ce secret de signature maintenant",
+        "revealDescription": "Utilisez-le pour vérifier X-Maali-Signature sur les webhooks entrants.",
+        "secretPrefix": "Préfixe du secret actuel : {{prefix}}…",
+        "validation": {
+          "url": "Entrez une URL HTTPS valide",
+          "events": "Sélectionnez au moins un événement"
+        },
+        "eventLabels": {
+          "application_submitted": "Candidature soumise",
+          "application_status_changed": "Statut de candidature modifié",
+          "opportunity_closed": "Opportunité fermée"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "Voir la documentation API",
+      "back": "Retour aux paramètres API",
+      "title": "Documentation API partenaire",
+      "subtitle": "Référence pour intégrer vos systèmes à MAALI."
     },
     "orgNotLinked": {
       "title": "Organisation non liée",

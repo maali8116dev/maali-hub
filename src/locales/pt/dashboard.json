@@ -1905,6 +1905,7 @@
     "menu": {
       "dashboard": "Painel",
       "opportunities": "Minhas oportunidades",
+      "api": "API",
       "notifications": "Notificacoes",
       "team": "Equipa",
       "settings": "Configuracoes"
@@ -1912,12 +1913,94 @@
     "pages": {
       "dashboard": "Painel do parceiro",
       "opportunities": "Minhas oportunidades",
+      "api": "API do parceiro",
+      "apiDocs": "Documentacao da API",
       "notifications": "Notificacoes",
       "team": "Equipa",
       "settings": "Configuracoes",
       "opportunityDetails": "Detalhes da oportunidade",
       "qualifiedApplicants": "Candidatos qualificados",
       "default": "Portal do parceiro"
+    },
+    "apiPage": {
+      "loading": "A carregar…",
+      "subtitle": "Gerir chaves API e webhooks para integracao programatica.",
+      "readOnlyTitle": "Apenas leitura",
+      "readOnlyDescription": "Apenas administradores da organizacao podem criar ou revogar chaves API e gerir webhooks.",
+      "copy": "Copiar",
+      "copied": "{{label}} copiado",
+      "copyFailed": "Nao foi possivel copiar para a area de transferencia",
+      "cancel": "Cancelar",
+      "saving": "A guardar…",
+      "overview": {
+        "title": "URL base da API",
+        "description": "Use esta URL base com a sua chave API para todos os pedidos REST.",
+        "baseUrl": "URL base",
+        "authHint": "Envie a chave secreta no cabecalho X-API-Key em cada pedido."
+      },
+      "keys": {
+        "title": "Chaves API",
+        "description": "Crie chaves de teste e producao separadas. O segredo completo so e mostrado uma vez na criacao.",
+        "create": "Criar chave",
+        "createTitle": "Criar chave API",
+        "createDescription": "Escolha ambiente e permissoes. Guarde o segredo em seguranca — nao pode ser recuperado depois.",
+        "created": "Chave API criada",
+        "createFailed": "Falha ao criar chave API",
+        "revoke": "Revogar",
+        "revokeTitle": "Revogar chave API?",
+        "revokeDescription": "Esta chave deixa de funcionar imediatamente. As integracoes precisarao de uma nova chave.",
+        "revoked": "Chave API revogada",
+        "revokeFailed": "Falha ao revogar chave API",
+        "empty": "Ainda sem chaves API ativas.",
+        "revealTitle": "Guarde esta chave API agora",
+        "revealDescription": "Esta e a unica vez que o segredo completo e mostrado.",
+        "environment": "Ambiente",
+        "envTest": "Teste (so leitura)",
+        "envLive": "Producao",
+        "expiryDays": "Expira em (dias)",
+        "scopes": "Permissoes",
+        "expires": "Expira em {{date}}",
+        "lastUsed": "Ultimo uso {{date}}",
+        "testKeyLimitationsTitle": "Chaves de teste sao so leitura",
+        "testKeyLimitationsDescription": "Chaves de teste nao podem escrever nem aceder a PII de candidatos. Use chave de producao para integracao.",
+        "scopeLabels": {
+          "opportunities:read": "Ler oportunidades",
+          "opportunities:write": "Escrever oportunidades",
+          "applications:read": "Ler candidaturas",
+          "applications:read_pii": "Ler PII de candidatos",
+          "webhooks:manage": "Gerir webhooks"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "A MAALI envia pedidos POST assinados para o seu endpoint HTTPS quando ocorrem eventos.",
+        "endpoint": "URL do endpoint",
+        "events": "Eventos subscritos",
+        "save": "Guardar webhook",
+        "saved": "Definicoes de webhook guardadas",
+        "saveFailed": "Falha ao guardar webhook",
+        "rotate": "Rodar segredo",
+        "rotated": "Segredo de assinatura do webhook rodado",
+        "rotateFailed": "Falha ao rodar segredo",
+        "revealTitle": "Guarde este segredo de assinatura agora",
+        "revealDescription": "Use-o para verificar X-Maali-Signature em webhooks recebidos.",
+        "secretPrefix": "Prefixo do segredo atual: {{prefix}}…",
+        "validation": {
+          "url": "Introduza um URL HTTPS valido",
+          "events": "Selecione pelo menos um evento"
+        },
+        "eventLabels": {
+          "application_submitted": "Candidatura submetida",
+          "application_status_changed": "Estado da candidatura alterado",
+          "opportunity_closed": "Oportunidade encerrada"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "Ver documentacao da API",
+      "back": "Voltar as definicoes da API",
+      "title": "Documentacao da API do parceiro",
+      "subtitle": "Referencia para integrar os seus sistemas com a MAALI."
     },
     "orgNotLinked": {
       "title": "Organizacao nao associada",

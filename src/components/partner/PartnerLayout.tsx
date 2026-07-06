@@ -13,6 +13,7 @@ import {
   Handshake,
   Bell,
   Users,
+  Plug,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ interface PartnerLayoutProps {
 const PARTNER_MENU_ITEMS = [
   { href: "/partner", menuKey: "dashboard", icon: LayoutDashboard },
   { href: "/partner/opportunities", menuKey: "opportunities", icon: FolderKanban },
+  { href: "/partner/api", menuKey: "api", icon: Plug },
   { href: "/partner/notifications", menuKey: "notifications", icon: Bell },
   { href: "/partner/team", menuKey: "team", icon: Users },
   { href: "/partner/settings", menuKey: "settings", icon: Settings },
@@ -70,6 +72,8 @@ const PartnerLayout = ({ children }: PartnerLayoutProps) => {
       return t("partner.pages.opportunityDetails");
     }
     if (location.pathname.startsWith("/partner/opportunities")) return t("partner.pages.opportunities");
+    if (location.pathname.startsWith("/partner/api/docs")) return t("partner.pages.apiDocs");
+    if (location.pathname.startsWith("/partner/api")) return t("partner.pages.api");
     if (location.pathname === "/partner/notifications") return t("partner.pages.notifications");
     if (location.pathname === "/partner/team") return t("partner.pages.team");
     if (location.pathname === "/partner/settings") return t("partner.pages.settings");

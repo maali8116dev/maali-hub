@@ -2100,6 +2100,7 @@
     "menu": {
       "dashboard": "Dashboard",
       "opportunities": "My Opportunities",
+      "api": "API",
       "notifications": "Notifications",
       "team": "Team",
       "settings": "Settings"
@@ -2107,12 +2108,94 @@
     "pages": {
       "dashboard": "Partner Dashboard",
       "opportunities": "My Opportunities",
+      "api": "Partner API",
+      "apiDocs": "API Documentation",
       "notifications": "Notifications",
       "team": "Team",
       "settings": "Settings",
       "opportunityDetails": "Opportunity Details",
       "qualifiedApplicants": "Qualified Applicants",
       "default": "Partner Portal"
+    },
+    "apiPage": {
+      "loading": "Loading…",
+      "subtitle": "Manage API keys and webhooks for programmatic integration.",
+      "readOnlyTitle": "View only",
+      "readOnlyDescription": "Only organization admins can create or revoke API keys and manage webhooks.",
+      "copy": "Copy",
+      "copied": "{{label}} copied",
+      "copyFailed": "Could not copy to clipboard",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "overview": {
+        "title": "API base URL",
+        "description": "Use this base URL with your API key for all REST requests.",
+        "baseUrl": "Base URL",
+        "authHint": "Send your secret key in the X-API-Key header on every request."
+      },
+      "keys": {
+        "title": "API keys",
+        "description": "Create separate test and live keys. The full secret is shown once at creation.",
+        "create": "Create key",
+        "createTitle": "Create API key",
+        "createDescription": "Choose environment and scopes. Store the secret securely — it cannot be retrieved later.",
+        "created": "API key created",
+        "createFailed": "Failed to create API key",
+        "revoke": "Revoke",
+        "revokeTitle": "Revoke API key?",
+        "revokeDescription": "This key stops working immediately. Integrations using it will fail until you deploy a new key.",
+        "revoked": "API key revoked",
+        "revokeFailed": "Failed to revoke API key",
+        "empty": "No active API keys yet.",
+        "revealTitle": "Save this API key now",
+        "revealDescription": "This is the only time the full secret is shown.",
+        "environment": "Environment",
+        "envTest": "Test (read-only)",
+        "envLive": "Live",
+        "expiryDays": "Expires in (days)",
+        "scopes": "Scopes",
+        "expires": "Expires {{date}}",
+        "lastUsed": "Last used {{date}}",
+        "testKeyLimitationsTitle": "Test keys are read-only",
+        "testKeyLimitationsDescription": "Test keys cannot write data or access applicant PII. Use a live key for production integrations.",
+        "scopeLabels": {
+          "opportunities:read": "Read opportunities",
+          "opportunities:write": "Write opportunities",
+          "applications:read": "Read applications",
+          "applications:read_pii": "Read applicant PII",
+          "webhooks:manage": "Manage webhooks"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "MAALI sends signed POST requests to your HTTPS endpoint when events occur.",
+        "endpoint": "Endpoint URL",
+        "events": "Subscribed events",
+        "save": "Save webhook",
+        "saved": "Webhook settings saved",
+        "saveFailed": "Failed to save webhook",
+        "rotate": "Rotate secret",
+        "rotated": "Webhook signing secret rotated",
+        "rotateFailed": "Failed to rotate secret",
+        "revealTitle": "Save this signing secret now",
+        "revealDescription": "Use it to verify X-Maali-Signature on inbound webhooks.",
+        "secretPrefix": "Current secret prefix: {{prefix}}…",
+        "validation": {
+          "url": "Enter a valid HTTPS URL",
+          "events": "Select at least one event"
+        },
+        "eventLabels": {
+          "application_submitted": "Application submitted",
+          "application_status_changed": "Application status changed",
+          "opportunity_closed": "Opportunity closed"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "View API docs",
+      "back": "Back to API settings",
+      "title": "Partner API documentation",
+      "subtitle": "Reference for integrating your systems with MAALI."
     },
     "orgNotLinked": {
       "title": "Organization not linked",

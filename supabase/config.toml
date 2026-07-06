@@ -90,3 +90,12 @@ verify_jwt = false
 
 [functions.translate-application]
 verify_jwt = false
+
+[functions.partner-api]
+verify_jwt = false
+
+[functions.manage-partner-api]
+verify_jwt = false
+
+[functions.process-partner-webhooks]
+verify_jwt = false

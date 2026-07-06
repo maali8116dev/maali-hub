@@ -2100,6 +2100,7 @@
     "menu": {
       "dashboard": "Übersicht",
       "opportunities": "Meine Möglichkeiten",
+      "api": "API",
       "notifications": "Benachrichtigungen",
       "team": "Team",
       "settings": "Einstellungen"
@@ -2107,12 +2108,94 @@
     "pages": {
       "dashboard": "Partner-Dashboard",
       "opportunities": "Meine Möglichkeiten",
+      "api": "Partner-API",
+      "apiDocs": "API-Dokumentation",
       "notifications": "Benachrichtigungen",
       "team": "Team",
       "settings": "Einstellungen",
       "opportunityDetails": "Opportunity-Details",
       "qualifiedApplicants": "Qualifizierte Bewerber",
       "default": "Partnerportal"
+    },
+    "apiPage": {
+      "loading": "Wird geladen…",
+      "subtitle": "API-Schlüssel und Webhooks für die programmatische Integration verwalten.",
+      "readOnlyTitle": "Nur Ansicht",
+      "readOnlyDescription": "Nur Organisations-Admins können API-Schlüssel erstellen oder widerrufen und Webhooks verwalten.",
+      "copy": "Kopieren",
+      "copied": "{{label}} kopiert",
+      "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen",
+      "cancel": "Abbrechen",
+      "saving": "Speichern…",
+      "overview": {
+        "title": "API-Basis-URL",
+        "description": "Verwenden Sie diese Basis-URL mit Ihrem API-Schlüssel für alle REST-Anfragen.",
+        "baseUrl": "Basis-URL",
+        "authHint": "Senden Sie Ihren geheimen Schlüssel bei jeder Anfrage im Header X-API-Key."
+      },
+      "keys": {
+        "title": "API-Schlüssel",
+        "description": "Erstellen Sie separate Test- und Live-Schlüssel. Das vollständige Secret wird nur einmal bei der Erstellung angezeigt.",
+        "create": "Schlüssel erstellen",
+        "createTitle": "API-Schlüssel erstellen",
+        "createDescription": "Umgebung und Berechtigungen wählen. Secret sicher speichern — später nicht abrufbar.",
+        "created": "API-Schlüssel erstellt",
+        "createFailed": "API-Schlüssel konnte nicht erstellt werden",
+        "revoke": "Widerrufen",
+        "revokeTitle": "API-Schlüssel widerrufen?",
+        "revokeDescription": "Der Schlüssel funktioniert sofort nicht mehr. Integrationen benötigen einen neuen Schlüssel.",
+        "revoked": "API-Schlüssel widerrufen",
+        "revokeFailed": "API-Schlüssel konnte nicht widerrufen werden",
+        "empty": "Noch keine aktiven API-Schlüssel.",
+        "revealTitle": "API-Schlüssel jetzt speichern",
+        "revealDescription": "Das vollständige Secret wird nur dieses eine Mal angezeigt.",
+        "environment": "Umgebung",
+        "envTest": "Test (nur Lesen)",
+        "envLive": "Live",
+        "expiryDays": "Läuft ab in (Tagen)",
+        "scopes": "Berechtigungen",
+        "expires": "Läuft ab am {{date}}",
+        "lastUsed": "Zuletzt verwendet {{date}}",
+        "testKeyLimitationsTitle": "Test-Schlüssel sind nur lesend",
+        "testKeyLimitationsDescription": "Test-Schlüssel können nicht schreiben und keine Bewerber-PII lesen. Für Produktion einen Live-Schlüssel verwenden.",
+        "scopeLabels": {
+          "opportunities:read": "Opportunities lesen",
+          "opportunities:write": "Opportunities schreiben",
+          "applications:read": "Bewerbungen lesen",
+          "applications:read_pii": "Bewerber-PII lesen",
+          "webhooks:manage": "Webhooks verwalten"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "MAALI sendet signierte POST-Anfragen an Ihren HTTPS-Endpunkt bei Ereignissen.",
+        "endpoint": "Endpunkt-URL",
+        "events": "Abonnierte Ereignisse",
+        "save": "Webhook speichern",
+        "saved": "Webhook-Einstellungen gespeichert",
+        "saveFailed": "Webhook konnte nicht gespeichert werden",
+        "rotate": "Secret rotieren",
+        "rotated": "Webhook-Signatur-Secret rotiert",
+        "rotateFailed": "Secret konnte nicht rotiert werden",
+        "revealTitle": "Signatur-Secret jetzt speichern",
+        "revealDescription": "Zur Verifizierung von X-Maali-Signature bei eingehenden Webhooks.",
+        "secretPrefix": "Aktuelles Secret-Präfix: {{prefix}}…",
+        "validation": {
+          "url": "Gültige HTTPS-URL eingeben",
+          "events": "Mindestens ein Ereignis auswählen"
+        },
+        "eventLabels": {
+          "application_submitted": "Bewerbung eingereicht",
+          "application_status_changed": "Bewerbungsstatus geändert",
+          "opportunity_closed": "Opportunity geschlossen"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "API-Dokumentation",
+      "back": "Zurück zu API-Einstellungen",
+      "title": "Partner-API-Dokumentation",
+      "subtitle": "Referenz zur Integration Ihrer Systeme mit MAALI."
     },
     "orgNotLinked": {
       "title": "Organisation nicht verknüpft",
