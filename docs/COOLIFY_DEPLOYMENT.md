@@ -101,14 +101,14 @@ GOTRUE_SMTP_ADMIN_EMAIL=no-reply@maalihub.com
   ```
   (adjust host/port to the functions container's internal name). If you skip the hook,
   GoTrue falls back to plain SMTP templates — auth still works, emails are just unbranded.
-- **Captcha** (P0 before launch): create a Cloudflare Turnstile site, then:
-  ```
-  GOTRUE_SECURITY_CAPTCHA_ENABLED=true
-  GOTRUE_SECURITY_CAPTCHA_PROVIDER=turnstile
-  GOTRUE_SECURITY_CAPTCHA_SECRET=<turnstile secret>
-  ```
-  The frontend must then send the captcha token in auth calls — this is still an open
-  code task (see PRODUCTION_LAUNCH_ISSUES.md B6).
+- **Captcha**: the app verifies Turnstile tokens itself in `rate-limited-auth`,
+  `submit-application`, and `submit-contact` (see §4b for `TURNSTILE_SECRET_KEY`) — it
+  does **not** rely on GoTrue's built-in captcha, since signup/login/password-reset go
+  through the `rate-limited-auth` Edge Function rather than calling GoTrue's public
+  endpoints directly. You do **not** need to set `GOTRUE_SECURITY_CAPTCHA_*` here.
+  Create one Turnstile site in the Cloudflare dashboard (Turnstile → Add Site,
+  domain `maalihub.com`) and use the **same** site/secret key pair for all three
+  functions above.
 
 ### 4b. Edge functions
 
@@ -150,6 +150,7 @@ docker restart <functions-container>
 | `GOOGLE_CLOUD_TRANSLATE_API_KEY` | translations (opportunity/CMS/application) |
 | `ABSTRACT_API_KEY` | email validation on signup |
 | `EMAIL_LOGO_URL` (optional) | absolute URL to email logo |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key — required in prod; `rate-limited-auth`, `submit-application`, `submit-contact` reject requests without it |
 
 ## 5. Data migration from Supabase Cloud
 
@@ -206,12 +207,22 @@ Dry-run this whole section once before the real cutover.
    VITE_SITE_URL=https://maalihub.com
    VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
    VITE_PAYSTACK_PUBLIC_KEY=pk_live_...
+   VITE_TURNSTILE_SITE_KEY=<turnstile site key, same site as §4a>
    VITE_PUBLIC_POSTHOG_KEY=<optional>
    VITE_PUBLIC_POSTHOG_HOST=<optional>
    VITE_SENTRY_DSN=<optional>
    ```
+   ⚠️ **`VITE_TURNSTILE_SITE_KEY` (frontend) and `TURNSTILE_SECRET_KEY` (§4b, functions)
+   are both required in production and must come from the same Turnstile site.** Against
+   a real (non-local) `SUPABASE_URL`, the Edge Functions fail closed whenever
+   `TURNSTILE_SECRET_KEY` is unset — so forgetting either variable breaks **every**
+   signup/login/password-reset/contact/application submission, including real users, not
+   just bots. The only environment where both can be safely left unset is a local
+   Supabase stack (`127.0.0.1`/`localhost`), which skips the check entirely for dev.
 4. Deploy. Optionally enable auto-deploy on push (add the CI gate from
    PRODUCTION_LAUNCH_ISSUES.md D12 before trusting this).
+   Health check: Dockerfile defines `GET /health` (nginx) — Coolify picks it up
+   automatically. Manual override: path `/health`, port `80`, expect `200`.
 5. `nginx.conf` ships CSP as **`Content-Security-Policy-Report-Only`**. After the
    smoke test, watch the browser console for CSP violation reports, fix the policy,
    then rename the header to `Content-Security-Policy` and redeploy.
@@ -242,14 +253,37 @@ email (e.g. contact form) — they take different paths (SMTP vs Resend API).
 1. `curl -I https://maalihub.com` → 200, security headers present, `index.html`
    `Cache-Control: no-cache`; an `/assets/*.js` URL → `immutable`.
 2. Deep link (e.g. `https://maalihub.com/opportunities`) loads directly (SPA fallback).
-3. Sign up → magic link arrives in inbox (not spam) → login works.
+3. Sign up → **Turnstile widget renders** on the signup form and the button stays
+   disabled until solved → magic link arrives in inbox (not spam) → login works
+   (widget appears there too).
 4. Google OAuth login round-trips.
-5. Apply to an opportunity with a document upload; reviewer sees it via signed URL.
-6. Live payment (smallest plan) on Stripe **and** Paystack → webhook fires →
+5. Submit the contact form (widget renders, submits, confirmation + admin email arrive).
+6. Apply to an opportunity with a document upload; widget renders on the final step;
+   reviewer sees the document via signed URL.
+7. Live payment (smallest plan) on Stripe **and** Paystack → webhook fires →
    membership activates; receipt email arrives.
-7. `select * from cron.job;` shows both workers; `email_queue` rows move to `sent`.
-8. From a machine outside the VPS: `psql -h api.maalihub.com -p 5432` **fails**
+8. `select * from cron.job;` shows both workers; `email_queue` rows move to `sent`.
+9. From a machine outside the VPS: `psql -h api.maalihub.com -p 5432` **fails**
    (connection refused/timeout), Studio prompts for auth.
+
+### "No available server" / HTTPS broken after deploy
+
+Traefik error **503** — proxy up, no healthy backend. TLS may still work; page shows
+Traefik message instead of nginx.
+
+**Check in order (Coolify → your frontend app):**
+
+1. **Deployment logs** — build finished? Container **Running** (not Exited/Restarting)?
+2. **Network → Ports Exposes** = `80` (nginx listens on 80 inside container; no 443).
+3. **Health check** — if enabled before `/health` shipped, disable it or set path `/`
+   until redeploy includes `nginx.conf` `/health`. Failing health check = Traefik drops backend.
+4. **Domain** — still `https://maalihub.com` (with `https://` prefix in Coolify).
+5. **Cloudflare** (if proxied ☁️) — SSL/TLS mode **Full** or **Full (strict)**, not Flexible.
+6. **All apps down?** — Servers → Proxy → set Traefik to **v3.6.1** → Restart Proxy
+   (Docker 29+ needs patched Traefik; see Coolify "no available server" docs).
+
+Quick VPS test (SSH): `docker ps` shows frontend container up;  
+`docker exec <container> curl -f http://127.0.0.1/health` → `ok`.
 
 ## 10. Backups (do this in week one, not "later")
 
@@ -260,7 +294,6 @@ email (e.g. contact form) — they take different paths (SMTP vs Resend API).
 
 ## Still open after this runbook (from PRODUCTION_LAUNCH_ISSUES.md)
 
-- **B6**: Turnstile captcha wiring in the frontend (auth + contact + application forms).
 - **D12**: CI workflow (lint/test/build) gating deploys.
 - **C2**: prerender static marketing routes; Helmet on opportunity detail.
 - **D5**: Privacy Policy + ToS content live at `/privacy`, `/terms`.
