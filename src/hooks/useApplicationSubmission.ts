@@ -199,7 +199,8 @@ export function useApplicationSubmission() {
 
   const submitApplication = async (
     draftId?: string | null,
-    opportunityType?: string | null
+    opportunityType?: string | null,
+    turnstileToken?: string
   ) => {
     if (!user || !formData.projectId) {
       throw new Error("User and opportunity ID are required");
@@ -321,6 +322,7 @@ export function useApplicationSubmission() {
             applicationData,
             libraryDocumentIds: allDocumentIds,
             token: session.access_token,
+            turnstileToken,
           },
           headers: {
             Authorization: `Bearer ${session.access_token}`,

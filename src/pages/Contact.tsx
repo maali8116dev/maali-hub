@@ -19,8 +19,23 @@ import { useAuth } from "@/hooks/useAuth";
 import { emailSchema } from "@/lib/emailValidation";
 import { useTranslation } from "react-i18next";
 import { LEGAL_CONTACT } from "@/components/legal/legalContact";
+import TurnstileWidget from "@/components/TurnstileWidget";
+import { useTurnstile } from "@/hooks/useTurnstile";
 
 const SUBJECT_OPTIONS = ["funding", "application", "partnership", "technical", "general"] as const;
+
+/** Reads the `code` field from a Supabase Edge Function error response body, if any. */
+async function readEdgeErrorCode(err: unknown): Promise<string | null> {
+  const ctx = (err as { context?: Response } | null)?.context;
+  if (!ctx || typeof ctx.clone !== "function") return null;
+  try {
+    const body = await ctx.clone().json();
+    return body?.code ?? body?.errorCode ?? null;
+  } catch {
+    return null;
+  }
+}
+
 type ContactFormData = {
   firstName: string;
   lastName: string;
@@ -33,10 +48,11 @@ type ContactFormData = {
 
 const Contact = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { session } = useAuth();
   const { t, i18n } = useTranslation("common");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const captcha = useTurnstile();
 
   const contactFormSchema = useMemo(
     () =>
@@ -84,28 +100,36 @@ const Contact = () => {
     setSubmitSuccess(false);
 
     try {
-      // Save to database
-      const { data: submission, error: dbError } = await supabase
-        .from("contact_submissions")
-        .insert({
-          first_name: data.firstName,
-          last_name: data.lastName,
-          email: data.email,
-          phone: data.phone || null,
-          country: data.country || null,
-          subject: data.subject,
-          message: data.message,
-          user_id: user?.id || null,
-        })
-        .select()
-        .single();
+      // Submit via Edge Function (verifies Turnstile token server-side before inserting)
+      const { data: result, error: submitError } = await supabase.functions.invoke(
+        "submit-contact",
+        {
+          body: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone || null,
+            country: data.country || null,
+            subject: data.subject,
+            message: data.message,
+            token: session?.access_token,
+            turnstileToken,
+          },
+        },
+      );
 
-      if (dbError) {
-        console.error("Database error:", dbError);
-        toast.error(t("contactPage.toasts.submitFailed"));
-        setIsSubmitting(false);
+      if (submitError || !result?.data?.id) {
+        console.error("Contact submission error:", submitError);
+        const code = await readEdgeErrorCode(submitError);
+        toast.error(
+          code === "CAPTCHA_FAILED"
+            ? t("contactPage.toasts.captchaFailed")
+            : t("contactPage.toasts.submitFailed"),
+        );
         return;
       }
+
+      const submissionId = result.data.id as string;
 
       // Send confirmation email to user
       const emailLocale = i18n.language?.split("-")[0];
@@ -113,7 +137,7 @@ const Contact = () => {
         data.email,
         data.firstName,
         data.message,
-        submission.id,
+        submissionId,
         emailLocale,
       );
 
@@ -133,7 +157,7 @@ const Contact = () => {
         data.country || null,
         data.subject,
         data.message,
-        submission.id,
+        submissionId,
         emailLocale,
       );
 
@@ -162,6 +186,8 @@ const Contact = () => {
       toast.error(t("contactPage.toasts.unexpectedError"));
     } finally {
       setIsSubmitting(false);
+      // Single-use token: reset after every attempt so the widget re-issues one.
+      captcha.reset();
     }
   };
 
@@ -382,12 +408,14 @@ const Contact = () => {
                       )}
                     </div>
 
+                    <TurnstileWidget {...captcha.widgetProps} className="flex justify-center" />
+
                     <Button
                       type="submit"
                       className="w-full min-h-[48px]"
                       variant="hero"
                       size="lg"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || captcha.blocked}
                     >
                       {isSubmitting ? (
                         <>

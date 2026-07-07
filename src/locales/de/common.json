@@ -847,6 +847,7 @@
       "messageTooLong": "Nachricht ist zu lang"
     },
     "toasts": {
+      "captchaFailed": "Captcha-Überprüfung fehlgeschlagen. Bitte lösen Sie das Captcha und versuchen Sie es erneut.",
       "submitFailed": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
       "submitSuccess": "Ihre Nachricht wurde erfolgreich gesendet! Wir melden uns innerhalb von 24 Stunden.",
       "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."

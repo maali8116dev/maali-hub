@@ -143,3 +143,17 @@ export function jsonResponse(
     headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
+
+/**
+ * Parse a client IP from edge-provided headers; returns null if absent/invalid.
+ * Used for rate-limit keys and Turnstile remoteip binding.
+ */
+export function parseClientIp(req: Request): string | null {
+  const raw =
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  if (!raw) return null;
+  const ipv4 = /^\d{1,3}(\.\d{1,3}){3}$/;
+  const ipv6 = /^[0-9a-fA-F:]+$/;
+  return ipv4.test(raw) || ipv6.test(raw) ? raw : null;
+}

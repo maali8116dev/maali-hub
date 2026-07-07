@@ -131,6 +131,7 @@
       "messageTooLong": "Le message est trop long"
     },
     "toasts": {
+      "captchaFailed": "Échec de la vérification captcha. Veuillez compléter le captcha et réessayer.",
       "submitFailed": "Échec de l'envoi du message. Veuillez réessayer.",
       "submitSuccess": "Votre message a été envoyé avec succès ! Nous vous répondrons sous 24 heures.",
       "unexpectedError": "Une erreur inattendue est survenue. Veuillez réessayer."

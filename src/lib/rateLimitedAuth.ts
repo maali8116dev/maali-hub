@@ -8,13 +8,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ||
-  "https://alpudhhsmgtpmgpjfuqs.supabase.co";
-
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  "sb_publishable_x9j94wxK7OqIvyNh0eN5hw_uCBviZiZ";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export interface RateLimitedAuthResult<T = unknown> {
   data: T | null;
@@ -69,6 +64,7 @@ export async function rateLimitedAuth<T = unknown>(
     email: string;
     password?: string;
     options?: Record<string, unknown>;
+    turnstileToken?: string;
   },
 ): Promise<RateLimitedAuthResult<T>> {
   try {
@@ -114,10 +110,15 @@ export async function rateLimitedAuth<T = unknown>(
 }
 
 /** Rate-limited sign-in via Edge Function, then setSession (no second signIn call). */
-export async function rateLimitedSignIn(email: string, password: string) {
+export async function rateLimitedSignIn(
+  email: string,
+  password: string,
+  turnstileToken?: string,
+) {
   const result = await rateLimitedAuth<AuthSessionPayload>("sign_in", {
     email,
     password,
+    turnstileToken,
   });
 
   if (result.error) return result;
@@ -132,11 +133,13 @@ export async function rateLimitedSignUp(
   email: string,
   password: string,
   options?: Record<string, unknown>,
+  turnstileToken?: string,
 ) {
   const result = await rateLimitedAuth<AuthSessionPayload>("sign_up", {
     email,
     password,
     options,
+    turnstileToken,
   });
 
   if (result.error) return result;

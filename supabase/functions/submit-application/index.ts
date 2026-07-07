@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
+import { authenticateRequest, jsonResponse, parseClientIp } from "../_shared/auth.ts";
 import { buildNotificationMetadata } from "../_shared/notifications.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 /* ------------------------------------------------------------------ */
 /*  Shared clients                                                     */
@@ -20,6 +21,7 @@ const supabaseAdmin = createClient(
 
 interface SubmitApplicationRequest {
   token?: string;
+  turnstileToken?: string;
   draftId?: string | null;
   opportunityId: number;
   submittedLocale?: string;
@@ -368,6 +370,16 @@ serve(async (req: Request): Promise<Response> => {
         success: false,
         error: "Opportunity ID is required",
         errorCode: "MISSING_OPPORTUNITY_ID",
+      });
+    }
+
+    // ── 2b. Captcha check ──────────────────────────────────────────
+    const captcha = await verifyTurnstile(body.turnstileToken, parseClientIp(req));
+    if (!captcha.success) {
+      return jsonResponse(req, 400, {
+        success: false,
+        error: "Captcha verification failed",
+        errorCode: "CAPTCHA_FAILED",
       });
     }
 

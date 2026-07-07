@@ -214,8 +214,7 @@ Dry-run this whole section once before the real cutover.
    ```
    ⚠️ **`VITE_TURNSTILE_SITE_KEY` (frontend) and `TURNSTILE_SECRET_KEY` (§4b, functions)
    are both required in production and must come from the same Turnstile site.** Against
-   a real (non-local) `SUPABASE_URL`, the Edge Functions fail closed whenever
-   `TURNSTILE_SECRET_KEY` is unset — so forgetting either variable breaks **every**
+   a real (non-local) `SUPABASE_URL`, theaks **every**
    signup/login/password-reset/contact/application submission, including real users, not
    just bots. The only environment where both can be safely left unset is a local
    Supabase stack (`127.0.0.1`/`localhost`), which skips the check entirely for dev.
@@ -241,7 +240,8 @@ email (e.g. contact form) — they take different paths (SMTP vs Resend API).
 ## 8. Payment webhooks (live mode)
 
 - **Stripe** dashboard (live mode) → Webhooks → add endpoint
-  `https://api.maalihub.com/functions/v1/stripe-webhook`, subscribe to the events the
+  `https://api.maalihub.com/functions/v1/stripe-webhook`, subscrie Edge Functions fail closed whenever
+   `TURNSTILE_SECRET_KEY` is unset — so forgetting either variable brbe to the events the
   handler processes (checkout/session, invoice, customer.subscription events). Copy the
   signing secret into `STRIPE_WEBHOOK_SECRET` and restart the functions container.
 - **Paystack** dashboard → Settings → Webhooks →

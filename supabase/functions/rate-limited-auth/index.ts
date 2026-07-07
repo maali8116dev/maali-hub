@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { parseClientIp } from "../_shared/auth.ts";
+import { verifyTurnstile } from "../_shared/turnstile.ts";
 
 /** Allowed auth operations. Config is read from the rate_limit_config table. */
 const ALLOWED_OPERATIONS = new Set([
@@ -17,23 +19,6 @@ const FALLBACK_CONFIG: Record<string, { max: number; window: number }> = {
   password_reset: { max: 3,  window: 60 },
   magic_link:     { max: 3,  window: 60 },
 };
-
-/** Safely parse a client IP from edge-provided headers; returns null if invalid. */
-function parseClientIP(req: Request): string | null {
-  // Supabase Edge Functions set x-forwarded-for automatically from the edge.
-  const raw =
-    req.headers.get("x-real-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-
-  if (!raw) return null;
-
-  // Basic validation: must look like an IPv4 or IPv6 address
-  const ipv4 = /^\d{1,3}(\.\d{1,3}){3}$/;
-  const ipv6 = /^[0-9a-fA-F:]+$/;
-  if (ipv4.test(raw) || ipv6.test(raw)) return raw;
-
-  return null;
-}
 
 type AuthOpResult = {
   data: { user?: { id: string }; session?: unknown } | null;
@@ -137,7 +122,7 @@ serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    const { operation, email, password, options } = body;
+    const { operation, email, password, options, turnstileToken } = body;
 
     // -------------------------------------------------------
     // Validate operation
@@ -155,6 +140,8 @@ serve(async (req: Request) => {
         { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
       );
     }
+
+    const clientIP = parseClientIp(req);
 
     // -------------------------------------------------------
     // Rate-limit check (service_role bypasses RLS + grants)
@@ -183,8 +170,6 @@ serve(async (req: Request) => {
       maxRequests = configRow.max_requests;
       windowMinutes = configRow.window_minutes;
     }
-
-    const clientIP = parseClientIP(req);
 
     const { data: rateLimitResult, error: rlError } = await serviceClient.rpc(
       "check_and_increment_rate_limit",
@@ -221,6 +206,18 @@ serve(async (req: Request) => {
             ...(resetAt ? { "Retry-After": String(Math.ceil((new Date(resetAt).getTime() - Date.now()) / 1000)) } : {}),
           },
         },
+      );
+    }
+
+    // -------------------------------------------------------
+    // Captcha check (after rate limiting so a rejected request doesn't
+    // burn the single-use token or an outbound siteverify call)
+    // -------------------------------------------------------
+    const captcha = await verifyTurnstile(turnstileToken, clientIP);
+    if (!captcha.success) {
+      return new Response(
+        JSON.stringify({ error: "Captcha verification failed", code: "CAPTCHA_FAILED" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } },
       );
     }
 

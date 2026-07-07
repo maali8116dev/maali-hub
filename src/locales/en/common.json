@@ -847,6 +847,7 @@
       "messageTooLong": "Message is too long"
     },
     "toasts": {
+      "captchaFailed": "Captcha verification failed. Please complete the captcha and try again.",
       "submitFailed": "Failed to submit your message. Please try again.",
       "submitSuccess": "Your message has been sent successfully! We'll get back to you within 24 hours.",
       "unexpectedError": "An unexpected error occurred. Please try again."

@@ -20,6 +20,8 @@ import { isMembershipExemptRole, userNeedsOnboarding } from "@/lib/membershipAcc
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { BackButton } from "@/components/ui/back-button";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import TurnstileWidget from "@/components/TurnstileWidget";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import {
   createAuthSchemas,
   type ResetPasswordFormValues,
@@ -74,6 +76,8 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  const signInCaptcha = useTurnstile();
+  const signUpCaptcha = useTurnstile();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -195,7 +199,8 @@ const Auth = () => {
             first_name: data.firstName,
             last_name: data.lastName,
           },
-        }
+        },
+        signUpCaptcha.token,
       );
 
       if (result.error) {
@@ -278,6 +283,9 @@ const Auth = () => {
       });
     } finally {
       setIsLoading(false);
+      // Turnstile tokens are single-use — reset after every attempt so a
+      // consumed token never lingers behind an enabled button.
+      signUpCaptcha.reset();
     }
   };
 
@@ -285,7 +293,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const result = await rateLimitedSignIn(data.email, data.password);
+      const result = await rateLimitedSignIn(data.email, data.password, signInCaptcha.token);
 
       if (result.error) {
         if (result.error.isRateLimited) {
@@ -323,6 +331,7 @@ const Auth = () => {
       });
     } finally {
       setIsLoading(false);
+      signInCaptcha.reset();
     }
   };
 
@@ -347,6 +356,7 @@ const Auth = () => {
       const rlResult = await rateLimitedAuth("password_reset", {
         email,
         options: { redirectTo: redirectUrl },
+        turnstileToken: signInCaptcha.token,
       });
 
       if (rlResult.error) {
@@ -378,6 +388,8 @@ const Auth = () => {
       });
     } finally {
       setIsLoading(false);
+      // Shared with sign-in: the token is single-use, so reset here too.
+      signInCaptcha.reset();
     }
   };
 
@@ -618,17 +630,24 @@ const Auth = () => {
                     iconPosition="left"
                     required
                   />
+                  <TurnstileWidget {...signInCaptcha.widgetProps} className="flex justify-center" />
                   <div className="flex items-center justify-end">
                     <button
                       type="button"
                       onClick={handleForgotPassword}
-                      disabled={isLoading}
+                      disabled={isLoading || signInCaptcha.blocked}
                       className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {t("auth.fields.forgotPassword")}
                     </button>
                   </div>
-                  <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    variant="hero"
+                    size="lg"
+                    disabled={isLoading || signInCaptcha.blocked}
+                  >
                     {isLoading ? t("auth.buttons.signingIn") : t("auth.buttons.signIn")}
                   </Button>
                 </form>
@@ -733,7 +752,14 @@ const Auth = () => {
                     iconPosition="left"
                     required
                   />
-                <Button type="submit" className="w-full" variant="hero" size="lg" disabled={isLoading}>
+                <TurnstileWidget {...signUpCaptcha.widgetProps} className="flex justify-center" />
+                <Button
+                  type="submit"
+                  className="w-full"
+                  variant="hero"
+                  size="lg"
+                  disabled={isLoading || signUpCaptcha.blocked}
+                >
                   {isLoading ? t("auth.buttons.creatingAccount") : t("auth.buttons.createAccount")}
                 </Button>
               </form>

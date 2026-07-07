@@ -28,6 +28,8 @@ import { useApplicantAutofill } from "@/hooks/useApplicantAutofill";
 import { useApplicationValidation } from "@/hooks/useApplicationValidation";
 import { useApplicationSubmission } from "@/hooks/useApplicationSubmission";
 import { supabase } from "@/integrations/supabase/client";
+import TurnstileWidget from "@/components/TurnstileWidget";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import type { ApplicationFormValues } from "./form/schemas";
 import { getStepSchema } from "./form/getStepSchema";
 import { getFormDefaults } from "./form/getFormDefaults";
@@ -52,6 +54,7 @@ const MultiStepApplicationForm = () => {
   const stepTitles = useMemo(() => getStepTitles(t), [t]);
   const { user } = useAuth();
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const captcha = useTurnstile();
   const isEmailVerified =
     user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const {
@@ -214,7 +217,13 @@ const MultiStepApplicationForm = () => {
       return;
     }
 
-    await submitApplication(draftId, opportunityType);
+    try {
+      await submitApplication(draftId, opportunityType, captcha.token);
+    } finally {
+      // Single-use token: reset after the attempt so a stale token can't gate
+      // a later submit if the user stays on this step.
+      captcha.reset();
+    }
   };
 
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -406,6 +415,10 @@ const MultiStepApplicationForm = () => {
               {/* Step 8: Submit */}
               {currentStep === 8 && <Step9Submit />}
 
+              {currentStep === totalSteps && (
+                <TurnstileWidget {...captcha.widgetProps} className="flex justify-center" />
+              )}
+
               {/* Navigation Buttons */}
               <div className="flex items-center justify-between pt-6 border-t">
                 <Button
@@ -424,7 +437,7 @@ const MultiStepApplicationForm = () => {
                     type="button"
                     variant="hero"
                     className="flex items-center gap-2"
-                    disabled={!isEmailVerified || isSubmitting}
+                    disabled={!isEmailVerified || isSubmitting || captcha.blocked}
                     onClick={handleSubmit}
                   >
                     {isSubmitting ? (
