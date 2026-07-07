@@ -29,6 +29,10 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_PUBLIC_POSTHOG_HOST=$VITE_PUBLIC_POSTHOG_HOST \
     VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 
+# Fail the image build if Coolify did not pass required Vite build variables.
+RUN test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_ANON_KEY" || \
+  (echo "ERROR: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as Coolify Build Variables" >&2; exit 1)
+
 RUN npm run build
 
 FROM nginx:1.27-alpine
