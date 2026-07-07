@@ -12,6 +12,7 @@ import {
   isPartnerApiWriteRequest,
   requireLiveKeyForWrite,
   tryIdempotencyReplay,
+  partnerInternalError,
 } from "../_shared/partnerApi.ts";
 import {
   closeOpportunity,
@@ -186,15 +187,13 @@ serve(async (req: Request) => {
     return response;
   } catch (err) {
     console.error("partner-api error:", err);
-    const message = err instanceof Error ? err.message : "Internal server error";
     if (ctx) {
       await logPartnerApiAudit(
         supabaseAdmin, ctx, req.method, routePath, 500, "INTERNAL_ERROR", Date.now() - started,
       );
     }
     return partnerJsonResponse(req, 500, {
-      error: message,
-      errorCode: "INTERNAL_ERROR",
+      ...partnerInternalError().body,
     }, rateInfo);
   }
 });

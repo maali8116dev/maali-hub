@@ -130,21 +130,31 @@ function stableStringify(value: unknown): string {
 export function getPartnerApiCorsHeaders(req?: Request): Record<string, string> {
   const origin = req?.headers.get("Origin") || "";
   const envOrigins = Deno.env.get("ALLOWED_ORIGINS");
+  const devOrigins = ["http://127.0.0.1:8080", "http://localhost:8080"];
   const allowed = envOrigins
-    ? envOrigins.split(",").map((o) => o.trim()).filter(Boolean)
-    : ["*"];
+    ? envOrigins.split(",").map((o) => o.trim()).filter(Boolean).filter((o) => o !== "*")
+    : devOrigins;
 
-  const allowOrigin = allowed.includes("*")
-    ? "*"
-    : (allowed.includes(origin) ? origin : allowed[0]);
+  const allowOrigin = origin && allowed.includes(origin) ? origin : allowed[0];
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type, x-api-key, idempotency-key",
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, OPTIONS",
-    ...(allowOrigin !== "*" ? { Vary: "Origin" } : {}),
+    Vary: "Origin",
   };
+}
+
+export const PARTNER_INTERNAL_ERROR_BODY = {
+  error: "Internal server error",
+  errorCode: "INTERNAL_ERROR",
+} as const;
+
+export function partnerInternalError(
+  status = 500,
+): { status: number; body: typeof PARTNER_INTERNAL_ERROR_BODY } {
+  return { status, body: { ...PARTNER_INTERNAL_ERROR_BODY } };
 }
 
 export function partnerJsonResponse(

@@ -16,6 +16,7 @@ import {
   mapOpportunityToApi,
   canIncludeApplicationPii,
   partnerJsonResponse,
+  partnerInternalError,
   requireScope,
   storeIdempotency,
 } from "./partnerApi.ts";
@@ -222,7 +223,8 @@ export async function listOpportunities(
 
   const { data, error } = await query;
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
 
   const rows = data ?? [];
@@ -258,7 +260,8 @@ export async function getOpportunity(
     .maybeSingle();
 
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
   if (!data) {
     return { status: 404, body: { error: "Opportunity not found", errorCode: "NOT_FOUND" } };
@@ -310,7 +313,8 @@ export async function createOpportunity(
       .single();
 
     if (error) {
-      return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+      console.error("partner API handler:", error);
+    return partnerInternalError();
     }
     return { status: 201, body: { data: mapOpportunityToApi(data) } };
   };
@@ -364,7 +368,8 @@ export async function patchOpportunity(
       .single();
 
     if (error) {
-      return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+      console.error("partner API handler:", error);
+    return partnerInternalError();
     }
     return { status: 200, body: { data: mapOpportunityToApi(data) } };
   };
@@ -399,7 +404,8 @@ export async function closeOpportunity(
       .single();
 
     if (error) {
-      return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+      console.error("partner API handler:", error);
+    return partnerInternalError();
     }
     return { status: 200, body: { data: mapOpportunityToApi(data) } };
   };
@@ -421,23 +427,48 @@ export async function listOpportunityApplications(
     return { status: 404, body: { error: "Opportunity not found", errorCode: "NOT_FOUND" } };
   }
 
-  const { data, error } = await supabase.rpc("partner_api_list_applications_ranked", {
+  const url = new URL(req.url);
+  const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit") || 50)));
+  const cursor = url.searchParams.get("cursor");
+
+  const rpcParams: {
+    p_opportunity_id: number;
+    p_partner_id: number;
+    p_limit: number;
+    p_cursor_rank?: number;
+    p_cursor_application_id?: string;
+  } = {
     p_opportunity_id: opportunityId,
     p_partner_id: ctx.partnerId,
-  });
+    p_limit: limit + 1,
+  };
 
-  if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+  if (cursor) {
+    const decoded = decodeCursor(cursor);
+    if (decoded?.rank_position != null && decoded?.application_id != null) {
+      rpcParams.p_cursor_rank = Number(decoded.rank_position);
+      rpcParams.p_cursor_application_id = String(decoded.application_id);
+    }
   }
 
-  const rows = data ?? [];
+  const { data, error } = await supabase.rpc("partner_api_list_applications_ranked", rpcParams);
+
+  if (error) {
+    console.error("partner API handler:", error);
+    return partnerInternalError();
+  }
+
+  const rows = (data ?? []) as Array<Record<string, unknown>>;
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+  const last = page[page.length - 1];
   const includePii = canIncludeApplicationPii(ctx);
 
   let appById = new Map<string, Record<string, unknown>>();
   let docUrlsByApp = new Map<string, string[]>();
 
-  if (includePii && rows.length) {
-    const appIds = rows.map((r: { application_id: string }) => r.application_id);
+  if (includePii && page.length) {
+    const appIds = page.map((r) => String(r.application_id));
     const [{ data: apps }, signedUrls] = await Promise.all([
       supabase
         .from("applications")
@@ -449,7 +480,7 @@ export async function listOpportunityApplications(
     docUrlsByApp = signedUrls;
   }
 
-  const items = rows.map((row: Record<string, unknown>) => {
+  const items = page.map((row) => {
     let pii: Record<string, unknown> | undefined;
     if (includePii) {
       const app = appById.get(String(row.application_id));
@@ -463,7 +494,18 @@ export async function listOpportunityApplications(
     return mapApplicationToApi({ opportunity_id: opportunityId }, row, pii);
   });
 
-  return { status: 200, body: { data: items } };
+  return {
+    status: 200,
+    body: {
+      data: items,
+      next_cursor: hasMore && last
+        ? encodeCursor({
+          rank_position: last.rank_position,
+          application_id: last.application_id,
+        })
+        : null,
+    },
+  };
 }
 
 export async function getApplication(
@@ -483,21 +525,29 @@ export async function getApplication(
     .maybeSingle();
 
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
 
   if (!app || !(await verifyOpportunityOwnership(supabase, app.opportunity_id, ctx.partnerId))) {
     return { status: 404, body: { error: "Application not found", errorCode: "NOT_FOUND" } };
   }
 
-  const { data: ranked } = await supabase.rpc("partner_api_list_applications_ranked", {
-    p_opportunity_id: app.opportunity_id,
-    p_partner_id: ctx.partnerId,
-  });
-
-  const rankRow = (ranked ?? []).find(
-    (r: { application_id: string }) => r.application_id === appId,
+  const { data: rankRows, error: rankError } = await supabase.rpc(
+    "partner_api_get_application_ranked",
+    {
+      p_opportunity_id: app.opportunity_id,
+      p_partner_id: ctx.partnerId,
+      p_application_id: appId,
+    },
   );
+
+  if (rankError) {
+    console.error("partner API handler:", rankError);
+    return partnerInternalError();
+  }
+
+  const rankRow = (rankRows ?? [])[0] as Record<string, unknown> | undefined;
 
   let pii: Record<string, unknown> | undefined;
   if (canIncludeApplicationPii(ctx)) {
@@ -603,7 +653,8 @@ export async function patchOrganization(
     .single();
 
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
 
   return {
@@ -722,7 +773,8 @@ export async function putWebhooks(
       .single();
 
     if (error) {
-      return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+      console.error("partner API handler:", error);
+    return partnerInternalError();
     }
 
     return {
@@ -756,7 +808,8 @@ export async function putWebhooks(
     .single();
 
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
 
   return {
@@ -805,7 +858,8 @@ export async function rotateWebhookSecret(
     .eq("partner_id", ctx.partnerId);
 
   if (error) {
-    return { status: 500, body: { error: error.message, errorCode: "INTERNAL_ERROR" } };
+    console.error("partner API handler:", error);
+    return partnerInternalError();
   }
 
   return {
