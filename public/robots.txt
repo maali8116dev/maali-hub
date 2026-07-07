@@ -25,4 +25,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://maali-opportunity-hub.lovable.app/sitemap.xml
+Sitemap: https://maalihub.com/sitemap.xml

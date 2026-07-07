@@ -96,7 +96,7 @@ serve(async (req) => {
         amount: pricing.amountSubunits,
         plan: planCode,
         reference,
-        callback_url: `${Deno.env.get("SITE_URL") ?? "https://maali-opportunity-hub.lovable.app"}/dashboard?upgrade_pending=1`,
+        callback_url: `${Deno.env.get("SITE_URL") ?? "https://maalihub.com"}/dashboard?upgrade_pending=1`,
         metadata: {
           userId,
           currency,

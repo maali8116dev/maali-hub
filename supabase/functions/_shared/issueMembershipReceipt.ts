@@ -97,7 +97,7 @@ export async function issueMembershipReceipt(
   }
 
   // Send email receipt
-  const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+  const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");

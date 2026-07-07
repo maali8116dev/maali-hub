@@ -25,8 +25,18 @@ const supabaseAdmin = createClient(
 
 serve(async (req: Request) => {
   // This function can be invoked by cron or manually.
-  // Optional: verify a shared secret header for security.
+  // Fail closed: CRON_SECRET is required outside local development.
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const isLocal = supabaseUrl.includes("127.0.0.1") || supabaseUrl.includes("localhost");
   const cronSecret = Deno.env.get("CRON_SECRET");
+
+  if (!isLocal && !cronSecret) {
+    return new Response(JSON.stringify({ error: "CRON_SECRET not configured" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (cronSecret) {
     const authHeader = req.headers.get("Authorization");
     if (authHeader !== `Bearer ${cronSecret}`) {

@@ -391,7 +391,7 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
         ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
         : "Member";
 
-      const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+      const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
@@ -1065,7 +1065,7 @@ async function enqueuePaymentReceiptEmail(
     }
 
     const amount = amountInCents ? (amountInCents / 100).toFixed(2) : "0.00";
-    const siteUrl = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
     const paymentDate = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -1344,7 +1344,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
         ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
         : "Member";
 
-      const siteUrl      = Deno.env.get("SITE_URL") || "https://maali-opportunity-hub.lovable.app";
+      const siteUrl      = Deno.env.get("SITE_URL") || "https://maalihub.com";
       const supabaseUrl  = Deno.env.get("SUPABASE_URL");
       const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
