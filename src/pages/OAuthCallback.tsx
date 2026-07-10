@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { userNeedsOnboarding } from '@/lib/membershipAccess';
+import { sendWelcomeEmail } from '@/lib/email';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
@@ -10,14 +11,12 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 async function ensureProfileForUser(
   userId: string,
   userMetadata: Record<string, unknown> | null,
-): Promise<boolean> {
+): Promise<{ isNew: boolean; firstName: string | null; lastName: string | null }> {
   const { data: existing } = await supabase
     .from('profiles')
     .select('id')
     .eq('user_id', userId)
     .single();
-
-  if (existing) return false;
 
   const meta = userMetadata ?? {};
   let firstName: string | null = (meta.first_name as string) ?? null;
@@ -29,13 +28,15 @@ async function ensureProfileForUser(
     lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
   }
 
+  if (existing) return { isNew: false, firstName, lastName };
+
   await supabase.from('profiles').insert({
     user_id: userId,
     first_name: firstName || null,
     last_name: lastName || null,
   });
 
-  return true;
+  return { isNew: true, firstName, lastName };
 }
 
 const OAuthCallback = () => {
@@ -98,7 +99,18 @@ const OAuthCallback = () => {
           }
 
           try {
-            await ensureProfileForUser(session.user.id, session.user.user_metadata);
+            const { isNew, firstName, lastName } = await ensureProfileForUser(
+              session.user.id,
+              session.user.user_metadata,
+            );
+            if (isNew) {
+              const recipientName = [firstName, lastName].filter(Boolean).join(' ') || userEmail;
+              sendWelcomeEmail(
+                userEmail,
+                recipientName,
+                `${window.location.origin}/onboarding`,
+              ).catch((err) => console.error('Failed to send welcome email:', err));
+            }
           } catch (profileErr) {
             if ((profileErr as { code?: string })?.code !== '23505') {
               console.warn('OAuth callback: ensure profile', profileErr);
