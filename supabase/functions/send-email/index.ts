@@ -1252,6 +1252,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send(emailPayload);
 
+    if (emailResponse.error) {
+      console.error("[send-email] Resend rejected the send:", emailResponse.error);
+      return new Response(
+        JSON.stringify({ error: emailResponse.error.message || "Failed to send email" }),
+        { status: 502, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("Email sent successfully:", emailResponse);
 
     return new Response(

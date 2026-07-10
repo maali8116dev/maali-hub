@@ -11,7 +11,7 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher';
 async function ensureProfileForUser(
   userId: string,
   userMetadata: Record<string, unknown> | null,
-): Promise<{ isNew: boolean; firstName: string | null; lastName: string | null }> {
+): Promise<{ firstName: string | null; lastName: string | null }> {
   const { data: existing } = await supabase
     .from('profiles')
     .select('id')
@@ -28,7 +28,7 @@ async function ensureProfileForUser(
     lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
   }
 
-  if (existing) return { isNew: false, firstName, lastName };
+  if (existing) return { firstName, lastName };
 
   await supabase.from('profiles').insert({
     user_id: userId,
@@ -36,7 +36,21 @@ async function ensureProfileForUser(
     last_name: lastName || null,
   });
 
-  return { isNew: true, firstName, lastName };
+  return { firstName, lastName };
+}
+
+/**
+ * A `profiles` row always exists by the time this runs (the `on_auth_user_created`
+ * DB trigger inserts it synchronously on signup), so presence of a profile can't be
+ * used to detect a first-time signup. Instead compare timestamps Supabase sets on
+ * the user: for a brand-new account `created_at` and `last_sign_in_at` are the same
+ * instant; a returning user's `last_sign_in_at` is well after `created_at`.
+ */
+function isNewSignup(user: { created_at: string; last_sign_in_at?: string | null }): boolean {
+  if (!user.last_sign_in_at) return true;
+  const createdAt = new Date(user.created_at).getTime();
+  const lastSignInAt = new Date(user.last_sign_in_at).getTime();
+  return Math.abs(lastSignInAt - createdAt) < 10_000;
 }
 
 const OAuthCallback = () => {
@@ -99,11 +113,11 @@ const OAuthCallback = () => {
           }
 
           try {
-            const { isNew, firstName, lastName } = await ensureProfileForUser(
+            const { firstName, lastName } = await ensureProfileForUser(
               session.user.id,
               session.user.user_metadata,
             );
-            if (isNew) {
+            if (isNewSignup(session.user)) {
               const recipientName = [firstName, lastName].filter(Boolean).join(' ') || userEmail;
               sendWelcomeEmail(
                 userEmail,
