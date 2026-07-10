@@ -50,19 +50,23 @@ export async function sendEmail(
   try {
     // For contact form emails, allow sending without authentication
     const isContactEmail = params.type === "contact_confirmation" || params.type === "contact_submission";
-    
+    let accessToken: string | undefined;
+
     if (!allowPublic && !isContactEmail) {
       const { data: sessionData } = await supabase.auth.getSession();
-      
+
       if (!sessionData.session) {
         return { success: false, error: "User not authenticated" };
       }
+      accessToken = sessionData.session.access_token;
     }
 
     const response = await supabase.functions.invoke("send-email", {
       body: {
         ...params,
         allowPublic: allowPublic || isContactEmail,
+        // Fallback for self-hosted Kong stripping the Authorization header.
+        token: accessToken,
       },
     });
 

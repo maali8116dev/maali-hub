@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
+import { extractToken } from "../_shared/auth.ts";
 import {
   CONTACT_SUBJECT_LABELS,
   getEmailLabels,
@@ -72,6 +73,8 @@ interface SendEmailRequest {
   to: string;
   type: EmailType;
   allowPublic?: boolean;
+  /** Fallback JWT when the relay strips the Authorization header (self-hosted Kong). */
+  token?: string;
   data: {
     recipientName?: string;
     projectTitle?: string;
@@ -1025,9 +1028,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, type, data, allowPublic }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
+    const { to, type, data, allowPublic, token: bodyToken }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
     const emailData = data || {};
-    
+
     // Determine request context
     const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
     const internalHeader = req.headers.get("X-Internal-Secret");
@@ -1041,18 +1044,19 @@ const handler = async (req: Request): Promise<Response> => {
     const isPublicAllowed =
       (allowPublic === true && isContactEmail) ||
       (allowPublic === true && isPaymentReceipt && Boolean(isInternal));
-    
+
     if (!isPublicAllowed) {
-      // Validate authorization for non-contact emails
-      const authHeader = req.headers.get("Authorization");
-      if (!authHeader?.startsWith("Bearer ")) {
+      // Validate authorization for non-contact emails. The relay strips the
+      // Authorization header before forwarding (self-hosted Kong), so fall
+      // back to a token passed in the body — same workaround as _shared/auth.ts.
+      const token = extractToken(req) || bodyToken || null;
+      if (!token) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
         );
       }
 
-      const token = authHeader.replace("Bearer ", "");
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
       // Allow trusted internal function-to-function calls using service role key.
@@ -1063,7 +1067,7 @@ const handler = async (req: Request): Promise<Response> => {
         const supabase = createClient(
           Deno.env.get("SUPABASE_URL")!,
           Deno.env.get("SUPABASE_ANON_KEY")!,
-          { global: { headers: { Authorization: authHeader } } }
+          { global: { headers: { Authorization: `Bearer ${token}` } } }
         );
 
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
