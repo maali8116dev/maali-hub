@@ -113,7 +113,7 @@ const Contact = () => {
             subject: data.subject,
             message: data.message,
             token: session?.access_token,
-            turnstileToken,
+            turnstileToken: captcha.token,
           },
         },
       );
