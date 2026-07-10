@@ -55,3 +55,4 @@ maali-migration.pdf
 migration-lovable-to-vercel.html
 # Self-host deploy config (secrets)
 scripts/.deploy.env
+scripts/deploy-selfhosted.sh

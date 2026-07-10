@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { generateReceiptPdf, storeReceiptPdf } from "./pdf-receipt.ts";
 import { resolveInvoiceNumber } from "./invoice-number.ts";
 

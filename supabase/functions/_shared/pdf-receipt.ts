@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 // Try importing pdf-lib with explicit target for Deno
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1?target=deno";
 

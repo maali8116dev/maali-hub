@@ -2,7 +2,7 @@
  * Partner API route handlers (service_role scoped to partner_id).
  */
 
-import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import {
   PartnerAuthContext,
   RateLimitInfo,

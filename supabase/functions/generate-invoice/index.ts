@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14?target=deno";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { authenticateRequest, jsonResponse } from "../_shared/auth.ts";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData, type ReceiptKind } from "../_shared/pdf-receipt.ts";

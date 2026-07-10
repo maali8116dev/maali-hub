@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { jsonResponse, parseClientIp } from "../_shared/auth.ts";
 import { verifyTurnstile } from "../_shared/turnstile.ts";

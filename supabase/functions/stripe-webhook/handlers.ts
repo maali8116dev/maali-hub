@@ -1,5 +1,5 @@
 import Stripe from "https://esm.sh/stripe@14.21.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
 import { resolveInvoiceNumber } from "../_shared/invoice-number.ts";
 import { buildNotificationMetadata } from "../_shared/notifications.ts";

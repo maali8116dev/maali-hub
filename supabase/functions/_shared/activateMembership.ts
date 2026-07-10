@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { issueMembershipReceipt } from "./issueMembershipReceipt.ts";
 
 export const supabaseAdmin = createClient(

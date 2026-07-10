@@ -2,7 +2,7 @@
  * Partner API core utilities — auth, rate limits, idempotency, mappers.
  */
 
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.56.0";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 
 export const PARTNER_API_SCOPES = [
   "opportunities:read",
