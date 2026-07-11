@@ -25,7 +25,7 @@ BEGIN
 
   PERFORM cron.schedule(
     'process-partner-webhooks',
-    '* * * * *',
+    '*/15 * * * *',
     $cron$
     SELECT net.http_post(
       url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'project_url')
