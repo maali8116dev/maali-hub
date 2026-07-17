@@ -126,11 +126,13 @@ Suggested execution order (dependency-aware): **A1 → A2 → A3 → A4 → A7 �
 - **Acceptance:** Cross-origin call from a non-allowed origin is blocked; app origin works.
 - **Deps:** A7, domain live.
 
-### B4. RLS + `verify_jwt` audit
+### B4. RLS + `verify_jwt` audit — report done, 2 fixes open
 - **Priority:** P0 · **Labels:** `area:security` `area:supabase` `P0`
 - **Tasks:**
-  - [ ] Verify RLS enabled + policy correct on every table; no anon-readable PII.
-  - [ ] Audit `config.toml` `verify_jwt=false` functions — each must self-auth (signature/CRON_SECRET/session).
+  - [x] Repo-side audit complete — see **`RLS_VERIFY_JWT_AUDIT.md`** (2026-07-17). All 43 tables RLS-enabled; no anon-readable PII; 24/26 `verify_jwt=false` functions self-auth correctly.
+  - [ ] **F1 (P0): `auth-email-hook` verifies no hook signature** — anyone reaching it can send arbitrary branded email via Resend. Add standardwebhooks signature check.
+  - [ ] **F2 (P1): `validate-email` unauthenticated + unlimited** — Abstract API quota burn. Add rate limit/Turnstile.
+  - [ ] Run the audit's §4 SQL against the live DB to confirm no drift.
 - **Acceptance:** Written report: every table's anon/authenticated grants + every public function's auth mechanism. No gaps.
 - **Deps:** A4.
 
