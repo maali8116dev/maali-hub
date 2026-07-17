@@ -111,14 +111,14 @@ Suggested execution order (dependency-aware): **A1 → A2 → A3 → A4 → A7 �
 - **Acceptance:** Old secrets invalid; app functions with new ones.
 - **Deps:** A2 (platform keys), can run parallel otherwise.
 
-### B2. Security headers at the edge
+### B2. Security headers at the edge — ✅ DONE (2026-07-17)
 - **Priority:** P0 · **Labels:** `area:security` `area:frontend` `P0`
-- **Context:** None set today. SPA has no server → configure at web server/CDN.
+- **Context:** Served by nginx (`nginx.conf`) inside the frontend container.
 - **Tasks:**
-  - [ ] `Content-Security-Policy` allowing self + Supabase, Stripe, Paystack, PostHog, Sentry, gpteng font CDN.
-  - [ ] `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` (or CSP `frame-ancestors`), `Referrer-Policy`, `Permissions-Policy`.
-- **Acceptance:** securityheaders.com grade A; app functions with CSP (no console CSP violations).
-- **Deps:** domain live.
+  - [x] Enforcing `Content-Security-Policy` (self + Supabase, Stripe, Paystack, PostHog, Sentry, Turnstile, gpteng font CDN) incl. `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`.
+  - [x] `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`.
+  - [x] Fixed nginx `add_header` inheritance bug that dropped CSP/Permissions-Policy on `/index.html` and `/assets/` locations (i.e. on every SPA deep link).
+- **Acceptance met:** securityheaders.com grade **A+** (2026-07-17); headers verified on `/` and deep links in prod. Any future CSP console violation = add the origin to all three policy copies in `nginx.conf`.
 
 ### B3. Lock CORS on Edge Functions
 - **Priority:** P0 · **Labels:** `area:security` `area:supabase` `P0`
