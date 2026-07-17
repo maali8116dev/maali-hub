@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
@@ -243,8 +244,39 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Supabase Auth Hook sends the payload directly
-    const payload: AuthHookPayload = await req.json();
+    // Verify the GoTrue send-email hook signature (standardwebhooks).
+    // The same secret must be set as GOTRUE_HOOK_SEND_EMAIL_SECRETS on GoTrue
+    // and SEND_EMAIL_HOOK_SECRET here (format: v1,whsec_<base64>).
+    // Fail closed in prod; local dev (localhost Supabase) may run unsigned.
+    const rawBody = await req.text();
+    const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const isLocal = supabaseUrl.includes("127.0.0.1") || supabaseUrl.includes("localhost");
+    let payload: AuthHookPayload;
+    if (hookSecret) {
+      try {
+        const wh = new Webhook(hookSecret.replace("v1,whsec_", ""));
+        payload = wh.verify(rawBody, {
+          "webhook-id": req.headers.get("webhook-id") ?? "",
+          "webhook-timestamp": req.headers.get("webhook-timestamp") ?? "",
+          "webhook-signature": req.headers.get("webhook-signature") ?? "",
+        }) as AuthHookPayload;
+      } catch (_err) {
+        console.error("auth-email-hook: invalid webhook signature");
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
+    } else if (isLocal) {
+      payload = JSON.parse(rawBody);
+    } else {
+      console.error("auth-email-hook: SEND_EMAIL_HOOK_SECRET is not set; rejecting unsigned request");
+      return new Response(
+        JSON.stringify({ error: "Hook secret not configured" }),
+        { status: 503, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
 
     // Log the payload for debugging
     console.log("Auth email hook received payload:", JSON.stringify({

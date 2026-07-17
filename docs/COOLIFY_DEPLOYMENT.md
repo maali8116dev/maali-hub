@@ -98,8 +98,12 @@ GOTRUE_SMTP_ADMIN_EMAIL=no-reply@maalihub.com
   ```
   GOTRUE_HOOK_SEND_EMAIL_ENABLED=true
   GOTRUE_HOOK_SEND_EMAIL_URI=http://functions:9000/auth-email-hook
+  GOTRUE_HOOK_SEND_EMAIL_SECRETS=v1,whsec_$(openssl rand -base64 32)
   ```
-  (adjust host/port to the functions container's internal name). If you skip the hook,
+  (adjust host/port to the functions container's internal name). Set the same
+  `v1,whsec_...` value as `SEND_EMAIL_HOOK_SECRET` on the functions container —
+  the hook verifies this signature and rejects unsigned requests in prod
+  (anti-phishing; see `RLS_VERIFY_JWT_AUDIT.md` F1). If you skip the hook,
   GoTrue falls back to plain SMTP templates — auth still works, emails are just unbranded.
 - **Captcha**: the app verifies Turnstile tokens itself in `rate-limited-auth`,
   `submit-application`, and `submit-contact` (see §4b for `TURNSTILE_SECRET_KEY`) — it

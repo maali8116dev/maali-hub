@@ -68,7 +68,14 @@ relay strips `Authorization`; see `_shared/auth.ts`). Each must self-auth:
 
 ## 3. Findings
 
-### 🔴 F1 (P0): `auth-email-hook` accepts unauthenticated requests
+### 🔴 F1 (P0): `auth-email-hook` accepts unauthenticated requests — ✅ FIXED 2026-07-17
+**Fixed:** the function now verifies the standardwebhooks signature against
+`SEND_EMAIL_HOOK_SECRET` (same value as GoTrue's `GOTRUE_HOOK_SEND_EMAIL_SECRETS`);
+401 on bad signature, 503 if the secret is unset in prod, unsigned allowed only
+against a localhost Supabase. Deploy requires setting both env vars — see
+`SECRETS_CHECKLIST.md` §2/§3. Original finding below.
+
+
 `supabase/functions/auth-email-hook/index.ts` performs **no signature or secret
 verification**. With `verify_jwt = false`, anyone who can reach
 `/functions/v1/auth-email-hook` can POST a forged GoTrue payload and make the

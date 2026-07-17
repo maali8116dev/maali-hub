@@ -25,6 +25,7 @@ somewhere safe. `ANON_KEY` and `SERVICE_ROLE_KEY` get reused in sections 3 and 4
 | `GOTRUE_SMTP_HOST` / `_PORT` / `_USER` / `_PASS` | your SMTP provider (e.g. Resend SMTP) |
 | `GOTRUE_SMTP_ADMIN_EMAIL` | e.g. `no-reply@maalihub.com` |
 | `GOTRUE_HOOK_SEND_EMAIL_ENABLED` / `_URI` | only if using the custom email hook function |
+| `GOTRUE_HOOK_SEND_EMAIL_SECRETS` | `v1,whsec_$(openssl rand -base64 32)` — same value as `SEND_EMAIL_HOOK_SECRET` in §3; the hook function rejects unsigned requests without it |
 
 ## 3. Edge functions container env vars
 
@@ -34,6 +35,7 @@ somewhere safe. `ANON_KEY` and `SERVICE_ROLE_KEY` get reused in sections 3 and 4
 | `SITE_URL` | `https://maalihub.com` |
 | `CRON_SECRET` | `openssl rand -hex 32` |
 | `INTERNAL_EMAIL_SECRET` | `openssl rand -hex 32` |
+| `SEND_EMAIL_HOOK_SECRET` | same `v1,whsec_...` value as `GOTRUE_HOOK_SEND_EMAIL_SECRETS` in §2 (only if using the auth email hook) |
 | `RESEND_API_KEY` | Resend dashboard |
 | `FROM_EMAIL` | e.g. `MAALI <no-reply@maalihub.com>` |
 | `SUPPORT_EMAIL` / `CONTACT_NOTIFICATION_EMAIL` | your team inbox |

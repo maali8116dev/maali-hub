@@ -130,7 +130,7 @@ Suggested execution order (dependency-aware): **A1 → A2 → A3 → A4 → A7 �
 - **Priority:** P0 · **Labels:** `area:security` `area:supabase` `P0`
 - **Tasks:**
   - [x] Repo-side audit complete — see **`RLS_VERIFY_JWT_AUDIT.md`** (2026-07-17). All 43 tables RLS-enabled; no anon-readable PII; 24/26 `verify_jwt=false` functions self-auth correctly.
-  - [ ] **F1 (P0): `auth-email-hook` verifies no hook signature** — anyone reaching it can send arbitrary branded email via Resend. Add standardwebhooks signature check.
+  - [x] **F1 (P0) fixed 2026-07-17:** `auth-email-hook` now verifies the standardwebhooks signature (`SEND_EMAIL_HOOK_SECRET`); rejects unsigned requests in prod (503 if secret unset, 401 on bad signature). **Deploy step:** set `GOTRUE_HOOK_SEND_EMAIL_SECRETS` (GoTrue) + `SEND_EMAIL_HOOK_SECRET` (functions) to the same `v1,whsec_...` value, then test a signup email.
   - [ ] **F2 (P1): `validate-email` unauthenticated + unlimited** — Abstract API quota burn. Add rate limit/Turnstile.
   - [ ] Run the audit's §4 SQL against the live DB to confirm no drift.
 - **Acceptance:** Written report: every table's anon/authenticated grants + every public function's auth mechanism. No gaps.
