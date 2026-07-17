@@ -222,9 +222,10 @@ Dry-run this whole section once before the real cutover.
    PRODUCTION_LAUNCH_ISSUES.md D12 before trusting this).
    Health check: Dockerfile defines `GET /health` (nginx) — Coolify picks it up
    automatically. Manual override: path `/health`, port `80`, expect `200`.
-5. `nginx.conf` ships CSP as **`Content-Security-Policy-Report-Only`**. After the
-   smoke test, watch the browser console for CSP violation reports, fix the policy,
-   then rename the header to `Content-Security-Policy` and redeploy.
+5. `nginx.conf` ships CSP as an enforcing **`Content-Security-Policy`** header (verified
+   locally against a production build — see git history if you need to fall back to
+   `-Report-Only` while debugging a new third-party integration). Watch the browser
+   console after deploy in case prod config (e.g. Supabase domain) differs from local.
 
 ## 7. Email deliverability (before real users)
 
