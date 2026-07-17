@@ -294,18 +294,33 @@ Suggested execution order (dependency-aware): **A1 → A2 → A3 → A4 → A7 �
 
 ### D12. CI/CD + staging gate
 - **Priority:** P1 · **Labels:** `area:infra` `P1`
-- **Context:** Single VPS deploy. Today only `i18n.yml` runs on PR. See `PRODUCTION_SELF_HOST_REVIEW.md` §13.
-- **Tasks:**
-  - [ ] **CI** (`.github/workflows/ci.yml`): `npm ci` → lint → vitest → build on every PR/push to `main`.
-  - [ ] Keep or merge `validate:i18n` into CI.
-  - [ ] **CD staging** (auto on `main`): SSH rsync `dist/` to staging VPS path; run migrations/functions only when those paths change.
-  - [ ] **CD prod** (manual approval or git tag): same as staging after smoke check.
-  - [ ] GitHub secrets: `VPS_SSH_KEY`, `VPS_HOST`, `VPS_USER`, `VITE_*` for build. **No** service_role in CI.
-  - [ ] GitHub environments `staging` / `production` with required reviewers on prod.
-  - [ ] `scripts/deploy-vps.sh` — idempotent; document rollback (previous `dist/` artifact, DB restore for bad migration).
+- **Context:** Single VPS deploy. See `PRODUCTION_SELF_HOST_REVIEW.md` §13.
+- **Shipped:**
+  - [x] **CI** (`.github/workflows/ci.yml`): `npm ci` → lint (report-only, ~550 pre-existing
+    errors) → i18n parity (blocking) → vitest (report-only, 9 pre-existing failing files) →
+    build (blocking), on every PR/push to `main`/`develop`. Absorbed the old `i18n.yml`.
+  - [x] **CD** (`.github/workflows/deploy-supabase.yml`): pushes DB migrations + edge
+    functions via `scripts/deploy-selfhosted.sh` over SSH, only when those paths change.
+    Auto on push to `main` (`staging` GitHub Environment); `production` only via manual
+    `workflow_dispatch`, gated by that environment's required reviewers.
+  - [x] GitHub environment secrets documented in `SECRETS_CHECKLIST.md` §6. No service_role
+    or payment/email secrets in GitHub — those stay in Coolify.
+  - Frontend is **not** deployed by these workflows — Coolify auto-builds the Dockerfile app
+    straight from git pushes (§6 of `COOLIFY_DEPLOYMENT.md`); CI/CD here exists to gate what
+    merges into the branch Coolify watches, and to stop migrations/functions from being
+    pushed by hand and forgotten.
+- **Still open:**
+  - [ ] Flip lint + vitest from report-only to blocking once the existing debt (551 lint
+    errors, 9 broken test files on a stale `react-i18next` mock) is cleared.
+  - [ ] Branch protection rule requiring the CI job to pass before merge to `main`.
+  - [ ] Add `staging`/`production` GitHub Environments + secrets in repo settings (workflow
+    references them; they don't exist yet).
+  - [ ] Test `deploy-supabase.yml` once against a real VPS/staging target — untested as
+    written.
   - [ ] Optional: Playwright against `STAGING_URL` in CI.
   - [ ] Staging VPS or second Compose project with separate keys/DB.
-- **Acceptance:** PR with failing test cannot merge (branch protection); deploy to prod requires passing CI + manual approval; rollback steps documented and tested once.
+- **Acceptance:** PR with failing build cannot merge (branch protection); deploy to prod
+  requires passing CI + manual approval; rollback steps documented and tested once.
 - **Deps:** A1 (VPS exists), C6 (static path known).
 
 ---

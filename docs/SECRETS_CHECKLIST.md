@@ -81,6 +81,25 @@ migrations/functions to the VPS. Not deployed anywhere; stays on your laptop.
 | `SSH_KEY` (optional) | override if not using default SSH config |
 | `DOCKER` (optional) | set to `sudo docker` if the VPS user isn't in the `docker` group |
 
+## 6. GitHub Actions — `deploy-supabase.yml`
+
+Set these as **environment secrets** on the `staging` and `production` GitHub
+Environments (Settings → Environments), not repo-wide — that's what lets each
+target point at a different VPS/container and lets you require a reviewer
+approval on `production`.
+
+| Secret | Value / source |
+|---|---|
+| `VPS_SSH_KEY` | private key for a deploy-only SSH user on the VPS (not your personal key) |
+| `VPS_HOST` | VPS IP or `vps.maalihub.com` |
+| `VPS_USER` | SSH user for deploys |
+| `DB_TUNNEL_PORT` | the local-only port Coolify's Supabase service publishes Postgres on the VPS (same one used in `DB_URL` above, e.g. `5433`) |
+| `DB_PASSWORD` | `SERVICE_PASSWORD_POSTGRES` from Coolify → Supabase service → Environment Variables |
+| `FUNCTIONS_CONTAINER` | docker container name of the edge-runtime service |
+
+No `service_role` key or Stripe/Paystack/Resend secrets go in GitHub — those
+live only in Coolify's function-container env vars (§3).
+
 ## Not required for launch
 
 - `VITE_MAINTENANCE_MODE` / `_MESSAGE` / `_ESTIMATED_TIME` / `_CONTACT_EMAIL` — only

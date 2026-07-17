@@ -1,0 +1,96 @@
+name: Deploy Supabase (migrations + edge functions)
+
+# Frontend is NOT deployed here — Coolify auto-builds the Dockerfile app
+# straight from git pushes (see docs/COOLIFY_DEPLOYMENT.md §6). This workflow
+# only pushes what Coolify can't: DB migrations and edge function code, via
+# scripts/deploy-selfhosted.sh over SSH. It runs the same script a human would
+# run from their laptop, just wired to CI so it happens on merge instead of
+# being forgotten.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/functions/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      migrations: ${{ steps.filter.outputs.migrations }}
+      functions: ${{ steps.filter.outputs.functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "migrations=true" >> "$GITHUB_OUTPUT"
+            echo "functions=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base="${{ github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" HEAD)
+          echo "migrations=$(echo "$changed" | grep -q '^supabase/migrations/' && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "functions=$(echo "$changed" | grep -q '^supabase/functions/' && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: changes
+    if: needs.changes.outputs.migrations == 'true' || needs.changes.outputs.functions == 'true'
+    runs-on: ubuntu-latest
+    # staging on auto push-to-main; production only via manual dispatch.
+    # GitHub Environments hold per-target secrets and let you require a
+    # reviewer approval on the `production` environment.
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node (for `npx supabase`)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Tunnel to Postgres
+        if: needs.changes.outputs.migrations == 'true'
+        # Postgres is intentionally not publicly exposed (see
+        # docs/PRODUCTION_LAUNCH_ISSUES.md A3) — tunnel through the VPS to the
+        # port Coolify's Supabase service publishes on 127.0.0.1 there.
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -fNL 5433:127.0.0.1:${{ secrets.DB_TUNNEL_PORT }} \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          sleep 2
+
+      - name: Push migrations
+        if: needs.changes.outputs.migrations == 'true'
+        env:
+          DB_URL: postgresql://postgres:${{ secrets.DB_PASSWORD }}@127.0.0.1:5433/postgres
+        run: scripts/deploy-selfhosted.sh migrations -y
+
+      - name: Deploy edge functions
+        if: needs.changes.outputs.functions == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          SSH_KEY: ~/.ssh/id_ed25519
+          FUNCTIONS_CONTAINER: ${{ secrets.FUNCTIONS_CONTAINER }}
+        run: scripts/deploy-selfhosted.sh functions -y
