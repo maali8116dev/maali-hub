@@ -1028,13 +1028,24 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, type, data, allowPublic, token: bodyToken }: SendEmailRequest & { allowPublic?: boolean } = await req.json();
+    const {
+      to,
+      type,
+      data,
+      allowPublic,
+      token: bodyToken,
+      internalSecret: bodyInternalSecret,
+    }: SendEmailRequest & { allowPublic?: boolean; internalSecret?: string } = await req.json();
     const emailData = data || {};
 
-    // Determine request context
+    // Determine request context.
+    // Prefer header; also accept body — self-hosted Kong/edge relay strips
+    // Authorization and sometimes custom headers on function→function calls.
     const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
     const internalHeader = req.headers.get("X-Internal-Secret");
-    const isInternal = internalSecret && internalHeader === internalSecret;
+    const isInternal =
+      Boolean(internalSecret) &&
+      (internalHeader === internalSecret || bodyInternalSecret === internalSecret);
 
     // Allow certain emails without user JWT:
     // - Contact emails (public site forms) when allowPublic is true

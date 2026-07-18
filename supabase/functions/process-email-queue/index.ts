@@ -101,6 +101,9 @@ serve(async (req: Request) => {
             // Allow public path in send-email, but we still guard payment_receipt
             // with INTERNAL_EMAIL_SECRET on the server side.
             allowPublic: true,
+            // Body fallbacks: Kong/edge relay strips headers on fn→fn calls
+            internalSecret: internalSecret ?? undefined,
+            token: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? undefined,
           }),
         });
 

@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { generateReceiptPdf, storeReceiptPdf } from "./pdf-receipt.ts";
 import { resolveInvoiceNumber } from "./invoice-number.ts";
+import { deliverPaymentReceiptEmail } from "./deliverPaymentReceipt.ts";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -96,57 +97,30 @@ export async function issueMembershipReceipt(
     console.warn("[issueMembershipReceipt] PDF store failed (non-fatal):", storeErr);
   }
 
-  // Send email receipt
+  // Send email receipt (or enqueue on any failure — including missing config / fetch throw)
   const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
 
   const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
   const recipientEmail = authUser?.user?.email ?? billingEmail ?? null;
 
-  if (!recipientEmail || !supabaseUrl) return;
-
-  const payload = {
-    recipientName: userName,
-    projectTitle: "Full Membership — MAALI",
-    applicationId: null,
-    amount: amount.toFixed(2),
-    currency: currency.toUpperCase(),
-    paymentDate,
-    transactionId: providerRef,
-    actionUrl: `${siteUrl}/dashboard/billing`,
-    invoicePdfUrl,
-  };
-
-  try {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (internalSecret) headers["X-Internal-Secret"] = internalSecret;
-    if (serviceKey) headers["Authorization"] = `Bearer ${serviceKey}`;
-
-    const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        to: recipientEmail,
-        type: "payment_receipt",
-        data: payload,
-        allowPublic: true,
-      }),
-    });
-
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error(`[issueMembershipReceipt] send-email failed (${res.status}): ${errBody}`);
-      // Enqueue for retry
-      await supabaseAdmin.from("email_queue").insert({
-        type: "payment_receipt",
-        to_email: recipientEmail,
-        payload,
-        idempotency_key: idempotencyKey ?? `membership_receipt:${providerRef}`,
-      });
-    }
-  } catch (emailErr) {
-    console.error("[issueMembershipReceipt] email failed (non-fatal):", emailErr);
+  if (!recipientEmail) {
+    console.warn("[issueMembershipReceipt] no recipient email, skipping");
+    return;
   }
+
+  await deliverPaymentReceiptEmail({
+    to: recipientEmail,
+    idempotencyKey: idempotencyKey ?? `membership_receipt:${providerRef}`,
+    payload: {
+      recipientName: userName,
+      projectTitle: "Full Membership — MAALI",
+      applicationId: null,
+      amount: amount.toFixed(2),
+      currency: currency.toUpperCase(),
+      paymentDate,
+      transactionId: providerRef,
+      actionUrl: `${siteUrl}/dashboard/billing`,
+      invoicePdfUrl,
+    },
+  });
 }

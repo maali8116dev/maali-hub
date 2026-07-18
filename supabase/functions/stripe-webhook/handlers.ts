@@ -1,6 +1,7 @@
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { generateReceiptPdf, storeReceiptPdf, type ReceiptData } from "../_shared/pdf-receipt.ts";
+import { deliverPaymentReceiptEmail } from "../_shared/deliverPaymentReceipt.ts";
 import { resolveInvoiceNumber } from "../_shared/invoice-number.ts";
 import { buildNotificationMetadata } from "../_shared/notifications.ts";
 import { activateMembership as activateMembershipShared } from "../_shared/activateMembership.ts";
@@ -392,54 +393,24 @@ async function handleMembershipPaymentSuccess(paymentIntent: Stripe.PaymentInten
         : "Member";
 
       const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
-      const supabaseUrl = Deno.env.get("SUPABASE_URL");
-      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
 
-      const payload = {
-        recipientName,
-        projectTitle: "Full Membership — MAALI",
-        applicationId: null,
-        amount: "2.00",
-        currency: "USD",
-        paymentDate: new Date().toLocaleDateString("en-US", {
-          year: "numeric", month: "long", day: "numeric",
-        }),
-        transactionId: paymentIntentId,
-        actionUrl: `${siteUrl}/dashboard`,
-        invoicePdfUrl,
-      };
-
-      if (supabaseUrl) {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (internalSecret) headers["X-Internal-Secret"] = internalSecret;
-        if (serviceRoleKey) headers["Authorization"] = `Bearer ${serviceRoleKey}`;
-
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            to: recipientEmail,
-            type: "payment_receipt",
-            data: payload,
-            allowPublic: true,
+      await deliverPaymentReceiptEmail({
+        to: recipientEmail,
+        idempotencyKey: `membership_receipt:${paymentIntentId}`,
+        payload: {
+          recipientName,
+          projectTitle: "Full Membership — MAALI",
+          applicationId: null,
+          amount: "2.00",
+          currency: "USD",
+          paymentDate: new Date().toLocaleDateString("en-US", {
+            year: "numeric", month: "long", day: "numeric",
           }),
-        });
-
-        if (res.ok) {
-          console.log(`[membership] receipt email sent to ${recipientEmail}`);
-        } else {
-          const errBody = await res.text();
-          console.error(`[membership] send-email failed (${res.status}): ${errBody}`);
-
-          await supabaseAdmin.from("email_queue").insert({
-            type: "payment_receipt",
-            to_email: recipientEmail,
-            payload,
-            idempotency_key: `membership_receipt:${paymentIntentId}`,
-          });
-        }
-      }
+          transactionId: paymentIntentId,
+          actionUrl: `${siteUrl}/dashboard`,
+          invoicePdfUrl,
+        },
+      });
     } else {
       console.warn("[membership] no email found for user, skipping receipt email");
     }
@@ -1107,6 +1078,8 @@ async function enqueuePaymentReceiptEmail(
             type: "payment_receipt",
             data: payload,
             allowPublic: true,
+            internalSecret: internalSecret ?? undefined,
+            token: serviceRoleKey ?? undefined,
           }),
         });
 
@@ -1143,10 +1116,38 @@ async function enqueuePaymentReceiptEmail(
   }
 }
 
-export async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const subscriptionId = typeof invoice.subscription === "string"
+/** Stripe API 2024+ / clover: subscription lives under parent.subscription_details. */
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const legacy = typeof invoice.subscription === "string"
     ? invoice.subscription
     : invoice.subscription?.id ?? null;
+  if (legacy) return legacy;
+
+  const parent = (invoice as { parent?: {
+    subscription_details?: { subscription?: string | { id: string } | null };
+  } | null }).parent;
+  const sub = parent?.subscription_details?.subscription;
+  if (typeof sub === "string") return sub;
+  if (sub && typeof sub === "object" && typeof sub.id === "string") return sub.id;
+  return null;
+}
+
+function getInvoicePaymentIntentId(invoice: Stripe.Invoice): string | null {
+  const legacy = typeof invoice.payment_intent === "string"
+    ? invoice.payment_intent
+    : invoice.payment_intent?.id ?? null;
+  if (legacy) return legacy;
+
+  // Clover-era invoices often omit payment_intent; try payments list if present.
+  const payments = (invoice as { payments?: { data?: Array<{ payment?: { payment_intent?: string | { id: string } } }> } }).payments;
+  const first = payments?.data?.[0]?.payment?.payment_intent;
+  if (typeof first === "string") return first;
+  if (first && typeof first === "object" && typeof first.id === "string") return first.id;
+  return null;
+}
+
+export async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) {
     console.log("[invoice.paid] No subscription ID — skipping (one-time charge)");
@@ -1162,9 +1163,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   }
 
   const newPeriodEnd = new Date(subscription.current_period_end * 1000).toISOString();
-  const paymentIntentId = typeof invoice.payment_intent === "string"
-    ? invoice.payment_intent
-    : invoice.payment_intent?.id ?? null;
+  const paymentIntentId = getInvoicePaymentIntentId(invoice);
 
   let existing: { id: string; status: string; tier: string } | null = null;
   const { data: bySub } = await supabaseAdmin
@@ -1242,39 +1241,48 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
     existingTxId = txByPi?.id ?? null;
   }
 
+  const amountPaid = (invoice.amount_paid ?? 200) / 100;
+  let txRow: { id: string; invoice_number: string | null } | null = null;
+  let invoicePdfUrl: string | null = null;
+
   if (existingTxId) {
     console.log(`[invoice.paid] Transaction already exists (${existingTxId}) for invoice ${stripeInvoiceId}`);
-    return;
-  }
+    const { data: existingTx } = await supabaseAdmin
+      .from("transactions")
+      .select("id, invoice_number, invoice_pdf_url")
+      .eq("id", existingTxId)
+      .maybeSingle();
+    txRow = existingTx ? { id: existingTx.id, invoice_number: existingTx.invoice_number } : { id: existingTxId, invoice_number: null };
+    invoicePdfUrl = existingTx?.invoice_pdf_url ?? null;
+  } else {
+    const { data: inserted, error: txError } = await supabaseAdmin
+      .from("transactions")
+      .insert({
+        user_id:                  userId,
+        type:                     "subscription",
+        status:                   "completed",
+        amount:                   amountPaid,
+        currency:                 invoice.currency ?? "usd",
+        provider:                 "stripe",
+        provider_payment_intent_id: paymentIntentId,
+        provider_transaction_id:  paymentIntentId,
+        stripe_invoice_id:        stripeInvoiceId,
+        description:              "Full Membership — MAALI ($2/month)",
+        completed_at:             new Date().toISOString(),
+      })
+      .select("id, invoice_number")
+      .maybeSingle();
 
-  const amountPaid = (invoice.amount_paid ?? 200) / 100;
-  const { data: txRow, error: txError } = await supabaseAdmin
-    .from("transactions")
-    .insert({
-      user_id:                  userId,
-      type:                     "subscription",
-      status:                   "completed",
-      amount:                   amountPaid,
-      currency:                 invoice.currency ?? "usd",
-      provider:                 "stripe",
-      provider_payment_intent_id: paymentIntentId,
-      provider_transaction_id:  paymentIntentId,
-      stripe_invoice_id:        stripeInvoiceId,
-      description:              "Full Membership — MAALI ($2/month)",
-      completed_at:             new Date().toISOString(),
-    })
-    .select("id, invoice_number")
-    .maybeSingle();
-
-  if (txError) {
-    console.error("[invoice.paid] Failed to insert transaction:", txError.message);
-    return;
+    if (txError) {
+      console.error("[invoice.paid] Failed to insert transaction:", txError.message);
+      return;
+    }
+    txRow = inserted;
   }
 
   const transactionId = txRow?.id ?? null;
 
-  let invoicePdfUrl: string | null = null;
-  if (transactionId && paymentIntentId) {
+  if (transactionId && paymentIntentId && !invoicePdfUrl) {
     try {
       const { data: userProfile } = await supabaseAdmin
         .from("profiles")
@@ -1344,47 +1352,25 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
         ? `${userProfile.first_name || ""} ${userProfile.last_name || ""}`.trim() || "Member"
         : "Member";
 
-      const siteUrl      = Deno.env.get("SITE_URL") || "https://maalihub.com";
-      const supabaseUrl  = Deno.env.get("SUPABASE_URL");
-      const serviceKey   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      const internalSecret = Deno.env.get("INTERNAL_EMAIL_SECRET");
+      const siteUrl = Deno.env.get("SITE_URL") || "https://maalihub.com";
 
-      const payload = {
-        recipientName,
-        projectTitle:  "Full Membership — MAALI",
-        applicationId: null,
-        amount:        amountPaid.toFixed(2),
-        currency:      (invoice.currency ?? "usd").toUpperCase(),
-        paymentDate:   new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-        transactionId: paymentIntentId,
-        actionUrl:     `${siteUrl}/dashboard/billing`,
-        invoicePdfUrl,
-      };
-
-      if (supabaseUrl) {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (internalSecret) headers["X-Internal-Secret"] = internalSecret;
-        if (serviceKey)     headers["Authorization"]     = `Bearer ${serviceKey}`;
-
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ to: recipientEmail, type: "payment_receipt", data: payload, allowPublic: true }),
-        });
-
-        if (!res.ok) {
-          const errBody = await res.text();
-          console.error(`[invoice.paid] send-email failed (${res.status}): ${errBody}`);
-          await supabaseAdmin.from("email_queue").insert({
-            type: "payment_receipt",
-            to_email: recipientEmail,
-            payload,
-            idempotency_key: `membership_receipt:${stripeInvoiceId}`,
-          });
-        } else {
-          console.log(`[invoice.paid] Receipt email sent to ${recipientEmail}`);
-        }
-      }
+      await deliverPaymentReceiptEmail({
+        to: recipientEmail,
+        idempotencyKey: `membership_receipt:${stripeInvoiceId}`,
+        payload: {
+          recipientName,
+          projectTitle: "Full Membership — MAALI",
+          applicationId: null,
+          amount: amountPaid.toFixed(2),
+          currency: (invoice.currency ?? "usd").toUpperCase(),
+          paymentDate: new Date().toLocaleDateString("en-US", {
+            year: "numeric", month: "long", day: "numeric",
+          }),
+          transactionId: paymentIntentId,
+          actionUrl: `${siteUrl}/dashboard/billing`,
+          invoicePdfUrl,
+        },
+      });
     }
   } catch (emailErr) {
     console.error("[invoice.paid] Email failed (non-fatal):", emailErr);

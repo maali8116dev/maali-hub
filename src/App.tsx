@@ -161,6 +161,7 @@ const App = () => {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <ErrorBoundary>
+          <SiteGate>
           <TooltipProvider>
             <TrackingInitializer />
             <Toaster />
@@ -881,6 +882,7 @@ const App = () => {
               </Suspense>
         </BrowserRouter>
       </TooltipProvider>
+          </SiteGate>
     </ErrorBoundary>
     </QueryClientProvider>
   </ThemeProvider>
