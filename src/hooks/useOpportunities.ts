@@ -338,31 +338,47 @@ export function useOpportunityCountries() {
   });
 }
 
+const HOMEPAGE_OPP_SELECT = `
+  *,
+  partner:partners(name),
+  tags:opportunity_tag_map(
+    tag:opportunity_tags(id, name, slug)
+  )
+`;
+
+function mapOpportunityRows(data: unknown[] | null): Opportunity[] {
+  return (data || []).map((item: any) => {
+    const tags = (item.tags || []).map((t: any) => t.tag).filter(Boolean);
+    return transformOpportunity({ ...item, tags, partner_name: item.partner?.name || null });
+  });
+}
+
 /**
- * Direct Supabase query for featured opportunities
+ * Featured for homepage; if none, latest open (still live DB — never mock).
  */
 async function fetchFeaturedOpportunitiesDirect(): Promise<Opportunity[]> {
-  const { data, error } = await (supabase
+  const featured = await (supabase
     .from("opportunities")
-    .select(`
-      *,
-      partner:partners(name),
-      tags:opportunity_tag_map(
-        tag:opportunity_tags(id, name, slug)
-      )
-    `)
+    .select(HOMEPAGE_OPP_SELECT)
     .eq("featured", true)
     .neq("status", "closed")
     .order("created_at", { ascending: false })
     .limit(6) as any);
 
-  if (error) throw error;
+  if (featured.error) throw featured.error;
 
-  // Transform the nested structure
-  return (data || []).map((item: any) => {
-    const tags = (item.tags || []).map((t: any) => t.tag).filter(Boolean);
-    return transformOpportunity({ ...item, tags, partner_name: item.partner?.name || null });
-  });
+  const featuredRows = mapOpportunityRows(featured.data);
+  if (featuredRows.length > 0) return featuredRows;
+
+  const latest = await (supabase
+    .from("opportunities")
+    .select(HOMEPAGE_OPP_SELECT)
+    .eq("status", "open")
+    .order("created_at", { ascending: false })
+    .limit(6) as any);
+
+  if (latest.error) throw latest.error;
+  return mapOpportunityRows(latest.data);
 }
 
 /**
