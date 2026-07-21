@@ -566,6 +566,18 @@
       "verifyingLink": "Please wait while we verify your password reset link...",
       "backToSignIn": "Back to Sign In"
     },
+    "otp": {
+      "signInWithCode": "Sign in with email code",
+      "usePassword": "Use password instead",
+      "sendCode": "Send code",
+      "sending": "Sending...",
+      "codeLabel": "Enter the 6-digit code",
+      "sentTo": "We sent a code to {{email}}",
+      "verify": "Verify & sign in",
+      "verifying": "Verifying...",
+      "resend": "Resend code",
+      "changeEmail": "Use a different email"
+    },
     "buttons": {
       "signIn": "Sign In",
       "signingIn": "Signing in...",
@@ -643,6 +655,22 @@
       "emailRequired": {
         "title": "Email required",
         "description": "Please enter your email address first."
+      },
+      "otpSent": {
+        "title": "Check your email",
+        "description": "We've sent a 6-digit sign-in code to your inbox."
+      },
+      "otpFailed": {
+        "title": "Couldn't send code",
+        "description": "Something went wrong. Please try again."
+      },
+      "otpInvalid": {
+        "title": "Invalid code",
+        "description": "That code is incorrect or has expired. Please try again."
+      },
+      "noAccount": {
+        "title": "No account found",
+        "description": "We couldn't find an account for that email. Please sign up first."
       },
       "passwordResetFailed": {
         "title": "Password reset failed",

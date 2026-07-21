@@ -155,8 +155,14 @@ const emailTemplate = (title: string, content: string) => `
 const getEmailContent = (
   emailActionType: AuthHookPayload["email_data"]["email_action_type"],
   recipientName: string,
-  redirectUrl: string
+  redirectUrl: string,
+  otpCode?: string
 ) => {
+  const codeBlock = otpCode
+    ? `<div style="text-align:center;margin:24px 0;">
+         <div style="display:inline-block;font-size:28px;font-weight:700;letter-spacing:6px;padding:14px 24px;border-radius:10px;background:#f4f4f5;color:#111;">${escapeHtml(otpCode)}</div>
+       </div>`
+    : '';
   // Normalize the action type to handle variations (Supabase may send "recovery" for password reset)
   const normalizedType = typeof emailActionType === "string" ? emailActionType.toLowerCase() : emailActionType;
   
@@ -197,9 +203,10 @@ const getEmailContent = (
         html: emailTemplate(
           "Sign in to your account",
           `
-            <p>Click the button below to sign in to your Maali account. If you didn't request this magic link, you can ignore this message.</p>
+            <p>Use the code below to sign in to your Maali account, or click the button. If you didn't request this, you can ignore this message.</p>
+            ${codeBlock}
             ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Sign In</a></div>` : ''}
-            <p>This link will expire in 1 hour.</p>
+            <p>This code and link expire in 1 hour.</p>
             <p>Best regards,<br>The Maali Team</p>
           `
         ),
@@ -398,8 +405,9 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get email content based on action type
-    const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl);
+    // Get email content based on action type. `token` is the 6-digit OTP that
+    // pairs with the magic link so users can sign in by code or by click.
+    const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl, token);
 
     // Get configured from email or fall back to default
     const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";

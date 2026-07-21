@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Form } from "@/components/ui/form";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +77,11 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  // Email OTP (passwordless) sign-in state
+  const [otpMode, setOtpMode] = useState(false);
+  const [otpStep, setOtpStep] = useState<"request" | "verify">("request");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpBusy, setOtpBusy] = useState(false);
   const signInCaptcha = useTurnstile();
   const signUpCaptcha = useTurnstile();
   const navigate = useNavigate();
@@ -454,6 +460,90 @@ const Auth = () => {
     }
   };
 
+  const exitOtpMode = () => {
+    setOtpMode(false);
+    setOtpStep("request");
+    setOtpCode("");
+  };
+
+  const handleSendOtp = async () => {
+    const valid = await signInForm.trigger("email");
+    if (!valid) return;
+    const email = signInForm.getValues("email");
+
+    setOtpBusy(true);
+    try {
+      const { error } = await rateLimitedAuth("email_otp", {
+        email,
+        turnstileToken: signInCaptcha.token,
+      });
+
+      if (error) {
+        if (error.isRateLimited) {
+          toast({
+            title: t("auth.toasts.tooManyAttempts.title"),
+            description: error.message,
+            variant: "destructive",
+          });
+        } else if (/signups not allowed|not found|no account|user not found/i.test(error.message)) {
+          toast({
+            title: t("auth.toasts.noAccount.title"),
+            description: t("auth.toasts.noAccount.description"),
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: t("auth.toasts.otpFailed.title"),
+            description: error.message || t("auth.toasts.otpFailed.description"),
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      setOtpStep("verify");
+      setOtpCode("");
+      toast({
+        title: t("auth.toasts.otpSent.title"),
+        description: t("auth.toasts.otpSent.description"),
+      });
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const email = signInForm.getValues("email");
+    if (otpCode.length !== 6) return;
+
+    setOtpBusy(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: "email",
+      });
+
+      if (error || !data?.session) {
+        toast({
+          title: t("auth.toasts.otpInvalid.title"),
+          description: t("auth.toasts.otpInvalid.description"),
+          variant: "destructive",
+        });
+        setOtpCode("");
+        return;
+      }
+
+      toast({
+        title: t("auth.toasts.welcomeBack.title"),
+        description: t("auth.toasts.welcomeBack.description"),
+      });
+      navigate(await getPostAuthPath(getReturnUrl()));
+    } finally {
+      setOtpBusy(false);
+    }
+  };
+
   const handleOAuthSignIn = async () => {
     setIsLoading(true);
     try {
@@ -614,50 +704,152 @@ const Auth = () => {
                 </div>
               </div>
 
-              <Form {...signInForm}>
-                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-                  <CustomFormField
-                    control={signInForm.control}
-                    name="email"
-                    fieldType={FormFieldType.EMAIL}
-                    label={t("auth.fields.email")}
-                    placeholder={t("auth.fields.emailPlaceholder")}
-                    icon={Mail}
-                    iconPosition="left"
-                    required
-                  />
-                  <CustomFormField
-                    control={signInForm.control}
-                    name="password"
-                    fieldType={FormFieldType.PASSWORD}
-                    label={t("auth.fields.password")}
-                    placeholder={t("auth.fields.passwordPlaceholder")}
-                    icon={Lock}
-                    iconPosition="left"
-                    required
-                  />
-                  <TurnstileWidget {...signInCaptcha.widgetProps} className="flex justify-center" />
-                  <div className="flex items-center justify-end">
-                    <button
+              {otpMode ? (
+                otpStep === "request" ? (
+                  <Form {...signInForm}>
+                    <div className="space-y-4">
+                      <CustomFormField
+                        control={signInForm.control}
+                        name="email"
+                        fieldType={FormFieldType.EMAIL}
+                        label={t("auth.fields.email")}
+                        placeholder={t("auth.fields.emailPlaceholder")}
+                        icon={Mail}
+                        iconPosition="left"
+                        required
+                      />
+                      <TurnstileWidget {...signInCaptcha.widgetProps} className="flex justify-center" />
+                      <Button
+                        type="button"
+                        className="w-full"
+                        variant="hero"
+                        size="lg"
+                        onClick={handleSendOtp}
+                        disabled={otpBusy || signInCaptcha.blocked}
+                      >
+                        {otpBusy ? t("auth.otp.sending") : t("auth.otp.sendCode")}
+                      </Button>
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={exitOtpMode}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          {t("auth.otp.usePassword")}
+                        </button>
+                      </div>
+                    </div>
+                  </Form>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground text-center">
+                      {t("auth.otp.sentTo", { email: signInForm.getValues("email") })}
+                    </p>
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-sm font-medium">{t("auth.otp.codeLabel")}</span>
+                      <InputOTP
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={setOtpCode}
+                        onComplete={handleVerifyOtp}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <Button
                       type="button"
-                      onClick={handleForgotPassword}
-                      disabled={isLoading || signInCaptcha.blocked}
-                      className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full"
+                      variant="hero"
+                      size="lg"
+                      onClick={handleVerifyOtp}
+                      disabled={otpBusy || otpCode.length !== 6}
                     >
-                      {t("auth.fields.forgotPassword")}
-                    </button>
+                      {otpBusy ? t("auth.otp.verifying") : t("auth.otp.verify")}
+                    </Button>
+                    <div className="flex items-center justify-between text-sm">
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={otpBusy}
+                        className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t("auth.otp.resend")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setOtpStep("request"); setOtpCode(""); }}
+                        className="text-primary hover:underline"
+                      >
+                        {t("auth.otp.changeEmail")}
+                      </button>
+                    </div>
                   </div>
+                )
+              ) : (
+                <>
+                  <Form {...signInForm}>
+                    <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+                      <CustomFormField
+                        control={signInForm.control}
+                        name="email"
+                        fieldType={FormFieldType.EMAIL}
+                        label={t("auth.fields.email")}
+                        placeholder={t("auth.fields.emailPlaceholder")}
+                        icon={Mail}
+                        iconPosition="left"
+                        required
+                      />
+                      <CustomFormField
+                        control={signInForm.control}
+                        name="password"
+                        fieldType={FormFieldType.PASSWORD}
+                        label={t("auth.fields.password")}
+                        placeholder={t("auth.fields.passwordPlaceholder")}
+                        icon={Lock}
+                        iconPosition="left"
+                        required
+                      />
+                      <TurnstileWidget {...signInCaptcha.widgetProps} className="flex justify-center" />
+                      <div className="flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          disabled={isLoading || signInCaptcha.blocked}
+                          className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {t("auth.fields.forgotPassword")}
+                        </button>
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        variant="hero"
+                        size="lg"
+                        disabled={isLoading || signInCaptcha.blocked}
+                      >
+                        {isLoading ? t("auth.buttons.signingIn") : t("auth.buttons.signIn")}
+                      </Button>
+                    </form>
+                  </Form>
                   <Button
-                    type="submit"
+                    type="button"
+                    variant="outline"
                     className="w-full"
-                    variant="hero"
-                    size="lg"
-                    disabled={isLoading || signInCaptcha.blocked}
+                    onClick={() => setOtpMode(true)}
+                    disabled={isLoading}
                   >
-                    {isLoading ? t("auth.buttons.signingIn") : t("auth.buttons.signIn")}
+                    <Mail className="mr-2 h-4 w-4" />
+                    {t("auth.otp.signInWithCode")}
                   </Button>
-                </form>
-              </Form>
+                </>
+              )}
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">

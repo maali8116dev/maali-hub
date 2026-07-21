@@ -10,6 +10,7 @@ const ALLOWED_OPERATIONS = new Set([
   "sign_up",
   "password_reset",
   "magic_link",
+  "email_otp",
 ]);
 
 /** Hardcoded fallbacks in case the config table lookup fails. */
@@ -18,6 +19,7 @@ const FALLBACK_CONFIG: Record<string, { max: number; window: number }> = {
   sign_up:        { max: 3,  window: 60 },
   password_reset: { max: 3,  window: 60 },
   magic_link:     { max: 3,  window: 60 },
+  email_otp:      { max: 5,  window: 60 },
 };
 
 type AuthOpResult = {
@@ -273,6 +275,17 @@ serve(async (req: Request) => {
         result = await supabase.auth.signInWithOtp({
           email,
           options: {
+            emailRedirectTo: options?.emailRedirectTo,
+          },
+        });
+        break;
+
+      case "email_otp":
+        // Existing users only — never provision an account from a code request.
+        result = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: false,
             emailRedirectTo: options?.emailRedirectTo,
           },
         });

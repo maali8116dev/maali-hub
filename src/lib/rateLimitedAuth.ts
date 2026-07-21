@@ -59,7 +59,7 @@ async function establishLocalSession<T extends AuthSessionPayload>(
  * @param payload    The rest of the fields (email, password, options, …)
  */
 export async function rateLimitedAuth<T = unknown>(
-  operation: "sign_in" | "sign_up" | "password_reset",
+  operation: "sign_in" | "sign_up" | "password_reset" | "magic_link" | "email_otp",
   payload: {
     email: string;
     password?: string;
