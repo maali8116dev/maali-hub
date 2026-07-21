@@ -129,24 +129,30 @@ const Auth = () => {
       const accessToken = hashParams.get("access_token");
       
       if (type === "recovery" && accessToken) {
-        // User is coming from password reset email
-        // Supabase automatically processes recovery tokens from URL hash
+        // User is coming from password reset email. The client runs with
+        // detectSessionInUrl:false (PKCE), so establish the session manually
+        // from the hash tokens the GoTrue verify redirect appended.
         setIsPasswordReset(true);
-        
-        // Wait for Supabase to process the token and establish session
-        // Check session after a short delay
-        setTimeout(async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            setIsSessionReady(true);
-          } else {
-            // If no session after delay, check again
-            setTimeout(async () => {
-              const { data: { session: retrySession } } = await supabase.auth.getSession();
-              setIsSessionReady(!!retrySession);
-            }, 1000);
-          }
-        }, 500);
+
+        const refreshToken = hashParams.get("refresh_token") ?? "";
+        const { data: setData, error: setErr } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (setErr || !setData?.session) {
+          console.error("Recovery setSession failed:", setErr?.message);
+          setIsSessionReady(false);
+          toast({
+            title: t("auth.toasts.passwordResetFailed.title"),
+            description: t("auth.toasts.passwordResetFailed.description"),
+            variant: "destructive",
+          });
+        } else {
+          setIsSessionReady(true);
+          // Strip tokens from the URL so they aren't left in history.
+          window.history.replaceState(null, "", `${window.location.pathname}#type=recovery`);
+        }
         return;
       }
       

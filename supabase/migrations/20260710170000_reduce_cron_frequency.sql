@@ -1,10 +1,19 @@
 -- Reduce process-email-queue and process-partner-webhooks from every minute
 -- to every 15 minutes.
+-- Unschedule by jobid: cron.unschedule(name) often raises XX000 on self-hosted
+-- even when cron.job has the row (role / catalog mismatch).
 
 DO $$
+DECLARE
+  jid bigint;
 BEGIN
-  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'process-email-queue') THEN
-    PERFORM cron.unschedule('process-email-queue');
+  SELECT jobid INTO jid FROM cron.job WHERE jobname = 'process-email-queue' LIMIT 1;
+  IF jid IS NOT NULL THEN
+    BEGIN
+      PERFORM cron.unschedule(jid);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'Could not unschedule process-email-queue (jobid=%): %', jid, SQLERRM;
+    END;
   END IF;
 
   IF EXISTS (
@@ -32,8 +41,14 @@ BEGIN
     RAISE NOTICE 'Skipped process-email-queue reschedule: vault secrets project_url/cron_secret not set.';
   END IF;
 
-  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'process-partner-webhooks') THEN
-    PERFORM cron.unschedule('process-partner-webhooks');
+  jid := NULL;
+  SELECT jobid INTO jid FROM cron.job WHERE jobname = 'process-partner-webhooks' LIMIT 1;
+  IF jid IS NOT NULL THEN
+    BEGIN
+      PERFORM cron.unschedule(jid);
+    EXCEPTION WHEN OTHERS THEN
+      RAISE NOTICE 'Could not unschedule process-partner-webhooks (jobid=%): %', jid, SQLERRM;
+    END;
   END IF;
 
   IF EXISTS (

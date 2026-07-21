@@ -345,25 +345,35 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Check if redirect_to already contains a hash (token already appended by Supabase)
     const hasHash = redirectUrl.includes('#');
-    
-    // For password reset (recovery), ensure token is in hash fragment
+
+    // GoTrue verify endpoint (on the API domain) validates token_hash server-side,
+    // creates a real session, then redirects to the app with a JWT in the hash —
+    // the raw email `token` is only a 6-digit OTP and can't establish a session.
+    // Must be the PUBLIC api url (SUPABASE_URL is the internal Kong host, not
+    // browser-reachable), so prefer an explicit public override.
+    const supabaseApiUrl = (
+      Deno.env.get("SUPABASE_PUBLIC_URL") ||
+      Deno.env.get("API_EXTERNAL_URL") ||
+      Deno.env.get("SUPABASE_URL") ||
+      ""
+    ).replace(/\/$/, "");
+    const appRedirectBase = (() => {
+      const base = redirectUrl.split('#')[0].split('?')[0];
+      return base.endsWith('/auth') ? base : `${base}/auth`;
+    })();
+    const verifyToken = token_hash || token;
+
+    // For password reset (recovery), route through the verify endpoint
     if ((normalizedType === "password_reset" || normalizedType === "recovery")) {
-      if (!hasHash && token) {
-        // Token not in URL yet, construct it
-        const baseUrl = redirectUrl.split('#')[0].split('?')[0];
-        const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
-        // Construct URL with token in hash: /auth#access_token=TOKEN&type=recovery
-        redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=recovery`;
+      if (!hasHash && supabaseApiUrl && verifyToken) {
+        redirectUrl = `${supabaseApiUrl}/auth/v1/verify?token=${encodeURIComponent(verifyToken)}&type=recovery&redirect_to=${encodeURIComponent(appRedirectBase)}`;
       } else if (!hasHash) {
-        // No token available, log warning but use redirect_to as-is
-        console.warn("Password reset requested but no token available in payload");
+        console.warn("Password reset requested but no token/API url available in payload");
       }
       // If hasHash is true, Supabase already constructed the URL correctly
-    } else if (normalizedType === "signup" && !hasHash && token) {
+    } else if (normalizedType === "signup" && !hasHash && supabaseApiUrl && verifyToken) {
       // For email verification
-      const baseUrl = redirectUrl.split('#')[0].split('?')[0];
-      const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
-      redirectUrl = `${urlPath}#access_token=${encodeURIComponent(token)}&type=signup`;
+      redirectUrl = `${supabaseApiUrl}/auth/v1/verify?token=${encodeURIComponent(verifyToken)}&type=signup&redirect_to=${encodeURIComponent(appRedirectBase)}`;
     } else if (normalizedType === "magiclink") {
       // For magic link, prefer token_hash and use query params so the client can call verifyOtp
       const baseUrl = redirectUrl.split('#')[0].split('?')[0];
