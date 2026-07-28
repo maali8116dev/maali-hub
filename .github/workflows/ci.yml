@@ -27,11 +27,8 @@ jobs:
       - name: i18n locale parity
         run: npm run validate:i18n
 
-      # Not blocking yet: 9 test files fail on a pre-existing broken
-      # react-i18next mock (185 tests still pass). Flip to blocking once fixed.
       - name: Unit tests
         run: npx vitest run
-        continue-on-error: true
 
       - name: Build
         run: npm run build

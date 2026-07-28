@@ -35,6 +35,9 @@ const SuccessStoriesSection = () => {
   const { data: stories = [], isLoading } = useFeaturedSuccessStories();
   const localizedStories = useLocalizedSuccessStories(stories);
 
+  // Hide section when DB has no featured stories (no empty-state card).
+  if (!isLoading && stories.length === 0) return null;
+
   return (
     <section className="py-16 sm:py-20 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,12 +66,6 @@ const SuccessStoriesSection = () => {
               </Card>
             ))}
           </div>
-        ) : stories.length === 0 ? (
-          <Card className="mb-12">
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No success stories available at this time.</p>
-            </CardContent>
-          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
             {localizedStories.map((story) => (

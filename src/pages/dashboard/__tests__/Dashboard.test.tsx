@@ -23,29 +23,34 @@ vi.mock('@/components/ProfileSetupWizard', () => ({
 vi.mock('@/components/onboarding/OnboardingChecklist', () => ({
   OnboardingChecklist: () => null,
 }));
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'dashboard:dashboard.title': 'Dashboard',
-        'dashboard:dashboard.welcome': 'Welcome to your dashboard',
-        'dashboard:dashboard.stats.totalApplications': 'Total Applications',
-        'dashboard:dashboard.stats.pending': 'Pending',
-        'dashboard:dashboard.stats.approved': 'Approved',
-        'dashboard:dashboard.stats.rejected': 'Rejected',
-        'dashboard:dashboard.emptyState.noApplications': 'No applications yet',
-        'dashboard:dashboard.emptyState.noApplicationsDesc': 'Start applying to opportunities to see your applications here.',
-        'dashboard:dashboard.profileCompletion.complete': 'Complete',
-        'dashboard:dashboard.profileCompletion.title': 'Profile Completion',
-        'dashboard:dashboard.profileCompletion.status': 'Progress',
-        'dashboard:dashboard.recentApplications.title': 'Recent Applications',
-        'dashboard:dashboard.recentApplications.viewAll': 'View All',
-        'dashboard:dashboard.recentApplications.submitted': 'Submitted',
-      };
-      return translations[key] || key;
-    },
-  }),
-}));
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>();
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'dashboard:dashboard.title': 'Dashboard',
+          'dashboard:dashboard.welcome': 'Welcome to your dashboard',
+          'dashboard:dashboard.stats.totalApplications': 'Total Applications',
+          'dashboard:dashboard.stats.pending': 'Pending',
+          'dashboard:dashboard.stats.approved': 'Approved',
+          'dashboard:dashboard.stats.rejected': 'Rejected',
+          'dashboard:dashboard.emptyState.noApplications': 'No applications yet',
+          'dashboard:dashboard.emptyState.noApplicationsDesc': 'Start applying to opportunities to see your applications here.',
+          'dashboard:dashboard.profileCompletion.complete': 'Complete',
+          'dashboard:dashboard.profileCompletion.title': 'Profile Completion',
+          'dashboard:dashboard.profileCompletion.status': 'Progress',
+          'dashboard:dashboard.recentApplications.title': 'Recent Applications',
+          'dashboard:dashboard.recentApplications.viewAll': 'View All',
+          'dashboard:dashboard.recentApplications.submitted': 'Submitted',
+        };
+        return translations[key] || key;
+      },
+      i18n: { changeLanguage: vi.fn(), language: 'en' },
+    }),
+  };
+});
 
 describe('Dashboard - Data Viewing', () => {
   const mockApplications = [

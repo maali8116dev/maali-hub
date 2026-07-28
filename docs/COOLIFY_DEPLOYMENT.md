@@ -1,7 +1,6 @@
 # Deploying MAALI to Hostinger VPS with Coolify + self-hosted Supabase
 
-Step-by-step runbook for `maalihub.com`. Complements `PRODUCTION_SELF_HOST_REVIEW.md`
-(the *what/why*) — this doc is the *how*, in execution order.
+Step-by-step runbook for `maalihub.com`. Pair with `SECRETS_CHECKLIST.md` for env vars.
 
 Target topology:
 
@@ -222,8 +221,7 @@ Dry-run this whole section once before the real cutover.
    signup/login/password-reset/contact/application submission, including real users, not
    just bots. The only environment where both can be safely left unset is a local
    Supabase stack (`127.0.0.1`/`localhost`), which skips the check entirely for dev.
-4. Deploy. Optionally enable auto-deploy on push (add the CI gate from
-   PRODUCTION_LAUNCH_ISSUES.md D12 before trusting this).
+4. Deploy. Optionally enable auto-deploy on push once CI gates are solid.
    Health check: Dockerfile defines `GET /health` (nginx) — Coolify picks it up
    automatically. Manual override: path `/health`, port `80`, expect `200`.
 5. `nginx.conf` ships CSP as an enforcing **`Content-Security-Policy`** header (verified
@@ -297,10 +295,9 @@ Quick VPS test (SSH): `docker ps` shows frontend container up;
 - Storage volume: nightly `rsync`/`restic` of the storage volume to the same offsite bucket.
 - **Test a restore** into a scratch Postgres once. An untested backup is a hope, not a backup.
 
-## Still open after this runbook (from PRODUCTION_LAUNCH_ISSUES.md)
+## Still open after this runbook
 
-- **D12**: CI workflow (lint/test/build) gating deploys.
-- **C2**: prerender static marketing routes; Helmet on opportunity detail.
-- **D5**: Privacy Policy + ToS content live at `/privacy`, `/terms`.
-- **D10**: uptime monitoring (e.g. UptimeRobot/Betterstack on `/` and
+- Prerender static marketing routes; Helmet on opportunity detail.
+- Privacy Policy + ToS content live at `/privacy`, `/terms`.
+- Uptime monitoring (e.g. UptimeRobot/Betterstack on `/` and
   `https://api.maalihub.com/auth/v1/health`) + log retention.

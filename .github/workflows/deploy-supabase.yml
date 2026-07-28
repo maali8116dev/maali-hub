@@ -72,9 +72,8 @@ jobs:
 
       - name: Tunnel to Postgres
         if: needs.changes.outputs.migrations == 'true'
-        # Postgres is intentionally not publicly exposed (see
-        # docs/PRODUCTION_LAUNCH_ISSUES.md A3) — tunnel through the VPS to the
-        # port Coolify's Supabase service publishes on 127.0.0.1 there.
+        # Postgres is intentionally not publicly exposed — tunnel through the
+        # VPS to the port Coolify's Supabase service publishes on 127.0.0.1.
         run: |
           ssh -i ~/.ssh/id_ed25519 -fNL 5433:127.0.0.1:${{ secrets.DB_TUNNEL_PORT }} \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"

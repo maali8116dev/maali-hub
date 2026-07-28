@@ -148,15 +148,13 @@ The application will be available at `http://localhost:8080`
 
 ## 📚 Documentation
 
-Guides live in [`docs/`](./docs/):
+Guides live in [`docs/`](./docs/) — see [`docs/README.md`](./docs/README.md) for the full list.
 
-- **[PROJECT_MANAGEMENT_SUMMARY.md](./docs/PROJECT_MANAGEMENT_SUMMARY.md)** - Project status and features
+- **[COOLIFY_DEPLOYMENT.md](./docs/COOLIFY_DEPLOYMENT.md)** - Coolify + self-hosted Supabase
+- **[SECRETS_CHECKLIST.md](./docs/SECRETS_CHECKLIST.md)** - Env vars & secrets
 - **[LOCAL_DB_SETUP.md](./docs/LOCAL_DB_SETUP.md)** - Local Supabase, OAuth, Stripe
-- **[REVIEW_SYSTEM.md](./docs/REVIEW_SYSTEM.md)** - Review system
-- **[DATABASE_SETUP.md](./docs/DATABASE_SETUP.md)** - Database setup
 - **[STRIPE_SETUP.md](./docs/STRIPE_SETUP.md)** - Stripe payments and webhooks
-- **[migration-selfhosted-to-lovable.md](./migration-selfhosted-to-lovable.md)** - Client guide: self-hosted → Lovable + Supabase
-- **[SUPABASE_EMAIL_HOOK_SETUP.md](./docs/SUPABASE_EMAIL_HOOK_SETUP.md)** - Email hook
+- **[REVIEW_SYSTEM.md](./docs/REVIEW_SYSTEM.md)** - Review system
 - **[SEO_GUIDE.md](./docs/SEO_GUIDE.md)** - SEO
 - **[MAINTENANCE_MODE.md](./docs/MAINTENANCE_MODE.md)** - Maintenance mode
 

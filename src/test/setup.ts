@@ -104,13 +104,17 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-    i18n: { changeLanguage: vi.fn() },
-  }),
-}));
+// Mock i18next — keep real exports (initReactI18next) so src/lib/i18n.ts can load
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>();
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => key,
+      i18n: { changeLanguage: vi.fn(), language: 'en' },
+    }),
+  };
+});
 
 // Mock analytics
 vi.mock('@/lib/posthog', () => ({
