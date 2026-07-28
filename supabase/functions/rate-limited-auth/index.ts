@@ -46,17 +46,14 @@ async function findUserIdByEmail(
   adminClient: ReturnType<typeof createClient>,
   email: string,
 ): Promise<string | null> {
-  const normalized = email.trim().toLowerCase();
-  let page = 1;
-  while (page <= 5) {
-    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 200 });
-    if (error || !data?.users?.length) return null;
-    const match = data.users.find((u) => u.email?.toLowerCase() === normalized);
-    if (match?.id) return match.id;
-    if (data.users.length < 200) break;
-    page++;
+  const { data, error } = await adminClient.rpc("get_user_id_by_email", {
+    p_email: email.trim(),
+  });
+  if (error) {
+    console.error("get_user_id_by_email failed:", error);
+    return null;
   }
-  return null;
+  return data ?? null;
 }
 
 /** Sign in; auto-confirms email so new users can finish onboarding before verifying inbox. */
