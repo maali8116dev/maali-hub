@@ -11,7 +11,7 @@ import { Check, Users, Zap, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useSectors } from "@/hooks/useSectors";
+import { COUNTRIES } from "@/components/application/form/countries";
 import Navigation from "@/components/Navigation";
 import { MembershipPaymentStep } from "@/components/membership/MembershipPaymentStep";
 import {
@@ -101,12 +101,17 @@ const StepProfile = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="country">{t("join.profile.country")}</Label>
-          <Input
+          <select
             id="country"
             value={form.country}
             onChange={set("country")}
-            placeholder={t("join.profile.countryPlaceholder")}
-          />
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            <option value="">{t("join.profile.countryPlaceholder")}</option>
+            {COUNTRIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 

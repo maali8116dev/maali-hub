@@ -17,6 +17,7 @@ import { useMentor, useCreateMentor, useUpdateMentor, useAdminMentors } from "@/
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { ArrowLeft, X, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 type MentorFormValues = {
   name: string;
@@ -43,21 +44,6 @@ const PREDEFINED_sectorS = [
   "Marketing",
   "Retail",
   "Real Estate",
-];
-
-const PREDEFINED_COUNTRIES = [
-  "Ghana",
-  "Nigeria",
-  "Kenya",
-  "South Africa",
-  "Egypt",
-  "Morocco",
-  "Senegal",
-  "Rwanda",
-  "Tanzania",
-  "Ethiopia",
-  "Uganda",
-  "Cameroon",
 ];
 
 const AdminMentorForm = () => {
@@ -122,7 +108,13 @@ const AdminMentorForm = () => {
 
   // Get existing countries from database
   const existingCountries = [...new Set(allMentors?.map(m => m.country).filter(Boolean))] as string[];
-  const allCountries = [...new Set([...PREDEFINED_COUNTRIES, ...existingCountries])].sort();
+  const countryOptions = useMemo(() => {
+    const byValue = new Map(COUNTRIES.map((c) => [c.value, c]));
+    for (const country of existingCountries) {
+      if (!byValue.has(country)) byValue.set(country, { value: country, label: country });
+    }
+    return [...byValue.values()].sort((a, b) => a.label.localeCompare(b.label));
+  }, [existingCountries]);
 
   // Load mentor data when editing
   useEffect(() => {
@@ -291,8 +283,8 @@ const AdminMentorForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {allCountries.map(country => (
-                            <SelectItem key={country} value={country}>{country}</SelectItem>
+                          {countryOptions.map(country => (
+                            <SelectItem key={country.value} value={country.value}>{country.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

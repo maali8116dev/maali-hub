@@ -47,10 +47,10 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "China", label: "China", code: "CN" },
   { value: "Colombia", label: "Colombia", code: "CO" },
   { value: "Comoros", label: "Comoros", code: "KM" },
-  { value: "Congo (Brazzaville)", label: "Congo (Brazzaville)", code: "CG" },
-  { value: "Congo (Kinshasa)", label: "Congo (Kinshasa)", code: "CD" },
+  { value: "Democratic Republic of the Congo", label: "Democratic Republic of the Congo (CD)", code: "CD" },
+  { value: "Republic of the Congo", label: "Republic of the Congo (CG)", code: "CG" },
   { value: "Costa Rica", label: "Costa Rica", code: "CR" },
-  { value: "CÃ´te d'Ivoire", label: "CÃ´te d'Ivoire", code: "CI" },
+  { value: "Côte d'Ivoire", label: "Côte d'Ivoire", code: "CI" },
   { value: "Croatia", label: "Croatia", code: "HR" },
   { value: "Cuba", label: "Cuba", code: "CU" },
   { value: "Cyprus", label: "Cyprus", code: "CY" },
@@ -158,7 +158,7 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "Saint Vincent and the Grenadines", label: "Saint Vincent and the Grenadines", code: "VC" },
   { value: "Samoa", label: "Samoa", code: "WS" },
   { value: "San Marino", label: "San Marino", code: "SM" },
-  { value: "SÃ£o TomÃ© and PrÃ­ncipe", label: "SÃ£o TomÃ© and PrÃ­ncipe", code: "ST" },
+  { value: "São Tomé and Príncipe", label: "São Tomé and Príncipe", code: "ST" },
   { value: "Saudi Arabia", label: "Saudi Arabia", code: "SA" },
   { value: "Senegal", label: "Senegal", code: "SN" },
   { value: "Serbia", label: "Serbia", code: "RS" },
@@ -207,10 +207,31 @@ export const COUNTRIES: CountryEntry[] = [
   { value: "Zimbabwe", label: "Zimbabwe", code: "ZW" },
 ];
 
-/** Names that differ between onboarding lists and COUNTRIES entries */
+/** African country labels — stored in DB / forms. Keep names in sync with COUNTRY_CODE_OVERRIDES. */
+export const AFRICAN_COUNTRIES = [
+  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
+  "Cabo Verde", "Cameroon", "Central African Republic", "Chad",   "Comoros",
+  "Democratic Republic of the Congo", "Republic of the Congo", "Côte d'Ivoire", "Djibouti",
+  "Egypt", "Equatorial Guinea",
+  "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea",
+  "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
+  "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique",
+  "Namibia", "Niger", "Nigeria", "Rwanda", "São Tomé and Príncipe",
+  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa",
+  "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda",
+  "Zambia", "Zimbabwe",
+] as const;
+
+export const AFRICAN_COUNTRY_OPTIONS = AFRICAN_COUNTRIES.map((c) => {
+  const entry = COUNTRIES.find((x) => x.value === c);
+  return { value: c, label: entry?.label ?? c };
+});
+
+/** Names that differ from COUNTRIES.value, plus legacy Congo labels already in DB. */
 const COUNTRY_CODE_OVERRIDES: Record<string, string> = {
   Congo: "CG",
-  "Côte d'Ivoire": "CI",
+  "Congo (Brazzaville)": "CG",
+  "Congo (Kinshasa)": "CD",
 };
 
 /** Lookup ISO code from country name */

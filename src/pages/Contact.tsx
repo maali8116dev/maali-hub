@@ -1,28 +1,31 @@
-import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useNavigate, Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Phone, MapPin, Clock, MessageSquare, Users, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Form } from "@/components/ui/form";
+import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
+import { Mail, Phone, MapPin, Clock, MessageSquare, Users, Loader2, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { sendContactConfirmationEmail, sendContactSubmissionEmail } from "@/lib/email";
 import { useAuth } from "@/hooks/useAuth";
-import { emailSchema } from "@/lib/emailValidation";
 import { useTranslation } from "react-i18next";
 import { LEGAL_CONTACT } from "@/components/legal/legalContact";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { useTurnstile } from "@/hooks/useTurnstile";
-
-const SUBJECT_OPTIONS = ["funding", "application", "partnership", "technical", "general"] as const;
+import {
+  COUNTRIES,
+  getCountryCode,
+} from "@/components/application/form/countries";
+import {
+  CONTACT_SUBJECT_OPTIONS,
+  createContactFormSchema,
+  type ContactFormValues,
+} from "@/lib/schemas/contactForm.schema";
 
 /** Reads the `code` field from a Supabase Edge Function error response body, if any. */
 async function readEdgeErrorCode(err: unknown): Promise<string | null> {
@@ -36,16 +39,6 @@ async function readEdgeErrorCode(err: unknown): Promise<string | null> {
   }
 }
 
-type ContactFormData = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  country?: string;
-  subject: (typeof SUBJECT_OPTIONS)[number];
-  message: string;
-};
-
 const Contact = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -54,32 +47,17 @@ const Contact = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const captcha = useTurnstile();
 
-  const contactFormSchema = useMemo(
+  const contactFormSchema = useMemo(() => createContactFormSchema(t), [t]);
+  const subjectOptions = useMemo(
     () =>
-      z.object({
-        firstName: z.string().min(1, t("contactPage.validation.firstNameRequired")).max(100, t("contactPage.validation.firstNameTooLong")),
-        lastName: z.string().min(1, t("contactPage.validation.lastNameRequired")).max(100, t("contactPage.validation.lastNameTooLong")),
-        email: emailSchema,
-        phone: z.string().optional(),
-        country: z.string().optional(),
-        subject: z.enum(SUBJECT_OPTIONS, {
-          required_error: t("contactPage.validation.subjectRequired"),
-        }),
-        message: z
-          .string()
-          .min(10, t("contactPage.validation.messageMin"))
-          .max(5000, t("contactPage.validation.messageTooLong")),
-      }),
+      CONTACT_SUBJECT_OPTIONS.map((value) => ({
+        value,
+        label: t(`contactPage.form.subject${value.charAt(0).toUpperCase()}${value.slice(1)}`),
+      })),
     [t],
   );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useForm<ContactFormData>({
+  const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
       firstName: "",
@@ -92,10 +70,10 @@ const Contact = () => {
     },
   });
 
-  const selectedSubject = watch("subject");
-  const selectedCountry = watch("country");
+  const selectedCountry = useWatch({ control: form.control, name: "country" });
+  const phoneCountryCode = getCountryCode(selectedCountry) || "GH";
 
-  const onSubmit = async (data: ContactFormData) => {
+  const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
     setSubmitSuccess(false);
 
@@ -172,14 +150,7 @@ const Contact = () => {
       // Reset form after 3 seconds
       setTimeout(() => {
         setSubmitSuccess(false);
-        // Reset form
-        setValue("firstName", "");
-        setValue("lastName", "");
-        setValue("email", "");
-        setValue("phone", "");
-        setValue("country", "");
-        setValue("subject", undefined);
-        setValue("message", "");
+        form.reset();
       }, 3000);
     } catch (error) {
       console.error("Submission error:", error);
@@ -272,141 +243,75 @@ const Contact = () => {
                     </Button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">{t("contactPage.form.firstNameLabel")}</Label>
-                        <Input
-                          id="firstName"
-                          placeholder={t("contactPage.form.firstNamePlaceholder")}
-                          className="h-12 sm:h-10"
-                          {...register("firstName")}
-                        />
-                        {errors.firstName && (
-                          <p className="text-sm text-destructive flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" />
-                            {errors.firstName.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">{t("contactPage.form.lastNameLabel")}</Label>
-                        <Input
-                          id="lastName"
-                          placeholder={t("contactPage.form.lastNamePlaceholder")}
-                          className="h-12 sm:h-10"
-                          {...register("lastName")}
-                        />
-                        {errors.lastName && (
-                          <p className="text-sm text-destructive flex items-center gap-1">
-                            <AlertCircle className="h-3 w-3" />
-                            {errors.lastName.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">{t("contactPage.form.emailLabel")}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder={t("contactPage.form.emailPlaceholder")}
-                        className="h-12 sm:h-10"
-                        {...register("email")}
+                      <CustomFormField
+                        control={form.control}
+                        name="firstName"
+                        fieldType={FormFieldType.INPUT}
+                        label={t("contactPage.form.firstNameLabel")}
+                        placeholder={t("contactPage.form.firstNamePlaceholder")}
+                        required
                       />
-                      {errors.email && (
-                        <p className="text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">{t("contactPage.form.phoneLabel")}</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder={t("contactPage.form.phonePlaceholder")}
-                        className="h-12 sm:h-10"
-                        {...register("phone")}
+                      <CustomFormField
+                        control={form.control}
+                        name="lastName"
+                        fieldType={FormFieldType.INPUT}
+                        label={t("contactPage.form.lastNameLabel")}
+                        placeholder={t("contactPage.form.lastNamePlaceholder")}
+                        required
                       />
-                      {errors.phone && (
-                        <p className="text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors.phone.message}
-                        </p>
-                      )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="country">{t("contactPage.form.countryLabel")}</Label>
-                      <Select
-                        value={selectedCountry}
-                        onValueChange={(value) => setValue("country", value)}
-                      >
-                        <SelectTrigger className="h-12 sm:h-10">
-                          <SelectValue placeholder={t("contactPage.form.countryPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="nigeria">{t("contactPage.form.countryNigeria")}</SelectItem>
-                          <SelectItem value="kenya">{t("contactPage.form.countryKenya")}</SelectItem>
-                          <SelectItem value="south-africa">{t("contactPage.form.countrySouthAfrica")}</SelectItem>
-                          <SelectItem value="ghana">{t("contactPage.form.countryGhana")}</SelectItem>
-                          <SelectItem value="uganda">{t("contactPage.form.countryUganda")}</SelectItem>
-                          <SelectItem value="tanzania">{t("contactPage.form.countryTanzania")}</SelectItem>
-                          <SelectItem value="other">{t("contactPage.form.countryOther")}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.country && (
-                        <p className="text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors.country.message}
-                        </p>
-                      )}
-                    </div>
+                    <CustomFormField
+                      control={form.control}
+                      name="email"
+                      fieldType={FormFieldType.EMAIL}
+                      label={t("contactPage.form.emailLabel")}
+                      placeholder={t("contactPage.form.emailPlaceholder")}
+                      required
+                    />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="subject">{t("contactPage.form.subjectLabel")}</Label>
-                      <Select
-                        value={selectedSubject}
-                        onValueChange={(value) => setValue("subject", value as ContactFormData["subject"])}
-                      >
-                        <SelectTrigger className="h-12 sm:h-10">
-                          <SelectValue placeholder={t("contactPage.form.subjectPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="funding">{t("contactPage.form.subjectFunding")}</SelectItem>
-                          <SelectItem value="application">{t("contactPage.form.subjectApplication")}</SelectItem>
-                          <SelectItem value="partnership">{t("contactPage.form.subjectPartnership")}</SelectItem>
-                          <SelectItem value="technical">{t("contactPage.form.subjectTechnical")}</SelectItem>
-                          <SelectItem value="general">{t("contactPage.form.subjectGeneral")}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.subject && (
-                        <p className="text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors.subject.message}
-                        </p>
-                      )}
-                    </div>
+                    <CustomFormField
+                      control={form.control}
+                      name="country"
+                      fieldType={FormFieldType.SELECT}
+                      label={t("contactPage.form.countryLabel")}
+                      placeholder={t("contactPage.form.countryPlaceholder")}
+                      options={COUNTRIES}
+                    />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="message">{t("contactPage.form.messageLabel")}</Label>
-                      <Textarea
-                        id="message"
-                        placeholder={t("contactPage.form.messagePlaceholder")}
-                        className="min-h-[120px]"
-                        {...register("message")}
-                      />
-                      {errors.message && (
-                        <p className="text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {errors.message.message}
-                        </p>
-                      )}
-                    </div>
+                    <CustomFormField
+                      key={phoneCountryCode}
+                      control={form.control}
+                      name="phone"
+                      fieldType={FormFieldType.PHONE_INTERNATIONAL}
+                      label={t("contactPage.form.phoneLabel")}
+                      placeholder={t("contactPage.form.phonePlaceholder")}
+                      country={phoneCountryCode}
+                      defaultCountry={phoneCountryCode}
+                    />
+
+                    <CustomFormField
+                      control={form.control}
+                      name="subject"
+                      fieldType={FormFieldType.SELECT}
+                      label={t("contactPage.form.subjectLabel")}
+                      placeholder={t("contactPage.form.subjectPlaceholder")}
+                      options={subjectOptions}
+                      required
+                    />
+
+                    <CustomFormField
+                      control={form.control}
+                      name="message"
+                      fieldType={FormFieldType.TEXTAREA}
+                      label={t("contactPage.form.messageLabel")}
+                      placeholder={t("contactPage.form.messagePlaceholder")}
+                      rows={5}
+                      required
+                    />
 
                     <TurnstileWidget {...captcha.widgetProps} className="flex justify-center" />
 
@@ -427,6 +332,7 @@ const Contact = () => {
                       )}
                     </Button>
                   </form>
+                  </Form>
                 )}
               </CardContent>
             </Card>

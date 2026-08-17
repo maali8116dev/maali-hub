@@ -17,6 +17,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { User, Building, MapPin, CheckCircle2, Circle, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 // Step 1: Basic Information Schema
 const step1Schema = z.object({
@@ -53,19 +54,6 @@ const BUSINESS_sectorS = [
   "Retail",
   "Services",
   "Other",
-];
-
-const AFRICAN_COUNTRIES = [
-  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
-  "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros",
-  "Congo", "CÃ´te d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea",
-  "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea",
-  "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
-  "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique",
-  "Namibia", "Niger", "Nigeria", "Rwanda", "SÃ£o TomÃ© and PrÃ­ncipe",
-  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa",
-  "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda",
-  "Zambia", "Zimbabwe"
 ];
 
 export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSetupWizardProps) => {
@@ -327,9 +315,9 @@ export const ProfileSetupWizard = ({ open, onOpenChange, onComplete }: ProfileSe
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="max-h-[300px]">
-                          {AFRICAN_COUNTRIES.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
+                          {COUNTRIES.map((country) => (
+                            <SelectItem key={country.value} value={country.value}>
+                              {country.label}
                             </SelectItem>
                           ))}
                         </SelectContent>

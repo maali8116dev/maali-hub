@@ -842,6 +842,7 @@
       "firstNameTooLong": "Vorname ist zu lang",
       "lastNameRequired": "Nachname ist erforderlich",
       "lastNameTooLong": "Nachname ist zu lang",
+      "phoneInvalid": "Geben Sie eine gültige internationale Nummer ein",
       "subjectRequired": "Bitte wählen Sie ein Thema",
       "messageMin": "Nachricht muss mindestens 10 Zeichen haben",
       "messageTooLong": "Nachricht ist zu lang"

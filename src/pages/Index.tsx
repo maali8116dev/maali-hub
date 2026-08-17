@@ -7,7 +7,6 @@ import FeaturedProjects from "@/components/landing/FeaturedProjects";
 import Benefits from "@/components/landing/Benefits";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
 import SuccessStoriesSection from "@/components/landing/SuccessStoriesSection";
-import Newsletter from "@/components/landing/Newsletter";
 import MembershipSection from "@/components/MembershipSection";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/seo/SEO";
@@ -54,7 +53,6 @@ const Index = () => {
           <Benefits />
           <FeatureShowcase />
           <SuccessStoriesSection />
-          <Newsletter />
         </main>
         <Footer />
       </div>

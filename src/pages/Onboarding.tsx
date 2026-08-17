@@ -27,22 +27,9 @@ import {
 } from "@/hooks/useMembership";
 import { useToast } from "@/hooks/use-toast";
 import { createOnboardingProfileSchema, type OnboardingProfileFormValues } from "@/lib/schemas/onboardingForm.schema";
-import { getCountryCode } from "@/components/application/form/countries";
+import { COUNTRIES, getCountryCode } from "@/components/application/form/countries";
 
 const headerLogoPublic = "/images/logo.webp";
-
-const AFRICAN_COUNTRIES = [
-  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
-  "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros",
-  "Congo", "Côte d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea",
-  "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea",
-  "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
-  "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique",
-  "Namibia", "Niger", "Nigeria", "Rwanda", "São Tomé and Príncipe",
-  "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa",
-  "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda",
-  "Zambia", "Zimbabwe",
-];
 
 // ─── Sectors from DB ─────────────────────────────────────────────────────────
 
@@ -204,7 +191,7 @@ const StepProfile = ({
             label={t("onboarding.profile.country")}
             placeholder={t("onboarding.profile.countryPlaceholder")}
             required
-            options={AFRICAN_COUNTRIES.map((c) => ({ value: c, label: c }))}
+            options={COUNTRIES}
           />
         </div>
 

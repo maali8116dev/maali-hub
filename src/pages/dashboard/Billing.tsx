@@ -51,6 +51,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MembershipProfileSection } from "@/components/profile/MembershipProfileSection";
 import { UpgradeMembershipModal } from "@/components/membership/UpgradeMembershipModal";
 import { useMembership } from "@/hooks/useMembership";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 const upgradeCtaClass =
   "text-primary underline-offset-4 hover:underline font-inherit bg-transparent border-0 p-0 cursor-pointer inline";
@@ -835,14 +836,24 @@ const Billing = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="country">{t("dashboard:billingPage.info.country")}</Label>
-                <Input
+                <select
                   id="country"
                   name="country"
-                  placeholder={t("dashboard:billingPage.info.countryPlaceholder")}
                   defaultValue={billingAddress?.country || ""}
                   required
-                  className="h-11 sm:h-10"
-                />
+                  className="flex h-11 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="" disabled>
+                    {t("dashboard:billingPage.info.countryPlaceholder")}
+                  </option>
+                  {billingAddress?.country &&
+                    !COUNTRIES.some((c) => c.value === billingAddress.country) && (
+                      <option value={billingAddress.country}>{billingAddress.country}</option>
+                    )}
+                  {COUNTRIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
               </div>
               <Button
                 type="submit"

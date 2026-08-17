@@ -39,7 +39,7 @@ const Privacy = () => {
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Biluge Mushegera</p>
             <p>Erfurt, Germany</p>
-            <p>Email: info@maali.tech</p>
+            <p>Email: support@maalihub.com</p>
           </Section>
           <Section title="General Information">
             <p>Processing is carried out in accordance with GDPR.</p>
@@ -107,7 +107,7 @@ const Privacy = () => {
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Biluge Mushegera</p>
             <p>Erfurt, Allemagne</p>
-            <p>E-mail : info@maali.tech</p>
+            <p>E-mail : support@maalihub.com</p>
           </Section>
           <Section title="Informations générales">
             <p>Le traitement est effectué conformément au RGPD.</p>
@@ -175,7 +175,7 @@ const Privacy = () => {
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Biluge Mushegera</p>
             <p>Erfurt, Alemanha</p>
-            <p>E-mail: info@maali.tech</p>
+            <p>E-mail: support@maalihub.com</p>
           </Section>
           <Section title="Informação geral">
             <p>O tratamento é realizado em conformidade com o RGPD.</p>
@@ -243,7 +243,7 @@ const Privacy = () => {
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Biluge Mushegera</p>
             <p>Juri-Gagarin-Ring 132/92, 99084 Erfurt, Deutschland</p>
-            <p>E-Mail: info@maali.tech</p>
+            <p>E-Mail: support@maalihub.com</p>
           </Section>
           <Section title="Allgemeine Hinweise">
             <p>Die Datenverarbeitung erfolgt gemäß DSGVO, BDSG und TTDSG.</p>
@@ -314,7 +314,7 @@ const Privacy = () => {
       <Card className="bg-primary/5 border-primary/20 mt-8">
         <CardContent className="pt-6">
           <h2 className="text-xl font-bold mb-3">{contactTitle}</h2>
-          <p className="text-muted-foreground text-sm">Email: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+          <p className="text-muted-foreground text-sm">Email: <a href="mailto:support@maalihub.com" className="text-primary underline">support@maalihub.com</a></p>
           <p className="text-muted-foreground text-sm">Tel: +49 361 21886352</p>
         </CardContent>
       </Card>

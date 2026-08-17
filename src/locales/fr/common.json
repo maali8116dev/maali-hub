@@ -126,6 +126,7 @@
       "firstNameTooLong": "Le prénom est trop long",
       "lastNameRequired": "Le nom est requis",
       "lastNameTooLong": "Le nom est trop long",
+      "phoneInvalid": "Saisissez un numéro international valide",
       "subjectRequired": "Veuillez sélectionner un sujet",
       "messageMin": "Le message doit contenir au moins 10 caractères",
       "messageTooLong": "Le message est trop long"

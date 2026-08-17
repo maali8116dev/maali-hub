@@ -14,10 +14,11 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { Mail, Building, MapPin, Loader2, CheckCircle2, X } from "lucide-react";
+import { Mail, Building, Loader2, CheckCircle2, X } from "lucide-react";
 import CustomFormField, { FormFieldType } from "@/components/form/CustomFormField";
 import { KycVerificationSection } from "@/components/profile/KycVerificationSection";
 import { MembershipProfileSection } from "@/components/profile/MembershipProfileSection";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 const profileSchema = (t: (key: string) => string) =>
   z.object({
@@ -261,9 +262,9 @@ const Profile = () => {
                 control={form.control}
                 name="country"
                 label={t("dashboard:profilePage.fields.country")}
-                fieldType={FormFieldType.INPUT}
+                fieldType={FormFieldType.SELECT}
                 placeholder={t("dashboard:profilePage.fields.countryPlaceholder")}
-                icon={MapPin}
+                options={COUNTRIES}
               />
 
               <CustomFormField

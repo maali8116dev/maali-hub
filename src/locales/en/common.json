@@ -872,6 +872,7 @@
       "lastNameRequired": "Last name is required",
       "lastNameTooLong": "Last name is too long",
       "subjectRequired": "Please select a subject",
+      "phoneInvalid": "Enter a valid international number",
       "messageMin": "Message must be at least 10 characters",
       "messageTooLong": "Message is too long"
     },

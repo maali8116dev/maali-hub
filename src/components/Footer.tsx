@@ -1,19 +1,11 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Loader2 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useNewsletterSubscribe } from "@/hooks/useNewsletterSubscribe";
+import { LEGAL_CONTACT } from "@/components/legal/legalContact";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { pathname } = useLocation();
-  const showNewsletter = pathname !== "/";
   const { t } = useTranslation("footer");
-  const [footerEmail, setFooterEmail] = useState("");
-  const { subscribe, isSubmitting } = useNewsletterSubscribe();
 
   const footerLinks = {
     platform: [
@@ -61,51 +53,22 @@ const Footer = () => {
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>info@maali.africa</span>
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <a href={`mailto:${LEGAL_CONTACT.email}`} className="hover:text-primary transition-colors">
+                    {LEGAL_CONTACT.email}
+                  </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4" />
-                  <span>+254 700 000 000</span>
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <a href={`tel:${LEGAL_CONTACT.phone.replace(/\s/g, "")}`} className="hover:text-primary transition-colors">
+                    {LEGAL_CONTACT.phone}
+                  </a>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>Nairobi, Kenya</span>
+                <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{LEGAL_CONTACT.addressDisplay}</span>
                 </div>
               </div>
-
-              {showNewsletter && (
-                <form
-                  className="space-y-3"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const ok = await subscribe(footerEmail, "footer");
-                    if (ok) setFooterEmail("");
-                  }}
-                >
-                  <h4 className="font-semibold text-sm">{t("stayUpdated")}</h4>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                      type="email"
-                      placeholder={t("enterEmail")}
-                      value={footerEmail}
-                      onChange={(e) => setFooterEmail(e.target.value)}
-                      className="flex-1 min-h-[44px] sm:min-h-0"
-                      required
-                      disabled={isSubmitting}
-                    />
-                    <Button
-                      type="submit"
-                      variant="hero"
-                      size="sm"
-                      className="min-h-[44px] sm:min-h-0"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("subscribe")}
-                    </Button>
-                  </div>
-                </form>
-              )}
             </div>
 
             <div className="lg:col-span-3">

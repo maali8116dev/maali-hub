@@ -842,6 +842,7 @@
       "firstNameTooLong": "O nome é demasiado longo",
       "lastNameRequired": "O apelido é obrigatório",
       "lastNameTooLong": "O apelido é demasiado longo",
+      "phoneInvalid": "Introduza um número internacional válido",
       "subjectRequired": "Selecione um assunto",
       "messageMin": "A mensagem deve ter pelo menos 10 caracteres",
       "messageTooLong": "A mensagem é demasiado longa"

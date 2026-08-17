@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PartnerOrgRequiredAlert } from "@/components/partner/PartnerOrgRequiredAlert";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getLocalizedSectorName } from "@/lib/localizedSector";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 type SettingsValues = {
   name: string;
@@ -266,8 +267,9 @@ const PartnerSettings = () => {
                   control={form.control}
                   name="contact_country"
                   label={t("dashboard:partner.settingsPage.contact.country")}
-                  fieldType={FormFieldType.INPUT}
+                  fieldType={FormFieldType.SELECT}
                   placeholder={t("dashboard:partner.settingsPage.contact.countryPlaceholder")}
+                  options={COUNTRIES}
                   disabled={!canEditOrg}
                 />
               </CardContent>

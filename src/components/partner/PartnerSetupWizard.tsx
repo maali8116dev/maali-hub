@@ -21,6 +21,7 @@ import {
   type Step2Values,
   type Step3Values,
 } from "@/lib/schemas/partnerSetupWizard.schema";
+import { COUNTRIES } from "@/components/application/form/countries";
 
 interface PartnerSetupWizardProps {
   open: boolean;
@@ -276,8 +277,9 @@ export function PartnerSetupWizard({ open, onOpenChange, onComplete }: PartnerSe
                   control={step2Form.control}
                   name="country"
                   label={t("partner.settingsPage.contact.country")}
-                  fieldType={FormFieldType.INPUT}
+                  fieldType={FormFieldType.SELECT}
                   placeholder={t("partner.settingsPage.contact.countryPlaceholder")}
+                  options={COUNTRIES}
                 />
               </form>
             </Form>

@@ -35,7 +35,7 @@ const Terms = () => {
         en: (
           <>
           <Section title="Company Information">
-            <p>Maali.tech</p>
+            <p>Maalihub</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Juri-Gagarin-Ring 132/92</p>
             <p>99084 Erfurt</p>
@@ -45,7 +45,7 @@ const Terms = () => {
             <p>Register Court: Jena Local Court</p>
             <p>Tax ID: 151 121/24516</p>
             <p className="pt-2">Phone: +49 361 21886352</p>
-            <p>Email: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+            <p>Email: <a href="mailto:support@maalihub.com" className="text-primary underline">support@maalihub.com</a></p>
           </Section>
           <Section title="Responsible for Content">
             <p>Biluge Mushegera</p>
@@ -71,7 +71,7 @@ const Terms = () => {
         fr: (
           <>
           <Section title="Informations sur l'entreprise">
-            <p>Maali.tech</p>
+            <p>Maalihub</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Juri-Gagarin-Ring 132/92</p>
             <p>99084 Erfurt</p>
@@ -81,7 +81,7 @@ const Terms = () => {
             <p>Tribunal d'enregistrement : Amtsgericht Jena</p>
             <p>Numéro fiscal : 151 121/24516</p>
             <p className="pt-2">Téléphone : +49 361 21886352</p>
-            <p>E-mail : <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+            <p>E-mail : <a href="mailto:support@maalihub.com" className="text-primary underline">support@maalihub.com</a></p>
           </Section>
           <Section title="Responsable du contenu">
             <p>Biluge Mushegera</p>
@@ -107,7 +107,7 @@ const Terms = () => {
         pt: (
           <>
           <Section title="Informações da empresa">
-            <p>Maali.tech</p>
+            <p>Maalihub</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Juri-Gagarin-Ring 132/92</p>
             <p>99084 Erfurt</p>
@@ -117,7 +117,7 @@ const Terms = () => {
             <p>Tribunal de registo: Amtsgericht Jena</p>
             <p>NIF: 151 121/24516</p>
             <p className="pt-2">Telefone: +49 361 21886352</p>
-            <p>E-mail: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+            <p>E-mail: <a href="mailto:support@maalihub.com" className="text-primary underline">support@maalihub.com</a></p>
           </Section>
           <Section title="Responsável pelo conteúdo">
             <p>Biluge Mushegera</p>
@@ -143,7 +143,7 @@ const Terms = () => {
         de: (
           <>
           <Section title="Angaben gemäß § 5 DDG">
-            <p>Maali.tech</p>
+            <p>Maalihub</p>
             <p>Techin Global UG (haftungsbeschränkt)</p>
             <p>Juri-Gagarin-Ring 132/92</p>
             <p>99084 Erfurt</p>
@@ -153,7 +153,7 @@ const Terms = () => {
             <p>Registergericht: Amtsgericht Jena</p>
             <p>Steuernummer: 151 121/24516</p>
             <p className="pt-2">Telefon: +49 361 21886352</p>
-            <p>E-Mail: <a href="mailto:info@maali.tech" className="text-primary underline">info@maali.tech</a></p>
+            <p>E-Mail: <a href="mailto:support@maalihub.com" className="text-primary underline">support@maalihub.com</a></p>
           </Section>
           <Section title="Verantwortlich für Inhalte (§ 18 Abs. 2 MStV)">
             <p>Biluge Mushegera</p>

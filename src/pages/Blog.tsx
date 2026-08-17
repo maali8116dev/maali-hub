@@ -223,22 +223,6 @@ const Blog = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* Newsletter CTA */}
-        <Card className="bg-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle>Stay Updated</CardTitle>
-            <CardDescription>
-              Subscribe to our newsletter to get the latest articles and funding opportunities delivered to your inbox.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input placeholder="Enter your email" className="flex-1" />
-              <Button variant="hero">Subscribe</Button>
-            </div>
-          </CardContent>
-        </Card>
       </main>
       <Footer />
     </div>
