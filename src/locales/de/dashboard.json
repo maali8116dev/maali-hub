@@ -76,6 +76,47 @@
       "title": "Vervollständigen Sie Ihr Profil",
       "description": "Ihr Profil ist zu {{percentage}} % vollständig. Ein vollständiges Profil erhöht Ihre Zulassungschancen.",
       "action": "Vollständiges Profil"
+    },
+    "onboardingChecklist": {
+      "title": "Erste Schritte",
+      "description": "Schließen Sie diese Schritte ab, um Maali optimal zu nutzen",
+      "progress": "Fortschritt",
+      "progressCount": "{{completed}} von {{total}} abgeschlossen",
+      "tasksCount": "{{completed}} von {{total}} Aufgaben abgeschlossen",
+      "viewFull": "Vollständige Checkliste anzeigen",
+      "allSet": "Alles erledigt! Sie sind startklar.",
+      "items": {
+        "emailVerify": {
+          "label": "E-Mail-Adresse bestätigen",
+          "description": "Prüfen Sie Ihren Posteingang auf den Bestätigungslink"
+        },
+        "completeProfile": {
+          "label": "Profil vervollständigen",
+          "description": "Fügen Sie Ihre Unternehmensdaten hinzu, um die Zulassungschancen zu erhöhen"
+        },
+        "verifyKyc": {
+          "label": "Identität verifizieren (KYC)",
+          "pending": "Ihre Dokumente werden geprüft",
+          "rejected": "Aktualisieren Sie Ihre Dokumente und reichen Sie sie erneut ein",
+          "idle": "Laden Sie einen Ausweis und ein Selfie hoch, um Ihre Identität zu bestätigen"
+        },
+        "browseOpportunities": {
+          "label": "Möglichkeiten durchsuchen",
+          "description": "Entdecken Sie verfügbare Möglichkeiten, die zu Ihrem Unternehmen passen"
+        },
+        "submitApplication": {
+          "label": "Erste Bewerbung einreichen",
+          "description": "Bewerben Sie sich auf Möglichkeiten, um loszulegen"
+        }
+      },
+      "actions": {
+        "resendEmail": "E-Mail erneut senden",
+        "completeProfile": "Profil vervollständigen",
+        "verifyKyc": "KYC verifizieren",
+        "resubmitKyc": "KYC erneut einreichen",
+        "browseOpportunities": "Möglichkeiten durchsuchen",
+        "startApplication": "Bewerbung starten"
+      }
     }
   },
   "applications": {

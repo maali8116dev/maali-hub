@@ -2489,6 +2489,47 @@
       "title": "Complete o seu perfil",
       "description": "O seu perfil está {{percentage}}% completo. Um perfil completo aumenta as hipóteses de aprovação.",
       "action": "Completar perfil"
+    },
+    "onboardingChecklist": {
+      "title": "Primeiros passos",
+      "description": "Conclua estes passos para tirar o máximo da Maali",
+      "progress": "Progresso",
+      "progressCount": "{{completed}} de {{total}} concluído(s)",
+      "tasksCount": "{{completed}} de {{total}} tarefas concluídas",
+      "viewFull": "Ver lista completa",
+      "allSet": "Tudo pronto! Pode avançar.",
+      "items": {
+        "emailVerify": {
+          "label": "Verifique o seu e-mail",
+          "description": "Consulte a caixa de entrada para o link de verificação"
+        },
+        "completeProfile": {
+          "label": "Complete o seu perfil",
+          "description": "Adicione os dados da empresa para aumentar as hipóteses de aprovação"
+        },
+        "verifyKyc": {
+          "label": "Verifique a sua identidade (KYC)",
+          "pending": "Os seus documentos estão em análise",
+          "rejected": "Atualize os documentos e reenvie para verificação",
+          "idle": "Carregue um documento de identificação e uma selfie para verificar a identidade"
+        },
+        "browseOpportunities": {
+          "label": "Explorar oportunidades",
+          "description": "Explore oportunidades disponíveis que correspondem ao seu negócio"
+        },
+        "submitApplication": {
+          "label": "Enviar a primeira candidatura",
+          "description": "Candidate-se a oportunidades para começar"
+        }
+      },
+      "actions": {
+        "resendEmail": "Reenviar e-mail",
+        "completeProfile": "Completar perfil",
+        "verifyKyc": "Verificar KYC",
+        "resubmitKyc": "Reenviar KYC",
+        "browseOpportunities": "Explorar oportunidades",
+        "startApplication": "Iniciar candidatura"
+      }
     }
   },
   "notifications": {

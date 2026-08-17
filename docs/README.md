@@ -8,6 +8,7 @@
 | [SECRETS_CHECKLIST.md](./SECRETS_CHECKLIST.md) | Env vars & secrets |
 | [LOCAL_DB_SETUP.md](./LOCAL_DB_SETUP.md) | Local Supabase, Google OAuth, membership Stripe |
 | [DATABASE_SETUP.md](./DATABASE_SETUP.md) | Database setup |
+| [MIGRATIONS_GUIDE.md](./MIGRATIONS_GUIDE.md) | Migration naming, idempotency, cron/vault gotchas |
 | [MAINTENANCE_MODE.md](./MAINTENANCE_MODE.md) | Maintenance mode |
 
 ## Payments & email

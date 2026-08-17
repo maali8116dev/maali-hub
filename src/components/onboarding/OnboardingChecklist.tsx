@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMembership } from '@/hooks/useMembership';
 import { useKycVerification } from '@/hooks/useKycVerification';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ChecklistItem {
   id: string;
@@ -33,6 +34,7 @@ export function OnboardingChecklist({
   showDismiss = true,
   compact = false 
 }: OnboardingChecklistProps) {
+  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
@@ -71,53 +73,57 @@ export function OnboardingChecklist({
   const hasSubmittedApplication = applications.some(app => app.status !== 'draft');
   const emailVerified = user?.email_confirmed_at !== null;
 
+  const kycDescription = kycVerified
+    ? undefined
+    : kycPending
+      ? t('dashboard.onboardingChecklist.items.verifyKyc.pending')
+      : kyc?.status === 'rejected'
+        ? t('dashboard.onboardingChecklist.items.verifyKyc.rejected')
+        : t('dashboard.onboardingChecklist.items.verifyKyc.idle');
+
   const checklistItems: ChecklistItem[] = [
     {
       id: 'email-verify',
-      label: 'Verify your email address',
-      description: 'Check your inbox for the verification link',
+      label: t('dashboard.onboardingChecklist.items.emailVerify.label'),
+      description: t('dashboard.onboardingChecklist.items.emailVerify.description'),
       completed: !!emailVerified,
       action: emailVerified ? undefined : {
-        label: 'Resend Email',
+        label: t('dashboard.onboardingChecklist.actions.resendEmail'),
         href: '/dashboard/settings'
       }
     },
     {
       id: 'complete-profile',
-      label: 'Complete your profile',
-      description: 'Add your business information to increase approval chances',
+      label: t('dashboard.onboardingChecklist.items.completeProfile.label'),
+      description: t('dashboard.onboardingChecklist.items.completeProfile.description'),
       completed: !!isProfileComplete,
       action: isProfileComplete ? undefined : {
-        label: 'Complete Profile',
+        label: t('dashboard.onboardingChecklist.actions.completeProfile'),
         href: '/dashboard/profile'
       }
     },
     {
       id: 'verify-kyc',
-      label: 'Verify your identity (KYC)',
-      description: kycVerified
-        ? undefined
-        : kycPending
-          ? 'Your documents are under review'
-          : kyc?.status === 'rejected'
-            ? 'Update your documents and resubmit for verification'
-            : 'Upload ID and a selfie so we can verify your identity',
+      label: t('dashboard.onboardingChecklist.items.verifyKyc.label'),
+      description: kycDescription,
       completed: kycVerified,
       action:
         kycVerified || kycPending
           ? undefined
           : {
-              label: kyc?.status === 'rejected' ? 'Resubmit KYC' : 'Verify KYC',
+              label: kyc?.status === 'rejected'
+                ? t('dashboard.onboardingChecklist.actions.resubmitKyc')
+                : t('dashboard.onboardingChecklist.actions.verifyKyc'),
               href: '/dashboard/profile',
             },
     },
     {
       id: 'browse-opportunities',
-      label: 'Browse funding opportunities',
-      description: 'Explore available opportunities that match your business',
+      label: t('dashboard.onboardingChecklist.items.browseOpportunities.label'),
+      description: t('dashboard.onboardingChecklist.items.browseOpportunities.description'),
       completed: hasApplications,
       action: hasApplications ? undefined : {
-        label: 'Browse Opportunities',
+        label: t('dashboard.onboardingChecklist.actions.browseOpportunities'),
         href: '/opportunities'
       }
     },
@@ -125,13 +131,13 @@ export function OnboardingChecklist({
       ? [
           {
             id: 'submit-application',
-            label: 'Submit your first application',
-            description: 'Apply for opportunities to get started',
+            label: t('dashboard.onboardingChecklist.items.submitApplication.label'),
+            description: t('dashboard.onboardingChecklist.items.submitApplication.description'),
             completed: hasSubmittedApplication,
             action: hasSubmittedApplication
               ? undefined
               : {
-                  label: 'Start Application',
+                  label: t('dashboard.onboardingChecklist.actions.startApplication'),
                   href: '/opportunities',
                 },
           },
@@ -159,7 +165,7 @@ export function OnboardingChecklist({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Getting Started</span>
+              <span className="text-sm font-medium">{t('dashboard.onboardingChecklist.title')}</span>
             </div>
             {showDismiss && (
               <Button
@@ -174,7 +180,7 @@ export function OnboardingChecklist({
           </div>
           <Progress value={progressPercentage} className="h-2 mb-3" />
           <div className="text-xs text-muted-foreground mb-3">
-            {completedCount} of {totalCount} tasks completed
+            {t('dashboard.onboardingChecklist.tasksCount', { completed: completedCount, total: totalCount })}
           </div>
           <Button
             variant="outline"
@@ -182,7 +188,7 @@ export function OnboardingChecklist({
             className="w-full"
             onClick={() => navigate('/dashboard')}
           >
-            View Full Checklist
+            {t('dashboard.onboardingChecklist.viewFull')}
             <ArrowRight className="h-3 w-3 ml-2" />
           </Button>
         </CardContent>
@@ -196,7 +202,7 @@ export function OnboardingChecklist({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Getting Started</CardTitle>
+            <CardTitle className="text-lg">{t('dashboard.onboardingChecklist.title')}</CardTitle>
           </div>
           {showDismiss && (
             <Button
@@ -210,15 +216,15 @@ export function OnboardingChecklist({
           )}
         </div>
         <CardDescription>
-          Complete these steps to get the most out of Maali
+          {t('dashboard.onboardingChecklist.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
+            <span className="text-muted-foreground">{t('dashboard.onboardingChecklist.progress')}</span>
             <span className="font-medium">
-              {completedCount} of {totalCount} completed
+              {t('dashboard.onboardingChecklist.progressCount', { completed: completedCount, total: totalCount })}
             </span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
@@ -276,7 +282,7 @@ export function OnboardingChecklist({
           <div className="pt-2 border-t">
             <div className="flex items-center gap-2 text-sm text-primary font-medium">
               <CheckCircle2 className="h-4 w-4" />
-              <span>All set! You're ready to go.</span>
+              <span>{t('dashboard.onboardingChecklist.allSet')}</span>
             </div>
           </div>
         )}

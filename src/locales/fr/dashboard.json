@@ -76,6 +76,47 @@
       "title": "Complétez votre profil",
       "description": "Votre profil est {{percentage}}% complet. Un profil complet augmente vos chances d'approbation.",
       "action": "Compléter le profil"
+    },
+    "onboardingChecklist": {
+      "title": "Premiers pas",
+      "description": "Suivez ces étapes pour tirer le meilleur parti de Maali",
+      "progress": "Progression",
+      "progressCount": "{{completed}} sur {{total}} terminé(s)",
+      "tasksCount": "{{completed}} sur {{total}} tâches terminées",
+      "viewFull": "Voir la liste complète",
+      "allSet": "Tout est prêt ! Vous pouvez continuer.",
+      "items": {
+        "emailVerify": {
+          "label": "Vérifiez votre adresse e-mail",
+          "description": "Consultez votre boîte de réception pour le lien de vérification"
+        },
+        "completeProfile": {
+          "label": "Complétez votre profil",
+          "description": "Ajoutez les informations de votre entreprise pour augmenter vos chances d'approbation"
+        },
+        "verifyKyc": {
+          "label": "Vérifiez votre identité (KYC)",
+          "pending": "Vos documents sont en cours d'examen",
+          "rejected": "Mettez à jour vos documents et soumettez-les à nouveau",
+          "idle": "Téléversez une pièce d'identité et un selfie pour vérifier votre identité"
+        },
+        "browseOpportunities": {
+          "label": "Parcourir les opportunités",
+          "description": "Explorez les opportunités qui correspondent à votre activité"
+        },
+        "submitApplication": {
+          "label": "Soumettez votre première candidature",
+          "description": "Postulez à des opportunités pour commencer"
+        }
+      },
+      "actions": {
+        "resendEmail": "Renvoyer l'e-mail",
+        "completeProfile": "Compléter le profil",
+        "verifyKyc": "Vérifier le KYC",
+        "resubmitKyc": "Resoumettre le KYC",
+        "browseOpportunities": "Parcourir les opportunités",
+        "startApplication": "Commencer une candidature"
+      }
     }
   },
   "applications": {

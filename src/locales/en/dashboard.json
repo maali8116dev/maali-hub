@@ -76,6 +76,47 @@
       "title": "Complete your profile",
       "description": "Your profile is {{percentage}}% complete. A complete profile increases your chances of approval.",
       "action": "Complete Profile"
+    },
+    "onboardingChecklist": {
+      "title": "Getting Started",
+      "description": "Complete these steps to get the most out of Maali",
+      "progress": "Progress",
+      "progressCount": "{{completed}} of {{total}} completed",
+      "tasksCount": "{{completed}} of {{total}} tasks completed",
+      "viewFull": "View Full Checklist",
+      "allSet": "All set! You're ready to go.",
+      "items": {
+        "emailVerify": {
+          "label": "Verify your email address",
+          "description": "Check your inbox for the verification link"
+        },
+        "completeProfile": {
+          "label": "Complete your profile",
+          "description": "Add your business information to increase approval chances"
+        },
+        "verifyKyc": {
+          "label": "Verify your identity (KYC)",
+          "pending": "Your documents are under review",
+          "rejected": "Update your documents and resubmit for verification",
+          "idle": "Upload ID and a selfie so we can verify your identity"
+        },
+        "browseOpportunities": {
+          "label": "Browse opportunities",
+          "description": "Explore available opportunities that match your business"
+        },
+        "submitApplication": {
+          "label": "Submit your first application",
+          "description": "Apply for opportunities to get started"
+        }
+      },
+      "actions": {
+        "resendEmail": "Resend Email",
+        "completeProfile": "Complete Profile",
+        "verifyKyc": "Verify KYC",
+        "resubmitKyc": "Resubmit KYC",
+        "browseOpportunities": "Browse Opportunities",
+        "startApplication": "Start Application"
+      }
     }
   },
   "applications": {
