@@ -1497,7 +1497,9 @@
         "totalUsers": "Total Users",
         "totalProjects": "Total Projects",
         "connected": "Connected",
-        "operational": "Operational"
+        "disconnected": "Disconnected",
+        "operational": "Operational",
+        "unavailable": "Unavailable"
       },
       "save": "Save Settings",
       "saving": "Saving...",

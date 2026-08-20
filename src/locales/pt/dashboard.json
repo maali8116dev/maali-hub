@@ -710,7 +710,9 @@
         "totalUsers": "Utilizadores",
         "totalProjects": "Projetos",
         "connected": "Ligado",
-        "operational": "Operacional"
+        "disconnected": "Desligado",
+        "operational": "Operacional",
+        "unavailable": "Indisponível"
       },
       "save": "Guardar",
       "saving": "A guardar...",

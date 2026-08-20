@@ -1497,7 +1497,9 @@
         "totalUsers": "Gesamtzahl der Benutzer",
         "totalProjects": "Gesamtprojekte",
         "connected": "Verbunden",
-        "operational": "Betriebsbereit"
+        "disconnected": "Getrennt",
+        "operational": "Betriebsbereit",
+        "unavailable": "Nicht verfügbar"
       },
       "save": "Einstellungen speichern",
       "saving": "Sparen...",

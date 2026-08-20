@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Database, Bell, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAdminStats } from "@/hooks/useAdminStats";
 
 const AdminSettings = () => {
   const { t } = useTranslation(["dashboard"]);
   const { toast } = useToast();
+  const { data: stats, isLoading: statsLoading, isError: statsError, isSuccess: statsOk } = useAdminStats();
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -18,6 +21,7 @@ const AdminSettings = () => {
   });
 
   const [saving, setSaving] = useState(false);
+  const systemHealthy = statsOk && !statsError;
 
   const handleSave = async () => {
     setSaving(true);
@@ -138,22 +142,42 @@ const AdminSettings = () => {
             <div>
               <Label>{t("admin.settingsPage.system.databaseStatus")}</Label>
               <p className="text-sm text-muted-foreground">
-                {t("admin.settingsPage.system.connected")}
+                {statsLoading
+                  ? "…"
+                  : systemHealthy
+                    ? t("admin.settingsPage.system.connected")
+                    : t("admin.settingsPage.system.disconnected")}
               </p>
             </div>
             <div>
               <Label>{t("admin.settingsPage.system.apiStatus")}</Label>
               <p className="text-sm text-muted-foreground">
-                {t("admin.settingsPage.system.operational")}
+                {statsLoading
+                  ? "…"
+                  : systemHealthy
+                    ? t("admin.settingsPage.system.operational")
+                    : t("admin.settingsPage.system.unavailable")}
               </p>
             </div>
             <div>
               <Label>{t("admin.settingsPage.system.totalUsers")}</Label>
-              <p className="text-sm text-muted-foreground">1,247</p>
+              {statsLoading ? (
+                <Skeleton className="h-5 w-16 mt-1" />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {(stats?.totalUsers ?? 0).toLocaleString()}
+                </p>
+              )}
             </div>
             <div>
               <Label>{t("admin.settingsPage.system.totalProjects")}</Label>
-              <p className="text-sm text-muted-foreground">45</p>
+              {statsLoading ? (
+                <Skeleton className="h-5 w-12 mt-1" />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {(stats?.totalProjects ?? 0).toLocaleString()}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>

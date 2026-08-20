@@ -1497,7 +1497,9 @@
         "totalUsers": "Utilisateurs",
         "totalProjects": "Projets",
         "connected": "Connecté",
-        "operational": "Opérationnel"
+        "disconnected": "Déconnecté",
+        "operational": "Opérationnel",
+        "unavailable": "Indisponible"
       },
       "save": "Enregistrer",
       "saving": "Enregistrement...",

@@ -136,18 +136,17 @@ const AdminPartners = () => {
         const partner = row.original;
         return (
           <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex items-center justify-center flex-shrink-0">
-            {partner.logo_url ? (
-              <img
-                src={partner.logo_url}
-                alt={partner.name}
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <span className="text-lg">ðŸ¢</span>
-            )}
+            <img
+              src={partner.logo_url || "/placeholder.svg"}
+              alt={partner.name}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                const img = e.target as HTMLImageElement;
+                if (!img.src.endsWith("/placeholder.svg")) {
+                  img.src = "/placeholder.svg";
+                }
+              }}
+            />
           </div>
         );
       },
