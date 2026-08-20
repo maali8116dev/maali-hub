@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#C94E1F" />
     <title>Maali - Empowering African Entrepreneurs</title>
     <meta name="description" content="Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa. Your journey to success starts here." />
     <meta name="author" content="Maali Platform" />
@@ -11,11 +17,23 @@
     <meta property="og:title" content="Maali - Empowering African Entrepreneurs" />
     <meta property="og:description" content="Discover funding opportunities, submit applications, and connect with a thriving ecosystem of entrepreneurs across Africa." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://maalihub.com/" />
+    <meta property="og:site_name" content="Maali Platform" />
+    <meta property="og:image" content="https://maalihub.com/og-image-default.png" />
+    <link rel="canonical" href="https://maalihub.com/" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:image" content="https://maalihub.com/og-image-default.png" />
+
+    <!-- Preconnect to critical origins -->
+    <link rel="preconnect" href="https://api.maalihub.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
+
+    <!-- Preload critical font -->
+    <link rel="preload" href="https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Preload LCP hero image for immediate discovery -->
+    <link rel="preload" href="/images/hero-agriculture.webp" as="image" fetchpriority="high" />
   </head>
 
   <body>

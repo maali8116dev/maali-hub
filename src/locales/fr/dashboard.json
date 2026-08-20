@@ -1,0 +1,2680 @@
+{
+  "memberGate": {
+    "title": "Adhésion complète requise",
+    "description": "L'adhésion Communauté permet de parcourir les opportunités. Passez à Membre complet pour postuler, téléverser des documents et suivre vos candidatures.",
+    "menuLocked": "Réservé aux Membres complets"
+  },
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "applications": "Mes candidatures",
+    "documents": "Mes documents",
+    "notifications": "Mes notifications",
+    "profile": "Profil",
+    "billing": "Facturation",
+    "settings": "Paramètres"
+  },
+  "header": {
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter"
+  },
+  "pages": {
+    "dashboard": "Tableau de bord",
+    "applications": "Mes candidatures",
+    "documents": "Mes documents",
+    "notifications": "Mes notifications",
+    "profile": "Profil",
+    "billing": "Facturation",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bon retour ! Voici un aperçu de votre activité.",
+    "helpTooltip": "Votre tableau de bord affiche un aperçu de vos candidatures, l'état de votre profil et les actions rapides. Utilisez les cartes de statistiques pour suivre vos progrès.",
+    "stats": {
+      "totalApplications": "Total des candidatures",
+      "totalApplicationsDesc": "Nombre total de candidatures que vous avez soumises, y compris les brouillons, en attente, approuvées et rejetées.",
+      "allTimeApplications": "Candidatures de tous les temps",
+      "pending": "En attente",
+      "pendingDesc": "Candidatures actuellement examinées par notre équipe. Vous serez notifié lorsqu'une décision sera prise.",
+      "underReview": "En cours d'examen",
+      "approved": "Approuvé",
+      "successfullyFunded": "Financé avec succès",
+      "rejected": "Rejeté",
+      "notSelected": "Non sélectionné"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "startNewApplication": "Démarrer une nouvelle candidature",
+      "browseOpportunities": "Parcourir les opportunités",
+      "viewAllApplications": "Voir toutes les candidatures"
+    },
+    "profileCompletion": {
+      "title": "Complétion du profil",
+      "status": "État du profil",
+      "complete": "Complet",
+      "completeProfile": "Complétez votre profil →",
+      "viewProfile": "Voir votre profil →"
+    },
+    "recentApplications": {
+      "title": "Candidatures récentes",
+      "viewAll": "Voir tout",
+      "submitted": "Soumis"
+    },
+    "emptyState": {
+      "noApplications": "Aucune candidature pour le moment",
+      "noApplicationsDesc": "Commencez à postuler pour des opportunités de financement pour voir vos candidatures ici.",
+      "browseOpportunities": "Parcourir les opportunités",
+      "viewGuide": "Voir le guide",
+      "tips": {
+        "completeProfile": "Complétez votre profil avant de postuler",
+        "readRequirements": "Lisez attentivement les exigences du projet",
+        "prepareDocuments": "Préparez tous les documents requis à l'avance",
+        "submitBeforeDeadline": "Soumettez les candidatures avant les dates limites"
+      }
+    },
+    "profileTip": {
+      "title": "Complétez votre profil",
+      "description": "Votre profil est {{percentage}}% complet. Un profil complet augmente vos chances d'approbation.",
+      "action": "Compléter le profil"
+    },
+    "onboardingChecklist": {
+      "title": "Premiers pas",
+      "description": "Suivez ces étapes pour tirer le meilleur parti de Maali",
+      "progress": "Progression",
+      "progressCount": "{{completed}} sur {{total}} terminé(s)",
+      "tasksCount": "{{completed}} sur {{total}} tâches terminées",
+      "viewFull": "Voir la liste complète",
+      "allSet": "Tout est prêt ! Vous pouvez continuer.",
+      "items": {
+        "emailVerify": {
+          "label": "Vérifiez votre adresse e-mail",
+          "description": "Consultez votre boîte de réception pour le lien de vérification"
+        },
+        "completeProfile": {
+          "label": "Complétez votre profil",
+          "description": "Ajoutez les informations de votre entreprise pour augmenter vos chances d'approbation"
+        },
+        "verifyKyc": {
+          "label": "Vérifiez votre identité (KYC)",
+          "pending": "Vos documents sont en cours d'examen",
+          "rejected": "Mettez à jour vos documents et soumettez-les à nouveau",
+          "idle": "Téléversez une pièce d'identité et un selfie pour vérifier votre identité"
+        },
+        "browseOpportunities": {
+          "label": "Parcourir les opportunités",
+          "description": "Explorez les opportunités qui correspondent à votre activité"
+        },
+        "submitApplication": {
+          "label": "Soumettez votre première candidature",
+          "description": "Postulez à des opportunités pour commencer"
+        }
+      },
+      "actions": {
+        "resendEmail": "Renvoyer l'e-mail",
+        "completeProfile": "Compléter le profil",
+        "verifyKyc": "Vérifier le KYC",
+        "resubmitKyc": "Resoumettre le KYC",
+        "browseOpportunities": "Parcourir les opportunités",
+        "startApplication": "Commencer une candidature"
+      }
+    }
+  },
+  "applications": {
+    "title": "Mes candidatures",
+    "subtitle": "Suivez et gérez vos candidatures de financement",
+    "helpTooltip": "Suivez le statut de toutes vos candidatures de financement. Vous pouvez filtrer par statut, rechercher et voir des informations détaillées sur chaque candidature.",
+    "firstTimeTip": {
+      "title": "Prêt à postuler pour un financement ?",
+      "description": "Parcourez les opportunités disponibles et soumettez votre première candidature. Assurez-vous que votre profil est complet pour augmenter vos chances d'approbation.",
+      "action": "Parcourir les opportunités"
+    },
+    "filters": {
+      "all": "Tout",
+      "pending": "En attente",
+      "under_review": "En cours d'examen",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "draft": "Brouillon",
+      "drafts": "Brouillons"
+    },
+    "columns": {
+      "applicant": "Candidat",
+      "project": "Projet",
+      "sector": "Secteur",
+      "country": "Pays",
+      "status": "Statut",
+      "submitted": "Soumis",
+      "actions": "Actions",
+      "email": "E-mail",
+      "rank": "Rang",
+      "avgScore": "Score moy.",
+      "reviews": "Avis",
+      "reviewDeadline": "Date limite d'examen",
+      "daysPending": "Jours en attente"
+    },
+    "statusDescriptions": {
+      "pending": "Votre candidature est en cours d'examen par notre équipe",
+      "approved": "Félicitations ! Votre candidature a été approuvée",
+      "rejected": "Votre candidature n'a pas été sélectionnée cette fois",
+      "draft": "Cette candidature est enregistrée mais pas encore soumise",
+      "under_review": "Votre candidature est actuellement en cours d'examen",
+      "default": "Statut de la candidature"
+    },
+    "actions": {
+      "continueApplication": "Continuer la candidature",
+      "applicationClosed": "Candidature fermée",
+      "viewDetails": "Voir les détails"
+    },
+    "table": {
+      "allApplications": "Toutes les candidatures",
+      "pendingApplications": "Candidatures en attente",
+      "approvedApplications": "Candidatures approuvées",
+      "rejectedApplications": "Candidatures rejetées",
+      "draftApplications": "Candidatures en brouillon",
+      "searchPlaceholder": "Rechercher par titre de projet, secteur ou pays..."
+    },
+    "emptyState": {
+      "errorTitle": "Erreur lors du chargement des candidatures",
+      "errorDesc": "Une erreur s'est produite lors du chargement de vos candidatures. Veuillez réessayer plus tard.",
+      "noApplications": "Aucune candidature pour le moment",
+      "noApplicationsDesc": "Commencez par parcourir les opportunités disponibles et soumettre votre première candidature.",
+      "noFilteredApplications": "Aucune candidature",
+      "noFilteredApplicationsDesc": "Essayez d'ajuster vos critères de filtre pour trouver plus de candidatures.",
+      "browseOpportunities": "Parcourir les opportunités",
+      "clearFilter": "Effacer le filtre",
+      "viewGuide": "Voir le guide",
+      "tips": {
+        "completeProfile": "Complétez votre profil pour augmenter les chances d'approbation",
+        "readRequirements": "Lisez attentivement les exigences du projet avant de postuler",
+        "saveDrafts": "Vous pouvez enregistrer les candidatures en brouillon et les soumettre plus tard",
+        "checkDeadlines": "Vérifiez les dates limites des candidatures pour éviter de manquer des opportunités"
+      }
+    },
+    "detail": {
+      "title": "Détails de la candidature",
+      "back": "Retour",
+      "applicationId": "ID : {{id}}",
+      "backToApplications": "Retour aux candidatures",
+      "notFound": {
+        "title": "Candidature introuvable",
+        "description": "La candidature que vous recherchez n'existe pas ou vous n'y avez pas accès.",
+        "viewAll": "Voir toutes les candidatures"
+      },
+      "metadata": {
+        "title": "Détails de la candidature",
+        "submitted": "Soumise :",
+        "status": "Statut :"
+      },
+      "applicantInfo": {
+        "title": "Informations du candidat",
+        "applicantType": "Type de candidat",
+        "fullLegalName": "Nom légal complet",
+        "organizationName": "Nom de l'organisation",
+        "registrationId": "Numéro d'enregistrement",
+        "contactEmail": "E-mail de contact",
+        "contactPhone": "Téléphone de contact",
+        "countryOfResidence": "Pays de résidence",
+        "cityRegion": "Ville/Région",
+        "applicant": "Candidat"
+      },
+      "organizationalBackground": {
+        "title": "Contexte organisationnel",
+        "yearEstablished": "Année de création",
+        "teamSize": "Taille de l'équipe",
+        "teamSizeMembers": "{{count}} membres",
+        "previousGrants": "Subventions/financements antérieurs",
+        "coreMission": "Mission/objectif principal",
+        "primarySectors": "Secteurs principaux",
+        "otherPrimarySector": "Autre secteur principal",
+        "keyTeamMembers": "Membres clés et rôles",
+        "previousGrantsDetails": "Détails des subventions antérieures"
+      },
+      "projectDetails": {
+        "title": "Détails du projet",
+        "project": "Projet",
+        "viewProjectDetails": "Voir les détails du projet",
+        "teamSize": "Taille de l'équipe"
+      },
+      "socialLinks": {
+        "title": "Liens sociaux et présence en ligne",
+        "otherSocialLinks": "Autres liens sociaux"
+      },
+      "documents": {
+        "title": "Documents justificatifs",
+        "downloading": "Téléchargement...",
+        "download": "Télécharger"
+      },
+      "compliance": {
+        "title": "Conformité et déclarations",
+        "informationAccurate": "Exactitude des informations confirmée",
+        "conflictOfInterest": "Conflit d'intérêts déclaré",
+        "reportingRequirements": "Exigences de reporting acceptées",
+        "dataProcessing": "Traitement des données consenti",
+        "confirmed": "Confirmé",
+        "notConfirmed": "Non confirmé",
+        "declared": "Déclaré",
+        "notDeclared": "Non déclaré",
+        "agreed": "Accepté",
+        "notAgreed": "Non accepté",
+        "consented": "Consentement donné",
+        "notConsented": "Consentement non donné",
+        "declarationDate": "Date de déclaration : {{date}}"
+      },
+      "values": {
+        "yes": "Oui",
+        "no": "Non",
+        "na": "N/D"
+      },
+      "review": {
+        "statusTitle": "Statut de l'évaluation",
+        "reviewersTitle": "Évaluateurs",
+        "totalReviews": "Évaluations totales :",
+        "pending": "En attente :",
+        "averageScore": "Score moyen :",
+        "scoreOutOf": "{{score}} sur 10",
+        "recommendations": "Recommandations :",
+        "tieBreakerHint": "Les évaluateurs ne sont pas d'accord près du seuil de rejet (~5/10) — ajoutez un évaluateur pour départager (jusqu'à {{max}} au total).",
+        "underReviewProgress": "Reste en cours d'évaluation jusqu'à ce que tous les évaluateurs assignés aient soumis ({{completed}}/{{total}} terminées).",
+        "allReviewsIn": "Toutes les évaluations sont reçues — approuvez ou rejetez pour mettre à jour le statut.",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "rejectDialogTitle": "Rejeter la candidature ?",
+        "rejectDialogDescription": "Le candidat sera notifié. Cette action ne peut pas être annulée depuis l'interface.",
+        "cancel": "Annuler",
+        "reviewersAssignedNoReviews": "{{count}} évaluateur(s) assigné(s), aucune évaluation soumise.",
+        "noReviewersAssigned": "Aucun évaluateur assigné.",
+        "addReviewer": "Ajouter un évaluateur",
+        "assignReviewers": "Assigner des évaluateurs",
+        "reassign": "Réassigner",
+        "needsTwoReviewers": "Cette candidature nécessite 2 évaluateurs. Seulement {{count}} assigné(s) pour l'instant.",
+        "unknownReviewer": "Évaluateur inconnu",
+        "assignedDate": "Assigné le {{date}}",
+        "score": "Score :",
+        "recommendation": "Recommandation :",
+        "assignDialogTitle": "Assigner des évaluateurs",
+        "assignDialogDescription": "Sélectionnez exactement 2 évaluateurs éligibles. Ajoutez depuis le menu et retirez avec le × sur chaque badge.",
+        "reviewersLabel": "Évaluateurs",
+        "addReviewerPlaceholder": "Ajouter un évaluateur...",
+        "noEligibleReviewers": "Plus d'évaluateurs éligibles",
+        "removeReviewerAria": "Retirer {{name}}",
+        "workload": "charge {{count}}",
+        "saving": "Enregistrement...",
+        "save": "Enregistrer",
+        "addDialogTitle": "Ajouter un évaluateur",
+        "addDialogDescription": "Ajoute un évaluateur éligible sans retirer les assignations existantes (départage / évaluation supplémentaire). L'assignation automatique utilise toujours 2 évaluateurs.",
+        "chooseReviewerPlaceholder": "Choisir un évaluateur...",
+        "adding": "Ajout…",
+        "toastApproved": "Candidature approuvée",
+        "toastRejected": "Candidature rejetée",
+        "toastStatusError": "Impossible de mettre à jour le statut",
+        "toastTryAgain": "Réessayer",
+        "toastReviewersUpdated": "Évaluateurs mis à jour",
+        "toastReviewersUpdatedDesc": "Les assignations ont été mises à jour avec succès.",
+        "toastUpdateFailed": "Échec de la mise à jour",
+        "toastReviewerAdded": "Évaluateur ajouté",
+        "toastReviewerAddedDesc": "Il peut soumettre une évaluation supplémentaire.",
+        "toastAddReviewerFailed": "Impossible d'ajouter l'évaluateur",
+        "reviewProgressCompleted": "{{completed}}/{{total}} terminées",
+        "reviewCount_one": "{{count}} évaluation",
+        "reviewCount_other": "{{count}} évaluations",
+        "noReviews": "Aucune évaluation"
+      },
+      "translation": {
+        "translateForMe": "Traduire pour moi",
+        "viewTranslation": "Voir la traduction",
+        "viewOriginal": "Voir l'original",
+        "translating": "Traduction en cours…",
+        "offer": "Candidature soumise en {{source}}. Traduction automatique disponible.",
+        "showingTranslated": "Traduction automatique de {{source}} vers {{target}}.",
+        "sameLocale": "La candidature est déjà dans votre langue.",
+        "errorTitle": "Échec de la traduction",
+        "errorDesc": "Impossible de traduire cette candidature. Réessayez plus tard."
+      }
+    },
+    "form": {
+      "page": {
+        "title": "Formulaire de candidature",
+        "subtitleWithProject": "Complétez le formulaire ci-dessous pour postuler à cette opportunité de financement.",
+        "subtitleGeneric": "Complétez le formulaire ci-dessous pour démarrer votre candidature.",
+        "backToProject": "Retour aux détails du projet",
+        "backToProjects": "Retour aux projets",
+        "loading": "Chargement...",
+        "closedTitle": "Candidatures fermées",
+        "closedDescription": "Cette opportunité est fermée. Les nouvelles candidatures et les modifications sont désactivées.",
+        "backToOpportunity": "Retour à l'opportunité",
+        "membershipCta": "Voir les options d'adhésion"
+      },
+      "steps": {
+        "applicantInfo": "Informations du candidat",
+        "organization": "Détails de l'organisation (facultatif)",
+        "projectOverview": "Aperçu du projet",
+        "socialLinks": "Liens sociaux",
+        "documents": "Téléverser des documents",
+        "review": "Révision",
+        "compliance": "Conformité et déclarations",
+        "submit": "Soumettre"
+      },
+      "progress": {
+        "stepOf": "Étape {{current}} sur {{total}}",
+        "saveDraft": "Enregistrer le brouillon",
+        "saving": "Enregistrement...",
+        "lastSaved": "Dernière sauvegarde : {{time}}",
+        "percentComplete": "{{percent}} % terminé"
+      },
+      "nav": {
+        "previous": "Précédent",
+        "next": "Suivant",
+        "submit": "Soumettre la candidature",
+        "submitting": "Envoi en cours...",
+        "verifyEmailToSubmit": "Vérifiez votre e-mail pour soumettre"
+      },
+      "requiredMark": "Les champs marqués d'un * sont obligatoires.",
+      "notProvided": "Non renseigné",
+      "edit": "Modifier",
+      "yes": "Oui",
+      "location": "Localisation",
+      "declarationDate": "Date de déclaration :",
+      "step1": {
+        "title": "Informations du candidat",
+        "description": "Parlez-nous de vous ou de votre organisation.",
+        "applicantType": "Type de candidat",
+        "applicantTypePlaceholder": "Sélectionnez le type de candidat",
+        "fullLegalName": "Nom légal complet",
+        "fullLegalNamePlaceholder": "Saisissez le nom légal complet",
+        "organizationName": "Nom de l'organisation",
+        "organizationNamePlaceholder": "Saisissez le nom de l'organisation",
+        "country": "Pays de résidence / d'enregistrement",
+        "countryPlaceholder": "Sélectionnez un pays",
+        "cityRegion": "Ville / Région",
+        "cityRegionPlaceholder": "Saisissez la ville ou la région",
+        "email": "Adresse e-mail",
+        "emailPlaceholder": "votre.email@exemple.com",
+        "phone": "Numéro de téléphone",
+        "phonePlaceholder": "Saisissez le numéro de téléphone"
+      },
+      "step2": {
+        "individualSkip": "Ces informations sur l'organisation sont facultatives et généralement inutiles pour les candidats individuels. Vous pouvez passer à l'étape suivante.",
+        "title": "Détails de l'organisation (facultatif)",
+        "description": "Partagez des informations supplémentaires sur la crédibilité et les capacités de votre organisation. Vous pouvez aussi les fournir dans les documents justificatifs.",
+        "yearEstablished": "Année de création",
+        "yearEstablishedPlaceholder": "2020",
+        "teamMembers": "Nombre de membres de l'équipe",
+        "teamMembersPlaceholder": "10",
+        "coreMission": "Mission / objectif principal",
+        "coreMissionPlaceholder": "Décrivez brièvement la mission et l'objectif principal de votre organisation...",
+        "max200Words": "Maximum 200 mots",
+        "primarySectors": "Secteur(s) principal(aux)",
+        "otherSector": "Autre secteur (précisez)",
+        "otherSectorPlaceholder": "Saisissez l'autre secteur",
+        "keyTeam": "Membres clés de l'équipe et rôles",
+        "keyTeamPlaceholder": "Listez les membres clés de l'équipe et leurs rôles...",
+        "previousGrants": "Subventions ou financements antérieurs reçus",
+        "previousGrantsDetails": "Détails des subventions / financements antérieurs",
+        "previousGrantsPlaceholder": "Fournissez des détails sur les subventions ou financements antérieurs...",
+        "max400Words": "Maximum 400 mots"
+      },
+      "step3": {
+        "grant": {
+          "title": "Aperçu du projet",
+          "hint": "Dites-nous ce pour quoi vous souhaitez obtenir un financement.",
+          "titleLabel": "Titre du projet",
+          "titlePlaceholder": "Saisissez le titre du projet",
+          "summaryLabel": "Résumé du projet",
+          "summaryPlaceholder": "Fournissez un résumé de votre projet (minimum 30 mots)...",
+          "locationLabel": "Zone géographique ciblée (facultatif)",
+          "locationPlaceholder": "Où le projet sera-t-il mené ? Laissez vide pour utiliser votre ville/pays de l'étape 1."
+        },
+        "nonGrant": {
+          "title": "Aperçu de la candidature",
+          "hint": "Parlez-nous de vos objectifs et de votre adéquation avec cette opportunité.",
+          "titleLabel": "Titre de la candidature",
+          "titlePlaceholder": "Saisissez le titre de la candidature",
+          "summaryLabel": "Lettre de motivation",
+          "summaryPlaceholder": "Décrivez brièvement vos objectifs, votre adéquation et les résultats attendus (minimum 30 mots)...",
+          "locationLabel": "Localisation / zone géographique",
+          "locationPlaceholder": "Où êtes-vous basé(e) ou où cette opportunité s'appliquera-t-elle ?"
+        },
+        "summaryWordLimit": "Doit contenir entre 30 et 400 mots"
+      },
+      "step4": {
+        "title": "Liens sociaux",
+        "description": "Partagez vos profils professionnels et réseaux sociaux (facultatif). Cela nous aide à mieux vous connaître.",
+        "linkedin": "URL du profil LinkedIn",
+        "linkedinPlaceholder": "https://linkedin.com/in/votreprofil",
+        "github": "URL du profil GitHub",
+        "githubPlaceholder": "https://github.com/votrenom",
+        "twitter": "URL du profil Twitter/X",
+        "twitterPlaceholder": "https://twitter.com/votrenom",
+        "website": "URL du site web",
+        "websitePlaceholder": "https://votresite.com",
+        "other": "Autres liens sociaux",
+        "otherPlaceholder": "Listez d'autres profils ou liens pertinents (Instagram, Facebook, portfolio, etc.)",
+        "max100Words": "Maximum 100 mots"
+      },
+      "step5": {
+        "title": "Téléverser des documents",
+        "description": "Téléversez les documents justificatifs de votre candidature (facultatif)."
+      },
+      "step6": {
+        "title": "Révisez votre candidature",
+        "description": "Veuillez vérifier toutes les informations ci-dessous avant de continuer.",
+        "registrationId": "Numéro d'enregistrement / d'identification :",
+        "previousGrantsFunding": "Subventions / financements antérieurs :",
+        "fromLibrary": "Depuis la bibliothèque :",
+        "newUploads": "Nouveaux téléversements :",
+        "documentCount": "{{count}} document(s)",
+        "noDocuments": "Aucun document sélectionné",
+        "documentsOnSubmit": "Les documents seront liés ou téléversés lors de la soumission de votre candidature",
+        "linkedin": "LinkedIn :",
+        "github": "GitHub :",
+        "twitter": "Twitter/X :",
+        "website": "Site web :"
+      },
+      "step7": {
+        "title": "Conformité et déclarations",
+        "description": "Veuillez lire et confirmer les déclarations suivantes. Tous les champs sont requis à des fins de gouvernance.",
+        "informationAccurateLabel": "Confirmation de l'exactitude des informations",
+        "informationAccurateDesc": "Je confirme que toutes les informations fournies dans cette candidature sont exactes, complètes et sincères au meilleur de ma connaissance.",
+        "conflictLabel": "Déclaration de conflit d'intérêts",
+        "conflictDesc": "Je déclare avoir divulgué tout conflit d'intérêts potentiel pouvant affecter cette candidature ou son évaluation.",
+        "reportingLabel": "Acceptation des exigences de reporting",
+        "reportingDesc": "J'accepte de fournir des rapports d'avancement réguliers, des états financiers et toute autre documentation exigée par l'organisme financeur.",
+        "dataProcessingLabel": "Consentement au traitement des données",
+        "dataProcessingDesc": "Je consens au traitement de mes données personnelles et des informations de candidature aux fins d'évaluation, d'administration et de communication liées à cette candidature."
+      },
+      "step8": {
+        "title": "Soumettre votre candidature",
+        "description": "Lisez l'avis de confirmation ci-dessous et cliquez sur le bouton de soumission pour finaliser votre candidature.",
+        "notice": "En soumettant cette candidature, vous confirmez que toutes les informations fournies sont exactes et complètes. Votre candidature sera examinée par notre équipe et vous serez informé(e) du résultat par e-mail."
+      },
+      "emailVerification": {
+        "title": "Vérification de l'e-mail requise",
+        "description": "Veuillez vérifier votre adresse e-mail avant de soumettre une candidature. Consultez votre boîte de réception ou votre tableau de bord pour renvoyer le lien."
+      },
+      "options": {
+        "applicantTypes": {
+          "Individual": "Particulier",
+          "Organization": "Organisation",
+          "Startup / SME": "Startup / PME",
+          "NGO / Non-profit": "ONG / Association",
+          "Research / Academic": "Recherche / Académique"
+        },
+        "sectors": {
+          "Health": "Santé",
+          "Education": "Éducation",
+          "Technology": "Technologie",
+          "Agriculture": "Agriculture",
+          "Environment": "Environnement",
+          "Creative": "Créatif",
+          "Other": "Autre"
+        }
+      },
+      "validation": {
+        "phoneRequired": "Le numéro de téléphone est requis",
+        "phoneInvalid": "Veuillez saisir un numéro de téléphone international valide",
+        "applicantTypeRequired": "Veuillez sélectionner un type de candidat",
+        "fullLegalNameRequired": "Le nom légal complet est requis",
+        "countryRequired": "Le pays de résidence est requis",
+        "cityRegionRequired": "La ville/région est requise",
+        "yearInvalid": "Veuillez saisir une année valide",
+        "yearFuture": "L'année ne peut pas être dans le futur",
+        "coreMissionMaxWords": "La mission / l'objectif principal ne doit pas dépasser 200 mots",
+        "teamMembersMin": "Le nombre de membres de l'équipe doit être d'au moins 1",
+        "keyTeamMaxWords": "Les membres clés et rôles ne doivent pas dépasser 200 mots",
+        "previousGrantsMaxWords": "Les détails des subventions antérieures ne doivent pas dépasser 400 mots",
+        "previousGrantsDetailsRequired": "Veuillez fournir des détails sur les subventions ou financements antérieurs",
+        "projectTitleRequired": "Le titre du projet est requis",
+        "projectSummaryRequired": "Le résumé du projet est requis",
+        "projectSummaryMinWords": "Le résumé du projet doit contenir au moins 30 mots",
+        "projectSummaryMaxWords": "Le résumé du projet ne doit pas dépasser 400 mots",
+        "informationAccurateRequired": "Vous devez confirmer que les informations fournies sont exactes",
+        "conflictOfInterestRequired": "Vous devez déclarer tout conflit d'intérêts",
+        "dataProcessingRequired": "Vous devez consentir au traitement des données",
+        "reportingRequirementsRequired": "Vous devez accepter les exigences de reporting",
+        "linkedinUrlInvalid": "Veuillez saisir une URL LinkedIn valide",
+        "githubUrlInvalid": "Veuillez saisir une URL GitHub valide",
+        "twitterUrlInvalid": "Veuillez saisir une URL Twitter/X valide",
+        "websiteUrlInvalid": "Veuillez saisir une URL de site web valide",
+        "otherSocialMaxWords": "Les autres liens sociaux ne doivent pas dépasser 100 mots"
+      },
+      "toasts": {
+        "draftRestored": {
+          "title": "Brouillon restauré",
+          "description": "Votre brouillon précédemment enregistré a été chargé."
+        },
+        "validationError": {
+          "title": "Erreur de validation",
+          "description": "Veuillez remplir correctement tous les champs obligatoires."
+        },
+        "emailVerificationRequired": {
+          "title": "Vérification de l'e-mail requise",
+          "description": "Veuillez vérifier votre adresse e-mail avant de soumettre une candidature."
+        },
+        "projectRequired": {
+          "title": "Projet requis",
+          "description": "Veuillez sélectionner un projet pour postuler."
+        },
+        "missingInformation": {
+          "title": "Informations manquantes",
+          "description": "Veuillez compléter tous les champs obligatoires avant de soumettre."
+        },
+        "complianceRequired": {
+          "title": "Conformité requise",
+          "description": "Veuillez confirmer toutes les déclarations de conformité avant de soumettre."
+        },
+        "applicationsClosed": {
+          "title": "Candidatures fermées",
+          "description": "Ce projet est fermé. Vous ne pouvez plus soumettre ni modifier des candidatures."
+        },
+        "membershipRequired": {
+          "title": "Adhésion requise",
+          "description": "Devenez membre complet pour soumettre des candidatures."
+        },
+        "uploadingDocuments": {
+          "title": "Téléversement des documents",
+          "description_one": "Téléversement de {{count}} document...",
+          "description_other": "Téléversement de {{count}} documents..."
+        },
+        "uploadPartialFailure": {
+          "title": "Certains téléversements ont échoué",
+          "description": "Certains documents n'ont pas pu être téléversés. Votre candidature sera tout de même soumise, sans ces fichiers."
+        },
+        "alreadyApplied": {
+          "title": "Déjà postulé",
+          "description": "Vous avez déjà soumis une candidature pour cette opportunité. Consultez votre tableau de bord pour voir son statut."
+        },
+        "opportunityClosed": {
+          "title": "Candidatures fermées",
+          "description": "Cette opportunité n'accepte plus de candidatures."
+        },
+        "submitSuccess": {
+          "title": "Candidature soumise",
+          "description": "Votre candidature a été soumise avec succès !"
+        },
+        "tooManySubmissions": {
+          "title": "Trop de soumissions",
+          "description": "Vous avez soumis trop de candidatures récemment. Veuillez attendre une heure et réessayer."
+        },
+        "submitFailed": {
+          "title": "Échec de la soumission",
+          "description": "Un problème est survenu lors de la soumission de votre candidature. Veuillez réessayer."
+        },
+        "errors": {
+          "alreadyApplied": "Vous avez déjà soumis une candidature pour cette opportunité.",
+          "projectClosed": "Cette opportunité n'accepte plus de candidatures.",
+          "membershipRequired": "Une adhésion complète est requise pour postuler. Rejoignez MAALI en tant que membre complet pour continuer.",
+          "unauthorized": "Votre session a expiré. Veuillez vous reconnecter pour continuer.",
+          "missingProjectId": "Un problème est survenu. Veuillez actualiser la page et réessayer.",
+          "validationError": "Nous n'avons pas pu valider votre candidature. Veuillez réessayer sous peu.",
+          "invalidBody": "Un problème est survenu avec les données du formulaire. Veuillez actualiser et réessayer.",
+          "internalError": "Un problème est survenu de notre côté. Veuillez réessayer ou contacter le support si le problème persiste.",
+          "generic": "Un problème est survenu lors de la soumission de votre candidature. Veuillez réessayer."
+        }
+      },
+      "documents": {
+        "cv": "CV",
+        "coverLetter": "Lettre de motivation",
+        "invalidFile": "Fichier invalide",
+        "fromLibrary": "Depuis votre bibliothèque",
+        "uploadNew": "Téléverser de nouveaux fichiers",
+        "uploadNewDocuments": "Téléverser de nouveaux documents",
+        "selectFromLibrary": "Sélectionner dans la bibliothèque",
+        "noLibraryDocs": "Aucun document dans votre bibliothèque pour le moment.",
+        "uploadHint": "Téléversez des fichiers ou sélectionnez-les dans votre bibliothèque de documents.",
+        "removeFile": "Supprimer le fichier",
+        "deleteConfirmTitle": "Supprimer le fichier ?",
+        "deleteConfirmDescription": "Cela supprimera « {{name}} » de votre sélection. Le fichier ne sera pas supprimé de votre bibliothèque.",
+        "cancel": "Annuler",
+        "remove": "Supprimer",
+        "requiredSlotsTitle": "Documents requis",
+        "requiredSlotsDescription": "Le CV et la lettre de motivation sont requis pour ce type d'opportunité.",
+        "recommendedTitle": "Documents justificatifs recommandés",
+        "recommendedIntro": "Téléversez tout document qui renforce votre candidature. Éléments recommandés :",
+        "recommendedRequiredNote": "Vous pouvez téléverser tous les fichiers dans cette zone. Les documents marqués d'un * sont obligatoires.",
+        "selectFromLibraryTitle": "Sélectionner dans la bibliothèque",
+        "selectFromLibraryHint": "Choisissez des documents de votre bibliothèque à réutiliser pour cette candidature",
+        "selectedCount": "({{count}} sélectionné(s))",
+        "fromLibrarySection": "Depuis votre bibliothèque de documents",
+        "otherLibrarySection": "Autres fichiers enregistrés",
+        "uploadDropzoneTitle": "Téléverser des fichiers",
+        "fileTypesHint": "PDF, DOC, DOCX et formats d'image courants — max. 10 Mo par fichier.",
+        "chooseFiles": "Choisir des fichiers",
+        "uploadOnSubmitHint": "Les fichiers seront téléversés lors de la soumission de votre candidature",
+        "filesToUploadTitle": "Fichiers à téléverser à la soumission ({{count}})",
+        "readyToUpload": "Prêt à téléverser",
+        "orSeparator": "OU",
+        "opportunityRequirementsTitle": "Documents requis pour cette opportunité",
+        "fileTooLarge": "Le fichier « {{fileName}} » est trop volumineux. Taille maximale : 10 Mo.",
+        "invalidFileType": "Le fichier « {{fileName}} » a un type non valide. Types autorisés : PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+        "individualRecommended": {
+          "id": "Pièce d'identité officielle (si demandée)",
+          "proposal": "Proposition de projet ou note conceptuelle"
+        },
+        "organizationRecommended": {
+          "registration": "Certificat d'enregistrement ou document de constitution légale",
+          "proposal": "Proposition de projet ou note conceptuelle"
+        },
+        "startupRecommended": {
+          "id": "Pièce d'identité officielle (si demandée)",
+          "proposal": "Proposition de projet ou note conceptuelle",
+          "budget": "Budget ou plan financier simple",
+          "cv": "CV/portfolio ou documents d'expérience pertinents"
+        },
+        "ngoRecommended": {
+          "registration": "Certificat d'enregistrement ou document de constitution légale",
+          "profile": "Profil de l'organisation ou document de mission",
+          "proposal": "Proposition de projet ou note conceptuelle",
+          "budget": "Budget/plan financier (et relevés si disponibles)",
+          "team": "CV de l'équipe et profils du personnel clé"
+        }
+      }
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez les paramètres et préférences de votre compte",
+    "notifications": {
+      "title": "Préférences de notification",
+      "description": "Choisissez les notifications que vous souhaitez recevoir",
+      "emailNotifications": "Notifications par e-mail",
+      "emailNotificationsDesc": "Recevez des mises à jour par e-mail concernant vos candidatures",
+      "applicationUpdates": "Mises à jour des candidatures",
+      "applicationUpdatesDesc": "Soyez notifié lorsque le statut de votre candidature change",
+      "newsletter": "Infolettre",
+      "newsletterDesc": "Recevez notre newsletter mensuelle avec des opportunités de financement"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "description": "Personnalisez votre expérience",
+      "language": "Langue",
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "security": {
+      "title": "Sécurité",
+      "description": "Gérez les paramètres de sécurité de votre compte",
+      "currentPassword": "Mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "enterCurrentPassword": "Entrez le mot de passe actuel",
+      "enterNewPassword": "Entrez le nouveau mot de passe",
+      "confirmNewPassword": "Confirmez le nouveau mot de passe",
+      "updatePassword": "Mettre à jour le mot de passe"
+    },
+    "dangerZone": {
+      "title": "Zone de danger",
+      "description": "Actions irréversibles et destructives",
+      "deleteAccount": "Supprimer le compte",
+      "deleteAccountDesc": "Supprimer définitivement votre compte et toutes les données associées"
+    },
+    "save": {
+      "saving": "Enregistrement...",
+      "saveChanges": "Enregistrer les modifications",
+      "saved": "Paramètres enregistrés",
+      "savedDesc": "Vos préférences ont été mises à jour.",
+      "languageUpdated": "Langue mise à jour",
+      "themeUpdated": "Thème mis à jour"
+    }
+  },
+  "notifications": {
+    "title": "Mes notifications",
+    "subtitle": "Restez informé de vos candidatures et de l'activité de votre compte",
+    "markAllAsRead": "Tout marquer comme lu",
+    "marking": "Marquage...",
+    "stats": {
+      "total": "Au total",
+      "unread": "Non lu",
+      "read": "Lu"
+    },
+    "sections": {
+      "unread": "Non lu",
+      "earlier": "Plus tôt"
+    },
+    "actions": {
+      "viewDetails": "Voir les détails →"
+    },
+    "emptyState": {
+      "title": "Aucune notification",
+      "description": "Vous êtes à jour ! Les nouvelles notifications apparaîtront ici."
+    }
+  },
+  "documents": {
+    "title": "Mes documents",
+    "subtitle": "Gérez votre bibliothèque de documents et les documents de candidature",
+    "uploadToLibrary": "Télécharger dans la bibliothèque",
+    "uploading": "Téléchargement...",
+    "applyForFunding": "Postuler aux opportunités",
+    "searchPlaceholder": "Rechercher des documents...",
+    "tabs": {
+      "library": "Bibliothèque",
+      "applications": "Candidatures"
+    },
+    "library": {
+      "title": "Bibliothèque de documents",
+      "description": "Documents réutilisables qui peuvent être sélectionnés lors de la candidature à des opportunités"
+    },
+    "applicationDocuments": {
+      "title": "Documents de candidature",
+      "description": "Documents liés à des candidatures spécifiques"
+    },
+    "emptyState": {
+      "noLibraryDocuments": "Aucun document dans la bibliothèque",
+      "noLibraryDocumentsDesc": "Téléchargez des documents dans votre bibliothèque pour les réutiliser dans plusieurs candidatures. Cliquez sur 'Télécharger dans la bibliothèque' ci-dessus pour commencer.",
+      "noLibraryDocumentsSearch": "Essayez d'ajuster votre recherche pour trouver plus de documents.",
+      "noApplicationDocuments": "Aucun document de candidature",
+      "noApplicationDocumentsDesc": "Les documents téléchargés avec vos candidatures apparaîtront ici. Commencez à postuler pour des opportunités pour télécharger des documents.",
+      "noApplicationDocumentsSearch": "Essayez d'ajuster votre recherche pour trouver plus de documents.",
+      "uploadToLibrary": "Télécharger dans la bibliothèque",
+      "browseOpportunities": "Parcourir les opportunités"
+    },
+    "deleteDialog": {
+      "title": "Supprimer le document",
+      "description": "Êtes-vous sûr de vouloir supprimer \"{{fileName}}\" ? Cette action ne peut pas être annulée.",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "badges": {
+      "application": "Candidature",
+      "library": "Bibliothèque"
+    },
+    "subtitleSlots": "Téléversez une fois, réutilisez pour vos candidatures. Les fichiers liés à une candidature sont sur la page de détail.",
+    "usageCount": "{{count}} sur {{max}} documents",
+    "fileTypes": {
+      "slots": "CV et lettre : PDF, DOC ou DOCX uniquement (PDF recommandé) — 10 Mo max.",
+      "other": "Formats : PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP — 10 Mo max par fichier."
+    },
+    "limitReached": {
+      "title": "Limite atteinte",
+      "description": "Maximum {{max}} documents. Il reste {{remaining}} place(s)."
+    },
+    "slots": {
+      "sectionTitle": "Documents standard",
+      "upload": "Téléverser",
+      "replace": "Remplacer",
+      "cv": {
+        "label": "CV",
+        "description": "Votre CV le plus récent (PDF ou Word). Un nouveau fichier remplace l'ancien."
+      },
+      "id": {
+        "label": "Pièce d'identité / Passeport",
+        "description": "Vérifié via la vérification d'identité sur votre profil.",
+        "verified": "Vérifié",
+        "viewKyc": "Voir la vérification",
+        "completeKyc": "Compléter la vérification"
+      },
+      "coverLetter": {
+        "label": "Lettre de motivation",
+        "description": "Optionnel. PDF ou Word. Réutilisée sauf si vous en téléversez une nouvelle."
+      }
+    },
+    "other": {
+      "title": "Autres documents",
+      "description": "Certificats, portfolios ou fichiers supplémentaires.",
+      "upload": "Téléverser des fichiers",
+      "empty": "Aucun autre document."
+    }
+  },
+  "resources": {
+    "hero": {
+      "title": "Bibliothèque de ressources",
+      "description": "Accédez à des guides, modèles, tutoriels et outils pour vous aider à réussir vos candidatures de financement",
+      "searchPlaceholder": "Rechercher des ressources...",
+      "availableCount": "{{count}} ressources disponibles"
+    },
+    "tabs": {
+      "all": "Tout",
+      "documents": "Fichiers",
+      "videos": "Vidéos",
+      "spreadsheets": "Tableurs",
+      "presentations": "Présentations",
+      "links": "Liens"
+    },
+    "emptyState": {
+      "noResources": "Aucune ressource disponible",
+      "noResourcesDesc": "Les ressources apparaîtront ici une fois qu'elles seront ajoutées par les administrateurs",
+      "noResults": "Aucun résultat trouvé",
+      "noResultsDesc": "Aucune ressource ne correspond à \"{{query}}\". Essayez un autre terme de recherche.",
+      "clearSearch": "Effacer la recherche",
+      "checkBackLater": "Revenez plus tard pour de nouvelles ressources"
+    },
+    "sections": {
+      "browseResources": "Parcourir les ressources",
+      "searchResults": "Résultats de recherche pour \"{{query}}\""
+    },
+    "card": {
+      "featured": "En vedette",
+      "view": "Voir",
+      "open": "Ouvrir",
+      "download": "Télécharger",
+      "typeLabels": {
+        "pdfDocument": "Document PDF",
+        "video": "Vidéo",
+        "webinar": "Webinaire",
+        "spreadsheet": "Tableur",
+        "presentation": "Présentation",
+        "document": "Fichier",
+        "externalLink": "Lien externe",
+        "directory": "Répertoire",
+        "event": "Événement"
+      }
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Aperçu de l'activité de la plateforme et des statistiques",
+    "stats": {
+      "totalUsers": "Utilisateurs totaux",
+      "registeredUsers": "Utilisateurs inscrits",
+      "totalProjects": "Projets totaux",
+      "activeOpportunities": "{{count}} opportunités actives",
+      "totalApplications": "Candidatures totales",
+      "allTimeSubmissions": "Soumissions cumulées",
+      "pendingReviews": "Évaluations en attente",
+      "awaitingReview": "En attente d'évaluation",
+      "approved": "Approuvé",
+      "successfullyApproved": "Approuvé avec succès",
+      "rejected": "Rejeté",
+      "notApproved": "Non approuvé"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "manageProjects": "Gérer les projets",
+      "reviewApps": "Évaluer les candidatures",
+      "manageUsers": "Gérer les utilisateurs",
+      "activityLogs": "Journaux d'activité"
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "viewAll": "Voir tout",
+      "emptyTitle": "Aucune activité récente",
+      "emptyDescription": "L'activité apparaîtra ici au fur et à mesure des interactions",
+      "combinedLabel": "Soumission + Attribution des évaluateurs · Candidature",
+      "fallbackActor": "Un utilisateur",
+      "genericAction": "{{actor}} a effectué {{action}} sur {{entity}}.",
+      "actionTypes": {
+        "submit": "Soumettre",
+        "assign_reviewers": "Attribuer des évaluateurs",
+        "review": "Évaluer",
+        "submission_and_assignment": "Soumission + Attribution"
+      },
+      "entityTypes": {
+        "application": "Candidature",
+        "opportunity": "Opportunité",
+        "user": "Utilisateur"
+      },
+      "descriptions": {
+        "applicationSubmitWithProject": "{{applicantName}} a soumis une candidature pour « {{projectTitle}} ».",
+        "applicationSubmitWithApplicant": "{{applicantName}} a soumis une candidature.",
+        "applicationSubmitGeneric": "{{actor}} a soumis une candidature.",
+        "reviewersAssigned_one": "{{count}} évaluateur attribué à cette candidature.",
+        "reviewersAssigned_other": "{{count}} évaluateurs attribués à cette candidature.",
+        "reviewersAssignedGeneric": "Évaluateurs attribués à cette candidature.",
+        "reviewSubmitted": "{{reviewerName}} a soumis une évaluation.",
+        "reviewSubmittedGeneric": "{{actor}} a soumis une évaluation.",
+        "combinedDefault": "Candidature soumise et équipe d'évaluation attribuée.",
+        "combinedWithProject": "{{applicantName}} a soumis une candidature pour « {{projectTitle}} », et {{reviewerPart}}.",
+        "combinedWithApplicant": "{{applicantName}} a soumis une candidature, et {{reviewerPart}}.",
+        "combinedWithReviewers": "Candidature soumise et {{reviewerPart}}.",
+        "reviewerPart_one": "{{count}} évaluateur attribué",
+        "reviewerPart_other": "{{count}} évaluateurs attribués",
+        "reviewerPartGeneric": "évaluateurs attribués"
+      }
+    }
+  },
+  "opportunities": {
+    "page": {
+      "title": "Mes opportunités",
+      "subtitle": "Créer et gérer vos opportunités de financement",
+      "create": "Nouvelle opportunité",
+      "createFirst": "Créer votre première opportunité",
+      "emptyDescription": "Vous n'avez pas encore créé d'opportunité.",
+      "emptyTipTitle": "Créez votre première opportunité",
+      "emptyTipDescription": "Les opportunités vous permettent d'attirer et de recevoir des candidatures de profils qualifiés. Créez-en une pour commencer !"
+    },
+    "table": {
+      "searchPlaceholder": "Rechercher des opportunités...",
+      "columns": {
+        "title": "Titre",
+        "status": "Statut",
+        "sector": "Secteur",
+        "deadline": "Date limite",
+        "applicationWindow": "Période de candidature",
+        "applicants": "Candidats",
+        "opportunityType": "Type d'opportunité",
+        "location": "Lieu",
+        "country": "Pays",
+        "funding": "Financement",
+        "created": "Créé",
+        "featured": "En vedette",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewProject": "Voir le projet",
+        "viewOpportunity": "Voir l'opportunité",
+        "viewApplications": "Voir les candidatures classées",
+        "editProject": "Modifier le projet",
+        "deleteProject": "Supprimer le projet",
+        "allApplications": "Toutes les candidatures ({{count}})",
+        "edit": "Modifier"
+      }
+    },
+    "form": {
+      "backAdmin": "Retour aux opportunités",
+      "backPartner": "Retour",
+      "titleCreate": "Créer une opportunité",
+      "titleEdit": "Modifier l'opportunité",
+      "subtitleCreateAdmin": "Renseignez les détails pour créer une nouvelle opportunité",
+      "subtitleEditAdmin": "Mettre à jour les détails de l'opportunité",
+      "subtitleCreatePartner": "Configurer une nouvelle opportunité de financement",
+      "subtitleEditPartner": "Mettre à jour les détails de votre opportunité",
+      "loading": "Chargement de l'opportunité...",
+      "sections": {
+        "information": {
+          "title": "Informations sur l'opportunité",
+          "description": "Saisissez les informations de base de l'opportunité."
+        },
+        "image": {
+          "title": "Image de l'opportunité",
+          "description": "Téléversez une image pour cette opportunité (facultatif)",
+          "uploadPlaceholder": "Téléverser l'image de l'opportunité",
+          "dropzoneHint": "Glissez-déposez une image ou cliquez pour parcourir",
+          "change": "Modifier",
+          "loading": "Chargement...",
+          "formats": "Formats pris en charge : JPG, PNG, WebP, GIF. Taille max. : 5 Mo"
+        },
+        "applicationSettings": {
+          "title": "Paramètres de candidature"
+        },
+        "applicationWindow": {
+          "title": "État de la période de candidature",
+          "description": "Dérivé du statut du projet et de la date limite.",
+          "hint": "Les candidats peuvent postuler et modifier les brouillons uniquement tant que c'est ouvert."
+        },
+        "featured": {
+          "title": "Opportunité en vedette",
+          "label": "Afficher sur la page d'accueil",
+          "hint": "Les opportunités en vedette apparaissent sur la page d'accueil"
+        },
+        "attachments": {
+          "title": "Pièces jointes",
+          "descriptionCreate": "Ajoutez des fichiers après la création, ou sélectionnez-les maintenant pour les joindre à l'enregistrement.",
+          "descriptionEdit": "Ajoutez des PDF, documents ou images visibles par les candidats.",
+          "addFile": "Ajouter un fichier",
+          "addFilePending": "Ajouter un fichier (envoyé à l'enregistrement)",
+          "uploading": "Envoi en cours...",
+          "formats": "PDF, Word, Excel, PowerPoint, texte, images. Max. 10 Mo par fichier.",
+          "removeFile": "Supprimer {{fileName}}"
+        }
+      },
+      "fields": {
+        "title": {
+          "label": "Titre",
+          "placeholder": "ex. Bourse pour entrepreneures tech africaines"
+        },
+        "description": {
+          "label": "Description détaillée",
+          "placeholder": "Fournissez une description complète de l'opportunité..."
+        },
+        "opportunityType": {
+          "label": "Type d'opportunité",
+          "placeholder": "Sélectionner le type"
+        },
+        "sector": {
+          "label": "Secteur",
+          "placeholder": "Sélectionner le secteur"
+        },
+        "status": {
+          "label": "Statut",
+          "placeholder": "Sélectionner le statut"
+        },
+        "fundingAmount": {
+          "label": "Montant du financement",
+          "placeholder": "ex. Jusqu'à 50 000 $"
+        },
+        "currency": {
+          "label": "Devise",
+          "placeholder": "ex. EUR"
+        },
+        "deadline": {
+          "label": "Date limite"
+        },
+        "location": {
+          "label": "Lieu",
+          "placeholder": "ex. Kenya, Nigeria, Toute l'Afrique"
+        },
+        "country": {
+          "label": "Pays",
+          "placeholder": "Sélectionner un pays"
+        },
+        "requirements": {
+          "label": "Exigences",
+          "placeholder": "Exigences séparées par des virgules (p. ex. plan d'affaires, pitch deck, finances)"
+        },
+        "eligibilityCriteria": {
+          "label": "Critères d'éligibilité",
+          "placeholder": "Critères séparés par des virgules"
+        },
+        "tags": {
+          "label": "Mots-clés",
+          "hint": "Sélectionnez des tags existants ou saisissez-en un nouveau et appuyez sur Entrée.",
+          "placeholder": "Saisir un tag...",
+          "add": "Ajouter",
+          "create": "Créer « {{tag}} »",
+          "remove": "Supprimer {{tag}}"
+        },
+        "maxApplicants": {
+          "label": "Nombre max. de candidats",
+          "placeholder": "Illimité",
+          "hint": "Laisser vide pour un nombre illimité de candidats"
+        },
+        "currentApplicants": {
+          "label": "Candidats actuels",
+          "hint": "Nombre en lecture seule des candidatures soumises."
+        }
+      },
+      "types": {
+        "grant": "Subvention",
+        "fellowship": "Bourse de recherche",
+        "scholarship": "Bourse d'études",
+        "internship": "Stage",
+        "training": "Formation",
+        "competition": "Concours",
+        "accelerator": "Accélérateur",
+        "incubator": "Incubateur",
+        "job": "Emploi"
+      },
+      "statuses": {
+        "new": "Nouveau",
+        "open": "Ouvert",
+        "closing-soon": "Bientôt clos",
+        "closed": "Fermé",
+        "archived": "Archivé"
+      },
+      "validation": {
+        "titleRequired": "Le titre est requis",
+        "titleMin": "Le titre doit comporter au moins 5 caractères",
+        "descriptionRequired": "La description est requise",
+        "descriptionMin": "La description doit comporter au moins 50 caractères",
+        "opportunityTypeRequired": "Sélectionnez un type d'opportunité",
+        "deadlineFormat": "La date limite doit être au format AAAA-MM-JJ",
+        "locationRequired": "Le lieu est requis",
+        "fundingAmountRequired": "Le montant du financement est requis",
+        "maxApplicantsPositive": "Le nombre max. de candidats doit être positif",
+        "currentApplicantsMin": "Le nombre de candidats actuels ne peut pas être négatif",
+        "sectorInvalid": "Secteur invalide"
+      },
+      "actions": {
+        "create": "Créer l'opportunité",
+        "update": "Mettre à jour l'opportunité",
+        "saving": "Enregistrement...",
+        "cancel": "Annuler"
+      },
+      "toast": {
+        "invalidTitle": "Vérifiez le formulaire",
+        "invalidDescription": "Corrigez les champs en surbrillance avant d'enregistrer."
+      }
+    }
+  },
+  "admin": {
+    "panel": "Panneau d'administration",
+    "roleFallback": "Administrateur",
+    "menu": {
+      "dashboard": "Tableau de bord",
+      "opportunities": "Opportunités",
+      "applications": "Candidatures",
+      "notifications": "Notifications admin",
+      "inbound": "Messages entrants",
+      "kyc": "Demandes KYC",
+      "reviewManagement": "Gestion des évaluations",
+      "financial": "Finances",
+      "sectors": "Secteurs",
+      "resources": "Ressources",
+      "blog": "Blogue",
+      "partners": "Partenaires",
+      "successStories": "Témoignages",
+      "faq": "FAQ",
+      "mentors": "Mentor·es",
+      "users": "Utilisateurs",
+      "activityLogs": "Journaux d'activité",
+      "settings": "Paramètres"
+    },
+    "pages": {
+      "dashboard": "Tableau de bord admin",
+      "opportunities": "Gérer les opportunités",
+      "opportunityApplications": "Candidatures par opportunité",
+      "applications": "Examiner les candidatures",
+      "financial": "Gestion financière",
+      "kyc": "Demandes KYC",
+      "notifications": "Notifications admin",
+      "blog": "Gérer le blog",
+      "partners": "Gérer les partenaires",
+      "successStories": "Gérer les témoignages",
+      "faq": "Gérer la FAQ",
+      "mentors": "Gérer les mentors",
+      "users": "Gérer les utilisateurs",
+      "sectors": "Gérer les secteurs",
+      "activityLogs": "Journaux d'activité",
+      "settings": "Paramètres admin",
+      "inbound": "Messages entrants",
+      "resources": "Ressources",
+      "reviewManagement": "Gestion des évaluations",
+      "userDetails": "Détails de l'utilisateur",
+      "opportunityCreate": "Créer une opportunité",
+      "opportunityEdit": "Modifier l'opportunité",
+      "opportunityDetails": "Détails de l'opportunité",
+      "applicationDetails": "Détails de la candidature",
+      "reviewerDetails": "Détails de l'évaluateur",
+      "resourceEdit": "Modifier la ressource"
+    },
+    "opportunitiesPage": {
+      "title": "Gérer les opportunités",
+      "subtitle": "Créer, modifier et gérer les opportunités de financement",
+      "create": "Créer une opportunité",
+      "allOpportunities": "Toutes les opportunités ({{count}})",
+      "searchPlaceholder": "Rechercher par titre, secteur ou lieu...",
+      "winnersSelected": "Lauréats sélectionnés",
+      "loadError": "Erreur lors du chargement des opportunités : {{message}}",
+      "empty": {
+        "title": "Aucune opportunité trouvée",
+        "description": "Commencez par créer votre première opportunité de financement."
+      },
+      "columns": {
+        "title": "Titre",
+        "status": "Statut",
+        "sector": "Secteur",
+        "deadline": "Date limite",
+        "applicationWindow": "Période de candidature",
+        "applicants": "Candidats",
+        "opportunityType": "Type d'opportunité",
+        "location": "Lieu",
+        "country": "Pays",
+        "funding": "Financement",
+        "created": "Créé",
+        "featured": "En vedette",
+        "actions": "Actions"
+      },
+      "actionTitles": {
+        "viewProject": "Voir le projet",
+        "viewApplications": "Voir les candidatures classées",
+        "editProject": "Modifier le projet",
+        "deleteProject": "Supprimer le projet"
+      },
+      "deleteDialog": {
+        "title": "Êtes-vous sûr ?",
+        "description": "Cette action est irréversible. L'opportunité et toutes les candidatures associées seront supprimées définitivement.",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "deleting": "Suppression..."
+      },
+      "translateAll": "Générer les traductions",
+      "translatingAll": "Génération des traductions...",
+      "translateAllDone": "Traductions générées",
+      "translateAllDoneDesc": "{{count}} opportunités mises en cache. Changez de langue pour voir les titres traduits.",
+      "translateAllPartial": "Certaines traductions ont échoué",
+      "translateAllPartialDesc": "{{failed}} sur {{total}} opportunités n'ont pas pu être traduites."
+    },
+    "sectorsPage": {
+      "title": "Secteurs",
+      "subtitle": "Gérer les secteurs de projet et leurs paramètres d'affichage",
+      "subtitleLoading": "Gérer les secteurs de projet",
+      "addSector": "Ajouter un secteur",
+      "create": {
+        "title": "Créer un secteur",
+        "description": "Ajoutez un nouveau secteur pour les projets. Le slug sera généré automatiquement s'il n'est pas fourni.",
+        "submit": "Créer",
+        "creating": "Création..."
+      },
+      "edit": {
+        "title": "Modifier le secteur",
+        "description": "Mettez à jour les détails du secteur. Les modifications affecteront tous les projets utilisant ce secteur.",
+        "submit": "Enregistrer les modifications",
+        "saving": "Enregistrement..."
+      },
+      "form": {
+        "name": "Nom",
+        "nameRequired": "Le nom est requis",
+        "nameMin": "Le nom doit contenir au moins 2 caractères",
+        "namePlaceholder": "ex. : Technologie",
+        "slugOptional": "Slug (optionnel)",
+        "slug": "Identifiant",
+        "slugPlaceholder": "ex. : technologie (généré automatiquement si vide)",
+        "slugEditPlaceholder": "ex. : technologie",
+        "descriptionOptional": "Description (optionnelle)",
+        "description": "Description du secteur",
+        "descriptionPlaceholder": "Brève description de ce secteur",
+        "active": "Actif",
+        "cancel": "Annuler"
+      },
+      "empty": {
+        "title": "Aucun secteur",
+        "description": "Commencez par créer votre premier secteur"
+      },
+      "list": {
+        "title": "Tous les secteurs",
+        "count": "{{count}} secteur au total",
+        "count_plural": "{{count}} secteurs au total",
+        "inactive": "Inactif",
+        "slug": "Slug : {{slug}}"
+      },
+      "delete": {
+        "title": "Supprimer le secteur",
+        "description": "Êtes-vous sûr de vouloir supprimer « {{name}} » ? Cette action est irréversible. Assurez-vous qu'aucun projet n'utilise ce secteur avant de le supprimer.",
+        "cancel": "Annuler",
+        "confirm": "Supprimer"
+      }
+    },
+    "kycPage": {
+      "title": "Demandes KYC",
+      "subtitle": "Examiner et approuver les vérifications d'identité soumises.",
+      "allRequests": "Toutes les demandes",
+      "loadError": "Échec du chargement des demandes KYC",
+      "retry": "Réessayer",
+      "unknown": "Inconnu",
+      "columns": {
+        "user": "Utilisateur",
+        "idType": "Type d'ID",
+        "status": "Statut",
+        "submitted": "Soumis",
+        "action": "Action"
+      },
+      "review": "Examiner",
+      "status": {
+        "pending": "En attente",
+        "verified": "Vérifié",
+        "rejected": "Rejeté",
+        "expired": "Expiré"
+      }
+    },
+    "financialPage": {
+      "title": "Gestion financière",
+      "subtitle": "Aperçu de toutes les transactions financières et des revenus",
+      "loadError": "Erreur de chargement des données financières : {{message}}",
+      "stats": {
+        "totalRevenue": "Revenu total",
+        "allTimeRevenue": "Revenu cumulé",
+        "thisMonth": "Ce mois",
+        "monthlyRevenue": "Revenu mensuel",
+        "revenueGrowthUp": "+{{percent}}% vs mois dernier",
+        "revenueGrowthDown": "{{percent}}% vs mois dernier",
+        "completed": "Terminées",
+        "successfulTransactions": "Transactions réussies",
+        "pending": "En attente",
+        "awaitingProcessing": "En cours de traitement",
+        "revenueBreakdown": "Répartition des revenus",
+        "applicationFees": "Frais de candidature",
+        "subscriptions": "Abonnements",
+        "refunded": "Remboursé",
+        "transactionStatus": "Statut des transactions",
+        "total": "Au total",
+        "failed": "Échouées",
+        "monthlyComparison": "Comparaison mensuelle",
+        "lastMonth": "Mois dernier"
+      },
+      "filters": {
+        "status": "Statut",
+        "allStatus": "Tous les statuts",
+        "type": "Type de transaction",
+        "allTypes": "Tous les types",
+        "date": "Période",
+        "allTime": "Tout",
+        "today": "Aujourd'hui",
+        "last7Days": "7 derniers jours",
+        "lastMonth": "Mois dernier",
+        "lastYear": "Année dernière",
+        "completed": "Terminée",
+        "pending": "En attente",
+        "processing": "En cours",
+        "failed": "Échouée",
+        "refunded": "Remboursée",
+        "applicationFee": "Frais de candidature",
+        "subscription": "Abonnement",
+        "refund": "Remboursement",
+        "other": "Autre"
+      },
+      "transactions": "Transactions ({{count}})",
+      "searchPlaceholder": "Rechercher par utilisateur, description, facture ou ID...",
+      "columns": {
+        "amount": "Montant",
+        "user": "Utilisateur",
+        "description": "Libellé",
+        "type": "Type de transaction",
+        "status": "Statut",
+        "date": "Date",
+        "project": "Projet",
+        "invoice": "Facture",
+        "actions": "Actions",
+        "invoiceBtn": "Facture",
+        "receiptBtn": "Reçu",
+        "na": "N/D"
+      }
+    },
+    "inboundPage": {
+      "title": "Entrants",
+      "subtitle": "Messages du formulaire de contact et inscriptions newsletter",
+      "tabs": {
+        "contact": "Messages contact",
+        "newsletter": "Infolettre"
+      },
+      "contactSearch": "Rechercher nom, e-mail, message...",
+      "newsletterSearch": "Rechercher e-mail...",
+      "allStatuses": "Tous les statuts",
+      "status": "Statut",
+      "contactSubmissions": "Messages de contact",
+      "newsletterSubscribers": "Abonnés newsletter",
+      "loadContactError": "Échec du chargement des messages",
+      "loadSubscribersError": "Échec du chargement des abonnés",
+      "retry": "Réessayer",
+      "view": "Voir",
+      "columns": {
+        "name": "Nom",
+        "subject": "Sujet",
+        "status": "Statut",
+        "received": "Reçu",
+        "email": "E-mail",
+        "source": "Provenance",
+        "subscribed": "Inscrit"
+      },
+      "subjects": {
+        "funding": "Financement",
+        "application": "Candidature",
+        "partnership": "Partenariat",
+        "technical": "Technique",
+        "general": "Général"
+      },
+      "statuses": {
+        "new": "Nouveau",
+        "read": "Lu",
+        "replied": "Répondu",
+        "archived": "Archivé"
+      },
+      "sheet": {
+        "subject": "Sujet",
+        "received": "Reçu",
+        "phone": "Téléphone",
+        "country": "Pays",
+        "message": "Contenu du message",
+        "adminNotes": "Notes admin",
+        "notesPlaceholder": "Notes internes...",
+        "saveChanges": "Enregistrer"
+      },
+      "toast": {
+        "saved": "Enregistré",
+        "savedDesc": "Message de contact mis à jour.",
+        "updateFailed": "Échec de mise à jour",
+        "updateFailedDesc": "Impossible d'enregistrer."
+      }
+    },
+    "activityLogsPage": {
+      "title": "Journaux d'activité",
+      "subtitle": "Suivre toutes les interactions utilisateurs et admin",
+      "recentActivity": "Activité récente",
+      "recentActivityDesc": "Voir toutes les actions sur la plateforme",
+      "export": "Exporter",
+      "exportCsv": "Exporter en CSV",
+      "printPdf": "Imprimer / PDF",
+      "searchPlaceholder": "Rechercher des activités...",
+      "actionType": "Type d'action",
+      "entityType": "Type d'entité",
+      "allActions": "Toutes les actions",
+      "allEntities": "Toutes les entités",
+      "dateRange": "Période :",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "to": "à",
+      "clearDates": "Effacer les dates",
+      "actions": {
+        "create": "Créer",
+        "update": "Modifier",
+        "delete": "Supprimer",
+        "view": "Voir",
+        "login": "Connexion",
+        "logout": "Déconnexion",
+        "submit": "Soumettre",
+        "approve": "Approuver",
+        "reject": "Rejeter"
+      },
+      "entities": {
+        "project": "Projets",
+        "application": "Candidatures",
+        "user": "Utilisateurs",
+        "blog_post": "Articles",
+        "profile": "Profils",
+        "document": "Fichier"
+      },
+      "columns": {
+        "user": "Utilisateur",
+        "action": "Action effectuée",
+        "entity": "Entité",
+        "description": "Détail",
+        "time": "Heure"
+      },
+      "empty": {
+        "title": "Aucun journal",
+        "description": "L'activité apparaîtra ici."
+      },
+      "system": "Système",
+      "pagination": "{{from}} à {{to}} sur {{total}} entrées",
+      "pageOf": "Page {{current}} sur {{total}}",
+      "toast": {
+        "preparingCsv": "Préparation CSV...",
+        "noLogsExport": "Aucun journal à exporter",
+        "exportedCsv": "{{count}} journaux exportés",
+        "exportFailed": "Échec export",
+        "preparingPrint": "Préparation impression...",
+        "noLogsPrint": "Aucun journal",
+        "printOpened": "Impression ouverte",
+        "printFailed": "Échec impression"
+      }
+    },
+    "settingsPage": {
+      "title": "Paramètres admin",
+      "subtitle": "Configurer le panneau admin et le système",
+      "general": {
+        "title": "Paramètres généraux",
+        "description": "Paramètres généraux du panneau",
+        "maintenance": "Mode maintenance",
+        "maintenanceDesc": "Restreindre l'accès"
+      },
+      "notifications": {
+        "title": "Notifications administrateur",
+        "description": "Préférences de notification",
+        "email": "E-mail",
+        "emailDesc": "Alertes par e-mail",
+        "applications": "Alertes candidatures",
+        "applicationsDesc": "Nouvelles candidatures"
+      },
+      "applicationAccess": {
+        "title": "Accès candidatures",
+        "description": "Frais archivés. Abonnement Membre complet requis.",
+        "body": "Adhésion sur /join. Code legacy dans archive/legacy-application-payment/."
+      },
+      "system": {
+        "title": "Système",
+        "description": "Statut et informations",
+        "databaseStatus": "Base de données",
+        "apiStatus": "API",
+        "totalUsers": "Utilisateurs",
+        "totalProjects": "Projets",
+        "connected": "Connecté",
+        "disconnected": "Déconnecté",
+        "operational": "Opérationnel",
+        "unavailable": "Indisponible"
+      },
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "toast": {
+        "saved": "Enregistré",
+        "savedDesc": "Paramètres mis à jour."
+      }
+    },
+    "reviewManagementPage": {
+      "title": "Gestion des évaluations",
+      "subtitle": "Affectations, secteurs, grilles et conflits",
+      "tabs": {
+        "reviewers": "Évaluateurs",
+        "conflicts": "Conflits",
+        "settings": "Paramètres"
+      },
+      "reviewers": {
+        "title": "Évaluateurs",
+        "description": "Gérer secteurs et charge de travail.",
+        "addSectorDialog": "Ajouter secteur",
+        "searchPlaceholder": "Rechercher évaluateur, secteur...",
+        "noSectors": "Aucun secteur",
+        "addSector": "Ajouter secteur",
+        "details": "Détails",
+        "workload": "{{count}} affectation active",
+        "workload_plural": "{{count}} affectations actives",
+        "columns": {
+          "reviewer": "Évaluateur",
+          "workload": "Charge",
+          "sectors": "Secteurs",
+          "actions": "Actions"
+        },
+        "toast": {
+          "sectorAdded": "Secteur ajouté",
+          "sectorAddedDesc": "Secteur ajouté avec succès.",
+          "sectorRemoved": "Secteur retiré",
+          "sectorRemovedDesc": "Secteur retiré.",
+          "error": "Erreur"
+        }
+      },
+      "addCategoryForm": {
+        "reviewer": "Évaluateur",
+        "selectReviewer": "Sélectionner",
+        "sector": "Secteur",
+        "selectSector": "Sélectionner secteur",
+        "adding": "Ajout...",
+        "addSector": "Ajouter secteur"
+      },
+      "conflicts": {
+        "title": "Conflits",
+        "searchPlaceholder": "Rechercher...",
+        "unknown": "Inconnu",
+        "columns": {
+          "reviewer": "Évaluateur",
+          "application": "Candidature",
+          "reason": "Raison",
+          "declared": "Déclaré"
+        }
+      },
+      "settings": {
+        "title": "Paramètres d'évaluation",
+        "description": "Paramètres globaux d'évaluation",
+        "numReviewers": "Évaluateurs par affectation",
+        "numReviewersDesc": "Nombre pour toutes les nouvelles affectations.",
+        "reviewerPerApp": "évaluateur par candidature",
+        "reviewersPerApp": "évaluateurs par candidature",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "toast": {
+          "invalid": "Valeur invalide",
+          "invalidDesc": "Entre 1 et 10.",
+          "saved": "Enregistré",
+          "savedDesc": "Mis à jour à {{count}}."
+        }
+      },
+      "rubrics": {
+        "title": "Grille système",
+        "description": "Critères de notation globaux",
+        "edit": "Modifier",
+        "editTitle": "Modifier la grille",
+        "create": "Créer grille",
+        "createTitle": "Créer la grille",
+        "currentCriteria": "Critères actuels",
+        "weight": "Poids : {{percent}}% • Max : {{max}}"
+      }
+    },
+    "reviewerDetailsPage": {
+      "back": "Retour",
+      "notFound": "Introuvable",
+      "loadError": "Échec chargement",
+      "retry": "Réessayer",
+      "stats": {
+        "workload": "Charge",
+        "totalReviews": "Évaluations",
+        "avgScore": "Score moyen",
+        "sectors": "Secteurs"
+      },
+      "sectors": "Secteurs",
+      "noSectors": "Aucun secteur",
+      "reviews": "Évaluations",
+      "columns": {
+        "application": "Candidature",
+        "status": "Statut",
+        "score": "Note",
+        "recommendation": "Recommandation",
+        "submitted": "Soumis"
+      },
+      "status": {
+        "pending": "En attente",
+        "in_progress": "En cours",
+        "completed": "Terminé"
+      },
+      "notSubmitted": "Non soumis",
+      "na": "N/D"
+    },
+    "cmsList": {
+      "common": {
+        "create": "Créer",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "cancel": "Annuler",
+        "view": "Voir",
+        "publish": "Publier",
+        "unpublish": "Dépublier",
+        "published": "Publié",
+        "draft": "Brouillon",
+        "archived": "Archivé",
+        "featured": "Vedette",
+        "actions": "Actions",
+        "status": "Statut",
+        "search": "Rechercher...",
+        "loadError": "Erreur de chargement.",
+        "confirmDeleteTitle": "Confirmer ?",
+        "confirmDelete": "Action irréversible.",
+        "allCategories": "Toutes catégories",
+        "filterByCategory": "Filtrer",
+        "allStatus": "Tous statuts",
+        "order": "Ordre : {{order}}"
+      },
+      "blog": {
+        "title": "Blog",
+        "subtitle": "Gérer les articles",
+        "create": "Créer article",
+        "allPosts": "Articles ({{count}})",
+        "searchPlaceholder": "Rechercher...",
+        "views": "{{count}} vues",
+        "deleteDesc": "Suppression définitive."
+      },
+      "faq": {
+        "title": "FAQ",
+        "subtitle": "Gérer les questions",
+        "create": "Créer FAQ",
+        "createFirst": "Première FAQ",
+        "searchPlaceholder": "Rechercher...",
+        "noResults": "Aucun résultat.",
+        "empty": "Aucune FAQ.",
+        "deleteDesc": "Suppression définitive."
+      },
+      "mentors": {
+        "title": "Mentors",
+        "subtitle": "Annuaire mentors",
+        "create": "Ajouter",
+        "searchPlaceholder": "Rechercher...",
+        "stats": {
+          "total": "Total",
+          "published": "Publiés",
+          "sectors": "Secteurs"
+        },
+        "columns": {
+          "name": "Nom",
+          "sector": "Secteur",
+          "country": "Pays",
+          "status": "Statut",
+          "order": "Ordre",
+          "actions": "Actions"
+        },
+        "deleteDesc": "Suppression définitive."
+      },
+      "partners": {
+        "title": "Partenaires",
+        "subtitle": "Gérer partenaires",
+        "create": "Ajouter",
+        "searchPlaceholder": "Rechercher...",
+        "columns": {
+          "name": "Nom",
+          "sector": "Secteur",
+          "status": "Statut",
+          "featured": "Vedette",
+          "linkedUser": "Utilisateur",
+          "actions": "Actions"
+        },
+        "yes": "Oui",
+        "no": "Non",
+        "none": "Aucun",
+        "deleteDesc": "Suppression définitive."
+      },
+      "resources": {
+        "title": "Ressources",
+        "subtitle": "Matériaux téléchargeables",
+        "create": "Ajouter",
+        "searchPlaceholder": "Rechercher...",
+        "columns": {
+          "title": "Titre",
+          "sector": "Secteur",
+          "type": "Format",
+          "size": "Taille",
+          "status": "Statut",
+          "downloads": "Téléchargements",
+          "actions": "Actions"
+        },
+        "deleteDesc": "Suppression définitive."
+      },
+      "successStories": {
+        "title": "Succès",
+        "subtitle": "Témoignages",
+        "create": "Ajouter",
+        "searchPlaceholder": "Rechercher...",
+        "columns": {
+          "name": "Nom",
+          "company": "Entreprise",
+          "sector": "Secteur",
+          "funding": "Financement",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "deleteDesc": "Suppression définitive."
+      }
+    },
+    "cmsForm": {
+      "common": {
+        "back": "Retour",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "create": "Créer",
+        "creating": "Création...",
+        "cancel": "Annuler",
+        "published": "Publié",
+        "draft": "Brouillon"
+      },
+      "validation": {
+        "required": "{{field}} requis",
+        "minChars": "{{field}} min. {{min}} caractères",
+        "validUrl": "URL invalide",
+        "validEmail": "E-mail invalide",
+        "displayOrderMin": "Ordre ≥ 0",
+        "nameMin2": "Nom min. 2 caractères"
+      },
+      "faq": {
+        "createTitle": "Créer FAQ",
+        "editTitle": "Modifier FAQ",
+        "createDesc": "Nouvelle question",
+        "editDesc": "Mettre à jour",
+        "question": "Intitulé de la question",
+        "answer": "Réponse",
+        "sector": "Secteur",
+        "selectSector": "Sélectionner",
+        "displayOrder": "Ordre",
+        "isPublished": "Publié"
+      },
+      "blog": {
+        "createTitle": "Créer article",
+        "editTitle": "Modifier article",
+        "title": "Titre",
+        "excerpt": "Extrait",
+        "content": "Contenu",
+        "author": "Auteur",
+        "sector": "Secteur",
+        "readTime": "Lecture",
+        "image": "Image de couverture",
+        "featured": "Vedette",
+        "status": "Statut",
+        "tags": "Mots-clés"
+      },
+      "mentor": {
+        "createTitle": "Ajouter mentor",
+        "editTitle": "Modifier mentor",
+        "name": "Nom",
+        "bio": "Biographie",
+        "sector": "Secteur",
+        "country": "Pays",
+        "linkedin": "LinkedIn",
+        "twitter": "Twitter",
+        "website": "Site",
+        "avatar": "Avatar",
+        "displayOrder": "Ordre",
+        "isPublished": "Publié"
+      },
+      "partner": {
+        "createTitle": "Ajouter partenaire",
+        "editTitle": "Modifier partenaire",
+        "name": "Nom",
+        "description": "Présentation du partenaire",
+        "logo": "Logo",
+        "website": "Site",
+        "sector": "Secteur",
+        "displayOrder": "Ordre",
+        "featured": "Vedette",
+        "status": "Statut",
+        "linkedUser": "Utilisateur",
+        "inviteEmail": "E-mail invitation"
+      },
+      "resource": {
+        "createTitle": "Ajouter ressource",
+        "editTitle": "Modifier ressource",
+        "title": "Titre",
+        "description": "Résumé de la ressource",
+        "sector": "Secteur",
+        "fileType": "Type",
+        "fileUrl": "URL",
+        "duration": "Durée",
+        "isPublished": "Publié"
+      },
+      "successStory": {
+        "createTitle": "Ajouter histoire",
+        "editTitle": "Modifier histoire",
+        "name": "Nom",
+        "company": "Entreprise",
+        "sector": "Secteur",
+        "location": "Lieu",
+        "fundingAmount": "Montant",
+        "fundingDate": "Date",
+        "image": "Image",
+        "description": "Résumé de l'histoire",
+        "impactMetrics": "Impact",
+        "displayOrder": "Ordre",
+        "isPublished": "Publié"
+      }
+    },
+    "footer": {
+      "userDashboard": "Tableau utilisateur",
+      "partnerDashboard": "Tableau partenaire",
+      "reviewerDashboard": "Tableau évaluateur"
+    },
+    "applicationsPage": {
+      "title": "Candidatures",
+      "loadingTitle": "Examiner les candidatures",
+      "subtitle": "Consultez toutes les candidatures soumises. Pour les évaluer, utilisez un compte évaluateur.",
+      "loadingSubtitle": "Examiner et gérer toutes les candidatures soumises",
+      "banner": {
+        "title": "Politique de séparation des rôles",
+        "description": "Les comptes administratifs peuvent consulter les candidatures mais ne peuvent pas approuver, rejeter ou demander des modifications. Cela garantit une séparation des responsabilités, une responsabilité claire et des pistes d'audit précises. Pour effectuer des actions d'évaluation, utilisez un compte évaluateur.",
+        "dismissAria": "Fermer la bannière"
+      },
+      "filters": {
+        "all": "Toutes"
+      },
+      "columns": {
+        "applicant": "Candidat",
+        "project": "Projet",
+        "status": "Statut",
+        "submitted": "Soumise",
+        "reviewProgress": "Progression de l'évaluation",
+        "actions": "Actions"
+      },
+      "viewDetails": "Voir les détails",
+      "viewDetailsTitle": "Voir les détails de la candidature",
+      "tableTitle": "Candidatures ({{count}})",
+      "searchPlaceholder": "Rechercher par nom du candidat, titre du projet ou entreprise...",
+      "errorTitle": "Erreur lors du chargement des candidatures",
+      "retry": "Réessayer"
+    },
+    "usersPage": {
+      "title": "Gérer les utilisateurs",
+      "subtitle": "Consulter et gérer tous les utilisateurs de la plateforme",
+      "errorTitle": "Erreur",
+      "loadError": "Échec du chargement des utilisateurs. Veuillez réessayer.",
+      "tableTitle": "Tous les utilisateurs ({{count}})",
+      "tableTitleLoading": "Tous les utilisateurs",
+      "emptyTitle": "Aucun utilisateur pour le moment",
+      "emptyDescription": "Les utilisateurs apparaîtront ici une fois inscrits",
+      "searchPlaceholder": "Rechercher par nom ou e-mail...",
+      "columns": {
+        "name": "Nom",
+        "role": "Rôle",
+        "status": "Statut",
+        "joined": "Inscrit",
+        "applications": "Candidatures",
+        "actions": "Actions"
+      },
+      "applicationCount_one": "{{count}} candidature",
+      "applicationCount_other": "{{count}} candidatures",
+      "viewProfile": "Voir le profil",
+      "suspend": "Suspendre",
+      "activate": "Activer",
+      "suspendDialog": {
+        "title": "Suspendre l'utilisateur",
+        "description": "Voulez-vous vraiment suspendre {{name}} ? Il ne pourra plus accéder à son compte tant qu'il ne sera pas réactivé.",
+        "cancel": "Annuler",
+        "confirm": "Suspendre l'utilisateur",
+        "confirming": "Suspension..."
+      },
+      "activateDialog": {
+        "title": "Activer l'utilisateur",
+        "description": "Voulez-vous vraiment activer {{name}} ? Il retrouvera l'accès à son compte.",
+        "cancel": "Annuler",
+        "confirm": "Activer l'utilisateur",
+        "confirming": "Activation..."
+      }
+    },
+    "userDetailsPage": {
+      "back": "Retour aux utilisateurs",
+      "notFound": "Utilisateur introuvable.",
+      "noBusinessName": "Aucun nom d'entreprise",
+      "cards": {
+        "email": "E-mail",
+        "joined": "Inscrit",
+        "applications": "Candidatures"
+      },
+      "applicationCount_one": "{{count}} candidature",
+      "applicationCount_other": "{{count}} candidatures",
+      "businessDetails": "Détails de l'entreprise",
+      "bio": "Biographie",
+      "fields": {
+        "businessName": "Nom de l'entreprise",
+        "businessSector": "Secteur d'activité",
+        "country": "Pays",
+        "notProvided": "Non renseigné",
+        "noBio": "Aucune bio fournie"
+      },
+      "roleManagement": {
+        "title": "Gestion des rôles",
+        "currentRole": "Rôle actuel",
+        "description": "Modifier le rôle de l'utilisateur pour lui accorder différentes permissions",
+        "selectRole": "Sélectionner un rôle",
+        "updating": "Mise à jour...",
+        "cannotChangeOwnRole": "Vous ne pouvez pas modifier votre propre rôle."
+      },
+      "roleChangeDialog": {
+        "title": "Modifier le rôle de l'utilisateur",
+        "description": "Voulez-vous vraiment changer le rôle de {{name}} de {{fromRole}} à {{toRole}} ? Cela affectera immédiatement ses permissions d'accès.",
+        "cancel": "Annuler",
+        "confirm": "Modifier le rôle",
+        "confirming": "Mise à jour..."
+      }
+    },
+    "kycCard": {
+      "title": "Vérification KYC",
+      "notSubmitted": "Cet utilisateur n'a pas soumis de vérification d'identité.",
+      "status": {
+        "pendingReview": "En attente d'examen"
+      },
+      "fields": {
+        "idType": "Type de pièce",
+        "idNumber": "Numéro de pièce",
+        "nameOnId": "Nom sur la pièce",
+        "nameMismatch": "Le nom diffère du profil",
+        "idDocument": "Document d'identité",
+        "selfie": "Photo d'identité",
+        "viewFull": "Voir en entier",
+        "noDocument": "Aucun document",
+        "noSelfie": "Aucun selfie"
+      },
+      "idTypes": {
+        "passport": "Passeport",
+        "national_id": "Carte d'identité nationale",
+        "drivers_license": "Permis de conduire",
+        "business_registration": "Immatriculation d'entreprise"
+      },
+      "adminNotes": "Notes admin (optionnel)",
+      "adminNotesPlaceholder": "Notes internes sur cette vérification...",
+      "rejectionReason": "Motif de rejet (obligatoire pour rejeter)",
+      "rejectionReasonPlaceholder": "Expliquez pourquoi la vérification est rejetée...",
+      "verify": "Vérifier",
+      "reject": "Rejeter",
+      "previousAdminNotes": "Notes admin :"
+    },
+    "projectDetailsPage": {
+      "loading": "Chargement du projet...",
+      "notFound": "Projet introuvable ou une erreur s'est produite.",
+      "back": "Retour aux projets",
+      "viewPublic": "Voir la page publique",
+      "edit": "Modifier le projet",
+      "featured": "À la une",
+      "requirementsTitle": "Exigences et éligibilité",
+      "requirements": "Exigences",
+      "eligibility": "Critères d'éligibilité",
+      "sidebarTitle": "Détails du projet",
+      "fundingAmount": "Montant du financement",
+      "deadline": "Date limite",
+      "location": "Lieu",
+      "applicants": "Candidats",
+      "metadata": "Métadonnées",
+      "created": "Créé",
+      "updated": "Mis à jour"
+    }
+  },
+  "profilePage": {
+    "title": "Profil",
+    "subtitle": "Gérez vos informations et préférences de profil",
+    "overview": "Aperçu du profil",
+    "noOrganization": "Aucune organisation indiquée",
+    "noLocation": "Aucun lieu",
+    "personalInfo": "Informations personnelles",
+    "profilePicture": "Photo de profil",
+    "uploadProfilePicture": "Télécharger une photo",
+    "avatarHint": "Téléchargez une photo pour personnaliser votre compte (JPG, PNG, WebP, GIF jusqu'à 5 Mo)",
+    "emailCannotChange": "L'e-mail ne peut pas être modifié",
+    "cancel": "Annuler",
+    "saving": "Enregistrement...",
+    "saveChanges": "Enregistrer",
+    "completion": "Complétion du profil",
+    "overallProgress": "Progression globale",
+    "percentComplete": "{{percentage}}% complété",
+    "items": {
+      "basicInfo": "Informations de base",
+      "contactDetails": "Coordonnées",
+      "bio": "Bio et description",
+      "identity": "Vérification d'identité"
+    },
+    "status": {
+      "complete": "Complet",
+      "pendingReview": "En attente d'examen",
+      "incomplete": "Incomplet"
+    },
+    "fields": {
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Entrez votre prénom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Entrez votre nom",
+      "email": "E-mail",
+      "country": "Lieu/Pays",
+      "countryPlaceholder": "Ville, Pays",
+      "phone": "Téléphone",
+      "phonePlaceholder": "Entrez votre numéro",
+      "businessName": "Organisation, employeur ou école",
+      "businessNamePlaceholder": "Entreprise, université, ONG ou employeur (optionnel)",
+      "bio": "Biographie",
+      "bioPlaceholder": "Parlez-nous de vous — travail, études, compétences ou objectifs...",
+      "bioDescription": "Optionnel. Aide les évaluateurs et programmes à comprendre votre parcours."
+    },
+    "validation": {
+      "firstNameRequired": "Le prénom est requis",
+      "lastNameRequired": "Le nom est requis"
+    },
+    "toasts": {
+      "updated": "Profil mis à jour",
+      "updatedDesc": "Votre profil a été mis à jour avec succès.",
+      "error": "Erreur",
+      "updateFailed": "Échec de la mise à jour du profil. Veuillez réessayer.",
+      "avatarRemoved": "Photo supprimée",
+      "avatarRemovedDesc": "Votre photo de profil a été supprimée.",
+      "warning": "Avertissement",
+      "avatarDeleteWarning": "Image supprimée mais échec de mise à jour du profil. Enregistrez vos modifications."
+    },
+    "errors": {
+      "loadFailed": "Échec du chargement du profil",
+      "retry": "Réessayer",
+      "notFound": "Aucun profil trouvé. Veuillez en créer un."
+    },
+    "defaultUser": "Utilisateur"
+  },
+  "billingPage": {
+    "title": "Facturation",
+    "subtitle": "Abonnement Membre complet (2 $/mois), moyens de paiement et reçus",
+    "paymentMethods": {
+      "title": "Moyens de paiement",
+      "description": "Cartes utilisées pour votre abonnement Membre complet",
+      "empty": "Aucun moyen de paiement enregistré",
+      "loading": "Chargement…",
+      "paidMemberHint": "Votre carte est enregistrée après le paiement. Si rien n'apparaît, attendez une minute et actualisez — ou <link>relancez le paiement</link>.",
+      "pendingCheckoutHint": "Terminez le paiement pour enregistrer votre carte. <link>Continuer le paiement</link>",
+      "upgradeHint": "Les cartes sont enregistrées lors du paiement Membre complet. <link>Passer à l'offre payante</link>",
+      "primary": "Principal",
+      "secondary": "Secondaire",
+      "expires": "Expire {{month}}/{{year}}",
+      "setDefault": "Définir par défaut"
+    },
+    "history": {
+      "title": "Historique de facturation",
+      "description": "Paiements d'abonnement et autres frais",
+      "empty": "Aucun historique de facturation",
+      "emptyHint": "Les paiements Membre complet apparaissent ici après le paiement. <link>Passer à l'offre</link>",
+      "membership": "Abonnement",
+      "invoice": "Facture : {{number}}",
+      "downloadReceipt": "Télécharger le reçu",
+      "receipt": "Reçu",
+      "columns": {
+        "date": "Date",
+        "description": "Libellé",
+        "invoice": "N° facture",
+        "amount": "Montant",
+        "status": "Statut",
+        "actions": "Actions"
+      }
+    },
+    "info": {
+      "title": "Informations de facturation",
+      "description": "Mettez à jour votre adresse et informations fiscales",
+      "billingEmail": "E-mail de facturation",
+      "taxId": "N° fiscal (optionnel)",
+      "taxIdPlaceholder": "Entrez votre n° fiscal",
+      "address": "Adresse de facturation",
+      "addressPlaceholder": "Adresse",
+      "city": "Ville",
+      "cityPlaceholder": "Ville",
+      "state": "État/Province",
+      "statePlaceholder": "État",
+      "zip": "Code postal",
+      "zipPlaceholder": "Code postal",
+      "country": "Pays",
+      "countryPlaceholder": "Pays",
+      "saving": "Enregistrement...",
+      "save": "Enregistrer les informations"
+    },
+    "deleteDialog": {
+      "onlyTitle": "Supprimer votre seul moyen de paiement ?",
+      "title": "Supprimer le moyen de paiement ?",
+      "onlyDesc": "C'est votre seul moyen de paiement. Vous devrez en ajouter un nouveau avant tout paiement futur. Continuer ?",
+      "defaultDesc": "C'est votre moyen par défaut. Il sera supprimé et un autre sera défini par défaut. Continuer ?",
+      "genericDesc": "Voulez-vous vraiment supprimer ce moyen de paiement ? Cette action est irréversible.",
+      "cancel": "Annuler",
+      "deleting": "Suppression...",
+      "delete": "Supprimer"
+    },
+    "status": {
+      "paid": "Payé",
+      "pending": "En attente",
+      "refunded": "Remboursé",
+      "failed": "Échoué"
+    },
+    "toasts": {
+      "saved": "Informations enregistrées",
+      "savedDesc": "Votre adresse de facturation a été mise à jour.",
+      "error": "Erreur",
+      "removed": "Moyen de paiement supprimé",
+      "removedOnly": "Moyen supprimé. Vous devrez en ajouter un nouveau pour les paiements futurs.",
+      "removedWithDefault": "Moyen supprimé. Un autre a été défini par défaut.",
+      "removedGeneric": "Votre moyen de paiement a été supprimé.",
+      "deleteFailed": "Échec de la suppression",
+      "defaultUpdated": "Moyen par défaut mis à jour",
+      "receiptUnavailable": "Reçu indisponible",
+      "receiptUnavailableDesc": "Aucun enregistrement de transaction pour ce paiement.",
+      "loginRequired": "Connectez-vous pour télécharger les factures.",
+      "invoiceDownloaded": "Facture téléchargée.",
+      "downloadFailed": "Échec du téléchargement de la facture."
+    }
+  },
+  "partner": {
+    "portal": "Portail partenaire",
+    "roleFallback": "Partenaire",
+    "menu": {
+      "dashboard": "Tableau de bord",
+      "opportunities": "Mes opportunités",
+      "api": "API",
+      "notifications": "Mes notifications",
+      "team": "Équipe",
+      "settings": "Paramètres"
+    },
+    "pages": {
+      "dashboard": "Tableau de bord partenaire",
+      "opportunities": "Mes opportunités",
+      "api": "API partenaire",
+      "apiDocs": "Documentation API",
+      "notifications": "Mes notifications",
+      "team": "Équipe",
+      "settings": "Paramètres",
+      "opportunityDetails": "Détails de l'opportunité",
+      "qualifiedApplicants": "Candidats qualifiés",
+      "default": "Portail partenaire"
+    },
+    "apiPage": {
+      "loading": "Chargement…",
+      "subtitle": "Gérez les clés API et les webhooks pour l'intégration programmatique.",
+      "readOnlyTitle": "Lecture seule",
+      "readOnlyDescription": "Seuls les administrateurs de l'organisation peuvent créer ou révoquer des clés API et gérer les webhooks.",
+      "copy": "Copier",
+      "copied": "{{label}} copié",
+      "copyFailed": "Impossible de copier dans le presse-papiers",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "overview": {
+        "title": "URL de base de l'API",
+        "description": "Utilisez cette URL de base avec votre clé API pour toutes les requêtes REST.",
+        "baseUrl": "URL de base",
+        "authHint": "Envoyez votre clé secrète dans l'en-tête X-API-Key à chaque requête."
+      },
+      "keys": {
+        "title": "Clés API",
+        "description": "Créez des clés test et production séparées. Le secret complet n'est affiché qu'une fois à la création.",
+        "create": "Créer une clé",
+        "createTitle": "Créer une clé API",
+        "createDescription": "Choisissez l'environnement et les permissions. Conservez le secret en lieu sûr — il ne peut pas être récupéré plus tard.",
+        "created": "Clé API créée",
+        "createFailed": "Échec de la création de la clé API",
+        "revoke": "Révoquer",
+        "revokeTitle": "Révoquer la clé API ?",
+        "revokeDescription": "Cette clé cesse de fonctionner immédiatement. Les intégrations devront utiliser une nouvelle clé.",
+        "revoked": "Clé API révoquée",
+        "revokeFailed": "Échec de la révocation de la clé API",
+        "empty": "Aucune clé API active pour le moment.",
+        "revealTitle": "Enregistrez cette clé API maintenant",
+        "revealDescription": "C'est la seule fois où le secret complet est affiché.",
+        "environment": "Environnement",
+        "envTest": "Test (lecture seule)",
+        "envLive": "Production",
+        "expiryDays": "Expire dans (jours)",
+        "scopes": "Permissions",
+        "expires": "Expire le {{date}}",
+        "lastUsed": "Dernière utilisation {{date}}",
+        "testKeyLimitationsTitle": "Les clés test sont en lecture seule",
+        "testKeyLimitationsDescription": "Les clés test ne peuvent pas écrire ni accéder aux PII des candidats. Utilisez une clé production pour l'intégration.",
+        "scopeLabels": {
+          "opportunities:read": "Lire les opportunités",
+          "opportunities:write": "Écrire les opportunités",
+          "applications:read": "Lire les candidatures",
+          "applications:read_pii": "Lire les PII candidats",
+          "webhooks:manage": "Gérer les webhooks"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "MAALI envoie des requêtes POST signées à votre point de terminaison HTTPS lors d'événements.",
+        "endpoint": "URL du point de terminaison",
+        "events": "Événements abonnés",
+        "save": "Enregistrer le webhook",
+        "saved": "Paramètres webhook enregistrés",
+        "saveFailed": "Échec de l'enregistrement du webhook",
+        "rotate": "Rotation du secret",
+        "rotated": "Secret de signature webhook rotaté",
+        "rotateFailed": "Échec de la rotation du secret",
+        "revealTitle": "Enregistrez ce secret de signature maintenant",
+        "revealDescription": "Utilisez-le pour vérifier X-Maali-Signature sur les webhooks entrants.",
+        "secretPrefix": "Préfixe du secret actuel : {{prefix}}…",
+        "validation": {
+          "url": "Entrez une URL HTTPS valide",
+          "events": "Sélectionnez au moins un événement"
+        },
+        "eventLabels": {
+          "application_submitted": "Candidature soumise",
+          "application_status_changed": "Statut de candidature modifié",
+          "opportunity_closed": "Opportunité fermée"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "Voir la documentation API",
+      "back": "Retour aux paramètres API",
+      "title": "Documentation API partenaire",
+      "subtitle": "Référence pour intégrer vos systèmes à MAALI."
+    },
+    "orgNotLinked": {
+      "title": "Organisation non liée",
+      "description": "Votre compte partenaire n'est pas encore lié à une organisation. Contactez votre administrateur Maali avant de créer des opportunités.",
+      "createDisabledTooltip": "Lieez votre organisation avant de créer des opportunités. Contactez votre administrateur Maali si besoin.",
+      "contactSupport": "Contacter le support"
+    },
+    "checklist": {
+      "title": "Liste de configuration",
+      "description": "Complétez ces étapes pour tirer le meilleur parti du portail partenaire.",
+      "progress": "Progression",
+      "progressCount": "{{completed}} sur {{total}} terminé(s)",
+      "items": {
+        "orgProfile": {
+          "label": "Profil de l'organisation",
+          "description": "Ajoutez le nom, le secteur et la description de votre organisation."
+        },
+        "orgLogo": {
+          "label": "Logo de l'organisation",
+          "description": "Téléversez un logo pour que les candidats reconnaissent votre marque."
+        },
+        "firstOpportunity": {
+          "label": "Première opportunité",
+          "description": "Publiez votre première opportunité de financement."
+        },
+        "firstApplication": {
+          "label": "Première candidature",
+          "description": "Recevez et consultez votre première candidature."
+        }
+      },
+      "actions": {
+        "editProfile": "Modifier le profil",
+        "uploadLogo": "Téléverser le logo",
+        "createOpportunity": "Créer une opportunité",
+        "viewSubmissions": "Voir les candidatures"
+      }
+    },
+    "dashboardPage": {
+      "subtitle": "Gérez vos opportunités et suivez les candidatures",
+      "zeroStatsTip": {
+        "title": "Vos indicateurs",
+        "description": "Ces cartes afficheront vos opportunités et candidatures une fois que vous en aurez créé une et commencé à recevoir des candidatures.",
+        "action": "Créer une opportunité"
+      },
+      "statsError": {
+        "title": "Échec du chargement des statistiques",
+        "description": "Impossible de charger vos indicateurs partenaire. Veuillez réessayer.",
+        "retry": "Réessayer"
+      },
+      "recentOpportunities": {
+        "title": "Opportunités récentes",
+        "description": "Accès rapide à vos dernières opportunités et listes de candidats.",
+        "viewAll": "Tout voir",
+        "viewOpportunity": "Voir l'opportunité",
+        "viewApplicants": "Voir les candidats",
+        "applicantCount": "{{count}} candidats"
+      },
+      "stats": {
+        "totalOpportunities": "Total opportunités",
+        "activeOpportunities": "Opportunités actives",
+        "totalApplications": "Total candidatures",
+        "approved": "Approuvées"
+      }
+    },
+    "settingsPage": {
+      "subtitle": "Gérez les paramètres de votre compte partenaire",
+      "accountInfo": {
+        "title": "Informations du compte",
+        "description": "Détails de votre compte",
+        "email": "E-mail",
+        "role": "Rôle"
+      },
+      "loading": "Chargement des informations de l'organisation...",
+      "orgProfile": {
+        "title": "Profil de l'organisation",
+        "description": "Mettez à jour les informations de votre organisation",
+        "logo": "Logo de l'organisation",
+        "uploadLogo": "Télécharger le logo",
+        "name": "Nom de l'organisation",
+        "namePlaceholder": "Nom de l'organisation",
+        "descriptionLabel": "Présentation de l'organisation",
+        "descriptionPlaceholder": "Brève description de votre organisation",
+        "website": "Site web",
+        "websitePlaceholder": "https://votre-site.com",
+        "sector": "Secteur",
+        "sectorPlaceholder": "Sélectionner un secteur"
+      },
+      "contact": {
+        "title": "Coordonnées",
+        "description": "Contact principal de votre organisation",
+        "name": "Nom du contact principal",
+        "namePlaceholder": "Nom complet",
+        "phone": "Téléphone professionnel (optionnel)",
+        "phonePlaceholder": "+33 1 23 45 67 89",
+        "country": "Pays / Région (optionnel)",
+        "countryPlaceholder": "ex. Kenya"
+      },
+      "validation": {
+        "nameRequired": "Le nom de l'organisation est requis",
+        "validUrl": "Veuillez entrer une URL valide",
+        "sectorRequired": "Le secteur est requis"
+      },
+      "toasts": {
+        "updated": "Profil partenaire mis à jour",
+        "updatedDesc": "Les informations de votre organisation ont été enregistrées.",
+        "failed": "Échec de la mise à jour",
+        "failedDesc": "Impossible d'enregistrer les détails du partenaire."
+      },
+      "readOnlyTitle": "Accès en lecture seule",
+      "readOnlyDescription": "Seuls les administrateurs de l'organisation partenaire peuvent modifier les paramètres. Contactez votre admin ou le support Maali."
+    },
+    "teamPage": {
+      "title": "Membres de l'équipe",
+      "subtitle": "Gérez qui peut accéder à votre organisation partenaire sur Maali.",
+      "description": "Personnes ayant accès à {{name}} sur le portail partenaire.",
+      "loading": "Chargement des membres…",
+      "empty": "Aucun membre lié pour l'instant.",
+      "inviteEmail": "Adresse e-mail",
+      "inviteEmailPlaceholder": "collegue@organisation.org",
+      "invalidEmail": "Entrez une adresse e-mail valide",
+      "inviteRole": "Rôle",
+      "sendInvite": "Envoyer l'invitation",
+      "inviteSuccess": "Invitation envoyée",
+      "inviteSuccessDescription": "Nous avons envoyé un lien de connexion à {{email}}.",
+      "inviteError": "Échec de l'envoi de l'invitation",
+      "roleUpdated": "Rôle mis à jour",
+      "roleUpdateError": "Échec de la mise à jour du rôle",
+      "memberRemoved": "Membre retiré",
+      "removeError": "Échec du retrait du membre",
+      "remove": "Retirer",
+      "removeConfirmTitle": "Retirer ce membre ?",
+      "removeConfirmDescription": "Il perdra l'accès au portail partenaire de cette organisation jusqu'à une nouvelle invitation.",
+      "cancel": "Annuler",
+      "you": "vous",
+      "readOnlyTitle": "Équipe gérée par les admins",
+      "readOnlyDescription": "Seuls les administrateurs peuvent inviter ou retirer des membres. Vous pouvez toujours voir qui a accès.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Membre"
+      }
+    },
+    "qualifiedApplicantsPage": {
+      "title": "Candidats qualifiés",
+      "subtitle": "{{title}} - Classés par scores d'examen",
+      "loading": "Chargement...",
+      "exportQualified": "Exporter qualifiés ({{count}})",
+      "exportCurrent": "Exporter la vue actuelle",
+      "allApplications": "Toutes les candidatures",
+      "stats": {
+        "total": "Total candidatures",
+        "qualified": "Qualifiés / Approuvés",
+        "reviewed": "Examinées",
+        "pending": "En attente"
+      },
+      "tableTitle": "Candidatures par rang",
+      "filters": {
+        "all": "Tous les statuts",
+        "approved": "Approuvés uniquement",
+        "pending": "En attente",
+        "rejected": "Rejetés",
+        "under_review": "En cours d'examen"
+      },
+      "searchPlaceholder": "Rechercher par nom ou e-mail..."
+    },
+    "opportunityForm": {
+      "back": "Retour",
+      "createTitle": "Créer une opportunité",
+      "editTitle": "Modifier l'opportunité",
+      "createSubtitle": "Configurez une nouvelle opportunité de financement",
+      "editSubtitle": "Mettez à jour les détails de votre opportunité"
+    },
+    "opportunityDetailsPage": {
+      "loading": "Chargement de l'opportunité...",
+      "notFound": "Opportunité introuvable ou accès refusé.",
+      "back": "Retour aux opportunités",
+      "viewPublic": "Voir la page publique",
+      "viewApplications": "Voir les candidatures classées",
+      "edit": "Modifier l'opportunité",
+      "requirementsTitle": "Exigences et éligibilité",
+      "requirements": "Exigences",
+      "eligibility": "Critères d'éligibilité",
+      "sidebarTitle": "Détails de l'opportunité",
+      "fundingAmount": "Montant du financement",
+      "deadline": "Date limite",
+      "location": "Lieu",
+      "applicants": "Candidats",
+      "metadata": "Métadonnées",
+      "opportunityId": "ID de l'opportunité",
+      "created": "Créée le",
+      "uncategorized": "Non classé"
+    },
+    "setupWizard": {
+      "title": "Bienvenue sur le portail partenaire Maali",
+      "description": "Configurons le profil de votre organisation pour que les candidats puissent en savoir plus.",
+      "stepOf": "Étape {{current}} sur {{total}}",
+      "percentComplete": "{{percent}} % terminé",
+      "steps": {
+        "organization": "Organisation",
+        "contact": "Contact",
+        "firstOpportunity": "Première opportunité"
+      },
+      "logoHint": "Un logo aide les candidats à reconnaître votre organisation",
+      "step3Intro": "Configurez optionnellement votre première opportunité maintenant, ou passez et faites-le plus tard depuis le tableau de bord.",
+      "fields": {
+        "opportunityTitle": "Titre de l'opportunité",
+        "opportunityTitlePlaceholder": "ex. Bourse Innovation 2026",
+        "fundingAmount": "Montant du financement",
+        "fundingAmountPlaceholder": "ex. 10 000 $ - 50 000 $",
+        "deadline": "Date limite de candidature"
+      },
+      "actions": {
+        "skip": "Passer pour l'instant",
+        "back": "Retour",
+        "next": "Suivant",
+        "saving": "Enregistrement…",
+        "complete": "Terminer la configuration"
+      },
+      "toasts": {
+        "updated": "Profil de l'organisation mis à jour !",
+        "updatedDesc": "Votre organisation partenaire est maintenant configurée.",
+        "error": "Erreur",
+        "errorDesc": "Échec de l'enregistrement du profil. Veuillez réessayer."
+      },
+      "validation": {
+        "descriptionMin": "La description doit comporter au moins 10 caractères",
+        "contactNameMin": "Le nom du contact est requis",
+        "validUrl": "Veuillez saisir une URL valide"
+      }
+    },
+    "rankedApplicationsPage": {
+      "title": "Candidatures classées",
+      "subtitle": "{{title}} - Classées par score d'évaluation",
+      "loading": "Chargement...",
+      "exportRankedCsv": "Exporter CSV classé",
+      "back": "Retour",
+      "exportTopTitle": "Exporter le top",
+      "exportTop": "Exporter le top",
+      "searchPlaceholder": "Rechercher par nom ou e-mail du candidat...",
+      "exportOnly": {
+        "title": "Vue export uniquement",
+        "description": "Les partenaires peuvent exporter les données classées en CSV. Vous ne pouvez pas approuver, rejeter ou contacter les candidats depuis cette page."
+      },
+      "reviewComplete": {
+        "title": "Classements prêts",
+        "description": "L'évaluation Maali est terminée. Exportez les résultats classés ci-dessous.",
+        "fromNotification": "Vous avez ouvert cette page depuis une notification. Les résultats classés sont prêts à être exportés ci-dessous."
+      },
+      "filters": {
+        "status": "Statut",
+        "statusAll": "Tous les statuts",
+        "minScore": "Score minimum",
+        "minScorePlaceholder": "ex. 7,0",
+        "noResults": "Aucune candidature ne correspond à vos filtres."
+      },
+      "csv": {
+        "rank": "Rang",
+        "applicantName": "Nom du candidat",
+        "organization": "Organisation",
+        "email": "E-mail",
+        "projectTitle": "Titre du projet",
+        "status": "Statut",
+        "avgScore": "Score moyen",
+        "reviews": "Évaluations",
+        "submitted": "Soumis le"
+      },
+      "loadError": {
+        "title": "Échec du chargement des candidatures",
+        "description": "Impossible de charger les candidatures classées pour cette opportunité. Veuillez réessayer.",
+        "retry": "Réessayer"
+      },
+      "empty": {
+        "noSubmissions": {
+          "title": "Aucune candidature pour l'instant",
+          "description": "Lorsque des candidats postulent, ils apparaîtront ici classés par notes d'évaluation."
+        },
+        "reviewPending": {
+          "title": "Évaluations en cours",
+          "description": "{{count}} candidature(s) soumise(s). Les classements et exports seront disponibles une fois les évaluations terminées."
+        }
+      }
+    }
+  },
+  "reviewer": {
+    "panel": "Panneau évaluateur",
+    "roleFallback": "Évaluateur",
+    "menu": {
+      "dashboard": "Tableau de bord",
+      "applications": "Candidatures",
+      "notifications": "Mes notifications",
+      "settings": "Paramètres"
+    },
+    "pages": {
+      "dashboard": "Tableau de bord évaluateur",
+      "applications": "Candidatures",
+      "notifications": "Mes notifications",
+      "settings": "Paramètres évaluateur",
+      "reviewApplication": "Examiner la candidature"
+    },
+    "dashboardPage": {
+      "subtitle": "Aperçu des candidatures et statistiques d'examen",
+      "loadError": "Erreur de chargement : {{message}}",
+      "stats": {
+        "pendingReview": "En attente d'examen",
+        "pendingDesc": "Candidatures en attente",
+        "approved": "Approuvées",
+        "approvedDesc": "Total des candidatures approuvées",
+        "rejected": "Rejetées",
+        "rejectedDesc": "Total des candidatures rejetées",
+        "total": "Au total",
+        "totalDesc": "Toutes les candidatures"
+      },
+      "performance": {
+        "title": "Performance d'examen",
+        "description": "Vos statistiques d'examen",
+        "totalApplications": "Total candidatures",
+        "approvalRate": "Taux d'approbation",
+        "pendingReviews": "Examens en attente"
+      },
+      "recent": {
+        "title": "Candidatures récentes",
+        "description": "Dernières soumissions à examiner",
+        "empty": "Aucune candidature en attente pour le moment.",
+        "submitted": "Soumis : {{date}}",
+        "deadline": "Date limite : {{date}}",
+        "view": "Voir",
+        "overdue": "En retard",
+        "dueToday": "Échéance aujourd'hui",
+        "daysLeft": "{{count}} jour restant",
+        "daysLeft_plural": "{{count}} jours restants"
+      },
+      "deadlineTooltip": "La date limite est fixée par les administrateurs. Soumettez votre examen avant cette date."
+    },
+    "applicationsPage": {
+      "subtitle": "Examiner et gérer toutes les candidatures soumises",
+      "subtitleCount": "Examiner et gérer toutes les candidatures soumises ({{count}})",
+      "loadError": "Erreur de chargement : {{message}}",
+      "unknownError": "Erreur inconnue",
+      "priorityAlert": {
+        "title": "Candidatures en attente depuis 5+ jours",
+        "description": "Veuillez prioriser l'examen de ces candidatures"
+      },
+      "tableTitles": {
+        "all": "Toutes les candidatures",
+        "draft": "Brouillons d'examen",
+        "pending": "Candidatures en attente",
+        "under_review": "Candidatures en cours d'examen",
+        "approved": "Candidatures approuvées",
+        "rejected": "Candidatures rejetées"
+      },
+      "noDeadline": "Pas de date limite",
+      "day": "jour",
+      "days": "jours",
+      "statusDescriptions": {
+        "draft": "Vous avez enregistré un brouillon et pouvez continuer",
+        "pending": "Candidature en attente d'examen par tous les évaluateurs assignés",
+        "under_review": "Examen en cours : {{completed}} sur {{total}} évaluateurs ont soumis",
+        "approved": "La candidature a été approuvée",
+        "rejected": "La candidature a été rejetée",
+        "default": "Statut de la candidature"
+      },
+      "actions": {
+        "startReview": "Commencer l'examen",
+        "continueReview": "Continuer l'examen",
+        "review": "Examiner"
+      },
+      "searchPlaceholder": "Rechercher par candidat, projet ou entreprise..."
+    },
+    "settingsPage": {
+      "subtitle": "Gérez vos préférences et notifications d'évaluateur",
+      "notifications": {
+        "title": "Préférences de notification",
+        "description": "Configurez comment vous recevez les notifications",
+        "email": "Notifications par e-mail",
+        "emailDesc": "Recevoir des e-mails pour les nouvelles candidatures",
+        "dailyDigest": "Résumé quotidien",
+        "dailyDigestDesc": "Recevoir un résumé quotidien des candidatures en attente",
+        "urgent": "Candidatures urgentes",
+        "urgentDesc": "Notification immédiate pour les candidatures en attente depuis 5+ jours"
+      },
+      "reviewPrefs": {
+        "title": "Préférences d'examen",
+        "description": "Définissez votre flux d'examen par défaut",
+        "priority": "Priorité d'examen par défaut",
+        "oldestFirst": "Plus anciennes d'abord",
+        "newestFirst": "Plus récentes d'abord",
+        "fundingHighLow": "Montant (élevé à faible)",
+        "fundingLowHigh": "Montant (faible à élevé)",
+        "autoAssign": "Attribution automatique",
+        "autoAssignDesc": "Attribuer automatiquement les nouvelles candidatures à votre file"
+      },
+      "profile": {
+        "title": "Informations du profil",
+        "description": "Mettez à jour vos informations d'évaluateur",
+        "fullName": "Nom complet",
+        "fullNamePlaceholder": "Entrez votre nom complet",
+        "email": "E-mail",
+        "emailPlaceholder": "votre.email@exemple.com",
+        "emailHint": "L'e-mail ne peut pas être modifié ici"
+      },
+      "saving": "Enregistrement...",
+      "save": "Enregistrer",
+      "toasts": {
+        "saved": "Paramètres enregistrés",
+        "savedDesc": "Vos paramètres d'évaluateur ont été mis à jour.",
+        "error": "Erreur",
+        "saveFailed": "Échec de l'enregistrement"
+      }
+    },
+    "reviewApplicationPage": {
+      "title": "Examiner la candidature",
+      "notAssigned": {
+        "title": "Non assigné",
+        "description": "Vous n'êtes pas assigné à l'examen de cette candidature",
+        "body": "Seuls les évaluateurs assignés peuvent soumettre un examen. Contactez un administrateur si vous pensez devoir l'être."
+      },
+      "submitted": {
+        "title": "Examen soumis",
+        "description": "Vous avez déjà soumis votre examen pour cette candidature",
+        "overallScore": "Score global :",
+        "recommendation": "Recommandation :",
+        "criterionScores": "Scores par critère :",
+        "yourComments": "Vos commentaires :",
+        "submittedAt": "Soumis :",
+        "engineNote": "Votre examen a été soumis. Le moteur de décision traitera tous les examens une fois que tous les évaluateurs auront soumis.",
+        "updateNote": "Vous pouvez mettre à jour votre examen en soumettant à nouveau — cela remplacera votre soumission précédente."
+      },
+      "toasts": {
+        "submitted": "Examen soumis",
+        "submittedDesc": "Votre examen a été soumis avec succès. Le moteur de décision traitera tous les examens.",
+        "downloadStarted": "Téléchargement démarré",
+        "downloadStartedDesc": "Téléchargement de {{fileName}}...",
+        "downloadFailed": "Échec du téléchargement",
+        "downloadFailedDesc": "Impossible de télécharger {{fileName}}. Le fichier n'existe peut-être pas ou vous n'avez pas la permission.",
+        "downloadError": "Erreur de téléchargement",
+        "downloadErrorDesc": "Échec du téléchargement du document. Veuillez réessayer."
+      }
+    }
+  }
+}

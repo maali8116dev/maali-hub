@@ -1,1 +1,104 @@
-project_id = "rpkpnfpepobtsgzroqjo"
+project_id = "alpudhhsmgtpmgpjfuqs"
+
+# Local OAuth: Studio Auth → Providers page does not load locally; configure here instead.
+# Add to .env.supabase (copy from .env.supabase.example; gitignored):
+#   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID=<from Google Cloud>
+#   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET=<from Google Cloud>
+# Google Cloud → Authorized redirect URI: http://127.0.0.1:54321/auth/v1/callback
+# Then: npm run supabase:stop && npm run supabase:start
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:8080"
+additional_redirect_urls = [
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+  "http://localhost:8080/auth/callback",
+  "http://127.0.0.1:8080/auth/callback",
+]
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = true
+
+[analytics]
+enabled = false
+
+[functions.validate-email]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.auth-email-hook]
+verify_jwt = false
+
+[functions.manage-user]
+verify_jwt = false
+
+[functions.create-payment-intent]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-checkout-session]
+verify_jwt = false
+
+[functions.generate-invoice]
+verify_jwt = false
+
+[functions.submit-application]
+verify_jwt = false
+
+[functions.submit-contact]
+verify_jwt = false
+
+[functions.update-application-status]
+verify_jwt = false
+
+[functions.process-email-queue]
+verify_jwt = false
+
+[functions.rate-limited-auth]
+verify_jwt = false
+
+[functions.create-membership-payment]
+verify_jwt = false
+
+[functions.resume-membership]
+verify_jwt = false
+
+[functions.cancel-membership]
+verify_jwt = false
+
+[functions.create-paystack-membership-payment]
+verify_jwt = false
+
+[functions.verify-paystack-payment]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
+
+[functions.invite-partner]
+verify_jwt = false
+
+[functions.translate-opportunity]
+verify_jwt = false
+
+[functions.translate-cms]
+verify_jwt = false
+
+[functions.translate-application]
+verify_jwt = false
+
+[functions.partner-api]
+verify_jwt = false
+
+[functions.manage-partner-api]
+verify_jwt = false
+
+[functions.process-partner-webhooks]
+verify_jwt = false

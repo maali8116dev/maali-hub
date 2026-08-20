@@ -1,0 +1,102 @@
+/* Rich Text Editor Styles */
+
+.rich-text-editor .ql-toolbar {
+  border-top: 1px solid hsl(var(--border));
+  border-left: 1px solid hsl(var(--border));
+  border-right: 1px solid hsl(var(--border));
+  border-top-left-radius: calc(var(--radius) - 2px);
+  border-top-right-radius: calc(var(--radius) - 2px);
+  background: hsl(var(--background));
+}
+
+.rich-text-editor .ql-container {
+  border-bottom: 1px solid hsl(var(--border));
+  border-left: 1px solid hsl(var(--border));
+  border-right: 1px solid hsl(var(--border));
+  border-bottom-left-radius: calc(var(--radius) - 2px);
+  border-bottom-right-radius: calc(var(--radius) - 2px);
+  font-family: inherit;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 150px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground));
+  font-style: normal;
+}
+
+.rich-text-editor .ql-toolbar .ql-stroke {
+  fill: none;
+  stroke: hsl(var(--foreground));
+}
+
+.rich-text-editor .ql-toolbar .ql-fill {
+  fill: hsl(var(--foreground));
+  stroke: none;
+}
+
+.rich-text-editor .ql-toolbar .ql-picker-label {
+  color: hsl(var(--foreground));
+}
+
+.rich-text-editor .ql-toolbar button:hover,
+.rich-text-editor .ql-toolbar button:focus {
+  color: hsl(var(--accent-foreground));
+}
+
+.rich-text-editor .ql-toolbar button.ql-active {
+  color: hsl(var(--primary));
+}
+
+.rich-text-editor .ql-editor h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor .ql-editor h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor .ql-editor h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.rich-text-editor .ql-editor ul,
+.rich-text-editor .ql-editor ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.rich-text-editor .ql-editor blockquote {
+  border-left: 4px solid hsl(var(--border));
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.rich-text-editor .ql-editor a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+
+.rich-text-editor .ql-editor a:hover {
+  color: hsl(var(--primary));
+  opacity: 0.8;
+}
+
+.rich-text-editor.error .ql-toolbar,
+.rich-text-editor.error .ql-container {
+  border-color: hsl(var(--destructive));
+}

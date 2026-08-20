@@ -1,0 +1,38 @@
+{
+  "title": "Bienvenue sur le portail partenaire Maali",
+  "description": "Configurons le profil de votre organisation pour que les candidats puissent en savoir plus.",
+  "stepOf": "Étape {{current}} sur {{total}}",
+  "percentComplete": "{{percent}} % terminé",
+  "steps": {
+    "organization": "Organisation",
+    "contact": "Contact",
+    "firstOpportunity": "Première opportunité"
+  },
+  "logoHint": "Un logo aide les candidats à reconnaître votre organisation",
+  "step3Intro": "Configurez optionnellement votre première opportunité maintenant, ou passez et faites-le plus tard depuis le tableau de bord.",
+  "fields": {
+    "opportunityTitle": "Titre de l'opportunité",
+    "opportunityTitlePlaceholder": "ex. Bourse Innovation 2026",
+    "fundingAmount": "Montant du financement",
+    "fundingAmountPlaceholder": "ex. 10 000 $ - 50 000 $",
+    "deadline": "Date limite de candidature"
+  },
+  "actions": {
+    "skip": "Passer pour l'instant",
+    "back": "Retour",
+    "next": "Suivant",
+    "saving": "Enregistrement…",
+    "complete": "Terminer la configuration"
+  },
+  "toasts": {
+    "updated": "Profil de l'organisation mis à jour !",
+    "updatedDesc": "Votre organisation partenaire est maintenant configurée.",
+    "error": "Erreur",
+    "errorDesc": "Échec de l'enregistrement du profil. Veuillez réessayer."
+  },
+  "validation": {
+    "descriptionMin": "La description doit comporter au moins 10 caractères",
+    "contactNameMin": "Le nom du contact est requis",
+    "validUrl": "Veuillez saisir une URL valide"
+  }
+}

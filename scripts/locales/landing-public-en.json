@@ -1,0 +1,128 @@
+{
+  "faqPage": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find quick answers to the most common questions about using Maali.",
+    "searchPlaceholder": "Search FAQs...",
+    "loadError": "Failed to load FAQs. Please try again later.",
+    "retry": "Retry",
+    "searchResults": "Search Results",
+    "emptySearch": "No questions found matching your search.",
+    "empty": "No FAQs available at the moment.",
+    "contactSupport": "Contact Support",
+    "stillHaveQuestions": "Still Have Questions?",
+    "stillHaveQuestionsDesc": "Can't find the answer you're looking for? Our support team is here to help."
+  },
+  "mentorsPage": {
+    "badge": "Mentorship Directory",
+    "title": "Connect with Expert Mentors",
+    "subtitle": "Learn from experienced entrepreneurs and industry leaders who are passionate about helping African businesses succeed.",
+    "searchPlaceholder": "Search mentors by name, expertise, or bio...",
+    "allSectors": "All sectors",
+    "allCountries": "All Countries",
+    "loadError": "Failed to load mentors. Please try again later.",
+    "emptyTitle": "No mentors found",
+    "emptyFiltered": "Try adjusting your search or filters",
+    "emptyDefault": "Check back soon for new mentors",
+    "moreExpertise": "+{{count}} more",
+    "noLinks": "No external links available",
+    "ctaTitle": "Want to Become a Mentor?",
+    "ctaDesc": "Share your expertise and help shape the next generation of African entrepreneurs. Join our mentor network and make a lasting impact.",
+    "ctaButton": "Get in Touch"
+  },
+  "guidePage": {
+    "title": "Application Guide",
+    "subtitle": "A step-by-step guide to help you successfully apply for funding opportunities on Maali.",
+    "introTitle": "Getting Started",
+    "introDesc": "This guide will walk you through the entire application process, from creating your account to submitting your application. Follow these steps to maximize your chances of success.",
+    "tipsLabel": "Tips:",
+    "bestPracticesTitle": "Best Practices",
+    "mistakesTitle": "Common Mistakes to Avoid",
+    "mistakes": [
+      "Submitting incomplete applications or missing required documents",
+      "Waiting until the last minute to submit your application",
+      "Not reading the opportunity requirements carefully",
+      "Providing inaccurate or misleading information",
+      "Not responding to requests for additional information"
+    ],
+    "resourcesTitle": "Need More Help?",
+    "resourcesDesc": "Explore these additional resources to help you succeed with your application.",
+    "resourcesFaq": "Frequently Asked Questions",
+    "resourcesContact": "Contact Support",
+    "resourcesSuccessStories": "Success Stories",
+    "steps": [
+      {
+        "title": "Create Your Account",
+        "description": "Start by creating a free account on Maali. You can sign up with your email or use Google for faster registration.",
+        "tips": ["Use a professional email address", "Choose a strong password", "Verify your email address promptly"],
+        "action": "Sign up now"
+      },
+      {
+        "title": "Complete Your Profile",
+        "description": "Fill out your profile with accurate business information. A complete profile increases your chances of approval.",
+        "tips": ["Include detailed business information", "Upload a professional business logo", "Provide accurate contact information"],
+        "action": "Go to Profile"
+      },
+      {
+        "title": "Browse Opportunities",
+        "description": "Explore available funding opportunities. Use filters to find opportunities that match your business sector and needs.",
+        "tips": ["Read opportunity descriptions carefully", "Check eligibility requirements", "Note application deadlines"],
+        "action": "Browse Projects"
+      },
+      {
+        "title": "Prepare Your Documents",
+        "description": "Gather all required documents before starting your application. This includes business plans, financial statements, and identification.",
+        "tips": ["Business registration documents", "Financial statements or projections", "Business plan (if required)", "Identification documents", "Any sector-specific certificates"],
+        "action": "View Requirements"
+      },
+      {
+        "title": "Submit Your Application",
+        "description": "Complete the multi-step application form. Take your time to provide accurate and detailed information.",
+        "tips": ["Answer all questions thoroughly", "Double-check for errors before submitting", "Save your progress if you need to return later"],
+        "action": "Start Application"
+      },
+      {
+        "title": "Track Your Application",
+        "description": "Monitor your application status from your dashboard. You'll receive email notifications when there are updates.",
+        "tips": ["Check your dashboard regularly", "Respond promptly to any requests for additional information", "Be patient during the review process"],
+        "action": "View Dashboard"
+      }
+    ],
+    "bestPractices": [
+      {
+        "title": "Be Honest and Accurate",
+        "description": "Provide truthful information about your business. Misrepresentation can lead to application rejection or future issues."
+      },
+      {
+        "title": "Prepare in Advance",
+        "description": "Gather all required documents before starting your application to avoid delays and ensure completeness."
+      },
+      {
+        "title": "Follow Instructions",
+        "description": "Read all instructions carefully and follow them precisely. Each opportunity may have specific requirements."
+      },
+      {
+        "title": "Meet Deadlines",
+        "description": "Submit your application well before the deadline to avoid last-minute issues and ensure your application is considered."
+      }
+    ]
+  },
+  "helpLinks": {
+    "title": "Need more help?",
+    "faq": {
+      "title": "FAQs",
+      "description": "Find answers to common questions"
+    },
+    "mentors": {
+      "title": "Mentors",
+      "description": "Connect with industry experts"
+    },
+    "support": {
+      "title": "Support",
+      "description": "Get help from our team"
+    },
+    "guide": {
+      "title": "Guide",
+      "description": "Step-by-step application guide"
+    }
+  }
+}

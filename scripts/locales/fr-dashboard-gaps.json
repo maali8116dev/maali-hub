@@ -1,0 +1,253 @@
+{
+  "menu": {
+    "documents": "Mes documents",
+    "notifications": "Mes notifications"
+  },
+  "pages": {
+    "documents": "Mes documents",
+    "notifications": "Mes notifications"
+  },
+  "applications": {
+    "columns": {
+      "actions": "Actions"
+    },
+    "detail": {
+      "review": {
+        "scoreOutOf": "{{score}} sur 10"
+      }
+    }
+  },
+  "settings": {
+    "notifications": {
+      "title": "Préférences de notification",
+      "newsletter": "Infolettre"
+    }
+  },
+  "notifications": {
+    "title": "Mes notifications",
+    "stats": {
+      "total": "Au total"
+    }
+  },
+  "resources": {
+    "tabs": {
+      "documents": "Fichiers"
+    },
+    "card": {
+      "typeLabels": {
+        "document": "Fichier"
+      }
+    }
+  },
+  "adminDashboard": {
+    "recentActivity": {
+      "genericAction": "{{actor}} a effectué {{action}} sur {{entity}}."
+    }
+  },
+  "opportunities": {
+    "table": {
+      "columns": {
+        "actions": "Actions"
+      }
+    },
+    "form": {
+      "fields": {
+        "description": {
+          "label": "Description détaillée"
+        },
+        "currency": {
+          "placeholder": "ex. EUR"
+        },
+        "tags": {
+          "label": "Mots-clés"
+        }
+      }
+    }
+  },
+  "admin": {
+    "roleFallback": "Administrateur",
+    "menu": {
+      "notifications": "Notifications admin",
+      "blog": "Blogue",
+      "mentors": "Mentor·es"
+    },
+    "pages": {
+      "notifications": "Notifications admin"
+    },
+    "opportunitiesPage": {
+      "columns": {
+        "actions": "Actions"
+      }
+    },
+    "sectorsPage": {
+      "form": {
+        "slug": "Identifiant",
+        "description": "Description du secteur"
+      }
+    },
+    "kycPage": {
+      "columns": {
+        "action": "Action"
+      }
+    },
+    "financialPage": {
+      "stats": {
+        "total": "Au total"
+      },
+      "filters": {
+        "type": "Type de transaction",
+        "date": "Période"
+      },
+      "transactions": "Transactions ({{count}})",
+      "columns": {
+        "description": "Libellé",
+        "type": "Type de transaction",
+        "date": "Date",
+        "actions": "Actions"
+      }
+    },
+    "inboundPage": {
+      "tabs": {
+        "contact": "Messages contact",
+        "newsletter": "Infolettre"
+      },
+      "columns": {
+        "source": "Provenance"
+      },
+      "sheet": {
+        "message": "Contenu du message"
+      }
+    },
+    "activityLogsPage": {
+      "entities": {
+        "document": "Fichier"
+      },
+      "columns": {
+        "action": "Action effectuée",
+        "description": "Détail"
+      }
+    },
+    "settingsPage": {
+      "notifications": {
+        "title": "Notifications administrateur"
+      }
+    },
+    "reviewManagementPage": {
+      "reviewers": {
+        "columns": {
+          "actions": "Actions"
+        }
+      }
+    },
+    "reviewerDetailsPage": {
+      "columns": {
+        "score": "Note"
+      }
+    },
+    "cmsList": {
+      "common": {
+        "actions": "Actions"
+      },
+      "mentors": {
+        "columns": {
+          "actions": "Actions"
+        }
+      },
+      "partners": {
+        "columns": {
+          "actions": "Actions"
+        }
+      },
+      "resources": {
+        "columns": {
+          "type": "Format",
+          "actions": "Actions"
+        }
+      },
+      "successStories": {
+        "columns": {
+          "actions": "Actions"
+        }
+      }
+    },
+    "cmsForm": {
+      "faq": {
+        "question": "Intitulé de la question"
+      },
+      "blog": {
+        "image": "Image de couverture",
+        "tags": "Mots-clés"
+      },
+      "mentor": {
+        "bio": "Biographie"
+      },
+      "partner": {
+        "description": "Présentation du partenaire"
+      },
+      "resource": {
+        "description": "Résumé de la ressource"
+      },
+      "successStory": {
+        "description": "Résumé de l'histoire"
+      }
+    },
+    "applicationsPage": {
+      "columns": {
+        "actions": "Actions"
+      }
+    },
+    "usersPage": {
+      "columns": {
+        "actions": "Actions"
+      }
+    },
+    "userDetailsPage": {
+      "bio": "Biographie"
+    },
+    "kycCard": {
+      "fields": {
+        "selfie": "Photo d'identité"
+      }
+    }
+  },
+  "profilePage": {
+    "fields": {
+      "bio": "Biographie"
+    }
+  },
+  "billingPage": {
+    "history": {
+      "columns": {
+        "date": "Date",
+        "description": "Libellé",
+        "actions": "Actions"
+      }
+    }
+  },
+  "partner": {
+    "menu": {
+      "notifications": "Mes notifications"
+    },
+    "pages": {
+      "notifications": "Mes notifications"
+    },
+    "settingsPage": {
+      "orgProfile": {
+        "descriptionLabel": "Présentation de l'organisation"
+      }
+    }
+  },
+  "reviewer": {
+    "menu": {
+      "notifications": "Mes notifications"
+    },
+    "pages": {
+      "notifications": "Mes notifications"
+    },
+    "dashboardPage": {
+      "stats": {
+        "total": "Au total"
+      }
+    }
+  }
+}

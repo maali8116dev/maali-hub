@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "adpyke.vscode-sql-formatter",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg"
+  ]
+}
+

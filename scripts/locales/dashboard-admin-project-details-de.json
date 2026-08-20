@@ -1,0 +1,21 @@
+{
+  "projectDetailsPage": {
+    "loading": "Projekt wird geladen...",
+    "notFound": "Projekt nicht gefunden oder ein Fehler ist aufgetreten.",
+    "back": "Zurück zu Projekten",
+    "viewPublic": "Öffentliche Seite anzeigen",
+    "edit": "Projekt bearbeiten",
+    "featured": "Empfohlen",
+    "requirementsTitle": "Anforderungen & Zulassung",
+    "requirements": "Anforderungen",
+    "eligibility": "Zulassungskriterien",
+    "sidebarTitle": "Projektdetails",
+    "fundingAmount": "Finanzierungsbetrag",
+    "deadline": "Frist",
+    "location": "Standort",
+    "applicants": "Bewerber",
+    "metadata": "Metadaten",
+    "created": "Erstellt",
+    "updated": "Aktualisiert"
+  }
+}

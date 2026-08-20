@@ -71,51 +71,88 @@
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 30 15% 99%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 25 25% 15%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 15 75% 45%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 30 15% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 35 20% 92%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent-foreground: 25 25% 15%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 35 20% 85%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 15 75% 45%;
   }
 
   .dark {
+    /* Core Background & Text */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
+    /* Card & Surfaces */
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
+    /* Popover */
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Primary - Terra Cotta / African Earth (adjusted for dark) */
+    --primary: 15 70% 55%;
+    --primary-foreground: 210 40% 98%;
+    --primary-light: 15 60% 65%;
+    --primary-dark: 15 80% 40%;
 
+    /* Secondary */
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
+    /* Muted */
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    /* Accent - Vibrant Green (adjusted for dark) */
+    --accent: 140 50% 55%;
     --accent-foreground: 210 40% 98%;
+    --accent-light: 140 45% 65%;
 
+    /* Success - Deep Green (adjusted for dark) */
+    --success: 140 60% 45%;
+    --success-foreground: 210 40% 98%;
+
+    /* Warning - Golden Orange (adjusted for dark) */
+    --warning: 35 80% 50%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+
+    /* Destructive - Sunset Red */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
+    /* Border & Input */
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* Gradients (adjusted for dark) */
+    --gradient-primary: linear-gradient(135deg, hsl(15 70% 55%), hsl(35 80% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(15 80% 40%), hsl(5 70% 50%), hsl(35 80% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(140 50% 50%), hsl(160 45% 55%));
+    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 6.5%), hsl(217.2 32.6% 12%));
+
+    /* Shadows (adjusted for dark) */
+    --shadow-elegant: 0 10px 30px -10px hsl(15 70% 55% / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 30px hsl(15 70% 55% / 0.4);
+
+    /* Animations (same as light) */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Sidebar */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -127,6 +164,85 @@
   }
 }
 
+/* Prose styles for rich text content */
+.prose {
+  max-width: none;
+  color: hsl(var(--foreground));
+}
+
+.prose h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+  line-height: 1.4;
+}
+
+.prose p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.prose ul,
+.prose ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose blockquote {
+  border-left: 4px solid hsl(var(--border));
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.prose a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  opacity: 0.8;
+}
+
+.prose strong {
+  font-weight: bold;
+}
+
+.prose em {
+  font-style: italic;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -134,5 +250,166 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch-friendly minimum sizes */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Safe area insets for mobile */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Hide browser's native password reveal button */
+  input[type="password"]::-webkit-credentials-auto-fill-button,
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none !important;
+  }
+
+  /* Hide React DevTools and debug overlays */
+  [data-react-devtools-portal],
+  [data-react-devtools-overlay],
+  [data-cursor-element-id]::after,
+  [data-lov-id]::after,
+  [data-component-path]::after {
+    display: none !important;
+  }
+
+  /* Hide debug numbers at bottom left of cards (React DevTools overlays) */
+  .rounded-lg.border.bg-card::before,
+  .rounded-lg.border.bg-card::after {
+    content: none !important;
+  }
+}
+
+/* Hide React DevTools overlay elements that show component indices */
+@layer base {
+  /* Hide any absolutely positioned debug overlays */
+  div[style*="position: absolute"][style*="z-index: 999999"],
+  div[style*="position: fixed"][style*="z-index: 999999"] {
+    display: none !important;
+  }
+}
+
+/* React Phone Number Input Styling */
+@layer components {
+  .PhoneInput {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid hsl(var(--input));
+    background-color: hsl(var(--background));
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  .PhoneInput:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+    border-color: hsl(var(--ring));
+  }
+
+  .PhoneInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .PhoneInputInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: hsl(var(--foreground));
+    padding: 0;
+    margin-left: 0.5rem;
+  }
+
+  .PhoneInputInput::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .PhoneInputInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .PhoneInputCountry {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    padding-right: 0.5rem;
+    position: relative;
+  }
+
+  .PhoneInputCountryIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    object-fit: cover;
+  }
+
+  .PhoneInputCountrySelect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    border: none;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .PhoneInputCountrySelectArrow {
+    opacity: 0.5;
+    margin-left: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Dark mode adjustments */
+  .dark .PhoneInput {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--input));
   }
 }

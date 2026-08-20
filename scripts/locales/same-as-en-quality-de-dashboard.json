@@ -1,0 +1,5 @@
+{
+  "admin": {
+    "roleFallback": "Administrator"
+  }
+}
