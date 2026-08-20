@@ -260,8 +260,10 @@ const PartnerForm = () => {
         <BackButton label={t(`${fc}.back`)} link="/admin/partners" />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Kept outside the layout so the team panel's own form is never nested inside it. */}
+      <form id="partner-form" onSubmit={handleSubmit(onSubmit)} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
@@ -274,6 +276,7 @@ const PartnerForm = () => {
                   <Label htmlFor="name">Partner Name *</Label>
                   <Input
                     id="name"
+                    form="partner-form"
                     {...register("name")}
                     placeholder="Enter partner organization name"
                     className={errors.name ? "border-destructive" : ""}
@@ -287,6 +290,7 @@ const PartnerForm = () => {
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
+                    form="partner-form"
                     {...register("description")}
                     placeholder="Brief description of the partner organization"
                     rows={4}
@@ -320,6 +324,7 @@ const PartnerForm = () => {
                       </Label>
                       <Input
                         id="logo_url_input"
+                        form="partner-form"
                         {...register("logo_url")}
                         placeholder="https://example.com/logo.png"
                         className={errors.logo_url ? "border-destructive" : ""}
@@ -336,6 +341,7 @@ const PartnerForm = () => {
                   <Label htmlFor="website_url">Website URL</Label>
                   <Input
                     id="website_url"
+                    form="partner-form"
                     {...register("website_url")}
                     placeholder="https://example.com"
                     className={errors.website_url ? "border-destructive" : ""}
@@ -424,6 +430,7 @@ const PartnerForm = () => {
                   <Input
                     id="invite_email"
                     type="email"
+                    form="partner-form"
                     {...register("invite_email")}
                     placeholder="partner@example.com"
                     className={errors.invite_email ? "border-destructive" : ""}
@@ -452,7 +459,7 @@ const PartnerForm = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-2">
-                  <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
+                  <Button type="submit" form="partner-form" className="w-full" disabled={isSubmitting || isLoading}>
                     <Save className="h-4 w-4 mr-2" />
                     {isSubmitting || isLoading
                       ? "Saving..."
@@ -472,8 +479,7 @@ const PartnerForm = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

@@ -122,7 +122,12 @@ export function PartnerTeamPanel({ partnerOrgId, partnerOrgName, canManage }: Pa
           {canManage && (
             <Form {...inviteForm}>
               <form
-                onSubmit={inviteForm.handleSubmit(handleInvite)}
+                onSubmit={(e) => {
+                  // Panel can render inside another form (admin PartnerForm);
+                  // stop the submit from bubbling to the parent form.
+                  e.stopPropagation();
+                  void inviteForm.handleSubmit(handleInvite)(e);
+                }}
                 className="rounded-lg border p-4 space-y-4"
               >
                 <CustomFormField

@@ -109,7 +109,9 @@ const AdminMentorForm = () => {
   // Get existing countries from database
   const existingCountries = [...new Set(allMentors?.map(m => m.country).filter(Boolean))] as string[];
   const countryOptions = useMemo(() => {
-    const byValue = new Map(COUNTRIES.map((c) => [c.value, c]));
+    const byValue = new Map<string, { value: string; label: string }>(
+      COUNTRIES.map((c) => [c.value, { value: c.value, label: c.label }])
+    );
     for (const country of existingCountries) {
       if (!byValue.has(country)) byValue.set(country, { value: country, label: country });
     }

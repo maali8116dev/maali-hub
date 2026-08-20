@@ -11,6 +11,7 @@ import { Check, Users, Zap, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useSectors } from "@/hooks/useSectors";
 import { COUNTRIES } from "@/components/application/form/countries";
 import Navigation from "@/components/Navigation";
 import { MembershipPaymentStep } from "@/components/membership/MembershipPaymentStep";
