@@ -647,6 +647,10 @@
       "passwordResetFailed": {
         "title": "Redefinição falhou"
       },
+      "linkExpired": {
+        "title": "Link expirado",
+        "description": "Este link é inválido ou já foi utilizado. Solicite um novo para entrar."
+      },
       "checkEmail": {
         "title": "Verifique o seu e-mail",
         "description": "Enviámos um link de redefinição. Verifique a sua caixa de entrada."

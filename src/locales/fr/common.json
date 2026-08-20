@@ -754,6 +754,10 @@
       "passwordResetFailed": {
         "title": "Échec de la réinitialisation"
       },
+      "linkExpired": {
+        "title": "Lien expiré",
+        "description": "Ce lien est invalide ou a déjà été utilisé. Demandez-en un nouveau pour vous connecter."
+      },
       "checkEmail": {
         "title": "Vérifiez votre e-mail",
         "description": "Nous vous avons envoyé un lien de réinitialisation. Consultez votre boîte de réception."

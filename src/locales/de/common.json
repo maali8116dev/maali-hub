@@ -647,6 +647,10 @@
       "passwordResetFailed": {
         "title": "Passwortzurücksetzung fehlgeschlagen"
       },
+      "linkExpired": {
+        "title": "Link abgelaufen",
+        "description": "Dieser Link ist ungültig oder wurde bereits verwendet. Fordere einen neuen Link an, um dich anzumelden."
+      },
       "checkEmail": {
         "title": "E-Mail prüfen",
         "description": "Wir haben Ihnen einen Link zur Passwortzurücksetzung gesendet. Bitte prüfen Sie Ihren Posteingang."

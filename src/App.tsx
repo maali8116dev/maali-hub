@@ -15,6 +15,7 @@ import { initPostHog } from "@/lib/posthog";
 import { initRateLimitConfig } from "@/lib/rateLimits";
 import { getMaintenanceConfig } from "@/lib/maintenanceMode";
 import { RouteSEO } from "@/components/seo/RouteSEO";
+import { AuthLinkHandler } from "@/components/auth/AuthLinkHandler";
 import PageFallback from "@/components/PageFallback";
 
 function RedirectProjectToOpportunity() {
@@ -168,6 +169,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <CookieConsent />
+              <AuthLinkHandler />
               <RouteSEO />
               <Suspense fallback={<PageFallback />}>
               <Routes>

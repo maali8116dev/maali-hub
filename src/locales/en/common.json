@@ -676,6 +676,10 @@
         "title": "Password reset failed",
         "description": "This reset link is invalid or has expired. Please request a new one."
       },
+      "linkExpired": {
+        "title": "Link expired",
+        "description": "This link is invalid or has already been used. Request a new one to sign in."
+      },
       "checkEmail": {
         "title": "Check your email",
         "description": "We've sent you a password reset link. Please check your inbox."

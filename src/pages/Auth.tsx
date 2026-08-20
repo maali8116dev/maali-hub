@@ -17,7 +17,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import authLogoIcon from "@/assets/logo_icon.webp";
 import { validateEmail } from "@/lib/emailValidation";
 import { rateLimitedAuth, rateLimitedSignIn, rateLimitedSignUp } from "@/lib/rateLimitedAuth";
-import { isMembershipExemptRole, userNeedsOnboarding } from "@/lib/membershipAccess";
+import { getPostAuthPath } from "@/lib/postAuthPath";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { BackButton } from "@/components/ui/back-button";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
@@ -29,29 +29,6 @@ import {
   type SignInFormValues,
   type SignUpFormValues,
 } from "@/lib/schemas/authForm.schema";
-
-async function getPostAuthPath(fallbackPath: string): Promise<string> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user?.id) return fallbackPath;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", session.user.id)
-    .maybeSingle();
-
-  if (isMembershipExemptRole(profile?.role)) {
-    if (profile?.role === "admin") return "/admin";
-    if (profile?.role === "reviewer") return "/reviewer";
-    if (profile?.role === "partner") return "/partner";
-    return fallbackPath;
-  }
-
-  const needsSetup = await userNeedsOnboarding(session.user.id);
-  return needsSetup ? "/onboarding" : fallbackPath;
-}
 
 function AuthPageLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation("common");
