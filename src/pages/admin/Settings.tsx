@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,31 +8,85 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Database, Bell, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAdminStats } from "@/hooks/useAdminStats";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+type AdminPrefs = {
+  emailNotifications: boolean;
+  applicationAlerts: boolean;
+  maintenanceMode: boolean;
+};
 
 const AdminSettings = () => {
   const { t } = useTranslation(["dashboard"]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: stats, isLoading: statsLoading, isError: statsError, isSuccess: statsOk } = useAdminStats();
 
-  const [settings, setSettings] = useState({
+  const { data: prefs, isLoading: prefsLoading } = useQuery({
+    queryKey: ["platform-settings", "admin-prefs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("platform_settings")
+        .select("id, maintenance_mode, email_notifications, application_alerts")
+        .order("id", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [settings, setSettings] = useState<AdminPrefs>({
     emailNotifications: true,
     applicationAlerts: true,
     maintenanceMode: false,
   });
 
-  const [saving, setSaving] = useState(false);
-  const systemHealthy = statsOk && !statsError;
+  useEffect(() => {
+    if (!prefs) return;
+    setSettings({
+      emailNotifications: prefs.email_notifications ?? true,
+      applicationAlerts: prefs.application_alerts ?? true,
+      maintenanceMode: prefs.maintenance_mode ?? false,
+    });
+  }, [prefs]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setTimeout(() => {
+  const savePrefs = useMutation({
+    mutationFn: async (next: AdminPrefs) => {
+      if (!prefs?.id) {
+        throw new Error("No platform_settings row found");
+      }
+      const { error } = await supabase
+        .from("platform_settings")
+        .update({
+          maintenance_mode: next.maintenanceMode,
+          email_notifications: next.emailNotifications,
+          application_alerts: next.applicationAlerts,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", prefs.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["platform-settings"] });
       toast({
         title: t("admin.settingsPage.toast.saved"),
         description: t("admin.settingsPage.toast.savedDesc"),
       });
-      setSaving(false);
-    }, 1000);
-  };
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t("admin.settingsPage.toast.saved"),
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const systemHealthy = statsOk && !statsError;
 
   return (
     <div className="space-y-6">
@@ -60,6 +114,7 @@ const AdminSettings = () => {
             <Switch
               id="maintenance"
               checked={settings.maintenanceMode}
+              disabled={prefsLoading}
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, maintenanceMode: checked })
               }
@@ -89,6 +144,7 @@ const AdminSettings = () => {
             <Switch
               id="email-notifications"
               checked={settings.emailNotifications}
+              disabled={prefsLoading}
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, emailNotifications: checked })
               }
@@ -106,6 +162,7 @@ const AdminSettings = () => {
             <Switch
               id="application-alerts"
               checked={settings.applicationAlerts}
+              disabled={prefsLoading}
               onCheckedChange={(checked) =>
                 setSettings({ ...settings, applicationAlerts: checked })
               }
@@ -184,8 +241,11 @@ const AdminSettings = () => {
       </Card>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? t("admin.settingsPage.saving") : t("admin.settingsPage.save")}
+        <Button
+          onClick={() => savePrefs.mutate(settings)}
+          disabled={savePrefs.isPending || prefsLoading || !prefs?.id}
+        >
+          {savePrefs.isPending ? t("admin.settingsPage.saving") : t("admin.settingsPage.save")}
         </Button>
       </div>
     </div>

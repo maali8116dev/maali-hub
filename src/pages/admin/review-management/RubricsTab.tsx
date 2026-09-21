@@ -28,9 +28,9 @@ export const RubricsTab = ({ sectors }: RubricsTabProps) => {
         .from('system_rubric')
         .select('*')
         .eq('id', '00000000-0000-0000-0000-000000000001')
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
+        .maybeSingle();
+
+      if (error) throw error;
       return data;
     },
   });

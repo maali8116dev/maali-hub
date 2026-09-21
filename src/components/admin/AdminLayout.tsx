@@ -18,9 +18,6 @@ import {
   Tag,
   Handshake,
   Star,
-  Building2,
-  UserCheck,
-  Home,
   Bell,
   Inbox,
 } from "lucide-react";
@@ -169,9 +166,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
         <SidebarFooter>
           <SidebarMenu>
-            {/* Testing Dashboards - Admin access to all dashboards */}
+            {/* Testing Dashboards - temporarily hidden
             <SidebarMenuItem>
-              <SidebarMenuButton 
+              <SidebarMenuButton
                 onClick={() => navigate("/dashboard")}
                 tooltip={t("admin.footer.userDashboard")}
               >
@@ -180,7 +177,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton 
+              <SidebarMenuButton
                 onClick={() => navigate("/partner")}
                 tooltip={t("admin.footer.partnerDashboard")}
               >
@@ -189,7 +186,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton 
+              <SidebarMenuButton
                 onClick={() => navigate("/reviewer")}
                 tooltip={t("admin.footer.reviewerDashboard")}
               >
@@ -197,6 +194,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 <span>{t("admin.footer.reviewerDashboard")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            */}
             <SidebarMenuItem>
               {user ? (
                 <SidebarMenuButton onClick={handleSignOut}>

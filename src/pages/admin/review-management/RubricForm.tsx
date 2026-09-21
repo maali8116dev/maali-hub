@@ -85,18 +85,25 @@ export const RubricForm = ({ initialRubric, onSuccess }: RubricFormProps) => {
         description: c.description?.trim() || '',
       }));
 
-      // Update system rubric directly (versioning removed for simplicity)
-      const { error } = await supabase
+      // Upsert: live may have no seed row; UPDATE returns 204 with 0 rows and silent fail
+      const SYSTEM_RUBRIC_ID = '00000000-0000-0000-0000-000000000001';
+      const { data, error } = await supabase
         .from('system_rubric')
-        .update({
-          rubric: { criteria: normalizedCriteria },
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', '00000000-0000-0000-0000-000000000001');
-      
+        .upsert(
+          {
+            id: SYSTEM_RUBRIC_ID,
+            rubric: { criteria: normalizedCriteria },
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        )
+        .select('id')
+        .maybeSingle();
+
       if (error) throw error;
-      
-      return '00000000-0000-0000-0000-000000000001';
+      if (!data?.id) throw new Error('Failed to save system rubric');
+
+      return data.id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-rubric'] });

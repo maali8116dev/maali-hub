@@ -17,9 +17,9 @@ export const useSystemRubric = () => {
         .from('system_rubric')
         .select('*')
         .eq('id', '00000000-0000-0000-0000-000000000001')
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
+        .maybeSingle();
+
+      if (error) throw error;
       if (!data) return null;
       
       return {

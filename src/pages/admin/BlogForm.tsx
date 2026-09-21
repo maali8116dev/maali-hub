@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,26 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAllSectors } from "@/hooks/useSectors";
 import { BackButton } from "@/components/ui/back-button";
 import { useTranslation } from "react-i18next";
+import {
+  useBlogPost,
+  useCreateBlogPost,
+  useUpdateBlogPost,
+  type BlogPostFormData,
+} from "@/hooks/useBlogPosts";
 
-type BlogPostFormValues = {
-  title: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  sector: string;
-  readTime: string;
-  image: string;
-  featured: boolean;
-  status: "draft" | "published" | "archived";
-  tags?: string;
-};
+type BlogPostFormValues = BlogPostFormData;
 
 const BlogForm = () => {
   const { t, i18n } = useTranslation(["dashboard"]);
@@ -67,23 +62,9 @@ const BlogForm = () => {
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  // Mock data - replace with API call when backend is ready
-  const [initialData] = useState<BlogPostFormValues | null>(
-    isEditing
-      ? {
-          title: "10 Tips for Writing a Winning Funding Application",
-          excerpt: "Learn the key strategies that successful entrepreneurs use to craft compelling funding applications that stand out.",
-          content: "Full article content here...",
-          author: "Sarah Johnson",
-          sector: "Applications",
-          readTime: "5 min read",
-          image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=600&fit=crop",
-          featured: true,
-          status: "published",
-          tags: "Funding, Applications, Business Tips",
-        }
-      : null
-  );
+  const { data: existingPost, isLoading: isLoadingPost } = useBlogPost(id);
+  const createBlogPost = useCreateBlogPost();
+  const updateBlogPost = useUpdateBlogPost();
 
   const {
     register,
@@ -91,9 +72,10 @@ const BlogForm = () => {
     formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm<BlogPostFormValues>({
     resolver: zodResolver(blogPostSchema),
-    defaultValues: initialData || {
+    defaultValues: {
       title: "",
       excerpt: "",
       content: "",
@@ -112,24 +94,44 @@ const BlogForm = () => {
   const imageUrl = watch("image");
 
   useEffect(() => {
-    if (initialData) {
-      Object.keys(initialData).forEach((key) => {
-        setValue(key as keyof BlogPostFormValues, initialData[key as keyof BlogPostFormValues]);
-      });
-    }
-  }, [initialData, setValue]);
+    if (!existingPost) return;
+    reset({
+      title: existingPost.title,
+      excerpt: existingPost.excerpt,
+      content: existingPost.content,
+      author: existingPost.author,
+      sector: existingPost.sector,
+      readTime: existingPost.read_time,
+      image: existingPost.image_url,
+      featured: existingPost.featured,
+      status: existingPost.status,
+      tags: existingPost.tags ?? "",
+    });
+  }, [existingPost, reset]);
 
   const onSubmit = async (data: BlogPostFormValues) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Blog post data:", data);
-    
-    // Navigate back to blog list after save
-    navigate("/admin/blog");
+    try {
+      if (isEditing && id) {
+        await updateBlogPost.mutateAsync({ id: Number(id), data });
+      } else {
+        await createBlogPost.mutateAsync(data);
+      }
+      navigate("/admin/blog");
+    } catch {
+      // toast handled in mutation
+    }
   };
 
   const { data: sectorsData = [] } = useAllSectors();
   const sectors = sectorsData.map((cat) => cat.name);
+
+  if (isEditing && isLoadingPost) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -347,9 +349,13 @@ const BlogForm = () => {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-2">
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full" disabled={isSubmitting || createBlogPost.isPending || updateBlogPost.isPending}>
                     <Save className="h-4 w-4 mr-2" />
-                    {isSubmitting ? t(`${fc}.saving`) : isEditing ? t(`${fc}.save`) : t(`${fc}.create`)}
+                    {isSubmitting || createBlogPost.isPending || updateBlogPost.isPending
+                      ? t(`${fc}.saving`)
+                      : isEditing
+                        ? t(`${fc}.save`)
+                        : t(`${fc}.create`)}
                   </Button>
                   <Button
                     type="button"

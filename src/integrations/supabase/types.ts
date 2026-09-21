@@ -1164,21 +1164,30 @@ export type Database = {
       }
       platform_settings: {
         Row: {
+          application_alerts: boolean
           application_fee: number
           created_at: string
+          email_notifications: boolean
           id: number
+          maintenance_mode: boolean
           updated_at: string
         }
         Insert: {
+          application_alerts?: boolean
           application_fee?: number
           created_at?: string
+          email_notifications?: boolean
           id?: number
+          maintenance_mode?: boolean
           updated_at?: string
         }
         Update: {
+          application_alerts?: boolean
           application_fee?: number
           created_at?: string
+          email_notifications?: boolean
           id?: number
+          maintenance_mode?: boolean
           updated_at?: string
         }
         Relationships: []

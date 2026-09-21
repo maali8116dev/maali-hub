@@ -13,17 +13,31 @@ export const ConflictsTab = () => {
   const { data: conflicts = [], refetch, isFetching } = useQuery({
     queryKey: ['all-conflicts'],
     queryFn: async () => {
+      // reviewer_id FKs auth.users, not profiles — cannot embed profiles!reviewer_id
       const { data, error } = await supabase
         .from('reviewer_conflicts')
         .select(`
           *,
-          reviewer:profiles!reviewer_id(user_id, first_name, last_name),
           application:applications!application_id(id, project_title)
         `)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      return data;
+      if (!data?.length) return [];
+
+      const reviewerIds = [...new Set(data.map((c) => c.reviewer_id))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name')
+        .in('user_id', reviewerIds);
+
+      if (profilesError) throw profilesError;
+
+      const byUserId = new Map((profiles || []).map((p) => [p.user_id, p]));
+      return data.map((c) => ({
+        ...c,
+        reviewer: byUserId.get(c.reviewer_id) ?? null,
+      }));
     },
   });
 

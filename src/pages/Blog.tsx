@@ -6,93 +6,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, User, ArrowRight, Tag } from "lucide-react";
+import { Search, Calendar, User, ArrowRight, Tag, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePublishedBlogPosts } from "@/hooks/useBlogPosts";
 
 const Blog = () => {
   const { t } = useTranslation("landing");
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: blogPosts = [], isLoading } = usePublishedBlogPosts();
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "10 Tips for Writing a Winning Funding Application",
-      excerpt: "Learn the key strategies that successful entrepreneurs use to craft compelling funding applications that stand out.",
-      author: "Sarah Johnson",
-      date: "January 15, 2024",
-      sector: "Applications",
-      readTime: "5 min read",
-      featured: true,
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=400&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Understanding Different Types of Funding Opportunities",
-      excerpt: "A comprehensive guide to grants, loans, equity, and other funding options available to African entrepreneurs.",
-      author: "Michael Okafor",
-      date: "January 10, 2024",
-      sector: "Funding",
-      readTime: "8 min read",
-      featured: false,
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Building a Sustainable Business in Africa",
-      excerpt: "Explore strategies for creating businesses that not only succeed financially but also create positive social impact.",
-      author: "Amina Diallo",
-      date: "January 5, 2024",
-      sector: "Business",
-      readTime: "6 min read",
-      featured: false,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=400&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Success Story: How TechNuru Transformed a Startup",
-      excerpt: "An in-depth look at how one entrepreneur used our platform to secure funding and scale their business.",
-      author: "David Kofi",
-      date: "December 28, 2023",
-      sector: "Success Stories",
-      readTime: "10 min read",
-      featured: false,
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop"
-    },
-    {
-      id: 5,
-      title: "Financial Planning for Early-Stage Startups",
-      excerpt: "Essential financial planning tips to help your startup navigate the early stages of growth and development.",
-      author: "Fatima Hassan",
-      date: "December 20, 2023",
-      sector: "Finance",
-      readTime: "7 min read",
-      featured: false,
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop"
-    },
-    {
-      id: 6,
-      title: "Networking Strategies for African Entrepreneurs",
-      excerpt: "Learn how to build meaningful connections and leverage your network to grow your business.",
-      author: "James Mwangi",
-      date: "December 15, 2023",
-      sector: "Networking",
-      readTime: "5 min read",
-      featured: false,
-      image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=400&fit=crop"
-    }
-  ];
-
-  const sectors = Array.from(new Set(blogPosts.map(post => post.sector)));
+  const sectors = Array.from(new Set(blogPosts.map((post) => post.sector).filter(Boolean)));
 
   const filteredPosts = searchQuery
-    ? blogPosts.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+    ? blogPosts.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : blogPosts;
 
-  const featuredPost = blogPosts.find(post => post.featured);
-  const regularPosts = blogPosts.filter(post => !post.featured);
+  const featuredPost = blogPosts.find((post) => post.featured);
+  const regularPosts = blogPosts.filter((post) => !post.featured);
+
+  const formatDate = (post: (typeof blogPosts)[number]) =>
+    new Date(post.published_at || post.created_at).toLocaleDateString();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="flex justify-center py-24">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,7 +71,7 @@ const Blog = () => {
           <Card className="mb-12 hover:shadow-md transition-shadow overflow-hidden">
             <div className="relative w-full h-64 md:h-80 overflow-hidden">
               <img
-                src={featuredPost.image}
+                src={featuredPost.image_url}
                 alt={featuredPost.title}
                 className="w-full h-full object-cover"
               />
@@ -144,9 +93,9 @@ const Blog = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{featuredPost.date}</span>
+                    <span>{formatDate(featuredPost)}</span>
                   </div>
-                  <span>{featuredPost.readTime}</span>
+                  <span>{featuredPost.read_time}</span>
                 </div>
                 <Link to={`/blog/${featuredPost.id}`}>
                   <Button variant="outline">
@@ -177,7 +126,7 @@ const Blog = () => {
             <Card key={post.id} className="hover:shadow-md transition-shadow flex flex-col overflow-hidden">
               <div className="relative w-full h-48 overflow-hidden">
                 <img
-                  src={post.image}
+                  src={post.image_url}
                   alt={post.title}
                   className="w-full h-full object-cover"
                 />
@@ -199,11 +148,11 @@ const Blog = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{post.date}</span>
+                    <span>{formatDate(post)}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{post.readTime}</span>
+                  <span className="text-sm text-muted-foreground">{post.read_time}</span>
                   <Link to={`/blog/${post.id}`}>
                     <Button variant="ghost" size="sm">
                       {t("blogPage.readMore")}
