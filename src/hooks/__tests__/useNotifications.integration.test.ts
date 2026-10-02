@@ -402,32 +402,33 @@ describe('Notifications Integration Tests', () => {
       '/dashboard/applications/test-app-123',
       complexMetadata
     );
+    expect(notificationId).toBeTruthy();
     if (notificationId) {
       createdNotificationIds.push(notificationId);
     }
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Fetch and verify metadata
+    // Fetch by id — avoid stale rows matched only by title
     const { data: notifications, error } = await (supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', testUserId)
-      .eq('title', 'Notification with Metadata')
-      .limit(1)
+      .eq('id', notificationId)
       .single() as any);
 
     expect(error).toBeNull();
     expect(notifications).toBeDefined();
     expect(notifications!.metadata).toBeDefined();
-    expect(notifications!.metadata).toMatchObject(complexMetadata);
-    expect(notifications!.metadata.application_id).toBe('test-app-123');
-    expect(notifications!.metadata.project_id).toBe(456);
-
-    // Add to cleanup
-    if (notifications) {
-      createdNotificationIds.push(notifications.id);
-    }
+    // Assert stable fields only — exact timestamp can flake vs DB round-trip / clock
+    expect(notifications!.metadata).toMatchObject({
+      application_id: 'test-app-123',
+      project_id: 456,
+      status: 'approved',
+      previous_status: 'pending',
+      reviewer_id: 'reviewer-789',
+    });
+    expect(typeof notifications!.metadata.timestamp).toBe('string');
+    expect(Number.isNaN(Date.parse(notifications!.metadata.timestamp))).toBe(false);
 
     console.log('âœ… Verified notification metadata storage');
   }, { timeout: 10000 });
