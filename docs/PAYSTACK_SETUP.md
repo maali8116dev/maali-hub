@@ -3,7 +3,7 @@
 ## Dashboard
 
 1. Create a **monthly plan** per currency (USD-equivalent pricing):
-   - NGN — ₦3,200/mo
+   - NGN: ₦3,000/mo
    - GHS — GH₵30/mo
    - KES — KSh 260/mo
    - ZAR — R 36/mo

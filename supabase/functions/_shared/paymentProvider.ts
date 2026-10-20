@@ -12,7 +12,7 @@ export const PAYSTACK_CURRENCIES: Record<
   PaystackCurrency,
   { currency: PaystackCurrency; amountSubunits: number; displayAmount: string }
 > = {
-  NGN: { currency: "NGN", amountSubunits: 320_000, displayAmount: "₦3,200" },
+  NGN: { currency: "NGN", amountSubunits: 300_000, displayAmount: "₦3,000" },
   GHS: { currency: "GHS", amountSubunits: 3_000, displayAmount: "GH₵30" },
   KES: { currency: "KES", amountSubunits: 26_000, displayAmount: "KSh 260" },
   ZAR: { currency: "ZAR", amountSubunits: 3_600, displayAmount: "R 36" },
