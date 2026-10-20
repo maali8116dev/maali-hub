@@ -1,0 +1,59 @@
+{
+  "viewAll": "Voir toutes les notifications",
+  "types": {
+    "review_assignment": "Assignation d'évaluateur"
+  },
+  "messages": {
+    "fallbackOpportunity": "cette opportunité",
+    "application": {
+      "submitted": {
+        "title": "Candidature soumise",
+        "message": "Votre candidature pour « {{opportunityTitle}} » a été soumise avec succès et est en cours d'examen."
+      },
+      "approved": {
+        "title": "Candidature approuvée !",
+        "message": "Félicitations ! Votre candidature pour « {{opportunityTitle}} » a été approuvée."
+      },
+      "rejected": {
+        "title": "Statut de candidature mis à jour",
+        "message": "Votre candidature pour « {{opportunityTitle}} » a été examinée. Consultez les détails de votre candidature pour plus d'informations."
+      },
+      "statusPending": {
+        "title": "Statut de candidature mis à jour",
+        "message": "Le statut de votre candidature pour « {{opportunityTitle}} » a été mis à jour en attente d'examen."
+      }
+    },
+    "payment": {
+      "confirmed": {
+        "title": "Paiement confirmé",
+        "message": "Vos frais de candidature ont été confirmés et votre candidature est maintenant en cours d'examen."
+      }
+    },
+    "membership": {
+      "activated": {
+        "title": "Adhésion complète active",
+        "message": "Votre adhésion complète à 2 $/mois est maintenant active. Vous pouvez postuler à toutes les opportunités de financement."
+      },
+      "ended": {
+        "title": "Adhésion terminée",
+        "message": "Votre adhésion complète est terminée. Vous êtes maintenant sur le plan communautaire gratuit. Passez à la version supérieure à tout moment pour postuler à nouveau."
+      }
+    },
+    "review": {
+      "assigned": {
+        "title": "Nouvelle candidature assignée",
+        "message": "Une nouvelle candidature pour « {{opportunityTitle}} » vous a été assignée pour examen."
+      },
+      "newApplicationRequiresReview": {
+        "title": "Nouvelle candidature assignée",
+        "message": "Une nouvelle candidature pour « {{opportunityTitle}} » nécessite votre examen."
+      }
+    },
+    "admin": {
+      "reviewerCapacityNeeded": {
+        "title": "Capacité d'évaluateurs requise",
+        "message": "Seulement {{availableCount}} évaluateur(s) disponible(s) pour « {{opportunityTitle}} ». Cette candidature nécessite {{requiredReviewers}} évaluateurs. Veuillez assigner un évaluateur supplémentaire."
+      }
+    }
+  }
+}

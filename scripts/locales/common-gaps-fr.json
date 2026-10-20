@@ -1,0 +1,12 @@
+{
+  "notifications": {
+    "title": "Mes notifications",
+    "total": "Au total",
+    "types": {
+      "default": "Général"
+    }
+  },
+  "dataTable": {
+    "csv": "Exporter en CSV"
+  }
+}

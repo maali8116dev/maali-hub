@@ -1,0 +1,9 @@
+{
+  "membership": {
+    "community": { "name": "Comunidade" },
+    "member": { "name": "Membro completo" }
+  },
+  "trustIndicators": {
+    "worldwide": "Mundial"
+  }
+}

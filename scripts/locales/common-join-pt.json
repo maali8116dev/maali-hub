@@ -1,0 +1,67 @@
+{
+  "memberPriceLabel": "2 $ / mês",
+  "steps": {
+    "profile": "Perfil",
+    "tier": "Adesão",
+    "payment": "Pagamento"
+  },
+  "profile": {
+    "title": "Fale-nos sobre si",
+    "description": "Isto constrói o seu perfil de membro MAALI visível na rede.",
+    "firstName": "Nome *",
+    "lastName": "Apelido *",
+    "businessName": "Empresa / Organização *",
+    "businessNamePlaceholder": "Savanna Ventures",
+    "sector": "Setor *",
+    "sectorPlaceholder": "Selecione o setor",
+    "country": "País *",
+    "countryPlaceholder": "Quénia",
+    "bio": "Breve biografia",
+    "bioPlaceholder": "Conte à rede MAALI o que está a construir…",
+    "continue": "Continuar"
+  },
+  "tier": {
+    "title": "Escolha a sua adesão",
+    "subtitle": "Pode fazer upgrade a qualquer momento.",
+    "mostPopular": "Mais popular",
+    "community": {
+      "name": "Comunidade",
+      "price": "Grátis",
+      "description": "Junte-se à rede MAALI e explore oportunidades.",
+      "cta": "Aderir grátis",
+      "features": [
+        "Explorar todas as oportunidades de financiamento",
+        "Aceder a recursos públicos",
+        "Juntar-se à rede comunitária",
+        "Newsletter mensal"
+      ]
+    },
+    "member": {
+      "name": "Membro completo",
+      "price": "2 $ / mês",
+      "description": "Desbloqueie a plataforma MAALI completa e candidate-se a oportunidades.",
+      "cta": "Tornar-se membro",
+      "features": [
+        "Tudo na Comunidade",
+        "Candidatar-se a oportunidades de financiamento",
+        "Revisão prioritária de candidaturas",
+        "Mensagens diretas com avaliadores",
+        "Perfil em destaque na rede",
+        "Eventos exclusivos para membros"
+      ]
+    }
+  },
+  "noAccount": {
+    "title": "Registe-se primeiro",
+    "message": "Precisa de uma conta antes de aderir à MAALI.",
+    "cta": "Criar conta"
+  },
+  "done": {
+    "title": "Bem-vindo à Maali!",
+    "paidDescription": "A sua adesão completa está ativa. Já pode candidatar-se a todas as oportunidades de financiamento.",
+    "communityDescription": "Juntou-se à rede comunitária Maali.",
+    "upgradeHint": "Faça upgrade para Membro completo a qualquer momento para se candidatar a financiamentos.",
+    "goHome": "Ir para o início",
+    "browseOpportunities": "Explorar oportunidades"
+  }
+}

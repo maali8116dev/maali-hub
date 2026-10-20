@@ -1,0 +1,11 @@
+{
+  "translateForMe": "Für mich übersetzen",
+  "viewTranslation": "Übersetzung anzeigen",
+  "viewOriginal": "Original anzeigen",
+  "translating": "Übersetze…",
+  "offer": "Bewerbung eingereicht in {{source}}. Maschinelle Übersetzung verfügbar.",
+  "showingTranslated": "Maschinelle Übersetzung von {{source}} nach {{target}}.",
+  "sameLocale": "Die Bewerbung ist bereits in Ihrer Sprache.",
+  "errorTitle": "Übersetzung fehlgeschlagen",
+  "errorDesc": "Diese Bewerbung konnte nicht übersetzt werden. Bitte später erneut versuchen."
+}

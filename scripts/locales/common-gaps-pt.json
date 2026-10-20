@@ -1,0 +1,13 @@
+{
+  "opportunitiesPage": {
+    "filters": {
+      "status": "Estado"
+    }
+  },
+  "notifications": {
+    "total": "No total"
+  },
+  "dataTable": {
+    "csv": "Exportar CSV"
+  }
+}

@@ -1,0 +1,387 @@
+import { useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Save, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAllSectors } from "@/hooks/useSectors";
+import { BackButton } from "@/components/ui/back-button";
+import { useTranslation } from "react-i18next";
+import {
+  useBlogPost,
+  useCreateBlogPost,
+  useUpdateBlogPost,
+  type BlogPostFormData,
+} from "@/hooks/useBlogPosts";
+
+type BlogPostFormValues = BlogPostFormData;
+
+const BlogForm = () => {
+  const { t, i18n } = useTranslation(["dashboard"]);
+  const ff = "admin.cmsForm.blog";
+  const fc = "admin.cmsForm.common";
+  const fv = "admin.cmsForm.validation";
+
+  const blogPostSchema = useMemo(
+    () =>
+      z.object({
+        title: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.title`) }))
+          .min(10, t(`${fv}.minChars`, { field: t(`${ff}.title`), min: 10 })),
+        excerpt: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.excerpt`) }))
+          .min(50, t(`${fv}.minChars`, { field: t(`${ff}.excerpt`), min: 50 })),
+        content: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.content`) }))
+          .min(100, t(`${fv}.minChars`, { field: t(`${ff}.content`), min: 100 })),
+        author: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.author`) })),
+        sector: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.sector`) })),
+        readTime: z.string().min(1, t(`${fv}.required`, { field: t(`${ff}.readTime`) })),
+        image: z
+          .string()
+          .min(1, t(`${fv}.required`, { field: t(`${ff}.image`) }))
+          .url(t(`${fv}.validUrl`)),
+        featured: z.boolean(),
+        status: z.enum(["draft", "published", "archived"]),
+        tags: z.string().optional(),
+      }),
+    [t, i18n.language]
+  );
+
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isEditing = !!id;
+
+  const { data: existingPost, isLoading: isLoadingPost } = useBlogPost(id);
+  const createBlogPost = useCreateBlogPost();
+  const updateBlogPost = useUpdateBlogPost();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+    reset,
+  } = useForm<BlogPostFormValues>({
+    resolver: zodResolver(blogPostSchema),
+    defaultValues: {
+      title: "",
+      excerpt: "",
+      content: "",
+      author: "",
+      sector: "",
+      readTime: "",
+      image: "",
+      featured: false,
+      status: "draft",
+      tags: "",
+    },
+  });
+
+  const featured = watch("featured");
+  const status = watch("status");
+  const imageUrl = watch("image");
+
+  useEffect(() => {
+    if (!existingPost) return;
+    reset({
+      title: existingPost.title,
+      excerpt: existingPost.excerpt,
+      content: existingPost.content,
+      author: existingPost.author,
+      sector: existingPost.sector,
+      readTime: existingPost.read_time,
+      image: existingPost.image_url,
+      featured: existingPost.featured,
+      status: existingPost.status,
+      tags: existingPost.tags ?? "",
+    });
+  }, [existingPost, reset]);
+
+  const onSubmit = async (data: BlogPostFormValues) => {
+    try {
+      if (isEditing && id) {
+        await updateBlogPost.mutateAsync({ id: Number(id), data });
+      } else {
+        await createBlogPost.mutateAsync(data);
+      }
+      navigate("/admin/blog");
+    } catch {
+      // toast handled in mutation
+    }
+  };
+
+  const { data: sectorsData = [] } = useAllSectors();
+  const sectors = sectorsData.map((cat) => cat.name);
+
+  if (isEditing && isLoadingPost) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {isEditing ? t(`${ff}.editTitle`) : t(`${ff}.createTitle`)}
+          </p>
+        </div>
+        <BackButton label={t(`${fc}.back`)} link="/admin/blog" />
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Post Content</CardTitle>
+                <CardDescription>Enter the main content for your blog post</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    {...register("title")}
+                    placeholder="Enter blog post title"
+                    className={errors.title ? "border-destructive" : ""}
+                  />
+                  {errors.title && (
+                    <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="excerpt">Excerpt *</Label>
+                  <Textarea
+                    id="excerpt"
+                    {...register("excerpt")}
+                    placeholder="Write a brief excerpt for the blog post"
+                    rows={3}
+                    className={errors.excerpt ? "border-destructive" : ""}
+                  />
+                  {errors.excerpt && (
+                    <p className="text-sm text-destructive mt-1">{errors.excerpt.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="content">Content *</Label>
+                  <Textarea
+                    id="content"
+                    {...register("content")}
+                    placeholder="Write the full blog post content (HTML supported)"
+                    rows={15}
+                    className={errors.content ? "border-destructive" : ""}
+                  />
+                  {errors.content && (
+                    <p className="text-sm text-destructive mt-1">{errors.content.message}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You can use HTML tags for formatting
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Publish Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Publish Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="status">Status *</Label>
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setValue("status", value as "draft" | "published" | "archived")}
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="featured">Featured Post</Label>
+                    <p className="text-xs text-muted-foreground">Show this post as featured</p>
+                  </div>
+                  <Switch
+                    id="featured"
+                    checked={featured}
+                    onCheckedChange={(checked) => setValue("featured", checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Post Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Post Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="image">Featured Image URL *</Label>
+                  <div className="space-y-2">
+                    <Input
+                      id="image"
+                      {...register("image")}
+                      placeholder="https://example.com/image.jpg"
+                      className={errors.image ? "border-destructive" : ""}
+                    />
+                    {errors.image && (
+                      <p className="text-sm text-destructive mt-1">{errors.image.message}</p>
+                    )}
+                    {imageUrl && (
+                      <div className="relative w-full h-32 rounded-lg overflow-hidden border">
+                        <img
+                          src={imageUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Enter a URL or upload an image (upload functionality coming soon)
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="author">Author *</Label>
+                  <Input
+                    id="author"
+                    {...register("author")}
+                    placeholder="Author name"
+                    className={errors.author ? "border-destructive" : ""}
+                  />
+                  {errors.author && (
+                    <p className="text-sm text-destructive mt-1">{errors.author.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="sector">Sector *</Label>
+                  <Select
+                    value={watch("sector")}
+                    onValueChange={(value) => setValue("sector", value)}
+                  >
+                    <SelectTrigger id="sector">
+                      <SelectValue placeholder="Select Sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sectors.length === 0 ? (
+                        <SelectItem value="no-sectors" disabled>No sectors available</SelectItem>
+                      ) : (
+                        sectors.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {errors.sector && (
+                    <p className="text-sm text-destructive mt-1">{errors.sector.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="readTime">Read Time *</Label>
+                  <Input
+                    id="readTime"
+                    {...register("readTime")}
+                    placeholder="e.g., 5 min read"
+                    className={errors.readTime ? "border-destructive" : ""}
+                  />
+                  {errors.readTime && (
+                    <p className="text-sm text-destructive mt-1">{errors.readTime.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="tags">Tags</Label>
+                  <Input
+                    id="tags"
+                    {...register("tags")}
+                    placeholder="Comma-separated tags"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Separate tags with commas
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <Button type="submit" className="w-full" disabled={isSubmitting || createBlogPost.isPending || updateBlogPost.isPending}>
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSubmitting || createBlogPost.isPending || updateBlogPost.isPending
+                      ? t(`${fc}.saving`)
+                      : isEditing
+                        ? t(`${fc}.save`)
+                        : t(`${fc}.create`)}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/admin/blog")}
+                  >
+                    {t(`${fc}.cancel`)}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default BlogForm;
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Not blocking yet: ~550 pre-existing errors in the repo. Reports on every
+      # PR so debt is visible; flip to blocking once the backlog is cleared.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: i18n locale parity
+        run: npm run validate:i18n
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build

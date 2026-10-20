@@ -1,0 +1,104 @@
+{
+  "faqPage": {
+    "title": "Häufig gestellte Fragen",
+    "subtitle": "Schnelle Antworten auf die häufigsten Fragen zu Maali.",
+    "searchPlaceholder": "FAQ durchsuchen…",
+    "loadError": "FAQ konnte nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "retry": "Erneut versuchen",
+    "searchResults": "Suchergebnisse",
+    "emptySearch": "Keine Fragen entsprechen Ihrer Suche.",
+    "empty": "Derzeit sind keine FAQ verfügbar.",
+    "contactSupport": "Support kontaktieren",
+    "stillHaveQuestions": "Noch Fragen?",
+    "stillHaveQuestionsDesc": "Finden Sie keine Antwort? Unser Support-Team hilft Ihnen gerne."
+  },
+  "mentorsPage": {
+    "badge": "Mentoren-Verzeichnis",
+    "title": "Verbinden Sie sich mit erfahrenen Mentoren",
+    "subtitle": "Lernen Sie von erfahrenen Unternehmern und Branchenführern, die afrikanischen Unternehmen zum Erfolg verhelfen.",
+    "searchPlaceholder": "Nach Name, Expertise oder Bio suchen…",
+    "allSectors": "Alle Branchen",
+    "allCountries": "Alle Länder",
+    "loadError": "Mentoren konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "emptyTitle": "Keine Mentoren gefunden",
+    "emptyFiltered": "Passen Sie Suche oder Filter an",
+    "emptyDefault": "Schauen Sie bald wieder vorbei für neue Mentoren",
+    "moreExpertise": "+{{count}} weitere",
+    "noLinks": "Keine externen Links verfügbar",
+    "ctaTitle": "Möchten Sie Mentor werden?",
+    "ctaDesc": "Teilen Sie Ihr Wissen und helfen Sie der nächsten Generation afrikanischer Unternehmer. Werden Sie Teil unseres Mentoren-Netzwerks.",
+    "ctaButton": "Kontakt aufnehmen"
+  },
+  "guidePage": {
+    "title": "Bewerbungsleitfaden",
+    "subtitle": "Schritt-für-Schritt-Anleitung für erfolgreiche Bewerbungen um Finanzierungsmöglichkeiten auf Maali.",
+    "introTitle": "Erste Schritte",
+    "introDesc": "Dieser Leitfaden begleitet Sie von der Kontoerstellung bis zur Bewerbungseinreichung. Folgen Sie diesen Schritten, um Ihre Erfolgschancen zu maximieren.",
+    "tipsLabel": "Tipps:",
+    "bestPracticesTitle": "Best Practices",
+    "mistakesTitle": "Häufige Fehler, die Sie vermeiden sollten",
+    "mistakes": [
+      "Unvollständige Bewerbungen oder fehlende Unterlagen einreichen",
+      "Bis zur letzten Minute mit der Einreichung warten",
+      "Anforderungen der Finanzierungsmöglichkeit nicht sorgfältig lesen",
+      "Unrichtige oder irreführende Angaben machen",
+      "Nicht auf Anfragen nach zusätzlichen Informationen reagieren"
+    ],
+    "resourcesTitle": "Brauchen Sie weitere Hilfe?",
+    "resourcesDesc": "Entdecken Sie diese Ressourcen für eine erfolgreiche Bewerbung.",
+    "resourcesFaq": "Häufig gestellte Fragen",
+    "resourcesContact": "Support kontaktieren",
+    "resourcesSuccessStories": "Erfolgsgeschichten",
+    "steps": [
+      {
+        "title": "Konto erstellen",
+        "description": "Beginnen Sie mit einem kostenlosen Maali-Konto. Registrierung per E-Mail oder Google.",
+        "tips": ["Verwenden Sie eine professionelle E-Mail-Adresse", "Wählen Sie ein sicheres Passwort", "Bestätigen Sie Ihre E-Mail zeitnah"],
+        "action": "Registrieren"
+      },
+      {
+        "title": "Profil vervollständigen",
+        "description": "Tragen Sie genaue Informationen zu Ihrem Unternehmen ein. Ein vollständiges Profil erhöht Ihre Chancen.",
+        "tips": ["Detaillierte Unternehmensinformationen", "Professionelles Logo", "Korrekte Kontaktdaten"],
+        "action": "Zum Profil"
+      },
+      {
+        "title": "Möglichkeiten durchsuchen",
+        "description": "Entdecken Sie verfügbare Finanzierungen. Filtern Sie nach Branche und Bedarf.",
+        "tips": ["Beschreibungen sorgfältig lesen", "Eignungsvoraussetzungen prüfen", "Fristen beachten"],
+        "action": "Projekte durchsuchen"
+      },
+      {
+        "title": "Unterlagen vorbereiten",
+        "description": "Sammeln Sie alle erforderlichen Dokumente, bevor Sie beginnen.",
+        "tips": ["Registrierungsunterlagen", "Finanzberichte oder Prognosen", "Businessplan falls erforderlich", "Ausweisdokumente", "Branchenspezifische Zertifikate"],
+        "action": "Anforderungen ansehen"
+      },
+      {
+        "title": "Bewerbung einreichen",
+        "description": "Füllen Sie das mehrstufige Formular sorgfältig und genau aus.",
+        "tips": ["Ausführlich antworten", "Vor dem Absenden prüfen", "Fortschritt speichern"],
+        "action": "Bewerbung starten"
+      },
+      {
+        "title": "Bewerbung verfolgen",
+        "description": "Verfolgen Sie den Status in Ihrem Dashboard. E-Mail-Benachrichtigungen bei Updates.",
+        "tips": ["Dashboard regelmäßig prüfen", "Schnell auf Anfragen reagieren", "Geduld während der Prüfung"],
+        "action": "Dashboard ansehen"
+      }
+    ],
+    "bestPractices": [
+      { "title": "Ehrlich und genau sein", "description": "Wahrheitsgemäße Angaben vermeiden Ablehnung und künftige Probleme." },
+      { "title": "Im Voraus vorbereiten", "description": "Unterlagen vor dem Start sammeln, um Verzögerungen zu vermeiden." },
+      { "title": "Anweisungen befolgen", "description": "Jede Möglichkeit kann spezifische Anforderungen haben." },
+      { "title": "Fristen einhalten", "description": "Reichen Sie rechtzeitig vor Ablauf der Frist ein." }
+    ]
+  },
+  "helpLinks": {
+    "title": "Brauchen Sie weitere Hilfe?",
+    "faq": { "title": "FAQ", "description": "Antworten auf häufige Fragen" },
+    "mentors": { "title": "Mentoren", "description": "Mit Branchenexperten vernetzen" },
+    "support": { "title": "Support", "description": "Hilfe von unserem Team" },
+    "guide": { "title": "Leitfaden", "description": "Schritt-für-Schritt-Bewerbungsleitfaden" }
+  }
+}

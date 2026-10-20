@@ -1,0 +1,330 @@
+{
+  "page": {
+    "title": "Bewerbungsformular",
+    "subtitleWithProject": "Füllen Sie das Formular aus, um sich für diese Fördermöglichkeit zu bewerben.",
+    "subtitleGeneric": "Füllen Sie das Formular aus, um Ihre Bewerbung zu starten.",
+    "backToProject": "Zurück zu Projektdetails",
+    "backToProjects": "Zurück zu Projekten",
+    "loading": "Wird geladen...",
+    "closedTitle": "Bewerbungen geschlossen",
+    "closedDescription": "Diese Chance ist geschlossen. Neue Bewerbungen und Bearbeitungen sind deaktiviert.",
+    "backToOpportunity": "Zurück zur Chance",
+    "membershipCta": "Mitgliedschaftsoptionen ansehen"
+  },
+  "steps": {
+    "applicantInfo": "Bewerberinformationen",
+    "organization": "Organisationsdetails (optional)",
+    "projectOverview": "Projektübersicht",
+    "socialLinks": "Soziale Links",
+    "documents": "Dokumente hochladen",
+    "review": "Prüfen",
+    "compliance": "Compliance & Erklärungen",
+    "submit": "Absenden"
+  },
+  "progress": {
+    "stepOf": "Schritt {{current}} von {{total}}",
+    "saveDraft": "Entwurf speichern",
+    "saving": "Speichern...",
+    "lastSaved": "Zuletzt gespeichert: {{time}}",
+    "percentComplete": "{{percent}} % abgeschlossen"
+  },
+  "nav": {
+    "previous": "Zurück",
+    "next": "Weiter",
+    "submit": "Bewerbung absenden",
+    "submitting": "Wird gesendet...",
+    "verifyEmailToSubmit": "E-Mail bestätigen zum Absenden"
+  },
+  "requiredMark": "Mit * markierte Felder sind Pflichtfelder.",
+  "notProvided": "Nicht angegeben",
+  "edit": "Bearbeiten",
+  "yes": "Ja",
+  "location": "Standort",
+  "declarationDate": "Erklärungsdatum:",
+  "step1": {
+    "title": "Bewerberinformationen",
+    "description": "Erzählen Sie uns von sich oder Ihrer Organisation.",
+    "applicantType": "Bewerbertyp",
+    "applicantTypePlaceholder": "Bewerbertyp auswählen",
+    "fullLegalName": "Vollständiger rechtlicher Name",
+    "fullLegalNamePlaceholder": "Vollständigen rechtlichen Namen eingeben",
+    "organizationName": "Organisationsname",
+    "organizationNamePlaceholder": "Organisationsname eingeben",
+    "country": "Wohnsitz- / Registrierungsland",
+    "countryPlaceholder": "Land auswählen",
+    "cityRegion": "Stadt / Region",
+    "cityRegionPlaceholder": "Stadt oder Region eingeben",
+    "email": "E-Mail-Adresse",
+    "emailPlaceholder": "ihre.email@beispiel.de",
+    "phone": "Telefonnummer",
+    "phonePlaceholder": "Telefonnummer eingeben"
+  },
+  "step2": {
+    "individualSkip": "Diese Organisationsangaben sind optional und für Einzelbewerber meist nicht nötig. Sie können mit dem nächsten Schritt fortfahren.",
+    "title": "Organisationsdetails (optional)",
+    "description": "Teilen Sie zusätzliche Informationen über Glaubwürdigkeit und Kapazität Ihrer Organisation. Sie können dies auch in Belegdokumenten angeben.",
+    "yearEstablished": "Gründungsjahr",
+    "yearEstablishedPlaceholder": "2020",
+    "teamMembers": "Anzahl der Teammitglieder",
+    "teamMembersPlaceholder": "10",
+    "coreMission": "Kernmission / Zweck",
+    "coreMissionPlaceholder": "Beschreiben Sie kurz die Kernmission und den Zweck Ihrer Organisation...",
+    "max200Words": "Maximal 200 Wörter",
+    "primarySectors": "Hauptsektor(en)",
+    "otherSector": "Anderer Sektor (bitte angeben)",
+    "otherSectorPlaceholder": "Anderen Sektor eingeben",
+    "keyTeam": "Wichtige Teammitglieder & Rollen",
+    "keyTeamPlaceholder": "Listen Sie wichtige Teammitglieder und ihre Rollen auf...",
+    "previousGrants": "Bereits erhaltene Zuschüsse oder Förderungen",
+    "previousGrantsDetails": "Details zu früheren Zuschüssen / Förderungen",
+    "previousGrantsPlaceholder": "Geben Sie Details zu früheren Zuschüssen oder Förderungen an...",
+    "max400Words": "Maximal 400 Wörter"
+  },
+  "step3": {
+    "grant": {
+      "title": "Projektübersicht",
+      "hint": "Beschreiben Sie, wofür Sie Förderung benötigen.",
+      "titleLabel": "Projekttitel",
+      "titlePlaceholder": "Projekttitel eingeben",
+      "summaryLabel": "Projektzusammenfassung",
+      "summaryPlaceholder": "Geben Sie eine Zusammenfassung Ihres Projekts an (mindestens 30 Wörter)...",
+      "locationLabel": "Geografischer Fokus (optional)",
+      "locationPlaceholder": "Wo wird das Projekt durchgeführt? Leer lassen, um Stadt/Land aus Schritt 1 zu verwenden."
+    },
+    "nonGrant": {
+      "title": "Bewerbungsübersicht",
+      "hint": "Beschreiben Sie Ihre Ziele und warum Sie gut zu dieser Chance passen.",
+      "titleLabel": "Bewerbungstitel",
+      "titlePlaceholder": "Bewerbungstitel eingeben",
+      "summaryLabel": "Motivationsschreiben",
+      "summaryPlaceholder": "Beschreiben Sie kurz Ihre Ziele, Eignung und erwartete Ergebnisse (mindestens 30 Wörter)...",
+      "locationLabel": "Standort / geografischer Fokus",
+      "locationPlaceholder": "Wo sind Sie ansässig oder wo gilt diese Chance?"
+    },
+    "summaryWordLimit": "Muss zwischen 30 und 400 Wörtern liegen"
+  },
+  "step4": {
+    "title": "Soziale Links",
+    "description": "Teilen Sie Ihre beruflichen und Social-Media-Profile (optional). So lernen wir Sie besser kennen.",
+    "linkedin": "LinkedIn-Profil-URL",
+    "linkedinPlaceholder": "https://linkedin.com/in/ihrprofil",
+    "github": "GitHub-Profil-URL",
+    "githubPlaceholder": "https://github.com/ihrbenutzername",
+    "twitter": "Twitter/X-Profil-URL",
+    "twitterPlaceholder": "https://twitter.com/ihrbenutzername",
+    "website": "Website-URL",
+    "websitePlaceholder": "https://ihrewebsite.de",
+    "other": "Weitere soziale Links",
+    "otherPlaceholder": "Weitere relevante Profile oder Links (z. B. Instagram, Facebook, Portfolio usw.)",
+    "max100Words": "Maximal 100 Wörter"
+  },
+  "step5": {
+    "title": "Dokumente hochladen",
+    "description": "Laden Sie unterstützende Dokumente für Ihre Bewerbung hoch (optional)."
+  },
+  "step6": {
+    "title": "Bewerbung prüfen",
+    "description": "Bitte prüfen Sie alle Angaben unten, bevor Sie fortfahren.",
+    "registrationId": "Registrierungs- / ID-Nummer:",
+    "previousGrantsFunding": "Frühere Zuschüsse / Förderungen:",
+    "fromLibrary": "Aus Bibliothek:",
+    "newUploads": "Neue Uploads:",
+    "documentCount": "{{count}} Dokument(e)",
+    "noDocuments": "Keine Dokumente ausgewählt",
+    "documentsOnSubmit": "Dokumente werden beim Absenden verknüpft oder hochgeladen",
+    "linkedin": "LinkedIn:",
+    "github": "GitHub:",
+    "twitter": "Twitter/X:",
+    "website": "Website:"
+  },
+  "step7": {
+    "title": "Compliance & Erklärungen",
+    "description": "Bitte lesen und bestätigen Sie die folgenden Erklärungen. Alle Felder sind aus Governance-Gründen erforderlich.",
+    "informationAccurateLabel": "Bestätigung der Richtigkeit der Angaben",
+    "informationAccurateDesc": "Ich bestätige, dass alle Angaben in dieser Bewerbung nach bestem Wissen korrekt, vollständig und wahrheitsgemäß sind.",
+    "conflictLabel": "Erklärung zu Interessenkonflikten",
+    "conflictDesc": "Ich erkläre, dass ich potenzielle Interessenkonflikte offengelegt habe, die diese Bewerbung oder ihre Bewertung beeinflussen könnten.",
+    "reportingLabel": "Zustimmung zu Berichtspflichten",
+    "reportingDesc": "Ich stimme zu, regelmäßige Fortschrittsberichte, Finanzunterlagen und sonstige vom Fördergeber geforderte Dokumente bereitzustellen.",
+    "dataProcessingLabel": "Einwilligung zur Datenverarbeitung",
+    "dataProcessingDesc": "Ich willige in die Verarbeitung meiner personenbezogenen Daten und Bewerbungsinformationen zum Zweck der Bewertung, Verwaltung und Kommunikation im Zusammenhang mit dieser Bewerbung ein."
+  },
+  "step8": {
+    "title": "Bewerbung absenden",
+    "description": "Lesen Sie den Bestätigungshinweis unten und klicken Sie auf Absenden, um Ihre Bewerbung abzuschließen.",
+    "notice": "Mit dem Absenden bestätigen Sie, dass alle Angaben korrekt und vollständig sind. Ihre Bewerbung wird von unserem Team geprüft; Sie werden per E-Mail über das Ergebnis informiert."
+  },
+  "emailVerification": {
+    "title": "E-Mail-Bestätigung erforderlich",
+    "description": "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie eine Bewerbung absenden. Prüfen Sie Ihren Posteingang oder Ihr Dashboard, um den Link erneut zu senden."
+  },
+  "options": {
+    "applicantTypes": {
+      "Individual": "Einzelperson",
+      "Organization": "Organisation",
+      "Startup / SME": "Startup / KMU",
+      "NGO / Non-profit": "NGO / gemeinnützig",
+      "Research / Academic": "Forschung / Wissenschaft"
+    },
+    "sectors": {
+      "Health": "Gesundheit",
+      "Education": "Bildung",
+      "Technology": "Technologie",
+      "Agriculture": "Landwirtschaft",
+      "Environment": "Umwelt",
+      "Creative": "Kreativ",
+      "Other": "Sonstiges"
+    }
+  },
+  "validation": {
+    "phoneRequired": "Telefonnummer ist erforderlich",
+    "phoneInvalid": "Bitte geben Sie eine gültige internationale Telefonnummer ein",
+    "applicantTypeRequired": "Bitte wählen Sie einen Bewerbertyp",
+    "fullLegalNameRequired": "Vollständiger rechtlicher Name ist erforderlich",
+    "countryRequired": "Wohnsitzland ist erforderlich",
+    "cityRegionRequired": "Stadt/Region ist erforderlich",
+    "yearInvalid": "Bitte geben Sie ein gültiges Jahr ein",
+    "yearFuture": "Das Jahr darf nicht in der Zukunft liegen",
+    "coreMissionMaxWords": "Kernmission / Zweck darf maximal 200 Wörter haben",
+    "teamMembersMin": "Anzahl der Teammitglieder muss mindestens 1 sein",
+    "keyTeamMaxWords": "Teammitglieder & Rollen dürfen maximal 200 Wörter haben",
+    "previousGrantsMaxWords": "Details zu früheren Zuschüssen dürfen maximal 400 Wörter haben",
+    "previousGrantsDetailsRequired": "Bitte geben Sie Details zu früheren Zuschüssen oder Förderungen an",
+    "projectTitleRequired": "Projekttitel ist erforderlich",
+    "projectSummaryRequired": "Projektzusammenfassung ist erforderlich",
+    "projectSummaryMinWords": "Projektzusammenfassung muss mindestens 30 Wörter haben",
+    "projectSummaryMaxWords": "Projektzusammenfassung darf maximal 400 Wörter haben",
+    "informationAccurateRequired": "Sie müssen bestätigen, dass die Angaben korrekt sind",
+    "conflictOfInterestRequired": "Sie müssen Interessenkonflikte erklären",
+    "dataProcessingRequired": "Sie müssen der Datenverarbeitung zustimmen",
+    "reportingRequirementsRequired": "Sie müssen den Berichtspflichten zustimmen",
+    "linkedinUrlInvalid": "Bitte geben Sie eine gültige LinkedIn-URL ein",
+    "githubUrlInvalid": "Bitte geben Sie eine gültige GitHub-URL ein",
+    "twitterUrlInvalid": "Bitte geben Sie eine gültige Twitter/X-URL ein",
+    "websiteUrlInvalid": "Bitte geben Sie eine gültige Website-URL ein",
+    "otherSocialMaxWords": "Weitere soziale Links dürfen maximal 100 Wörter haben"
+  },
+  "toasts": {
+    "draftRestored": {
+      "title": "Entwurf wiederhergestellt",
+      "description": "Ihr zuvor gespeicherter Entwurf wurde geladen."
+    },
+    "validationError": {
+      "title": "Validierungsfehler",
+      "description": "Bitte füllen Sie alle Pflichtfelder korrekt aus."
+    },
+    "emailVerificationRequired": {
+      "title": "E-Mail-Bestätigung erforderlich",
+      "description": "Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie eine Bewerbung absenden."
+    },
+    "projectRequired": {
+      "title": "Projekt erforderlich",
+      "description": "Bitte wählen Sie ein Projekt für Ihre Bewerbung."
+    },
+    "missingInformation": {
+      "title": "Fehlende Informationen",
+      "description": "Bitte vervollständigen Sie alle Pflichtfelder vor dem Absenden."
+    },
+    "complianceRequired": {
+      "title": "Compliance erforderlich",
+      "description": "Bitte bestätigen Sie alle Compliance-Erklärungen vor dem Absenden."
+    },
+    "applicationsClosed": {
+      "title": "Bewerbungen geschlossen",
+      "description": "Dieses Projekt ist geschlossen. Sie können keine Bewerbungen mehr einreichen oder bearbeiten."
+    },
+    "membershipRequired": {
+      "title": "Mitgliedschaft erforderlich",
+      "description": "Werden Sie Vollmitglied, um Bewerbungen einzureichen."
+    },
+    "uploadingDocuments": {
+      "title": "Dokumente werden hochgeladen",
+      "description_one": "{{count}} Dokument wird hochgeladen...",
+      "description_other": "{{count}} Dokumente werden hochgeladen..."
+    },
+    "uploadPartialFailure": {
+      "title": "Einige Uploads fehlgeschlagen",
+      "description": "Einige Dokumente konnten nicht hochgeladen werden. Ihre Bewerbung wird trotzdem ohne diese Dateien eingereicht."
+    },
+    "alreadyApplied": {
+      "title": "Bereits beworben",
+      "description": "Sie haben bereits eine Bewerbung für diese Chance eingereicht. Prüfen Sie Ihr Dashboard für den Status."
+    },
+    "opportunityClosed": {
+      "title": "Bewerbungen geschlossen",
+      "description": "Diese Chance nimmt keine Bewerbungen mehr an."
+    },
+    "submitSuccess": {
+      "title": "Bewerbung eingereicht",
+      "description": "Ihre Bewerbung wurde erfolgreich eingereicht!"
+    },
+    "tooManySubmissions": {
+      "title": "Zu viele Einreichungen",
+      "description": "Sie haben kürzlich zu viele Bewerbungen eingereicht. Bitte warten Sie eine Stunde und versuchen Sie es erneut."
+    },
+    "submitFailed": {
+      "title": "Einreichung fehlgeschlagen",
+      "description": "Beim Absenden Ihrer Bewerbung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "errors": {
+      "alreadyApplied": "Sie haben bereits eine Bewerbung für diese Chance eingereicht.",
+      "projectClosed": "Diese Chance nimmt keine Bewerbungen mehr an.",
+      "membershipRequired": "Vollmitgliedschaft ist erforderlich. Werden Sie MAALI-Vollmitglied, um fortzufahren.",
+      "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "missingProjectId": "Etwas ist schiefgelaufen. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
+      "validationError": "Wir konnten Ihre Bewerbung nicht validieren. Bitte versuchen Sie es in Kürze erneut.",
+      "invalidBody": "Etwas stimmt mit Ihren Formulardaten nicht. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut.",
+      "internalError": "Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
+      "generic": "Beim Absenden Ihrer Bewerbung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    }
+  },
+  "documents": {
+    "cv": "Lebenslauf",
+    "coverLetter": "Anschreiben",
+    "invalidFile": "Ungültige Datei",
+    "fromLibrary": "Aus Ihrer Bibliothek",
+    "uploadNew": "Neue Dateien hochladen",
+    "uploadNewDocuments": "Neue Dokumente hochladen",
+    "selectFromLibrary": "Aus Bibliothek auswählen",
+    "noLibraryDocs": "Noch keine Dokumente in Ihrer Bibliothek.",
+    "uploadHint": "Dateien hochladen oder aus Ihrer Dokumentenbibliothek auswählen.",
+    "removeFile": "Datei entfernen",
+    "deleteConfirmTitle": "Datei entfernen?",
+    "deleteConfirmDescription": "«{{name}}» wird aus Ihrer Auswahl entfernt. Die Datei bleibt in Ihrer Bibliothek.",
+    "cancel": "Abbrechen",
+    "remove": "Entfernen",
+    "requiredSlotsTitle": "Erforderliche Dokumente",
+    "requiredSlotsDescription": "Lebenslauf und Anschreiben sind für diesen Chancentyp erforderlich.",
+    "recommendedTitle": "Empfohlene Belegdokumente",
+    "recommendedIntro": "Laden Sie Dokumente hoch, die Ihre Bewerbung stärken. Empfohlene Unterlagen:",
+    "recommendedRequiredNote": "Sie können alle Dateien in dieser Zone hochladen. Mit * markierte Dokumente sind Pflicht.",
+    "selectFromLibraryTitle": "Aus Bibliothek auswählen",
+    "selectFromLibraryHint": "Wählen Sie Dokumente aus Ihrer Bibliothek für diese Bewerbung",
+    "selectedCount": "({{count}} ausgewählt)",
+    "fromLibrarySection": "Aus Ihrer Dokumentenbibliothek",
+    "otherLibrarySection": "Weitere gespeicherte Dateien",
+    "uploadDropzoneTitle": "Dateien hochladen",
+    "fileTypesHint": "PDF, DOC, DOCX und gängige Bildformate — max. 10 MB pro Datei.",
+    "individualRecommended": {
+      "id": "Amtlicher Ausweis (falls angefordert)",
+      "proposal": "Projektvorschlag oder Konzeptnotiz"
+    },
+    "organizationRecommended": {
+      "registration": "Registrierungszertifikat oder Gründungsdokument",
+      "proposal": "Projektvorschlag oder Konzeptnotiz"
+    },
+    "startupRecommended": {
+      "id": "Amtlicher Ausweis (falls angefordert)",
+      "proposal": "Projektvorschlag oder Konzeptnotiz",
+      "budget": "Budget oder einfacher Finanzplan",
+      "cv": "Lebenslauf/Portfolio oder relevante Erfahrungsunterlagen"
+    },
+    "ngoRecommended": {
+      "registration": "Registrierungszertifikat oder Gründungsdokument",
+      "profile": "Organisationsprofil oder Missionsdokument",
+      "proposal": "Projektvorschlag oder Konzeptnotiz",
+      "budget": "Budget/Finanzplan (ggf. mit Kontoauszügen)",
+      "team": "Team-Lebensläufe und Profile wichtiger Mitarbeitender"
+    }
+  }
+}

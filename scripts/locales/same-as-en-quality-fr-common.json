@@ -1,0 +1,13 @@
+{
+  "toasts": {
+    "cms": {
+      "translationNotConfigured": "Clé API Google Translate non configurée sur le serveur.",
+      "translationNotAuthenticated": "Connexion requise pour générer les traductions."
+    }
+  },
+  "contactPage": {
+    "form": {
+      "emailLabel": "E-mail *"
+    }
+  }
+}

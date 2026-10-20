@@ -1,0 +1,104 @@
+{
+  "faqPage": {
+    "title": "Foire aux questions",
+    "subtitle": "Réponses rapides aux questions les plus fréquentes sur Maali.",
+    "searchPlaceholder": "Rechercher dans la FAQ…",
+    "loadError": "Impossible de charger la FAQ. Réessayez plus tard.",
+    "retry": "Réessayer",
+    "searchResults": "Résultats de recherche",
+    "emptySearch": "Aucune question ne correspond à votre recherche.",
+    "empty": "Aucune FAQ disponible pour le moment.",
+    "contactSupport": "Contacter le support",
+    "stillHaveQuestions": "Encore des questions ?",
+    "stillHaveQuestionsDesc": "Vous ne trouvez pas la réponse ? Notre équipe support est là pour vous aider."
+  },
+  "mentorsPage": {
+    "badge": "Annuaire des mentors",
+    "title": "Connectez-vous avec des mentors experts",
+    "subtitle": "Apprenez auprès d'entrepreneurs expérimentés et de leaders du secteur qui aident les entreprises africaines à réussir.",
+    "searchPlaceholder": "Rechercher par nom, expertise ou bio…",
+    "allSectors": "Tous les secteurs",
+    "allCountries": "Tous les pays",
+    "loadError": "Impossible de charger les mentors. Réessayez plus tard.",
+    "emptyTitle": "Aucun mentor trouvé",
+    "emptyFiltered": "Essayez d'ajuster votre recherche ou vos filtres",
+    "emptyDefault": "Revenez bientôt pour de nouveaux mentors",
+    "moreExpertise": "+{{count}} de plus",
+    "noLinks": "Aucun lien externe disponible",
+    "ctaTitle": "Devenir mentor ?",
+    "ctaDesc": "Partagez votre expertise et aidez la prochaine génération d'entrepreneurs africains. Rejoignez notre réseau de mentors.",
+    "ctaButton": "Nous contacter"
+  },
+  "guidePage": {
+    "title": "Guide de candidature",
+    "subtitle": "Guide étape par étape pour postuler avec succès aux opportunités de financement sur Maali.",
+    "introTitle": "Pour commencer",
+    "introDesc": "Ce guide vous accompagne de la création de compte à la soumission de candidature. Suivez ces étapes pour maximiser vos chances.",
+    "tipsLabel": "Conseils :",
+    "bestPracticesTitle": "Bonnes pratiques",
+    "mistakesTitle": "Erreurs courantes à éviter",
+    "mistakes": [
+      "Soumettre une candidature incomplète ou des documents manquants",
+      "Attendre la dernière minute pour soumettre",
+      "Ne pas lire attentivement les exigences de l'opportunité",
+      "Fournir des informations inexactes ou trompeuses",
+      "Ne pas répondre aux demandes d'informations complémentaires"
+    ],
+    "resourcesTitle": "Besoin d'aide supplémentaire ?",
+    "resourcesDesc": "Explorez ces ressources pour réussir votre candidature.",
+    "resourcesFaq": "Foire aux questions",
+    "resourcesContact": "Contacter le support",
+    "resourcesSuccessStories": "Histoires de réussite",
+    "steps": [
+      {
+        "title": "Créer votre compte",
+        "description": "Commencez par un compte gratuit sur Maali. Inscription par e-mail ou Google.",
+        "tips": ["Utilisez une adresse e-mail professionnelle", "Choisissez un mot de passe sécurisé", "Vérifiez votre e-mail rapidement"],
+        "action": "S'inscrire"
+      },
+      {
+        "title": "Compléter votre profil",
+        "description": "Renseignez des informations exactes sur votre activité. Un profil complet augmente vos chances.",
+        "tips": ["Informations détaillées sur votre activité", "Logo professionnel", "Coordonnées exactes"],
+        "action": "Aller au profil"
+      },
+      {
+        "title": "Parcourir les opportunités",
+        "description": "Explorez les financements disponibles. Filtrez par secteur et besoins.",
+        "tips": ["Lisez les descriptions attentivement", "Vérifiez l'éligibilité", "Notez les dates limites"],
+        "action": "Parcourir les projets"
+      },
+      {
+        "title": "Préparer vos documents",
+        "description": "Rassemblez tous les documents requis avant de commencer.",
+        "tips": ["Documents d'enregistrement", "États financiers ou projections", "Business plan si requis", "Pièces d'identité", "Certificats sectoriels"],
+        "action": "Voir les exigences"
+      },
+      {
+        "title": "Soumettre votre candidature",
+        "description": "Complétez le formulaire multi-étapes avec soin et précision.",
+        "tips": ["Répondez en détail", "Relisez avant envoi", "Sauvegardez votre progression"],
+        "action": "Commencer la candidature"
+      },
+      {
+        "title": "Suivre votre candidature",
+        "description": "Suivez le statut depuis votre tableau de bord. Notifications par e-mail.",
+        "tips": ["Consultez régulièrement le tableau de bord", "Répondez vite aux demandes", "Soyez patient pendant l'examen"],
+        "action": "Voir le tableau de bord"
+      }
+    ],
+    "bestPractices": [
+      { "title": "Soyez honnête et précis", "description": "Des informations véridiques évitent le rejet et les problèmes futurs." },
+      { "title": "Préparez-vous à l'avance", "description": "Rassemblez les documents avant de commencer pour éviter les retards." },
+      { "title": "Suivez les instructions", "description": "Chaque opportunité peut avoir des exigences spécifiques." },
+      { "title": "Respectez les délais", "description": "Soumettez bien avant la date limite." }
+    ]
+  },
+  "helpLinks": {
+    "title": "Besoin d'aide ?",
+    "faq": { "title": "FAQ", "description": "Réponses aux questions fréquentes" },
+    "mentors": { "title": "Mentors", "description": "Connectez-vous avec des experts" },
+    "support": { "title": "Support", "description": "Aide de notre équipe" },
+    "guide": { "title": "Guide", "description": "Guide de candidature étape par étape" }
+  }
+}

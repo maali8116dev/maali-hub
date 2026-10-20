@@ -1,0 +1,92 @@
+{
+  "contactPage": {
+    "hero": {
+      "title": "Kontakt",
+      "subtitle": "Nehmen Sie Kontakt mit unserem Team auf. Wir helfen Ihnen gerne zum Erfolg."
+    },
+    "validation": {
+      "firstNameRequired": "Vorname ist erforderlich",
+      "firstNameTooLong": "Vorname ist zu lang",
+      "lastNameRequired": "Nachname ist erforderlich",
+      "lastNameTooLong": "Nachname ist zu lang",
+      "subjectRequired": "Bitte wählen Sie ein Thema",
+      "messageMin": "Nachricht muss mindestens 10 Zeichen haben",
+      "messageTooLong": "Nachricht ist zu lang"
+    },
+    "toasts": {
+      "submitFailed": "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "submitSuccess": "Ihre Nachricht wurde erfolgreich gesendet! Wir melden uns innerhalb von 24 Stunden.",
+      "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+    },
+    "form": {
+      "title": "Senden Sie uns eine Nachricht",
+      "description": "Füllen Sie das Formular aus und wir melden uns so schnell wie möglich.",
+      "firstNameLabel": "Vorname *",
+      "firstNamePlaceholder": "Geben Sie Ihren Vornamen ein",
+      "lastNameLabel": "Nachname *",
+      "lastNamePlaceholder": "Geben Sie Ihren Nachnamen ein",
+      "emailLabel": "E-Mail *",
+      "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+      "phoneLabel": "Telefonnummer",
+      "phonePlaceholder": "Geben Sie Ihre Telefonnummer ein",
+      "countryLabel": "Land",
+      "countryPlaceholder": "Wählen Sie Ihr Land",
+      "countryOther": "Sonstiges",
+      "countryNigeria": "Nigeria",
+      "countryKenya": "Kenia",
+      "countrySouthAfrica": "Südafrika",
+      "countryGhana": "Ghana",
+      "countryUganda": "Uganda",
+      "countryTanzania": "Tansania",
+      "subjectLabel": "Thema *",
+      "subjectPlaceholder": "Thema auswählen",
+      "subjectFunding": "Finanzierungsanfrage",
+      "subjectApplication": "Bewerbungsunterstützung",
+      "subjectPartnership": "Partnerschaft",
+      "subjectTechnical": "Technischer Support",
+      "subjectGeneral": "Allgemeine Anfrage",
+      "messageLabel": "Nachricht *",
+      "messagePlaceholder": "Sagen Sie uns, wie wir Ihnen helfen können…",
+      "sending": "Wird gesendet…",
+      "submit": "Nachricht senden"
+    },
+    "success": {
+      "title": "Nachricht erfolgreich gesendet!",
+      "description": "Vielen Dank für Ihre Nachricht. Wir haben sie erhalten und antworten innerhalb von 24 Stunden.",
+      "sendAnother": "Weitere Nachricht senden"
+    },
+    "contactInfo": {
+      "title": "Kontaktinformationen",
+      "emailTitle": "E-Mail schreiben",
+      "emailDescription": "Wir antworten innerhalb von 24 Stunden",
+      "callTitle": "Anrufen",
+      "callDescription": "Mo–Fr, 9–18 Uhr WAT",
+      "officeTitle": "Büro",
+      "officeDescription": "Panafrikanische Präsenz",
+      "responseTimeTitle": "Antwortzeit",
+      "responseTimeValue": "24 Stunden",
+      "responseTimeDescription": "Durchschnittliche Antwortzeit"
+    },
+    "officeLocations": {
+      "title": "Standorte",
+      "description": "Wir sind in ganz Afrika mit regionalen Hub-Standorten tätig",
+      "offices": [
+        { "city": "Lagos", "country": "Nigeria", "address": "Victoria Island, Lagos State", "role": "Westafrika-Hub" },
+        { "city": "Nairobi", "country": "Kenia", "address": "Westlands, Nairobi", "role": "Ostafrika-Hub" },
+        { "city": "Cape Town", "country": "Südafrika", "address": "Century City, Cape Town", "role": "Südafrika-Hub" }
+      ]
+    },
+    "quickSupport": {
+      "title": "Schneller Support",
+      "description": "Sofortige Hilfe nötig? Schauen Sie in unsere FAQ oder vereinbaren Sie einen Anruf mit unserem Team.",
+      "viewFaq": "FAQ ansehen",
+      "scheduleCall": "Anruf vereinbaren"
+    },
+    "cta": {
+      "title": "Bereit loszulegen?",
+      "description": "Warten Sie nicht — entdecken Sie jetzt verfügbare Finanzierungsmöglichkeiten",
+      "browseOpportunities": "Chancen durchsuchen",
+      "createAccount": "Konto erstellen"
+    }
+  }
+}

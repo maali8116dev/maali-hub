@@ -1,0 +1,21 @@
+{
+  "projectDetailsPage": {
+    "loading": "Loading project...",
+    "notFound": "Project not found or an error occurred.",
+    "back": "Back to Projects",
+    "viewPublic": "View Public Page",
+    "edit": "Edit Project",
+    "featured": "Featured",
+    "requirementsTitle": "Requirements & Eligibility",
+    "requirements": "Requirements",
+    "eligibility": "Eligibility Criteria",
+    "sidebarTitle": "Project Details",
+    "fundingAmount": "Funding Amount",
+    "deadline": "Deadline",
+    "location": "Location",
+    "applicants": "Applicants",
+    "metadata": "Metadata",
+    "created": "Created",
+    "updated": "Updated"
+  }
+}

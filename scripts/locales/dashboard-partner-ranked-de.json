@@ -1,0 +1,12 @@
+{
+  "rankedApplicationsPage": {
+    "title": "Bewertete Bewerbungen",
+    "subtitle": "{{title}} - Nach Bewertungspunkten sortiert",
+    "loading": "Wird geladen...",
+    "exportRankedCsv": "Sortierte CSV exportieren",
+    "back": "Zurück",
+    "exportTopTitle": "Top exportieren",
+    "exportTop": "Top exportieren",
+    "searchPlaceholder": "Nach Bewerbername oder E-Mail suchen..."
+  }
+}

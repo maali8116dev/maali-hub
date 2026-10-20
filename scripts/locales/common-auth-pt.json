@@ -1,0 +1,240 @@
+{
+  "auth": {
+    "backToHome": "Voltar ao início",
+    "brandAlt": "Maali",
+    "welcome": {
+      "title": "Bem-vindo",
+      "subtitle": "Junte-se à comunidade de talentos africanos"
+    },
+    "tabs": {
+      "signIn": "Entrar",
+      "signUp": "Registar"
+    },
+    "oauth": {
+      "continueWithGoogle": "Continuar com Google",
+      "orContinueWith": "Ou continuar com"
+    },
+    "fields": {
+      "email": "E-mail",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Introduza a sua palavra-passe",
+      "passwordCreatePlaceholder": "Crie uma palavra-passe segura",
+      "passwordConfirm": "Confirmar palavra-passe",
+      "passwordConfirmPlaceholder": "Introduza novamente a sua palavra-passe",
+      "newPassword": "Nova palavra-passe",
+      "newPasswordPlaceholder": "Introduza a sua nova palavra-passe",
+      "confirmNewPassword": "Confirmar nova palavra-passe",
+      "confirmNewPasswordPlaceholder": "Introduza novamente a sua nova palavra-passe",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "João",
+      "lastName": "Apelido",
+      "lastNamePlaceholder": "Silva",
+      "forgotPassword": "Esqueceu a palavra-passe?"
+    },
+    "reset": {
+      "title": "Definir nova palavra-passe",
+      "description": "Introduza a sua nova palavra-passe abaixo",
+      "verifyingLink": "Aguarde enquanto verificamos o seu link de redefinição…",
+      "backToSignIn": "Voltar ao início de sessão"
+    },
+    "buttons": {
+      "signIn": "Entrar",
+      "signingIn": "A entrar…",
+      "createAccount": "Criar conta",
+      "creatingAccount": "A criar conta…",
+      "updatePassword": "Atualizar palavra-passe",
+      "updatingPassword": "A atualizar palavra-passe…",
+      "verifyingLink": "A verificar link…"
+    },
+    "passwordStrength": {
+      "label": "Força da palavra-passe:",
+      "requirementsTitle": "Requisitos:",
+      "allMet": "Todos os requisitos cumpridos!",
+      "levels": {
+        "weak": "Fraca",
+        "medium": "Média",
+        "strong": "Forte",
+        "veryStrong": "Muito forte"
+      },
+      "requirements": {
+        "minLength": "Pelo menos 8 caracteres",
+        "uppercase": "Contém letra maiúscula",
+        "lowercase": "Contém letra minúscula",
+        "number": "Contém número",
+        "special": "Contém carácter especial (!@#$%^&*)"
+      }
+    },
+    "validation": {
+      "emailInvalid": "Endereço de e-mail inválido",
+      "passwordRequired": "A palavra-passe é obrigatória",
+      "firstNameMin": "O nome deve ter pelo menos 2 caracteres",
+      "lastNameMin": "O apelido deve ter pelo menos 2 caracteres",
+      "minLength": "A palavra-passe deve ter pelo menos 8 caracteres",
+      "uppercase": "A palavra-passe deve conter pelo menos uma letra maiúscula",
+      "lowercase": "A palavra-passe deve conter pelo menos uma letra minúscula",
+      "number": "A palavra-passe deve conter pelo menos um número",
+      "special": "A palavra-passe deve conter pelo menos um carácter especial",
+      "passwordConfirmRequired": "A confirmação da palavra-passe é obrigatória",
+      "passwordMismatch": "As palavras-passe não coincidem"
+    },
+    "toasts": {
+      "invalidEmail": {
+        "title": "E-mail inválido",
+        "description": "Utilize um endereço de e-mail válido."
+      },
+      "tooManyAttempts": {
+        "title": "Demasiadas tentativas"
+      },
+      "accountExists": {
+        "title": "Conta já existe",
+        "description": "Inicie sessão com a sua conta existente ou utilize outro e-mail."
+      },
+      "signUpFailed": {
+        "title": "Registo falhou"
+      },
+      "accountCreatedSignIn": {
+        "title": "Conta criada",
+        "description": "Inicie sessão para continuar a configurar o seu perfil e adesão."
+      },
+      "accountCreated": {
+        "title": "Conta criada!",
+        "description": "Complete o seu perfil e adesão para começar."
+      },
+      "invalidCredentials": {
+        "title": "Credenciais inválidas",
+        "description": "Verifique o e-mail e a palavra-passe e tente novamente."
+      },
+      "signInFailed": {
+        "title": "Início de sessão falhou"
+      },
+      "welcomeBack": {
+        "title": "Bem-vindo de volta!",
+        "description": "Iniciou sessão com sucesso."
+      },
+      "emailRequired": {
+        "title": "E-mail obrigatório",
+        "description": "Introduza primeiro o seu endereço de e-mail."
+      },
+      "passwordResetFailed": {
+        "title": "Redefinição falhou"
+      },
+      "checkEmail": {
+        "title": "Verifique o seu e-mail",
+        "description": "Enviámos um link de redefinição. Verifique a sua caixa de entrada."
+      },
+      "sessionExpired": {
+        "title": "Sessão expirada",
+        "description": "O link de redefinição expirou ou é inválido. Solicite um novo."
+      },
+      "passwordUpdateFailed": {
+        "title": "Atualização falhou"
+      },
+      "passwordUpdated": {
+        "title": "Palavra-passe atualizada!",
+        "description": "A sua palavra-passe foi atualizada. Já pode iniciar sessão."
+      },
+      "googleSignInFailed": {
+        "title": "Início de sessão com Google falhou"
+      },
+      "error": {
+        "title": "Erro",
+        "description": "Ocorreu um erro inesperado. Tente novamente."
+      }
+    },
+    "oauthCallback": {
+      "errorTitle": "Erro de autenticação",
+      "redirecting": "A redirecionar para o início de sessão…",
+      "completing": "A concluir início de sessão…",
+      "pleaseWait": "Aguarde enquanto finalizamos a configuração da sua conta.",
+      "authFailed": "Autenticação falhou",
+      "noEmail": "A sua conta não tem e-mail associado. Utilize o início de sessão por e-mail.",
+      "sessionFailed": "Não foi possível estabelecer a sessão. Tente novamente."
+    }
+  },
+  "onboarding": {
+    "memberPriceLabel": "2 $ / mês",
+    "steps": {
+      "profile": "Perfil",
+      "payment": "Pagamento"
+    },
+    "profile": {
+      "title": "Complete o seu perfil",
+      "description": "Isto constrói o seu perfil Maali — visível para parceiros e ofertantes de oportunidades na rede.",
+      "avatarLabel": "Foto de perfil",
+      "optional": "(opcional)",
+      "avatarPlaceholder": "Carregar foto de perfil",
+      "avatarHint": "JPG, PNG, WebP ou GIF até 5 MB",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Amara",
+      "lastName": "Apelido",
+      "lastNamePlaceholder": "Diallo",
+      "organisation": "Empresa / Organização / Universidade (opcional)",
+      "organisationPlaceholder": "ex. Savanna Ventures, Universidade de Acra, PNUD",
+      "sector": "Setor / Área",
+      "sectorPlaceholder": "Selecione a sua área",
+      "sectorLoading": "A carregar…",
+      "country": "País",
+      "countryPlaceholder": "Selecione o país",
+      "cityRegion": "Cidade / Região",
+      "cityRegionPlaceholder": "ex. Lagos, Nairobi, Grande Acra",
+      "phone": "Número de telefone",
+      "phonePlaceholder": "+234 800 000 0000",
+      "bio": "Breve biografia (opcional)",
+      "bioPlaceholder": "ex. Engenheiro de software à procura de bolsas, empreendedor em agri-tech, recém-licenciado à procura de estágios em finanças…",
+      "saving": "A guardar…",
+      "continue": "Continuar"
+    },
+    "payment": {
+      "title": "Pagamento",
+      "description": "Membro completo — {{price}}. Cancele a qualquer momento.",
+      "billingEmail": "E-mail de faturação para recibos",
+      "billingEmailPlaceholder": "voce@exemplo.com",
+      "billingHint": "Morada e NIF podem ser adicionados mais tarde em Painel → Faturação.",
+      "cardHint": "O seu cartão aparecerá em Painel → Faturação após o pagamento.",
+      "failed": "Pagamento falhou",
+      "initFailed": "Não foi possível iniciar o pagamento: {{message}}",
+      "back": "Voltar",
+      "goBack": "Retroceder",
+      "processing": "A processar…",
+      "payAndJoin": "Pagar 2 $ e aderir",
+      "stripeNote": "Os pagamentos são processados de forma segura pela Stripe. A MAALI nunca armazena os dados do seu cartão.",
+      "skipToCommunity": "Continuar com conta Comunidade gratuita"
+    },
+    "activating": {
+      "title": "A ativar a sua adesão…",
+      "description": "Pagamento recebido. Estamos a confirmar com a Stripe — normalmente demora apenas alguns segundos."
+    },
+    "noAccount": {
+      "message": "Precisa primeiro de uma conta.",
+      "cta": "Criar conta"
+    },
+    "done": {
+      "title": "Bem-vindo à Maali!",
+      "description": "A sua adesão está ativa. Já pode candidatar-se a financiamentos, empregos, estágios, bolsas e muito mais.",
+      "goToDashboard": "Ir para o painel"
+    },
+    "logoAlt": "Maali Opportunity Hub",
+    "validation": {
+      "firstNameRequired": "O nome é obrigatório",
+      "lastNameRequired": "O apelido é obrigatório",
+      "sectorRequired": "O setor é obrigatório",
+      "countryRequired": "O país é obrigatório",
+      "cityRegionRequired": "A cidade / região é obrigatória",
+      "phoneRequired": "O número de telefone é obrigatório",
+      "phoneInvalid": "Introduza um número internacional válido (ex. +234 800 000 0000)"
+    },
+    "toasts": {
+      "profileSaveError": {
+        "title": "Erro ao guardar o perfil"
+      },
+      "error": {
+        "title": "Erro"
+      },
+      "activationPending": {
+        "title": "Pagamento recebido — ativação pendente",
+        "description": "O seu pagamento foi efetuado, mas ainda não recebemos a confirmação da Stripe. Atualize dentro de um minuto ou contacte o suporte se o problema persistir."
+      }
+    }
+  }
+}

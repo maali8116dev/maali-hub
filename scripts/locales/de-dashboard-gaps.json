@@ -1,0 +1,207 @@
+{
+  "menu": {
+    "dashboard": "Übersicht"
+  },
+  "pages": {
+    "dashboard": "Übersicht"
+  },
+  "dashboard": {
+    "title": "Übersicht"
+  },
+  "applications": {
+    "columns": {
+      "status": "Status"
+    },
+    "detail": {
+      "applicationId": "Kennung: {{id}}",
+      "metadata": {
+        "status": "Status:"
+      }
+    }
+  },
+  "settings": {
+    "notifications": {
+      "newsletter": "Rundschreiben"
+    },
+    "preferences": {
+      "system": "Systemstandard"
+    }
+  },
+  "resources": {
+    "tabs": {
+      "videos": "Videos",
+      "links": "Weblinks"
+    },
+    "card": {
+      "typeLabels": {
+        "video": "Video",
+        "webinar": "Webinar"
+      }
+    }
+  },
+  "adminDashboard": {
+    "recentActivity": {
+      "genericAction": "{{actor}} hat {{action}} für {{entity}} ausgeführt."
+    }
+  },
+  "opportunities": {
+    "table": {
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "form": {
+      "fields": {
+        "status": {
+          "label": "Status"
+        },
+        "currency": {
+          "placeholder": "z. B. EUR"
+        }
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "dashboard": "Übersicht",
+      "blog": "Blog",
+      "faq": "Häufige Fragen"
+    },
+    "opportunitiesPage": {
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "sectorsPage": {
+      "form": {
+        "name": "Bezeichnung"
+      }
+    },
+    "kycPage": {
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "financialPage": {
+      "filters": {
+        "status": "Status"
+      },
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "inboundPage": {
+      "tabs": {
+        "newsletter": "Rundschreiben"
+      },
+      "status": "Status",
+      "columns": {
+        "name": "Name",
+        "status": "Status"
+      }
+    },
+    "activityLogsPage": {
+      "export": "Exportieren",
+      "actions": {
+        "login": "Anmeldung"
+      },
+      "system": "System"
+    },
+    "reviewerDetailsPage": {
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "cmsList": {
+      "common": {
+        "status": "Status"
+      },
+      "mentors": {
+        "columns": {
+          "name": "Name",
+          "status": "Status"
+        }
+      },
+      "partners": {
+        "columns": {
+          "name": "Name",
+          "status": "Status"
+        }
+      },
+      "resources": {
+        "columns": {
+          "status": "Status",
+          "downloads": "Downloads"
+        }
+      },
+      "successStories": {
+        "columns": {
+          "name": "Name",
+          "status": "Status"
+        }
+      }
+    },
+    "cmsForm": {
+      "blog": {
+        "status": "Status"
+      },
+      "mentor": {
+        "name": "Name"
+      },
+      "partner": {
+        "name": "Name",
+        "status": "Status"
+      },
+      "successStory": {
+        "name": "Name"
+      }
+    },
+    "applicationsPage": {
+      "columns": {
+        "status": "Status"
+      }
+    },
+    "usersPage": {
+      "columns": {
+        "name": "Name",
+        "status": "Status"
+      }
+    },
+    "kycCard": {
+      "fields": {
+        "selfie": "Selfie-Aufnahme"
+      }
+    }
+  },
+  "billingPage": {
+    "history": {
+      "columns": {
+        "status": "Status"
+      }
+    }
+  },
+  "partner": {
+    "roleFallback": "Partner",
+    "menu": {
+      "dashboard": "Übersicht"
+    },
+    "settingsPage": {
+      "orgProfile": {
+        "websitePlaceholder": "https://ihre-website.de"
+      },
+      "contact": {
+        "phonePlaceholder": "+49 123 456789"
+      }
+    }
+  },
+  "reviewer": {
+    "menu": {
+      "dashboard": "Übersicht"
+    },
+    "settingsPage": {
+      "profile": {
+        "emailPlaceholder": "ihre.email@beispiel.de"
+      }
+    }
+  }
+}

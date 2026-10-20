@@ -1,0 +1,8 @@
+{
+  "toasts": {
+    "cms": {
+      "translationNotConfigured": "Chave da API Google Translate não configurada no servidor.",
+      "translationNotAuthenticated": "Início de sessão necessário para gerar traduções."
+    }
+  }
+}

@@ -1,0 +1,24 @@
+# Maali Platform
+
+> Maali is Africa's opportunity hub — discover grants, jobs, internships, trainings, scholarships, and fellowships, apply with confidence, and track outcomes.
+
+## Pages
+
+- [Home](/): Overview of the Maali opportunity platform for African talent.
+- [Opportunities](/opportunities): Browse all open grants, jobs, scholarships, fellowships, and trainings.
+- [About](/about): Mission, values, and how Maali supports African entrepreneurs and talent.
+- [Resources](/resources): Guides, templates, and toolkits for applicants.
+- [Partners](/partners): Funding and ecosystem partners working with Maali.
+- [Success Stories](/success-stories): Real outcomes from people who used Maali.
+- [Blog](/blog): Articles on funding, careers, and entrepreneurship across Africa.
+- [Mentors](/mentors): Mentors available to guide applicants and founders.
+- [FAQ](/faq): Common questions about applications, eligibility, and fees.
+- [Help](/help): Support center for using the platform.
+- [Guide](/guide): Step-by-step guide to getting started on Maali.
+- [Contact](/contact): Reach the Maali team.
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)
+- [Cookie Policy](/cookies)

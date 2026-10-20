@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "title": "Biblioteca de recursos",
+    "description": "Aceda a guias, modelos, tutoriais e ferramentas para ter sucesso nas suas candidaturas",
+    "searchPlaceholder": "Pesquisar recursos...",
+    "availableCount": "{{count}} recursos disponíveis"
+  },
+  "tabs": {
+    "all": "Todos",
+    "documents": "Documentos",
+    "videos": "Vídeos",
+    "spreadsheets": "Folhas de cálculo",
+    "presentations": "Apresentações",
+    "links": "Links"
+  },
+  "emptyState": {
+    "noResources": "Sem recursos disponíveis",
+    "noResourcesDesc": "Os recursos aparecerão aqui quando forem adicionados pelos administradores",
+    "noResults": "Nenhum resultado encontrado",
+    "noResultsDesc": "Nenhum recurso corresponde a «{{query}}». Tente outro termo de pesquisa.",
+    "clearSearch": "Limpar pesquisa",
+    "checkBackLater": "Volte mais tarde para novos recursos"
+  },
+  "sections": {
+    "browseResources": "Explorar recursos",
+    "searchResults": "Resultados de pesquisa para «{{query}}»"
+  },
+  "card": {
+    "featured": "Em destaque",
+    "view": "Ver",
+    "open": "Abrir",
+    "download": "Transferir",
+    "typeLabels": {
+      "pdfDocument": "Documento PDF",
+      "video": "Vídeo",
+      "webinar": "Webinário",
+      "spreadsheet": "Folha de cálculo",
+      "presentation": "Apresentação",
+      "document": "Documento",
+      "externalLink": "Link externo",
+      "directory": "Diretório",
+      "event": "Evento"
+    }
+  }
+}

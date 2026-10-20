@@ -1,0 +1,445 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
+import { getCorsHeaders, escapeHtml } from "../_shared/cors.ts";
+import { EMAIL_LOGO_ATTACHMENT, EMAIL_LOGO_IMG_HTML, getSiteBaseUrl } from "../_shared/emailBrand.ts";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+// Supabase Auth Hook payload structure
+interface AuthHookPayload {
+  user: {
+    id: string;
+    email: string;
+    user_metadata?: {
+      first_name?: string;
+      last_name?: string;
+      [key: string]: unknown;
+    };
+  };
+  email_data: {
+    token?: string;
+    token_hash?: string;
+    redirect_to?: string;
+    email_action_type: "signup" | "password_reset" | "recovery" | "email_change" | "magiclink" | "email_change_token_new" | "email_change_token_current" | string;
+  };
+}
+
+// Base URL for logo and links
+const baseUrl = getSiteBaseUrl();
+
+// Primary gradient colors (Terra Cotta to Golden Orange)
+// hsl(15 75% 45%) = #C85A2E, hsl(35 85% 55%) = #F5A623
+const primaryGradient = "linear-gradient(135deg, #C85A2E 0%, #F5A623 100%)";
+
+// AWS-style email template helper
+const emailTemplate = (title: string, content: string) => `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: #eee;
+        margin: 0;
+        padding: 0;
+        color: #212121;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #eee;
+      }
+      .email-section {
+        background-color: #ffffff;
+      }
+      .header {
+        background: ${primaryGradient};
+        padding: 20px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 75px;
+        height: auto;
+      }
+      .content {
+        padding: 25px 35px;
+      }
+      .content h1 {
+        color: #333;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 0 0 15px 0;
+      }
+      .content p {
+        color: #333;
+        font-size: 14px;
+        line-height: 24px;
+        margin: 6px 0 14px 0;
+      }
+      .button {
+        display: inline-block;
+        background: ${primaryGradient};
+        color: #ffffff !important;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        margin: 20px 0;
+      }
+      .button:visited {
+        color: #ffffff !important;
+      }
+      .button:hover {
+        opacity: 0.9;
+      }
+      .button-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #ffffff !important;
+      }
+      .divider {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 0;
+      }
+      .footer {
+        padding: 25px 35px;
+      }
+      .footer p {
+        color: #333;
+        font-size: 14px;
+        margin: 0;
+      }
+      .footer-links {
+        color: #333;
+        font-size: 12px;
+        margin: 24px 0;
+        padding: 0 20px;
+      }
+      .footer-links a {
+        color: #2754C5;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="email-section">
+        <div class="header">
+          ${EMAIL_LOGO_IMG_HTML}
+        </div>
+        <div class="content">
+          <h1>${title}</h1>
+          ${content}
+        </div>
+        <hr class="divider" />
+        <div class="footer">
+          <p>Maali will never email you and ask you to disclose or verify your password, credit card, or banking account number.</p>
+        </div>
+      </div>
+      <p class="footer-links">
+        This message was produced and distributed by Maali Opportunity Hub. © ${new Date().getFullYear()}, Maali. All rights reserved. View our 
+        <a href="${baseUrl}/privacy" target="_blank">privacy policy</a>.
+      </p>
+    </div>
+  </body>
+  </html>
+`;
+
+const getEmailContent = (
+  emailActionType: AuthHookPayload["email_data"]["email_action_type"],
+  recipientName: string,
+  redirectUrl: string,
+  otpCode?: string
+) => {
+  const codeBlock = otpCode
+    ? `<div style="text-align:center;margin:24px 0;">
+         <div style="display:inline-block;font-size:28px;font-weight:700;letter-spacing:6px;padding:14px 24px;border-radius:10px;background:#f4f4f5;color:#111;">${escapeHtml(otpCode)}</div>
+       </div>`
+    : '';
+  // Normalize the action type to handle variations (Supabase may send "recovery" for password reset)
+  const normalizedType = typeof emailActionType === "string" ? emailActionType.toLowerCase() : emailActionType;
+  
+  switch (normalizedType) {
+    case "password_reset":
+    case "recovery": // Supabase sends "recovery" for password reset emails
+      return {
+        subject: "Reset Your Password - Maali",
+        html: emailTemplate(
+          "Reset your password",
+          `
+            <p>We received a request to reset your password for your Maali account. We want to make sure it's really you.</p>
+            <p>Click the button below to create a new password. If you didn't request a password reset, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button button-warning" style="color:#ffffff;text-decoration:none;">Reset Password</a></div>` : ''}
+            <p>This link will expire in 1 hour for security reasons.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+
+    case "signup":
+      return {
+        subject: "Verify Your Email - Maali",
+        html: emailTemplate(
+          "Verify your email address",
+          `
+            <p>Thanks for starting the new Maali account creation process. We want to make sure it's really you. Please click the button below to verify your email address. If you don't want to create an account, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Verify Email Address</a></div>` : ''}
+            <p>This verification link will expire in 24 hours.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+
+    case "magiclink":
+      return {
+        subject: "Sign In to Maali",
+        html: emailTemplate(
+          "Sign in to your account",
+          `
+            <p>Use the code below to sign in to your Maali account, or click the button. If you didn't request this, you can ignore this message.</p>
+            ${codeBlock}
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Sign In</a></div>` : ''}
+            <p>This code and link expire in 1 hour.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+
+    case "email_change":
+    case "email_change_token_new":
+    case "email_change_token_current":
+      return {
+        subject: "Confirm Email Change - Maali",
+        html: emailTemplate(
+          "Confirm email change",
+          `
+            <p>You requested to change your email address for your Maali account. We want to make sure it's really you.</p>
+            <p>Click the button below to confirm this change. If you didn't request this change, you can ignore this message.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">Confirm Email Change</a></div>` : ''}
+            <p>This link will expire in 1 hour.</p>
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+
+    default:
+      return {
+        subject: "Maali Account Notification",
+        html: emailTemplate(
+          "Maali Notification",
+          `
+            <p>You have a new notification from Maali.</p>
+            ${redirectUrl ? `<div style="text-align: center;"><a href="${redirectUrl}" class="button" style="color:#ffffff;text-decoration:none;">View Details</a></div>` : ''}
+            <p>Best regards,<br>The Maali Team</p>
+          `
+        ),
+      };
+  }
+};
+
+const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: getCorsHeaders(req) });
+  }
+
+  try {
+    // Verify the GoTrue send-email hook signature (standardwebhooks).
+    // The same secret must be set as GOTRUE_HOOK_SEND_EMAIL_SECRETS on GoTrue
+    // and SEND_EMAIL_HOOK_SECRET here (format: v1,whsec_<base64>).
+    // Fail closed in prod; local dev (localhost Supabase) may run unsigned.
+    const rawBody = await req.text();
+    const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const isLocal = supabaseUrl.includes("127.0.0.1") || supabaseUrl.includes("localhost");
+    let payload: AuthHookPayload;
+    if (hookSecret) {
+      try {
+        const wh = new Webhook(hookSecret.replace("v1,whsec_", ""));
+        payload = wh.verify(rawBody, {
+          "webhook-id": req.headers.get("webhook-id") ?? "",
+          "webhook-timestamp": req.headers.get("webhook-timestamp") ?? "",
+          "webhook-signature": req.headers.get("webhook-signature") ?? "",
+        }) as AuthHookPayload;
+      } catch (_err) {
+        console.error("auth-email-hook: invalid webhook signature");
+        return new Response(
+          JSON.stringify({ error: "Invalid signature" }),
+          { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+        );
+      }
+    } else if (isLocal) {
+      payload = JSON.parse(rawBody);
+    } else {
+      console.error("auth-email-hook: SEND_EMAIL_HOOK_SECRET is not set; rejecting unsigned request");
+      return new Response(
+        JSON.stringify({ error: "Hook secret not configured" }),
+        { status: 503, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log the payload for debugging
+    console.log("Auth email hook received payload:", JSON.stringify({
+      user_id: payload.user?.id,
+      email: payload.user?.email,
+      email_action_type: payload.email_data?.email_action_type,
+      has_redirect_to: !!payload.email_data?.redirect_to,
+    }, null, 2));
+
+    if (!payload.user || !payload.email_data) {
+      console.error("Invalid payload structure:", payload);
+      return new Response(
+        JSON.stringify({ error: "Invalid payload structure" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    const { user, email_data } = payload;
+    const { email, user_metadata } = user;
+    const { email_action_type, redirect_to, token, token_hash } = email_data;
+    
+    console.log(`Processing email for action type: "${email_action_type}"`);
+
+    // Get recipient name from user_metadata or fetch from profiles table
+    // M1 FIX: HTML-escape the name to prevent injection in email templates
+    let recipientName = "User";
+    
+    if (user_metadata?.first_name || user_metadata?.last_name) {
+      const rawName = `${user_metadata.first_name || ""} ${user_metadata.last_name || ""}`.trim() || "User";
+      recipientName = escapeHtml(rawName);
+    } else {
+      // Try to fetch from profiles table
+      try {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+        );
+        
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("first_name, last_name")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (profile?.first_name || profile?.last_name) {
+          const rawName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "User";
+          recipientName = escapeHtml(rawName);
+        }
+      } catch (err) {
+        console.log("Could not fetch profile, using default name:", err);
+      }
+    }
+
+    // Build redirect URL for auth flows
+    // For password reset we keep using hash-based access_token handling.
+    // For magic links we switch to token_hash + verifyOtp flow on the client.
+    let redirectUrl = redirect_to;
+    
+    if (!redirectUrl) {
+      const siteUrl = Deno.env.get("SITE_URL") || "http://localhost:5173";
+      redirectUrl = `${siteUrl}/auth`;
+    }
+    
+    // Normalize the action type
+    const normalizedType = typeof email_action_type === "string" ? email_action_type.toLowerCase() : email_action_type;
+    
+    // Check if redirect_to already contains a hash (token already appended by Supabase)
+    const hasHash = redirectUrl.includes('#');
+
+    // GoTrue verify endpoint (on the API domain) validates token_hash server-side,
+    // creates a real session, then redirects to the app with a JWT in the hash —
+    // the raw email `token` is only a 6-digit OTP and can't establish a session.
+    // Must be the PUBLIC api url (SUPABASE_URL is the internal Kong host, not
+    // browser-reachable), so prefer an explicit public override.
+    const supabaseApiUrl = (
+      Deno.env.get("SUPABASE_PUBLIC_URL") ||
+      Deno.env.get("API_EXTERNAL_URL") ||
+      Deno.env.get("SUPABASE_URL") ||
+      ""
+    ).replace(/\/$/, "");
+    const appRedirectBase = (() => {
+      const base = redirectUrl.split('#')[0].split('?')[0];
+      return base.endsWith('/auth') ? base : `${base}/auth`;
+    })();
+    const verifyToken = token_hash || token;
+
+    // For password reset (recovery), route through the verify endpoint
+    if ((normalizedType === "password_reset" || normalizedType === "recovery")) {
+      if (!hasHash && supabaseApiUrl && verifyToken) {
+        redirectUrl = `${supabaseApiUrl}/auth/v1/verify?token=${encodeURIComponent(verifyToken)}&type=recovery&redirect_to=${encodeURIComponent(appRedirectBase)}`;
+      } else if (!hasHash) {
+        console.warn("Password reset requested but no token/API url available in payload");
+      }
+      // If hasHash is true, Supabase already constructed the URL correctly
+    } else if (normalizedType === "signup" && !hasHash && supabaseApiUrl && verifyToken) {
+      // For email verification
+      redirectUrl = `${supabaseApiUrl}/auth/v1/verify?token=${encodeURIComponent(verifyToken)}&type=signup&redirect_to=${encodeURIComponent(appRedirectBase)}`;
+    } else if (normalizedType === "magiclink") {
+      // For magic link, prefer token_hash and use query params so the client can call verifyOtp
+      const baseUrl = redirectUrl.split('#')[0].split('?')[0];
+      const urlPath = baseUrl.endsWith('/auth') ? baseUrl : `${baseUrl}/auth`;
+      const th = token_hash || token;
+      // Construct URL like: /auth?type=magiclink&token_hash=HASH
+      redirectUrl = `${urlPath}?type=magiclink${th ? `&token_hash=${encodeURIComponent(th)}` : ""}`;
+    }
+    
+    console.log(`Constructed redirect URL (first 150 chars): ${redirectUrl.substring(0, 150)}`);
+
+    // Validate and sanitize email address
+    const sanitizedEmail = typeof email === 'string' ? email.trim() : '';
+    
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      console.error(`Invalid email format: ${email}`);
+      return new Response(
+        JSON.stringify({ error: "Invalid email address format" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
+    // Get email content based on action type. `token` is the 6-digit OTP that
+    // pairs with the magic link so users can sign in by code or by click.
+    const { subject, html } = getEmailContent(email_action_type, recipientName, redirectUrl, token);
+
+    // Get configured from email or fall back to default
+    const fromEmail = Deno.env.get("FROM_EMAIL") || "Maali <onboarding@resend.dev>";
+
+    // Send email via Resend
+    const emailResponse = await resend.emails.send({
+      from: fromEmail,
+      to: [sanitizedEmail], // Use sanitized email
+      subject,
+      html,
+      attachments: [EMAIL_LOGO_ATTACHMENT],
+    });
+
+    console.log(`Email sent successfully for ${email_action_type}:`, emailResponse);
+
+    // Return 200 to indicate success to Supabase
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in auth-email-hook:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    
+    // Return 200 even on error to prevent Supabase from retrying indefinitely
+    // Log the error for monitoring instead
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      { status: 200, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+    );
+  }
+};
+
+serve(handler);
+

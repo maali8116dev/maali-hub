@@ -1,0 +1,12 @@
+{
+  "rankedApplicationsPage": {
+    "title": "Candidatures classées",
+    "subtitle": "{{title}} - Classées par score d'évaluation",
+    "loading": "Chargement...",
+    "exportRankedCsv": "Exporter CSV classé",
+    "back": "Retour",
+    "exportTopTitle": "Exporter le top",
+    "exportTop": "Exporter le top",
+    "searchPlaceholder": "Rechercher par nom ou e-mail du candidat..."
+  }
+}

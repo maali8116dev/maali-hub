@@ -1,0 +1,15 @@
+{
+  "opportunityDetail": {
+    "uncategorized": "Uncategorized",
+    "location": "Location",
+    "deadline": "Application Deadline",
+    "sector": "Sector",
+    "fundingAmount": "Funding Amount",
+    "opportunityType": "Opportunity Type",
+    "organization": "Organization",
+    "programFormat": "Program Format",
+    "experienceLevel": "Experience Level",
+    "requirements": "Requirements",
+    "eligibilityCriteria": "Eligibility Criteria"
+  }
+}

@@ -1,0 +1,97 @@
+﻿import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+
+interface ComplianceCardProps {
+  application: Record<string, any>;
+}
+
+interface ComplianceItemProps {
+  label: string;
+  confirmed: boolean;
+  confirmedText: string;
+  notConfirmedText: string;
+}
+
+const ComplianceItem = ({ label, confirmed, confirmedText, notConfirmedText }: ComplianceItemProps) => (
+  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+    {confirmed ? (
+      <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
+    ) : (
+      <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+    )}
+    <div className="flex-1">
+      <p className="text-sm font-medium">{label}</p>
+      <p className="text-xs text-muted-foreground">
+        {confirmed ? confirmedText : notConfirmedText}
+      </p>
+    </div>
+  </div>
+);
+
+const ComplianceCard = ({ application }: ComplianceCardProps) => {
+  const { t } = useTranslation("dashboard");
+
+  const hasCompliance =
+    application.information_accurate_confirmed !== undefined ||
+    application.conflict_of_interest_declared !== undefined ||
+    application.reporting_requirements_agreed !== undefined ||
+    application.data_processing_consented !== undefined;
+
+  if (!hasCompliance) return null;
+
+  return (
+    <Card>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">{t("applications.detail.compliance.title")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
+        <div className="space-y-2">
+          {application.information_accurate_confirmed !== undefined && (
+            <ComplianceItem
+              label={t("applications.detail.compliance.informationAccurate")}
+              confirmed={application.information_accurate_confirmed}
+              confirmedText={t("applications.detail.compliance.confirmed")}
+              notConfirmedText={t("applications.detail.compliance.notConfirmed")}
+            />
+          )}
+          {application.conflict_of_interest_declared !== undefined && (
+            <ComplianceItem
+              label={t("applications.detail.compliance.conflictOfInterest")}
+              confirmed={application.conflict_of_interest_declared}
+              confirmedText={t("applications.detail.compliance.declared")}
+              notConfirmedText={t("applications.detail.compliance.notDeclared")}
+            />
+          )}
+          {application.reporting_requirements_agreed !== undefined && (
+            <ComplianceItem
+              label={t("applications.detail.compliance.reportingRequirements")}
+              confirmed={application.reporting_requirements_agreed}
+              confirmedText={t("applications.detail.compliance.agreed")}
+              notConfirmedText={t("applications.detail.compliance.notAgreed")}
+            />
+          )}
+          {application.data_processing_consented !== undefined && (
+            <ComplianceItem
+              label={t("applications.detail.compliance.dataProcessing")}
+              confirmed={application.data_processing_consented}
+              confirmedText={t("applications.detail.compliance.consented")}
+              notConfirmedText={t("applications.detail.compliance.notConsented")}
+            />
+          )}
+        </div>
+        {application.declaration_date && (
+          <div className="pt-2 border-t">
+            <p className="text-xs text-muted-foreground">
+              {t("applications.detail.compliance.declarationDate", {
+                date: new Date(application.declaration_date).toLocaleDateString(),
+              })}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ComplianceCard;

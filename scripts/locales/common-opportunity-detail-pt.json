@@ -1,0 +1,15 @@
+{
+  "opportunityDetail": {
+    "uncategorized": "Sem categoria",
+    "location": "Localização",
+    "deadline": "Prazo de candidatura",
+    "sector": "Setor",
+    "fundingAmount": "Montante do financiamento",
+    "opportunityType": "Tipo de oportunidade",
+    "organization": "Organização",
+    "programFormat": "Formato do programa",
+    "experienceLevel": "Nível de experiência",
+    "requirements": "Requisitos",
+    "eligibilityCriteria": "Critérios de elegibilidade"
+  }
+}
