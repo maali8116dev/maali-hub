@@ -1,11 +1,11 @@
 {
   "hero": {
-    "badge": "Join African talent building careers and ventures with MAALI",
-    "headline1": "From informal activity",
-    "headline2": "to investable",
-    "headline3": "opportunity",
-    "subheadline": "Discover grants, jobs, internships, trainings, scholarships, loans, and enterprise support. Build the profile and evidence that open larger formal opportunities across agriculture, technology, finance, business, environment, and more.",
-    "description": "Whether you farm, trade, build a startup, or start your career, MAALI meets you where you are and helps you move forward.",
+    "badge": "Join 500+ members across Africa",
+    "headline1": "Empowering",
+    "headline2": "Businesses",
+    "headline3": "to Build Wealth",
+    "subheadline": "One hub to discover and apply for grants, jobs, internships, trainings, scholarships, loans, and more.",
+    "description": "Whether you're building a venture, farming, growing your career, or starting as a student or intern, connect with programs, partners, and reviewers on one trusted platform.",
     "imageAlt": "African talent and enterprises building opportunity",
     "startApplication": "Get Started",
     "viewProjects": "Browse Opportunities",
@@ -285,7 +285,6 @@
       "title": "Our Vision",
       "description": "An Africa where every productive person has a clear path from informal or early-stage activity to formal, investable opportunity across farms, markets, startups, and careers."
     },
-
     "values": {
       "title": "Our Values",
       "empowerment": {
