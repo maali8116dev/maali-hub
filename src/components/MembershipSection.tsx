@@ -97,8 +97,11 @@ const MembershipSection = () => {
           </Card>
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-10">
+        <p className="text-center text-sm text-muted-foreground mt-10 max-w-2xl mx-auto">
           {t("membership.socialProof")}
+        </p>
+        <p className="text-center text-sm text-muted-foreground/90 mt-3 max-w-2xl mx-auto italic">
+          {t("membership.partnerCallout")}
         </p>
       </div>
     </section>

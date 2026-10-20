@@ -1,12 +1,12 @@
 ﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Target, Users, Award } from "lucide-react";
+import { Handshake, Target, TrendingUp, Scale, Layers, Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Benefits = () => {
   const { t } = useTranslation('landing');
   const benefits = [
     {
-      icon: Zap,
+      icon: Handshake,
       title: t('benefits.benefit1.title'),
       description: t('benefits.benefit1.description'),
       color: "text-primary",
@@ -20,18 +20,32 @@ const Benefits = () => {
       bgColor: "bg-accent/10"
     },
     {
-      icon: Users,
+      icon: TrendingUp,
       title: t('benefits.benefit3.title'),
       description: t('benefits.benefit3.description'),
       color: "text-success",
       bgColor: "bg-success/10"
     },
     {
-      icon: Award,
+      icon: Scale,
       title: t('benefits.benefit4.title'),
       description: t('benefits.benefit4.description'),
       color: "text-warning",
       bgColor: "bg-warning/10"
+    },
+    {
+      icon: Layers,
+      title: t('benefits.benefit5.title'),
+      description: t('benefits.benefit5.description'),
+      color: "text-primary",
+      bgColor: "bg-primary/10"
+    },
+    {
+      icon: Smartphone,
+      title: t('benefits.benefit6.title'),
+      description: t('benefits.benefit6.description'),
+      color: "text-accent",
+      bgColor: "bg-accent/10"
     }
   ];
 
@@ -50,7 +64,7 @@ const Benefits = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {benefits.map((benefit, index) => {
             const IconComponent = benefit.icon;
             return (

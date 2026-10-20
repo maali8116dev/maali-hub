@@ -34,7 +34,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0 bg-transparent">
         <img 
           src={heroImage}
-          alt={t('hero.imageAlt', { defaultValue: 'African entrepreneurs in agriculture' })}
+          alt={t('hero.imageAlt')}
           fetchPriority="high"
           loading="eager"
           decoding="sync"

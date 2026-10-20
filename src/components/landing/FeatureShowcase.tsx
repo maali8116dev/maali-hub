@@ -8,7 +8,8 @@ import {
   TrendingUp,
   Clock,
   MessageSquare,
-  BadgeCheck
+  BadgeCheck,
+  Building2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -68,6 +69,12 @@ const FeatureShowcase = () => {
       title: t('featureShowcase.feature9.title'),
       description: t('featureShowcase.feature9.description'),
       color: "text-primary"
+    },
+    {
+      icon: Building2,
+      title: t('featureShowcase.feature10.title'),
+      description: t('featureShowcase.feature10.description'),
+      color: "text-accent"
     }
   ];
 

@@ -1,11 +1,11 @@
 {
   "hero": {
-    "badge": "Junte-se a 500+ membros em toda a África",
-    "headline1": "Capacitando",
-    "headline2": "empresas",
-    "headline3": "a gerar riqueza",
-    "subheadline": "Um hub para descobrir e candidatar-se a subsídios, empregos, estágios, formações, bolsas e mais.",
-    "description": "Seja construindo um negócio, crescendo na carreira ou começando como estudante ou estagiário — conecte-se a programas, parceiros e avaliadores numa plataforma confiável.",
+    "badge": "Junte-se a talentos africanos a construir carreiras e negócios com a MAALI",
+    "headline1": "Da atividade informal",
+    "headline2": "à oportunidade",
+    "headline3": "investível",
+    "subheadline": "Descubra bolsas, empregos, estágios, formações, bolsas de estudo, empréstimos e apoio empresarial. Construa o perfil e as evidências que abrem oportunidades formais maiores na agricultura, tecnologia, finanças, negócios, ambiente e mais.",
+    "description": "Quer cultive, comercialize, construa uma startup ou inicie a carreira, a MAALI encontra-o onde está e ajuda a avançar.",
     "startApplication": "Começar",
     "viewProjects": "Ver oportunidades",
     "browseOpportunities": "Ver oportunidades",
@@ -20,20 +20,21 @@
       "tag": "Fintech"
     },
     "previewCard2": {
-      "name": "Programa do Kofi",
-      "detail": "Fellowship EdTech",
-      "tag": "Educação"
+      "name": "Cooperativa da Ada",
+      "detail": "Bolsa pré-selecionada",
+      "tag": "Agricultura"
     },
     "previewCard3": {
       "name": "Função do Samuel",
       "detail": "Estágio em tech",
       "tag": "Tecnologia"
-    }
+    },
+    "imageAlt": "Talentos e empresas africanas a construir oportunidades"
   },
   "membership": {
     "badge": "Associação",
     "title": "Junte-se à rede MAALI",
-    "subtitle": "Para empreendedores, profissionais, estudantes e estagiários. Navegue grátis ou desbloqueie candidaturas por menos que um café por mês.",
+    "subtitle": "Para empreendedores, agricultores, comerciantes, profissionais, estudantes e estagiários. Navegue grátis, ou desbloqueie candidaturas e ferramentas de preparação por menos que um café por mês.",
     "community": {
       "name": "Comunidade",
       "price": "Grátis",
@@ -56,56 +57,65 @@
       "feature3": "Candidaturas guiadas em várias etapas",
       "feature4": "Eventos e workshops exclusivos para membros"
     },
-    "socialProof": "Junte-se ao talento africano que constrói carreira e negócios com a MAALI."
+    "socialProof": "Junte-se ao talento africano que constrói carreira e negócios com a MAALI.",
+    "partnerCallout": "Parceiros podem oferecer empréstimos produtivos, financiamento revolving ou programas de cohortes (incluindo agribusiness). A adesão MAALI desbloqueia candidaturas na rede; produtos de empréstimo são oferecidos por parceiros quando disponíveis, e não são garantidos com cada adesão."
   },
   "trustIndicators": {
     "title": "Confiado pelas principais",
     "titleHighlight": "Organizações",
-    "subtitle": "Nosso foco em honestidade, integridade e competência nos torna a escolha preferida de nossos parceiros e clientes.",
+    "subtitle": "A MAALI trabalha com parceiros de formação, finanças e oportunidades para ligar competências, capital e crescimento, incluindo cohortes de agribusiness quando relevante.",
     "worldwide": "Mundial",
     "logoLabel": "Logo {{index}}"
   },
   "howItWorks": {
     "title": "Como",
     "titleHighlight": "Funciona",
-    "subtitle": "Quatro etapas da descoberta ao resultado — para empreendedores, profissionais, estudantes e estagiários: subsídios, empregos, estágios, formações, bolsas e mais.",
+    "subtitle": "Um caminho claro de onde está hoje para onde pode ir: preparação progressiva, não sorte pontual.",
     "step1": {
-      "title": "Descobrir oportunidades",
-      "description": "Explore subsídios, empregos, estágios, formações, bolsas, fellowships e outros programas. Filtre por setor, local e tipo de oportunidade."
+      "title": "Ativar",
+      "description": "Junte-se à MAALI, complete o perfil e identifique a oportunidade certa: bolsa, emprego, formação, bolsa de estudo, empréstimo ou apoio empresarial."
     },
     "step2": {
-      "title": "Junte-se ao Maali",
-      "description": "Crie sua conta e perfil. Entre grátis como Community para navegar, ou torne-se Full Member para candidatar-se a qualquer oportunidade."
+      "title": "Otimizar",
+      "description": "Reforce elegibilidade: documentos, registos, clareza de fluxo de caixa e adequação. Use guias, mentores e candidaturas guiadas."
     },
     "step3": {
-      "title": "Candidate-se com confiança",
-      "description": "Candidatura guiada em várias etapas. Envie documentos, salve rascunhos e submeta quando estiver pronto — financiamento ou carreira."
+      "title": "Candidatar com confiança",
+      "description": "Submeta através de candidaturas multi-etapa com rascunhos, uploads e requisitos claros."
     },
     "step4": {
-      "title": "Avaliação e resultados",
-      "description": "Avaliadores especializados analisam candidaturas com equidade. Acompanhe o status no painel até seleção ou premiação final."
+      "title": "Escalar e acompanhar",
+      "description": "Siga resultados de revisão, construa histórico e progrida para oportunidades formais maiores: financiamento, empréstimos, funções ou preparação para investimento."
     },
     "cta": "Começar hoje"
   },
   "benefits": {
     "title": "Por que escolher",
     "titleHighlight": "Maali",
-    "subtitle": "Feito para talento africano — fundadores, profissionais, estudantes e estagiários — num só lugar para encontrar oportunidades reais.",
+    "subtitle": "Feito para talentos e empresas africanas (fundadores, agricultores, comerciantes, profissionais, estudantes e estagiários) num só lugar para encontrar e perseguir oportunidades reais.",
     "benefit1": {
-      "title": "Rápido e Simples",
-      "description": "Complete candidaturas em minutos. O processo guiado serve para subsídios, empregos, estágios e formações."
+      "title": "Encontrar pessoas onde estão",
+      "description": "Informal ou em fase inicial? Tratamos isso como ponto de partida, não beco sem saída."
     },
     "benefit2": {
       "title": "Todos os tipos de oportunidade",
-      "description": "Subsídios, empregos, estágios, formações, bolsas, fellowships, aceleradoras e mais — para candidatos africanos."
+      "description": "Bolsas, empregos, estágios, formações, bolsas de estudo, fellowships, aceleradoras, empréstimos e programas de parceiros."
     },
     "benefit3": {
-      "title": "Suporte Especializado",
-      "description": "Orientação de mentores e avaliadores experientes em toda a candidatura e seleção."
+      "title": "Preparação que se acumula",
+      "description": "Perfil, documentos e resultados que ajudam a qualificar-se para mais ao longo do tempo."
     },
     "benefit4": {
-      "title": "Resultados Comprovados",
-      "description": "Junte-se a membros que obtiveram financiamento, colocações, fellowships e programas de carreira."
+      "title": "Revisão justa e parceiros de confiança",
+      "description": "Avaliação transparente com organizações que constroem o pipeline de África."
+    },
+    "benefit5": {
+      "title": "Amplitude setorial",
+      "description": "Agricultura e agribusiness e também tecnologia, FinTech, negócios, ambiente e mais."
+    },
+    "benefit6": {
+      "title": "Feito para a vida real",
+      "description": "Mobile-first, multilingue, adesão que mantém o acesso simples."
     }
   },
   "testimonials": {
@@ -153,7 +163,7 @@
   "featuredProjects": {
     "title": "Oportunidades",
     "titleHighlight": "em Destaque",
-    "subtitle": "Explore programas em vários setores — financiamento, emprego, estágio ou desenvolvimento profissional.",
+    "subtitle": "Explore programas em todos os setores: agricultura, tecnologia, finanças, negócios, ambiente e mais, financiamento, empréstimo, função, estágio ou apoio empresarial.",
     "viewAll": "Ver todas as oportunidades"
   },
   "successStories": {
@@ -165,7 +175,7 @@
   "featureShowcase": {
     "title": "Construído para",
     "titleHighlight": "Talento Africano",
-    "subtitle": "Cada recurso apoia fundadores, profissionais, estudantes e estagiários no panorama de oportunidades africanas.",
+    "subtitle": "Cada funcionalidade apoia fundadores, agricultores, comerciantes, profissionais, estudantes e estagiários no panorama de oportunidades em África.",
     "feature1": {
       "title": "Candidaturas Guiadas",
       "description": "Candidaturas em várias etapas com documentos, rascunhos e validação para uma submissão completa."
@@ -201,6 +211,10 @@
     "feature9": {
       "title": "Associação Simples",
       "description": "Navegue grátis como Community, ou Full Member por $2/mês para candidatar-se a qualquer tipo de oportunidade."
+    },
+    "feature10": {
+      "title": "Progressão empresarial",
+      "description": "Passe da primeira candidatura a um perfil mais claro e bancável para que a próxima oportunidade seja mais fácil de ganhar."
     }
   },
   "apply": {
@@ -213,7 +227,7 @@
     "howItWorksTitle": "Como funciona",
     "ready": {
       "title": "Pronto para candidatar-se?",
-      "description": "Explore oportunidades atuais por setor e tipo — encontre programas para o seu negócio ou carreira.",
+      "description": "Explore oportunidades atuais por setor e tipo, encontre programas para o seu negócio ou carreira.",
       "cta": "Ver todas as oportunidades"
     },
     "help": {
@@ -230,10 +244,10 @@
   },
   "about": {
     "title": "Sobre o Maali",
-    "hero": "O Maali Opportunity Hub é mais que um diretório — é uma ponte de confiança entre empreendedores, profissionais, estudantes e estagiários africanos e subsídios, empregos, estágios, formações, bolsas, fellowships e outros programas no continente.",
+    "hero": "O MAALI Opportunity Hub é mais do que um site de listagens. É uma ponte de confiança que liga empreendedores, agricultores, comerciantes, profissionais, estudantes e estagiários africanos a bolsas, empregos, estágios, formações, bolsas de estudo, fellowships e percursos de preparação empresarial no continente.",
     "mission": {
       "title": "A nossa missão",
-      "description": "Democratizar o acesso a oportunidades — financiamento, empregos, formação e percursos de carreira — para o talento africano, fomentando inovação e crescimento económico sustentável.",
+      "description": "Ligar talentos e empresas viáveis africanas a oportunidades acessíveis (financiamento, empregos, aprendizagem e apoio empresarial) e às competências, registos e evidências necessários para crescer.",
       "cta": "Juntar-se à rede",
       "stat": "1.000+",
       "statLabel": "Membros e candidatos apoiados"
@@ -254,13 +268,13 @@
       },
       "impact": {
         "title": "Impacto",
-        "description": "Resultados reais — subsídios, colocações, fellowships e crescimento profissional — para comunidades em África."
+        "description": "Resultados reais (subsídios, colocações, fellowships e crescimento profissional) para comunidades em África."
       }
     },
     "story": {
       "title": "A nossa história",
       "p1": "O Maali nasceu de uma observação simples: África tem talento extraordinário, mas muitos fundadores, profissionais, estudantes e estagiários ainda lutam para encontrar e candidatar-se às oportunidades certas.",
-      "p2": "O nome Maali relaciona-se com riqueza e valor em somali — oportunidade económica e crescimento de carreira, não apenas ajuda.",
+      "p2": "O nome Maali relaciona-se com riqueza e valor em somali, oportunidade económica e crescimento de carreira, não apenas ajuda.",
       "p3": "Através de tecnologia, associação e um processo de avaliação justo, ajudamos o talento africano a descobrir programas, candidatar-se e acompanhar resultados numa só plataforma.",
       "ctaTitle": "Junte-se à rede",
       "ctaDescription": "Faça parte do hub que liga talento africano a subsídios, empregos, estágios, formações e mais.",
@@ -276,6 +290,10 @@
       "subtitle": "Junte-se ao talento africano que constrói negócios e carreiras com subsídios, empregos, estágios, formações, bolsas e mais.",
       "browse": "Ver oportunidades",
       "partner": "Tornar-se parceiro"
+    },
+    "vision": {
+      "title": "A Nossa Visão",
+      "description": "Uma África onde cada pessoa produtiva tem um caminho claro da atividade informal ou inicial para uma oportunidade formal e investível em fazendas, mercados, startups e carreiras."
     }
   },
   "faqPage": {
@@ -470,14 +488,14 @@
   },
   "seo": {
     "home": {
-      "title": "Capacitar talentos africanos",
-      "description": "Descubra subsídios, empregos, estágios, formações, bolsas e muito mais. Candidate-se com confiança no hub de oportunidades Maali.",
-      "orgDescription": "Capacitar talentos africanos através de subsídios, empregos, estágios, formações, bolsas e oportunidades de carreira"
+      "title": "Da atividade informal à oportunidade investível",
+      "description": "Descubra bolsas, empregos, estágios, formações, bolsas de estudo e apoio empresarial. Construa preparação e candidate-se com confiança no hub de oportunidades de África.",
+      "orgDescription": "Ligar talentos e empresas africanas a financiamento, empregos, aprendizagem e percursos de preparação"
     },
     "routes": {
       "home": {
-        "title": "Capacitar talentos africanos",
-        "description": "Descubra subsídios, empregos, formações e bolsas em África. Candidate-se com confiança no Maali."
+        "title": "Da atividade informal à oportunidade investível",
+        "description": "Descubra bolsas, empregos, estágios, formações, bolsas de estudo e apoio empresarial em África. Ativar, Otimizar, Escalar no hub Maali."
       },
       "opportunities": {
         "title": "Oportunidades",
@@ -513,7 +531,7 @@
       },
       "faq": {
         "title": "Perguntas frequentes",
-        "description": "Respostas a questões comuns sobre o Maali — candidaturas, elegibilidade, taxas e avaliações."
+        "description": "Respostas a questões comuns sobre o Maali: candidaturas, elegibilidade, taxas e avaliações."
       },
       "mentors": {
         "title": "Mentores",
@@ -545,5 +563,34 @@
       "description": "A oportunidade que procura não existe.",
       "back": "Voltar às oportunidades"
     }
+  },
+  "progression": {
+    "title": "Da atividade informal",
+    "titleHighlight": "à oportunidade investível",
+    "body": "Muitas pessoas produtivas são ignoradas porque o seu trabalho está subdocumentado. A MAALI ajuda membros a construir práticas e evidências (vendas e despesas, custos mais claros, candidaturas mais fortes) para que parceiros, programas e financiadores os avaliem de forma justa, incluindo para empréstimos produtivos quando esses percursos existem.",
+    "buildTitle": "Construir preparação",
+    "build1": "Perfil de negócio / carreira",
+    "build2": "Documentos e registos",
+    "build3": "Adequação e elegibilidade",
+    "build4": "Mentores e recursos",
+    "qualifyTitle": "Qualificar-se para mais",
+    "qualify1": "Candidaturas mais fortes ao longo do tempo",
+    "qualify2": "Histórico na plataforma",
+    "qualify3": "Preparação para bolsas, empregos, empréstimos, contratação pública e vias de investimento",
+    "qualify4": "Programas de parceiros que desbloqueiam capital, empréstimos ou colocação quando disponíveis"
+  },
+  "spotlight": {
+    "badge": "Percurso de destaque",
+    "title": "Destaque: Agribusiness e empresa produtiva",
+    "body": "Com parceiros como Green Agric Technology (GAT) e programas de juventude em agribusiness, a MAALI pode integrar cohortes, perfilar membros, combinar oportunidades (incluindo empréstimos produtivos quando os parceiros os oferecem) e acompanhar resultados: Ativar, Otimizar, Escalar. A mesma plataforma serve fundadores e profissionais em todos os outros setores listados.",
+    "ctaPrimary": "Explorar oportunidades de agricultura",
+    "ctaSecondary": "Falar sobre um piloto de coorte"
+  },
+  "finalCta": {
+    "title": "Pronto para Ativar?",
+    "body": "Junte-se à rede MAALI. Navegue grátis, ou torne-se Full Member para candidatar-se e construir a sua história de progressão.",
+    "ctaPrimary": "Começar",
+    "ctaSecondary": "Explorar oportunidades",
+    "ctaPartners": "Contactar equipa de parceiros"
   }
 }

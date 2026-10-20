@@ -1,11 +1,11 @@
 {
   "hero": {
-    "badge": "Über 500 Mitglieder in ganz Afrika",
-    "headline1": "Befähigt",
-    "headline2": "Unternehmen",
-    "headline3": "zum Vermögensaufbau",
-    "subheadline": "Eine Plattform für Zuschüsse, Jobs, Praktika, Schulungen, Stipendien und mehr.",
-    "description": "Ob Gründung, Karriere oder Studium — verbinden Sie sich mit Programmen, Partnern und Prüfern auf einer vertrauenswürdigen Plattform.",
+    "badge": "Schließen Sie sich afrikanischen Talenten an, die mit MAALI Karrieren und Vorhaben aufbauen",
+    "headline1": "Von informeller Aktivität",
+    "headline2": "zur investierbaren",
+    "headline3": "Chance",
+    "subheadline": "Entdecken Sie Zuschüsse, Jobs, Praktika, Trainings, Stipendien, Kredite und Unternehmensförderung. Bauen Sie Profil und Nachweise auf, die größere formale Chancen öffnen in Landwirtschaft, Technologie, Finanzen, Business, Umwelt und mehr.",
+    "description": "Ob Sie Landwirtschaft betreiben, handeln, ein Startup aufbauen oder Ihre Karriere starten, MAALI trifft Sie dort, wo Sie sind, und hilft Ihnen voranzukommen.",
     "startApplication": "Loslegen",
     "viewProjects": "Chancen durchsuchen",
     "browseOpportunities": "Chancen durchsuchen",
@@ -20,20 +20,21 @@
       "tag": "Fintech"
     },
     "previewCard2": {
-      "name": "Kofis Programm",
-      "detail": "EdTech-Fellowship",
-      "tag": "Bildung"
+      "name": "Adas Genossenschaft",
+      "detail": "Zuschuss vorgemerkt",
+      "tag": "Landwirtschaft"
     },
     "previewCard3": {
       "name": "Samuels Stelle",
       "detail": "Tech-Praktikum",
       "tag": "Technologie"
-    }
+    },
+    "imageAlt": "Afrikanische Talente und Unternehmen, die Chancen aufbauen"
   },
   "membership": {
     "badge": "Mitgliedschaft",
     "title": "Dem MAALI-Netzwerk beitreten",
-    "subtitle": "Für Unternehmer, Fachkräfte, Studierende und Praktikanten. Kostenlos browsen oder Bewerbungen für weniger als einen Kaffee pro Monat freischalten.",
+    "subtitle": "Für Unternehmer, Landwirte, Händler, Fachkräfte, Studierende und Praktikanten. Kostenlos browsen, oder Bewerbungen und Bereitschafts-Tools für weniger als einen Kaffee im Monat freischalten.",
     "community": {
       "name": "Community",
       "price": "Kostenlos",
@@ -56,56 +57,65 @@
       "feature3": "Geführte Mehrschritt-Bewerbungen",
       "feature4": "Exklusive Events & Workshops"
     },
-    "socialProof": "Schließen Sie sich Talenten an, die mit MAALI Karrieren und Unternehmen aufbauen."
+    "socialProof": "Schließen Sie sich Talenten an, die mit MAALI Karrieren und Unternehmen aufbauen.",
+    "partnerCallout": "Partner können produktive Kredite, Revolving Finance oder Kohortenprogramme anbieten (inkl. Agribusiness). Die MAALI-Mitgliedschaft schaltet Bewerbungen im Netzwerk frei; Kreditprodukte werden von Partnern angeboten, wo verfügbar, und sind nicht mit jeder Mitgliedschaft garantiert."
   },
   "trustIndicators": {
     "title": "Vertraut von führenden",
     "titleHighlight": "Organisationen",
     "worldwide": "weltweit",
     "logoLabel": "Logo {{index}}",
-    "subtitle": "Unser Fokus auf Ehrlichkeit, Integrität und Kompetenz macht uns zur bevorzugten Wahl für Partner und Kunden."
+    "subtitle": "MAALI arbeitet mit Trainings-, Finanz- und Opportunity-Partnern zusammen, um Skills, Kapital und Wachstum zu verbinden, inkl. Agribusiness-Kohorten wo relevant."
   },
   "howItWorks": {
     "title": "So",
     "titleHighlight": "funktioniert's",
-    "subtitle": "Vier Schritte von der Entdeckung zum Ergebnis — für Gründer, Fachkräfte, Studierende und Praktikanten.",
+    "subtitle": "Ein klarer Weg von dort, wo Sie heute sind, dorthin, wo Sie hinwollen: progressive Bereitschaft, kein Glückstreffer.",
     "step1": {
-      "title": "Chancen entdecken",
-      "description": "Zuschüsse, Jobs, Praktika, Stipendien, Fellowships und mehr. Filtern nach Sektor, Ort und Typ."
+      "title": "Aktivieren",
+      "description": "Treten Sie MAALI bei, vervollständigen Sie Ihr Profil und finden Sie die richtige Chance: Zuschuss, Job, Training, Stipendium, Kredit oder Unternehmensförderung."
     },
     "step2": {
-      "title": "Maali beitreten",
-      "description": "Konto und Profil anlegen. Community kostenlos zum Browsen oder Vollmitglied für alle Bewerbungen."
+      "title": "Optimieren",
+      "description": "Stärken Sie die Eignung: Dokumente, Aufzeichnungen, Cashflow-Klarheit und Fit. Nutzen Sie Guides, Mentoren und geführte Bewerbungen."
     },
     "step3": {
-      "title": "Sicher bewerben",
-      "description": "Geführte Mehrschritt-Bewerbung. Dokumente hochladen, Entwürfe speichern, einreichen wenn bereit."
+      "title": "Mit Vertrauen bewerben",
+      "description": "Einreichen über mehrstufige Bewerbungen mit Entwürfen, Uploads und klaren Anforderungen."
     },
     "step4": {
-      "title": "Prüfung & Ergebnisse",
-      "description": "Faire Prüfung durch Experten. Status im Dashboard verfolgen bis zur Auswahl oder Förderung."
+      "title": "Skalieren & verfolgen",
+      "description": "Verfolgen Sie Prüfungsergebnisse, bauen Sie eine Erfolgsbilanz auf und wachsen Sie zu größeren formalen Chancen: Finanzierung, Kredite, Rollen oder Investitionsbereitschaft."
     },
     "cta": "Heute starten"
   },
   "benefits": {
     "title": "Warum",
     "titleHighlight": "Maali",
-    "subtitle": "Für afrikanisches Talent — Gründer, Fachkräfte, Studierende und Praktikanten — an einem Ort.",
+    "subtitle": "Für afrikanische Talente und Unternehmen (Gründer, Landwirte, Händler, Fachkräfte, Studierende und Praktikanten), ein Ort für echte Chancen.",
     "benefit1": {
-      "title": "Schnell & einfach",
-      "description": "Bewerbungen in Minuten, nicht Stunden. Für Zuschüsse, Jobs, Praktika und Schulungen gleichermaßen."
+      "title": "Menschen dort treffen, wo sie sind",
+      "description": "Informell oder early-stage? Wir sehen das als Startpunkt, nicht als Sackgasse."
     },
     "benefit2": {
-      "title": "Alle Chancentypen",
-      "description": "Zuschüsse, Jobs, Praktika, Stipendien, Fellowships, Acceleratoren und mehr — kuratiert für Afrika."
+      "title": "Jeder Opportunity-Typ",
+      "description": "Zuschüsse, Jobs, Praktika, Trainings, Stipendien, Fellowships, Acceleratoren, Kredite und Partnerprogramme."
     },
     "benefit3": {
-      "title": "Experten-Support",
-      "description": "Begleitung durch Mentoren und Prüfer während der gesamten Bewerbung."
+      "title": "Bereitschaft, die sich aufbaut",
+      "description": "Profil, Dokumente und Outcomes, die Ihnen helfen, sich über die Zeit für mehr zu qualifizieren."
     },
     "benefit4": {
-      "title": "Nachweisbare Ergebnisse",
-      "description": "Mitglieder mit Förderung, Plätzen und Programmen durch einen fairen, transparenten Prozess."
+      "title": "Faire Prüfung & vertrauenswürdige Partner",
+      "description": "Transparente Bewertung mit Organisationen, die Afrikas Pipeline aufbauen."
+    },
+    "benefit5": {
+      "title": "Sektorbreite",
+      "description": "Landwirtschaft und Agribusiness sowie Technologie, FinTech, Business, Umwelt und mehr."
+    },
+    "benefit6": {
+      "title": "Fürs echte Leben gebaut",
+      "description": "Mobile-first, mehrsprachig, Mitgliedschaft die Zugang einfach hält."
     }
   },
   "testimonials": {
@@ -132,7 +142,7 @@
       "name": "Amina Okafor",
       "company": "AgriTech Innovations",
       "location": "Nigeria",
-      "quote": "Mehrsprachigkeit und Mobile-First — ich konnte meine Praktikumsbewerbung auch mit schwachem Netz bearbeiten.",
+      "quote": "Mehrsprachigkeit und Mobile-First, ich konnte meine Praktikumsbewerbung auch mit schwachem Netz bearbeiten.",
       "result": "Praktikum vermittelt",
       "sector": "Landwirtschaft"
     }
@@ -153,7 +163,7 @@
   "featuredProjects": {
     "title": "Ausgewählte",
     "titleHighlight": "Chancen",
-    "subtitle": "Programme über Sektoren hinweg — Förderung, Rollen, Praktika oder Weiterbildung.",
+    "subtitle": "Programme über Sektoren hinweg: Landwirtschaft, Technologie, Finanzen, Business, Umwelt und mehr, Finanzierung, Kredit, Rolle, Praktikum oder Unternehmensförderung.",
     "viewAll": "Alle Chancen ansehen"
   },
   "successStories": {
@@ -165,7 +175,7 @@
   "featureShowcase": {
     "title": "Gebaut für",
     "titleHighlight": "afrikanisches Talent",
-    "subtitle": "Jede Funktion unterstützt Gründer, Fachkräfte, Studierende und Praktikanten.",
+    "subtitle": "Jedes Feature unterstützt Gründer, Landwirte, Händler, Fachkräfte, Studierende und Praktikanten in Afrikas Opportunity-Landschaft.",
     "feature1": {
       "title": "Geführte Bewerbungen",
       "description": "Mehrschritt mit Uploads, Entwürfen und Validierung für vollständige Einreichungen."
@@ -176,7 +186,7 @@
     },
     "feature3": {
       "title": "Mobile-First",
-      "description": "Optimiert für Mobilgeräte — entdecken und bewerben auch mit schwachem Netz."
+      "description": "Optimiert für Mobilgeräte, entdecken und bewerben auch mit schwachem Netz."
     },
     "feature4": {
       "title": "Kollaborative Prüfung",
@@ -201,6 +211,10 @@
     "feature9": {
       "title": "Einfache Mitgliedschaft",
       "description": "Community kostenlos browsen oder Vollmitglied für 2 $/Monat für alle Bewerbungen."
+    },
+    "feature10": {
+      "title": "Unternehmensprogression",
+      "description": "Von der ersten Bewerbung zu einem klareren, bankfähigen Profil, damit die nächste Chance leichter zu gewinnen ist."
     }
   },
   "apply": {
@@ -213,7 +227,7 @@
     "howItWorksTitle": "So funktioniert's",
     "ready": {
       "title": "Bereit zu bewerben?",
-      "description": "Aktuelle Chancen nach Sektor und Typ — Programme passend zu Ihren Zielen.",
+      "description": "Aktuelle Chancen nach Sektor und Typ, Programme passend zu Ihren Zielen.",
       "cta": "Alle Chancen ansehen"
     },
     "help": {
@@ -230,10 +244,10 @@
   },
   "about": {
     "title": "Über Maali",
-    "hero": "Maali Opportunity Hub verbindet afrikanisches Talent mit Zuschüssen, Jobs, Praktika, Schulungen, Stipendien und Fellowships — mehr als nur eine Liste.",
+    "hero": "Der MAALI Opportunity Hub ist mehr als eine Listenseite. Er ist eine vertrauenswürdige Brücke, die afrikanische Unternehmer, Landwirte, Händler, Fachkräfte, Studierende und Praktikanten mit Zuschüssen, Jobs, Praktika, Trainings, Stipendien, Fellowships und Enterprise-Readiness-Pfaden auf dem Kontinent verbindet.",
     "mission": {
       "title": "Unsere Mission",
-      "description": "Zugang zu Chancen demokratisieren — Förderung, Jobs, Lernen und Karrierewege für afrikanisches Talent.",
+      "description": "Afrikanische Talente und tragfähige Unternehmen mit zugänglichen Chancen verbinden (Finanzierung, Jobs, Lernen und Unternehmensförderung) und den Skills, Aufzeichnungen und Nachweisen, die für Wachstum nötig sind.",
       "cta": "Netzwerk beitreten",
       "stat": "1.000+",
       "statLabel": "Mitglieder & Bewerber unterstützt"
@@ -254,13 +268,13 @@
       },
       "impact": {
         "title": "Wirkung",
-        "description": "Echte Ergebnisse — Zuschüsse, Plätze, Fellowships — in Afrika."
+        "description": "Echte Ergebnisse (Zuschüsse, Plätze, Fellowships) in Afrika."
       }
     },
     "story": {
       "title": "Unsere Geschichte",
       "p1": "Maali entstand aus einer Beobachtung: Afrika hat außergewöhnliches Talent, doch viele finden die richtigen Chancen nicht.",
-      "p2": "Der Name Maali steht für Wert und Reichtum — wirtschaftliche Chancen und Karrierewachstum.",
+      "p2": "Der Name Maali steht für Wert und Reichtum, wirtschaftliche Chancen und Karrierewachstum.",
       "p3": "Mit Technologie, Mitgliedschaft und fairer Prüfung helfen wir Talenten, Programme zu finden, sich zu bewerben und Ergebnisse zu verfolgen.",
       "ctaTitle": "Netzwerk beitreten",
       "ctaDescription": "Teil des Hubs, der afrikanisches Talent mit Chancen verbindet.",
@@ -276,6 +290,10 @@
       "subtitle": "Schließen Sie sich Talenten an, die mit Zuschüssen, Jobs, Praktika und mehr vorankommen.",
       "browse": "Chancen durchsuchen",
       "partner": "Partner werden"
+    },
+    "vision": {
+      "title": "Unsere Vision",
+      "description": "Ein Afrika, in dem jede produktive Person einen klaren Weg von informeller oder früher Aktivität zu formaler, investierbarer Chance hat, über Farmen, Märkte, Startups und Karrieren hinweg."
     }
   },
   "faqPage": {
@@ -470,14 +488,14 @@
   },
   "seo": {
     "home": {
-      "title": "Afrikanische Talente stärken",
-      "description": "Entdecken Sie Zuschüsse, Jobs, Praktika, Schulungen, Stipendien und mehr. Bewerben Sie sich mit Vertrauen auf Maali.",
-      "orgDescription": "Afrikanische Talente durch Zuschüsse, Jobs, Praktika, Schulungen, Stipendien und Karrierechancen stärken"
+      "title": "Von informeller Aktivität zur investierbaren Chance",
+      "description": "Entdecken Sie Zuschüsse, Jobs, Praktika, Trainings, Stipendien und Unternehmensförderung. Bauen Sie Bereitschaft auf und bewerben Sie sich mit Vertrauen auf Afrikas Opportunity-Hub.",
+      "orgDescription": "Afrikanische Talente und Unternehmen mit Finanzierung, Jobs, Lernen und Bereitschaftspfaden verbinden"
     },
     "routes": {
       "home": {
-        "title": "Afrikanische Talente stärken",
-        "description": "Entdecken Sie Zuschüsse, Jobs, Schulungen und Stipendien in Afrika. Bewerben Sie sich mit Vertrauen auf Maali."
+        "title": "Von informeller Aktivität zur investierbaren Chance",
+        "description": "Entdecken Sie Zuschüsse, Jobs, Praktika, Trainings, Stipendien und Unternehmensförderung in Afrika. Activate, Optimise, Scale auf dem Maali-Hub."
       },
       "opportunities": {
         "title": "Chancen",
@@ -513,7 +531,7 @@
       },
       "faq": {
         "title": "Häufig gestellte Fragen",
-        "description": "Antworten auf häufige Fragen zu Maali — Bewerbungen, Berechtigung, Gebühren und Bewertungen."
+        "description": "Antworten auf häufige Fragen zu Maali: Bewerbungen, Berechtigung, Gebühren und Bewertungen."
       },
       "mentors": {
         "title": "Mentoren",
@@ -545,5 +563,34 @@
       "description": "Die gesuchte Chance existiert nicht.",
       "back": "Zurück zu Chancen"
     }
+  },
+  "progression": {
+    "title": "Von informeller Aktivität",
+    "titleHighlight": "zur investierbaren Chance",
+    "body": "Viele produktive Menschen werden übersehen, weil ihre Arbeit unterdokumentiert ist. MAALI hilft Mitgliedern, Praktiken und Nachweise aufzubauen (Umsätze und Ausgaben, klarere Kosten, stärkere Bewerbungen), damit Partner, Programme und Financiers sie fair bewerten können, auch für produktive Kredite, wo diese Pfade existieren.",
+    "buildTitle": "Bereitschaft aufbauen",
+    "build1": "Unternehmens- / Karriereprofil",
+    "build2": "Dokumente und Aufzeichnungen",
+    "build3": "Opportunity-Fit und Eignung",
+    "build4": "Mentoren und Ressourcen",
+    "qualifyTitle": "Sich für mehr qualifizieren",
+    "qualify1": "Stärkere Bewerbungen über die Zeit",
+    "qualify2": "Erfolgsbilanz auf der Plattform",
+    "qualify3": "Bereitschaft für Zuschüsse, Jobs, Kredite, Beschaffung und Investitionspfade",
+    "qualify4": "Partnerprogramme, die Kapital, Kredite oder Placement freischalten, wo verfügbar"
+  },
+  "spotlight": {
+    "badge": "Leitpfad",
+    "title": "Spotlight: Agribusiness & produktives Unternehmen",
+    "body": "Mit Partnern wie Green Agric Technology (GAT) und Jugend-in-Agribusiness-Programmen kann MAALI Kohorten onboarden, Mitglieder profilieren, Chancen matchen (inkl. produktiver Kredite, wo Partner sie anbieten) und Outcomes tracken: Activate, Optimise, Scale. Dieselbe Plattform dient Gründern und Fachkräften in allen anderen gelisteten Sektoren.",
+    "ctaPrimary": "Landwirtschafts-Chancen erkunden",
+    "ctaSecondary": "Über einen Kohorten-Pilot sprechen"
+  },
+  "finalCta": {
+    "title": "Bereit zu aktivieren?",
+    "body": "Treten Sie dem MAALI-Netzwerk bei. Chancen kostenlos browsen oder Full Member werden, um sich zu bewerben und Ihre Progression aufzubauen.",
+    "ctaPrimary": "Loslegen",
+    "ctaSecondary": "Chancen browsen",
+    "ctaPartners": "Partner-Team kontaktieren"
   }
 }

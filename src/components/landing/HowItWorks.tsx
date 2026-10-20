@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Compass, UserPlus, ClipboardList, LineChart, ArrowRight } from "lucide-react";
+import { Rocket, Sparkles, ClipboardList, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      icon: Compass,
+      icon: Rocket,
       title: t('howItWorks.step1.title'),
       description: t('howItWorks.step1.description'),
       color: "text-primary",
@@ -19,7 +19,7 @@ const HowItWorks = () => {
     },
     {
       number: 2,
-      icon: UserPlus,
+      icon: Sparkles,
       title: t('howItWorks.step2.title'),
       description: t('howItWorks.step2.description'),
       color: "text-accent",
@@ -35,7 +35,7 @@ const HowItWorks = () => {
     },
     {
       number: 4,
-      icon: LineChart,
+      icon: TrendingUp,
       title: t('howItWorks.step4.title'),
       description: t('howItWorks.step4.description'),
       color: "text-warning",

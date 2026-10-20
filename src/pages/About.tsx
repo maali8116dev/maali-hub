@@ -54,7 +54,9 @@ const About = () => {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <h2 className="text-3xl font-bold text-foreground mb-4">{t("about.mission.title")}</h2>
-                <p className="text-lg text-muted-foreground mb-6">{t("about.mission.description")}</p>
+                <p className="text-lg text-muted-foreground mb-4">{t("about.mission.description")}</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{t("about.vision.title")}</h3>
+                <p className="text-muted-foreground mb-6">{t("about.vision.description")}</p>
                 <Button variant="hero" size="lg" asChild>
                   <Link to="/join">{t("about.mission.cta")}</Link>
                 </Button>

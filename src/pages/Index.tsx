@@ -3,10 +3,13 @@ import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustIndicators from "@/components/landing/TrustIndicators";
 import HowItWorks from "@/components/landing/HowItWorks";
+import ProgressionSection from "@/components/landing/ProgressionSection";
 import FeaturedProjects from "@/components/landing/FeaturedProjects";
 import Benefits from "@/components/landing/Benefits";
 import FeatureShowcase from "@/components/landing/FeatureShowcase";
+import AgriSpotlight from "@/components/landing/AgriSpotlight";
 import SuccessStoriesSection from "@/components/landing/SuccessStoriesSection";
+import FinalCta from "@/components/landing/FinalCta";
 import MembershipSection from "@/components/MembershipSection";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/seo/SEO";
@@ -49,10 +52,13 @@ const Index = () => {
           <MembershipSection />
           <TrustIndicators />
           <HowItWorks />
+          <ProgressionSection />
           <FeaturedProjects />
           <Benefits />
           <FeatureShowcase />
+          <AgriSpotlight />
           <SuccessStoriesSection />
+          <FinalCta />
         </main>
         <Footer />
       </div>

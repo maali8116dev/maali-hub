@@ -1,11 +1,12 @@
 {
   "hero": {
-    "badge": "Join 500+ members across Africa",
-    "headline1": "Empowering",
-    "headline2": "Businesses",
-    "headline3": "to Build Wealth",
-    "subheadline": "One hub to discover and apply for grants, jobs, internships, trainings, scholarships, and more.",
-    "description": "Whether you're building a venture, growing your career, or starting as a student or intern — connect with programs, partners, and reviewers on one trusted platform.",
+    "badge": "Join African talent building careers and ventures with MAALI",
+    "headline1": "From informal activity",
+    "headline2": "to investable",
+    "headline3": "opportunity",
+    "subheadline": "Discover grants, jobs, internships, trainings, scholarships, loans, and enterprise support. Build the profile and evidence that open larger formal opportunities across agriculture, technology, finance, business, environment, and more.",
+    "description": "Whether you farm, trade, build a startup, or start your career, MAALI meets you where you are and helps you move forward.",
+    "imageAlt": "African talent and enterprises building opportunity",
     "startApplication": "Get Started",
     "viewProjects": "Browse Opportunities",
     "browseOpportunities": "Browse Opportunities",
@@ -20,9 +21,9 @@
       "tag": "Fintech"
     },
     "previewCard2": {
-      "name": "Kofi's Program",
-      "detail": "EdTech Fellowship",
-      "tag": "Education"
+      "name": "Ada's Cooperative",
+      "detail": "Grant shortlisted",
+      "tag": "Agriculture"
     },
     "previewCard3": {
       "name": "Samuel's Role",
@@ -33,7 +34,8 @@
   "membership": {
     "badge": "Membership",
     "title": "Join the MAALI Network",
-    "subtitle": "For entrepreneurs, professionals, students, and interns. Browse for free, or unlock applications for less than a cup of coffee a month.",
+    "subtitle": "For entrepreneurs, farmers, traders, professionals, students, and interns. Browse free, or unlock applications and readiness tools for less than a cup of coffee a month.",
+    "partnerCallout": "Partners may offer productive loans, revolving finance, or cohort programmes (including agribusiness pathways). Membership on MAALI unlocks applications across the network; loan products are offered by partners where available, not guaranteed with every membership.",
     "community": {
       "name": "Community",
       "price": "Free",
@@ -63,49 +65,86 @@
     "titleHighlight": "Organizations",
     "worldwide": "Worldwide",
     "logoLabel": "Logo {{index}}",
-    "subtitle": "Our focus on honesty, integrity and competence makes us the preferred choice for our partners and clients."
+    "subtitle": "MAALI works with training, finance, and opportunity partners to bridge skills, capital, and growth, including agribusiness cohorts where relevant."
   },
   "howItWorks": {
     "title": "How It",
     "titleHighlight": "Works",
-    "subtitle": "Four steps from discovery to outcome — for entrepreneurs, professionals, students, and interns pursuing grants, jobs, internships, trainings, scholarships, and more.",
+    "subtitle": "A clear path from where you are today to where you can go: progressive readiness, not one-off luck.",
     "step1": {
-      "title": "Discover Opportunities",
-      "description": "Browse grants, jobs, internships, trainings, scholarships, fellowships, and other programs. Filter by sector, location, and opportunity type."
+      "title": "Activate",
+      "description": "Join MAALI, complete your profile, and identify the right opportunity: grant, job, training, scholarship, loan, or enterprise support."
     },
     "step2": {
-      "title": "Join Maali",
-      "description": "Create your account and profile. Join free as Community to browse, or become a Full Member to apply to any opportunity on the platform."
+      "title": "Optimise",
+      "description": "Strengthen eligibility: documents, records, cash-flow clarity, and fit. Use guides, mentors, and guided applications."
     },
     "step3": {
-      "title": "Apply with Confidence",
-      "description": "Use our guided multi-step application. Upload documents, save drafts, and submit when you're ready — whether you're applying for funding or a career program."
+      "title": "Apply with confidence",
+      "description": "Submit through multi-step applications with drafts, uploads, and clear requirements."
     },
     "step4": {
-      "title": "Review & Track Outcomes",
-      "description": "Expert reviewers evaluate applications fairly. Follow status updates in your dashboard through review, feedback, and final selection or award."
+      "title": "Scale & track",
+      "description": "Follow review outcomes, build a track record, and progress toward larger formal opportunities: funding, loans, roles, or investment readiness."
     },
     "cta": "Get Started Today"
+  },
+  "progression": {
+    "title": "From informal activity",
+    "titleHighlight": "to investable opportunity",
+    "body": "Many productive people are overlooked because their work is under-documented. MAALI helps members build practices and evidence (sales and expenses, clearer costing, stronger applications) so partners, programmes, and financiers can assess them fairly, including for productive loans where those pathways exist.",
+    "buildTitle": "Build readiness",
+    "build1": "Business / career profiling",
+    "build2": "Documents and records",
+    "build3": "Opportunity fit and eligibility",
+    "build4": "Mentors and resources",
+    "qualifyTitle": "Qualify for more",
+    "qualify1": "Stronger applications over time",
+    "qualify2": "Track record on the platform",
+    "qualify3": "Readiness for grants, jobs, loans, procurement, and investment pathways",
+    "qualify4": "Partner programmes that unlock capital, loans, or placement where available"
+  },
+  "spotlight": {
+    "badge": "Flagship pathway",
+    "title": "Spotlight: Agribusiness & productive enterprise",
+    "body": "With partners like Green Agric Technology (GAT) and youth-in-agribusiness programmes, MAALI can onboard cohorts, profile members, match opportunities (including productive loans where partners offer them), and track outcomes: Activate, Optimise, Scale. The same platform serves founders and professionals in every other sector we list.",
+    "ctaPrimary": "Explore agriculture opportunities",
+    "ctaSecondary": "Talk to us about a cohort pilot"
+  },
+  "finalCta": {
+    "title": "Ready to Activate?",
+    "body": "Join the MAALI network. Browse opportunities free, or become a Full Member to apply and build your progression story.",
+    "ctaPrimary": "Get Started",
+    "ctaSecondary": "Browse Opportunities",
+    "ctaPartners": "Contact partners team"
   },
   "benefits": {
     "title": "Why Choose",
     "titleHighlight": "Maali",
-    "subtitle": "Built for African talent — founders, professionals, students, and interns — with one place to find and pursue real opportunities.",
+    "subtitle": "Built for African talent and enterprises (founders, farmers, traders, professionals, students, and interns) with one place to find and pursue real opportunities.",
     "benefit1": {
-      "title": "Fast & Simple",
-      "description": "Complete applications in minutes, not hours. Our guided process works for grants, jobs, internships, and training programs alike."
+      "title": "Meet people where they are",
+      "description": "Informal or early-stage? We treat that as a starting point, not a dead end."
     },
     "benefit2": {
       "title": "Every Opportunity Type",
-      "description": "Grants, jobs, internships, trainings, scholarships, fellowships, accelerators, and more — curated for African applicants."
+      "description": "Grants, jobs, internships, trainings, scholarships, fellowships, accelerators, loans, and partner programmes."
     },
     "benefit3": {
-      "title": "Expert Support",
-      "description": "Get guidance from experienced mentors and reviewers throughout your application and selection journey."
+      "title": "Readiness that compounds",
+      "description": "Profile, documents, and outcomes that help you qualify for more over time."
     },
     "benefit4": {
-      "title": "Proven Outcomes",
-      "description": "Join members who've secured funding, placements, fellowships, and career programs through a fair, transparent process."
+      "title": "Fair review & trusted partners",
+      "description": "Transparent evaluation with organisations building Africa’s pipeline."
+    },
+    "benefit5": {
+      "title": "Sector breadth",
+      "description": "Agriculture and agribusiness and technology, FinTech, business, environment, and more."
+    },
+    "benefit6": {
+      "title": "Built for real life",
+      "description": "Mobile-first, multilingual, membership that keeps access simple."
     }
   },
   "testimonials": {
@@ -153,7 +192,7 @@
   "featuredProjects": {
     "title": "Featured",
     "titleHighlight": "Opportunities",
-    "subtitle": "Explore programs across sectors — from agriculture to technology — whether you're seeking funding, a role, an internship, or professional development.",
+    "subtitle": "Explore programmes across sectors: agriculture, technology, finance, business, environment, and more, whether you seek funding, a loan, a role, an internship, or enterprise support.",
     "viewAll": "View All Opportunities"
   },
   "successStories": {
@@ -165,7 +204,7 @@
   "featureShowcase": {
     "title": "Built for",
     "titleHighlight": "African Talent",
-    "subtitle": "Every feature supports founders, professionals, students, and interns navigating Africa's opportunity landscape.",
+    "subtitle": "Every feature supports founders, farmers, traders, professionals, students, and interns navigating Africa's opportunity landscape.",
     "feature1": {
       "title": "Guided Applications",
       "description": "Multi-step applications with document uploads, draft saving, and validation so your submission is complete and compelling."
@@ -201,6 +240,10 @@
     "feature9": {
       "title": "Simple Membership",
       "description": "Browse free as Community, or become a Full Member for $2/month to apply to any opportunity type on the platform."
+    },
+    "feature10": {
+      "title": "Enterprise progression",
+      "description": "Move from first application to a clearer, bankable profile so the next opportunity is easier to win."
     }
   },
   "apply": {
@@ -213,7 +256,7 @@
     "howItWorksTitle": "How It Works",
     "ready": {
       "title": "Ready to Apply?",
-      "description": "Browse current opportunities across sectors and types — find programs that match your venture or career goals.",
+      "description": "Browse current opportunities across sectors and types, find programs that match your venture or career goals.",
       "cta": "View All Opportunities"
     },
     "help": {
@@ -230,14 +273,19 @@
   },
   "about": {
     "title": "About Maali",
-    "hero": "Maali Opportunity Hub is more than a listing site — it's a trusted bridge connecting African entrepreneurs, professionals, students, and interns with grants, jobs, internships, trainings, scholarships, fellowships, and other programs across the continent.",
+    "hero": "MAALI Opportunity Hub is more than a listings site. It is a trusted bridge connecting African entrepreneurs, farmers, traders, professionals, students, and interns with grants, jobs, internships, trainings, scholarships, fellowships, and enterprise-readiness pathways across the continent.",
     "mission": {
       "title": "Our Mission",
-      "description": "To democratize access to opportunities — funding, jobs, learning, and career pathways — for African talent, fostering innovation and sustainable economic growth across the continent.",
+      "description": "Connect African talent and viable enterprises with accessible opportunities (funding, jobs, learning, and enterprise support) and the skills, records, and evidence needed to grow.",
       "cta": "Join the Network",
       "stat": "1,000+",
       "statLabel": "Members & Applicants Supported"
     },
+    "vision": {
+      "title": "Our Vision",
+      "description": "An Africa where every productive person has a clear path from informal or early-stage activity to formal, investable opportunity across farms, markets, startups, and careers."
+    },
+
     "values": {
       "title": "Our Values",
       "empowerment": {
@@ -254,13 +302,13 @@
       },
       "impact": {
         "title": "Impact",
-        "description": "Driving real outcomes — grants, placements, fellowships, and career growth — for communities across Africa."
+        "description": "Driving real outcomes (grants, placements, fellowships, and career growth) for communities across Africa."
       }
     },
     "story": {
       "title": "Our Story",
       "p1": "Maali was born from a simple observation: Africa is home to extraordinary talent, yet many founders, professionals, students, and interns still struggle to find and apply for the right opportunities.",
-      "p2": "Our name Maali relates to wealth and value in Somali — reflecting economic opportunity and career growth, not aid alone.",
+      "p2": "Our name Maali relates to wealth and value in Somali, reflecting economic opportunity and career growth, not aid alone.",
       "p3": "Through technology, membership, and a fair review process, we help African talent discover programs, apply with confidence, and track outcomes on one platform.",
       "ctaTitle": "Join the Network",
       "ctaDescription": "Be part of the hub connecting African talent to grants, jobs, internships, trainings, and more.",
@@ -470,14 +518,14 @@
   },
   "seo": {
     "home": {
-      "title": "Empowering African Talent",
-      "description": "Discover grants, jobs, internships, trainings, scholarships, and more. Apply with confidence and track outcomes on Africa's opportunity hub.",
-      "orgDescription": "Empowering African talent through grants, jobs, internships, trainings, scholarships, and career opportunities"
+      "title": "From informal activity to investable opportunity",
+      "description": "Discover grants, jobs, internships, trainings, scholarships, loans, and enterprise support. Build readiness and apply with confidence on Africa's opportunity hub.",
+      "orgDescription": "Connecting African talent and enterprises with funding, loans, jobs, learning, and enterprise-readiness pathways"
     },
     "routes": {
       "home": {
-        "title": "Empowering African Talent",
-        "description": "Discover grants, jobs, internships, trainings, scholarships, and more across Africa. Apply with confidence and track outcomes on the Maali opportunity hub."
+        "title": "From informal activity to investable opportunity",
+        "description": "Discover grants, jobs, internships, trainings, scholarships, and enterprise support across Africa. Activate, Optimise, Scale on the Maali opportunity hub."
       },
       "opportunities": {
         "title": "Opportunities",
@@ -513,7 +561,7 @@
       },
       "faq": {
         "title": "Frequently Asked Questions",
-        "description": "Answers to common questions about Maali — applications, eligibility, fees, reviews, and how opportunities work."
+        "description": "Answers to common questions about Maali: applications, eligibility, fees, reviews, and how opportunities work."
       },
       "mentors": {
         "title": "Mentors",
