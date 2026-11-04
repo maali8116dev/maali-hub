@@ -265,27 +265,17 @@ describe('Notifications Integration Tests', () => {
     // Wait a bit for database to process
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Verify notifications exist in database
-    const { data: notifications, error } = await (supabase
+    // Verify notifications exist in database. Only look at the IDs this run
+    // created — CI runs concurrently against the same seeded user.
+    const { data: testNotifications, error } = await (supabase
       .from('notifications')
       .select('*')
       .eq('user_id', testUserId)
-      .order('created_at', { ascending: false })
-      .limit(10) as any);
+      .in('id', createdNotificationIds) as any);
 
     expect(error).toBeNull();
-    expect(notifications).toBeDefined();
-    expect(notifications!.length).toBeGreaterThanOrEqual(5);
-
-    // Verify we can find our test notifications
-    const testNotifications = notifications!.filter((n: any) => 
-      n.title.startsWith('Test Notification')
-    );
-
-    expect(testNotifications.length).toBeGreaterThanOrEqual(5);
-
-    // Store IDs for cleanup
-    createdNotificationIds = testNotifications.map((n: any) => n.id);
+    expect(testNotifications).toBeDefined();
+    expect(testNotifications!.length).toBe(5);
 
     // Verify notification properties
     testNotifications.forEach((notification: any) => {
