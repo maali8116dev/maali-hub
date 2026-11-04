@@ -1,0 +1,2680 @@
+{
+  "memberGate": {
+    "title": "Full membership required",
+    "description": "Community membership lets you browse opportunities. Upgrade to a Full Member to apply, upload documents, and track applications.",
+    "menuLocked": "Full Member feature"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "applications": "My Applications",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "header": {
+    "signOut": "Sign Out",
+    "signIn": "Sign In"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "applications": "My Applications",
+    "documents": "Documents",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! Here's an overview of your activity.",
+    "helpTooltip": "Your dashboard shows an overview of your applications, profile status, and quick actions. Use the stats cards to track your progress.",
+    "stats": {
+      "totalApplications": "Total Applications",
+      "totalApplicationsDesc": "Total number of applications you've submitted, including drafts, pending, approved, and rejected applications.",
+      "allTimeApplications": "All time applications",
+      "pending": "Pending",
+      "pendingDesc": "Applications currently being reviewed by our team. You'll be notified when a decision is made.",
+      "underReview": "Under review",
+      "approved": "Approved",
+      "successfullyFunded": "Successfully funded",
+      "rejected": "Rejected",
+      "notSelected": "Not selected"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "startNewApplication": "Start New Application",
+      "browseOpportunities": "Browse Opportunities",
+      "viewAllApplications": "View All Applications"
+    },
+    "profileCompletion": {
+      "title": "Profile Completion",
+      "status": "Profile Status",
+      "complete": "Complete",
+      "completeProfile": "Complete your profile →",
+      "viewProfile": "View your profile →"
+    },
+    "recentApplications": {
+      "title": "Recent Applications",
+      "viewAll": "View All",
+      "submitted": "Submitted"
+    },
+    "emptyState": {
+      "noApplications": "No applications yet",
+      "noApplicationsDesc": "Start applying to opportunities to see your applications here.",
+      "browseOpportunities": "Browse Opportunities",
+      "viewGuide": "View Guide",
+      "tips": {
+        "completeProfile": "Complete your profile before applying",
+        "readRequirements": "Read project requirements carefully",
+        "prepareDocuments": "Prepare all required documents in advance",
+        "submitBeforeDeadline": "Submit applications before deadlines"
+      }
+    },
+    "profileTip": {
+      "title": "Complete your profile",
+      "description": "Your profile is {{percentage}}% complete. A complete profile increases your chances of approval.",
+      "action": "Complete Profile"
+    },
+    "onboardingChecklist": {
+      "title": "Getting Started",
+      "description": "Complete these steps to get the most out of Maali",
+      "progress": "Progress",
+      "progressCount": "{{completed}} of {{total}} completed",
+      "tasksCount": "{{completed}} of {{total}} tasks completed",
+      "viewFull": "View Full Checklist",
+      "allSet": "All set! You're ready to go.",
+      "items": {
+        "emailVerify": {
+          "label": "Verify your email address",
+          "description": "Check your inbox for the verification link"
+        },
+        "completeProfile": {
+          "label": "Complete your profile",
+          "description": "Add your business information to increase approval chances"
+        },
+        "verifyKyc": {
+          "label": "Verify your identity (KYC)",
+          "pending": "Your documents are under review",
+          "rejected": "Update your documents and resubmit for verification",
+          "idle": "Upload ID and a selfie so we can verify your identity"
+        },
+        "browseOpportunities": {
+          "label": "Browse opportunities",
+          "description": "Explore available opportunities that match your business"
+        },
+        "submitApplication": {
+          "label": "Submit your first application",
+          "description": "Apply for opportunities to get started"
+        }
+      },
+      "actions": {
+        "resendEmail": "Resend Email",
+        "completeProfile": "Complete Profile",
+        "verifyKyc": "Verify KYC",
+        "resubmitKyc": "Resubmit KYC",
+        "browseOpportunities": "Browse Opportunities",
+        "startApplication": "Start Application"
+      }
+    }
+  },
+  "applications": {
+    "title": "My Applications",
+    "subtitle": "Track and manage your applications",
+    "helpTooltip": "Track the status of all your applications. You can filter by status, search, and view detailed information about each application.",
+    "firstTimeTip": {
+      "title": "Ready to apply for opportunities?",
+      "description": "Browse available opportunities and submit your first application. Make sure your profile is complete to increase your chances of approval.",
+      "action": "Browse Opportunities"
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "under_review": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "draft": "Draft",
+      "drafts": "Drafts"
+    },
+    "columns": {
+      "applicant": "Applicant",
+      "project": "Project",
+      "sector": "Sector",
+      "country": "Country",
+      "status": "Status",
+      "submitted": "Submitted",
+      "actions": "Actions",
+      "email": "Email",
+      "rank": "Rank",
+      "avgScore": "Avg Score",
+      "reviews": "Reviews",
+      "reviewDeadline": "Review Deadline",
+      "daysPending": "Days Pending"
+    },
+    "statusDescriptions": {
+      "pending": "Your application is being reviewed by our team",
+      "approved": "Congratulations! Your application has been approved",
+      "rejected": "Your application was not selected this time",
+      "draft": "This application is saved but not yet submitted",
+      "under_review": "Reviewers are scoring your application, or admins are deciding the outcome",
+      "default": "Application status"
+    },
+    "actions": {
+      "continueApplication": "Continue Application",
+      "applicationClosed": "Application Closed",
+      "viewDetails": "View Details"
+    },
+    "table": {
+      "allApplications": "All Applications",
+      "pendingApplications": "Pending Applications",
+      "approvedApplications": "Approved Applications",
+      "rejectedApplications": "Rejected Applications",
+      "draftApplications": "Draft Applications",
+      "searchPlaceholder": "Search by project title, sector, or country..."
+    },
+    "emptyState": {
+      "errorTitle": "Error loading applications",
+      "errorDesc": "There was an error loading your applications. Please try again later.",
+      "noApplications": "No applications yet",
+      "noApplicationsDesc": "Start by browsing available opportunities and submitting your first application.",
+      "noFilteredApplications": "No",
+      "noFilteredApplicationsDesc": "Try adjusting your filter criteria to find more applications.",
+      "browseOpportunities": "Browse Opportunities",
+      "clearFilter": "Clear Filter",
+      "viewGuide": "View Guide",
+      "tips": {
+        "completeProfile": "Complete your profile to increase approval chances",
+        "readRequirements": "Read project requirements carefully before applying",
+        "saveDrafts": "You can save applications as drafts and submit later",
+        "checkDeadlines": "Check application deadlines to avoid missing opportunities"
+      }
+    },
+    "form": {
+      "page": {
+        "title": "Application Form",
+        "subtitleWithProject": "Complete the form below to apply for this funding opportunity.",
+        "subtitleGeneric": "Complete the form below to start your application.",
+        "backToProject": "Back to Project Details",
+        "backToProjects": "Back to Projects",
+        "loading": "Loading...",
+        "closedTitle": "Applications Closed",
+        "closedDescription": "This opportunity is closed. New applications and edits are disabled.",
+        "backToOpportunity": "Back to Opportunity",
+        "membershipCta": "View membership options"
+      },
+      "steps": {
+        "applicantInfo": "Applicant Information",
+        "organization": "Organization Details (Optional)",
+        "projectOverview": "Project Overview",
+        "socialLinks": "Social Links",
+        "documents": "Upload Documents",
+        "review": "Review",
+        "compliance": "Compliance & Declarations",
+        "submit": "Submit"
+      },
+      "progress": {
+        "stepOf": "Step {{current}} of {{total}}",
+        "saveDraft": "Save Draft",
+        "saving": "Saving...",
+        "lastSaved": "Last saved: {{time}}",
+        "percentComplete": "{{percent}}% Complete"
+      },
+      "nav": {
+        "previous": "Previous",
+        "next": "Next",
+        "submit": "Submit Application",
+        "submitting": "Submitting...",
+        "verifyEmailToSubmit": "Verify Email to Submit"
+      },
+      "requiredMark": "All fields marked with * are required.",
+      "notProvided": "Not provided",
+      "edit": "Edit",
+      "yes": "Yes",
+      "location": "Location",
+      "declarationDate": "Declaration Date:",
+      "step1": {
+        "title": "Applicant Information",
+        "description": "Tell us about yourself or your organization.",
+        "applicantType": "Applicant Type",
+        "applicantTypePlaceholder": "Select applicant type",
+        "fullLegalName": "Full Legal Name",
+        "fullLegalNamePlaceholder": "Enter full legal name",
+        "organizationName": "Organization Name",
+        "organizationNamePlaceholder": "Enter organization name",
+        "country": "Country of Residence / Registration",
+        "countryPlaceholder": "Select country",
+        "cityRegion": "City / Region",
+        "cityRegionPlaceholder": "Enter city or region",
+        "email": "Email Address",
+        "emailPlaceholder": "your.email@example.com",
+        "phone": "Phone Number",
+        "phonePlaceholder": "Enter phone number"
+      },
+      "step2": {
+        "individualSkip": "These organization details are optional and usually not needed for individual applicants. You can proceed to the next step.",
+        "title": "Organization Details (Optional)",
+        "description": "Share additional context about your organization's credibility and capacity. You can also provide this information in supporting documents.",
+        "yearEstablished": "Year Established",
+        "yearEstablishedPlaceholder": "2020",
+        "teamMembers": "Number of Team Members",
+        "teamMembersPlaceholder": "10",
+        "coreMission": "Core Mission / Purpose",
+        "coreMissionPlaceholder": "Briefly describe your organization's core mission and purpose...",
+        "max200Words": "Maximum 200 words",
+        "primarySectors": "Primary sector(s)",
+        "otherSector": "Other sector (Please specify)",
+        "otherSectorPlaceholder": "Enter other sector",
+        "keyTeam": "Key Team Members & Roles",
+        "keyTeamPlaceholder": "List key team members and their roles...",
+        "previousGrants": "Previous grants or funding received",
+        "previousGrantsDetails": "Previous Grants / Funding Details",
+        "previousGrantsPlaceholder": "Provide details about previous grants or funding received...",
+        "max400Words": "Maximum 400 words"
+      },
+      "step3": {
+        "grant": {
+          "title": "Project Overview",
+          "hint": "Tell us what you want funding for.",
+          "titleLabel": "Project Title",
+          "titlePlaceholder": "Enter project title",
+          "summaryLabel": "Project Summary",
+          "summaryPlaceholder": "Provide a summary of your project (minimum 30 words)...",
+          "locationLabel": "Geographic focus (optional)",
+          "locationPlaceholder": "Where will the project run? Leave blank to use your city/country from step 1."
+        },
+        "nonGrant": {
+          "title": "Application Overview",
+          "hint": "Tell us about your goals and why you're a strong fit for this opportunity.",
+          "titleLabel": "Application Title",
+          "titlePlaceholder": "Enter application title",
+          "summaryLabel": "Statement of Purpose",
+          "summaryPlaceholder": "Briefly describe your goals, fit, and expected outcomes (minimum 30 words)...",
+          "locationLabel": "Location / Geographic Focus",
+          "locationPlaceholder": "Where are you based or where will this opportunity apply?"
+        },
+        "summaryWordLimit": "Must be between 30 and 400 words"
+      },
+      "step4": {
+        "title": "Social Links",
+        "description": "Share your professional and social media profiles (optional). This helps us learn more about you and your work.",
+        "linkedin": "LinkedIn Profile URL",
+        "linkedinPlaceholder": "https://linkedin.com/in/yourprofile",
+        "github": "GitHub Profile URL",
+        "githubPlaceholder": "https://github.com/yourusername",
+        "twitter": "Twitter/X Profile URL",
+        "twitterPlaceholder": "https://twitter.com/yourusername",
+        "website": "Website URL",
+        "websitePlaceholder": "https://yourwebsite.com",
+        "other": "Other Social Links",
+        "otherPlaceholder": "List any other relevant social media profiles or links (e.g., Instagram, Facebook, portfolio, etc.)",
+        "max100Words": "Maximum 100 words"
+      },
+      "step5": {
+        "title": "Upload Documents",
+        "description": "Upload supporting documents for your application (optional)."
+      },
+      "step6": {
+        "title": "Review Your Application",
+        "description": "Please review all the information below before proceeding.",
+        "registrationId": "Registration / ID Number:",
+        "previousGrantsFunding": "Previous Grants / Funding:",
+        "fromLibrary": "From Library:",
+        "newUploads": "New Uploads:",
+        "documentCount": "{{count}} document(s)",
+        "noDocuments": "No documents selected",
+        "documentsOnSubmit": "Documents will be linked/uploaded when you submit your application",
+        "linkedin": "LinkedIn:",
+        "github": "GitHub:",
+        "twitter": "Twitter/X:",
+        "website": "Website:"
+      },
+      "step7": {
+        "title": "Compliance & Declarations",
+        "description": "Please read and confirm the following declarations. All fields are required for governance purposes.",
+        "informationAccurateLabel": "Confirmation that information is accurate",
+        "informationAccurateDesc": "I confirm that all information provided in this application is accurate, complete, and truthful to the best of my knowledge.",
+        "conflictLabel": "Conflict of interest declaration",
+        "conflictDesc": "I declare that I have disclosed any potential conflicts of interest that may affect this application or its evaluation.",
+        "reportingLabel": "Agreement to reporting requirements",
+        "reportingDesc": "I agree to provide regular progress reports, financial statements, and other documentation as required by the funding organization.",
+        "dataProcessingLabel": "Consent to data processing",
+        "dataProcessingDesc": "I consent to the processing of my personal data and application information for the purposes of evaluation, administration, and communication related to this application."
+      },
+      "step8": {
+        "title": "Submit Your Application",
+        "description": "Review the confirmation notice below and click the submit button to finalize your application.",
+        "notice": "By submitting this application, you confirm that all the information provided is accurate and complete. Your application will be reviewed by our team and you will be notified of the outcome via email."
+      },
+      "emailVerification": {
+        "title": "Email Verification Required",
+        "description": "Please verify your email address before submitting an application. Check your inbox for the verification link, or visit your dashboard to resend it."
+      },
+      "options": {
+        "applicantTypes": {
+          "Individual": "Individual",
+          "Organization": "Organization",
+          "Startup / SME": "Startup / SME",
+          "NGO / Non-profit": "NGO / Non-profit",
+          "Research / Academic": "Research / Academic"
+        },
+        "sectors": {
+          "Health": "Health",
+          "Education": "Education",
+          "Technology": "Technology",
+          "Agriculture": "Agriculture",
+          "Environment": "Environment",
+          "Creative": "Creative",
+          "Other": "Other"
+        }
+      },
+      "validation": {
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Please enter a valid international phone number",
+        "applicantTypeRequired": "Please select an applicant type",
+        "fullLegalNameRequired": "Full legal name is required",
+        "countryRequired": "Country of residence is required",
+        "cityRegionRequired": "City/region is required",
+        "yearInvalid": "Please enter a valid year",
+        "yearFuture": "Year cannot be in the future",
+        "coreMissionMaxWords": "Core mission / purpose must not exceed 200 words",
+        "teamMembersMin": "Number of team members must be at least 1",
+        "keyTeamMaxWords": "Key team members & roles must not exceed 200 words",
+        "previousGrantsMaxWords": "Previous grants / funding details must not exceed 400 words",
+        "previousGrantsDetailsRequired": "Please provide details about previous grants or funding",
+        "projectTitleRequired": "Project title is required",
+        "projectSummaryRequired": "Project summary is required",
+        "projectSummaryMinWords": "Project summary must be at least 30 words",
+        "projectSummaryMaxWords": "Project summary must not exceed 400 words",
+        "informationAccurateRequired": "You must confirm that the information provided is accurate",
+        "conflictOfInterestRequired": "You must declare any conflicts of interest",
+        "dataProcessingRequired": "You must consent to data processing",
+        "reportingRequirementsRequired": "You must agree to reporting requirements",
+        "linkedinUrlInvalid": "Please enter a valid LinkedIn URL",
+        "githubUrlInvalid": "Please enter a valid GitHub URL",
+        "twitterUrlInvalid": "Please enter a valid Twitter/X URL",
+        "websiteUrlInvalid": "Please enter a valid website URL",
+        "otherSocialMaxWords": "Other social links must not exceed 100 words"
+      },
+      "toasts": {
+        "draftRestored": {
+          "title": "Draft Restored",
+          "description": "Your previously saved draft has been loaded."
+        },
+        "validationError": {
+          "title": "Validation Error",
+          "description": "Please fill in all required fields correctly."
+        },
+        "emailVerificationRequired": {
+          "title": "Email Verification Required",
+          "description": "Please verify your email address before submitting an application."
+        },
+        "projectRequired": {
+          "title": "Project Required",
+          "description": "Please select a project to apply for."
+        },
+        "missingInformation": {
+          "title": "Missing Information",
+          "description": "Please complete all required fields before submitting."
+        },
+        "complianceRequired": {
+          "title": "Compliance Required",
+          "description": "Please confirm all compliance declarations before submitting."
+        },
+        "applicationsClosed": {
+          "title": "Applications Closed",
+          "description": "This project is closed. You can no longer submit or edit applications."
+        },
+        "membershipRequired": {
+          "title": "Membership required",
+          "description": "Become a Full Member to submit applications."
+        },
+        "uploadingDocuments": {
+          "title": "Uploading Documents",
+          "description_one": "Uploading {{count}} document...",
+          "description_other": "Uploading {{count}} documents..."
+        },
+        "uploadPartialFailure": {
+          "title": "Some uploads failed",
+          "description": "Some documents failed to upload. Your application will still be submitted, but without those files."
+        },
+        "alreadyApplied": {
+          "title": "Already Applied",
+          "description": "You've already submitted an application for this opportunity. Check your dashboard to view its status."
+        },
+        "opportunityClosed": {
+          "title": "Applications Closed",
+          "description": "This opportunity is no longer accepting applications."
+        },
+        "submitSuccess": {
+          "title": "Application Submitted",
+          "description": "Your application has been submitted successfully!"
+        },
+        "tooManySubmissions": {
+          "title": "Too Many Submissions",
+          "description": "You've submitted too many applications recently. Please wait an hour and try again."
+        },
+        "submitFailed": {
+          "title": "Submission Failed",
+          "description": "Something went wrong submitting your application. Please try again."
+        },
+        "errors": {
+          "alreadyApplied": "You've already submitted an application for this opportunity.",
+          "projectClosed": "This opportunity is no longer accepting applications.",
+          "membershipRequired": "Full membership is required to apply. Join MAALI as a Full Member to continue.",
+          "unauthorized": "Your session has expired. Please sign in again to continue.",
+          "missingProjectId": "Something went wrong. Please refresh the page and try again.",
+          "validationError": "We couldn't validate your application. Please try again shortly.",
+          "invalidBody": "Something went wrong with your form data. Please refresh and try again.",
+          "internalError": "Something went wrong on our end. Please try again or contact support if the issue persists.",
+          "generic": "Something went wrong submitting your application. Please try again."
+        }
+      },
+      "documents": {
+        "cv": "CV / Resume",
+        "coverLetter": "Cover letter",
+        "invalidFile": "Invalid File",
+        "fromLibrary": "From Your Library",
+        "uploadNew": "Upload New Files",
+        "uploadNewDocuments": "Upload New Documents",
+        "selectFromLibrary": "Select from library",
+        "noLibraryDocs": "No documents in your library yet.",
+        "uploadHint": "Upload files or select from your document library.",
+        "removeFile": "Remove file",
+        "deleteConfirmTitle": "Remove file?",
+        "deleteConfirmDescription": "This will remove \"{{name}}\" from your selection. The file will not be deleted from your library.",
+        "cancel": "Cancel",
+        "remove": "Remove",
+        "requiredSlotsTitle": "Required documents",
+        "requiredSlotsDescription": "CV and cover letter are required for this opportunity type.",
+        "recommendedTitle": "Recommended Supporting Documents",
+        "recommendedIntro": "Upload any documents that strengthen your application. Recommended items:",
+        "recommendedRequiredNote": "You can upload all files in this one dropzone. Documents marked with * are required.",
+        "selectFromLibraryTitle": "Select from Library",
+        "selectFromLibraryHint": "Choose documents from your library to reuse for this application",
+        "selectedCount": "({{count}} selected)",
+        "fromLibrarySection": "From your document library",
+        "otherLibrarySection": "Other saved files",
+        "uploadDropzoneTitle": "Upload Files",
+        "fileTypesHint": "PDF, DOC, DOCX, and common image formats — max 10MB per file.",
+        "chooseFiles": "Choose Files",
+        "uploadOnSubmitHint": "Files will be uploaded when you submit your application",
+        "filesToUploadTitle": "Files to upload on submit ({{count}})",
+        "readyToUpload": "Ready to upload",
+        "orSeparator": "OR",
+        "opportunityRequirementsTitle": "Required documents for this opportunity",
+        "fileTooLarge": "File \"{{fileName}}\" is too large. Maximum size is 10MB.",
+        "invalidFileType": "File \"{{fileName}}\" has an invalid type. Allowed types: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP.",
+        "individualRecommended": {
+          "id": "Government-issued ID (if requested)",
+          "proposal": "Project proposal or concept note"
+        },
+        "organizationRecommended": {
+          "registration": "Registration certificate or legal incorporation document",
+          "proposal": "Project proposal or concept note"
+        },
+        "startupRecommended": {
+          "id": "Government-issued ID (if requested)",
+          "proposal": "Project proposal or concept note",
+          "budget": "Budget or simple financial plan",
+          "cv": "CV/portfolio or relevant experience documents"
+        },
+        "ngoRecommended": {
+          "registration": "Registration certificate or legal incorporation document",
+          "profile": "Organization profile or mission document",
+          "proposal": "Project proposal or concept note",
+          "budget": "Budget/financial plan (plus statements where available)",
+          "team": "Team CVs and key personnel profiles"
+        }
+      }
+    },
+    "detail": {
+      "title": "Application Details",
+      "back": "Back",
+      "applicationId": "ID: {{id}}",
+      "backToApplications": "Back to Applications",
+      "notFound": {
+        "title": "Application Not Found",
+        "description": "The application you're looking for doesn't exist or you don't have access to it.",
+        "viewAll": "View All Applications"
+      },
+      "metadata": {
+        "title": "Application Details",
+        "submitted": "Submitted:",
+        "status": "Status:"
+      },
+      "applicantInfo": {
+        "title": "Applicant Information",
+        "applicantType": "Applicant Type",
+        "fullLegalName": "Full Legal Name",
+        "organizationName": "Organization Name",
+        "registrationId": "Registration ID Number",
+        "contactEmail": "Contact Email",
+        "contactPhone": "Contact Phone",
+        "countryOfResidence": "Country of Residence",
+        "cityRegion": "City/Region",
+        "applicant": "Applicant"
+      },
+      "organizationalBackground": {
+        "title": "Organizational Background",
+        "yearEstablished": "Year Established",
+        "teamSize": "Team Size",
+        "teamSizeMembers": "{{count}} members",
+        "previousGrants": "Previous Grants/Funding Received",
+        "coreMission": "Core Mission/Purpose",
+        "primarySectors": "Primary sectors",
+        "otherPrimarySector": "Other Primary sector",
+        "keyTeamMembers": "Key Team Members & Roles",
+        "previousGrantsDetails": "Previous Grants/Funding Details"
+      },
+      "projectDetails": {
+        "title": "Project Details",
+        "project": "Project",
+        "viewProjectDetails": "View Project Details",
+        "teamSize": "Team Size"
+      },
+      "socialLinks": {
+        "title": "Social Links & Online Presence",
+        "otherSocialLinks": "Other Social Links"
+      },
+      "documents": {
+        "title": "Supporting Documents",
+        "downloading": "Downloading...",
+        "download": "Download"
+      },
+      "compliance": {
+        "title": "Compliance & Declarations",
+        "informationAccurate": "Information Accurate Confirmed",
+        "conflictOfInterest": "Conflict of Interest Declared",
+        "reportingRequirements": "Reporting Requirements Agreed",
+        "dataProcessing": "Data Processing Consented",
+        "confirmed": "Confirmed",
+        "notConfirmed": "Not confirmed",
+        "declared": "Declared",
+        "notDeclared": "Not declared",
+        "agreed": "Agreed",
+        "notAgreed": "Not agreed",
+        "consented": "Consented",
+        "notConsented": "Not consented",
+        "declarationDate": "Declaration Date: {{date}}"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No",
+        "na": "N/A"
+      },
+      "translation": {
+        "translateForMe": "Translate for me",
+        "viewTranslation": "View translation",
+        "viewOriginal": "View original",
+        "translating": "Translating…",
+        "offer": "Application submitted in {{source}}. Machine translation available.",
+        "showingTranslated": "Showing machine translation from {{source}} to {{target}}.",
+        "sameLocale": "Application is already in your language.",
+        "errorTitle": "Translation failed",
+        "errorDesc": "Could not translate this application. Try again later."
+      },
+      "review": {
+        "statusTitle": "Review Status",
+        "reviewersTitle": "Reviewers",
+        "totalReviews": "Total Reviews:",
+        "pending": "Pending:",
+        "averageScore": "Average Score:",
+        "scoreOutOf": "{{score}} / 10",
+        "recommendations": "Recommendations:",
+        "tieBreakerHint": "Reviewers disagree near the reject threshold (~5/10) — add another reviewer to break the tie (up to {{max}} total).",
+        "underReviewProgress": "Stays under review until all assigned reviewers submit ({{completed}}/{{total}} done).",
+        "allReviewsIn": "All reviews in — approve or reject to update status.",
+        "approve": "Approve",
+        "reject": "Reject",
+        "rejectDialogTitle": "Reject application?",
+        "rejectDialogDescription": "Applicant will be notified. This cannot be undone from the UI.",
+        "cancel": "Cancel",
+        "reviewersAssignedNoReviews": "{{count}} reviewer(s) assigned, no reviews submitted yet.",
+        "noReviewersAssigned": "No reviewers assigned yet.",
+        "addReviewer": "Add reviewer",
+        "assignReviewers": "Assign reviewers",
+        "reassign": "Reassign",
+        "needsTwoReviewers": "This application needs 2 reviewers. Only {{count}} assigned so far.",
+        "unknownReviewer": "Unknown Reviewer",
+        "assignedDate": "Assigned {{date}}",
+        "score": "Score:",
+        "recommendation": "Recommendation:",
+        "assignDialogTitle": "Assign reviewers",
+        "assignDialogDescription": "Select exactly 2 eligible reviewers. Add from the dropdown and remove with the × on each pill.",
+        "reviewersLabel": "Reviewers",
+        "addReviewerPlaceholder": "Add reviewer...",
+        "noEligibleReviewers": "No more eligible reviewers",
+        "removeReviewerAria": "Remove {{name}}",
+        "workload": "workload {{count}}",
+        "saving": "Saving...",
+        "save": "Save",
+        "addDialogTitle": "Add reviewer",
+        "addDialogDescription": "Adds one eligible reviewer without removing existing assignments (tie-breaker / extra review). Automatic assignment still uses 2 reviewers only.",
+        "chooseReviewerPlaceholder": "Choose reviewer...",
+        "adding": "Adding…",
+        "toastApproved": "Application approved",
+        "toastRejected": "Application rejected",
+        "toastStatusError": "Could not update status",
+        "toastTryAgain": "Try again",
+        "toastReviewersUpdated": "Reviewers updated",
+        "toastReviewersUpdatedDesc": "Assignments were updated successfully.",
+        "toastUpdateFailed": "Update failed",
+        "toastReviewerAdded": "Reviewer added",
+        "toastReviewerAddedDesc": "They can submit an additional review.",
+        "toastAddReviewerFailed": "Could not add reviewer",
+        "reviewProgressCompleted": "{{completed}}/{{total}} completed",
+        "reviewCount_one": "{{count}} review",
+        "reviewCount_other": "{{count}} reviews",
+        "noReviews": "No reviews"
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose what notifications you want to receive",
+      "emailNotifications": "Email Notifications",
+      "emailNotificationsDesc": "Receive email updates about your applications",
+      "applicationUpdates": "Application Updates",
+      "applicationUpdatesDesc": "Get notified when your application status changes",
+      "newsletter": "Newsletter",
+      "newsletterDesc": "Receive our monthly newsletter with new opportunities"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Customize your experience",
+      "language": "Language",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Manage your account security settings",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "enterCurrentPassword": "Enter current password",
+      "enterNewPassword": "Enter new password",
+      "confirmNewPassword": "Confirm new password",
+      "updatePassword": "Update Password"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Irreversible and destructive actions",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDesc": "Permanently delete your account and all associated data"
+    },
+    "save": {
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "saved": "Settings saved",
+      "savedDesc": "Your preferences have been updated.",
+      "languageUpdated": "Language updated",
+      "themeUpdated": "Theme updated"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Stay updated on your applications and account activity",
+    "markAllAsRead": "Mark all as read",
+    "marking": "Marking...",
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "sections": {
+      "unread": "Unread",
+      "earlier": "Earlier"
+    },
+    "actions": {
+      "viewDetails": "View details →"
+    },
+    "emptyState": {
+      "title": "No notifications",
+      "description": "You're all caught up! New notifications will appear here."
+    }
+  },
+  "documents": {
+    "title": "My Documents",
+    "subtitle": "Manage your document library and application documents",
+    "subtitleSlots": "Upload once, reuse across applications. Application-specific files appear on each application detail page.",
+    "usageCount": "{{count}} of {{max}} documents used",
+    "fileTypes": {
+      "slots": "CV & cover letter: PDF, DOC, or DOCX only (PDF preferred) — max 10MB.",
+      "other": "Allowed: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP — max 10MB per file."
+    },
+    "uploadToLibrary": "Upload to Library",
+    "uploading": "Uploading...",
+    "applyForFunding": "Apply for Opportunities",
+    "searchPlaceholder": "Search documents...",
+    "tabs": {
+      "library": "Library",
+      "applications": "Applications"
+    },
+    "library": {
+      "title": "Document Library",
+      "description": "Reusable documents that can be selected when applying for opportunities"
+    },
+    "applicationDocuments": {
+      "title": "Application Documents",
+      "description": "Documents linked to specific applications"
+    },
+    "emptyState": {
+      "noLibraryDocuments": "No library documents",
+      "noLibraryDocumentsDesc": "Upload documents to your library to reuse them across multiple applications. Click 'Upload to Library' above to get started.",
+      "noLibraryDocumentsSearch": "Try adjusting your search to find more documents.",
+      "noApplicationDocuments": "No application documents",
+      "noApplicationDocumentsDesc": "Documents uploaded with your applications will appear here. Start applying for opportunities to upload documents.",
+      "noApplicationDocumentsSearch": "Try adjusting your search to find more documents.",
+      "uploadToLibrary": "Upload to Library",
+      "browseOpportunities": "Browse Opportunities"
+    },
+    "deleteDialog": {
+      "title": "Delete Document",
+      "description": "Are you sure you want to delete \"{{fileName}}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "badges": {
+      "application": "Application",
+      "library": "Library"
+    },
+    "limitReached": {
+      "title": "Document limit reached",
+      "description": "You can store up to {{max}} documents. You have {{remaining}} slot(s) left."
+    },
+    "slots": {
+      "sectionTitle": "Standard documents",
+      "upload": "Upload",
+      "replace": "Replace",
+      "cv": {
+        "label": "CV / Resume",
+        "description": "Your latest CV (PDF or Word). Uploading again replaces the previous file."
+      },
+      "id": {
+        "label": "National ID / Passport",
+        "description": "Verified through identity verification on your profile.",
+        "verified": "Verified",
+        "viewKyc": "View verification",
+        "completeKyc": "Complete verification"
+      },
+      "coverLetter": {
+        "label": "Cover letter",
+        "description": "Optional. PDF or Word. Reused when you apply unless you upload a new one."
+      }
+    },
+    "other": {
+      "title": "Other documents",
+      "description": "Certificates, portfolios, or any extra files (not typed slots).",
+      "upload": "Upload files",
+      "empty": "No other documents yet."
+    }
+  },
+  "resources": {
+    "hero": {
+      "title": "Resource Library",
+      "description": "Access guides, templates, tutorials, and tools to help you succeed in your opportunity applications",
+      "searchPlaceholder": "Search resources...",
+      "availableCount": "{{count}} resources available"
+    },
+    "tabs": {
+      "all": "All",
+      "documents": "Documents",
+      "videos": "Videos",
+      "spreadsheets": "Spreadsheets",
+      "presentations": "Presentations",
+      "links": "Links"
+    },
+    "emptyState": {
+      "noResources": "No resources available",
+      "noResourcesDesc": "Resources will appear here once they are added by administrators",
+      "noResults": "No results found",
+      "noResultsDesc": "No resources match \"{{query}}\". Try a different search term.",
+      "clearSearch": "Clear search",
+      "checkBackLater": "Check back later for new resources"
+    },
+    "sections": {
+      "browseResources": "Browse Resources",
+      "searchResults": "Search results for \"{{query}}\""
+    },
+    "card": {
+      "featured": "Featured",
+      "view": "View",
+      "open": "Open",
+      "download": "Download",
+      "typeLabels": {
+        "pdfDocument": "PDF Document",
+        "video": "Video",
+        "webinar": "Webinar",
+        "spreadsheet": "Spreadsheet",
+        "presentation": "Presentation",
+        "document": "Document",
+        "externalLink": "External Link",
+        "directory": "Directory",
+        "event": "Event"
+      }
+    }
+  },
+  "adminDashboard": {
+    "subtitle": "Overview of platform activity and statistics",
+    "stats": {
+      "totalUsers": "Total Users",
+      "registeredUsers": "Registered users",
+      "totalProjects": "Total Projects",
+      "activeOpportunities": "{{count}} active opportunities",
+      "totalApplications": "Total Applications",
+      "allTimeSubmissions": "All time submissions",
+      "pendingReviews": "Pending Reviews",
+      "awaitingReview": "Awaiting review",
+      "approved": "Approved",
+      "successfullyApproved": "Successfully approved",
+      "rejected": "Rejected",
+      "notApproved": "Not approved"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "manageProjects": "Manage Projects",
+      "reviewApps": "Review Apps",
+      "manageUsers": "Manage Users",
+      "activityLogs": "Activity Logs"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "viewAll": "View All",
+      "emptyTitle": "No recent activity",
+      "emptyDescription": "Activity will appear here as users interact with the platform",
+      "combinedLabel": "Submission + Reviewer Assignment · Application",
+      "fallbackActor": "A user",
+      "genericAction": "{{actor}} {{action}} {{entity}}.",
+      "actionTypes": {
+        "submit": "Submit",
+        "assign_reviewers": "Assign Reviewers",
+        "review": "Review",
+        "submission_and_assignment": "Submission + Assignment"
+      },
+      "entityTypes": {
+        "application": "Application",
+        "opportunity": "Opportunity",
+        "user": "User"
+      },
+      "descriptions": {
+        "applicationSubmitWithProject": "{{applicantName}} submitted an application for \"{{projectTitle}}\".",
+        "applicationSubmitWithApplicant": "{{applicantName}} submitted an application.",
+        "applicationSubmitGeneric": "{{actor}} submitted an application.",
+        "reviewersAssigned_one": "{{count}} reviewer assigned to this application.",
+        "reviewersAssigned_other": "{{count}} reviewers assigned to this application.",
+        "reviewersAssignedGeneric": "Reviewers assigned to this application.",
+        "reviewSubmitted": "{{reviewerName}} submitted a review.",
+        "reviewSubmittedGeneric": "{{actor}} submitted a review.",
+        "combinedDefault": "Application submitted and review team assigned.",
+        "combinedWithProject": "{{applicantName}} submitted an application for \"{{projectTitle}}\", and {{reviewerPart}}.",
+        "combinedWithApplicant": "{{applicantName}} submitted an application, and {{reviewerPart}}.",
+        "combinedWithReviewers": "Application submitted and {{reviewerPart}}.",
+        "reviewerPart_one": "{{count}} reviewer assigned",
+        "reviewerPart_other": "{{count}} reviewers assigned",
+        "reviewerPartGeneric": "reviewers assigned"
+      }
+    }
+  },
+  "opportunities": {
+    "page": {
+      "title": "My Opportunities",
+      "subtitle": "Create and manage your funding opportunities",
+      "create": "New Opportunity",
+      "createFirst": "Create Your First Opportunity",
+      "emptyDescription": "You haven't created any opportunities yet.",
+      "emptyTipTitle": "Create your first opportunity",
+      "emptyTipDescription": "Opportunities are how you attract and collect applications from qualified candidates. Create one to get started!"
+    },
+    "table": {
+      "searchPlaceholder": "Search opportunities...",
+      "columns": {
+        "title": "Title",
+        "status": "Status",
+        "sector": "Sector",
+        "deadline": "Deadline",
+        "applicationWindow": "Application Window",
+        "applicants": "Applicants",
+        "opportunityType": "Opportunity Type",
+        "location": "Location",
+        "country": "Country",
+        "funding": "Funding",
+        "created": "Created",
+        "featured": "Featured",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewProject": "View project",
+        "viewOpportunity": "View opportunity",
+        "viewApplications": "View ranked applications",
+        "editProject": "Edit project",
+        "deleteProject": "Delete project",
+        "allApplications": "All Applications ({{count}})",
+        "edit": "Edit"
+      }
+    },
+    "form": {
+      "backAdmin": "Back to Opportunities",
+      "backPartner": "Back",
+      "titleCreate": "Create New Opportunity",
+      "titleEdit": "Edit Opportunity",
+      "subtitleCreateAdmin": "Fill in the details to create a new opportunity",
+      "subtitleEditAdmin": "Update opportunity details",
+      "subtitleCreatePartner": "Set up a new funding opportunity",
+      "subtitleEditPartner": "Update your opportunity details",
+      "loading": "Loading opportunity...",
+      "sections": {
+        "information": {
+          "title": "Opportunity Information",
+          "description": "Enter the basic information for the opportunity."
+        },
+        "image": {
+          "title": "Opportunity Image",
+          "description": "Upload an image for this opportunity (optional)",
+          "uploadPlaceholder": "Upload Opportunity Image",
+          "dropzoneHint": "Drag and drop an image, or click to browse",
+          "change": "Change",
+          "loading": "Loading...",
+          "formats": "Supported formats: JPG, PNG, WebP, GIF. Max size: 5MB"
+        },
+        "applicationSettings": {
+          "title": "Application Settings"
+        },
+        "applicationWindow": {
+          "title": "Application Window State",
+          "description": "Derived from project status and deadline.",
+          "hint": "Applicants can apply and edit drafts only while this is open."
+        },
+        "featured": {
+          "title": "Featured Opportunity",
+          "label": "Show on Homepage",
+          "hint": "Featured opportunities appear on the landing page"
+        },
+        "attachments": {
+          "title": "Attachments",
+          "descriptionCreate": "Add files after creating the opportunity, or select files now to attach once saved.",
+          "descriptionEdit": "Add PDFs, documents, or images for applicants to view.",
+          "addFile": "Add file",
+          "addFilePending": "Add file (uploaded when saved)",
+          "uploading": "Uploading...",
+          "formats": "PDF, Word, Excel, PowerPoint, text, images. Max 10MB each.",
+          "removeFile": "Remove {{fileName}}"
+        }
+      },
+      "fields": {
+        "title": {
+          "label": "Title",
+          "placeholder": "e.g., African Women Tech Entrepreneurs Grant"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Provide a comprehensive description of the opportunity. Use formatting to make it clear and engaging..."
+        },
+        "opportunityType": {
+          "label": "Opportunity Type",
+          "placeholder": "Select type"
+        },
+        "sector": {
+          "label": "Sector",
+          "placeholder": "Select sector"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Select status"
+        },
+        "fundingAmount": {
+          "label": "Funding Amount",
+          "placeholder": "e.g., Up to $50,000"
+        },
+        "currency": {
+          "label": "Currency",
+          "placeholder": "USD"
+        },
+        "deadline": {
+          "label": "Deadline"
+        },
+        "location": {
+          "label": "Location",
+          "placeholder": "e.g., Kenya, Nigeria, All Africa"
+        },
+        "country": {
+          "label": "Country",
+          "placeholder": "Select country"
+        },
+        "requirements": {
+          "label": "Requirements",
+          "placeholder": "Comma-separated requirements (e.g., Business plan, Pitch deck, Financials)"
+        },
+        "eligibilityCriteria": {
+          "label": "Eligibility Criteria",
+          "placeholder": "Comma-separated eligibility (e.g., Women-led startup, Registered business)"
+        },
+        "tags": {
+          "label": "Tags",
+          "hint": "Select existing tags or type a new one and press Enter to create it.",
+          "placeholder": "Type a tag name...",
+          "add": "Add",
+          "create": "Create \"{{tag}}\"",
+          "remove": "Remove {{tag}}"
+        },
+        "maxApplicants": {
+          "label": "Max Applicants",
+          "placeholder": "Unlimited",
+          "hint": "Leave empty for unlimited applicants"
+        },
+        "currentApplicants": {
+          "label": "Current Applicants",
+          "hint": "Read-only count from submitted applications."
+        }
+      },
+      "types": {
+        "grant": "Grant",
+        "fellowship": "Fellowship",
+        "scholarship": "Scholarship",
+        "internship": "Internship",
+        "training": "Training",
+        "competition": "Competition",
+        "accelerator": "Accelerator",
+        "incubator": "Incubator",
+        "job": "Job"
+      },
+      "statuses": {
+        "new": "New",
+        "open": "Open",
+        "closing-soon": "Closing Soon",
+        "closed": "Closed",
+        "archived": "Archived"
+      },
+      "validation": {
+        "titleRequired": "Title is required",
+        "titleMin": "Title must be at least 5 characters",
+        "descriptionRequired": "Description is required",
+        "descriptionMin": "Description must be at least 50 characters",
+        "opportunityTypeRequired": "Select an opportunity type",
+        "deadlineFormat": "Deadline must be in YYYY-MM-DD format",
+        "locationRequired": "Location is required",
+        "fundingAmountRequired": "Funding amount is required",
+        "maxApplicantsPositive": "Max applicants must be a positive number",
+        "currentApplicantsMin": "Current applicants cannot be negative",
+        "sectorInvalid": "Invalid sector"
+      },
+      "actions": {
+        "create": "Create Opportunity",
+        "update": "Update Opportunity",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "invalidTitle": "Check the form",
+        "invalidDescription": "Fix the highlighted fields before saving."
+      }
+    }
+  },
+  "admin": {
+    "panel": "Admin Panel",
+    "roleFallback": "Admin",
+    "menu": {
+      "dashboard": "Dashboard",
+      "opportunities": "Opportunities",
+      "applications": "Applications",
+      "notifications": "Notifications",
+      "inbound": "Inbound",
+      "kyc": "KYC Requests",
+      "reviewManagement": "Review Management",
+      "financial": "Financial",
+      "sectors": "Sectors",
+      "resources": "Resources",
+      "blog": "Blog",
+      "partners": "Partners",
+      "successStories": "Success Stories",
+      "faq": "FAQs",
+      "mentors": "Mentors",
+      "users": "Users",
+      "activityLogs": "Activity Logs",
+      "settings": "Settings"
+    },
+    "pages": {
+      "dashboard": "Admin Dashboard",
+      "opportunities": "Manage Opportunities",
+      "opportunityApplications": "Opportunity Applications",
+      "applications": "Review Applications",
+      "financial": "Financial Management",
+      "kyc": "KYC Requests",
+      "notifications": "Notifications",
+      "blog": "Manage Blog",
+      "partners": "Manage Partners",
+      "successStories": "Manage Success Stories",
+      "faq": "Manage FAQs",
+      "mentors": "Manage Mentors",
+      "users": "Manage Users",
+      "sectors": "Manage Sectors",
+      "activityLogs": "Activity Logs",
+      "settings": "Admin Settings",
+      "inbound": "Inbound",
+      "resources": "Resources",
+      "reviewManagement": "Review Management",
+      "userDetails": "User Details",
+      "opportunityCreate": "Create Opportunity",
+      "opportunityEdit": "Edit Opportunity",
+      "opportunityDetails": "Opportunity Details",
+      "applicationDetails": "Application Details",
+      "reviewerDetails": "Reviewer Details",
+      "resourceEdit": "Edit Resource"
+    },
+    "opportunitiesPage": {
+      "title": "Manage Opportunities",
+      "subtitle": "Create, edit, and manage funding opportunities",
+      "create": "Create Opportunity",
+      "allOpportunities": "All Opportunities ({{count}})",
+      "searchPlaceholder": "Search by title, sector, or location...",
+      "winnersSelected": "Winners Selected",
+      "loadError": "Error loading opportunities: {{message}}",
+      "empty": {
+        "title": "No opportunities found",
+        "description": "Start by creating your first funding opportunity."
+      },
+      "columns": {
+        "title": "Title",
+        "status": "Status",
+        "sector": "Sector",
+        "deadline": "Deadline",
+        "applicationWindow": "Application Window",
+        "applicants": "Applicants",
+        "opportunityType": "Opportunity Type",
+        "location": "Location",
+        "country": "Country",
+        "funding": "Funding",
+        "created": "Created",
+        "featured": "Featured",
+        "actions": "Actions"
+      },
+      "actionTitles": {
+        "viewProject": "View project",
+        "viewApplications": "View ranked applications",
+        "editProject": "Edit project",
+        "deleteProject": "Delete project"
+      },
+      "deleteDialog": {
+        "title": "Are you sure?",
+        "description": "This action cannot be undone. This will permanently delete the opportunity and all associated applications.",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting..."
+      },
+      "translateAll": "Generate translations",
+      "translatingAll": "Generating translations...",
+      "translateAllDone": "Translations generated",
+      "translateAllDoneDesc": "{{count}} opportunities cached. Switch language to view translated titles.",
+      "translateAllPartial": "Some translations failed",
+      "translateAllPartialDesc": "{{failed}} of {{total}} opportunities could not be translated."
+    },
+    "sectorsPage": {
+      "title": "Sectors",
+      "subtitle": "Manage project sectors and their display settings",
+      "subtitleLoading": "Manage project sectors",
+      "addSector": "Add Sector",
+      "create": {
+        "title": "Create Sector",
+        "description": "Add a new sector for projects. The slug will be auto-generated if not provided.",
+        "submit": "Create",
+        "creating": "Creating..."
+      },
+      "edit": {
+        "title": "Edit Sector",
+        "description": "Update sector details. Changes will affect all projects using this sector.",
+        "submit": "Save Changes",
+        "saving": "Saving..."
+      },
+      "form": {
+        "name": "Name",
+        "nameRequired": "Name is required",
+        "nameMin": "Name must be at least 2 characters",
+        "namePlaceholder": "e.g., Technology",
+        "slugOptional": "Slug (optional)",
+        "slug": "Slug",
+        "slugPlaceholder": "e.g., technology (auto-generated if empty)",
+        "slugEditPlaceholder": "e.g., technology",
+        "descriptionOptional": "Description (optional)",
+        "description": "Description",
+        "descriptionPlaceholder": "Brief description of this sector",
+        "active": "Active",
+        "cancel": "Cancel"
+      },
+      "empty": {
+        "title": "No sectors",
+        "description": "Get started by creating your first sector"
+      },
+      "list": {
+        "title": "All sectors",
+        "count": "{{count}} sector total",
+        "count_plural": "{{count}} sectors total",
+        "inactive": "Inactive",
+        "slug": "Slug: {{slug}}"
+      },
+      "delete": {
+        "title": "Delete Sector",
+        "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone. Make sure no projects are using this sector before deleting.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      }
+    },
+    "kycPage": {
+      "title": "KYC Requests",
+      "subtitle": "Review and approve submitted identity verifications.",
+      "allRequests": "All requests",
+      "loadError": "Failed to load KYC requests",
+      "retry": "Retry",
+      "unknown": "Unknown",
+      "columns": {
+        "user": "User",
+        "idType": "ID Type",
+        "status": "Status",
+        "submitted": "Submitted",
+        "action": "Action"
+      },
+      "review": "Review",
+      "status": {
+        "pending": "Pending",
+        "verified": "Verified",
+        "rejected": "Rejected",
+        "expired": "Expired"
+      }
+    },
+    "financialPage": {
+      "title": "Financial Management",
+      "subtitle": "Overview of all financial transactions and revenue",
+      "loadError": "Error loading financial data: {{message}}",
+      "stats": {
+        "totalRevenue": "Total Revenue",
+        "allTimeRevenue": "All time revenue",
+        "thisMonth": "This Month",
+        "monthlyRevenue": "Monthly revenue",
+        "revenueGrowthUp": "+{{percent}}% vs last month",
+        "revenueGrowthDown": "{{percent}}% vs last month",
+        "completed": "Completed",
+        "successfulTransactions": "Successful transactions",
+        "pending": "Pending",
+        "awaitingProcessing": "Awaiting processing",
+        "revenueBreakdown": "Revenue Breakdown",
+        "applicationFees": "Application Fees",
+        "subscriptions": "Subscriptions",
+        "refunded": "Refunded",
+        "transactionStatus": "Transaction Status",
+        "total": "Total",
+        "failed": "Failed",
+        "monthlyComparison": "Monthly Comparison",
+        "lastMonth": "Last Month"
+      },
+      "filters": {
+        "status": "Status",
+        "allStatus": "All Status",
+        "type": "Type",
+        "allTypes": "All Types",
+        "date": "Date",
+        "allTime": "All Time",
+        "today": "Today",
+        "last7Days": "Last 7 Days",
+        "lastMonth": "Last Month",
+        "lastYear": "Last Year",
+        "completed": "Completed",
+        "pending": "Pending",
+        "processing": "Processing",
+        "failed": "Failed",
+        "refunded": "Refunded",
+        "applicationFee": "Application Fee",
+        "subscription": "Subscription",
+        "refund": "Refund",
+        "other": "Other"
+      },
+      "transactions": "Transactions ({{count}})",
+      "searchPlaceholder": "Search by user, description, invoice, or transaction ID...",
+      "columns": {
+        "amount": "Amount",
+        "user": "User",
+        "description": "Description",
+        "type": "Type",
+        "status": "Status",
+        "date": "Date",
+        "project": "Project",
+        "invoice": "Invoice",
+        "actions": "Actions",
+        "invoiceBtn": "Invoice",
+        "receiptBtn": "Receipt",
+        "na": "N/A"
+      }
+    },
+    "inboundPage": {
+      "title": "Inbound",
+      "subtitle": "Contact form messages and newsletter signups",
+      "tabs": {
+        "contact": "Contact",
+        "newsletter": "Newsletter"
+      },
+      "contactSearch": "Search name, email, message...",
+      "newsletterSearch": "Search email...",
+      "allStatuses": "All statuses",
+      "status": "Status",
+      "contactSubmissions": "Contact submissions",
+      "newsletterSubscribers": "Newsletter subscribers",
+      "loadContactError": "Failed to load contact submissions",
+      "loadSubscribersError": "Failed to load subscribers",
+      "retry": "Retry",
+      "view": "View",
+      "columns": {
+        "name": "Name",
+        "subject": "Subject",
+        "status": "Status",
+        "received": "Received",
+        "email": "Email",
+        "source": "Source",
+        "subscribed": "Subscribed"
+      },
+      "subjects": {
+        "funding": "Funding",
+        "application": "Application",
+        "partnership": "Partnership",
+        "technical": "Technical",
+        "general": "General"
+      },
+      "statuses": {
+        "new": "New",
+        "read": "Read",
+        "replied": "Replied",
+        "archived": "Archived"
+      },
+      "sheet": {
+        "subject": "Subject",
+        "received": "Received",
+        "phone": "Phone",
+        "country": "Country",
+        "message": "Message",
+        "adminNotes": "Admin notes",
+        "notesPlaceholder": "Internal notes...",
+        "saveChanges": "Save changes"
+      },
+      "toast": {
+        "saved": "Saved",
+        "savedDesc": "Contact submission updated.",
+        "updateFailed": "Update failed",
+        "updateFailedDesc": "Could not save changes."
+      }
+    },
+    "activityLogsPage": {
+      "title": "Activity Logs",
+      "subtitle": "Track and monitor all user and admin interactions",
+      "recentActivity": "Recent Activity",
+      "recentActivityDesc": "View all actions performed across the platform",
+      "export": "Export",
+      "exportCsv": "Export to CSV",
+      "printPdf": "Print / Save as PDF",
+      "searchPlaceholder": "Search activities...",
+      "actionType": "Action Type",
+      "entityType": "Entity Type",
+      "allActions": "All Actions",
+      "allEntities": "All Entities",
+      "dateRange": "Date range:",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "to": "to",
+      "clearDates": "Clear dates",
+      "actions": {
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "view": "View",
+        "login": "Login",
+        "logout": "Logout",
+        "submit": "Submit",
+        "approve": "Approve",
+        "reject": "Reject"
+      },
+      "entities": {
+        "project": "Projects",
+        "application": "Applications",
+        "user": "Users",
+        "blog_post": "Blog Posts",
+        "profile": "Profiles",
+        "document": "Documents"
+      },
+      "columns": {
+        "user": "User",
+        "action": "Action",
+        "entity": "Entity",
+        "description": "Description",
+        "time": "Time"
+      },
+      "empty": {
+        "title": "No activity logs",
+        "description": "Activity will appear here as users interact with the platform."
+      },
+      "system": "System",
+      "pagination": "Showing {{from}} to {{to}} of {{total}} entries",
+      "pageOf": "Page {{current}} of {{total}}",
+      "toast": {
+        "preparingCsv": "Preparing CSV export...",
+        "noLogsExport": "No logs to export",
+        "exportedCsv": "Exported {{count}} logs to CSV",
+        "exportFailed": "Failed to export logs",
+        "preparingPrint": "Preparing print view...",
+        "noLogsPrint": "No logs to print",
+        "printOpened": "Print view opened",
+        "printFailed": "Failed to prepare print view"
+      }
+    },
+    "settingsPage": {
+      "title": "Admin Settings",
+      "subtitle": "Configure admin panel and system settings",
+      "general": {
+        "title": "General Settings",
+        "description": "Configure general admin panel settings",
+        "maintenance": "Maintenance Mode",
+        "maintenanceDesc": "Enable maintenance mode to restrict access"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configure admin notification preferences",
+        "email": "Email Notifications",
+        "emailDesc": "Receive email alerts for important events",
+        "applications": "Application Alerts",
+        "applicationsDesc": "Get notified when new applications are submitted"
+      },
+      "applicationAccess": {
+        "title": "Application access",
+        "description": "Per-application fees are archived. Users need an active Full Member subscription to apply.",
+        "body": "Membership is managed at /join. Legacy fee code is in archive/legacy-application-payment/."
+      },
+      "system": {
+        "title": "System Information",
+        "description": "View system status and information",
+        "databaseStatus": "Database Status",
+        "apiStatus": "API Status",
+        "totalUsers": "Total Users",
+        "totalProjects": "Total Projects",
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "operational": "Operational",
+        "unavailable": "Unavailable"
+      },
+      "save": "Save Settings",
+      "saving": "Saving...",
+      "toast": {
+        "saved": "Settings saved",
+        "savedDesc": "Admin settings have been updated."
+      }
+    },
+    "reviewManagementPage": {
+      "title": "Review Management",
+      "subtitle": "Manage reviewer assignments, sectors, rubrics, and conflicts",
+      "tabs": {
+        "reviewers": "Reviewers",
+        "conflicts": "Conflicts",
+        "settings": "Settings"
+      },
+      "reviewers": {
+        "title": "Reviewers",
+        "description": "Manage reviewer sectors and view workload. Reviewers can only review applications in their assigned sectors.",
+        "addSectorDialog": "Add Reviewer sector",
+        "searchPlaceholder": "Search by reviewer name, sector, or workload...",
+        "noSectors": "No sectors assigned",
+        "addSector": "Add sector",
+        "details": "Details",
+        "workload": "{{count}} active assignment",
+        "workload_plural": "{{count}} active assignments",
+        "columns": {
+          "reviewer": "Reviewer",
+          "workload": "Workload",
+          "sectors": "Sectors",
+          "actions": "Actions"
+        },
+        "toast": {
+          "sectorAdded": "Sector Added",
+          "sectorAddedDesc": "Reviewer sector added successfully.",
+          "sectorRemoved": "Sector Removed",
+          "sectorRemovedDesc": "Reviewer sector removed.",
+          "error": "Error"
+        }
+      },
+      "addCategoryForm": {
+        "reviewer": "Reviewer",
+        "selectReviewer": "Select reviewer",
+        "sector": "Sector",
+        "selectSector": "Select sector",
+        "adding": "Adding...",
+        "addSector": "Add sector"
+      },
+      "conflicts": {
+        "title": "Reviewer Conflicts",
+        "searchPlaceholder": "Search by reviewer name or application title...",
+        "unknown": "Unknown",
+        "columns": {
+          "reviewer": "Reviewer",
+          "application": "Application",
+          "reason": "Reason",
+          "declared": "Declared"
+        }
+      },
+      "settings": {
+        "title": "Review Management Settings",
+        "description": "Configure global settings for the review management system",
+        "numReviewers": "Number of Reviewers per Assignment",
+        "numReviewersDesc": "All new reviewer assignments will use this number. This ensures consistency across all applications.",
+        "reviewerPerApp": "reviewer per application",
+        "reviewersPerApp": "reviewers per application",
+        "save": "Save Settings",
+        "saving": "Saving...",
+        "toast": {
+          "invalid": "Invalid Value",
+          "invalidDesc": "Number of reviewers must be between 1 and 10.",
+          "saved": "Settings Saved",
+          "savedDesc": "Number of reviewers per assignment updated to {{count}}."
+        }
+      },
+      "rubrics": {
+        "title": "System Rubric",
+        "description": "Define scoring criteria and weights that apply to all applications",
+        "edit": "Edit Rubric",
+        "editTitle": "Edit System Rubric",
+        "create": "Create System Rubric",
+        "createTitle": "Create System Rubric",
+        "currentCriteria": "Current Rubric Criteria",
+        "weight": "Weight: {{percent}}% • Max: {{max}}"
+      }
+    },
+    "reviewerDetailsPage": {
+      "back": "Back to Review Management",
+      "notFound": "Reviewer not found",
+      "loadError": "Failed to load reviewer details",
+      "retry": "Retry",
+      "stats": {
+        "workload": "Active Workload",
+        "totalReviews": "Total Reviews",
+        "avgScore": "Average Score",
+        "sectors": "Assigned Sectors"
+      },
+      "sectors": "Sectors",
+      "noSectors": "No sectors assigned",
+      "reviews": "Reviews & Assignments",
+      "columns": {
+        "application": "Application",
+        "status": "Status",
+        "score": "Score",
+        "recommendation": "Recommendation",
+        "submitted": "Submitted"
+      },
+      "status": {
+        "pending": "Pending",
+        "in_progress": "In Progress",
+        "completed": "Completed"
+      },
+      "notSubmitted": "Not submitted",
+      "na": "N/A"
+    },
+    "cmsList": {
+      "common": {
+        "create": "Create",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "view": "View",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "published": "Published",
+        "draft": "Draft",
+        "archived": "Archived",
+        "featured": "Featured",
+        "actions": "Actions",
+        "status": "Status",
+        "search": "Search...",
+        "loadError": "Error loading data. Please try again.",
+        "confirmDeleteTitle": "Are you sure?",
+        "confirmDelete": "This action cannot be undone.",
+        "allCategories": "All Categories",
+        "filterByCategory": "Filter by category",
+        "allStatus": "All Status",
+        "order": "Order: {{order}}"
+      },
+      "blog": {
+        "title": "Manage Blog Posts",
+        "subtitle": "Create, edit, and manage blog articles",
+        "create": "Create Post",
+        "allPosts": "All Posts ({{count}})",
+        "searchPlaceholder": "Search posts by title, author, or sector...",
+        "views": "{{count}} views",
+        "deleteDesc": "This will permanently delete the blog post."
+      },
+      "faq": {
+        "title": "Manage FAQs",
+        "subtitle": "Create, edit, and manage frequently asked questions",
+        "create": "Create FAQ",
+        "createFirst": "Create First FAQ",
+        "searchPlaceholder": "Search FAQs...",
+        "noResults": "No FAQs found matching your search.",
+        "empty": "No FAQs created yet.",
+        "deleteDesc": "This will permanently delete the FAQ."
+      },
+      "mentors": {
+        "title": "Mentor Management",
+        "subtitle": "Manage your mentorship directory",
+        "create": "Add Mentor",
+        "searchPlaceholder": "Search mentors...",
+        "stats": {
+          "total": "Total Mentors",
+          "published": "Published",
+          "sectors": "Sectors"
+        },
+        "columns": {
+          "name": "Name",
+          "sector": "Sector",
+          "country": "Country",
+          "status": "Status",
+          "order": "Order",
+          "actions": "Actions"
+        },
+        "deleteDesc": "This will permanently delete the mentor."
+      },
+      "partners": {
+        "title": "Manage Partners",
+        "subtitle": "Create, edit, and manage partner organizations",
+        "create": "Add Partner",
+        "searchPlaceholder": "Search partners...",
+        "columns": {
+          "name": "Name",
+          "sector": "Sector",
+          "status": "Status",
+          "featured": "Featured",
+          "linkedUser": "Linked User",
+          "actions": "Actions"
+        },
+        "yes": "Yes",
+        "no": "No",
+        "none": "None",
+        "deleteDesc": "This will permanently delete the partner."
+      },
+      "resources": {
+        "title": "Resources",
+        "subtitle": "Manage downloadable resources and materials",
+        "create": "Add Resource",
+        "searchPlaceholder": "Search resources...",
+        "columns": {
+          "title": "Title",
+          "sector": "Sector",
+          "type": "Type",
+          "size": "Size",
+          "status": "Status",
+          "downloads": "Downloads",
+          "actions": "Actions"
+        },
+        "deleteDesc": "This will permanently delete the resource."
+      },
+      "successStories": {
+        "title": "Success Stories",
+        "subtitle": "Manage success stories and testimonials",
+        "create": "Add Story",
+        "searchPlaceholder": "Search stories...",
+        "columns": {
+          "name": "Name",
+          "company": "Company",
+          "sector": "Sector",
+          "funding": "Funding",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "deleteDesc": "This will permanently delete the success story."
+      }
+    },
+    "cmsForm": {
+      "common": {
+        "back": "Back",
+        "save": "Save",
+        "saving": "Saving...",
+        "create": "Create",
+        "creating": "Creating...",
+        "cancel": "Cancel",
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "validation": {
+        "required": "{{field}} is required",
+        "minChars": "{{field}} must be at least {{min}} characters",
+        "validUrl": "Please enter a valid URL",
+        "validEmail": "Please enter a valid email",
+        "displayOrderMin": "Display order must be 0 or greater",
+        "nameMin2": "Name must be at least 2 characters"
+      },
+      "faq": {
+        "createTitle": "Create FAQ",
+        "editTitle": "Edit FAQ",
+        "createDesc": "Add a new frequently asked question",
+        "editDesc": "Update FAQ details",
+        "question": "Question",
+        "answer": "Answer",
+        "sector": "Sector",
+        "selectSector": "Select sector",
+        "displayOrder": "Display Order",
+        "isPublished": "Published"
+      },
+      "blog": {
+        "createTitle": "Create Blog Post",
+        "editTitle": "Edit Blog Post",
+        "title": "Title",
+        "excerpt": "Excerpt",
+        "content": "Content",
+        "author": "Author",
+        "sector": "Sector",
+        "readTime": "Read Time",
+        "image": "Image URL",
+        "featured": "Featured",
+        "status": "Status",
+        "tags": "Tags"
+      },
+      "mentor": {
+        "createTitle": "Add Mentor",
+        "editTitle": "Edit Mentor",
+        "name": "Name",
+        "bio": "Bio",
+        "sector": "Sector",
+        "country": "Country",
+        "linkedin": "LinkedIn URL",
+        "twitter": "Twitter URL",
+        "website": "Website URL",
+        "avatar": "Avatar URL",
+        "displayOrder": "Display Order",
+        "isPublished": "Published"
+      },
+      "partner": {
+        "createTitle": "Add Partner",
+        "editTitle": "Edit Partner",
+        "name": "Name",
+        "description": "Description",
+        "logo": "Logo URL",
+        "website": "Website URL",
+        "sector": "Sector",
+        "displayOrder": "Display Order",
+        "featured": "Featured",
+        "status": "Status",
+        "linkedUser": "Linked User",
+        "inviteEmail": "Invite Email"
+      },
+      "resource": {
+        "createTitle": "Add Resource",
+        "editTitle": "Edit Resource",
+        "title": "Title",
+        "description": "Description",
+        "sector": "Sector",
+        "fileType": "File Type",
+        "fileUrl": "File URL",
+        "duration": "Duration",
+        "isPublished": "Published"
+      },
+      "successStory": {
+        "createTitle": "Add Success Story",
+        "editTitle": "Edit Success Story",
+        "name": "Name",
+        "company": "Company",
+        "sector": "Sector",
+        "location": "Location",
+        "fundingAmount": "Funding Amount",
+        "fundingDate": "Funding Date",
+        "image": "Image URL",
+        "description": "Description",
+        "impactMetrics": "Impact Metrics",
+        "displayOrder": "Display Order",
+        "isPublished": "Published"
+      }
+    },
+    "footer": {
+      "userDashboard": "User Dashboard",
+      "partnerDashboard": "Partner Dashboard",
+      "reviewerDashboard": "Reviewer Dashboard"
+    },
+    "applicationsPage": {
+      "title": "Applications",
+      "loadingTitle": "Review Applications",
+      "subtitle": "View all submitted applications. To review applications, please use a reviewer account.",
+      "loadingSubtitle": "Review and manage all submitted applications",
+      "banner": {
+        "title": "Role Separation Policy",
+        "description": "Administrative accounts can view applications but cannot approve, reject, or request changes. This ensures proper separation of concerns, clear accountability, and accurate audit trails. To perform review actions, please use a reviewer account.",
+        "dismissAria": "Dismiss banner"
+      },
+      "filters": {
+        "all": "All"
+      },
+      "columns": {
+        "applicant": "Applicant",
+        "project": "Project",
+        "status": "Status",
+        "submitted": "Submitted",
+        "reviewProgress": "Review Progress",
+        "actions": "Actions"
+      },
+      "viewDetails": "View Details",
+      "viewDetailsTitle": "View application details",
+      "tableTitle": "Applications ({{count}})",
+      "searchPlaceholder": "Search by applicant name, project title, or company...",
+      "errorTitle": "Error loading applications",
+      "retry": "Retry"
+    },
+    "usersPage": {
+      "title": "Manage Users",
+      "subtitle": "View and manage all platform users",
+      "errorTitle": "Error",
+      "loadError": "Failed to load users. Please try again.",
+      "tableTitle": "All Users ({{count}})",
+      "tableTitleLoading": "All Users",
+      "emptyTitle": "No users yet",
+      "emptyDescription": "Users will appear here once they register",
+      "searchPlaceholder": "Search by name or email...",
+      "columns": {
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "applications": "Applications",
+        "actions": "Actions"
+      },
+      "applicationCount_one": "{{count}} application",
+      "applicationCount_other": "{{count}} applications",
+      "viewProfile": "View Profile",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "suspendDialog": {
+        "title": "Suspend User",
+        "description": "Are you sure you want to suspend {{name}}? They will not be able to access their account until reactivated.",
+        "cancel": "Cancel",
+        "confirm": "Suspend User",
+        "confirming": "Suspending..."
+      },
+      "activateDialog": {
+        "title": "Activate User",
+        "description": "Are you sure you want to activate {{name}}? They will regain access to their account.",
+        "cancel": "Cancel",
+        "confirm": "Activate User",
+        "confirming": "Activating..."
+      }
+    },
+    "userDetailsPage": {
+      "back": "Back to Users",
+      "notFound": "User not found.",
+      "noBusinessName": "No business name",
+      "cards": {
+        "email": "Email",
+        "joined": "Joined",
+        "applications": "Applications"
+      },
+      "applicationCount_one": "{{count}} application",
+      "applicationCount_other": "{{count}} applications",
+      "businessDetails": "Business Details",
+      "bio": "Bio",
+      "fields": {
+        "businessName": "Business Name",
+        "businessSector": "Business sector",
+        "country": "Country",
+        "notProvided": "Not provided",
+        "noBio": "No bio provided"
+      },
+      "roleManagement": {
+        "title": "Role Management",
+        "currentRole": "Current Role",
+        "description": "Change the user's role to grant different permissions",
+        "selectRole": "Select role",
+        "updating": "Updating...",
+        "cannotChangeOwnRole": "You cannot change your own role."
+      },
+      "roleChangeDialog": {
+        "title": "Change User Role",
+        "description": "Are you sure you want to change {{name}}'s role from {{fromRole}} to {{toRole}}? This will immediately affect their access permissions.",
+        "cancel": "Cancel",
+        "confirm": "Change Role",
+        "confirming": "Updating..."
+      }
+    },
+    "kycCard": {
+      "title": "KYC Verification",
+      "notSubmitted": "This user has not submitted identity verification.",
+      "status": {
+        "pendingReview": "Pending Review"
+      },
+      "fields": {
+        "idType": "ID Type",
+        "idNumber": "ID Number",
+        "nameOnId": "Name on ID",
+        "nameMismatch": "Name differs from profile",
+        "idDocument": "ID Document",
+        "selfie": "Selfie",
+        "viewFull": "View full",
+        "noDocument": "No document",
+        "noSelfie": "No selfie"
+      },
+      "idTypes": {
+        "passport": "Passport",
+        "national_id": "National ID",
+        "drivers_license": "Driver's License",
+        "business_registration": "Business Registration"
+      },
+      "adminNotes": "Admin Notes (optional)",
+      "adminNotesPlaceholder": "Internal notes about this verification...",
+      "rejectionReason": "Rejection Reason (required to reject)",
+      "rejectionReasonPlaceholder": "Explain why the verification is being rejected...",
+      "verify": "Verify",
+      "reject": "Reject",
+      "previousAdminNotes": "Admin Notes:"
+    },
+    "projectDetailsPage": {
+      "loading": "Loading project...",
+      "notFound": "Project not found or an error occurred.",
+      "back": "Back to Projects",
+      "viewPublic": "View Public Page",
+      "edit": "Edit Project",
+      "featured": "Featured",
+      "requirementsTitle": "Requirements & Eligibility",
+      "requirements": "Requirements",
+      "eligibility": "Eligibility Criteria",
+      "sidebarTitle": "Project Details",
+      "fundingAmount": "Funding Amount",
+      "deadline": "Deadline",
+      "location": "Location",
+      "applicants": "Applicants",
+      "metadata": "Metadata",
+      "created": "Created",
+      "updated": "Updated"
+    }
+  },
+  "profilePage": {
+    "title": "Profile",
+    "subtitle": "Manage your profile information and preferences",
+    "overview": "Profile Overview",
+    "noOrganization": "No organization listed",
+    "noLocation": "No location",
+    "personalInfo": "Personal Information",
+    "profilePicture": "Profile Picture",
+    "uploadProfilePicture": "Upload Profile Picture",
+    "avatarHint": "Upload a profile picture to personalize your account (JPG, PNG, WebP, GIF up to 5MB)",
+    "emailCannotChange": "Email cannot be changed",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "completion": "Profile Completion",
+    "overallProgress": "Overall Progress",
+    "percentComplete": "{{percentage}}% Complete",
+    "items": {
+      "basicInfo": "Basic Information",
+      "contactDetails": "Contact Details",
+      "bio": "Bio & Description",
+      "identity": "Identity Verification"
+    },
+    "status": {
+      "complete": "Complete",
+      "pendingReview": "Pending Review",
+      "incomplete": "Incomplete"
+    },
+    "fields": {
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter your last name",
+      "email": "Email",
+      "country": "Location/Country",
+      "countryPlaceholder": "City, Country",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Enter phone number",
+      "businessName": "Organization, employer, or school",
+      "businessNamePlaceholder": "Company, university, NGO, or employer (optional)",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself — your work, studies, skills, or what you're looking for...",
+      "bioDescription": "Optional. Helps reviewers and programs understand your background (founder, professional, or intern)."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required"
+    },
+    "toasts": {
+      "updated": "Profile updated",
+      "updatedDesc": "Your profile has been successfully updated.",
+      "error": "Error",
+      "updateFailed": "Failed to update profile. Please try again.",
+      "avatarRemoved": "Profile picture removed",
+      "avatarRemovedDesc": "Your profile picture has been removed.",
+      "warning": "Warning",
+      "avatarDeleteWarning": "Image deleted but failed to update profile. Please save your changes."
+    },
+    "errors": {
+      "loadFailed": "Failed to load profile",
+      "retry": "Retry",
+      "notFound": "No profile found. Please create one."
+    },
+    "defaultUser": "User"
+  },
+  "billingPage": {
+    "title": "Billing",
+    "subtitle": "Full Member subscription ($2/month), payment methods, and receipts",
+    "paymentMethods": {
+      "title": "Payment Methods",
+      "description": "Cards used for your Full Member subscription",
+      "empty": "No payment methods on file",
+      "loading": "Loading…",
+      "paidMemberHint": "Your card is saved automatically after membership checkout. If nothing appears, wait a minute and refresh — or <link>run checkout again</link>.",
+      "pendingCheckoutHint": "Finish membership payment to save your card. <link>Continue checkout</link>",
+      "upgradeHint": "Cards are saved when you pay for Full Membership. <link>Upgrade & pay</link>",
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "expires": "Expires {{month}}/{{year}}",
+      "setDefault": "Set as Default"
+    },
+    "history": {
+      "title": "Billing History",
+      "description": "Membership payments and other charges",
+      "empty": "No billing history yet",
+      "emptyHint": "Full Member payments appear here after checkout. <link>Upgrade</link>",
+      "membership": "Membership",
+      "invoice": "Invoice: {{number}}",
+      "downloadReceipt": "Download Receipt",
+      "receipt": "Receipt",
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "invoice": "Invoice #",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "info": {
+      "title": "Billing Information",
+      "description": "Update your billing address and tax information",
+      "billingEmail": "Billing Email",
+      "taxId": "Tax ID (Optional)",
+      "taxIdPlaceholder": "Enter your tax ID",
+      "address": "Billing Address",
+      "addressPlaceholder": "Street address",
+      "city": "City",
+      "cityPlaceholder": "City",
+      "state": "State/Province",
+      "statePlaceholder": "State",
+      "zip": "ZIP/Postal Code",
+      "zipPlaceholder": "ZIP Code",
+      "country": "Country",
+      "countryPlaceholder": "Country",
+      "saving": "Saving...",
+      "save": "Save Billing Information"
+    },
+    "deleteDialog": {
+      "onlyTitle": "Delete Your Only Payment Method?",
+      "title": "Delete Payment Method?",
+      "onlyDesc": "This is your only payment method. If you delete it, you'll need to add a new payment method before making any future payments. Are you sure you want to continue?",
+      "defaultDesc": "This is your default payment method. It will be removed and another payment method will be set as default. Are you sure you want to continue?",
+      "genericDesc": "Are you sure you want to remove this payment method? This action cannot be undone.",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "delete": "Delete"
+    },
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "refunded": "Refunded",
+      "failed": "Failed"
+    },
+    "toasts": {
+      "saved": "Billing information saved",
+      "savedDesc": "Your billing address has been updated.",
+      "error": "Error",
+      "removed": "Payment method removed",
+      "removedOnly": "Your payment method has been removed. You'll need to add a new payment method for future transactions.",
+      "removedWithDefault": "Your payment method has been removed. Another payment method has been set as default.",
+      "removedGeneric": "Your payment method has been removed.",
+      "deleteFailed": "Failed to delete payment method",
+      "defaultUpdated": "Default payment method updated",
+      "receiptUnavailable": "Receipt unavailable",
+      "receiptUnavailableDesc": "No transaction record found for this payment yet.",
+      "loginRequired": "You must be logged in to download invoices.",
+      "invoiceDownloaded": "Invoice downloaded.",
+      "downloadFailed": "Failed to download invoice."
+    }
+  },
+  "partner": {
+    "portal": "Partner Portal",
+    "roleFallback": "Partner",
+    "menu": {
+      "dashboard": "Dashboard",
+      "opportunities": "My Opportunities",
+      "api": "API",
+      "notifications": "Notifications",
+      "team": "Team",
+      "settings": "Settings"
+    },
+    "pages": {
+      "dashboard": "Partner Dashboard",
+      "opportunities": "My Opportunities",
+      "api": "Partner API",
+      "apiDocs": "API Documentation",
+      "notifications": "Notifications",
+      "team": "Team",
+      "settings": "Settings",
+      "opportunityDetails": "Opportunity Details",
+      "qualifiedApplicants": "Qualified Applicants",
+      "default": "Partner Portal"
+    },
+    "apiPage": {
+      "loading": "Loading…",
+      "subtitle": "Manage API keys and webhooks for programmatic integration.",
+      "readOnlyTitle": "View only",
+      "readOnlyDescription": "Only organization admins can create or revoke API keys and manage webhooks.",
+      "copy": "Copy",
+      "copied": "{{label}} copied",
+      "copyFailed": "Could not copy to clipboard",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "overview": {
+        "title": "API base URL",
+        "description": "Use this base URL with your API key for all REST requests.",
+        "baseUrl": "Base URL",
+        "authHint": "Send your secret key in the X-API-Key header on every request."
+      },
+      "keys": {
+        "title": "API keys",
+        "description": "Create separate test and live keys. The full secret is shown once at creation.",
+        "create": "Create key",
+        "createTitle": "Create API key",
+        "createDescription": "Choose environment and scopes. Store the secret securely — it cannot be retrieved later.",
+        "created": "API key created",
+        "createFailed": "Failed to create API key",
+        "revoke": "Revoke",
+        "revokeTitle": "Revoke API key?",
+        "revokeDescription": "This key stops working immediately. Integrations using it will fail until you deploy a new key.",
+        "revoked": "API key revoked",
+        "revokeFailed": "Failed to revoke API key",
+        "empty": "No active API keys yet.",
+        "revealTitle": "Save this API key now",
+        "revealDescription": "This is the only time the full secret is shown.",
+        "environment": "Environment",
+        "envTest": "Test (read-only)",
+        "envLive": "Live",
+        "expiryDays": "Expires in (days)",
+        "scopes": "Scopes",
+        "expires": "Expires {{date}}",
+        "lastUsed": "Last used {{date}}",
+        "testKeyLimitationsTitle": "Test keys are read-only",
+        "testKeyLimitationsDescription": "Test keys cannot write data or access applicant PII. Use a live key for production integrations.",
+        "scopeLabels": {
+          "opportunities:read": "Read opportunities",
+          "opportunities:write": "Write opportunities",
+          "applications:read": "Read applications",
+          "applications:read_pii": "Read applicant PII",
+          "webhooks:manage": "Manage webhooks"
+        }
+      },
+      "webhooks": {
+        "title": "Webhooks",
+        "description": "MAALI sends signed POST requests to your HTTPS endpoint when events occur.",
+        "endpoint": "Endpoint URL",
+        "events": "Subscribed events",
+        "save": "Save webhook",
+        "saved": "Webhook settings saved",
+        "saveFailed": "Failed to save webhook",
+        "rotate": "Rotate secret",
+        "rotated": "Webhook signing secret rotated",
+        "rotateFailed": "Failed to rotate secret",
+        "revealTitle": "Save this signing secret now",
+        "revealDescription": "Use it to verify X-Maali-Signature on inbound webhooks.",
+        "secretPrefix": "Current secret prefix: {{prefix}}…",
+        "validation": {
+          "url": "Enter a valid HTTPS URL",
+          "events": "Select at least one event"
+        },
+        "eventLabels": {
+          "application_submitted": "Application submitted",
+          "application_status_changed": "Application status changed",
+          "opportunity_closed": "Opportunity closed"
+        }
+      }
+    },
+    "apiDocs": {
+      "viewDocs": "View API docs",
+      "back": "Back to API settings",
+      "title": "Partner API documentation",
+      "subtitle": "Reference for integrating your systems with MAALI."
+    },
+    "orgNotLinked": {
+      "title": "Organization not linked",
+      "description": "Your partner account is not linked to an organization yet. Contact your Maali administrator to finish setup before creating opportunities.",
+      "createDisabledTooltip": "Link your organization before creating opportunities. Contact your Maali administrator if you need help.",
+      "contactSupport": "Contact support"
+    },
+    "checklist": {
+      "title": "Setup checklist",
+      "description": "Complete these steps to get the most from your partner portal.",
+      "progress": "Progress",
+      "progressCount": "{{completed}} of {{total}} complete",
+      "items": {
+        "orgProfile": {
+          "label": "Organization profile",
+          "description": "Add your organization name, sector, and description."
+        },
+        "orgLogo": {
+          "label": "Organization logo",
+          "description": "Upload a logo so applicants recognize your brand."
+        },
+        "firstOpportunity": {
+          "label": "First opportunity",
+          "description": "Publish your first funding opportunity."
+        },
+        "firstApplication": {
+          "label": "First application",
+          "description": "Receive and review your first application."
+        }
+      },
+      "actions": {
+        "editProfile": "Edit profile",
+        "uploadLogo": "Upload logo",
+        "createOpportunity": "Create opportunity",
+        "viewSubmissions": "View submissions"
+      }
+    },
+    "dashboardPage": {
+      "subtitle": "Manage your opportunities and track applications",
+      "zeroStatsTip": {
+        "title": "Your dashboard metrics",
+        "description": "These cards will show your opportunity and application counts once you create your first opportunity and start receiving applications.",
+        "action": "Create Opportunity"
+      },
+      "statsError": {
+        "title": "Failed to load dashboard stats",
+        "description": "We could not load your partner metrics. Please try again.",
+        "retry": "Retry"
+      },
+      "recentOpportunities": {
+        "title": "Recent opportunities",
+        "description": "Quick access to your latest opportunities and applicant lists.",
+        "viewAll": "View all",
+        "viewOpportunity": "View opportunity",
+        "viewApplicants": "View applicants",
+        "applicantCount": "{{count}} applicants"
+      },
+      "stats": {
+        "totalOpportunities": "Total Opportunities",
+        "activeOpportunities": "Active Opportunities",
+        "totalApplications": "Total Applications",
+        "approved": "Approved"
+      }
+    },
+    "settingsPage": {
+      "subtitle": "Manage your partner account settings",
+      "accountInfo": {
+        "title": "Account Information",
+        "description": "Your account details",
+        "email": "Email",
+        "role": "Role"
+      },
+      "loading": "Loading organization details...",
+      "orgProfile": {
+        "title": "Organization Profile",
+        "description": "Update your organization information",
+        "logo": "Organization Logo",
+        "uploadLogo": "Upload Logo",
+        "name": "Organization Name",
+        "namePlaceholder": "Organization name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Brief description of your organization",
+        "website": "Website",
+        "websitePlaceholder": "https://your-website.com",
+        "sector": "Sector",
+        "sectorPlaceholder": "Select sector"
+      },
+      "contact": {
+        "title": "Contact Details",
+        "description": "Primary contact for your organization",
+        "name": "Primary Contact Name",
+        "namePlaceholder": "Full name",
+        "phone": "Business Phone (optional)",
+        "phonePlaceholder": "+1 234 567 890",
+        "country": "Country / Region (optional)",
+        "countryPlaceholder": "e.g. Kenya"
+      },
+      "validation": {
+        "nameRequired": "Organization name is required",
+        "validUrl": "Please enter a valid URL",
+        "sectorRequired": "Sector is required"
+      },
+      "toasts": {
+        "updated": "Partner profile updated",
+        "updatedDesc": "Your organization details have been saved.",
+        "failed": "Update failed",
+        "failedDesc": "Unable to save partner details."
+      },
+      "readOnlyTitle": "View-only access",
+      "readOnlyDescription": "Only partner organization admins can edit organization settings. Contact your org admin or Maali support for changes."
+    },
+    "teamPage": {
+      "title": "Team members",
+      "subtitle": "Manage who can access your partner organization on Maali.",
+      "description": "People with access to {{name}} on the partner portal.",
+      "loading": "Loading team members...",
+      "empty": "No team members linked yet.",
+      "inviteEmail": "Email address",
+      "inviteEmailPlaceholder": "colleague@organization.org",
+      "invalidEmail": "Enter a valid email address",
+      "inviteRole": "Role",
+      "sendInvite": "Send invite",
+      "inviteSuccess": "Invite sent",
+      "inviteSuccessDescription": "We sent a sign-in link to {{email}}.",
+      "inviteError": "Failed to send invite",
+      "roleUpdated": "Role updated",
+      "roleUpdateError": "Failed to update role",
+      "memberRemoved": "Member removed",
+      "removeError": "Failed to remove member",
+      "remove": "Remove",
+      "removeConfirmTitle": "Remove team member?",
+      "removeConfirmDescription": "They will lose access to this organization's partner portal until invited again.",
+      "cancel": "Cancel",
+      "you": "you",
+      "readOnlyTitle": "Team managed by admins",
+      "readOnlyDescription": "Only organization admins can invite or remove teammates. You can still view who has access.",
+      "roles": {
+        "admin": "Admin",
+        "member": "Member"
+      }
+    },
+    "setupWizard": {
+      "title": "Welcome to Maali Partner Portal",
+      "description": "Let's set up your organization profile so applicants can learn about you.",
+      "stepOf": "Step {{current}} of {{total}}",
+      "percentComplete": "{{percent}}% complete",
+      "steps": {
+        "organization": "Organization",
+        "contact": "Contact",
+        "firstOpportunity": "First Opportunity"
+      },
+      "logoHint": "A logo helps applicants recognize your organization",
+      "step3Intro": "Optionally set up your first opportunity now, or skip and do it later from the dashboard.",
+      "fields": {
+        "opportunityTitle": "Opportunity Title",
+        "opportunityTitlePlaceholder": "e.g. 2026 Innovation Grant",
+        "fundingAmount": "Funding Amount",
+        "fundingAmountPlaceholder": "e.g. $10,000 - $50,000",
+        "deadline": "Application Deadline"
+      },
+      "actions": {
+        "skip": "Skip for now",
+        "back": "Back",
+        "next": "Next",
+        "saving": "Saving...",
+        "complete": "Complete Setup"
+      },
+      "toasts": {
+        "updated": "Organization profile updated!",
+        "updatedDesc": "Your partner organization is now set up.",
+        "error": "Error",
+        "errorDesc": "Failed to save organization profile. Please try again."
+      },
+      "validation": {
+        "descriptionMin": "Description must be at least 10 characters",
+        "contactNameMin": "Contact name is required",
+        "validUrl": "Please enter a valid URL"
+      }
+    },
+    "qualifiedApplicantsPage": {
+      "title": "Qualified Applicants",
+      "subtitle": "{{title}} - Ranked by review scores",
+      "loading": "Loading...",
+      "exportQualified": "Export Qualified ({{count}})",
+      "exportCurrent": "Export Current View",
+      "allApplications": "All Applications",
+      "stats": {
+        "total": "Total Applications",
+        "qualified": "Qualified / Approved",
+        "reviewed": "Reviewed",
+        "pending": "Pending"
+      },
+      "tableTitle": "Applications by Rank",
+      "filters": {
+        "all": "All Statuses",
+        "approved": "Approved Only",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "under_review": "Under Review"
+      },
+      "searchPlaceholder": "Search by applicant name or email..."
+    },
+    "opportunityForm": {
+      "back": "Back",
+      "createTitle": "Create New Opportunity",
+      "editTitle": "Edit Opportunity",
+      "createSubtitle": "Set up a new funding opportunity",
+      "editSubtitle": "Update your opportunity details"
+    },
+    "opportunityDetailsPage": {
+      "loading": "Loading opportunity...",
+      "notFound": "Opportunity not found or you do not have access.",
+      "back": "Back to Opportunities",
+      "viewPublic": "View Public Page",
+      "viewApplications": "View Ranked Applications",
+      "edit": "Edit Opportunity",
+      "requirementsTitle": "Requirements & Eligibility",
+      "requirements": "Requirements",
+      "eligibility": "Eligibility Criteria",
+      "sidebarTitle": "Opportunity Details",
+      "fundingAmount": "Funding Amount",
+      "deadline": "Deadline",
+      "location": "Location",
+      "applicants": "Applicants",
+      "metadata": "Metadata",
+      "opportunityId": "Opportunity ID",
+      "created": "Created",
+      "uncategorized": "Uncategorized"
+    },
+    "rankedApplicationsPage": {
+      "title": "Ranked Applications",
+      "subtitle": "{{title}} - Ranked by review scores",
+      "loading": "Loading...",
+      "exportRankedCsv": "Export Ranked CSV",
+      "back": "Back",
+      "exportTopTitle": "Export Top Ranked",
+      "exportTop": "Export Top",
+      "searchPlaceholder": "Search by applicant name or email...",
+      "exportOnly": {
+        "title": "Export-only view",
+        "description": "Partners can export ranked applicant data as CSV. You cannot approve, reject, or message applicants from this page."
+      },
+      "reviewComplete": {
+        "title": "Rankings ready",
+        "description": "Maali review scoring is complete. Export ranked results below.",
+        "fromNotification": "You opened this from a review-complete notification. Ranked results are ready to export below."
+      },
+      "filters": {
+        "status": "Status",
+        "statusAll": "All statuses",
+        "minScore": "Minimum score",
+        "minScorePlaceholder": "e.g. 7.0",
+        "noResults": "No applications match your filters."
+      },
+      "csv": {
+        "rank": "Rank",
+        "applicantName": "Applicant Name",
+        "organization": "Organization",
+        "email": "Email",
+        "projectTitle": "Project Title",
+        "status": "Status",
+        "avgScore": "Avg Score",
+        "reviews": "Reviews",
+        "submitted": "Submitted"
+      },
+      "loadError": {
+        "title": "Failed to load applications",
+        "description": "We could not load ranked applications for this opportunity. Please try again.",
+        "retry": "Retry"
+      },
+      "empty": {
+        "noSubmissions": {
+          "title": "No applications yet",
+          "description": "When applicants submit to this opportunity, they will appear here ranked by review scores."
+        },
+        "reviewPending": {
+          "title": "Reviews in progress",
+          "description": "{{count}} application(s) submitted. Rankings and exports will be available once reviewers complete scoring."
+        }
+      }
+    }
+  },
+  "reviewer": {
+    "panel": "Reviewer Panel",
+    "roleFallback": "Reviewer",
+    "menu": {
+      "dashboard": "Dashboard",
+      "applications": "Applications",
+      "notifications": "Notifications",
+      "settings": "Settings"
+    },
+    "pages": {
+      "dashboard": "Reviewer Dashboard",
+      "applications": "Applications",
+      "notifications": "Notifications",
+      "settings": "Reviewer Settings",
+      "reviewApplication": "Review Application"
+    },
+    "dashboardPage": {
+      "subtitle": "Overview of applications and review statistics",
+      "loadError": "Error loading applications: {{message}}",
+      "stats": {
+        "pendingReview": "Pending Review",
+        "pendingDesc": "Applications awaiting review",
+        "approved": "Approved",
+        "approvedDesc": "Total approved applications",
+        "rejected": "Rejected",
+        "rejectedDesc": "Total rejected applications",
+        "total": "Total",
+        "totalDesc": "All applications"
+      },
+      "performance": {
+        "title": "Review Performance",
+        "description": "Your review statistics",
+        "totalApplications": "Total Applications",
+        "approvalRate": "Approval Rate",
+        "pendingReviews": "Pending Reviews"
+      },
+      "recent": {
+        "title": "Recent Applications",
+        "description": "Latest submissions requiring review",
+        "empty": "No pending applications at this time.",
+        "submitted": "Submitted: {{date}}",
+        "deadline": "Deadline: {{date}}",
+        "view": "View",
+        "overdue": "Overdue",
+        "dueToday": "Due today",
+        "daysLeft": "{{count}} day left",
+        "daysLeft_plural": "{{count}} days left"
+      },
+      "deadlineTooltip": "Review deadline is set by administrators. Submit your review before this date."
+    },
+    "applicationsPage": {
+      "subtitle": "Review and manage all submitted applications",
+      "subtitleCount": "Review and manage all submitted applications ({{count}})",
+      "loadError": "Error loading applications: {{message}}",
+      "unknownError": "Unknown error",
+      "priorityAlert": {
+        "title": "Applications pending for 5+ days",
+        "description": "Please prioritize reviewing these applications"
+      },
+      "tableTitles": {
+        "all": "All Applications",
+        "draft": "Draft Reviews",
+        "pending": "Pending Applications",
+        "under_review": "Under Review Applications",
+        "approved": "Approved Applications",
+        "rejected": "Rejected Applications"
+      },
+      "noDeadline": "No deadline",
+      "day": "day",
+      "days": "days",
+      "statusDescriptions": {
+        "draft": "You saved a draft review and can continue from where you left off",
+        "pending": "Application is pending review by all assigned reviewers",
+        "under_review": "Review in progress: {{completed}} of {{total}} reviewers have submitted",
+        "approved": "Application has been approved",
+        "rejected": "Application has been rejected",
+        "default": "Application status"
+      },
+      "actions": {
+        "startReview": "Start Review",
+        "continueReview": "Continue Review",
+        "review": "Review"
+      },
+      "searchPlaceholder": "Search by applicant name, project title, or company..."
+    },
+    "settingsPage": {
+      "subtitle": "Manage your reviewer preferences and notifications",
+      "notifications": {
+        "title": "Notification Preferences",
+        "description": "Configure how you receive notifications about new applications",
+        "email": "Email Notifications",
+        "emailDesc": "Receive email notifications for new applications",
+        "dailyDigest": "Daily Digest",
+        "dailyDigestDesc": "Receive a daily summary of pending applications",
+        "urgent": "Urgent Applications",
+        "urgentDesc": "Get notified immediately for applications pending 5+ days"
+      },
+      "reviewPrefs": {
+        "title": "Review Preferences",
+        "description": "Set your default review workflow preferences",
+        "priority": "Default Review Priority",
+        "oldestFirst": "Oldest First",
+        "newestFirst": "Newest First",
+        "fundingHighLow": "Funding Amount (High to Low)",
+        "fundingLowHigh": "Funding Amount (Low to High)",
+        "autoAssign": "Auto-assign Applications",
+        "autoAssignDesc": "Automatically assign new applications to your review queue"
+      },
+      "profile": {
+        "title": "Profile Information",
+        "description": "Update your reviewer profile information",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter your full name",
+        "email": "Email",
+        "emailPlaceholder": "your.email@example.com",
+        "emailHint": "Email cannot be changed here"
+      },
+      "saving": "Saving...",
+      "save": "Save Settings",
+      "toasts": {
+        "saved": "Settings Saved",
+        "savedDesc": "Your reviewer settings have been updated.",
+        "error": "Error",
+        "saveFailed": "Failed to save settings"
+      }
+    },
+    "reviewApplicationPage": {
+      "title": "Review Application",
+      "notAssigned": {
+        "title": "Not Assigned",
+        "description": "You are not assigned to review this application",
+        "body": "Only assigned reviewers can submit reviews for applications. If you believe you should be assigned, please contact an administrator."
+      },
+      "submitted": {
+        "title": "Review Submitted",
+        "description": "You have already submitted your review for this application",
+        "overallScore": "Overall Score:",
+        "recommendation": "Recommendation:",
+        "criterionScores": "Criterion Scores:",
+        "yourComments": "Your Comments:",
+        "submittedAt": "Submitted:",
+        "engineNote": "Your review has been submitted. The decision engine will process all reviews once all assigned reviewers have submitted their reviews.",
+        "updateNote": "You can update your review by submitting again - it will replace your previous submission."
+      },
+      "toasts": {
+        "submitted": "Review Submitted",
+        "submittedDesc": "Your review has been submitted successfully. The decision engine will process all reviews.",
+        "downloadStarted": "Download Started",
+        "downloadStartedDesc": "Downloading {{fileName}}...",
+        "downloadFailed": "Download Failed",
+        "downloadFailedDesc": "Unable to download {{fileName}}. The file may not exist or you may not have permission to access it.",
+        "downloadError": "Download Error",
+        "downloadErrorDesc": "Failed to download document. Please try again."
+      }
+    }
+  }
+}

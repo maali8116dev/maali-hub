@@ -1,0 +1,72 @@
+{
+  "title": "Minhas candidaturas",
+  "subtitle": "Acompanhe e gira as suas candidaturas",
+  "helpTooltip": "Acompanhe o estado de todas as suas candidaturas. Pode filtrar por estado, pesquisar e ver informações detalhadas sobre cada candidatura.",
+  "firstTimeTip": {
+    "title": "Pronto para se candidatar?",
+    "description": "Explore as oportunidades disponíveis e envie a sua primeira candidatura. Certifique-se de que o seu perfil está completo para aumentar as hipóteses de aprovação.",
+    "action": "Explorar oportunidades"
+  },
+  "filters": {
+    "all": "Todas",
+    "pending": "Pendente",
+    "under_review": "Em análise",
+    "approved": "Aprovada",
+    "rejected": "Rejeitada",
+    "draft": "Rascunho",
+    "drafts": "Rascunhos"
+  },
+  "columns": {
+    "applicant": "Candidato",
+    "project": "Projeto",
+    "sector": "Setor",
+    "country": "País",
+    "status": "Estado",
+    "submitted": "Enviada",
+    "actions": "Ações",
+    "email": "E-mail",
+    "rank": "Classificação",
+    "avgScore": "Pontuação média",
+    "reviews": "Avaliações",
+    "reviewDeadline": "Prazo de avaliação",
+    "daysPending": "Dias pendentes"
+  },
+  "statusDescriptions": {
+    "pending": "A sua candidatura está a ser analisada pela nossa equipa",
+    "approved": "Parabéns! A sua candidatura foi aprovada",
+    "rejected": "A sua candidatura não foi selecionada desta vez",
+    "draft": "Esta candidatura está guardada mas ainda não foi enviada",
+    "under_review": "Os avaliadores estão a pontuar a sua candidatura, ou os administradores estão a decidir o resultado",
+    "default": "Estado da candidatura"
+  },
+  "actions": {
+    "continueApplication": "Continuar candidatura",
+    "applicationClosed": "Candidatura encerrada",
+    "viewDetails": "Ver detalhes"
+  },
+  "table": {
+    "allApplications": "Todas as candidaturas",
+    "pendingApplications": "Candidaturas pendentes",
+    "approvedApplications": "Candidaturas aprovadas",
+    "rejectedApplications": "Candidaturas rejeitadas",
+    "draftApplications": "Candidaturas em rascunho",
+    "searchPlaceholder": "Pesquisar por título do projeto, setor ou país..."
+  },
+  "emptyState": {
+    "errorTitle": "Erro ao carregar candidaturas",
+    "errorDesc": "Ocorreu um erro ao carregar as suas candidaturas. Tente novamente mais tarde.",
+    "noApplications": "Ainda sem candidaturas",
+    "noApplicationsDesc": "Comece por explorar as oportunidades disponíveis e enviar a sua primeira candidatura.",
+    "noFilteredApplications": "Nenhuma",
+    "noFilteredApplicationsDesc": "Tente ajustar os critérios de filtro para encontrar mais candidaturas.",
+    "browseOpportunities": "Explorar oportunidades",
+    "clearFilter": "Limpar filtro",
+    "viewGuide": "Ver guia",
+    "tips": {
+      "completeProfile": "Complete o seu perfil para aumentar as hipóteses de aprovação",
+      "readRequirements": "Leia atentamente os requisitos do projeto antes de se candidatar",
+      "saveDrafts": "Pode guardar candidaturas como rascunho e enviar mais tarde",
+      "checkDeadlines": "Verifique os prazos das candidaturas para não perder oportunidades"
+    }
+  }
+}

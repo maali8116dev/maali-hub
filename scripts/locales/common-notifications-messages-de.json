@@ -1,0 +1,59 @@
+{
+  "viewAll": "Alle Benachrichtigungen anzeigen",
+  "types": {
+    "review_assignment": "Gutachterzuweisung"
+  },
+  "messages": {
+    "fallbackOpportunity": "diese Gelegenheit",
+    "application": {
+      "submitted": {
+        "title": "Bewerbung eingereicht",
+        "message": "Ihre Bewerbung für „{{opportunityTitle}}“ wurde erfolgreich eingereicht und wird nun geprüft."
+      },
+      "approved": {
+        "title": "Bewerbung genehmigt!",
+        "message": "Herzlichen Glückwunsch! Ihre Bewerbung für „{{opportunityTitle}}“ wurde genehmigt."
+      },
+      "rejected": {
+        "title": "Bewerbungsstatus aktualisiert",
+        "message": "Ihre Bewerbung für „{{opportunityTitle}}“ wurde geprüft. Weitere Informationen finden Sie in den Bewerbungsdetails."
+      },
+      "statusPending": {
+        "title": "Bewerbungsstatus aktualisiert",
+        "message": "Der Status Ihrer Bewerbung für „{{opportunityTitle}}“ wurde auf „Ausstehende Prüfung“ aktualisiert."
+      }
+    },
+    "payment": {
+      "confirmed": {
+        "title": "Zahlung bestätigt",
+        "message": "Ihre Bewerbungsgebühr wurde bestätigt und Ihre Bewerbung wird nun geprüft."
+      }
+    },
+    "membership": {
+      "activated": {
+        "title": "Vollmitgliedschaft aktiv",
+        "message": "Ihre Vollmitgliedschaft für 2 $/Monat ist jetzt aktiv. Sie können sich auf alle Fördermöglichkeiten bewerben."
+      },
+      "ended": {
+        "title": "Mitgliedschaft beendet",
+        "message": "Ihre Vollmitgliedschaft ist beendet. Sie nutzen jetzt den kostenlosen Community-Plan. Upgraden Sie jederzeit, um sich erneut zu bewerben."
+      }
+    },
+    "review": {
+      "assigned": {
+        "title": "Neue Bewerbung zugewiesen",
+        "message": "Eine neue Bewerbung für „{{opportunityTitle}}“ wurde Ihnen zur Prüfung zugewiesen."
+      },
+      "newApplicationRequiresReview": {
+        "title": "Neue Bewerbung zugewiesen",
+        "message": "Eine neue Bewerbung für „{{opportunityTitle}}“ erfordert Ihre Prüfung."
+      }
+    },
+    "admin": {
+      "reviewerCapacityNeeded": {
+        "title": "Gutachterkapazität erforderlich",
+        "message": "Nur {{availableCount}} Gutachter für „{{opportunityTitle}}“ verfügbar. Diese Bewerbung benötigt {{requiredReviewers}} Gutachter. Bitte weisen Sie einen weiteren Gutachter zu."
+      }
+    }
+  }
+}

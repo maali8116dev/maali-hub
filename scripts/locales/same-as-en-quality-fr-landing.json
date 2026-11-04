@@ -1,0 +1,12 @@
+{
+  "helpLinks": {
+    "support": { "title": "Assistance" },
+    "guide": { "title": "Guide de démarrage" }
+  },
+  "about": {
+    "values": {
+      "collaboration": { "title": "Collaboration" },
+      "impact": { "title": "Impact" }
+    }
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "page": {
+    "title": "Formulaire de candidature",
+    "subtitleWithProject": "Complétez le formulaire ci-dessous pour postuler à cette opportunité de financement.",
+    "subtitleGeneric": "Complétez le formulaire ci-dessous pour démarrer votre candidature.",
+    "backToProject": "Retour aux détails du projet",
+    "backToProjects": "Retour aux projets",
+    "loading": "Chargement...",
+    "closedTitle": "Candidatures fermées",
+    "closedDescription": "Cette opportunité est fermée. Les nouvelles candidatures et les modifications sont désactivées.",
+    "backToOpportunity": "Retour à l'opportunité",
+    "membershipCta": "Voir les options d'adhésion"
+  },
+  "steps": {
+    "applicantInfo": "Informations du candidat",
+    "organization": "Détails de l'organisation (facultatif)",
+    "projectOverview": "Aperçu du projet",
+    "socialLinks": "Liens sociaux",
+    "documents": "Téléverser des documents",
+    "review": "Révision",
+    "compliance": "Conformité et déclarations",
+    "submit": "Soumettre"
+  },
+  "progress": {
+    "stepOf": "Étape {{current}} sur {{total}}",
+    "saveDraft": "Enregistrer le brouillon",
+    "saving": "Enregistrement...",
+    "lastSaved": "Dernière sauvegarde : {{time}}",
+    "percentComplete": "{{percent}} % terminé"
+  },
+  "nav": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "submit": "Soumettre la candidature",
+    "submitting": "Envoi en cours...",
+    "verifyEmailToSubmit": "Vérifiez votre e-mail pour soumettre"
+  },
+  "requiredMark": "Les champs marqués d'un * sont obligatoires.",
+  "notProvided": "Non renseigné",
+  "edit": "Modifier",
+  "yes": "Oui",
+  "location": "Localisation",
+  "declarationDate": "Date de déclaration :",
+  "step1": {
+    "title": "Informations du candidat",
+    "description": "Parlez-nous de vous ou de votre organisation.",
+    "applicantType": "Type de candidat",
+    "applicantTypePlaceholder": "Sélectionnez le type de candidat",
+    "fullLegalName": "Nom légal complet",
+    "fullLegalNamePlaceholder": "Saisissez le nom légal complet",
+    "organizationName": "Nom de l'organisation",
+    "organizationNamePlaceholder": "Saisissez le nom de l'organisation",
+    "country": "Pays de résidence / d'enregistrement",
+    "countryPlaceholder": "Sélectionnez un pays",
+    "cityRegion": "Ville / Région",
+    "cityRegionPlaceholder": "Saisissez la ville ou la région",
+    "email": "Adresse e-mail",
+    "emailPlaceholder": "votre.email@exemple.com",
+    "phone": "Numéro de téléphone",
+    "phonePlaceholder": "Saisissez le numéro de téléphone"
+  },
+  "step2": {
+    "individualSkip": "Ces informations sur l'organisation sont facultatives et généralement inutiles pour les candidats individuels. Vous pouvez passer à l'étape suivante.",
+    "title": "Détails de l'organisation (facultatif)",
+    "description": "Partagez des informations supplémentaires sur la crédibilité et les capacités de votre organisation. Vous pouvez aussi les fournir dans les documents justificatifs.",
+    "yearEstablished": "Année de création",
+    "yearEstablishedPlaceholder": "2020",
+    "teamMembers": "Nombre de membres de l'équipe",
+    "teamMembersPlaceholder": "10",
+    "coreMission": "Mission / objectif principal",
+    "coreMissionPlaceholder": "Décrivez brièvement la mission et l'objectif principal de votre organisation...",
+    "max200Words": "Maximum 200 mots",
+    "primarySectors": "Secteur(s) principal(aux)",
+    "otherSector": "Autre secteur (précisez)",
+    "otherSectorPlaceholder": "Saisissez l'autre secteur",
+    "keyTeam": "Membres clés de l'équipe et rôles",
+    "keyTeamPlaceholder": "Listez les membres clés de l'équipe et leurs rôles...",
+    "previousGrants": "Subventions ou financements antérieurs reçus",
+    "previousGrantsDetails": "Détails des subventions / financements antérieurs",
+    "previousGrantsPlaceholder": "Fournissez des détails sur les subventions ou financements antérieurs...",
+    "max400Words": "Maximum 400 mots"
+  },
+  "step3": {
+    "grant": {
+      "title": "Aperçu du projet",
+      "hint": "Dites-nous ce pour quoi vous souhaitez obtenir un financement.",
+      "titleLabel": "Titre du projet",
+      "titlePlaceholder": "Saisissez le titre du projet",
+      "summaryLabel": "Résumé du projet",
+      "summaryPlaceholder": "Fournissez un résumé de votre projet (minimum 30 mots)...",
+      "locationLabel": "Zone géographique ciblée (facultatif)",
+      "locationPlaceholder": "Où le projet sera-t-il mené ? Laissez vide pour utiliser votre ville/pays de l'étape 1."
+    },
+    "nonGrant": {
+      "title": "Aperçu de la candidature",
+      "hint": "Parlez-nous de vos objectifs et de votre adéquation avec cette opportunité.",
+      "titleLabel": "Titre de la candidature",
+      "titlePlaceholder": "Saisissez le titre de la candidature",
+      "summaryLabel": "Lettre de motivation",
+      "summaryPlaceholder": "Décrivez brièvement vos objectifs, votre adéquation et les résultats attendus (minimum 30 mots)...",
+      "locationLabel": "Localisation / zone géographique",
+      "locationPlaceholder": "Où êtes-vous basé(e) ou où cette opportunité s'appliquera-t-elle ?"
+    },
+    "summaryWordLimit": "Doit contenir entre 30 et 400 mots"
+  },
+  "step4": {
+    "title": "Liens sociaux",
+    "description": "Partagez vos profils professionnels et réseaux sociaux (facultatif). Cela nous aide à mieux vous connaître.",
+    "linkedin": "URL du profil LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/in/votreprofil",
+    "github": "URL du profil GitHub",
+    "githubPlaceholder": "https://github.com/votrenom",
+    "twitter": "URL du profil Twitter/X",
+    "twitterPlaceholder": "https://twitter.com/votrenom",
+    "website": "URL du site web",
+    "websitePlaceholder": "https://votresite.com",
+    "other": "Autres liens sociaux",
+    "otherPlaceholder": "Listez d'autres profils ou liens pertinents (Instagram, Facebook, portfolio, etc.)",
+    "max100Words": "Maximum 100 mots"
+  },
+  "step5": {
+    "title": "Téléverser des documents",
+    "description": "Téléversez les documents justificatifs de votre candidature (facultatif)."
+  },
+  "step6": {
+    "title": "Révisez votre candidature",
+    "description": "Veuillez vérifier toutes les informations ci-dessous avant de continuer.",
+    "registrationId": "Numéro d'enregistrement / d'identification :",
+    "previousGrantsFunding": "Subventions / financements antérieurs :",
+    "fromLibrary": "Depuis la bibliothèque :",
+    "newUploads": "Nouveaux téléversements :",
+    "documentCount": "{{count}} document(s)",
+    "noDocuments": "Aucun document sélectionné",
+    "documentsOnSubmit": "Les documents seront liés ou téléversés lors de la soumission de votre candidature",
+    "linkedin": "LinkedIn :",
+    "github": "GitHub :",
+    "twitter": "Twitter/X :",
+    "website": "Site web :"
+  },
+  "step7": {
+    "title": "Conformité et déclarations",
+    "description": "Veuillez lire et confirmer les déclarations suivantes. Tous les champs sont requis à des fins de gouvernance.",
+    "informationAccurateLabel": "Confirmation de l'exactitude des informations",
+    "informationAccurateDesc": "Je confirme que toutes les informations fournies dans cette candidature sont exactes, complètes et sincères au meilleur de ma connaissance.",
+    "conflictLabel": "Déclaration de conflit d'intérêts",
+    "conflictDesc": "Je déclare avoir divulgué tout conflit d'intérêts potentiel pouvant affecter cette candidature ou son évaluation.",
+    "reportingLabel": "Acceptation des exigences de reporting",
+    "reportingDesc": "J'accepte de fournir des rapports d'avancement réguliers, des états financiers et toute autre documentation exigée par l'organisme financeur.",
+    "dataProcessingLabel": "Consentement au traitement des données",
+    "dataProcessingDesc": "Je consens au traitement de mes données personnelles et des informations de candidature aux fins d'évaluation, d'administration et de communication liées à cette candidature."
+  },
+  "step8": {
+    "title": "Soumettre votre candidature",
+    "description": "Lisez l'avis de confirmation ci-dessous et cliquez sur le bouton de soumission pour finaliser votre candidature.",
+    "notice": "En soumettant cette candidature, vous confirmez que toutes les informations fournies sont exactes et complètes. Votre candidature sera examinée par notre équipe et vous serez informé(e) du résultat par e-mail."
+  },
+  "emailVerification": {
+    "title": "Vérification de l'e-mail requise",
+    "description": "Veuillez vérifier votre adresse e-mail avant de soumettre une candidature. Consultez votre boîte de réception ou votre tableau de bord pour renvoyer le lien."
+  },
+  "options": {
+    "applicantTypes": {
+      "Individual": "Particulier",
+      "Organization": "Organisation",
+      "Startup / SME": "Startup / PME",
+      "NGO / Non-profit": "ONG / Association",
+      "Research / Academic": "Recherche / Académique"
+    },
+    "sectors": {
+      "Health": "Santé",
+      "Education": "Éducation",
+      "Technology": "Technologie",
+      "Agriculture": "Agriculture",
+      "Environment": "Environnement",
+      "Creative": "Créatif",
+      "Other": "Autre"
+    }
+  },
+  "validation": {
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "phoneInvalid": "Veuillez saisir un numéro de téléphone international valide",
+    "applicantTypeRequired": "Veuillez sélectionner un type de candidat",
+    "fullLegalNameRequired": "Le nom légal complet est requis",
+    "countryRequired": "Le pays de résidence est requis",
+    "cityRegionRequired": "La ville/région est requise",
+    "yearInvalid": "Veuillez saisir une année valide",
+    "yearFuture": "L'année ne peut pas être dans le futur",
+    "coreMissionMaxWords": "La mission / l'objectif principal ne doit pas dépasser 200 mots",
+    "teamMembersMin": "Le nombre de membres de l'équipe doit être d'au moins 1",
+    "keyTeamMaxWords": "Les membres clés et rôles ne doivent pas dépasser 200 mots",
+    "previousGrantsMaxWords": "Les détails des subventions antérieures ne doivent pas dépasser 400 mots",
+    "previousGrantsDetailsRequired": "Veuillez fournir des détails sur les subventions ou financements antérieurs",
+    "projectTitleRequired": "Le titre du projet est requis",
+    "projectSummaryRequired": "Le résumé du projet est requis",
+    "projectSummaryMinWords": "Le résumé du projet doit contenir au moins 30 mots",
+    "projectSummaryMaxWords": "Le résumé du projet ne doit pas dépasser 400 mots",
+    "informationAccurateRequired": "Vous devez confirmer que les informations fournies sont exactes",
+    "conflictOfInterestRequired": "Vous devez déclarer tout conflit d'intérêts",
+    "dataProcessingRequired": "Vous devez consentir au traitement des données",
+    "reportingRequirementsRequired": "Vous devez accepter les exigences de reporting",
+    "linkedinUrlInvalid": "Veuillez saisir une URL LinkedIn valide",
+    "githubUrlInvalid": "Veuillez saisir une URL GitHub valide",
+    "twitterUrlInvalid": "Veuillez saisir une URL Twitter/X valide",
+    "websiteUrlInvalid": "Veuillez saisir une URL de site web valide",
+    "otherSocialMaxWords": "Les autres liens sociaux ne doivent pas dépasser 100 mots"
+  },
+  "toasts": {
+    "draftRestored": {
+      "title": "Brouillon restauré",
+      "description": "Votre brouillon précédemment enregistré a été chargé."
+    },
+    "validationError": {
+      "title": "Erreur de validation",
+      "description": "Veuillez remplir correctement tous les champs obligatoires."
+    },
+    "emailVerificationRequired": {
+      "title": "Vérification de l'e-mail requise",
+      "description": "Veuillez vérifier votre adresse e-mail avant de soumettre une candidature."
+    },
+    "projectRequired": {
+      "title": "Projet requis",
+      "description": "Veuillez sélectionner un projet pour postuler."
+    },
+    "missingInformation": {
+      "title": "Informations manquantes",
+      "description": "Veuillez compléter tous les champs obligatoires avant de soumettre."
+    },
+    "complianceRequired": {
+      "title": "Conformité requise",
+      "description": "Veuillez confirmer toutes les déclarations de conformité avant de soumettre."
+    },
+    "applicationsClosed": {
+      "title": "Candidatures fermées",
+      "description": "Ce projet est fermé. Vous ne pouvez plus soumettre ni modifier des candidatures."
+    },
+    "membershipRequired": {
+      "title": "Adhésion requise",
+      "description": "Devenez membre complet pour soumettre des candidatures."
+    },
+    "uploadingDocuments": {
+      "title": "Téléversement des documents",
+      "description_one": "Téléversement de {{count}} document...",
+      "description_other": "Téléversement de {{count}} documents..."
+    },
+    "uploadPartialFailure": {
+      "title": "Certains téléversements ont échoué",
+      "description": "Certains documents n'ont pas pu être téléversés. Votre candidature sera tout de même soumise, sans ces fichiers."
+    },
+    "alreadyApplied": {
+      "title": "Déjà postulé",
+      "description": "Vous avez déjà soumis une candidature pour cette opportunité. Consultez votre tableau de bord pour voir son statut."
+    },
+    "opportunityClosed": {
+      "title": "Candidatures fermées",
+      "description": "Cette opportunité n'accepte plus de candidatures."
+    },
+    "submitSuccess": {
+      "title": "Candidature soumise",
+      "description": "Votre candidature a été soumise avec succès !"
+    },
+    "tooManySubmissions": {
+      "title": "Trop de soumissions",
+      "description": "Vous avez soumis trop de candidatures récemment. Veuillez attendre une heure et réessayer."
+    },
+    "submitFailed": {
+      "title": "Échec de la soumission",
+      "description": "Un problème est survenu lors de la soumission de votre candidature. Veuillez réessayer."
+    },
+    "errors": {
+      "alreadyApplied": "Vous avez déjà soumis une candidature pour cette opportunité.",
+      "projectClosed": "Cette opportunité n'accepte plus de candidatures.",
+      "membershipRequired": "Une adhésion complète est requise pour postuler. Rejoignez MAALI en tant que membre complet pour continuer.",
+      "unauthorized": "Votre session a expiré. Veuillez vous reconnecter pour continuer.",
+      "missingProjectId": "Un problème est survenu. Veuillez actualiser la page et réessayer.",
+      "validationError": "Nous n'avons pas pu valider votre candidature. Veuillez réessayer sous peu.",
+      "invalidBody": "Un problème est survenu avec les données du formulaire. Veuillez actualiser et réessayer.",
+      "internalError": "Un problème est survenu de notre côté. Veuillez réessayer ou contacter le support si le problème persiste.",
+      "generic": "Un problème est survenu lors de la soumission de votre candidature. Veuillez réessayer."
+    }
+  },
+  "documents": {
+    "cv": "CV",
+    "coverLetter": "Lettre de motivation",
+    "invalidFile": "Fichier invalide",
+    "fromLibrary": "Depuis votre bibliothèque",
+    "uploadNew": "Téléverser de nouveaux fichiers",
+    "uploadNewDocuments": "Téléverser de nouveaux documents",
+    "selectFromLibrary": "Sélectionner dans la bibliothèque",
+    "noLibraryDocs": "Aucun document dans votre bibliothèque pour le moment.",
+    "uploadHint": "Téléversez des fichiers ou sélectionnez-les dans votre bibliothèque de documents.",
+    "removeFile": "Supprimer le fichier",
+    "deleteConfirmTitle": "Supprimer le fichier ?",
+    "deleteConfirmDescription": "Cela supprimera « {{name}} » de votre sélection. Le fichier ne sera pas supprimé de votre bibliothèque.",
+    "cancel": "Annuler",
+    "remove": "Supprimer",
+    "requiredSlotsTitle": "Documents requis",
+    "requiredSlotsDescription": "Le CV et la lettre de motivation sont requis pour ce type d'opportunité.",
+    "recommendedTitle": "Documents justificatifs recommandés",
+    "recommendedIntro": "Téléversez tout document qui renforce votre candidature. Éléments recommandés :",
+    "recommendedRequiredNote": "Vous pouvez téléverser tous les fichiers dans cette zone. Les documents marqués d'un * sont obligatoires.",
+    "selectFromLibraryTitle": "Sélectionner dans la bibliothèque",
+    "selectFromLibraryHint": "Choisissez des documents de votre bibliothèque à réutiliser pour cette candidature",
+    "selectedCount": "({{count}} sélectionné(s))",
+    "fromLibrarySection": "Depuis votre bibliothèque de documents",
+    "otherLibrarySection": "Autres fichiers enregistrés",
+    "uploadDropzoneTitle": "Téléverser des fichiers",
+    "fileTypesHint": "PDF, DOC, DOCX et formats d'image courants — max. 10 Mo par fichier.",
+    "individualRecommended": {
+      "id": "Pièce d'identité officielle (si demandée)",
+      "proposal": "Proposition de projet ou note conceptuelle"
+    },
+    "organizationRecommended": {
+      "registration": "Certificat d'enregistrement ou document de constitution légale",
+      "proposal": "Proposition de projet ou note conceptuelle"
+    },
+    "startupRecommended": {
+      "id": "Pièce d'identité officielle (si demandée)",
+      "proposal": "Proposition de projet ou note conceptuelle",
+      "budget": "Budget ou plan financier simple",
+      "cv": "CV/portfolio ou documents d'expérience pertinents"
+    },
+    "ngoRecommended": {
+      "registration": "Certificat d'enregistrement ou document de constitution légale",
+      "profile": "Profil de l'organisation ou document de mission",
+      "proposal": "Proposition de projet ou note conceptuelle",
+      "budget": "Budget/plan financier (et relevés si disponibles)",
+      "team": "CV de l'équipe et profils du personnel clé"
+    }
+  }
+}

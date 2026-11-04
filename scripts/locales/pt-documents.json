@@ -1,0 +1,76 @@
+{
+  "title": "Os meus documentos",
+  "subtitle": "Gira a sua biblioteca de documentos e documentos de candidatura",
+  "subtitleSlots": "Carregue uma vez, reutilize nas candidaturas. Os ficheiros específicos de cada candidatura aparecem na página de detalhes.",
+  "usageCount": "{{count}} de {{max}} documentos utilizados",
+  "fileTypes": {
+    "slots": "CV e carta de apresentação: apenas PDF, DOC ou DOCX (PDF preferido) — máx. 10 MB.",
+    "other": "Permitidos: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, WEBP — máx. 10 MB por ficheiro."
+  },
+  "uploadToLibrary": "Carregar para biblioteca",
+  "uploading": "A carregar...",
+  "applyForFunding": "Candidatar-se a oportunidades",
+  "searchPlaceholder": "Pesquisar documentos...",
+  "tabs": {
+    "library": "Biblioteca",
+    "applications": "Candidaturas"
+  },
+  "library": {
+    "title": "Biblioteca de documentos",
+    "description": "Documentos reutilizáveis que pode selecionar ao candidatar-se a oportunidades"
+  },
+  "applicationDocuments": {
+    "title": "Documentos de candidatura",
+    "description": "Documentos associados a candidaturas específicas"
+  },
+  "emptyState": {
+    "noLibraryDocuments": "Sem documentos na biblioteca",
+    "noLibraryDocumentsDesc": "Carregue documentos para a sua biblioteca para os reutilizar em várias candidaturas. Clique em «Carregar para biblioteca» acima para começar.",
+    "noLibraryDocumentsSearch": "Tente ajustar a pesquisa para encontrar mais documentos.",
+    "noApplicationDocuments": "Sem documentos de candidatura",
+    "noApplicationDocumentsDesc": "Os documentos carregados com as suas candidaturas aparecerão aqui. Comece a candidatar-se para carregar documentos.",
+    "noApplicationDocumentsSearch": "Tente ajustar a pesquisa para encontrar mais documentos.",
+    "uploadToLibrary": "Carregar para biblioteca",
+    "browseOpportunities": "Explorar oportunidades"
+  },
+  "deleteDialog": {
+    "title": "Eliminar documento",
+    "description": "Tem a certeza de que pretende eliminar «{{fileName}}»? Esta ação não pode ser anulada.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "badges": {
+    "application": "Candidatura",
+    "library": "Biblioteca"
+  },
+  "limitReached": {
+    "title": "Limite de documentos atingido",
+    "description": "Pode guardar até {{max}} documentos. Tem {{remaining}} vaga(s) disponível(eis)."
+  },
+  "slots": {
+    "sectionTitle": "Documentos padrão",
+    "upload": "Carregar",
+    "replace": "Substituir",
+    "cv": {
+      "label": "CV",
+      "description": "O seu CV mais recente (PDF ou Word). Um novo carregamento substitui o ficheiro anterior."
+    },
+    "id": {
+      "label": "Documento de identificação / Passaporte",
+      "description": "Verificado através da verificação de identidade no seu perfil.",
+      "verified": "Verificado",
+      "viewKyc": "Ver verificação",
+      "completeKyc": "Completar verificação"
+    },
+    "coverLetter": {
+      "label": "Carta de apresentação",
+      "description": "Opcional. PDF ou Word. Reutilizada quando se candidata, salvo se carregar uma nova."
+    }
+  },
+  "other": {
+    "title": "Outros documentos",
+    "description": "Certificados, portfólios ou ficheiros extra (fora dos slots tipados).",
+    "upload": "Carregar ficheiros",
+    "empty": "Ainda sem outros documentos."
+  }
+}

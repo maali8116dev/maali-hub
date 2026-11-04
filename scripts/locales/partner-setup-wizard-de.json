@@ -1,0 +1,38 @@
+{
+  "title": "Willkommen im Maali-Partnerportal",
+  "description": "Richten wir Ihr Organisationsprofil ein, damit Bewerber mehr über Sie erfahren.",
+  "stepOf": "Schritt {{current}} von {{total}}",
+  "percentComplete": "{{percent}} % abgeschlossen",
+  "steps": {
+    "organization": "Organisation",
+    "contact": "Kontakt",
+    "firstOpportunity": "Erste Chance"
+  },
+  "logoHint": "Ein Logo hilft Bewerbern, Ihre Organisation zu erkennen",
+  "step3Intro": "Richten Sie optional jetzt Ihre erste Chance ein oder überspringen Sie und erledigen Sie es später im Dashboard.",
+  "fields": {
+    "opportunityTitle": "Titel der Chance",
+    "opportunityTitlePlaceholder": "z. B. Innovationsförderung 2026",
+    "fundingAmount": "Förderbetrag",
+    "fundingAmountPlaceholder": "z. B. 10.000 $ - 50.000 $",
+    "deadline": "Bewerbungsfrist"
+  },
+  "actions": {
+    "skip": "Vorerst überspringen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "saving": "Wird gespeichert…",
+    "complete": "Einrichtung abschließen"
+  },
+  "toasts": {
+    "updated": "Organisationsprofil aktualisiert!",
+    "updatedDesc": "Ihre Partnerorganisation ist jetzt eingerichtet.",
+    "error": "Fehler",
+    "errorDesc": "Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+  },
+  "validation": {
+    "descriptionMin": "Beschreibung muss mindestens 10 Zeichen haben",
+    "contactNameMin": "Kontaktname ist erforderlich",
+    "validUrl": "Bitte geben Sie eine gültige URL ein"
+  }
+}

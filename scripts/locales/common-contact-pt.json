@@ -1,0 +1,92 @@
+{
+  "contactPage": {
+    "hero": {
+      "title": "Contacte-nos",
+      "subtitle": "Entre em contacto com a nossa equipa. Estamos aqui para o ajudar a ter sucesso."
+    },
+    "validation": {
+      "firstNameRequired": "O nome é obrigatório",
+      "firstNameTooLong": "O nome é demasiado longo",
+      "lastNameRequired": "O apelido é obrigatório",
+      "lastNameTooLong": "O apelido é demasiado longo",
+      "subjectRequired": "Selecione um assunto",
+      "messageMin": "A mensagem deve ter pelo menos 10 caracteres",
+      "messageTooLong": "A mensagem é demasiado longa"
+    },
+    "toasts": {
+      "submitFailed": "Não foi possível enviar a mensagem. Tente novamente.",
+      "submitSuccess": "A sua mensagem foi enviada com sucesso! Responderemos dentro de 24 horas.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "form": {
+      "title": "Envie-nos uma mensagem",
+      "description": "Preencha o formulário abaixo e responderemos o mais rapidamente possível.",
+      "firstNameLabel": "Nome *",
+      "firstNamePlaceholder": "Introduza o seu nome",
+      "lastNameLabel": "Apelido *",
+      "lastNamePlaceholder": "Introduza o seu apelido",
+      "emailLabel": "E-mail *",
+      "emailPlaceholder": "Introduza o seu endereço de e-mail",
+      "phoneLabel": "Número de telefone",
+      "phonePlaceholder": "Introduza o seu número de telefone",
+      "countryLabel": "País",
+      "countryPlaceholder": "Selecione o seu país",
+      "countryOther": "Outro",
+      "countryNigeria": "Nigéria",
+      "countryKenya": "Quénia",
+      "countrySouthAfrica": "África do Sul",
+      "countryGhana": "Gana",
+      "countryUganda": "Uganda",
+      "countryTanzania": "Tanzânia",
+      "subjectLabel": "Assunto *",
+      "subjectPlaceholder": "Selecione um assunto",
+      "subjectFunding": "Consulta de financiamento",
+      "subjectApplication": "Apoio à candidatura",
+      "subjectPartnership": "Parceria",
+      "subjectTechnical": "Suporte técnico",
+      "subjectGeneral": "Consulta geral",
+      "messageLabel": "Mensagem *",
+      "messagePlaceholder": "Diga-nos como podemos ajudá-lo…",
+      "sending": "A enviar…",
+      "submit": "Enviar mensagem"
+    },
+    "success": {
+      "title": "Mensagem enviada com sucesso!",
+      "description": "Obrigado por nos contactar. Recebemos a sua mensagem e responderemos dentro de 24 horas.",
+      "sendAnother": "Enviar outra mensagem"
+    },
+    "contactInfo": {
+      "title": "Informações de contacto",
+      "emailTitle": "Envie-nos um e-mail",
+      "emailDescription": "Responderemos dentro de 24 horas",
+      "callTitle": "Ligue-nos",
+      "callDescription": "Seg–Sex, 9h–18h WAT",
+      "officeTitle": "Escritório",
+      "officeDescription": "Operações pan-africanas",
+      "responseTimeTitle": "Tempo de resposta",
+      "responseTimeValue": "24 horas",
+      "responseTimeDescription": "Tempo médio de resposta"
+    },
+    "officeLocations": {
+      "title": "Localizações dos escritórios",
+      "description": "Operamos em toda a África com hubs regionais",
+      "offices": [
+        { "city": "Lagos", "country": "Nigéria", "address": "Victoria Island, Lagos State", "role": "Hub da África Ocidental" },
+        { "city": "Nairobi", "country": "Quénia", "address": "Westlands, Nairobi", "role": "Hub da África Oriental" },
+        { "city": "Cape Town", "country": "África do Sul", "address": "Century City, Cape Town", "role": "Hub da África Austral" }
+      ]
+    },
+    "quickSupport": {
+      "title": "Suporte rápido",
+      "description": "Precisa de ajuda imediata? Consulte a nossa FAQ ou agende uma chamada com a nossa equipa.",
+      "viewFaq": "Ver FAQ",
+      "scheduleCall": "Agendar chamada"
+    },
+    "cta": {
+      "title": "Pronto para começar?",
+      "description": "Não espere — explore oportunidades de financiamento disponíveis agora",
+      "browseOpportunities": "Explorar oportunidades",
+      "createAccount": "Criar conta"
+    }
+  }
+}

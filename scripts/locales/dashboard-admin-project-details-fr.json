@@ -1,0 +1,21 @@
+{
+  "projectDetailsPage": {
+    "loading": "Chargement du projet...",
+    "notFound": "Projet introuvable ou une erreur s'est produite.",
+    "back": "Retour aux projets",
+    "viewPublic": "Voir la page publique",
+    "edit": "Modifier le projet",
+    "featured": "À la une",
+    "requirementsTitle": "Exigences et éligibilité",
+    "requirements": "Exigences",
+    "eligibility": "Critères d'éligibilité",
+    "sidebarTitle": "Détails du projet",
+    "fundingAmount": "Montant du financement",
+    "deadline": "Date limite",
+    "location": "Lieu",
+    "applicants": "Candidats",
+    "metadata": "Métadonnées",
+    "created": "Créé",
+    "updated": "Mis à jour"
+  }
+}

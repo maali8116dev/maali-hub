@@ -1,0 +1,104 @@
+{
+  "faqPage": {
+    "title": "Perguntas frequentes",
+    "subtitle": "Respostas rápidas às perguntas mais comuns sobre o Maali.",
+    "searchPlaceholder": "Pesquisar na FAQ…",
+    "loadError": "Não foi possível carregar a FAQ. Tente novamente mais tarde.",
+    "retry": "Tentar novamente",
+    "searchResults": "Resultados da pesquisa",
+    "emptySearch": "Nenhuma pergunta corresponde à sua pesquisa.",
+    "empty": "Nenhuma FAQ disponível de momento.",
+    "contactSupport": "Contactar o suporte",
+    "stillHaveQuestions": "Ainda tem dúvidas?",
+    "stillHaveQuestionsDesc": "Não encontra a resposta? A nossa equipa de suporte está pronta para ajudar."
+  },
+  "mentorsPage": {
+    "badge": "Diretório de mentores",
+    "title": "Conecte-se com mentores especializados",
+    "subtitle": "Aprenda com empreendedores experientes e líderes do setor que ajudam empresas africanas a ter sucesso.",
+    "searchPlaceholder": "Pesquisar por nome, especialidade ou bio…",
+    "allSectors": "Todos os setores",
+    "allCountries": "Todos os países",
+    "loadError": "Não foi possível carregar os mentores. Tente novamente mais tarde.",
+    "emptyTitle": "Nenhum mentor encontrado",
+    "emptyFiltered": "Tente ajustar a pesquisa ou os filtros",
+    "emptyDefault": "Volte em breve para novos mentores",
+    "moreExpertise": "+{{count}} mais",
+    "noLinks": "Nenhum link externo disponível",
+    "ctaTitle": "Quer ser mentor?",
+    "ctaDesc": "Partilhe a sua experiência e ajude a próxima geração de empreendedores africanos. Junte-se à nossa rede de mentores.",
+    "ctaButton": "Contacte-nos"
+  },
+  "guidePage": {
+    "title": "Guia de candidatura",
+    "subtitle": "Guia passo a passo para se candidatar com sucesso a oportunidades de financiamento no Maali.",
+    "introTitle": "Para começar",
+    "introDesc": "Este guia acompanha-o desde a criação da conta até à submissão da candidatura. Siga estes passos para maximizar as suas hipóteses.",
+    "tipsLabel": "Dicas:",
+    "bestPracticesTitle": "Boas práticas",
+    "mistakesTitle": "Erros comuns a evitar",
+    "mistakes": [
+      "Submeter candidatura incompleta ou documentos em falta",
+      "Esperar até ao último minuto para submeter",
+      "Não ler atentamente os requisitos da oportunidade",
+      "Fornecer informações imprecisas ou enganosas",
+      "Não responder a pedidos de informação adicional"
+    ],
+    "resourcesTitle": "Precisa de mais ajuda?",
+    "resourcesDesc": "Explore estes recursos para ter sucesso na sua candidatura.",
+    "resourcesFaq": "Perguntas frequentes",
+    "resourcesContact": "Contactar o suporte",
+    "resourcesSuccessStories": "Histórias de sucesso",
+    "steps": [
+      {
+        "title": "Criar a sua conta",
+        "description": "Comece com uma conta gratuita no Maali. Registo por e-mail ou Google.",
+        "tips": ["Use um endereço de e-mail profissional", "Escolha uma palavra-passe segura", "Verifique o e-mail rapidamente"],
+        "action": "Registar"
+      },
+      {
+        "title": "Completar o seu perfil",
+        "description": "Preencha informações exatas sobre o seu negócio. Um perfil completo aumenta as suas hipóteses.",
+        "tips": ["Informações detalhadas sobre o negócio", "Logótipo profissional", "Dados de contacto corretos"],
+        "action": "Ir ao perfil"
+      },
+      {
+        "title": "Explorar oportunidades",
+        "description": "Explore financiamentos disponíveis. Filtre por setor e necessidades.",
+        "tips": ["Leia as descrições com atenção", "Verifique a elegibilidade", "Anote os prazos"],
+        "action": "Explorar projetos"
+      },
+      {
+        "title": "Preparar os documentos",
+        "description": "Reúna todos os documentos necessários antes de começar.",
+        "tips": ["Documentos de registo", "Demonstrações financeiras ou projeções", "Plano de negócios se exigido", "Documentos de identificação", "Certificados específicos do setor"],
+        "action": "Ver requisitos"
+      },
+      {
+        "title": "Submeter a candidatura",
+        "description": "Preencha o formulário em várias etapas com cuidado e precisão.",
+        "tips": ["Responda em detalhe", "Revise antes de enviar", "Guarde o progresso"],
+        "action": "Iniciar candidatura"
+      },
+      {
+        "title": "Acompanhar a candidatura",
+        "description": "Acompanhe o estado no seu painel. Notificações por e-mail.",
+        "tips": ["Consulte o painel regularmente", "Responda rapidamente a pedidos", "Seja paciente durante a análise"],
+        "action": "Ver painel"
+      }
+    ],
+    "bestPractices": [
+      { "title": "Seja honesto e preciso", "description": "Informações verdadeiras evitam rejeição e problemas futuros." },
+      { "title": "Prepare-se com antecedência", "description": "Reúna os documentos antes de começar para evitar atrasos." },
+      { "title": "Siga as instruções", "description": "Cada oportunidade pode ter requisitos específicos." },
+      { "title": "Respeite os prazos", "description": "Submeta bem antes da data limite." }
+    ]
+  },
+  "helpLinks": {
+    "title": "Precisa de mais ajuda?",
+    "faq": { "title": "FAQ", "description": "Respostas a perguntas frequentes" },
+    "mentors": { "title": "Mentores", "description": "Conecte-se com especialistas" },
+    "support": { "title": "Suporte", "description": "Ajuda da nossa equipa" },
+    "guide": { "title": "Guia", "description": "Guia de candidatura passo a passo" }
+  }
+}
