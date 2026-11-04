@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import type { PaystackBillingMode } from "@/lib/paymentProvider";
 
 export type MembershipTier = "community" | "member";
-export type MembershipStatus = "active" | "inactive" | "pending_payment";
+export type MembershipStatus = "active" | "inactive" | "pending_payment" | "expired";
 
 export interface Membership {
   id: string;
@@ -19,6 +20,7 @@ export interface Membership {
   provider_payment_ref: string | null;
   paystack_email_token: string | null;
   billing_currency: string | null;
+  renewal_type?: PaystackBillingMode | null;
   cancel_at_period_end: boolean;
   amount_paid: number | null;
   starts_at: string;

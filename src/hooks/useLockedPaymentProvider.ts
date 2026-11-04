@@ -8,5 +8,6 @@ export function useLockedPaymentProvider() {
     loading,
     lockedProvider: getLockedProvider(membership),
     billingCurrency: membership?.billing_currency ?? null,
+    renewalType: membership?.renewal_type ?? null,
   };
 }

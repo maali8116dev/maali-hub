@@ -182,9 +182,15 @@
       "locked": "Checkout ist für diese Mitgliedschaft auf {{provider}} festgelegt.",
       "payWithPaystack": "Mit Paystack bezahlen",
       "paystackAmount": "Es werden {{amount}} / Monat ({{currency}}) berechnet.",
+      "paystackPrepaidAmount": "Sie zahlen {{amount}} für einen Monat ({{currency}}). Nach Ablauf manuell verlängern.",
       "paystackFooter": "Paystack unterstützt Karte, Mobile Money und Banküberweisung in unterstützten Ländern.",
       "paystackNotConfigured": "Paystack ist nicht konfiguriert. Support kontaktieren oder per Karte (Stripe) zahlen.",
       "stripeFooter": "Internationale Karten über Stripe. Abrechnung in USD.",
+      "billingModeLabel": "Wie möchten Sie in Nigeria zahlen?",
+      "billingModeSubscription": "Karte mit Auto-Verlängerung",
+      "billingModeSubscriptionHint": "Visa/Mastercard — verlängert sich monatlich automatisch.",
+      "billingModePrepaid": "Opay / Banküberweisung (1 Monat)",
+      "billingModePrepaidHint": "Gleicher Preis. Einmal für 30 Tage zahlen; danach erneut. Opay kann nicht automatisch verlängern.",
       "stripe": {
         "label": "Karte (international)",
         "description": "Visa, Mastercard, Amex — Abrechnung in USD (2 $/Monat)"

@@ -13,18 +13,22 @@ type PaystackVerifyResponse = {
     amount: number;
     currency: string;
     customer?: { customer_code?: string };
-    metadata?: { userId?: string };
+    metadata?: {
+      userId?: string;
+      billingMode?: string;
+      renewal_type?: string;
+    };
     plan_object?: { plan_code?: string };
     subscription_code?: string;
     subscription?: { subscription_code?: string };
   };
 };
 
-serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
+serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: getCorsHeaders(req) });
   }
 
   if (!Deno.env.get("PAYSTACK_SECRET_KEY")) {
@@ -58,37 +62,46 @@ serve(async (req) => {
       return jsonResponse(req, 200, { activated: false, status: tx.status });
     }
 
-    // Security: the reference must belong to the calling user. Fail closed if
-    // metadata is missing — fall back to our own membership row for ownership.
     let ownerId = tx.metadata?.userId ?? null;
+    const { data: membershipRow } = await supabaseAdmin
+      .from("memberships")
+      .select("user_id, renewal_type")
+      .eq("provider_payment_ref", tx.reference)
+      .maybeSingle();
+
     if (!ownerId) {
-      const { data: row } = await supabaseAdmin
-        .from("memberships")
-        .select("user_id")
-        .eq("provider_payment_ref", tx.reference)
-        .maybeSingle();
-      ownerId = row?.user_id ?? null;
+      ownerId = membershipRow?.user_id ?? null;
     }
     if (ownerId !== auth.user.id) {
       return jsonResponse(req, 403, { error: "Reference does not belong to this account." });
     }
 
+    const metaMode = tx.metadata?.billingMode ?? tx.metadata?.renewal_type;
+    const isPrepaid =
+      metaMode === "prepaid" || membershipRow?.renewal_type === "prepaid";
+
     const customerCode = tx.customer?.customer_code ?? null;
     const currency = (tx.currency ?? "NGN").toUpperCase();
-    const planCode = getPaystackPlanCode(currency as "NGN" | "GHS" | "KES" | "ZAR");
-    let subscriptionCode =
-      tx.subscription_code ?? tx.subscription?.subscription_code ?? null;
+    let subscriptionCode: string | null = null;
     let emailToken: string | null = null;
-    if (!subscriptionCode) {
-      const resolved = await resolvePaystackSubscription({
-        customerCode,
-        email: auth.user.email ?? null,
-        paymentRef: tx.reference,
-        planCode,
-      });
-      subscriptionCode = resolved.subscriptionCode;
-      emailToken = resolved.emailToken;
+
+    if (!isPrepaid) {
+      const planCode = getPaystackPlanCode(currency as "NGN" | "GHS" | "KES" | "ZAR");
+      subscriptionCode =
+        tx.subscription_code ?? tx.subscription?.subscription_code ?? null;
+      if (!subscriptionCode) {
+        const resolved = await resolvePaystackSubscription({
+          customerCode,
+          email: auth.user.email ?? null,
+          paymentRef: tx.reference,
+          planCode,
+        });
+        subscriptionCode = resolved.subscriptionCode;
+        emailToken = resolved.emailToken;
+      }
     }
+
+    const expiresAt = new Date(Date.now() + THIRTY_DAYS_MS).toISOString();
 
     const activated = await activateMembership({
       userId: auth.user.id,
@@ -100,9 +113,15 @@ serve(async (req) => {
       billingCurrency: currency,
       amountMajor: Number(tx.amount ?? 0) / 100,
       amountSubunits: Number(tx.amount ?? 0),
+      expiresAt,
+      renewalType: isPrepaid ? "prepaid" : "subscription",
     });
 
-    return jsonResponse(req, 200, { activated, status: tx.status });
+    return jsonResponse(req, 200, {
+      activated,
+      status: tx.status,
+      billingMode: isPrepaid ? "prepaid" : "subscription",
+    });
   } catch (err) {
     console.error("[verify-paystack-payment]", err);
     return jsonResponse(req, 500, { error: (err as Error).message });

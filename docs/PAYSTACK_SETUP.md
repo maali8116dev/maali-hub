@@ -2,12 +2,22 @@
 
 ## Dashboard
 
-1. Create a **monthly plan** per currency (USD-equivalent pricing):
+1. Create a **monthly plan** per currency (USD-equivalent pricing) — used for **card auto-renew**:
    - NGN: ₦3,000/mo
    - GHS — GH₵30/mo
    - KES — KSh 260/mo
    - ZAR — R 36/mo
 2. Copy each **plan code** (e.g. `PLN_xxx`).
+3. Enable payment channels that cover **Opay / bank transfer** (bank, bank_transfer, USSD).
+
+## NGN billing modes
+
+| Mode | Who | How |
+|---|---|---|
+| `subscription` | Card (Visa/Mastercard) | Paystack Plan — auto-renew |
+| `prepaid` | Opay / bank / USSD | One-time charge, **same ₦3,000**, 30-day access; renew manually |
+
+Prepaid omits `plan` on initialize. Cron `expire-prepaid-memberships` (Bearer `CRON_SECRET`) marks expired rows hourly.
 
 ## Webhook
 

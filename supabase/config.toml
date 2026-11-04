@@ -102,3 +102,6 @@ verify_jwt = false
 
 [functions.process-partner-webhooks]
 verify_jwt = false
+
+[functions.expire-prepaid-memberships]
+verify_jwt = false

@@ -7,6 +7,8 @@ export const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
+export type MembershipRenewalType = "subscription" | "prepaid";
+
 export type ActivateMembershipParams = {
   userId: string;
   provider: "stripe" | "paystack";
@@ -18,6 +20,7 @@ export type ActivateMembershipParams = {
   amountMajor: number;
   amountSubunits?: number | null;
   expiresAt?: string | null;
+  renewalType?: MembershipRenewalType | null;
   description?: string;
   existingMembershipId?: string | null;
 };
@@ -68,6 +71,7 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
     amountMajor,
     amountSubunits,
     expiresAt,
+    renewalType,
     description = "Full Membership — MAALI (monthly)",
     existingMembershipId,
   } = params;
@@ -118,6 +122,7 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
     amount_paid: amountSubunits ?? amountPaidCents,
     cancel_at_period_end: false,
     ...(expiresAt ? { expires_at: expiresAt } : {}),
+    ...(renewalType ? { renewal_type: renewalType } : {}),
     updated_at: new Date().toISOString(),
     ...(provider === "stripe" && providerCustomerId
       ? { stripe_customer_id: providerCustomerId }

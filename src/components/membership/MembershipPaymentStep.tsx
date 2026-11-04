@@ -118,6 +118,7 @@ const StripePaymentForm = ({
 type PaystackCheckoutProps = {
   accessCode: string;
   reference: string;
+  billingMode?: "subscription" | "prepaid";
   displayAmount: string;
   currency: string;
   onSuccess: () => void;
@@ -128,6 +129,7 @@ type PaystackCheckoutProps = {
 const PaystackCheckout = ({
   accessCode,
   reference,
+  billingMode = "subscription",
   displayAmount,
   currency,
   onSuccess,
@@ -174,11 +176,14 @@ const PaystackCheckout = ({
     });
   };
 
+  const amountCopy =
+    billingMode === "prepaid"
+      ? t("payment.provider.paystackPrepaidAmount", { amount: displayAmount, currency })
+      : t("payment.provider.paystackAmount", { amount: displayAmount, currency });
+
   return (
     <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">
-        {t("payment.provider.paystackAmount", { amount: displayAmount, currency })}
-      </p>
+      <p className="text-sm text-muted-foreground">{amountCopy}</p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-3">
         {onBack && (
@@ -237,13 +242,14 @@ export function MembershipPaymentStep({
   onExternalCheckoutChange,
 }: MembershipPaymentStepProps) {
   const { t } = useTranslation("common");
-  const { lockedProvider, loading: lockLoading } = useLockedPaymentProvider();
+  const { lockedProvider, loading: lockLoading, renewalType } = useLockedPaymentProvider();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [paystackSession, setPaystackSession] = useState<{
     accessCode: string;
     reference: string;
     displayAmount: string;
     currency: string;
+    billingMode?: "subscription" | "prepaid";
   } | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(false);
@@ -256,7 +262,11 @@ export function MembershipPaymentStep({
 
   const effectiveChoice: PaymentProviderChoice = lockedProvider
     ? lockedProvider === "paystack"
-      ? { provider: "paystack", currency: (choice.currency ?? defaultPaystackCurrency) as PaystackCurrency }
+      ? {
+          provider: "paystack",
+          currency: (choice.currency ?? defaultPaystackCurrency) as PaystackCurrency,
+          billingMode: choice.billingMode ?? renewalType ?? "subscription",
+        }
       : { provider: "stripe" }
     : choice;
 
@@ -306,13 +316,19 @@ export function MembershipPaymentStep({
           setClientSecret(data.clientSecret);
         }
       } else {
+        const billingMode = effectiveChoice.billingMode ?? "subscription";
+
         const { data, error } = await invokeWithAuth<{
           accessCode?: string;
           reference?: string;
           displayAmount?: string;
           currency?: string;
+          billingMode?: string;
           error?: string;
-        }>("create-paystack-membership-payment", { currency: effectiveChoice.currency });
+        }>("create-paystack-membership-payment", {
+          currency: effectiveChoice.currency,
+          billingMode,
+        });
 
         if (cancelled) return;
         if (error || !data?.accessCode) {
@@ -325,6 +341,7 @@ export function MembershipPaymentStep({
             reference: data.reference ?? "",
             displayAmount: data.displayAmount ?? PAYSTACK_CURRENCIES[effectiveChoice.currency!].displayAmount,
             currency: data.currency ?? effectiveChoice.currency!,
+            billingMode: (data.billingMode as "subscription" | "prepaid" | undefined) ?? billingMode,
           });
         }
       }
@@ -335,7 +352,7 @@ export function MembershipPaymentStep({
     return () => {
       cancelled = true;
     };
-  }, [readyToInit, effectiveChoice.provider, effectiveChoice.currency, t]);
+  }, [readyToInit, effectiveChoice.provider, effectiveChoice.currency, effectiveChoice.billingMode, t]);
 
   const payLabel =
     payLabelStripe ?? t("onboarding.payment.payAndJoin");
@@ -406,6 +423,7 @@ export function MembershipPaymentStep({
         <PaystackCheckout
           accessCode={paystackSession.accessCode}
           reference={paystackSession.reference}
+          billingMode={paystackSession.billingMode}
           displayAmount={paystackSession.displayAmount}
           currency={paystackSession.currency}
           onSuccess={onSuccess}

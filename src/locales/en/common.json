@@ -182,9 +182,15 @@
       "locked": "Checkout locked to {{provider}} for this membership.",
       "payWithPaystack": "Pay with Paystack",
       "paystackAmount": "You will be charged {{amount}} / month ({{currency}}).",
+      "paystackPrepaidAmount": "You will pay {{amount}} for one month ({{currency}}). Renew manually when it ends.",
       "paystackFooter": "Paystack supports card, mobile money, and bank transfer in supported countries.",
       "paystackNotConfigured": "Paystack is not configured. Contact support or pay with card (Stripe).",
       "stripeFooter": "International cards via Stripe. Billed in USD.",
+      "billingModeLabel": "How do you want to pay in Nigeria?",
+      "billingModeSubscription": "Auto-renew with card",
+      "billingModeSubscriptionHint": "Visa/Mastercard — renews automatically each month.",
+      "billingModePrepaid": "Opay / bank transfer (1 month)",
+      "billingModePrepaidHint": "Same price. Pay once for 30 days; renew again when it ends. Opay cannot auto-renew.",
       "stripe": {
         "label": "Card (international)",
         "description": "Visa, Mastercard, Amex — billed in USD ($2/mo)"

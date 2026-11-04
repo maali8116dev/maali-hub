@@ -23,6 +23,14 @@ function metadataUserId(data: Record<string, unknown>): string | null {
   return field?.value ?? null;
 }
 
+function isPrepaidCharge(data: Record<string, unknown>): boolean {
+  const meta = data.metadata as Record<string, unknown> | undefined;
+  if (meta?.billingMode === "prepaid" || meta?.renewal_type === "prepaid") return true;
+  const custom = meta?.custom_fields as Array<{ variable_name?: string; value?: string }> | undefined;
+  const field = custom?.find((f) => f.variable_name === "billing_mode");
+  return field?.value === "prepaid";
+}
+
 function amountMatchesPlan(amountKobo: number, currency: string): boolean {
   const upper = currency.toUpperCase() as PaystackCurrency;
   const plan = PAYSTACK_CURRENCIES[upper];
@@ -69,45 +77,53 @@ async function handleChargeSuccess(data: Record<string, unknown>) {
     : null;
 
   const amountMajor = amountKobo / 100;
-  const expiresAt = resolveExpiresAt(data);
+  const prepaid = isPrepaidCharge(data);
+  const expiresAt = prepaid
+    ? new Date(Date.now() + THIRTY_DAYS_MS).toISOString()
+    : resolveExpiresAt(data);
+  const renewalType = prepaid ? "prepaid" as const : "subscription" as const;
+  // Prepaid one-time charges have no subscription_code — never treat as Plan renewal.
+  const effectiveSubCode = prepaid ? null : subCode;
 
   if (!userId) {
     const { data: row } = await supabaseAdmin
       .from("memberships")
-      .select("user_id")
+      .select("user_id, renewal_type")
       .eq("provider_payment_ref", reference)
       .maybeSingle();
     if (!row?.user_id) {
       console.error("[paystack-webhook] charge.success missing userId");
       return;
     }
+    const rowPrepaid = prepaid || row.renewal_type === "prepaid";
     await activateMembership({
       userId: row.user_id,
       provider: "paystack",
       providerPaymentRef: reference,
       providerCustomerId: customerCode,
-      providerSubscriptionId: subCode,
+      providerSubscriptionId: rowPrepaid ? null : effectiveSubCode,
       billingCurrency: currency,
       amountMajor,
       amountSubunits: amountKobo,
-      expiresAt,
+      expiresAt: rowPrepaid ? new Date(Date.now() + THIRTY_DAYS_MS).toISOString() : expiresAt,
+      renewalType: rowPrepaid ? "prepaid" : renewalType,
     });
     return;
   }
 
-  const isRenewal = !!subCode;
+  const isRenewal = !!effectiveSubCode;
   if (isRenewal) {
     const { data: existing } = await supabaseAdmin
       .from("memberships")
       .select("id, status, tier")
       .eq("user_id", userId)
-      .eq("provider_subscription_id", subCode)
+      .eq("provider_subscription_id", effectiveSubCode)
       .maybeSingle();
 
     if (existing?.status === "active" && existing.tier === "member") {
       await extendMembershipRenewal({
         userId,
-        providerSubscriptionId: subCode,
+        providerSubscriptionId: effectiveSubCode!,
         providerPaymentRef: reference,
         provider: "paystack",
         billingCurrency: currency,
@@ -123,11 +139,12 @@ async function handleChargeSuccess(data: Record<string, unknown>) {
     provider: "paystack",
     providerPaymentRef: reference,
     providerCustomerId: customerCode,
-    providerSubscriptionId: subCode,
+    providerSubscriptionId: effectiveSubCode,
     billingCurrency: currency,
     amountMajor,
     amountSubunits: amountKobo,
     expiresAt,
+    renewalType,
   });
 }
 

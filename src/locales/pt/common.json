@@ -182,9 +182,15 @@
       "locked": "Checkout bloqueado em {{provider}} para esta adesão.",
       "payWithPaystack": "Pagar com Paystack",
       "paystackAmount": "Será cobrado {{amount}} / mês ({{currency}}).",
+      "paystackPrepaidAmount": "Paga {{amount}} por um mês ({{currency}}). Renove manualmente quando terminar.",
       "paystackFooter": "Paystack suporta cartão, mobile money e transferência bancária nos países suportados.",
       "paystackNotConfigured": "Paystack não está configurado. Contacte o suporte ou pague com cartão (Stripe).",
       "stripeFooter": "Cartões internacionais via Stripe. Faturação em USD.",
+      "billingModeLabel": "Como quer pagar na Nigéria?",
+      "billingModeSubscription": "Cartão com renovação automática",
+      "billingModeSubscriptionHint": "Visa/Mastercard — renova todos os meses.",
+      "billingModePrepaid": "Opay / transferência (1 mês)",
+      "billingModePrepaidHint": "Mesmo preço. Pague uma vez por 30 dias; renove depois. Opay não renova automaticamente.",
       "stripe": {
         "label": "Cartão (internacional)",
         "description": "Visa, Mastercard, Amex — faturação em USD (2 $/mês)"

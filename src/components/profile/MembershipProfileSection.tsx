@@ -216,7 +216,7 @@ export function MembershipProfileSection() {
               {isPaidMember && (
                 <div>
                   <dt className="text-muted-foreground">
-                    {cancelAtPeriodEnd ? "Access ends" : "Renews"}
+                    {cancelAtPeriodEnd || membership.renewal_type === "prepaid" ? "Access ends" : "Renews"}
                   </dt>
                   <dd className="font-medium mt-0.5">
                     {membership.expires_at

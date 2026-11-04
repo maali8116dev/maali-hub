@@ -1,9 +1,13 @@
 export type PaymentProviderId = "stripe" | "paystack";
 export type PaystackCurrency = "NGN" | "GHS" | "KES" | "ZAR";
+/** subscription = Paystack Plan (card auto-renew); prepaid = one-time month (Opay/bank). */
+export type PaystackBillingMode = "subscription" | "prepaid";
 
 export type PaymentProviderChoice = {
   provider: PaymentProviderId;
   currency?: PaystackCurrency;
+  /** Only used when provider is paystack. Default subscription. */
+  billingMode?: PaystackBillingMode;
 };
 
 export const PAYMENT_PROVIDERS: {
@@ -63,5 +67,8 @@ export function getLockedProvider(membership: {
 
 export function isCheckoutChoiceComplete(choice: PaymentProviderChoice): boolean {
   if (choice.provider === "stripe") return true;
-  return !!choice.currency && choice.currency in PAYSTACK_CURRENCIES;
+  if (!choice.currency || !(choice.currency in PAYSTACK_CURRENCIES)) return false;
+  // NGN: require explicit card vs Opay/prepaid choice.
+  if (choice.currency === "NGN" && !choice.billingMode) return false;
+  return true;
 }
