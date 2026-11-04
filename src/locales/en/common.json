@@ -189,8 +189,8 @@
       "billingModeLabel": "How do you want to pay in Nigeria?",
       "billingModeSubscription": "Auto-renew with card",
       "billingModeSubscriptionHint": "Visa/Mastercard — renews automatically each month.",
-      "billingModePrepaid": "Opay / bank transfer (1 month)",
-      "billingModePrepaidHint": "Same price. Pay once for 30 days; renew again when it ends. Opay cannot auto-renew.",
+      "billingModePrepaid": "Pay once (1 month)",
+      "billingModePrepaidHint": "Bank, transfer, USSD, or OPay — same price. Access for 30 days; renew when it ends.",
       "stripe": {
         "label": "Card (international)",
         "description": "Visa, Mastercard, Amex — billed in USD ($2/mo)"

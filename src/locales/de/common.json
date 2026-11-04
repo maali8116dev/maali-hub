@@ -189,8 +189,8 @@
       "billingModeLabel": "Wie möchten Sie in Nigeria zahlen?",
       "billingModeSubscription": "Karte mit Auto-Verlängerung",
       "billingModeSubscriptionHint": "Visa/Mastercard — verlängert sich monatlich automatisch.",
-      "billingModePrepaid": "Opay / Banküberweisung (1 Monat)",
-      "billingModePrepaidHint": "Gleicher Preis. Einmal für 30 Tage zahlen; danach erneut. Opay kann nicht automatisch verlängern.",
+      "billingModePrepaid": "Einmal zahlen (1 Monat)",
+      "billingModePrepaidHint": "Bank, Überweisung, USSD oder OPay — gleicher Preis. 30 Tage Zugang; danach erneut zahlen.",
       "stripe": {
         "label": "Karte (international)",
         "description": "Visa, Mastercard, Amex — Abrechnung in USD (2 $/Monat)"

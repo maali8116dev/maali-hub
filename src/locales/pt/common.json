@@ -189,8 +189,8 @@
       "billingModeLabel": "Como quer pagar na Nigéria?",
       "billingModeSubscription": "Cartão com renovação automática",
       "billingModeSubscriptionHint": "Visa/Mastercard — renova todos os meses.",
-      "billingModePrepaid": "Opay / transferência (1 mês)",
-      "billingModePrepaidHint": "Mesmo preço. Pague uma vez por 30 dias; renove depois. Opay não renova automaticamente.",
+      "billingModePrepaid": "Pagar uma vez (1 mês)",
+      "billingModePrepaidHint": "Banco, transferência, USSD ou OPay — mesmo preço. Acesso por 30 dias; renove depois.",
       "stripe": {
         "label": "Cartão (internacional)",
         "description": "Visa, Mastercard, Amex — faturação em USD (2 $/mês)"
