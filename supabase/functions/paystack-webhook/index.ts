@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { verifyPaystackSignature } from "../_shared/paystackApi.ts";
 import { supabaseAdmin, activateMembership, extendMembershipRenewal } from "../_shared/activateMembership.ts";
-import { PAYSTACK_CURRENCIES, type PaystackCurrency } from "../_shared/paymentProvider.ts";
+import { isPaystackMembershipCharge } from "../_shared/paymentProvider.ts";
 
 type PaystackEvent = {
   event: string;
@@ -31,13 +31,6 @@ function isPrepaidCharge(data: Record<string, unknown>): boolean {
   return field?.value === "prepaid";
 }
 
-function amountMatchesPlan(amountKobo: number, currency: string): boolean {
-  const upper = currency.toUpperCase() as PaystackCurrency;
-  const plan = PAYSTACK_CURRENCIES[upper];
-  if (!plan) return true;
-  return amountKobo === plan.amountSubunits;
-}
-
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function resolveExpiresAt(data: Record<string, unknown>): string {
@@ -50,9 +43,16 @@ function resolveExpiresAt(data: Record<string, unknown>): string {
   return new Date(Date.now() + THIRTY_DAYS_MS).toISOString();
 }
 
+function chargePlanCode(data: Record<string, unknown>): string | null {
+  const plan = data.plan as Record<string, unknown> | string | undefined;
+  if (typeof plan === "string") return plan || null;
+  return typeof plan?.plan_code === "string" ? plan.plan_code : null;
+}
+
+const MEMBERSHIP_COLUMNS = "id, user_id, status, tier, renewal_type, provider_payment_ref";
+
 async function handleChargeSuccess(data: Record<string, unknown>) {
   const reference = String(data.reference ?? "");
-  const userId = metadataUserId(data);
   const currency = String(data.currency ?? "NGN").toUpperCase();
   const amountKobo = Number(data.amount ?? 0);
 
@@ -61,10 +61,11 @@ async function handleChargeSuccess(data: Record<string, unknown>) {
     return;
   }
 
-  if (!amountMatchesPlan(amountKobo, currency)) {
-    console.warn(
-      `[paystack-webhook] amount differs from config: ${amountKobo} ${currency} (proceeding — dashboard plan is source of truth)`,
+  if (!isPaystackMembershipCharge(amountKobo, currency, chargePlanCode(data))) {
+    console.error(
+      `[paystack-webhook] ${reference}: ${amountKobo} ${currency} is not a Full Membership charge — not activating`,
     );
+    return;
   }
 
   const customer = data.customer as Record<string, unknown> | undefined;
@@ -76,62 +77,61 @@ async function handleChargeSuccess(data: Record<string, unknown>) {
     ? data.subscription_code
     : null;
 
-  const amountMajor = amountKobo / 100;
-  const prepaid = isPrepaidCharge(data);
-  const expiresAt = prepaid
-    ? new Date(Date.now() + THIRTY_DAYS_MS).toISOString()
-    : resolveExpiresAt(data);
-  const renewalType = prepaid ? "prepaid" as const : "subscription" as const;
-  // Prepaid one-time charges have no subscription_code — never treat as Plan renewal.
-  const effectiveSubCode = prepaid ? null : subCode;
+  // The membership this charge belongs to: the checkout row for this
+  // reference, else the payer's active Paystack membership (renewal charges
+  // carry a new reference and often no metadata or subscription code).
+  const { data: byRef } = await supabaseAdmin
+    .from("memberships")
+    .select(MEMBERSHIP_COLUMNS)
+    .eq("provider_payment_ref", reference)
+    .maybeSingle();
 
-  if (!userId) {
-    const { data: row } = await supabaseAdmin
+  const metaUserId = metadataUserId(data);
+  let current = byRef;
+  if (!current && (metaUserId || customerCode)) {
+    let query = supabaseAdmin
       .from("memberships")
-      .select("user_id, renewal_type")
-      .eq("provider_payment_ref", reference)
-      .maybeSingle();
-    if (!row?.user_id) {
-      console.error("[paystack-webhook] charge.success missing userId");
-      return;
-    }
-    const rowPrepaid = prepaid || row.renewal_type === "prepaid";
-    await activateMembership({
-      userId: row.user_id,
-      provider: "paystack",
-      providerPaymentRef: reference,
-      providerCustomerId: customerCode,
-      providerSubscriptionId: rowPrepaid ? null : effectiveSubCode,
-      billingCurrency: currency,
-      amountMajor,
-      amountSubunits: amountKobo,
-      expiresAt: rowPrepaid ? new Date(Date.now() + THIRTY_DAYS_MS).toISOString() : expiresAt,
-      renewalType: rowPrepaid ? "prepaid" : renewalType,
-    });
+      .select(MEMBERSHIP_COLUMNS)
+      .eq("payment_provider", "paystack")
+      .eq("status", "active")
+      .eq("tier", "member");
+    query = metaUserId
+      ? query.eq("user_id", metaUserId)
+      : query.eq("provider_customer_id", customerCode);
+    const { data: rows } = await query.order("updated_at", { ascending: false }).limit(1);
+    current = rows?.[0] ?? null;
+  }
+
+  const userId = metaUserId ?? current?.user_id ?? null;
+  if (!userId) {
+    console.error("[paystack-webhook] charge.success missing userId");
     return;
   }
 
-  const isRenewal = !!effectiveSubCode;
-  if (isRenewal) {
-    const { data: existing } = await supabaseAdmin
-      .from("memberships")
-      .select("id, status, tier")
-      .eq("user_id", userId)
-      .eq("provider_subscription_id", effectiveSubCode)
-      .maybeSingle();
+  const amountMajor = amountKobo / 100;
+  const prepaid = isPrepaidCharge(data) || byRef?.renewal_type === "prepaid";
+  const expiresAt = prepaid
+    ? new Date(Date.now() + THIRTY_DAYS_MS).toISOString()
+    : resolveExpiresAt(data);
 
-    if (existing?.status === "active" && existing.tier === "member") {
-      await extendMembershipRenewal({
-        userId,
-        providerSubscriptionId: effectiveSubCode!,
-        providerPaymentRef: reference,
-        provider: "paystack",
-        billingCurrency: currency,
-        amountMajor,
-        expiresAt,
-      });
-      return;
-    }
+  const isRenewal =
+    !prepaid &&
+    current?.status === "active" &&
+    current.tier === "member" &&
+    current.renewal_type !== "prepaid" &&
+    current.provider_payment_ref !== reference;
+
+  if (isRenewal) {
+    await extendMembershipRenewal({
+      userId,
+      membershipId: current!.id,
+      providerPaymentRef: reference,
+      provider: "paystack",
+      billingCurrency: currency,
+      amountMajor,
+      expiresAt,
+    });
+    return;
   }
 
   await activateMembership({
@@ -139,12 +139,13 @@ async function handleChargeSuccess(data: Record<string, unknown>) {
     provider: "paystack",
     providerPaymentRef: reference,
     providerCustomerId: customerCode,
-    providerSubscriptionId: effectiveSubCode,
+    // Prepaid one-time charges have no subscription_code — never treat as Plan renewal.
+    providerSubscriptionId: prepaid ? null : subCode,
     billingCurrency: currency,
     amountMajor,
     amountSubunits: amountKobo,
     expiresAt,
-    renewalType,
+    renewalType: prepaid ? "prepaid" : "subscription",
   });
 }
 
@@ -211,6 +212,18 @@ async function handleSubscriptionDisable(data: Record<string, unknown>) {
   await supabaseAdmin.rpc("downgrade_membership_to_community", {
     p_user_id: membership.user_id,
   });
+}
+
+/** Cancelled but paid through the current period: access ends on subscription.disable. */
+async function handleSubscriptionNotRenew(data: Record<string, unknown>) {
+  const subCode = String(data.subscription_code ?? "");
+  if (!subCode) return;
+
+  const { error } = await supabaseAdmin
+    .from("memberships")
+    .update({ cancel_at_period_end: true, updated_at: new Date().toISOString() })
+    .eq("provider_subscription_id", subCode);
+  if (error) throw new Error(`subscription.not_renew update failed: ${error.message}`);
 }
 
 async function handleInvoicePaymentFailed(data: Record<string, unknown>) {
@@ -303,8 +316,10 @@ serve(async (req) => {
         await handleSubscriptionCreate(payload.data);
         break;
       case "subscription.disable":
-      case "subscription.not_renew":
         await handleSubscriptionDisable(payload.data);
+        break;
+      case "subscription.not_renew":
+        await handleSubscriptionNotRenew(payload.data);
         break;
       case "invoice.payment_failed":
         await handleInvoicePaymentFailed(payload.data);

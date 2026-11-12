@@ -109,6 +109,21 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
     return true;
   }
 
+  // A Paystack reference activates a membership once. Without this, replaying
+  // an old successful reference re-activates an expired/downgraded membership.
+  if (provider === "paystack") {
+    const { data: consumed } = await supabaseAdmin
+      .from("transactions")
+      .select("id")
+      .eq("provider_transaction_id", providerPaymentRef)
+      .eq("status", "completed")
+      .maybeSingle();
+    if (consumed) {
+      console.warn(`[activateMembership] reference already used: ${providerPaymentRef}`);
+      return false;
+    }
+  }
+
   const amountPaidCents = Math.round(amountMajor * 100);
   const patch = {
     tier: "member",
@@ -137,8 +152,8 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
     membershipId = existing.id;
     const { error } = await supabaseAdmin.from("memberships").update(patch).eq("id", existing.id);
     if (error) {
-      console.error("[activateMembership] update failed:", error.message);
-      return false;
+      // Throw so webhook callers report failure and the provider retries.
+      throw new Error(`[activateMembership] update failed: ${error.message}`);
     }
   } else {
     const { data: inserted, error } = await supabaseAdmin
@@ -151,8 +166,7 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
       .select("id")
       .single();
     if (error) {
-      console.error("[activateMembership] insert failed:", error.message);
-      return false;
+      throw new Error(`[activateMembership] insert failed: ${error.message}`);
     }
     membershipId = inserted.id;
   }
@@ -221,31 +235,25 @@ export async function activateMembership(params: ActivateMembershipParams): Prom
 
 export async function extendMembershipRenewal(params: {
   userId: string;
-  providerSubscriptionId: string;
+  membershipId: string;
   providerPaymentRef: string;
   provider: "paystack";
   billingCurrency: string;
   amountMajor: number;
   expiresAt: string;
 }): Promise<void> {
-  const { data: existing } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from("memberships")
-    .select("id")
-    .eq("user_id", params.userId)
-    .eq("provider_subscription_id", params.providerSubscriptionId)
-    .maybeSingle();
-
-  if (existing) {
-    await supabaseAdmin
-      .from("memberships")
-      .update({
-        status: "active",
-        tier: "member",
-        expires_at: params.expiresAt,
-        cancel_at_period_end: false,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existing.id);
+    .update({
+      status: "active",
+      tier: "member",
+      expires_at: params.expiresAt,
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", params.membershipId);
+  if (error) {
+    throw new Error(`[extendMembershipRenewal] update failed: ${error.message}`);
   }
 
   const { data: existingTx } = await supabaseAdmin

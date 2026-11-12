@@ -1090,6 +1090,18 @@ const handler = async (req: Request): Promise<Response> => {
             { status: 401, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
           );
         }
+
+        // A browser session may only send its own welcome email. Every other
+        // template is sent server-side with the service role key; otherwise any
+        // signed-in user could mail arbitrary branded content to anyone.
+        const ownEmail = (userData.user.email ?? "").toLowerCase();
+        const requestedTo = typeof to === "string" ? to.trim().toLowerCase() : "";
+        if (type !== "welcome" || !ownEmail || requestedTo !== ownEmail) {
+          return new Response(
+            JSON.stringify({ error: "Forbidden" }),
+            { status: 403, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+          );
+        }
       }
     }
 

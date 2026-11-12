@@ -15,7 +15,7 @@ interface ProjectDetailsCardProps {
 const ProjectDetailsCard = ({ application, showProjectLink = false }: ProjectDetailsCardProps) => {
   const { t } = useTranslation("dashboard");
   const isGrantType = (application.project?.opportunity_type ?? "grant") === "grant";
-  const { titleLabel, summaryLabel, locationLabel } = getProjectOverviewCopy(isGrantType);
+  const { titleLabel, summaryLabel, locationLabel } = getProjectOverviewCopy(t, isGrantType);
 
   return (
     <Card>

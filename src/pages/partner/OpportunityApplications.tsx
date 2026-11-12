@@ -69,7 +69,7 @@ function RankedApplicationsMobileList({
             </Badge>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {getApplicationStatusBadge(app.status, t)}
+            {getApplicationStatusBadge(app.status, undefined, t)}
             <Badge className={scoreBadgeClass(app.average_score)}>
               {app.average_score?.toFixed(1) ?? t("dashboard:applications.detail.values.na")}
             </Badge>
@@ -196,7 +196,7 @@ const PartnerOpportunityApplications = () => {
       {
         accessorKey: "status",
         header: t("dashboard:applications.columns.status"),
-        cell: ({ row }) => getApplicationStatusBadge(row.original.status, t),
+        cell: ({ row }) => getApplicationStatusBadge(row.original.status, undefined, t),
       },
       {
         accessorKey: "submitted_at",

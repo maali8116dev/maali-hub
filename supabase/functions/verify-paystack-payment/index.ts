@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { authenticateRequest, getCorsHeaders, jsonResponse } from "../_shared/auth.ts";
 import { resolvePaystackSubscription, paystackRequest } from "../_shared/paystackApi.ts";
-import { getPaystackPlanCode } from "../_shared/paymentProvider.ts";
+import { getPaystackPlanCode, isPaystackMembershipCharge } from "../_shared/paymentProvider.ts";
 import { activateMembership, supabaseAdmin } from "../_shared/activateMembership.ts";
 
 type PaystackVerifyResponse = {
@@ -19,6 +19,7 @@ type PaystackVerifyResponse = {
       renewal_type?: string;
     };
     plan_object?: { plan_code?: string };
+    plan?: string | null;
     subscription_code?: string;
     subscription?: { subscription_code?: string };
   };
@@ -60,6 +61,14 @@ serve(async (req) => {
     const tx = verify.data;
     if (tx.status !== "success") {
       return jsonResponse(req, 200, { activated: false, status: tx.status });
+    }
+
+    const txPlanCode = tx.plan_object?.plan_code ?? (typeof tx.plan === "string" ? tx.plan : null);
+    if (!isPaystackMembershipCharge(Number(tx.amount ?? 0), tx.currency ?? "", txPlanCode)) {
+      console.error(
+        `[verify-paystack-payment] ${tx.reference}: ${tx.amount} ${tx.currency} is not a Full Membership charge`,
+      );
+      return jsonResponse(req, 400, { error: "Payment does not match the Full Membership price." });
     }
 
     let ownerId = tx.metadata?.userId ?? null;

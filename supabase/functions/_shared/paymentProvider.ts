@@ -29,6 +29,23 @@ export function parsePaystackCurrency(value: unknown): PaystackCurrency | null {
   return upper in PAYSTACK_CURRENCIES ? upper : null;
 }
 
+/**
+ * A Paystack charge pays for Full Membership only if it is in a supported
+ * currency and either matches the configured price or was charged against
+ * the configured Plan (the dashboard Plan owns the subscription amount).
+ */
+export function isPaystackMembershipCharge(
+  amountSubunits: number,
+  currency: string,
+  planCode?: string | null,
+): boolean {
+  const upper = parsePaystackCurrency(currency);
+  if (!upper) return false;
+  if (amountSubunits === PAYSTACK_CURRENCIES[upper].amountSubunits) return true;
+  const configuredPlan = getPaystackPlanCode(upper);
+  return Boolean(planCode) && planCode === configuredPlan;
+}
+
 export function parsePaymentProvider(value: unknown): PaymentProviderId | null {
   if (value === "stripe" || value === "paystack") return value;
   return null;

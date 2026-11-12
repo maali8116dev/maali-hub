@@ -1207,8 +1207,8 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
       })
       .eq("id", existing.id);
     if (memErr) {
-      console.error("[invoice.paid] Failed to update membership:", memErr.message);
-      return;
+      // Throw so the event is marked failed and Stripe retries.
+      throw new Error(`[invoice.paid] Failed to update membership: ${memErr.message}`);
     }
   } else {
     await supabaseAdmin.from("memberships").insert({

@@ -60,6 +60,25 @@ serve(async (req) => {
   const resolvedOrgId = partnerOrgId ?? profile.partner_id ?? null;
   const resolvedRole = partnerRole ?? (resolvedOrgId ? "member" : "admin");
 
+  // An invite must not silently convert someone's existing applicant account
+  // into a partner account. Checked before generateLink, which creates the
+  // user (and its default profile) for new emails.
+  const { data: existingUserId } = await supabaseAdmin.rpc("get_user_id_by_email", {
+    p_email: email,
+  });
+  if (existingUserId) {
+    const { data: priorProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("role")
+      .eq("user_id", existingUserId)
+      .maybeSingle();
+    if (priorProfile && priorProfile.role !== "partner") {
+      return jsonResponse(req, 409, {
+        error: "This email already has a MAALI account and cannot be added to a partner team.",
+      });
+    }
+  }
+
   const siteUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
   const redirectTo = `${siteUrl}/partner`;
 
