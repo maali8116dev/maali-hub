@@ -311,3 +311,242 @@ Not run end to end.
   limits, and table-level RLS for tables not named above.
 - The live database: actual grants, policies and bucket settings may differ
   from the migrations.
+
+---
+
+## 6. Local test results — 2026-11-12
+
+Run against the local Supabase stack (Docker) with the existing local data
+(20 users, 20 applications). All pending migrations, including the five new
+`20261112…` ones, applied without errors. Test users created for the run were
+deleted afterwards; database checks ran in rolled-back transactions.
+
+**Database (35 checks, all pass)**
+
+- Memberships: a user cannot upgrade their own row, flip a pending row to
+  active, insert a paid row, or set billing columns; community insert and the
+  Onboarding fallback still work.
+- Functions: `anon` and ordinary users get "permission denied" on
+  `claim_email_batch`, `create_notification`, `mark_all_notifications_read`,
+  `partner_api_list_applications_ranked`, `cancel_membership`,
+  `check_and_increment_rate_limit`; non-admins are refused by
+  `assign_reviewers_to_application`. The service role still works, an admin can
+  still assign reviewers, and the trigger chain still creates the reviewer's
+  notification.
+- Storage: receipts bucket is private; a reviewer sees 18 of 44 application
+  documents (exactly the assigned ones); a partner can delete their own
+  project image but not someone else's.
+- `partner_invites`: invitee can read only their own invite and cannot create
+  or accept one directly.
+
+**Edge functions (34 checks, all pass)**
+
+- `send-email`: a user cannot send `password_reset` or `welcome` to another
+  address; no token is rejected; own welcome email passes the gate.
+- Invites: existing applicant is not converted at invite time; another user,
+  a missing token and a wrong token are all refused; the right token converts
+  the account; an invite cannot be reused; decline leaves the account alone;
+  a new email is still set up directly; an applicant cannot send invites.
+- `paystack-webhook` (events signed with a local dummy secret): bad signature
+  rejected; ₦100 charge and unsupported currency do not activate; correct
+  prepaid charge activates and creates the notification; replaying a used
+  reference after expiry or downgrade does not re-activate; a charge on the
+  configured plan activates; a renewal with no metadata and no subscription
+  code extends the expiry; `not_renew` keeps access and flags the
+  cancellation; `disable` downgrades.
+- Webhook host filter: 14 of 14 cases (private ranges, localhost, internal
+  names, IPv6).
+
+**Found and fixed during testing**
+
+- `notifications_type_check` did not allow the types `payment` and
+  `review_assignment` that the edge functions send, so every payment
+  notification was rejected by the database. Fixed in
+  `20261112140000_notifications_allow_payment_types.sql`.
+
+**Observed**
+
+- Inside the local edge runtime `SUPABASE_URL` is `http://kong:8000`, so the
+  "skip the secret check on localhost" branches (O10) do not trigger even
+  locally; cron-protected functions returned 503 without `CRON_SECRET`.
+
+**Not tested**
+
+- Anything that needs the real Paystack or Stripe API: `verify-paystack-payment`
+  beyond failing closed, Stripe checkout (`STRIPE_MEMBER_PRICE_ID` is not set
+  locally), the billing portal customer lookup, and whether real Paystack
+  events have the shape the webhook tests assumed.
+- The browser: the accept-invite page and the admin receipt button were not
+  opened in the app.
+- Real email delivery, the partner webhook delivery job, and the
+  `validate-email` cap beyond confirming the function still responds.
+
+---
+
+## 7. Second pass — new findings (all OPEN unless marked)
+
+Covered this time: table write rules for the main tables, the partner API,
+application submission and status updates, the auth email hook, invoices,
+HTML rendering in the frontend, and npm dependencies. Read from the
+migrations and code; **not run against a database** (the first three are easy
+to confirm with one `UPDATE` each as a normal user on the local stack).
+
+### N1. An applicant can edit their own application's status and scores — OPEN, critical
+
+- Where: policy `Applications updatable by authorized roles` — the owner may
+  update their row while the opportunity is open, and nothing restricts which
+  columns (the only BEFORE triggers are the rate limit and `updated_at`).
+- Impact: `supabase.from('applications').update({ status: 'approved' }).eq('id', myApp)`
+  from the browser. The same applies to any score, rank or review-note column
+  on the row.
+- Also: reviewers may update **any** application, not only assigned ones.
+- Fix: a BEFORE UPDATE trigger that rejects changes to status/score/review
+  columns unless the caller is admin or service role (same idea as
+  `prevent_role_self_update`), and limit reviewers to assigned applications.
+
+### N2. A partner user can move themselves into any organisation, as its admin — OPEN, critical
+
+- Where: `profiles` owner-update policy plus `prevent_role_self_update`, which
+  only guards `role`. `partner_id` and `partner_role` are free to edit, and
+  `get_user_partner_org_id()` / `is_partner_org_admin()` read them.
+- Impact: any account with the partner role (including an invited team
+  *member*) can set `partner_id` to another organisation and
+  `partner_role = 'admin'`, then read that organisation's applicants and
+  documents, edit its opportunities, manage its team and API keys.
+- Fix: extend the trigger to block changes to `partner_id` and `partner_role`
+  unless the caller is admin or service role. The team RPCs
+  (`link_partner_team_member`, `update_partner_team_member_role`,
+  `remove_partner_team_member`) are SECURITY DEFINER and must keep working —
+  check `auth.role()` / a session flag rather than the row owner.
+
+### N3. Anyone signed in can write review scores — OPEN, high
+
+- Where: policy `Reviewers can insert their own scores` only checks
+  `auth.uid() = reviewer_id`. No role or assignment check.
+- Impact: an applicant can insert a "review" of their own application.
+  `handle_review_completion` counts rows in `review_scores` against the number
+  of assignments, so fake rows can mark a review complete and skew averages.
+- Fix: require the reviewer role and a matching `application_assignments` row
+  in the INSERT (and UPDATE) policy.
+
+### N4. Users can mark their own KYC as verified — OPEN, high
+
+- Where: policy `KYC updatable by owner or admin`. The USING clause limits
+  owners to rows that are `pending`/`rejected`, but the WITH CHECK clause does
+  not limit the new status.
+- Impact: `update kyc_verifications set status = 'verified'` on your own row;
+  it also triggers the "KYC verified" email.
+- Fix: owner WITH CHECK must require `status = 'pending'`.
+
+### N5. Users can create and edit their own payment records — OPEN, high
+
+- Where: `transactions` policies `Users can create their own transactions` and
+  `Transactions updatable by owner or admin`.
+- Impact: a user can insert a "completed" transaction of any amount, then
+  download an official MAALI receipt for it from `generate-invoice`; admin
+  revenue figures include it. They can also alter real records.
+- Fix: remove client INSERT/UPDATE on `transactions`; only service-role
+  functions write them. Check `src/` for client writes first.
+
+### N6. `submit-application` can overwrite a non-draft application — OPEN, medium
+
+- Where: `supabase/functions/submit-application/index.ts` — the `draftId` path
+  updates `applications` where `id = draftId and user_id = user.id`, with no
+  `is_draft = true` condition, and also rewrites `opportunity_id`.
+- Impact: a user can pass the id of an already-reviewed application of theirs
+  as `draftId` together with a different opportunity. The row moves to the new
+  opportunity with status `pending`, keeping its existing reviews and scores.
+- Fix: add `.eq("is_draft", true)` (and keep the opportunity fixed).
+
+### N7. Dependencies — OPEN, medium
+
+`npm audit --omit=dev`: 30 advisories (1 critical, 14 high). The ones that
+reach the running app:
+
+- `dompurify` (high, direct) — XSS bypass. This is the library protecting the
+  three places that render stored HTML (opportunity description, blog post,
+  partner opportunity page), so it matters. Non-breaking fix available.
+- `react-router` / `react-router-dom` (high, direct) — open redirect / XSS via
+  untrusted paths. Non-breaking fix available.
+- `zod` (high, direct) — memory exhaustion on oversized input; fix is a major
+  version bump.
+- `protobufjs` (critical, indirect), `ws`, `lodash`, `postcss` and the rest are
+  indirect or build-time; `npm audit fix` clears the non-breaking ones.
+
+### N8. Partner API webhook save path missed the internal-host check — FIXED (uncommitted)
+
+`putWebhooks` in `_shared/partnerApiHandlers.ts` is a second place a webhook
+URL is saved. It now uses `isForbiddenWebhookHost` too. (Delivery already
+refused private targets.)
+
+### Checked and found sound
+
+- Partner API: every handler filters by the API key's `partner_id`, and
+  application access goes through `verifyOpportunityOwnership`.
+- `update-application-status`: admin check, then an RPC run as the caller.
+- `auth-email-hook`: verifies the hook signature and refuses unsigned requests
+  outside local development.
+- `generate-invoice`: non-admins are limited to their own records (but see N5).
+- Frontend HTML: all three `dangerouslySetInnerHTML` uses of stored content go
+  through DOMPurify (but see N7).
+- `profiles.role` self-escalation is blocked; `memberships` (fixed earlier).
+
+### Still not reviewed
+
+- The older one-off checkout handlers in `stripe-webhook/handlers.ts`.
+- Read (SELECT) policies table by table, and tables not named in this document.
+- Translate functions' spend limits (callable only by admin, assigned reviewer
+  or the owning partner; no size cap found).
+- Deploy pipeline and the VPS configuration.
+
+---
+
+## 8. Second-pass fixes and test results — 2026-11-12
+
+Status of section 7 (all on the branch, uncommitted, not deployed):
+
+| ID | Finding | Status | Fix |
+|---|---|---|---|
+| N1 | Applicant can edit own application status | FIXED, tested | `20261112150000_table_rule_hardening.sql` — client writes limited to drafts |
+| N2 | Partner can move into any organisation | FIXED, tested | same migration — `partner_id` / `partner_role` guarded |
+| N3 | Anyone can write review scores | FIXED, tested | same migration — reviewer role + assignment required |
+| N4 | Users can mark own KYC verified | FIXED, tested | same migration — owners can only submit as `pending` |
+| N5 | Users can write own payment records | FIXED, tested | same migration — client insert/update removed |
+| N6 | `submit-application` overwrites non-drafts | FIXED, tested | `submit-application/index.ts` — `is_draft = true` required |
+| N7 | Dependency advisories | PARTLY FIXED | `npm audit fix`: 30 → 8. Left: `zod` (needs a major version bump) and `quill` (no fix published) |
+| N8 | Partner API webhook save path | FIXED | `_shared/partnerApiHandlers.ts` |
+
+**Tests on the local stack** (rolled-back transactions; test users deleted):
+
+- Applications (12): owner, reviewer and direct non-draft inserts are refused;
+  draft create/edit, the admin status RPC, admin direct edits and the service
+  role still work.
+- Review scores (4): applicant and unassigned reviewer refused; assigned
+  reviewer can insert and edit, and the completion trigger still updates the
+  application.
+- Partner fields (5): self-move and self-promotion refused; name edits, the
+  admin team-role RPC and the service role still work.
+- KYC (5): inserting or updating to `verified` refused; pending submit,
+  resubmit and admin verification work.
+- Transactions (3): insert and update refused; reading own records works.
+- `submit-application` (3): a reviewed application passed as `draftId` is left
+  untouched; a real draft still submits (captcha satisfied with Cloudflare's
+  published always-pass test secret).
+- The earlier 34 edge-function checks were re-run afterwards: all pass.
+- After the dependency update the app builds and the typecheck is unchanged
+  (24 pre-existing errors).
+
+**Behaviour changes to know about**
+
+- Clients can no longer insert a non-draft application directly. Before, this
+  also bypassed the membership gate and captcha in `submit-application`.
+- Reviewers can no longer update `applications` rows directly (no client code
+  does); status changes happen through the review-completion trigger.
+
+**Noticed, not changed**
+
+- `applications` has no DELETE policy, so the "discard draft" call in
+  `useAutoSaveDraft.ts` deletes nothing. This was already the case before
+  these changes.
+- `npm audit fix --omit=dev` removes dev dependencies from `node_modules`;
+  run a plain `npm install` afterwards (done here).

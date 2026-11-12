@@ -22,6 +22,7 @@ import {
 } from "./partnerApi.ts";
 import { generateWebhookSecret } from "./partnerWebhookCrypto.ts";
 import { sha256Hex } from "./partnerApi.ts";
+import { isForbiddenWebhookHost } from "./webhookUrl.ts";
 
 const DOC_BUCKET = "application-docs";
 const SIGNED_URL_TTL = 3600;
@@ -742,6 +743,9 @@ export async function putWebhooks(
 
   if (!endpointUrl.startsWith("https://")) {
     return { status: 400, body: { error: "endpointUrl must use HTTPS", errorCode: "VALIDATION_ERROR" } };
+  }
+  if (isForbiddenWebhookHost(new URL(endpointUrl).hostname)) {
+    return { status: 400, body: { error: "endpointUrl must be a public host", errorCode: "VALIDATION_ERROR" } };
   }
 
   const invalid = subscribedEvents.filter((e) => !WEBHOOK_EVENTS.includes(e as typeof WEBHOOK_EVENTS[number]));

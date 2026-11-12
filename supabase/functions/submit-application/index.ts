@@ -451,6 +451,8 @@ serve(async (req: Request): Promise<Response> => {
         .update({ ...appRow, opportunity_id: opportunityId })
         .eq("id", draftId)
         .eq("user_id", user.id)
+        // Only a draft may be submitted; never overwrite a submitted application.
+        .eq("is_draft", true)
         .select()
         .single();
 
