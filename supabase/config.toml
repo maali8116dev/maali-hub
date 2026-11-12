@@ -105,3 +105,5 @@ verify_jwt = false
 
 [functions.expire-prepaid-memberships]
 verify_jwt = false
+[functions.accept-partner-invite]
+verify_jwt = false

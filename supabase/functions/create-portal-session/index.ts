@@ -41,9 +41,12 @@ serve(async (req) => {
 
   // Fallback: look up by email in Stripe if the DB row doesn't have it yet.
   if (!stripeCustomerId && auth.user.email) {
-    const list = await stripe.customers.list({ email: auth.user.email, limit: 1 });
-    if (list.data.length > 0) {
-      stripeCustomerId = list.data[0].id;
+    // Only a customer created for this user. Matching on email alone would
+    // open someone else's billing portal (emails are not verified).
+    const list = await stripe.customers.list({ email: auth.user.email, limit: 20 });
+    const own = list.data.find((c) => c.metadata?.userId === userId);
+    if (own) {
+      stripeCustomerId = own.id;
       // Backfill the DB row so future calls don't need this fallback.
       await supabaseAdmin
         .from("memberships")

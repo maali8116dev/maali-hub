@@ -411,6 +411,13 @@ const Onboarding = () => {
       stripe_customer_id: null,
       stripe_payment_intent_id: null,
       stripe_subscription_id: null,
+      // RLS only accepts client writes with every billing column empty.
+      provider_customer_id: null,
+      provider_subscription_id: null,
+      provider_payment_ref: null,
+      paystack_email_token: null,
+      amount_paid: null,
+      expires_at: null,
       updated_at: new Date().toISOString(),
     };
 

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { authenticateRequest } from "../_shared/auth.ts";
 import { getSupabaseAdmin, sha256Hex, filterScopesForEnvironment, getPartnerApiCorsHeaders, partnerJsonResponse } from "../_shared/partnerApi.ts";
 import { generateWebhookSecret } from "../_shared/partnerWebhookCrypto.ts";
+import { isForbiddenWebhookHost } from "../_shared/webhookUrl.ts";
 
 const supabaseAdmin = getSupabaseAdmin();
 
@@ -193,6 +194,9 @@ serve(async (req: Request) => {
 
         if (!endpointUrl.startsWith("https://")) {
           return partnerJsonResponse(req, 400, { error: "endpointUrl must use HTTPS" });
+        }
+        if (isForbiddenWebhookHost(new URL(endpointUrl).hostname)) {
+          return partnerJsonResponse(req, 400, { error: "endpointUrl must be a public host" });
         }
 
         const invalid = subscribedEvents.filter(

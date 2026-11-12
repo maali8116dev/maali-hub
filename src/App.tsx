@@ -110,6 +110,7 @@ const ReviewerNotifications = lazy(() => import("./pages/reviewer/Notifications"
 
 // Lazy-loaded partner pages
 const PartnerDashboard = lazy(() => import("./pages/partner/Dashboard"));
+const PartnerAcceptInvite = lazy(() => import("./pages/partner/AcceptInvite"));
 const PartnerOpportunities = lazy(() => import("./pages/partner/Opportunities"));
 const PartnerOpportunityForm = lazy(() => import("./pages/partner/OpportunityForm"));
 const PartnerOpportunityDetails = lazy(() => import("./pages/partner/OpportunityDetails"));
@@ -682,6 +683,15 @@ const App = () => {
           />
 
           {/* Partner Routes - Protected, requires authentication and partner role */}
+          {/* Any signed-in account may answer a partner invite; accepting is what grants the partner role */}
+          <Route
+            path="/partner/accept-invite"
+            element={
+              <ProtectedRoute requireAuth={true} requireMembership={false}>
+                <PartnerAcceptInvite />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/partner/dashboard" element={<Navigate to="/partner" replace />} />
           <Route
             path="/partner"

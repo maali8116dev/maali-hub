@@ -2283,6 +2283,19 @@
           "description": "{{count}} candidatura(s) submetida(s). Classificacoes e exportacoes ficam disponiveis quando os revisores concluirem a pontuacao."
         }
       }
+    },
+    "invitePage": {
+      "title": "Convite de parceiro",
+      "description": "{{org}} convidou-o a juntar-se à sua equipa de parceiro na MAALI.",
+      "warning": "Ao aceitar, esta conta passa a ser uma conta de parceiro. Utilizará o portal de parceiros em vez do painel de candidato.",
+      "accept": "Aceitar convite",
+      "decline": "Recusar",
+      "empty": "Não tem convites de parceiro pendentes.",
+      "goHome": "Ir para o painel",
+      "accepted": "Convite aceite",
+      "declined": "Convite recusado",
+      "error": "Ocorreu um erro. Tente novamente.",
+      "needLink": "Para aceitar, abra a ligação no seu e-mail de convite."
     }
   },
   "reviewer": {

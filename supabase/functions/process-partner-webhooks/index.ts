@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { signWebhookPayload } from "../_shared/partnerWebhookCrypto.ts";
+import { assertPublicWebhookUrl } from "../_shared/webhookUrl.ts";
 
 const BATCH_SIZE = 20;
 const BACKOFF_MINUTES = [1, 5, 30, 120, 360];
@@ -89,8 +90,12 @@ serve(async (req: Request) => {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5000);
 
+        await assertPublicWebhookUrl(hook.endpoint_url);
+
         const res = await fetch(hook.endpoint_url, {
           method: "POST",
+          // A redirect could bounce the request to an internal host.
+          redirect: "manual",
           headers: {
             "Content-Type": "application/json",
             "X-Maali-Signature": signature,

@@ -115,9 +115,12 @@ serve(async (req) => {
     if (storedCustomerId) {
       stripeCustomerId = storedCustomerId;
     } else if (userEmail) {
-      const list = await stripe.customers.list({ email: userEmail, limit: 1 });
-      stripeCustomerId = list.data.length > 0
-        ? list.data[0].id
+      // Only reuse a customer this user created. Matching on email alone would
+      // attach the account to someone else's customer (emails are not verified).
+      const list = await stripe.customers.list({ email: userEmail, limit: 20 });
+      const own = list.data.find((c) => c.metadata?.userId === userId);
+      stripeCustomerId = own
+        ? own.id
         : (await stripe.customers.create({ email: userEmail, metadata: { userId } })).id;
     } else {
       stripeCustomerId = (await stripe.customers.create({ metadata: { userId } })).id;
@@ -158,6 +161,11 @@ serve(async (req) => {
     }
 
     if (!paymentIntent?.client_secret) {
+      // No payment step is only acceptable when Stripe says the invoice is settled.
+      if (invoice?.status !== "paid") {
+        console.error("[create-membership-payment] no payment intent on unpaid invoice", invoice?.id);
+        return jsonResponse(req, 502, { error: "Could not start payment. Please try again." });
+      }
       // Already active (e.g. $0 coupon) — activate directly.
       await activateMembershipShared({
         userId,

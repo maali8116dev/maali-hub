@@ -2519,6 +2519,19 @@
           "description": "{{count}} candidature(s) soumise(s). Les classements et exports seront disponibles une fois les évaluations terminées."
         }
       }
+    },
+    "invitePage": {
+      "title": "Invitation partenaire",
+      "description": "{{org}} vous invite à rejoindre son équipe partenaire sur MAALI.",
+      "warning": "En acceptant, ce compte devient un compte partenaire. Vous utiliserez le portail partenaire à la place du tableau de bord candidat.",
+      "accept": "Accepter l’invitation",
+      "decline": "Refuser",
+      "empty": "Vous n’avez aucune invitation partenaire en attente.",
+      "goHome": "Aller au tableau de bord",
+      "accepted": "Invitation acceptée",
+      "declined": "Invitation refusée",
+      "error": "Une erreur s’est produite. Veuillez réessayer.",
+      "needLink": "Pour accepter, ouvrez le lien dans votre e-mail d’invitation."
     }
   },
   "reviewer": {

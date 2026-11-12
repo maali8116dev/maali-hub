@@ -9,6 +9,11 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } },
 );
 
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: getCorsHeaders(req) });
@@ -60,9 +65,11 @@ serve(async (req) => {
   const resolvedOrgId = partnerOrgId ?? profile.partner_id ?? null;
   const resolvedRole = partnerRole ?? (resolvedOrgId ? "member" : "admin");
 
-  // An invite must not silently convert someone's existing applicant account
-  // into a partner account. Checked before generateLink, which creates the
-  // user (and its default profile) for new emails.
+  // Someone who already has a non-partner MAALI account is not converted
+  // here: they get a pending invite and their account only changes when they
+  // accept it (accept-partner-invite). Checked before generateLink, which
+  // creates the user (and its default profile) for new emails.
+  let needsAcceptance = false;
   const { data: existingUserId } = await supabaseAdmin.rpc("get_user_id_by_email", {
     p_email: email,
   });
@@ -72,15 +79,20 @@ serve(async (req) => {
       .select("role")
       .eq("user_id", existingUserId)
       .maybeSingle();
-    if (priorProfile && priorProfile.role !== "partner") {
-      return jsonResponse(req, 409, {
-        error: "This email already has a MAALI account and cannot be added to a partner team.",
-      });
-    }
+    needsAcceptance = !!priorProfile && priorProfile.role !== "partner";
+  }
+  if (needsAcceptance && !resolvedOrgId) {
+    return jsonResponse(req, 400, {
+      error: "partnerOrgId is required to invite someone who already has an account.",
+    });
   }
 
   const siteUrl = Deno.env.get("SITE_URL") || "https://yourdomain.com";
-  const redirectTo = `${siteUrl}/partner`;
+  // One-time token carried only in the emailed link (stored hashed).
+  const inviteToken = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
+  const redirectTo = needsAcceptance
+    ? `${siteUrl}/partner/accept-invite?invite_token=${inviteToken}`
+    : `${siteUrl}/partner`;
 
   const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
     type: "magiclink",
@@ -119,37 +131,60 @@ serve(async (req) => {
     }
   }
 
-  const { error: profileUpdateError } = await supabaseAdmin
-    .from("profiles")
-    .upsert(
-      {
-        user_id: invitedUser.id,
-        role: "partner",
-        partner_id: resolvedOrgId,
-        partner_role: resolvedOrgId ? resolvedRole : null,
-      },
-      { onConflict: "user_id" },
-    );
+  if (needsAcceptance) {
+    // Replace any earlier unanswered invite to the same org.
+    await supabaseAdmin
+      .from("partner_invites")
+      .delete()
+      .eq("user_id", invitedUser.id)
+      .eq("partner_id", resolvedOrgId)
+      .is("accepted_at", null);
 
-  if (profileUpdateError) {
-    console.error("[invite-partner] profile upsert error:", profileUpdateError.message);
-  }
+    const { error: inviteInsertError } = await supabaseAdmin.from("partner_invites").insert({
+      user_id: invitedUser.id,
+      partner_id: resolvedOrgId,
+      partner_role: resolvedRole,
+      partner_org_name: partnerOrgName,
+      token_hash: await sha256Hex(inviteToken),
+      invited_by: auth.user.id,
+    });
+    if (inviteInsertError) {
+      console.error("[invite-partner] invite insert error:", inviteInsertError.message);
+      return jsonResponse(req, 500, { error: "Failed to create the invitation" });
+    }
+  } else {
+    const { error: profileUpdateError } = await supabaseAdmin
+      .from("profiles")
+      .upsert(
+        {
+          user_id: invitedUser.id,
+          role: "partner",
+          partner_id: resolvedOrgId,
+          partner_role: resolvedOrgId ? resolvedRole : null,
+        },
+        { onConflict: "user_id" },
+      );
 
-  if (resolvedOrgId) {
-    const { data: orgRow } = await supabaseAdmin
-      .from("partners")
-      .select("user_id")
-      .eq("id", resolvedOrgId)
-      .maybeSingle();
+    if (profileUpdateError) {
+      console.error("[invite-partner] profile upsert error:", profileUpdateError.message);
+    }
 
-    if (!orgRow?.user_id) {
-      const { error: linkOrgError } = await supabaseAdmin
+    if (resolvedOrgId) {
+      const { data: orgRow } = await supabaseAdmin
         .from("partners")
-        .update({ user_id: invitedUser.id })
-        .eq("id", resolvedOrgId);
+        .select("user_id")
+        .eq("id", resolvedOrgId)
+        .maybeSingle();
 
-      if (linkOrgError) {
-        console.error("[invite-partner] partner link error:", linkOrgError.message);
+      if (!orgRow?.user_id) {
+        const { error: linkOrgError } = await supabaseAdmin
+          .from("partners")
+          .update({ user_id: invitedUser.id })
+          .eq("id", resolvedOrgId);
+
+        if (linkOrgError) {
+          console.error("[invite-partner] partner link error:", linkOrgError.message);
+        }
       }
     }
   }

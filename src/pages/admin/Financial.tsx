@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,18 @@ import {
 } from "@/components/ui/select";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, SortableColumnHeader } from "@/components/ui/data-table";
+
+// The receipts bucket is private: stored receipt URLs need a short-lived signed
+// URL. Anything else (e.g. a Stripe-hosted receipt) opens as is.
+const openReceipt = async (url: string) => {
+  const path = url.split("/receipts/")[1]?.split("?")[0];
+  if (!path) {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+  const { data } = await supabase.storage.from("receipts").createSignedUrl(path, 60);
+  if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+};
 
 const AdminFinancial = () => {
   const { t } = useTranslation(["dashboard", "common"]);
@@ -235,15 +248,13 @@ const AdminFinancial = () => {
               </Button>
             )}
             {(tx.invoicePdfUrl || tx.receiptUrl) && (
-              <Button variant="outline" size="sm" asChild>
-                <a
-                  href={tx.invoicePdfUrl || tx.receiptUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {t("admin.financialPage.columns.receiptBtn")}
-                </a>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openReceipt(tx.invoicePdfUrl || tx.receiptUrl || "")}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {t("admin.financialPage.columns.receiptBtn")}
               </Button>
             )}
           </div>

@@ -2519,6 +2519,19 @@
           "description": "{{count}} application(s) submitted. Rankings and exports will be available once reviewers complete scoring."
         }
       }
+    },
+    "invitePage": {
+      "title": "Partner invitation",
+      "description": "{{org}} has invited you to join their partner team on MAALI.",
+      "warning": "Accepting turns this account into a partner account. You will use the partner portal instead of the applicant dashboard.",
+      "accept": "Accept invitation",
+      "decline": "Decline",
+      "empty": "You have no pending partner invitations.",
+      "goHome": "Go to dashboard",
+      "accepted": "Invitation accepted",
+      "declined": "Invitation declined",
+      "error": "Something went wrong. Please try again.",
+      "needLink": "To accept, open the link in your invitation email."
     }
   },
   "reviewer": {

@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.56.0?no-dts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { parseClientIp } from "../_shared/auth.ts";
+
+const supabaseAdmin = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  { auth: { autoRefreshToken: false, persistSession: false } },
+);
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -15,6 +23,28 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ valid: false, message: "Email is required." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Each lookup below is a paid API call and this endpoint is public, so cap
+    // it per IP. Over the cap we skip the paid check rather than block sign-up
+    // (many real users share one IP on mobile networks).
+    const { data: limit, error: limitError } = await supabaseAdmin.rpc(
+      "check_and_increment_rate_limit",
+      {
+        p_user_id: null,
+        p_ip_address: parseClientIp(req),
+        p_operation_type: "validate_email",
+        p_max_requests: 20,
+        p_window_minutes: 60,
+      },
+    );
+    if (limitError) {
+      console.error("validate-email rate limit check failed:", limitError.message);
+    } else if (limit && !limit.allowed) {
+      return new Response(
+        JSON.stringify({ valid: true, skipped: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

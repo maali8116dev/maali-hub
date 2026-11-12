@@ -2519,6 +2519,19 @@
           "description": "{{count}} Bewerbung(en) eingereicht. Rankings und Exporte sind verfügbar, sobald die Gutachter bewertet haben."
         }
       }
+    },
+    "invitePage": {
+      "title": "Partnereinladung",
+      "description": "{{org}} hat Sie eingeladen, dem Partnerteam auf MAALI beizutreten.",
+      "warning": "Mit der Annahme wird dieses Konto zu einem Partnerkonto. Sie nutzen dann das Partnerportal statt des Bewerber-Dashboards.",
+      "accept": "Einladung annehmen",
+      "decline": "Ablehnen",
+      "empty": "Sie haben keine offenen Partnereinladungen.",
+      "goHome": "Zum Dashboard",
+      "accepted": "Einladung angenommen",
+      "declined": "Einladung abgelehnt",
+      "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "needLink": "Öffnen Sie zum Annehmen den Link in Ihrer Einladungs-E-Mail."
     }
   },
   "reviewer": {
