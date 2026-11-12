@@ -72,6 +72,18 @@ serve(async (req: Request) => {
       return jsonResponse(req, 401, { error: auth.error ?? "Unauthorized" });
     }
 
+    // Every call is billed by Google per character; cap how often one account can trigger it.
+    const { data: rateLimit } = await supabaseAdmin.rpc("check_and_increment_rate_limit", {
+      p_user_id: auth.user.id,
+      p_ip_address: null,
+      p_operation_type: "translate",
+      p_max_requests: 60,
+      p_window_minutes: 60,
+    });
+    if (rateLimit && !rateLimit.allowed) {
+      return jsonResponse(req, 429, { error: "Too many translation requests. Try again later." });
+    }
+
     const opportunityId = Number(body.opportunityId);
     if (!Number.isFinite(opportunityId)) {
       return jsonResponse(req, 400, { error: "Invalid opportunityId" });

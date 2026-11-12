@@ -340,7 +340,7 @@ export function useOpportunityCountries() {
 
 const HOMEPAGE_OPP_SELECT = `
   *,
-  partner:partners(name),
+  partner:partners_public(name),
   tags:opportunity_tag_map(
     tag:opportunity_tags(id, name, slug)
   )

@@ -104,6 +104,16 @@ serve(async (req: Request) => {
       );
     }
 
+    // Paying the fee moves the application to "pending" (stripe-webhook), so it
+    // must only be payable while it is actually awaiting payment — otherwise a
+    // rejected or approved application could be reset by paying.
+    if (application.status !== "pending_payment") {
+      return new Response(
+        JSON.stringify({ error: "Application is not awaiting payment" }),
+        { status: 400, headers: { ...getCorsHeaders(req), "Content-Type": "application/json" } }
+      );
+    }
+
     if (application.application_fee_paid) {
       return new Response(
         JSON.stringify({ error: "Application fee already paid" }),
@@ -167,9 +177,11 @@ serve(async (req: Request) => {
     // Find or create a Stripe Customer so payment methods and history are saved
     let stripeCustomerId: string | undefined;
     if (user.email) {
-      const existingCustomers = await stripe.customers.list({ email: user.email, limit: 1 });
-      if (existingCustomers.data.length > 0) {
-        stripeCustomerId = existingCustomers.data[0].id;
+      // Only reuse a customer created for this user (emails are not verified).
+      const existingCustomers = await stripe.customers.list({ email: user.email, limit: 20 });
+      const own = existingCustomers.data.find((c) => c.metadata?.userId === user.id);
+      if (own) {
+        stripeCustomerId = own.id;
       } else {
         const customer = await stripe.customers.create({
           email: user.email,

@@ -550,3 +550,176 @@ Status of section 7 (all on the branch, uncommitted, not deployed):
   these changes.
 - `npm audit fix --omit=dev` removes dev dependencies from `node_modules`;
   run a plain `npm install` afterwards (done here).
+
+---
+
+## 9. Third pass — read access, remaining tables, legacy Stripe, translation spend, deploy
+
+Read rules and data functions were checked on the local database (migrations
+applied) by calling them as an applicant, as an anonymous visitor and as a
+reviewer. Everything else in this section is from reading the code.
+
+### What is sound
+
+- Every table in `public` has row security on. The eight tables without
+  policies (`stripe_events`, `paystack_events`, `partner_api_*`,
+  `partner_webhooks*`) are service-role only, which is correct.
+- All 30 admin/reviewer/partner data functions probed (`get_all_users_for_admin`,
+  `get_admin_stats`, `get_financial_stats`, `get_admin_applications`,
+  `get_application_details`, the ranked-application and reviewer functions,
+  the `admin_*` writers, `cleanup_old_pending_payment_applications`, the
+  partner team RPCs, …) refuse an ordinary applicant and an anonymous caller.
+- An applicant sees no other user's applications, profiles, documents, review
+  scores or assignments. An anonymous visitor sees no applications or profiles.
+- Memberships, KYC, transactions, billing addresses, payment methods,
+  notifications and activity logs are own-row (plus admin) for reads.
+
+### R1. Partner contact details are public — OPEN, medium
+
+- Where: policy `Public can view active partners` on `partners` (to `anon` and
+  `authenticated`), with full-table SELECT granted.
+- Confirmed locally: an anonymous request can read `contact_name`,
+  `contact_phone`, `contact_country`, `user_id` and `created_by` of every
+  active partner. The `partners_public` view exists to hide these, but it is
+  `security_invoker`, so it needs the same wide policy on the base table.
+- Fix: make `partners_public` a definer view (or a SECURITY DEFINER function)
+  exposing only the public columns, point the public pages at it, and drop the
+  public policy from the base table. The frontend reads both `partners` and
+  `partners_public` today, so the public pages need checking when this changes.
+
+### R2. Reviewers can read every submitted application and every profile — OPEN, medium (design decision)
+
+- Confirmed locally: a reviewer could read 12 applications not assigned to
+  them and all 19 other profiles. `reviewer_conflicts` exists, but a conflicted
+  reviewer can still open the application directly.
+- Your audit document calls the profile access "by design". If reviewers are
+  external, limit `applications`, `application_documents` (table) and
+  `profiles` to assigned applications, as now done for storage and scores.
+
+### R3. A few functions answer questions about any user id — OPEN, low
+
+- `validate_application_submission(user, opportunity)` (callable by anonymous):
+  reveals whether that user has applied, their application id, and whether
+  they hold a paid membership.
+- `get_opportunity_details_with_user_status(opportunity, user)`: another
+  user's application status for an opportunity.
+- `get_user_role(user)` (anonymous): the role of any user id.
+- `is_email_allowed(email)`: allow-list membership of any address.
+- All need a user UUID first, which is not public. Fix: ignore the user
+  argument unless the caller is that user, admin or service role
+  (`get_user_role` must stay callable — the policies use it).
+
+### L1. Legacy application-fee checkout could reset a decided application — FIXED (uncommitted, not run)
+
+- Where: `create-checkout-session` + `stripe-webhook` (`handleCheckoutCompleted`,
+  `handlePaymentSuccess`), which set the application to `pending` once the fee
+  is paid.
+- `create-checkout-session` only checked ownership and "fee not already paid".
+  Every application is created with `application_fee_paid = false`, so if a
+  platform application fee is ever configured, a rejected applicant could pay
+  it and put their application back to `pending` (and trigger reviewer
+  assignment again). With no fee configured the function returns 400, so this
+  is dormant today.
+- Fix made: the function now requires `status = 'pending_payment'`. It also no
+  longer adopts a Stripe customer by email (same issue as O3).
+- The frontend no longer calls this function. If the per-application fee is
+  gone for good, removing the function and those webhook branches is cleaner.
+
+### C1. Translation has no spend control — OPEN, cost (low/medium)
+
+- `translate-opportunity`, `translate-cms`, `translate-application` send whole
+  stored fields to Google Translate for three languages on every call, with no
+  size cap, no per-user rate limit and no "source unchanged" check.
+- Callers are limited (admin; partner for their own opportunity; assigned
+  reviewer for an application), so this is about a partner or reviewer account
+  looping the call, or simply repeated clicks on long descriptions.
+- Fix: skip when the source text hash matches the stored translation, cap
+  field length, and add `check_and_increment_rate_limit` per user.
+
+### D1. The deploy workflow runs a script that is not in the repository — OPEN, operational
+
+- `.github/workflows/deploy-supabase.yml` runs `scripts/deploy-selfhosted.sh`,
+  but `.gitignore` line 58 excludes that file and it is not tracked. On a
+  GitHub runner the step fails with "file not found", so migrations and edge
+  functions are not deployed automatically; they only go out when someone runs
+  the script by hand.
+- `gh` reports the workflow does not exist on GitHub yet (404), so it has
+  probably never run. Either commit the script (it reads secrets from the
+  environment / `scripts/.deploy.env`, so check it holds none itself) or move
+  its logic into the workflow.
+
+### D2. The deleted migration can block every future migration deploy — OPEN, operational
+
+- The working tree deletes `20260922100000_restore_admin_delete_opportunity.sql`,
+  which is already committed and probably already applied on the server.
+  `supabase db push` refuses to run when the remote history contains a version
+  the local folder lacks. If that deletion is committed, the security
+  migrations on this branch would not deploy until it is restored or the
+  history is repaired.
+
+### D3. Smaller deploy notes — OPEN, low
+
+- The workflow trusts the server's SSH host key on first contact
+  (`ssh-keyscan`) rather than pinning it as a secret.
+- Edge functions are mirrored with `rsync --delete`; the new
+  `accept-partner-invite` function also needs whatever per-function routing
+  the self-hosted functions container uses (the local `config.toml` entry does
+  not apply there).
+- The script downloads the Supabase CLI onto the server with `curl | tar`
+  without a checksum.
+- CI does not apply migrations to a scratch database, so a migration that
+  fails to apply is only discovered at deploy time.
+
+### Not covered even now
+
+- Membership payment-intent path in `stripe-webhook` (lines ~220–440) was only
+  skimmed: it activates from PaymentIntent metadata, which is set server-side.
+- Realtime subscriptions and storage read rules for the public buckets.
+- The live database and server configuration.
+
+---
+
+## 10. Third-pass fixes and test results — 2026-11-12
+
+| ID | Finding | Status | Fix |
+|---|---|---|---|
+| R1 | Partner contact details public | FIXED, tested | `20261112160000_read_access_tightening.sql` — `partners_public` is now the only public surface (active partners, public columns); the wide policy on `partners` is dropped. `useOpportunities.ts` embeds `partners_public` instead of `partners`. |
+| R2 | Reviewers read every application and profile | FIXED, tested | same migration — reviewers see only assigned applications, their documents, and those applicants' profiles |
+| R3 | Functions answering about any user id | PARTLY FIXED, tested | `validate_application_submission` and `get_opportunity_details_with_user_status` are service-role only. `get_user_role` and `is_email_allowed` left callable (policies and sign-up depend on them). |
+| L1 | Legacy fee checkout could reset a decided application | FIXED, boots, not exercised | `create-checkout-session` |
+| C1 | Translation has no spend control | PARTLY FIXED, boots, not exercised | 60 calls per user per hour in the three translate functions. No size cap or "unchanged" skip yet. |
+| D1 | Deploy workflow calls an untracked script | LEFT AS IS (owner's decision: the script is for manual deploys) | — |
+| D2 | Deleted `admin_delete_opportunity` migration | RESTORED in the working tree | `git checkout` of `20260922100000_restore_admin_delete_opportunity.sql` |
+
+**Tests on the local stack**
+
+- Read access (19 checks, all pass): a reviewer with 8 assignments sees
+  exactly 8 applications, 6 other profiles and 18 documents (of 20 / 20 / 44);
+  the reviewer dashboard RPC still works; applicants see their own
+  applications; admin sees everything including partner contact fields; a
+  partner reads their own organisation row and their organisation's
+  applications; anonymous and applicant callers get no rows from `partners`
+  but do see active partners through `partners_public`.
+- REST as an anonymous visitor: `partners?select=contact_phone,…` returns `[]`;
+  `partners_public` returns the active partner; the opportunity list's
+  `partner:partners_public(name)` embed returns the partner name.
+- All earlier suites re-run: database 22 + 12 + 29 checks and edge functions
+  34 + 3 checks pass. (Two old test statements needed reading: the draft-delete
+  one is the known missing DELETE rule; the other selected from `partners` as
+  an applicant, which now correctly returns nothing.)
+- Typecheck unchanged (24 pre-existing errors).
+
+**Deploy note for the restored migration**
+
+When the restored `20260922…` file was applied to a database that already had
+later migrations, the CLI refused until run with `--include-all`. The manual
+deploy script has the same switch (`INCLUDE_ALL_MIGRATIONS=1`). Whether you
+need it depends on whether the server already recorded `20260922100000`:
+check `supabase_migrations.schema_migrations` before the next push.
+
+**Behaviour changes to know about**
+
+- Anything that read the `partners` table as a visitor or applicant now gets
+  no rows; use `partners_public`. Only the opportunity list did this.
+- Reviewers can no longer browse applications, profiles or library documents
+  outside their assignments.
